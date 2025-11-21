@@ -5,7 +5,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.OnHeapBytes;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,7 +14,6 @@ import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 public class TestJsonIssue467 {
 
     static class ResponseItem467 extends SelfDescribingMarshallable {
-        @NotNull
         public String index;
         public final Bytes<?> key = Bytes.allocateElasticOnHeap();
         public Object payload;
@@ -122,8 +120,7 @@ public class TestJsonIssue467 {
     private static Wire jsonResponseItem() {
         CLASS_ALIASES.addAlias(ResponseItem467.class);
         String json = " {\"@ResponseItem467\":{\"index\":\"4dc800000034\",\"key\":\"notificationMsg\",\"payload\":\"Successfully debited your account by 0.0\"}}";
-        final Wire jsonWire = WireType.JSON_ONLY.apply(Bytes.from(json));
-        return jsonWire;
+        return WireType.JSON_ONLY.apply(Bytes.from(json));
     }
 
     @Test

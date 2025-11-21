@@ -173,9 +173,9 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         transient int c0, c1, c3;
         @LongConversion(Base85LongConverter.class)
         long number;
-        Bytes<?> a = Bytes.forFieldGroup(this, "a");
-        Bytes<?> b = Bytes.forFieldGroup(this, "b");
-        Bytes<?> c = Bytes.forFieldGroup(this, "c");
+        final Bytes<?> a = Bytes.forFieldGroup(this, "a");
+        final Bytes<?> b = Bytes.forFieldGroup(this, "b");
+        final Bytes<?> c = Bytes.forFieldGroup(this, "c");
 
         // Required overrides for the SelfDescribingTriviallyCopyable class to describe its serialization format.
         @Override

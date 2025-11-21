@@ -42,7 +42,7 @@ public class ProjectTest extends WireTestCommon {
     // Test case to verify the projection functionality between two data transfer objects.
     @SuppressWarnings("unchecked")
     @Test
-    public void testProject() throws Exception {
+    public void testProject() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Initialize the first DTO with sample data
@@ -83,6 +83,7 @@ public class ProjectTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     static class Dto1 extends SelfDescribingMarshallable {
         @NotNull
+        final
         Map m = new HashMap<>();
         String anotherField;
         long someValue;
@@ -94,6 +95,7 @@ public class ProjectTest extends WireTestCommon {
         long someValue;
         String anotherField;
         @NotNull
+        final
         Map m = new HashMap<>();
     }
 

@@ -108,8 +108,8 @@ public class NestedGenericTest extends WireTestCommon {
 
     // Class A implementing BytesMarshallable interface to enable serialization/deserialization using Chronicle Wire
     private static class A implements BytesMarshallable {
-        int x;
-        String y;
+        final int x;
+        final String y;
 
         A(int x, String y) {
             this.x = x;

@@ -111,7 +111,7 @@ public class Marshallable2Test extends WireTestCommon {
     // Static class representing an outer object that contains nested inner objects and implements the Validatable interface
     @SuppressWarnings("unused")
     private static class Outer extends SelfDescribingMarshallable implements Validatable {
-        String name;
+        final String name;
         Inner1 inner1;
         Inner2 inner2;
         transient boolean validated;

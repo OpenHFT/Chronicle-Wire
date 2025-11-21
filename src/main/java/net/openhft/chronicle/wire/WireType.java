@@ -19,9 +19,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Spliterator;
@@ -449,7 +449,6 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * objects to a byte buffer, e.g., WriteMarshallable, Map, Iterable, etc.
      *
      * @param marshallable The object to be converted to bytes.
-     * @return A Bytes buffer containing the serialized form of the object.
      * @throws InvalidMarshallableException If the object cannot be serialized properly.
      */
     @NotNull
@@ -570,7 +569,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
         //: MappedFile.readOnly(file).acquireBytesForRead(0);
 
-        Bytes<?> bytes = Bytes.wrapForRead(readAsBytes(url == null ? new FileInputStream(file) : open(url)));
+        Bytes<?> bytes = Bytes.wrapForRead(readAsBytes(url == null ? Files.newInputStream(file.toPath()) : open(url)));
         if (bytes.readRemaining() == 0)
             throw new IOException("File " + file + " was empty");
         try {

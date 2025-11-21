@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class SizeLongConverterTest {
 
-    private SizeLongConverter converter = SizeLongConverter.INSTANCE;
+    private final SizeLongConverter converter = SizeLongConverter.INSTANCE;
 
     @Test
     public void testParse() {

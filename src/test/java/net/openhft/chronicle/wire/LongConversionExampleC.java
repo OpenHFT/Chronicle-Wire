@@ -24,7 +24,7 @@ public class LongConversionExampleC {
         private long text4a, text4b, text4c, text4d, text4e;
 
         // Transient Bytes object to hold address data
-        private transient Bytes<House> address = Bytes.forFieldGroup(this, "address");
+        private final transient Bytes<House> address = Bytes.forFieldGroup(this, "address");
 
         // Method to append the address details to the Bytes object
         void address(CharSequence owner) {

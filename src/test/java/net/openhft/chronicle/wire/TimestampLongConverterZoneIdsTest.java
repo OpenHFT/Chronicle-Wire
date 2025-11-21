@@ -81,7 +81,7 @@ public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
         };
 
         // The sample time in UTC for each converter type.
-        long sampleTimeInUTC;
+        final long sampleTimeInUTC;
 
         ConverterType(long sampleTimeInUTC) {
             this.sampleTimeInUTC = sampleTimeInUTC;

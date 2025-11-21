@@ -207,7 +207,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         if (passthrough)
             mainCode.append(";\n");
         else mainCode.append(") {\n");
-        mainCode.append("_dc_.chainedElement(" + (!terminating && !passthrough) + ");\n");
+        mainCode.append("_dc_.chainedElement(").append(String.valueOf(!terminating && !passthrough)).append(");\n");
         mainCode.append("if (_out_.recordHistory()) MessageHistory.writeHistory(_dc_);\n");
 
         int startJ = 0;

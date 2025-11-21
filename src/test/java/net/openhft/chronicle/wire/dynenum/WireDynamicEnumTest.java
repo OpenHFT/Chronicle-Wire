@@ -258,35 +258,35 @@ public class WireDynamicEnumTest extends WireTestCommon {
             // Implement the 'push' method to capture the name, nice, and value of the WDENums enum.
             @Override
             public void push(WDENums nums) {
-                sw.append(nums.name() + " ~ " + nums.nice + " ~ " + nums.value + "\n");
+                sw.append(nums.name()).append(" ~ ").append(nums.nice).append(" ~ ").append(String.valueOf(nums.value)).append("\n");
             }
 
             // Implement the 'holds' method to capture and print the held WDENums.
             @Override
             public void holds(HoldsWDENum holdsWDENum) {
                 sw.append(holdsWDENum.toString());
-                sw.append("# " + holdsWDENum.a.value + ", " + holdsWDENum.b.value + "\n");
+                sw.append("# ").append(String.valueOf(holdsWDENum.a.value)).append(", ").append(String.valueOf(holdsWDENum.b.value)).append("\n");
             }
 
             // Implement the 'unwraps' method to mark a WDENums enum as updated and then call the 'updateEnum' method.
             @Override
             public void unwraps(UnwrapsWDENum unwrapsWDENum) {
                 WDENums c = unwrapsWDENum.c;
-                sw.append("Update " + c + "\n");
+                sw.append("Update ").append(String.valueOf(c)).append("\n");
                 net.openhft.chronicle.wire.DynamicEnum.updateEnum(c);
             }
 
             // Implement the 'push2' method to capture the name, nice, and value of the WDENum2 enum.
             @Override
             public void push2(WDENum2 nums) {
-                sw.append(nums.name() + " = " + nums.nice + " = " + nums.value + "\n");
+                sw.append(nums.name()).append(" = ").append(nums.nice).append(" = ").append(String.valueOf(nums.value)).append("\n");
             }
 
             // Implement the 'unwrap2' method to mark a WDENum2 as updated and then call the 'updateEnum' method.
             @Override
             public void unwrap2(UnwrapsWDENum2 unwrapsWDENum2) {
                 WDENum2 d = unwrapsWDENum2.d;
-                sw.append("Update " + d + "\n");
+                sw.append("Update ").append(String.valueOf(d)).append("\n");
                 net.openhft.chronicle.wire.DynamicEnum.updateEnum(d);
             }
         });
@@ -430,7 +430,8 @@ public class WireDynamicEnumTest extends WireTestCommon {
 
     // Class to hold two instances of WDENums
     static class HoldsWDENum extends SelfDescribingMarshallable {
-        WDENums a, b;  // The two instances of WDENums
+        final WDENums a;
+        final WDENums b;  // The two instances of WDENums
 
         // Constructor initializes the holder with two WDENums values
         HoldsWDENum(WDENums a, WDENums b) {
@@ -442,6 +443,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
     // Class to wrap and unwrap an instance of WDENums for marshalling purposes
     static class UnwrapsWDENum extends SelfDescribingMarshallable {
         @AsMarshallable
+        final
         WDENums c;  // The wrapped instance of WDENums
 
         // Constructor initializes the wrapper with a WDENums value
@@ -453,6 +455,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
     // Class to wrap and unwrap an instance of WDENum2 for marshalling purposes
     static class UnwrapsWDENum2 extends SelfDescribingMarshallable {
         @AsMarshallable
+        final
         WDENum2 d;  // The wrapped instance of WDENum2
 
         // Constructor initializes the wrapper with a WDENum2 value

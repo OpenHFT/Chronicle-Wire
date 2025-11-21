@@ -22,10 +22,10 @@ import java.util.function.BiConsumer;
  */
 @RunWith(value = Parameterized.class)
 public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
-    private ArrayBlockingQueue<Object> singleQ = new ArrayBlockingQueue<>(1);
-    private ArrayBlockingQueue<Object> doubleQ = new ArrayBlockingQueue<>(2);
+    private final ArrayBlockingQueue<Object> singleQ = new ArrayBlockingQueue<>(1);
+    private final ArrayBlockingQueue<Object> doubleQ = new ArrayBlockingQueue<>(2);
     private final List<Map<Class<?>, Object>> usedObjects = Arrays.asList(new HashMap<>(), new HashMap<>());
-    private Class<?>[] prevObjClasses = new Class<?>[2];
+    private final Class<?>[] prevObjClasses = new Class<?>[2];
     private final Boolean multipleNonMarshallableParamTypes;
 
     public MethodWriterVagueTypesTest(Boolean multipleNonMarshallableParamTypes) {
@@ -67,7 +67,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
 
     static class NonMarshallableTestContainer implements Container {
 
-        String randomInt = String.valueOf(new Random().nextInt());
+        final String randomInt = String.valueOf(new Random().nextInt());
 
         @Override
         public String toString() {
@@ -125,9 +125,9 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         testDouble(printer::msg, reader, "key2", new NonMarshallableTestContainer());
         testDouble(printer::msg, reader, new MarshallableTestContainer(), new MarshallableTestContainer());
         testDouble(printer::msg, reader, new NonMarshallableTestContainer(), new NonMarshallableTestContainer());
-        testDouble(printer::msg, reader, Integer.valueOf(5), new MarshallableTestContainer());
-        testDouble(printer::msg, reader, Integer.valueOf(6), new MarshallableTestContainer());
-        testDouble(printer::msg, reader, Long.valueOf(3L), new MarshallableTestContainer());
+        testDouble(printer::msg, reader, 5, new MarshallableTestContainer());
+        testDouble(printer::msg, reader, 6, new MarshallableTestContainer());
+        testDouble(printer::msg, reader, 3L, new MarshallableTestContainer());
     }
 
     @Test
@@ -172,7 +172,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         test(() -> printer.msg(obj), reader, singleQ, obj);
     }
 
-    private <K extends Object, C extends Container> void testDouble(BiConsumer<K, C> printer, MethodReader reader, K key, C obj) throws Exception {
+    private <K, C extends Container> void testDouble(BiConsumer<K, C> printer, MethodReader reader, K key, C obj) throws Exception {
         test(() -> printer.accept(key, obj), reader, doubleQ, key, obj);
     }
 

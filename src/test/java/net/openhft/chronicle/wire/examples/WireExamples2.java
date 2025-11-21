@@ -42,11 +42,11 @@ public class WireExamples2 {
      */
     static class TextObject extends SelfDescribingMarshallable {
         // Temporary buffer for conversion purposes
-        transient StringBuilder temp = new StringBuilder();
+        final transient StringBuilder temp = new StringBuilder();
 
         // Represents the text in Base64 encoded format
         @LongConversion(Base64LongConverter.class)
-        private long text;
+        private final long text;
 
         /**
          * Constructor to initialize the `TextObject` with the given text.

@@ -4,9 +4,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesOut;
-import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
-import net.openhft.chronicle.core.values.LongArrayValues;
 import org.junit.Test;
 
 import java.util.UUID;

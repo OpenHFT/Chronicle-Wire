@@ -399,8 +399,7 @@ public enum WireInternal {
             int first = 6;
             int last = Jvm.trimLast(first, stes2);
             // Loop to add each stack trace element from current thread's stack
-            for (int i = first; i <= last; i++)
-                stes.add(stes2[i]);
+            stes.addAll(Arrays.asList(stes2).subList(first, last + 1));
         }
 
         // Set the final stack trace to the throwable

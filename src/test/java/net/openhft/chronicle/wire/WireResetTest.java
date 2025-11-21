@@ -104,8 +104,8 @@ public class WireResetTest extends WireTestCommon {
 
     public static class Event extends SelfDescribingMarshallable implements Closeable {
 
-        Identifier identifier = new Identifier();
-        Collection<Identifier> ids = new LinkedList<>();
+        final Identifier identifier = new Identifier();
+        final Collection<Identifier> ids = new LinkedList<>();
         String payload;
         LocalDate someDate;
         private boolean isClosed;
@@ -130,7 +130,7 @@ public class WireResetTest extends WireTestCommon {
     static class Identifier extends SelfDescribingMarshallable {
         String id;
         Identifier parent;
-        Map<String, String> permissions = new HashMap<>();
+        final Map<String, String> permissions = new HashMap<>();
 
         Identifier() {
         }

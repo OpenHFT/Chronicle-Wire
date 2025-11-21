@@ -273,7 +273,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                     "proxy method writers will be dropped in x.25.");
         }
 
-        @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
+        @NotNull Class[] interfacesArr = interfaces.toArray(new Class[0]);
 
         //noinspection unchecked
         return (T) Proxy.newProxyInstance(classLoader, interfacesArr, new CallSupplierInvocationHandler(this));

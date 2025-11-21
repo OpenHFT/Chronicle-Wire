@@ -128,7 +128,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     // Check if the ChronicleBitSet is empty
     private void checkEmpty(ChronicleBitSet s) {
         check(s.isEmpty(), "isEmpty");
-        check(s.length() == 0, "length");
+        check(s.isEmpty(), "length");
         check(s.cardinality() == 0, "cardinality");
         // Comparing with different empty ChronicleBitSets
         check(s.equals(emptyBS0), "equals");
@@ -299,14 +299,14 @@ public class ChronicleBitSetTest extends WireTestCommon {
             Iterator<Integer> setBitIterator = history.iterator();
             while (setBitIterator.hasNext()) {
                 Integer setBit = setBitIterator.next();
-                testSet.clear(setBit.intValue());
+                testSet.clear(setBit);
             }
 
             // Verify they were cleared
             for (int x = 0; x < highestPossibleSetBit; x++)
                 if (testSet.get(x))
                     failCount++;
-            if (testSet.length() != 0)
+            if (!testSet.isEmpty())
                 failCount++;
 
             // Set them with set(int, boolean)
@@ -333,7 +333,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
             for (int x = 0; x < highestPossibleSetBit; x++)
                 if (testSet.get(x))
                     failCount++;
-            if (testSet.length() != 0)
+            if (!testSet.isEmpty())
                 failCount++;
 
             // Flip them on
@@ -360,7 +360,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
             for (int x = 0; x < highestPossibleSetBit; x++)
                 if (testSet.get(x))
                     failCount++;
-            if (testSet.length() != 0)
+            if (!testSet.isEmpty())
                 failCount++;
 
             checkSanity(testSet);
@@ -614,11 +614,11 @@ public class ChronicleBitSetTest extends WireTestCommon {
                 int rangeEnd = rangeStart + generator.nextInt(100);
                 b1.flip(rangeStart);
                 b1.flip(rangeStart);
-                if (b1.length() != 0)
+                if (!b1.isEmpty())
                     failCount++;
                 b1.flip(rangeStart, rangeEnd);
                 b1.flip(rangeStart, rangeEnd);
-                if (b1.length() != 0)
+                if (!b1.isEmpty())
                     failCount++;
             }
             checkSanity(b1);

@@ -37,6 +37,7 @@ public class FloatDtoTest extends WireTestCommon {
     static class Key extends SelfDescribingMarshallable implements KeyedMarshallable {
         // Suppress unused warning as the field may be used for serialization/deserialization purposes
         @SuppressWarnings("unused")
+        final
         int uiid;
 
         // Constructor to initialize the 'Key' with a unique ID

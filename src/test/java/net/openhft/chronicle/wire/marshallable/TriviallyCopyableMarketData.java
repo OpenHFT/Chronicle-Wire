@@ -21,11 +21,6 @@ public class TriviallyCopyableMarketData extends BytesInBinaryMarshallable {
     private static final int START = START_END[0];
     private static final int LENGTH = START_END[1] - START_END[0];
 
-    // Unique identifier for the security, encoded in Base85 format for compactness
-    @LongConversion(Base85LongConverter.class)
-    private
-    long securityId;
-
     // Timestamp of the market data, encoded to represent microsecond precision
     @LongConversion(MicroTimestampLongConverter.class)
     long time;
@@ -70,7 +65,7 @@ public class TriviallyCopyableMarketData extends BytesInBinaryMarshallable {
      * @param securityId Unique identifier for the security.
      */
     public void securityId(long securityId) {
-        this.securityId = securityId;
+        // Unique identifier for the security, encoded in Base85 format for compactness
     }
 
     /**

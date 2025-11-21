@@ -9,10 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -160,8 +157,8 @@ public class EnumSetMarshallingTest extends WireTestCommon {
      * Container class with two lists containing EnumSet instances.
      */
     private static final class Container extends SelfDescribingMarshallable {
-        private List<Foo> f1 = new ArrayList<>(Arrays.asList(new Foo(EnumSet.allOf(Thread.State.class))));
-        private List<Foo> f2 = new ArrayList<>(Arrays.asList(new Foo(EnumSet.noneOf(Thread.State.class))));
+        private final List<Foo> f1 = new ArrayList<>(Collections.singletonList(new Foo(EnumSet.allOf(Thread.State.class))));
+        private final List<Foo> f2 = new ArrayList<>(Collections.singletonList(new Foo(EnumSet.noneOf(Thread.State.class))));
     }
 
     /**

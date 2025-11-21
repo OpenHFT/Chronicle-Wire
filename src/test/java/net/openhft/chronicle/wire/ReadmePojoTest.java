@@ -48,7 +48,7 @@ public class ReadmePojoTest extends WireTestCommon {
     }
 
     @Test
-    public void testMapDump() throws IOException {
+    public void testMapDump() {
         // Creating a LinkedHashMap with various key-value pairs
         @NotNull Map<String, Object> map = new LinkedHashMap<>();
         map.put("text", "words");
@@ -87,9 +87,9 @@ public class ReadmePojoTest extends WireTestCommon {
     }
 
     static class MyPojo extends SelfDescribingMarshallable {
-        String text; // Textual data
-        int num;     // Numerical value
-        double factor; // Floating point factor
+        final String text; // Textual data
+        final int num;     // Numerical value
+        final double factor; // Floating point factor
 
         // Constructor for MyPojo
         MyPojo(String text, int num, double factor) {
@@ -100,8 +100,9 @@ public class ReadmePojoTest extends WireTestCommon {
     }
 
     static class MyPojos extends SelfDescribingMarshallable {
-        String name; // Name of the collection
+        final String name; // Name of the collection
         @NotNull
+        final
         List<MyPojo> myPojos = new ArrayList<>(); // List of MyPojo objects
 
         // Constructor for MyPojos

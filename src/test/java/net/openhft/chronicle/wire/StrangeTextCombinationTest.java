@@ -17,8 +17,7 @@ import java.util.Collection;
 // A parameterized test class that tests various string serialization behaviors for different WireTypes.
 @RunWith(value = Parameterized.class)
 public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireTestCommon {
-    private WireType wireType;
-    private Bytes<?> bytes;
+    private final WireType wireType;
 
     // Constructor initializes the WireType for this instance of the test.
     public StrangeTextCombinationTest(WireType wireType) {
@@ -156,7 +155,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     // The Wire is backed by an on-heap elastic byte buffer.
     @NotNull
     private Wire wireFactory() {
-        bytes = Bytes.allocateElasticOnHeap(64);
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         return wireType.apply(bytes);
     }
 }

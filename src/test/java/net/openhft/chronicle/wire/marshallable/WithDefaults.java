@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 class WithDefaults extends SelfDescribingMarshallable {
 
     // Stores bytes data initialized with the string "Hello"
-    public Bytes<?> bytes = Bytes.from("Hello");
+    public final Bytes<?> bytes = Bytes.from("Hello");
 
     // Stores a default text value "Hello"
     public String text = "Hello";

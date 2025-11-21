@@ -19,7 +19,7 @@ import static org.junit.Assume.assumeFalse;
 public class Issue739Test extends WireTestCommon {
 
     static class One extends SelfDescribingMarshallable {
-        String text;
+        final String text;
 
         public One(String text) {
             this.text = text;
@@ -27,7 +27,7 @@ public class Issue739Test extends WireTestCommon {
     }
 
     static class Two extends SelfDescribingMarshallable {
-        String text;
+        final String text;
 
         public Two(String text) {
             this.text = text;

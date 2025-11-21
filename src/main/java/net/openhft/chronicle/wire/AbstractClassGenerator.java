@@ -89,17 +89,14 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
                 generateMainCode(mainCode);
 
                 // Append package and import statements.
-                sourceCode.append("" +
-                        "package " + metaData.packageName() + ";\n" +
-                        "\n");
+                sourceCode.append("" + "package ").append(metaData.packageName()).append(";\n").append("\n");
                 final String implementsSet = metaData.interfaces().stream()
                         .map(this::nameForClass)
                         .sorted()
                         .collect(Collectors.joining(", "));
 
                 for (String import0 : importSet) {
-                    sourceCode.append("" +
-                            "import " + import0 + ";\n");
+                    sourceCode.append("" + "import ").append(import0).append(";\n");
                 }
                 // can't add classes to imports from this point.
                 importSet = Collections.unmodifiableSortedSet(importSet);
@@ -115,7 +112,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
                     sourceCode.append(" extends ")
                             .append(extendsClassName);
                 }
-                if (implementsSet.length() > 0) {
+                if (!implementsSet.isEmpty()) {
                     sourceCode.append(" implements ")
                             .append(implementsSet);
                 }

@@ -181,8 +181,9 @@ public class FIX42Test extends WireTestCommon {
     // Inner static class representing a snapshot of market data
     static class MarketDataSnapshot implements WriteMarshallable {
         // Fields representing the currency symbol and its opening and closing prices
-        String symbol;
-        double openingPrice, closingPrice;
+        final String symbol;
+        final double openingPrice;
+        final double closingPrice;
 
         // Constructor to initialize the market data snapshot with provided values
         MarketDataSnapshot(String symbol, double openingPrice, double closingPrice) {

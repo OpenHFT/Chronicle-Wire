@@ -40,7 +40,7 @@ public class VanillaWireParser implements WireParser {
     private final StringBuilder lastEventName = new StringBuilder(128);
 
     // Called when a numeric field id is not mapped in {@link #numberedConsumer}
-    private FieldNumberParselet fieldNumberParselet;
+    private final FieldNumberParselet fieldNumberParselet;
 
     // Cache of the parselet associated with {@link #lastEventName}
     private WireParselet lastParslet = null;

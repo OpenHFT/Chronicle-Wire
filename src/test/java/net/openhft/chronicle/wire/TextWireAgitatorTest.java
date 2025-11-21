@@ -8,8 +8,6 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import org.junit.Test;
 
-import java.util.Map;
-
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 

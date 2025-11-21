@@ -62,11 +62,8 @@ public class NanoTimeTest extends net.openhft.chronicle.wire.WireTestCommon {
      * that automatically provides serialization and deserialization functionality for the object.
      */
     static class Event extends SelfDescribingMarshallable {
-        @NanoTime
-        private long start;
 
         Event(long start) {
-            this.start = start;
         }
     }
 }

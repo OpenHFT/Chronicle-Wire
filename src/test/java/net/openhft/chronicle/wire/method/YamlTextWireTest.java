@@ -32,7 +32,6 @@ public class YamlTextWireTest extends WireTestCommon {
         ClassAliasPool.CLASS_ALIASES.addAlias(Fields.class);
     }
 
-    private final String name;  // Name of the test scenario
     private final String s;     // YAML formatted text to be tested
 
     /**
@@ -42,7 +41,7 @@ public class YamlTextWireTest extends WireTestCommon {
      * @param text YAML formatted text to be used in the test.
      */
     public YamlTextWireTest(String name, String text) {
-        this.name = name;
+        // Name of the test scenario
         this.s = text;
     }
 

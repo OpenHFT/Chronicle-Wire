@@ -850,7 +850,7 @@ public class JSONWire extends TextWire {
         public JSONWire typeLiteral(@Nullable CharSequence type) {
 
             startBlock('{');
-            bytes.append("\"@type\":\"" + type + "\"");
+            bytes.append("\"@type\":\"").append(String.valueOf(type)).append("\"");
             endBlock('}');
 
             return (JSONWire) wireOut();

@@ -81,7 +81,7 @@ public class AbstractFieldTest extends WireTestCommon {
 
     // Custom Marshallable class for testing purposes.
     static class MySelfDescribingMarshallable extends SelfDescribingMarshallable {
-        String text;
+        final String text;
 
         MySelfDescribingMarshallable(String s) {
             text = s;

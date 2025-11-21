@@ -77,8 +77,7 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
     private void doWriteReadBytesArray(String expected) {
         Data data = new Data();
         data.timestamp = 1234567890L;
-        byte[] bytes = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
-        data.bytes = bytes;
+        data.bytes = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
 
         Wire wire = WireType.BINARY_LIGHT.apply(new HexDumpBytes());
         wire.write("data")

@@ -16,8 +16,7 @@ public class LongArrayValueBitSetOperationsTest extends WireTestCommon {
 
     @Test
     public void basicOps() {
-        LongArrayValueBitSet bs = new LongArrayValueBitSet(192, new BinaryWire(Bytes.allocateElasticOnHeap(256)));
-        try {
+        try (LongArrayValueBitSet bs = new LongArrayValueBitSet(192, new BinaryWire(Bytes.allocateElasticOnHeap(256)))) {
             bs.set(0);
             bs.set(64);
             bs.set(128);
@@ -41,8 +40,6 @@ public class LongArrayValueBitSetOperationsTest extends WireTestCommon {
             assertTrue(bs.get(10));
             assertFalse(bs.get(12));
             assertTrue(bs.get(14));
-        } finally {
-            bs.close();
         }
     }
 }

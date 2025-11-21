@@ -332,15 +332,15 @@ public class WiresTest extends WireTestCommon {
     }
 
     private static final class BytesContainer {
-        Bytes<?> bytesField = Bytes.allocateElasticOnHeap(64);
+        final Bytes<?> bytesField = Bytes.allocateElasticOnHeap(64);
     }
 
     private static final class BytesContainerMarshallable extends SelfDescribingMarshallable {
-        Bytes<?> bytesField = Bytes.allocateElasticOnHeap(64);
+        final Bytes<?> bytesField = Bytes.allocateElasticOnHeap(64);
     }
 
     private static final class StringBuilderContainer {
-        StringBuilder stringBuilder = new StringBuilder();
+        final StringBuilder stringBuilder = new StringBuilder();
     }
 
     @SuppressWarnings("deprecation")
@@ -351,7 +351,9 @@ public class WiresTest extends WireTestCommon {
     }
 
     static class OneTwoFour extends BytesInBinaryMarshallable {
-        long one, two, four;
+        final long one;
+        final long two;
+        final long four;
 
         OneTwoFour(long one, long two, long four) {
             this.one = one;
@@ -361,7 +363,9 @@ public class WiresTest extends WireTestCommon {
     }
 
     static class TwoFourThree extends BytesInBinaryMarshallable {
-        long two, four, three;
+        final long two;
+        final long four;
+        final long three;
 
         TwoFourThree(long two, long four, long three) {
             this.two = two;
@@ -384,7 +388,7 @@ public class WiresTest extends WireTestCommon {
     }
 
     static class BasicBytesMarshallable implements BytesMarshallable {
-        String name;
+        final String name;
 
         BasicBytesMarshallable(String name) {
             this.name = name;
@@ -392,7 +396,7 @@ public class WiresTest extends WireTestCommon {
     }
 
     static class ContainsBM extends BytesInBinaryMarshallable {
-        BasicBytesMarshallable inner;
+        final BasicBytesMarshallable inner;
 
         ContainsBM(BasicBytesMarshallable inner) {
             this.inner = inner;

@@ -112,8 +112,7 @@ public class PerfRegressionTest extends WireTestCommon {
         pb.directory(file.getParentFile());
 
         // Start the process and return it
-        final Process process = pb.start();
-        return process;
+        return pb.start();
     }
 
     // Retrieve and return the execution result from the output stream of a given process

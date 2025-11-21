@@ -26,7 +26,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
     private final boolean numericField;
     private final boolean fieldLess;
     @NotNull
-    private
+    private final
     Bytes<?> bytes = allocateElasticOnHeap();
 
     // Constructor for parameterized test

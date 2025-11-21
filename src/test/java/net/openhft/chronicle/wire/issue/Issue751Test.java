@@ -3,7 +3,6 @@
  */
 package net.openhft.chronicle.wire.issue;
 
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +14,7 @@ import static org.junit.Assume.assumeFalse;
 public class Issue751Test extends WireTestCommon {
 
     public static class One extends SelfDescribingMarshallable {
-        Comparable<?> text;
+        final Comparable<?> text;
 
         One(Comparable<?> text) {
             this.text = text;
@@ -23,7 +22,7 @@ public class Issue751Test extends WireTestCommon {
     }
 
     public static class Two implements Comparable<Two>, Marshallable {
-        Comparable<?> text;
+        final Comparable<?> text;
 
         Two(Comparable<?> text) {
             this.text = text;
@@ -36,8 +35,8 @@ public class Issue751Test extends WireTestCommon {
     }
 
     static class Three extends SelfDescribingMarshallable {
-        One one;
-        Two two;
+        final One one;
+        final Two two;
 
         Three(One one, Two two) {
             this.one = one;

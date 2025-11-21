@@ -89,12 +89,16 @@ public class Base64Test extends net.openhft.chronicle.wire.WireTestCommon {
      */
     static class Data64 extends SelfDescribingMarshallable {
         @Base64
+        final
         byte b;
         @Base64
+        final
         short s;
         @Base64
+        final
         int i;
         @Base64
+        final
         long data;
 
         /**

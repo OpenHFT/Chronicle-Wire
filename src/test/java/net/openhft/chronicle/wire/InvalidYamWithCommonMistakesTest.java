@@ -208,8 +208,8 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
 
     // DTO class containing a string and another DTO
     static class Dto extends SelfDescribingMarshallable {
-        String y;
-        DtoB x;
+        final String y;
+        final DtoB x;
 
         // Constructor to initialize DTO with given values
         Dto(final String y, final DtoB x) {

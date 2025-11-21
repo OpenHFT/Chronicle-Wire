@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 public class KubernetesYamlTest extends WireTestCommon {
 
     // Directory path to Kubernetes YAML files
-    private static String DIR = "/yaml/k8s/";
+    private static final String DIR = "/yaml/k8s/";
 
     /**
      * Performs a test based on a given YAML file and expected results.

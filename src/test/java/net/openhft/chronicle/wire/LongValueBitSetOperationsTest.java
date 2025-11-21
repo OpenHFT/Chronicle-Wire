@@ -21,8 +21,7 @@ public class LongValueBitSetOperationsTest extends WireTestCommon {
 
     @Test
     public void setGetFlipAcrossWords() {
-        LongValueBitSet bs = newSet(128);
-        try {
+        try (LongValueBitSet bs = newSet(128)) {
 
             // Set boundary bits
             bs.set(0);
@@ -50,15 +49,12 @@ public class LongValueBitSetOperationsTest extends WireTestCommon {
             // Clear range that includes last bit
             bs.clear(120, 128);
             assertEquals(-1, bs.nextSetBit(120));
-        } finally {
-            bs.close();
         }
     }
 
     @Test
     public void cardinalityAndToByteArray() {
-        LongValueBitSet bs = newSet(130);
-        try {
+        try (LongValueBitSet bs = newSet(130)) {
             bs.set(1);
             bs.set(65);
             bs.set(129);
@@ -66,8 +62,6 @@ public class LongValueBitSetOperationsTest extends WireTestCommon {
             byte[] arr = bs.toByteArray();
             assertNotNull(arr);
             assertTrue(arr.length > 0);
-        } finally {
-            bs.close();
         }
     }
 }

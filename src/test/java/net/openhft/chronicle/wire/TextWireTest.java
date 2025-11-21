@@ -1975,13 +1975,13 @@ public class TextWireTest extends WireTestCommon {
 
     // Test for attempting to serialize a non-serializable object (current thread).
     @Test(expected = IllegalArgumentException.class)
-    public void writeUnserializable1() throws IOException {
+    public void writeUnserializable1() {
         System.out.println(TEXT.asString(Thread.currentThread()));
     }
 
     // Test for attempting to serialize a non-serializable object (socket instance).
     @Test(expected = IllegalArgumentException.class)
-    public void writeUnserializable2() throws IOException {
+    public void writeUnserializable2() {
         @NotNull Socket s = new Socket();
         System.out.println(TEXT.asString(s));
     }
@@ -2071,7 +2071,7 @@ public class TextWireTest extends WireTestCommon {
     public void testStringArray() {
         // Initialize a new Wire instance and append a serialized StringArray object to it.
         @NotNull Wire wire = createWire();
-        wire.bytes().append("!" + StringArray.class.getName() + " { strings: [ a, b, c ] }");
+        wire.bytes().append("!").append(StringArray.class.getName()).append(" { strings: [ a, b, c ] }");
 
         // Deserialize the StringArray from the Wire and validate its content.
         StringArray sa = wire.getValueIn()
@@ -2080,7 +2080,7 @@ public class TextWireTest extends WireTestCommon {
 
         // Repeat the test with a different serialized StringArray.
         @NotNull Wire wire2 = createWire();
-        wire2.bytes().append("!" + StringArray.class.getName() + " { strings: abc }");
+        wire2.bytes().append("!").append(StringArray.class.getName()).append(" { strings: abc }");
 
         // Deserialize the StringArray and validate its content.
         StringArray sa2 = wire2.getValueIn()
@@ -2372,7 +2372,7 @@ public class TextWireTest extends WireTestCommon {
         final double d2 = textWire.getValueIn().float64();
 
         // Validate the double value remains consistent after the transfer
-        Assert.assertEquals(d2, d, 0);
+        Assert.assertEquals(d, d2, 0);
     }
 
     @Test
@@ -2481,7 +2481,7 @@ public class TextWireTest extends WireTestCommon {
         }
 
         // Setup a method reader to capture DTOs
-        final MethodReader reader = wire.methodReader((BinaryWireTest.IDTO) dto -> sb.append("dto: " + dto + "\n"));
+        final MethodReader reader = wire.methodReader((BinaryWireTest.IDTO) dto -> sb.append("dto: ").append(dto).append("\n"));
 
         // Validate the read comments and DTO
         assertTrue(reader.readOne());
@@ -2549,7 +2549,7 @@ public class TextWireTest extends WireTestCommon {
                         "     # fin\n");
 
         // Assert that the object was deserialized correctly without being affected by the comments.
-        assertArrayEquals(obj.strings, new String[]{"bar", "quux"});
+        assertArrayEquals(new String[]{"bar", "quux"}, obj.strings);
     }
 
     @Test
@@ -2618,7 +2618,7 @@ public class TextWireTest extends WireTestCommon {
         int d;
         int notThere;
         // transient Map to hold other unexpected fields
-        transient Map<String, Object> others = new LinkedHashMap<>();
+        final transient Map<String, Object> others = new LinkedHashMap<>();
 
         @Override
         public void unexpectedField(Object event, ValueIn valueIn) {
@@ -2627,13 +2627,12 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Class with fields of Bytes type initialised with various Byte buffers.
-    // CHECKSTYLE:OFF - uppercase field names required to match YAML keys in assertions
     @SuppressWarnings("java:S116") // Keep A,B,C,D uppercase to match expected YAML keys in assertions
     static class ABCD extends SelfDescribingMarshallable implements Monitorable {
-        Bytes<?> A = Bytes.allocateElasticDirect();
-        Bytes<?> B = Bytes.allocateDirect(64);
-        Bytes<?> C = Bytes.allocateElasticOnHeap();
-        Bytes<?> D = Bytes.allocateElasticOnHeap(1);
+        final Bytes<?> A = Bytes.allocateElasticDirect();
+        final Bytes<?> B = Bytes.allocateDirect(64);
+        final Bytes<?> C = Bytes.allocateElasticOnHeap();
+        final Bytes<?> D = Bytes.allocateElasticOnHeap(1);
 
         // Method to release all byte buffers
         void releaseAll() {
@@ -2659,7 +2658,6 @@ public class TextWireTest extends WireTestCommon {
         StringBuilder B = new StringBuilder();
         StringBuilder C = new StringBuilder();
     }
-    // CHECKSTYLE:ON
 
     // Nested class having another nested class field and a long field
     private static class NestedA extends SelfDescribingMarshallable {
@@ -2680,6 +2678,7 @@ public class TextWireTest extends WireTestCommon {
     // Class wrapping a Bytes field and providing a method to set it
     static class BytesWrapper extends SelfDescribingMarshallable {
         @NotNull
+        final
         Bytes<?> bytes = allocateElasticDirect();
 
         void bytes(@NotNull CharSequence cs) {
@@ -2690,8 +2689,8 @@ public class TextWireTest extends WireTestCommon {
 
     // Class wrapping two double fields with a constructor to set them
     static class DoubleWrapper extends SelfDescribingMarshallable {
-        double d;
-        double n;
+        final double d;
+        final double n;
 
         DoubleWrapper(double d) {
             this.d = d;
@@ -2702,10 +2701,10 @@ public class TextWireTest extends WireTestCommon {
     // Class representing a nested list structure, capable of marshallable reading.
     static class NestedList extends SelfDescribingMarshallable {
         String name;
-        List<NestedItem> listA = new ArrayList<>();
-        List<NestedItem> listB = new ArrayList<>();
-        transient List<NestedItem> listA2 = new ArrayList<>();
-        transient List<NestedItem> listB2 = new ArrayList<>();
+        final List<NestedItem> listA = new ArrayList<>();
+        final List<NestedItem> listB = new ArrayList<>();
+        final transient List<NestedItem> listA2 = new ArrayList<>();
+        final transient List<NestedItem> listB2 = new ArrayList<>();
         int num;
 
         // Override readMarshallable to define custom deserialization logic from a wire format.
@@ -2727,7 +2726,7 @@ public class TextWireTest extends WireTestCommon {
 
     // Class encapsulating a list of WithEnumSet instances, providing a structure for nesting.
     static class NestedWithEnumSet extends SelfDescribingMarshallable {
-        List<WithEnumSet> list = new ArrayList<>();
+        final List<WithEnumSet> list = new ArrayList<>();
     }
 
     // Class representing an item that pairs a name with a set of TimeUnit enumeration items.
@@ -2760,7 +2759,7 @@ public class TextWireTest extends WireTestCommon {
 
     // Class holding a list of strings with customized marshallable reading.
     static class MyDto extends SelfDescribingMarshallable {
-        List<String> strings = new ArrayList<>();
+        final List<String> strings = new ArrayList<>();
 
         // Define a custom way to read objects of this type from the wire format.
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
@@ -2801,9 +2800,11 @@ public class TextWireTest extends WireTestCommon {
     static class TwoLongs extends SelfDescribingMarshallable {
 
         @LongConversion(HexadecimalLongConverter.class)
+        final
         long hexadecimal;
 
         @LongConversion(HexadecimalLongConverter.class)
+        final
         long hexa2;
 
         // Constructor initializing both long fields.
@@ -2815,8 +2816,8 @@ public class TextWireTest extends WireTestCommon {
 
     // Class encapsulating an integer and a Duration object, to be serialized/deserialized.
     static class DurationHolder extends SelfDescribingMarshallable {
-        int foo;
-        Duration duration;
+        final int foo;
+        final Duration duration;
 
         // Constructor initializing both fields.
         DurationHolder(int foo, Duration duration) {
@@ -2826,6 +2827,6 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Basic class capable of being serialized/deserialized without field definition.
-    private class Circle implements Marshallable {
+    private static class Circle implements Marshallable {
     }
 }

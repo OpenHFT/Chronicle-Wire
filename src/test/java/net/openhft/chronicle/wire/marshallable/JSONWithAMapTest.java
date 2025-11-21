@@ -9,7 +9,6 @@ import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -91,14 +90,14 @@ public class JSONWithAMapTest extends net.openhft.chronicle.wire.WireTestCommon 
         }
 
         // check the number of '{' match the number of '}'
-        Assert.assertTrue("openBracket=" + openBracket + ",closeBracket=" + closeBracket, openBracket == closeBracket);
+        Assert.assertEquals("openBracket=" + openBracket + ",closeBracket=" + closeBracket, openBracket, closeBracket);
 
         // DON'T CHANGE THE EXPECTED JSON IT IS CORRECT ! - please use this website to validate the json - https://jsonformatter.org
         Assert.assertEquals(expected, actual);
     }
 
     private static class ResponseItem extends SelfDescribingMarshallable {
-        public @NotNull String index;
+        public String index;
         public Bytes<?> key = Bytes.allocateElasticOnHeap();
         public Object payload;
     }

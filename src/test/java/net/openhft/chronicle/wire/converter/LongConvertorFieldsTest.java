@@ -3,7 +3,6 @@
  */
 package net.openhft.chronicle.wire.converter;
 
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.*;
 import org.junit.Test;
 
@@ -19,14 +18,19 @@ public class LongConvertorFieldsTest {
      */
     static class Base16DTO extends SelfDescribingMarshallable {
         @Base16
+        final
         byte b;
         @Base16
+        final
         char ch;
         @Base16
+        final
         short s;
         @Base16
+        final
         int i;
         @Base16
+        final
         long l;
 
         /**
@@ -78,14 +82,19 @@ public class LongConvertorFieldsTest {
      */
     static class Base64DTO extends SelfDescribingMarshallable {
         @Base64
+        final
         byte b;
         @Base64
+        final
         char ch;
         @Base64
+        final
         short s;
         @Base64
+        final
         int i;
         @Base64
+        final
         long l;
 
         /**
@@ -137,14 +146,19 @@ public class LongConvertorFieldsTest {
      */
     static class Base85DTO extends SelfDescribingMarshallable {
         @Base85
+        final
         byte b;
         @Base85
+        final
         char ch;
         @Base85
+        final
         short s;
         @Base85
+        final
         int i;
         @Base85
+        final
         long l;
 
         /**
@@ -209,14 +223,19 @@ public class LongConvertorFieldsTest {
 
     static class ShortTextDTO extends SelfDescribingMarshallable {
         @ShortText
+        final
         byte b;
         @ShortText
+        final
         char ch;
         @ShortText
+        final
         short s;
         @ShortText
+        final
         int i;
         @ShortText
+        final
         long l;
 
         ShortTextDTO(byte b, char ch, short s, int i, long l) {
@@ -267,14 +286,19 @@ public class LongConvertorFieldsTest {
 
     static class WordsDTO extends SelfDescribingMarshallable {
         @Words
+        final
         byte b;
         @Words
+        final
         char ch;
         @Words
+        final
         short s;
         @Words
+        final
         int i;
         @Words
+        final
         long l;
 
         /**

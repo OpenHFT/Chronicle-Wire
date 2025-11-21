@@ -56,7 +56,7 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
      */
     static class MyDto extends SelfDescribingMarshallable {
         // List to store string values
-        List<String> strings = new ArrayList<>();
+        final List<String> strings = new ArrayList<>();
 
         /**
          * Reads the data from the provided WireIn object to populate this DTO.
@@ -79,6 +79,6 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
      */
     static class MyDto2 extends SelfDescribingMarshallable {
         // Map to store MyDto instances with String keys
-        Map<String, MyDto> myDto = new TreeMap<String, MyDto>();
+        final Map<String, MyDto> myDto = new TreeMap<String, MyDto>();
     }
 }

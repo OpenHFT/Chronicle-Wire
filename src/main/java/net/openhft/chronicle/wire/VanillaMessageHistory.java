@@ -407,20 +407,19 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     /** Fallback binary serialisation when direct memory is unavailable. */
     public void writeMarshallable0(@NotNull BytesOut<?> b) {
-        BytesOut<?> bytes = b;
-        bytes.writeHexDumpDescription("sources")
+        b.writeHexDumpDescription("sources")
                 .writeUnsignedByte(sources);
         for (int i = 0; i < sources; i++)
-            bytes.writeInt(sourceIdArray[i]);
+            b.writeInt(sourceIdArray[i]);
         for (int i = 0; i < sources; i++)
-            bytes.writeLong(sourceIndexArray[i]);
+            b.writeLong(sourceIndexArray[i]);
 
-        bytes.writeHexDumpDescription("timings")
+        b.writeHexDumpDescription("timings")
                 .writeUnsignedByte(timings + 1);// one more time for this output
         for (int i = 0; i < timings; i++) {
-            bytes.writeLong(timingsArray[i]);
+            b.writeLong(timingsArray[i]);
         }
-        bytes.writeLong(nanoTime()); // add time for this output
+        b.writeLong(nanoTime()); // add time for this output
         dirty = false;
     }
 

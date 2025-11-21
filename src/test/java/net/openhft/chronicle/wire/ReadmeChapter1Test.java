@@ -557,19 +557,11 @@ The code for the class Data
 ```java
 */
 class Data extends SelfDescribingMarshallable {
-    private String message;
-    private long number;
-    private TimeUnit timeUnit;
-    private double price;
 
     public Data() {
     }
 
     public Data(String message, long number, TimeUnit timeUnit, double price) {
-        this.message = message;
-        this.number = number;
-        this.timeUnit = timeUnit;
-        this.price = price;
     }
 
 /*

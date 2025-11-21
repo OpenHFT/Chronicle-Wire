@@ -13,7 +13,7 @@ package net.openhft.chronicle.wire;
  */
 class RawText {
     // The encapsulated raw textual data
-    String text;
+    final String text;
 
     /**
      * Constructs a new instance of {@code RawText} initialised with the provided

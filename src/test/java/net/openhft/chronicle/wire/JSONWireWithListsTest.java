@@ -39,8 +39,8 @@ public class JSONWireWithListsTest extends net.openhft.chronicle.wire.WireTestCo
 
     // Inner class representing a Formula 1 driver with surname and car number
     static class F1 {
-        private String surname; // Surname of the driver
-        private int car;        // Car number of the driver
+        private final String surname; // Surname of the driver
+        private final int car;        // Car number of the driver
 
         // Constructor for initializing F1 driver data
         F1(String surname, int car) {

@@ -8,8 +8,6 @@ import net.openhft.chronicle.bytes.DistributedUniqueTimeProvider;
 // Main class illustrating event time serialization and performance measurement of time provision.
 public class EgMain {
 
-    private static long time;
-
     public static void main(String[] args) {
         // Create a time provider for a specific host ID.
         DistributedUniqueTimeProvider tp = DistributedUniqueTimeProvider.forHostId(28);
@@ -29,6 +27,7 @@ public class EgMain {
         for (int t = 0; t < 3; t++) {
             long start = System.nanoTime();
             int runs = 10000000;
+            long time;
             for (int i = 0; i < runs; i++)
                 time = tp.currentTimeNanos();
             long delay = (System.nanoTime() - start) / runs;

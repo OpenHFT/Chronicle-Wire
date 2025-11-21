@@ -350,7 +350,7 @@ public class WireTests {
 
     // Inner class to represent a test object with a Class field
     static class TestClass extends SelfDescribingMarshallable {
-        Class<?> o;
+        final Class<?> o;
 
         TestClass(Class<?> o) {
             this.o = o;
@@ -362,6 +362,6 @@ public class WireTests {
     }
 
     // Inner class to represent a Circle, implements Marshallable for serialization
-    private class Circle implements Marshallable {
+    private static class Circle implements Marshallable {
     }
 }

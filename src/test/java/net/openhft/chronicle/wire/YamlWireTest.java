@@ -1706,14 +1706,14 @@ public class YamlWireTest extends WireTestCommon {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void writeUnserializable() throws IOException {
+    public void writeUnserializable() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         System.out.println(WireType.YAML_ONLY.asString(Thread.currentThread()));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void writeUnserializable2() throws IOException {
+    public void writeUnserializable2() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         @NotNull Socket s = new Socket();
@@ -1780,13 +1780,13 @@ public class YamlWireTest extends WireTestCommon {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         @NotNull Wire wire = createWire();
-        wire.bytes().append("!" + StringArray.class.getName() + " { strings: [ a, b, c ] }");
+        wire.bytes().append("!").append(StringArray.class.getName()).append(" { strings: [ a, b, c ] }");
         StringArray sa = wire.getValueIn()
                 .object(StringArray.class);
         assertEquals("[a, b, c]", Arrays.toString(sa.strings));
 
         @NotNull Wire wire2 = createWire();
-        wire2.bytes().append("!" + StringArray.class.getName() + " { strings: abc }");
+        wire2.bytes().append("!").append(StringArray.class.getName()).append(" { strings: abc }");
         StringArray sa2 = wire2.getValueIn()
                 .object(StringArray.class);
         assertEquals("[abc]", Arrays.toString(sa2.strings));
@@ -1889,7 +1889,7 @@ public class YamlWireTest extends WireTestCommon {
         final YamlWire wire2 = YamlWire.from(bytes.toString());
         final double d2 = wire2.getValueIn().float64();
 
-        Assert.assertEquals(d2, d, 0);
+        Assert.assertEquals(d, d2, 0);
         bytes.releaseLast();
     }
 
@@ -1906,7 +1906,7 @@ public class YamlWireTest extends WireTestCommon {
             wire.commentListener(cs ->
                     sb.append(cs).append("\n"));
         }
-        final MethodReader reader = wire.methodReader((BinaryWireTest.IDTO) dto -> sb.append("dto: " + dto + "\n"));
+        final MethodReader reader = wire.methodReader((BinaryWireTest.IDTO) dto -> sb.append("dto: ").append(dto).append("\n"));
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
         assertEquals("one\n" +
@@ -2074,7 +2074,7 @@ public class YamlWireTest extends WireTestCommon {
         int d;
         int notThere;
 
-        transient Map<String, Object> others = new LinkedHashMap<>();
+        final transient Map<String, Object> others = new LinkedHashMap<>();
 
         @Override
         public void unexpectedField(Object event, ValueIn valueIn) {
@@ -2088,6 +2088,7 @@ public class YamlWireTest extends WireTestCommon {
 
     static class BytesWrapper extends SelfDescribingMarshallable {
         @NotNull
+        final
         Bytes<?> bytes = allocateElasticDirect();
 
         void bytes(@NotNull CharSequence cs) {
@@ -2097,7 +2098,7 @@ public class YamlWireTest extends WireTestCommon {
     }
 
     static class YNestedWithEnumSet extends SelfDescribingMarshallable {
-        List<WithEnumSet> list = new ArrayList<>();
+        final List<WithEnumSet> list = new ArrayList<>();
     }
 
     static class Data extends SelfDescribingMarshallable {
@@ -2107,6 +2108,6 @@ public class YamlWireTest extends WireTestCommon {
         byte[] data;
     }
 
-    private class Circle implements Marshallable {
+    private static class Circle implements Marshallable {
     }
 }

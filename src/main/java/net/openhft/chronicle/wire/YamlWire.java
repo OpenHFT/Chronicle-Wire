@@ -57,7 +57,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     private final Map<String, Object> anchorValues = new HashMap<>();
 
     // Provides default ValueIn when a field is missing
-    private DefaultValueIn defaultValueIn;
+    private final DefaultValueIn defaultValueIn;
 
     // Context for writing YAML documents
     private WriteDocumentContext writeContext;
@@ -1200,8 +1200,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public BracketType getBracketType() {
             switch (yt.current()) {
-                default:
-                    throw new UnsupportedOperationException(yt.toString());
                 case DIRECTIVES_END:
                 case TAG:
                 case COMMENT:
@@ -1218,6 +1216,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 case TEXT:
                 case LITERAL:
                     return BracketType.NONE;
+                default:
+                    throw new UnsupportedOperationException(yt.toString());
             }
         }
 
@@ -1851,8 +1851,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             consumePadding();
             switch (yt.current()) {
                 case TAG: {
-                    Class<?> type = typePrefix();
-                    return type;
+                    return typePrefix();
                 }
                 default:
                     return null;

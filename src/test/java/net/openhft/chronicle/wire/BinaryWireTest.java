@@ -1505,7 +1505,7 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testUsingEvents() throws Exception {
+    public void testUsingEvents() {
         // Creating a wire instance with binary format
         final Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
         w.usePadding(true);
@@ -1620,7 +1620,7 @@ public class BinaryWireTest extends WireTestCommon {
         }
 
         // Reading using a method reader and processing the DTO
-        final MethodReader reader = wire.methodReader((IDTO) dto -> sb.append("dto: " + dto + "\n"));
+        final MethodReader reader = wire.methodReader((IDTO) dto -> sb.append("dto: ").append(dto).append("\n"));
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
         assertEquals("one\n" +
@@ -1704,7 +1704,7 @@ public class BinaryWireTest extends WireTestCommon {
     // A basic DTO class extending the self-describing marshallable class
     static class DTO extends SelfDescribingMarshallable {
 
-        String text;
+        final String text;
 
         DTO(String text) {
             this.text = text;
@@ -1712,6 +1712,6 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     // A simple class representing a Circle
-    private class Circle implements Marshallable {
+    private static class Circle implements Marshallable {
     }
 }

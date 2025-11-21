@@ -110,7 +110,8 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
     static class MyMarshallable implements Marshallable {
 
         // Mutable sequence of characters to store textual data.
-        @NotNull StringBuilder text = new StringBuilder();
+        @NotNull
+        final StringBuilder text = new StringBuilder();
 
         // Method responsible for deserializing the object from the Wire input.
         @Override
@@ -180,6 +181,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
         public List<MarshableOrderBy> marshableOrderBy = new ArrayList<>();
 
         // List of filter conditions specifying the columns and their respective filter expressions.
-        @NotNull List<MarshableFilter> marshableFilters = new ArrayList<>();
+        @NotNull
+        final List<MarshableFilter> marshableFilters = new ArrayList<>();
     }
 }

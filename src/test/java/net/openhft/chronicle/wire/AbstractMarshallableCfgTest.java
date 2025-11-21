@@ -15,8 +15,8 @@ import static org.junit.Assume.assumeFalse;
 
 public class AbstractMarshallableCfgTest extends WireTestCommon{
     static class MyAMC extends AbstractMarshallableCfg {
-        NestedAMC nestedAMC = new NestedAMC();  // Configuration nested inside MyAMC
-        NestedSDM nestedSDM = new NestedSDM();  // Self-describing data nested inside MyAMC
+        final NestedAMC nestedAMC = new NestedAMC();  // Configuration nested inside MyAMC
+        final NestedSDM nestedSDM = new NestedSDM();  // Self-describing data nested inside MyAMC
     }
 
     // Define a nested configuration class that also extends AbstractMarshallableCfg
@@ -27,7 +27,7 @@ public class AbstractMarshallableCfgTest extends WireTestCommon{
 
     // Define a nested self-describing data class
     static class NestedSDM extends SelfDescribingMarshallable {
-        Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer();
+        final Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer();
         double amt = 1.0;
     }
 

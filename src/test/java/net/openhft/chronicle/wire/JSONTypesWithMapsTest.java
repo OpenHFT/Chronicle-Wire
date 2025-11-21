@@ -42,8 +42,8 @@ public class JSONTypesWithMapsTest extends net.openhft.chronicle.wire.WireTestCo
 
     // Static class representing Formula 1 details.
     static class F1 {
-        private String surname;  // Surname of the F1 driver.
-        private int car;         // Represents the car number.
+        private final String surname;  // Surname of the F1 driver.
+        private final int car;         // Represents the car number.
 
         // Constructor for the F1 class.
         F1(String surname, int car) {

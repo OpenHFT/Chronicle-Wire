@@ -99,7 +99,7 @@ public class MarshallableMethodReaderTest extends net.openhft.chronicle.wire.Wir
 
     // Implementation of the Saying interface, stores said strings
     static class SayingMicroservice extends SelfDescribingMarshallable implements Saying {
-        transient List<String> said = new ArrayList<>();
+        final transient List<String> said = new ArrayList<>();
 
         @Override
         public void say(String hi) {

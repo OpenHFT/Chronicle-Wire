@@ -505,7 +505,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         // A list of separators to be used when writing the value.
         @NotNull
-        protected List<BytesStore> seps = new ArrayList<>(4);
+        protected final List<BytesStore> seps = new ArrayList<>(4);
 
         // The current separator being used.
         @NotNull
@@ -1491,7 +1491,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             @Nullable BytesStore<?, ?> popSep = null;
             if (wasLeaf) {
                 leaf = false;
-            } else if (seps.size() > 0) {
+            } else if (!seps.isEmpty()) {
                 popSep = seps.get(seps.size() - 1);
                 popState();
                 newLine();

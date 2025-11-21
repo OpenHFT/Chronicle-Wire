@@ -77,8 +77,7 @@ public class GenerateJsonSchemaMain {
         for (Class<?> aClass : interfaces) {
             g.generateEventSchemaFor(aClass);
         }
-        final String json = g.asJson();
-        return json;
+        return g.asJson();
     }
 
     /**
@@ -98,7 +97,7 @@ public class GenerateJsonSchemaMain {
         String sep = "";
         for (Map.Entry<Class<?>, String> entry : definitions.entrySet()) {
             sb.append(sep);
-            sb.append("\"" + entry.getKey().getSimpleName() + "\": {\n");
+            sb.append("\"").append(entry.getKey().getSimpleName()).append("\": {\n");
             sb.append(entry.getValue());
             sb.append("}");
             sep = ",\n";
@@ -107,7 +106,7 @@ public class GenerateJsonSchemaMain {
         sb.append("},\n" +
                 "\"properties\": {\n");
         for (Map.Entry<String, String> entry : events.entrySet()) {
-            sb.append("\"" + entry.getKey() + "\": {\n");
+            sb.append("\"").append(entry.getKey()).append("\": {\n");
             sb.append(entry.getValue());
             sb.append("},\n");
         }
@@ -167,7 +166,7 @@ public class GenerateJsonSchemaMain {
         String sep = "\n";
         for (Map.Entry<String, String> entry : properties.entrySet()) {
             sb.append(sep);
-            sb.append("\"" + entry.getKey() + "\": {\n");
+            sb.append("\"").append(entry.getKey()).append("\": {\n");
             sb.append(entry.getValue());
             sb.append("}");
             sep = ",\n";
@@ -218,7 +217,7 @@ public class GenerateJsonSchemaMain {
         }
         Comment comment = Jvm.findAnnotation(type, Comment.class);
         if (comment != null)
-            sb.append("\"description\": \"" + comment.value() + "\",\n");
+            sb.append("\"description\": \"").append(comment.value()).append("\",\n");
 
         addProperties(properties, sb);
         definitions.put(type, sb.toString());
@@ -279,7 +278,7 @@ public class GenerateJsonSchemaMain {
             generateObjectSchemaFor(pType);
             String alias = aliases.get(pType);
             String key = alias.startsWith("#") ? "$ref" : "type";
-            desc.append("\"" + key + "\": \"" + alias + "\"\n");
+            desc.append("\"").append(key).append("\": \"").append(alias).append("\"\n");
         }
     }
 

@@ -994,9 +994,6 @@ public class BinaryWire extends AbstractWire implements Wire {
     public <K> K readEvent(@NotNull Class<K> expectedClass) throws InvalidMarshallableException {
         int peekCode = peekCodeAfterPadding();
         switch (peekCode >> 4) {
-            case BinaryWireHighCode.END_OF_STREAM:
-                return null;
-
             case BinaryWireHighCode.CONTROL:
             case BinaryWireHighCode.SPECIAL:
                 return readSpecialField(peekCode, expectedClass);
@@ -1005,6 +1002,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             case BinaryWireHighCode.FIELD1:
                 return readSmallField(peekCode, expectedClass);
 
+            case BinaryWireHighCode.END_OF_STREAM:
             default:
                 return null;
         }
@@ -4626,7 +4624,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             } catch (Exception e) {
                 return otherwise;  // On any exception, return the default value.
             }
-            if (text == null || text.length() == 0)  // If text is empty or null, return the default value.
+            if (text == null || text.isEmpty())  // If text is empty or null, return the default value.
                 return otherwise;
             try {
                 return Long.parseLong(text);  // Try to parse the text as a long.
@@ -4650,7 +4648,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             } catch (BufferUnderflowException e) {
                 return Double.NaN; // On buffer underflow, return NaN.
             }
-            if (text == null || text.length() == 0)  // If text is empty or null, return NaN.
+            if (text == null || text.isEmpty())  // If text is empty or null, return NaN.
                 return Double.NaN;
             return Double.parseDouble(text);  // Try to parse the text as a double.
         }
@@ -4659,7 +4657,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         public boolean bool() throws IORuntimeException {
             int code = readCode();
             if (isText(code))
-                return Boolean.valueOf(text());
+                return Boolean.parseBoolean(text());
 
             switch (code) {
                 case TRUE:

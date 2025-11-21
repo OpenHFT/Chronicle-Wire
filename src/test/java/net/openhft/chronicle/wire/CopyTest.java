@@ -23,7 +23,7 @@ public class CopyTest extends WireTestCommon {
     private final WireType from, to;
 
     // Determines if the test uses the type information while copying
-    private boolean withType;
+    private final boolean withType;
 
     // Constructor to initialize wire types and whether the test runs with type information
     public CopyTest(WireType from, WireType to, boolean withType) {

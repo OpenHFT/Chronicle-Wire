@@ -29,7 +29,7 @@ public class FileMarshallableOut implements MarshallableOut {
 
     private final URL url; // The URL pointing to the file being written to
     private final FMOOptions options = new FMOOptions(); // Options for controlling file output behavior
-    private Wire wire; // The underlying Wire data structure managing the data
+    private final Wire wire; // The underlying Wire data structure managing the data
 
     // DocumentContextHolder for managing document context lifecycle and output operations
     private final DocumentContextHolder dcHolder = new DocumentContextHolder() {

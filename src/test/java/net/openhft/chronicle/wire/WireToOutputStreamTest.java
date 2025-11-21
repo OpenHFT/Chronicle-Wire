@@ -120,7 +120,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
         long value;
         String text;
 
-        Timestamp timestamp = new Timestamp(1234567890000L);
+        final Timestamp timestamp = new Timestamp(1234567890000L);
 
         @Override
         public String toString() {

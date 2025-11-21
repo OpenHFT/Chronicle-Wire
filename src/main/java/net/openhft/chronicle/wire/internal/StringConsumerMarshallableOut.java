@@ -18,10 +18,10 @@ import java.util.function.Consumer;
 public class StringConsumerMarshallableOut implements MarshallableOut {
 
     // Consumer to process the serialized string representation
-    private Consumer<String> stringConsumer;
+    private final Consumer<String> stringConsumer;
 
     // Wire object responsible for serialization
-    private Wire wire;
+    private final Wire wire;
 
     // Document context holder for managing the wire and forwarding the serialized content to the stringConsumer
     private final DocumentContextHolder dcHolder = new DocumentContextHolder() {

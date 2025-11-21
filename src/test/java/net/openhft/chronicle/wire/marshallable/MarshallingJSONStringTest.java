@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 public class MarshallingJSONStringTest implements Marshallable {
 

@@ -6,9 +6,7 @@ package net.openhft.chronicle.wire;
 import io.github.classgraph.*;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.*;
 
 import javax.sql.rowset.serial.SerialClob;
 import javax.swing.*;
@@ -34,8 +32,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
 
 // Test class to verify serializable objects with Wire.
 final class SerializableObjectTest extends WireTestCommon {
@@ -323,20 +319,20 @@ final class SerializableObjectTest extends WireTestCommon {
     // Assert that two objects are "equivalent" based on certain conditions
     private static void assertEqualEnough(Object a, Object b) {
         if (a.getClass() != b.getClass())
-            assertEquals(a, b);
+            Assertions.assertEquals(a, b);
         if (a instanceof Throwable) {
-            assertEquals(a.getClass(), b.getClass());
-            assertEquals(((Throwable) a).getMessage(), ((Throwable) b).getMessage());
+            Assertions.assertEquals(a.getClass(), b.getClass());
+            Assertions.assertEquals(((Throwable) a).getMessage(), ((Throwable) b).getMessage());
         } else if (a instanceof Queue) {
-            assertEquals(a.toString(), b.toString());
+            Assertions.assertEquals(a.toString(), b.toString());
         } else {
-            assertEquals(a, b);
+            Assertions.assertEquals(a, b);
         }
     }
 
     @BeforeEach
     void hasDirect() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -358,7 +354,7 @@ final class SerializableObjectTest extends WireTestCommon {
                 // Assert the source and target objects are equivalent
                 if (!(source instanceof Comparable) || ((Comparable) source).compareTo(target) != 0) {
                     if (wireTypeObject.wireType == WireType.JSON || source instanceof EnumMap)
-                        assertEquals(source.toString(), target.toString());
+                        Assertions.assertEquals(source.toString(), target.toString());
                     else
                         assertEqualEnough(source, target);
                 }
@@ -382,8 +378,8 @@ final class SerializableObjectTest extends WireTestCommon {
 
     // Inner class representing a pairing of WireType and object for testing
     private static final class WireTypeObject {
-        WireType wireType;
-        Object object;
+        final WireType wireType;
+        final Object object;
 
         WireTypeObject(WireType wireType, Object object) {
             this.wireType = wireType;

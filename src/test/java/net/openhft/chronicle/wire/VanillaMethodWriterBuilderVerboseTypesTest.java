@@ -28,7 +28,7 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
     }
 
     // Flag to determine if verbose types should be used
-    private boolean verboseTypes;
+    private final boolean verboseTypes;
 
     // Expected string representation for the current test run
     private final String expects;
@@ -64,21 +64,15 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
     // Nested class representing a specific object with a string and value
     static class MyObject2 extends SelfDescribingMarshallable {
 
-        private final String str;
-        private final int value;
-
         MyObject2(String str, int value) {
-            this.str = str;
-            this.value = value;
         }
     }
 
     // Nested class representing an object containing a list of `MyObject2`
     static class MyObject extends SelfDescribingMarshallable {
 
-        private final ArrayList<MyObject2> list = new ArrayList<>();
-
         MyObject(String str, int value) {
+            ArrayList<MyObject2> list = new ArrayList<>();
             list.add(new MyObject2(str, value));
         }
     }

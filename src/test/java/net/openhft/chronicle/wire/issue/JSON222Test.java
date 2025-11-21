@@ -19,7 +19,7 @@ import org.junit.runners.Parameterized;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -86,7 +86,7 @@ public class JSON222Test extends WireTestCommon {
         // Read the file content into a byte array
         int len = Maths.toUInt31(file.length());
         @NotNull byte[] bytes = new byte[len];
-        try (@NotNull InputStream in = new FileInputStream(file)) {
+        try (@NotNull InputStream in = Files.newInputStream(file.toPath())) {
             in.read(bytes);
         }
         // System.out.println(file + " " + new String(bytes, "UTF-8"));
@@ -130,7 +130,7 @@ public class JSON222Test extends WireTestCommon {
                 if (!file2.exists())
                     throw new AssertionError("Expected to fail\n" + bytes2);
                 @NotNull byte[] bytes4 = new byte[(int) file2.length()];
-                try (@NotNull InputStream in = new FileInputStream(file2)) {
+                try (@NotNull InputStream in = Files.newInputStream(file2.toPath())) {
                     in.read(bytes4);
                 }
                 String expected = new String(bytes4, UTF_8);

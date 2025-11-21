@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 public class TextWriteDocumentContext implements WriteDocumentContext {
 
     // The wire used for writing.
-    protected Wire wire;
+    protected final Wire wire;
 
     // Flag to check if the current data being written is meta-data.
     private boolean metaData;

@@ -178,7 +178,7 @@ public enum Wires {
     }
 
     // Legacy thread-local {@link StringBuilder}. Prefer {@link #STRING_BUILDER_SCOPED_RESOURCE_POOL}
-    static ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
+    static final ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
 
     // Shared {@link net.openhft.compiler.CachedCompiler} for dynamic class generation
     static CachedCompiler CACHED_COMPILER = null;
@@ -1442,7 +1442,7 @@ public enum Wires {
             final String text = in.text().trim();
 
             // Check if the input string is empty.
-            if (text.length() < 1) {
+            if (text.isEmpty()) {
                 throw new IORuntimeException("At least one character (e.g. '0') must be present in order to deserialize a Date object");
             }
             final char firstChar = text.charAt(0);
@@ -1566,7 +1566,7 @@ public enum Wires {
                 case "java.lang.Character":
                     return ScalarStrategy.of(Character.class, (o, in) -> {
                         @Nullable final String text = in.text();
-                        if (text == null || text.length() == 0)
+                        if (text == null || text.isEmpty())
                             return null;
                         return text.charAt(0);
                     });

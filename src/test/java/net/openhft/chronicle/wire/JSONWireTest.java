@@ -547,9 +547,9 @@ public class JSONWireTest extends WireTestCommon {
 
     // A static class to demonstrate a holder of maps with different types of numeric keys and string values
     static class MapWithIntegerKeysHolder extends SelfDescribingMarshallable {
-        Map<Integer, String> intMap = new LinkedHashMap<>(); // A map with integer keys
-        Map<Long, String> longMap = new LinkedHashMap<>();   // A map with long keys
-        Map<Double, String> doubleMap = new LinkedHashMap<>(); // A map with double keys
+        final Map<Integer, String> intMap = new LinkedHashMap<>(); // A map with integer keys
+        final Map<Long, String> longMap = new LinkedHashMap<>();   // A map with long keys
+        final Map<Double, String> doubleMap = new LinkedHashMap<>(); // A map with double keys
     }
 
     // A class to represent a nested structure for testing JSON serialization

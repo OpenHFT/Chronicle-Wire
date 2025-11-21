@@ -52,11 +52,11 @@ public class MapCustomTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     static class MapsHolder<T extends Integer> extends SelfDescribingMarshallable {
         // Define custom maps and their instances
-        IntToStringMap i2sMap = new IntToStringMap();
-        IntMap<Void, String> iMap = new IntMap<>();
-        IntSuperMap<String, MapsHolder> isMap = new IntSuperMap<>();
-        TransformingMap<T, BigDecimal, String> transMap = new TransformingMap<>(BigDecimal::new);
-        GeneralMap gMap = new GeneralMap();
+        final IntToStringMap i2sMap = new IntToStringMap();
+        final IntMap<Void, String> iMap = new IntMap<>();
+        final IntSuperMap<String, MapsHolder> isMap = new IntSuperMap<>();
+        final TransformingMap<T, BigDecimal, String> transMap = new TransformingMap<>(BigDecimal::new);
+        final GeneralMap gMap = new GeneralMap();
         // ClassCastException: net.openhft.chronicle.core.util.ObjectUtils$$Lambda$73/1401132667 cannot be cast to Map
         // private MarkedMap<String> mMap = i2sMap;
 
@@ -116,7 +116,7 @@ public class MapCustomTest extends WireTestCommon {
      * Custom LinkedHashMap that supports value transformation.
      */
     public static class TransformingMap<K, O, I> extends LinkedHashMap<K, I> {
-        Function<I, O> transform;
+        final Function<I, O> transform;
 
         // Constructor to set the transformation function
         TransformingMap(Function<I, O> transform) {

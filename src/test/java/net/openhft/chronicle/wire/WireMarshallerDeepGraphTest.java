@@ -46,7 +46,7 @@ public class WireMarshallerDeepGraphTest extends WireTestCommon {
 
     public static class Parent extends SelfDescribingMarshallable {
         String title = "p";
-        List<Child> children = new ArrayList<>();
-        Map<String, Long> counters = new LinkedHashMap<>();
+        final List<Child> children = new ArrayList<>();
+        final Map<String, Long> counters = new LinkedHashMap<>();
     }
 }

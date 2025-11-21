@@ -69,7 +69,7 @@ public class WireBug39Test extends WireTestCommon {
      * The object mainly manages a StringBuilder data and provides
      * mechanisms to handle serialization and deserialization using Wire.
      */
-    class MarshallableObj implements Marshallable {
+    static class MarshallableObj implements Marshallable {
         private final StringBuilder builder = new StringBuilder();
 
         public void clear() {

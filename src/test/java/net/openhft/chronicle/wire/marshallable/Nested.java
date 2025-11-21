@@ -16,21 +16,6 @@ import java.util.Set;
 @SuppressWarnings("serial")
 class Nested extends SelfDescribingMarshallable {
 
-    // Holds scalar values
-    private ScalarValues values;
-
-    // A list of strings
-    private List<String> strings;
-
-    // A set of integers
-    private Set<Integer> ints;
-
-    // A map with string keys and lists of doubles as values
-    private Map<String, List<Double>> map;
-
-    // An array of strings
-    private String[] array;
-
     /**
      * Default constructor.
      */
@@ -47,10 +32,10 @@ class Nested extends SelfDescribingMarshallable {
      * @param array    An array of strings
      */
     public Nested(ScalarValues values, List<String> strings, Set<Integer> ints, Map<String, List<Double>> map, String[] array) {
-        this.values = values;
-        this.strings = strings;
-        this.ints = ints;
-        this.map = map;
-        this.array = array;
+        // Holds scalar values
+        // A list of strings
+        // A set of integers
+        // A map with string keys and lists of doubles as values
+        // An array of strings
     }
 }

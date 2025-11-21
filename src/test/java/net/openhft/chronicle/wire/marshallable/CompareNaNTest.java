@@ -62,8 +62,8 @@ public class CompareNaNTest extends WireTestCommon {
      * A Data Transfer Object (DTO) representing primitive data types.
      */
     static class PrimDTO extends SelfDescribingMarshallable {
-        double d;
-        float f;
+        final double d;
+        final float f;
 
         PrimDTO(double d, float f) {
             this.d = d;
@@ -75,8 +75,8 @@ public class CompareNaNTest extends WireTestCommon {
      * A Data Transfer Object (DTO) representing wrapped data types (e.g., Double, Float).
      */
     static class WrapDTO extends SelfDescribingMarshallable {
-        Double d;
-        Float f;
+        final Double d;
+        final Float f;
 
         WrapDTO(Double d, Float f) {
             this.d = d;
@@ -89,8 +89,8 @@ public class CompareNaNTest extends WireTestCommon {
      * It can hold various object types, including Double and Float wrappers.
      */
     static class ObjectWrapDTO extends SelfDescribingMarshallable {
-        Object d;
-        Object f;
+        final Object d;
+        final Object f;
 
         ObjectWrapDTO(Object d, Object f) {
             this.d = d;

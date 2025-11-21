@@ -221,14 +221,13 @@ public class WireMarshaller<T> {
             String fieldName = field.getName();
             if (("ordinal".equals(fieldName) || "hash".equals(fieldName)) && Enum.class.isAssignableFrom(clazz))
                 continue;
-            String name = fieldName;
-            if (name.startsWith("this$0")) {
+            if (fieldName.startsWith("this$0")) {
                 if (ValidatableUtil.validateEnabled())
-                    Jvm.warn().on(WireMarshaller.class, "Found " + name + ", in " + clazz + " which will be ignored!");
+                    Jvm.warn().on(WireMarshaller.class, "Found " + fieldName + ", in " + clazz + " which will be ignored!");
                 continue;
             }
             Jvm.setAccessible(field);
-            map.put(name, field);
+            map.put(fieldName, field);
         }
     }
 
@@ -905,7 +904,7 @@ public class WireMarshaller<T> {
         final WireKey key;
 
         Comment commentAnnotation;
-        Boolean isLeaf;
+        final Boolean isLeaf;
 
         /**
          * Constructor initializing field with given value.
@@ -1490,7 +1489,7 @@ public class WireMarshaller<T> {
      * and to various sources, using unsafe operations for performance optimization.
      */
     static class StringBuilderFieldAccess extends FieldAccess {
-        private StringBuilder defaultValue;
+        private final StringBuilder defaultValue;
 
         public StringBuilderFieldAccess(@NotNull Field field, @Nullable Object defaultObject) throws IllegalAccessException {
             super(field, true);
@@ -2496,7 +2495,7 @@ public class WireMarshaller<T> {
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             String text = read.text();
-            if (text == null || text.length() < 1) {
+            if (text == null || text.isEmpty()) {
                 if (overwrite)
                     text = INVALID_CHAR_STR;
                 else

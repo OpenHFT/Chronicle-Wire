@@ -207,7 +207,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     DYNAMIC_ENUM {
 
         // Reflective field access to the ordinal of the Enum class
-        private Field ordinal = Jvm.getField(Enum.class, "ordinal");
+        private final Field ordinal = Jvm.getField(Enum.class, "ordinal");
 
         /**
          * Reads a dynamic enum value from the provided input source.

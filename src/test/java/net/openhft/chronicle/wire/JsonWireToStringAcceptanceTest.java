@@ -3,6 +3,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -11,15 +12,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-
 /**
  * Verify that unicode characters can be properly represented in JSON output.
  */
 @SuppressWarnings("UnnecessaryUnicodeEscape")
 class JsonWireToStringAcceptanceTest {
 
-    private static Collection<WireType> WIRE_TYPES = Arrays.asList(WireType.JSON, WireType.JSON_ONLY);
+    private static final Collection<WireType> WIRE_TYPES = Arrays.asList(WireType.JSON, WireType.JSON_ONLY);
 
     @ParameterizedTest
     @ValueSource(strings = {"£", "€", "¥", "\u20B9", "ó", "óaóó", "", "ÊÆÄ"})
@@ -27,7 +26,7 @@ class JsonWireToStringAcceptanceTest {
         Map<String, String> map = new HashMap<>();
         map.put("x", input);
         for (WireType wireType : WIRE_TYPES) {
-            assertEquals("{\"x\":\"" + input + "\"}", wireType.asString(map));
+            Assertions.assertEquals("{\"x\":\"" + input + "\"}", wireType.asString(map));
         }
     }
 
@@ -37,7 +36,7 @@ class JsonWireToStringAcceptanceTest {
         Map<String, String> map = new HashMap<>();
         map.put("x", input);
         WireOut object = new JSONWire().getValueOut().object(map);
-        assertEquals("{\"x\":\"" + input + "\"}", object.toString());
+        Assertions.assertEquals("{\"x\":\"" + input + "\"}", object.toString());
     }
 
     @ParameterizedTest
@@ -47,7 +46,7 @@ class JsonWireToStringAcceptanceTest {
         map.put("x", input);
         JSONWire jsonWire = new JSONWire();
         jsonWire.getValueOut().object(map);
-        assertEquals("{\"x\":\"" + input + "\"}", JSONWire.asText(jsonWire));
+        Assertions.assertEquals("{\"x\":\"" + input + "\"}", JSONWire.asText(jsonWire));
     }
 
 }

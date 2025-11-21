@@ -72,6 +72,7 @@ public class JSONWireDTOTest extends WireTestCommon {
     static class JSOuterClass extends SelfDescribingMarshallable {
         String text;
         @NotNull
+        final
         List<JSNestedClass> nested = new ArrayList<>();
         boolean b;
         byte bb;
@@ -87,9 +88,9 @@ public class JSONWireDTOTest extends WireTestCommon {
     }
 
     // Nested class representing a part of the DTO.
-    class JSNestedClass extends SelfDescribingMarshallable {
-        String str;
-        int num;
+    static class JSNestedClass extends SelfDescribingMarshallable {
+        final String str;
+        final int num;
 
         // Constructor to initialize the nested class.
         JSNestedClass(String str, int num) {

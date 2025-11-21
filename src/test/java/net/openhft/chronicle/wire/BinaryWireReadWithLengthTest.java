@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.Test;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -89,6 +90,6 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
 
         source.copyOne(textWire);
         String first = textWire.bytes().toString();
-        assertTrue(first.length() > 0);
+        assertFalse(first.isEmpty());
     }
 }

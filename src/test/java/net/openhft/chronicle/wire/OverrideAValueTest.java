@@ -66,6 +66,7 @@ public class OverrideAValueTest extends WireTestCommon {
         static final Integer ONE = new Integer(1);
         // Non-static Integer field num, initialized to ONE
         @NotNull
+        final
         Integer num = ONE;
     }
 
@@ -76,6 +77,7 @@ public class OverrideAValueTest extends WireTestCommon {
         static final NumberHolder NH = new NumberHolder();
         // Non-static NumberHolder field nh, initialized to NH
         @NotNull
+        final
         NumberHolder nh = NH;
     }
 

@@ -76,8 +76,8 @@ public class This0AsTransientTest extends WireTestCommon {
     /**
      * Non-static inner class, which inherently has a hidden reference to the outer instance (this$0).
      */
-    class MyClass1 extends SelfDescribingMarshallable {
-        long value;
+    static class MyClass1 extends SelfDescribingMarshallable {
+        final long value;
 
         MyClass1(long value) {
             this.value = value;
@@ -88,10 +88,10 @@ public class This0AsTransientTest extends WireTestCommon {
      * Another non-static inner class, which also has a hidden reference to the outer instance.
      * This class has an explicit 'this$0' field to mimic the behaviour of hidden fields in inner classes.
      */
-    class MyClass2 extends SelfDescribingMarshallable {
+    static class MyClass2 extends SelfDescribingMarshallable {
         @SuppressWarnings("unused")
         String this$0;
-        long value;
+        final long value;
 
         MyClass2(long value) {
             this.value = value;

@@ -13,7 +13,7 @@ public class MarshallableCfgResetTest extends net.openhft.chronicle.wire.WireTes
 
     // Represents an engine with a configuration whether it's electric or not
     public static class Engine extends AbstractMarshallableCfg {
-        boolean isItElectric;
+        final boolean isItElectric;
 
         // Constructs an Engine instance with a given electric configuration
         Engine(boolean isItElectric) {
@@ -25,7 +25,7 @@ public class MarshallableCfgResetTest extends net.openhft.chronicle.wire.WireTes
     static class Boat extends SelfDescribingMarshallable {
 
         // Engine instance associated with the boat
-        Engine engine;
+        final Engine engine;
 
         // Constructs a Boat instance with a given engine
         Boat(Engine engine) {

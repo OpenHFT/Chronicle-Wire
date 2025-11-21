@@ -30,7 +30,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
 
     // Contains the description of the data layout.
     @FieldGroup("header")
-    transient int description = $description();
+    final transient int description = $description();
 
     /**
      * Fetches the description of the current data layout.

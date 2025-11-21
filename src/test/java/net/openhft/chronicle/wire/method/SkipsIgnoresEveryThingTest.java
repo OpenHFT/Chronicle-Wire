@@ -48,7 +48,7 @@ public class SkipsIgnoresEveryThingTest extends net.openhft.chronicle.wire.WireT
 
         // Create a method reader that routes messages to different handlers based on the ID
         final MethodReader reader = wire.methodReader(new Selective() {
-            DontSayBad dsb = new DontSayBad();
+            final DontSayBad dsb = new DontSayBad();
 
             @Override
             public Saying to(long id) {

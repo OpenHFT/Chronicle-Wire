@@ -111,18 +111,18 @@ public class EnumWireTest extends WireTestCommon {
     // DTO with a field of type Marsh.
     static class Person1 extends SelfDescribingMarshallable {
         @NotNull
-        private Marsh field = Marsh.MARSH;
+        private final Marsh field = Marsh.MARSH;
     }
 
     // DTO with a field of type NoMarsh.
     static class Person2 extends SelfDescribingMarshallable {
         @NotNull
-        private NoMarsh field = NoMarsh.NO_MARSH;
+        private final NoMarsh field = NoMarsh.NO_MARSH;
     }
 
     // DTO with a field of type MarshAndResolve.
     static class Person3 extends SelfDescribingMarshallable {
         @NotNull
-        private MarshAndResolve field = MarshAndResolve.MARSH_AND_RESOLVE;
+        private final MarshAndResolve field = MarshAndResolve.MARSH_AND_RESOLVE;
     }
 }

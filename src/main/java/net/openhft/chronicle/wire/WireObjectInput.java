@@ -30,12 +30,12 @@ class WireObjectInput implements ObjectInput {
      */
     @Nullable
     @Override
-    public Object readObject() throws ClassNotFoundException, IOException {
+    public Object readObject() {
         return wire.getValueIn().object();
     }
 
     @Override
-    public int read() throws IOException {
+    public int read() {
         if (wire.bytes().readRemaining() <= 0)
             return -1;
         return wire.getValueIn().int8() & 0xFF;
@@ -68,7 +68,7 @@ class WireObjectInput implements ObjectInput {
      * Skips up to {@code n} bytes and may rewind if negative.
      */
     @Override
-    public long skip(long n) throws IOException {
+    public long skip(long n) {
         @NotNull final Bytes<?> bytes = wire.bytes();
         final long maxRewind = bytes.start() - bytes.readPosition();
         long len = Math.max(maxRewind, Math.min(bytes.readRemaining(), n));
@@ -80,13 +80,13 @@ class WireObjectInput implements ObjectInput {
      * Estimate of readable bytes.
      */
     @Override
-    public int available() throws IOException {
+    public int available() {
         return (int) Math.min(Integer.MAX_VALUE, wire.bytes().readRemaining());
     }
 
     /** No-op: lifecycle managed externally. */
     @Override
-    public void close() throws IOException {
+    public void close() {
     }
 
     /** Fills the array or throws {@link EOFException}. */
@@ -97,13 +97,13 @@ class WireObjectInput implements ObjectInput {
 
     /** Unsupported. */
     @Override
-    public void readFully(byte[] b, int off, int len) throws IOException {
+    public void readFully(byte[] b, int off, int len) {
         throw new UnsupportedOperationException("TODO");
     }
 
     /** Unsupported. */
     @Override
-    public int skipBytes(int n) throws IOException {
+    public int skipBytes(int n) {
         throw new UnsupportedOperationException();
     }
 

@@ -104,7 +104,7 @@ public class JSON322Test extends WireTestCommon {
     }
 
     static class One extends SelfDescribingMarshallable {
-        String text;
+        final String text;
 
         One(String text) {
             this.text = text;
@@ -112,7 +112,7 @@ public class JSON322Test extends WireTestCommon {
     }
 
     static class Two extends SelfDescribingMarshallable {
-        String text;
+        final String text;
 
         Two(String text) {
             this.text = text;
@@ -120,7 +120,7 @@ public class JSON322Test extends WireTestCommon {
     }
 
     static class Four extends Two {
-        String text;
+        final String text;
 
         Four(String text) {
             super(text);
@@ -143,7 +143,7 @@ public class JSON322Test extends WireTestCommon {
     }
 
     static class TypeOne322 extends SelfDescribingMarshallable {
-        String text;
+        final String text;
 
         TypeOne322(String one) {
             text = one;
@@ -151,8 +151,8 @@ public class JSON322Test extends WireTestCommon {
     }
 
     static class TypeTwo322 extends SelfDescribingMarshallable {
-        int id;
-        long value;
+        final int id;
+        final long value;
 
         TypeTwo322(int id, long value) {
             this.id = id;

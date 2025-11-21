@@ -22,7 +22,7 @@ public class UnknownDatatimeTest extends WireTestCommon {
      * Tests if an unknown datetime can be ignored during deserialization.
      */
     @Test
-    public void ignoreAnUnknownDateTime() throws IOException {
+    public void ignoreAnUnknownDateTime() {
         // Deserialize an instance of AClass from a string.
         // The string contains a datetime field 'eventTime' which is not expected to exist in AClass.
         AClass aClass = Marshallable.fromString("!" + AClass.class.getName() + " { eventTime: 2019-04-02T11:20:41.616653, id: 123456 }");

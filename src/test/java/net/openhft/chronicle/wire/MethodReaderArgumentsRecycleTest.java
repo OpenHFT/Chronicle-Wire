@@ -374,12 +374,8 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     }
 
     static class MyDto extends SelfDescribingMarshallable {
-        private final int a;
-        private final int b;
 
         MyDto(int a, int b) {
-            this.a = a;
-            this.b = b;
         }
     }
 }

@@ -151,7 +151,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
 
     // Test to ensure only JSON Wire is supported and if BINARY_LIGHT is used, an IllegalArgumentException is thrown.
     @Test(expected = IllegalArgumentException.class)
-    public void httpBinary() throws IOException, InterruptedException {
+    public void httpBinary() throws IOException {
         InetSocketAddress address = new InetSocketAddress(0);
         HttpServer server = HttpServer.create(address, 0);
         int port = server.getAddress().getPort();
@@ -248,7 +248,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
 
         // Handler for the benchmarking requests.
         class BenchHandler implements HttpHandler {
-            Wire wire = WireType.JSON_ONLY.apply(Bytes.allocateElasticOnHeap(128));
+            final Wire wire = WireType.JSON_ONLY.apply(Bytes.allocateElasticOnHeap(128));
 
             @Override
             public void handle(HttpExchange xchg) {

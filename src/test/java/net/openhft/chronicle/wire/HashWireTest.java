@@ -65,5 +65,10 @@ public class HashWireTest extends WireTestCommon {
         Field(String name) {
             this.name = name;
         }
+
+        @Override
+        public Field clone() {
+            return deepCopy();
+        }
     }
 }

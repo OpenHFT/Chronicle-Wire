@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(value = Parameterized.class)
 public class TestLongConversion {
-    private static char SEPARATOR = '/';
+    private static final char SEPARATOR = '/';
     private final LongConverter longConverter;
 
     @Parameterized.Parameters

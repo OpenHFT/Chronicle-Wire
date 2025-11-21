@@ -47,17 +47,12 @@ public class JSONTypesWithEnumsAndBoxedTypesTest extends net.openhft.chronicle.w
     // Class representing Formula 1 details.
     static class F1 extends AbstractMarshallableCfg {
 
-        private String surname;  // Surname of the F1 driver.
-
-        // change this to and int from an Integer and, it will work !
-        private Integer car;
-        private Location location;  // Represents the current location of the car.
-
         // Constructor for the F1 class.
         F1(String surname, int car, Location location) {
-            this.surname = surname;
-            this.car = car;
-            this.location = location;
+            // Surname of the F1 driver.
+            // change this to and int from an Integer and, it will work !
+            Integer car1 = car;
+            // Represents the current location of the car.
         }
     }
 

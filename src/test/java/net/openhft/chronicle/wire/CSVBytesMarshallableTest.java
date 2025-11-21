@@ -106,9 +106,7 @@ class FXPrice implements BytesMarshallable {
     //enum
     private CcyPair pair;
     private int size;
-    private byte level;
     private String exchangeName;
-    private transient double midPrice;
 
     /**
      * Reads the object's data from bytes.
@@ -121,9 +119,9 @@ class FXPrice implements BytesMarshallable {
         offerprice = bytes.parseDouble();
         pair = parseEnum(bytes, CcyPair.INTERNER);
         size = Maths.toInt32(bytes.parseLong());
-        level = Maths.toInt8(bytes.parseLong());
+        byte level = Maths.toInt8(bytes.parseLong());
         exchangeName = bytes.parseUtf8(StopCharTesters.COMMA_STOP);
-        midPrice = (bidprice + offerprice) / 2;
+        double midPrice = (bidprice + offerprice) / 2;
     }
 
     /**

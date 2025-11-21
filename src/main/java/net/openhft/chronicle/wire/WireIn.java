@@ -297,7 +297,6 @@ public interface WireIn extends WireCommon, MarshallableIn {
      *
      * @param includeMetaData If true, metadata headers are included in the read attempt.
      * @return The type of header that was read.
-     * @throws EOFException if an end-of-file marker is encountered.
      */
     @NotNull
     HeaderType readDataHeader(boolean includeMetaData) throws EOFException;

@@ -240,20 +240,7 @@ public class GenerateMethodReader {
 
         // Import statements required for the generated code.
         boolean hasMultipleNonMarshallableParamTypes = !Boolean.FALSE.equals(multipleNonMarshallableParamTypes);
-        sourceCode.append("" +
-                "import net.openhft.chronicle.core.Jvm;\n" +
-                "import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;\n" +
-                "import net.openhft.chronicle.core.util.ObjectUtils;\n" +
-                "import net.openhft.chronicle.bytes.*;\n" +
-                "import net.openhft.chronicle.wire.*;\n" +
-                "import net.openhft.chronicle.wire.utils.*;\n" +
-                "import net.openhft.chronicle.wire.BinaryWireCode;\n" +
-                "\n" +
-                (hasMultipleNonMarshallableParamTypes ? "import java.util.HashMap;\n" : "") +
-                "import java.util.Map;\n" +
-                (hasMultipleNonMarshallableParamTypes ? "import java.util.function.Function;\n" : "") +
-                "import java.lang.reflect.Method;\n" +
-                "\n");
+        sourceCode.append("" + "import net.openhft.chronicle.core.Jvm;\n" + "import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;\n" + "import net.openhft.chronicle.core.util.ObjectUtils;\n" + "import net.openhft.chronicle.bytes.*;\n" + "import net.openhft.chronicle.wire.*;\n" + "import net.openhft.chronicle.wire.utils.*;\n" + "import net.openhft.chronicle.wire.BinaryWireCode;\n" + "\n").append(hasMultipleNonMarshallableParamTypes ? "import java.util.HashMap;\n" : "").append("import java.util.Map;\n").append(hasMultipleNonMarshallableParamTypes ? "import java.util.function.Function;\n" : "").append("import java.lang.reflect.Method;\n").append("\n");
 
         // Declare the generated class extending AbstractGeneratedMethodReader.
         sourceCode.append(format("public class %s extends AbstractGeneratedMethodReader {%n", generatedClassName()));

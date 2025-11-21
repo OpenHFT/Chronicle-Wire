@@ -105,8 +105,9 @@ public class MethodWriterByInterfaceTest extends WireTestCommon {
 
     // Implementation of MWBI with name and time fields
     static class MWBImpl extends SelfDescribingMarshallable implements MWBI {
-        String name;
+        final String name;
         @LongConversion(MicroTimestampLongConverter.class)
+        final
         long time;
 
         // Constructor to initialize name and time

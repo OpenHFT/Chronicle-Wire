@@ -17,8 +17,7 @@ public class LongValueBitSetMoreOpsTest extends WireTestCommon {
 
     @Test
     public void previousAndNextClearBits() {
-        LongValueBitSet bs = bound(256);
-        try {
+        try (LongValueBitSet bs = bound(256)) {
             bs.set(1);
             bs.set(63);
             bs.set(64);
@@ -27,16 +26,12 @@ public class LongValueBitSetMoreOpsTest extends WireTestCommon {
             assertEquals(62, bs.previousClearBit(63));
             assertEquals(65, bs.nextClearBit(65));
             assertEquals(199, bs.previousClearBit(200));
-        } finally {
-            bs.close();
         }
     }
 
     @Test
     public void streamEqualsCopyFromAndMarshallRoundTrip() {
-        LongValueBitSet a = bound(128);
-        LongValueBitSet b = bound(128);
-        try {
+        try (LongValueBitSet a = bound(128); LongValueBitSet b = bound(128)) {
             a.set(3);
             a.set(5);
             a.set(127);
@@ -49,9 +44,6 @@ public class LongValueBitSetMoreOpsTest extends WireTestCommon {
             LongValueBitSet r = w.read("bs").object(LongValueBitSet.class);
             assertEquals(a, r);
             r.close();
-        } finally {
-            a.close();
-            b.close();
         }
     }
 }

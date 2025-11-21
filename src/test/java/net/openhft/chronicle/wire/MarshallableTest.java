@@ -252,14 +252,14 @@ public class MarshallableTest extends WireTestCommon {
 
     // A data class with static properties and default values
     static class StaticData extends AbstractMarshallableCfg {
-        int anInt = 100;
+        final int anInt = 100;
         public long aLong = ~100L;
-        List<String> aList = new ArrayList<>();
+        final List<String> aList = new ArrayList<>();
     }
 
     // A data class similar to StaticData, but non-static and without default values for some fields
-    class NonStaticData extends AbstractMarshallableCfg {
+    static class NonStaticData extends AbstractMarshallableCfg {
         int anInt;
-        List<String> aList = new ArrayList<>();
+        final List<String> aList = new ArrayList<>();
     }
 }

@@ -146,7 +146,7 @@ public class StreamingDemoMain {
         void action(Action action);
 
         enum Action {
-            OPEN, CLOSE;
+            OPEN, CLOSE
         }
     }
 }

@@ -110,7 +110,7 @@ public class DefaultMarshallerTest extends WireTestCommon {
     enum NestedEnum {
         ONE,
         TWO,
-        THREE;
+        THREE
     }
 
     // Defining a class with an embedded array

@@ -46,7 +46,7 @@ public class ClassAliasPoolTest extends WireTestCommon {
 
             @Override
             public void appendTo(StringBuffer buffer) {
-                buffer.append("charSequence(\"" + text + "\")");
+                buffer.append("charSequence(\"").append(text).append("\")");
             }
         });
         return null;

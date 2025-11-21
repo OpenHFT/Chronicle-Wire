@@ -64,7 +64,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
 
     // Prepares test data before the test runs
     @Before
-    public void createTestData() throws Exception {
+    public void createTestData() {
         // Populate testData with random strings
         for (int i = 0; i < DATA_SET_SIZE; i++) {
             testData[i] = makeString(random.nextInt(250) + 32, random);
@@ -167,19 +167,17 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
 
     // Runnable class to read/write from/to BinaryWire
     private static final class BinaryTextReaderWriter implements Runnable {
-        private final Supplier<BinaryWire> binaryWireSupplier;
         private final ThreadLocal<BinaryWire> wire;
         private final Random random = new Random(System.nanoTime());
         private final Consumer<RuntimeException> exceptionConsumer;
 
         private BinaryTextReaderWriter(final Consumer<RuntimeException> exceptionConsumer,
-                                       final Supplier<BinaryWire> binaryWireSupplier) throws IOException {
+                                       final Supplier<BinaryWire> binaryWireSupplier) {
             this.exceptionConsumer = exceptionConsumer;
-            this.binaryWireSupplier = binaryWireSupplier;
 
             // Each thread gets its own BinaryWire instance
             wire = ThreadLocal.withInitial(
-                    this.binaryWireSupplier);
+                    binaryWireSupplier);
         }
 
         @Override

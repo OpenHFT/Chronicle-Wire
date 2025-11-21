@@ -13,6 +13,7 @@ import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
 import net.openhft.chronicle.wire.domestic.stream.Streams;
 import net.openhft.chronicle.wire.domestic.streaming.reduction.MarketData;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +29,6 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor.builder;
 import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.*;
-import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -95,7 +95,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
                     vo -> vo.object(invalid)
             );
 
-            fail(wire.toString());
+            Assertions.fail(wire.toString());
         } catch (InvalidMarshallableException expected) {
             // expected
         }

@@ -89,9 +89,7 @@ public class PerfRegressionHolder {
 
     // Example test method for benchmarking a specific type of object
     public void benchNull() {
-        final DefaultStringFields from = this.dsf0;
-        final DefaultStringFields to = this.dsf2;
-        testAll2(from, to);  // Utilizing a variant of the testing method
+        testAll2(this.dsf0, this.dsf2);  // Utilizing a variant of the testing method
     }
 
     public void benchBytes() {
@@ -165,12 +163,12 @@ public class PerfRegressionHolder {
     // Inner class representing a type of marshallable byte fields for testing
     static class BytesFields extends BytesInBinaryMarshallable {
         // Several Bytes objects used for testing purposes
-        Bytes<?> a = Bytes.allocateElasticOnHeap();
-        Bytes<?> b = Bytes.allocateElasticOnHeap();
-        Bytes<?> c = Bytes.allocateElasticOnHeap();
-        Bytes<?> d = Bytes.allocateElasticOnHeap();
-        Bytes<?> e = Bytes.allocateElasticOnHeap();
-        Bytes<?> f = Bytes.allocateElasticOnHeap();
+        final Bytes<?> a = Bytes.allocateElasticOnHeap();
+        final Bytes<?> b = Bytes.allocateElasticOnHeap();
+        final Bytes<?> c = Bytes.allocateElasticOnHeap();
+        final Bytes<?> d = Bytes.allocateElasticOnHeap();
+        final Bytes<?> e = Bytes.allocateElasticOnHeap();
+        final Bytes<?> f = Bytes.allocateElasticOnHeap();
 
         // Default constructor
         BytesFields() {

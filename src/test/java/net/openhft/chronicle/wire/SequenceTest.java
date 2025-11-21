@@ -201,8 +201,8 @@ public class SequenceTest extends WireTestCommon {
 
     // Static class My extending the SelfDescribingMarshallable class.
     static class My extends SelfDescribingMarshallable {
-        List<CharSequence> stuff = new ArrayList<>(); // Instance variable to hold data.
-        transient List<CharSequence> stuffBuffer = new ArrayList<>(); // Buffer for intermediate operations.
+        final List<CharSequence> stuff = new ArrayList<>(); // Instance variable to hold data.
+        final transient List<CharSequence> stuffBuffer = new ArrayList<>(); // Buffer for intermediate operations.
 
         // Method to read marshallable data from the wire.
         @Override

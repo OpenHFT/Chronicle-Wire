@@ -37,12 +37,8 @@ public class WireExamples1 {
     }
 
     static class Car implements Marshallable {
-        private int number;
-        private String driver;
 
         Car(String driver, int number) {
-            this.driver = driver;
-            this.number = number;
         }
     }
 }

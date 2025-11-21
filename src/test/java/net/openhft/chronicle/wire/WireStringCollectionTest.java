@@ -51,7 +51,9 @@ public class WireStringCollectionTest extends net.openhft.chronicle.wire.WireTes
 
     // Definition for ContainsList class
     private static class ContainsList extends AbstractEventCfg<ContainsList> {
-        @NotNull List<String> list = new ArrayList<>();
-        @NotNull Map<String, String> map = new HashMap<>();
+        @NotNull
+        final List<String> list = new ArrayList<>();
+        @NotNull
+        final Map<String, String> map = new HashMap<>();
     }
 }

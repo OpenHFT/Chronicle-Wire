@@ -88,10 +88,10 @@ public class WireCollection extends WireModel {
                 .write(ModelKeys.reference).text(reference)
                 .write(ModelKeys.path).text(path)
                 .write(ModelKeys.name).text(name);
-        if (properties.size() > 0) {
+        if (!properties.isEmpty()) {
             wire.write(ModelKeys.properties).marshallable(properties, String.class, WireProperty.class, true);
         }
-        if (collections != null && collections.size() > 0) {
+        if (collections != null && !collections.isEmpty()) {
             wire.write(ModelKeys.collections).marshallable(collections, String.class, WireCollection.class, false);
         }
     }

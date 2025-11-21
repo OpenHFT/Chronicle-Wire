@@ -102,7 +102,7 @@ public class InnerMapTest extends WireTestCommon {
 
     // A nested class within the `MyMarshable` class
     static class MyNested extends SelfDescribingMarshallable {
-        String value;
+        final String value;
 
         // Constructor to initialize the value
         MyNested(String value) {

@@ -149,8 +149,7 @@ public enum GeneratedProxyClass {
         sb.append("  private final MethodWriterInvocationHandlerSupplier handler;\n" +
                         "    private final Method[] methods = new Method[")
                 .append(declaredMethods.size())
-                .append("];\n")
-                .append("  private static final int maxArgs = " + maxArgs + ";\n")
+                .append("];\n").append("  private static final int maxArgs = ").append(maxArgs).append(";\n")
                 .append("  private final ThreadLocal<Object[][]> argsTL = " +
                         "ThreadLocal.withInitial(() -> IntStream.range(0, maxArgs + 1)" +
                         ".mapToObj(Object[]::new).toArray(Object[][]::new));\n\n")

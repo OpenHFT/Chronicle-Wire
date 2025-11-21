@@ -45,7 +45,7 @@ public interface WireKey {
      */
     static int toCode(@NotNull CharSequence cs) {
         @NotNull String s = cs.toString();
-        if (s.length() > 0 && Character.isDigit(s.charAt(0)))
+        if (!s.isEmpty() && Character.isDigit(s.charAt(0)))
             try {
                 return Integer.parseInt(s);
             } catch (NumberFormatException faillback) {

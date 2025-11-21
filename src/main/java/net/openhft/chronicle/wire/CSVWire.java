@@ -31,12 +31,6 @@ public class CSVWire extends TextWire {
             StopCharTesters.COMMA_STOP::escaping);
 
     /**
-     * Field names parsed from the first line of the input. These are used to
-     * map subsequent column values when reading records.
-     */
-    private final List<String> header = new ArrayList<>();
-
-    /**
      * Creates a wire backed by the supplied bytes and parses the first line as
      * the header row.
      *
@@ -48,6 +42,11 @@ public class CSVWire extends TextWire {
         super(bytes, use8bit);
         while (lineStart == 0) {
             long start = bytes.readPosition();
+            /*
+             * Field names parsed from the first line of the input. These are used to
+             * map subsequent column values when reading records.
+             */
+            List<String> header = new ArrayList<>();
             header.add(valueIn.text());
             if (bytes.readPosition() == start)
                 break;

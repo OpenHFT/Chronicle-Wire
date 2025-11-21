@@ -12,7 +12,7 @@ class TestMarshallable extends SelfDescribingMarshallable {
     // Defining a non-null StringBuilder field named 'name' to store a name value,
     // initializing it to an empty StringBuilder instance
     @NotNull
-    private StringBuilder name = new StringBuilder();
+    private final StringBuilder name = new StringBuilder();
 
     // Defining an integer field named 'count' to store a count value
     private int count;
