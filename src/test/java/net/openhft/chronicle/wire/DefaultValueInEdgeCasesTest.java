@@ -13,8 +13,8 @@ import static org.junit.Assert.*;
 public class DefaultValueInEdgeCasesTest extends WireTestCommon {
 
     public static class WithDefaults extends SelfDescribingMarshallable {
-        final int i = 7;
-        final String s = "d";
+        int i = 7;
+        String s = "d";
     }
 
     @Test

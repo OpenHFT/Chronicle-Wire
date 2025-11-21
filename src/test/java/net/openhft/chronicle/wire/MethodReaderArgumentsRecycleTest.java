@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -373,9 +374,14 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
         Object list;
     }
 
+    @UsedViaReflection
     static class MyDto extends SelfDescribingMarshallable {
+        private final int a;
+        private final int b;
 
         MyDto(int a, int b) {
+            this.a = a;
+            this.b = b;
         }
     }
 }

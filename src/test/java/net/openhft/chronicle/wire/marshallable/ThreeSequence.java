@@ -22,22 +22,27 @@ class ThreeSequence extends SelfDescribingMarshallable {
     // Transient buffers to temporarily hold data during the marshalling process.
     // These buffers are not serialized because of the 'transient' modifier.
     @NotNull
-    private final transient List<Rung> aBuffer = new ArrayList<>();
+    private transient List<Rung> aBuffer = new ArrayList<>();
     @NotNull
-    private final transient List<Rung> bBuffer = new ArrayList<>();
+    private transient List<Rung> bBuffer = new ArrayList<>();
     @NotNull
-    private final transient List<Rung> cBuffer = new ArrayList<>();
+    private transient List<Rung> cBuffer = new ArrayList<>();
 
     // Lists that hold the actual serialized/deserialized data.
     @NotNull
-    private final
+    private
     List<Rung> a = new ArrayList<>();
     @NotNull
-    private final
+    private
     List<Rung> b = new ArrayList<>();
     @NotNull
-    private final
+    private
     List<Rung> c = new ArrayList<>();
+
+    // An optional text field associated with this object.
+    @Nullable
+    private
+    String text;
 
     /**
      * Custom method to deserialize data from the provided wire.
@@ -55,7 +60,6 @@ class ThreeSequence extends SelfDescribingMarshallable {
         // Reads the sequence "c" from the wire into the list 'c' using 'cBuffer' as a buffer.
         wire.read("c").sequence(c, cBuffer, Rung::new);
         // Reads the "text" field from the wire.
-        // An optional text field associated with this object.
-        @Nullable String text = wire.read("text").text();
+        text = wire.read("text").text();
     }
 }

@@ -3,6 +3,7 @@
  */
 package net.openhft.chronicle.wire.java17;
 
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
 /**
@@ -11,6 +12,9 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
  * self-describing marshalling and unmarshalling.
  */
 class Group extends SelfDescribingMarshallable {
+    @UsedViaReflection
+    // The field associated with this group
+    private Field field;
 
     /**
      * Constructs a Group with the specified field.
@@ -18,6 +22,6 @@ class Group extends SelfDescribingMarshallable {
      * @param field The field to be associated with this group.
      */
     public Group(Field field) {
-        // The field associated with this group
+        this.field = field;
     }
 }

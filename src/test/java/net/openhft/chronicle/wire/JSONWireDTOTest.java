@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -69,10 +70,10 @@ public class JSONWireDTOTest extends WireTestCommon {
     }
 
     // Class representing the outer structure of the DTO.
+    @UsedViaReflection
     static class JSOuterClass extends SelfDescribingMarshallable {
         String text;
         @NotNull
-        final
         List<JSNestedClass> nested = new ArrayList<>();
         boolean b;
         byte bb;
@@ -88,9 +89,11 @@ public class JSONWireDTOTest extends WireTestCommon {
     }
 
     // Nested class representing a part of the DTO.
-    static class JSNestedClass extends SelfDescribingMarshallable {
-        final String str;
-        final int num;
+    @UsedViaReflection
+    class JSNestedClass extends SelfDescribingMarshallable {
+        // must non static and have this$0 for this tests
+        String str;
+        int num;
 
         // Constructor to initialize the nested class.
         JSNestedClass(String str, int num) {

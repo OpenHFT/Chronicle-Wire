@@ -3,6 +3,7 @@
  */
 package net.openhft.chronicle.wire.converter;
 
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
 import org.junit.Test;
@@ -62,8 +63,12 @@ public class NanoTimeTest extends net.openhft.chronicle.wire.WireTestCommon {
      * that automatically provides serialization and deserialization functionality for the object.
      */
     static class Event extends SelfDescribingMarshallable {
+        @UsedViaReflection
+        @NanoTime
+        private long start;
 
         Event(long start) {
+            this.start = start;
         }
     }
 }

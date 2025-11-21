@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.wire.Base85LongConverter;
 import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 import net.openhft.chronicle.wire.LongConversion;
@@ -20,6 +21,11 @@ public class TriviallyCopyableMarketData extends BytesInBinaryMarshallable {
     private static final int[] START_END = BytesUtil.triviallyCopyableRange(TriviallyCopyableMarketData.class);
     private static final int START = START_END[0];
     private static final int LENGTH = START_END[1] - START_END[0];
+
+    // Unique identifier for the security, encoded in Base85 format for compactness
+    @UsedViaReflection
+    @LongConversion(Base85LongConverter.class)
+    private long securityId;
 
     // Timestamp of the market data, encoded to represent microsecond precision
     @LongConversion(MicroTimestampLongConverter.class)
@@ -65,7 +71,7 @@ public class TriviallyCopyableMarketData extends BytesInBinaryMarshallable {
      * @param securityId Unique identifier for the security.
      */
     public void securityId(long securityId) {
-        // Unique identifier for the security, encoded in Base85 format for compactness
+        this.securityId = securityId;
     }
 
     /**

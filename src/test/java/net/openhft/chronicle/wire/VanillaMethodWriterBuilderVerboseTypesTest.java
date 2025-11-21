@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
@@ -28,7 +29,7 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
     }
 
     // Flag to determine if verbose types should be used
-    private final boolean verboseTypes;
+    private boolean verboseTypes;
 
     // Expected string representation for the current test run
     private final String expects;
@@ -62,17 +63,24 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
     }
 
     // Nested class representing a specific object with a string and value
+    @UsedViaReflection
     static class MyObject2 extends SelfDescribingMarshallable {
 
+        private final String str;
+        private final int value;
+
         MyObject2(String str, int value) {
+            this.str = str;
+            this.value = value;
         }
     }
 
     // Nested class representing an object containing a list of `MyObject2`
     static class MyObject extends SelfDescribingMarshallable {
+        @UsedViaReflection
+        private final ArrayList<MyObject2> list = new ArrayList<>();
 
         MyObject(String str, int value) {
-            ArrayList<MyObject2> list = new ArrayList<>();
             list.add(new MyObject2(str, value));
         }
     }

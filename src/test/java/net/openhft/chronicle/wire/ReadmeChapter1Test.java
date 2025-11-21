@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +21,6 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
-// CHECKSTYLE:OFF - README-style examples intentionally non-conforming for documentation purposes
 @SuppressWarnings({"java:S2699", "java:S125", "java:S1854", "java:S1481"})
 public class ReadmeChapter1Test extends WireTestCommon {
 
@@ -556,12 +556,21 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 The code for the class Data
 ```java
 */
+@UsedViaReflection
 class Data extends SelfDescribingMarshallable {
+    private String message;
+    private long number;
+    private TimeUnit timeUnit;
+    private double price;
 
     public Data() {
     }
 
     public Data(String message, long number, TimeUnit timeUnit, double price) {
+        this.message = message;
+        this.number = number;
+        this.timeUnit = timeUnit;
+        this.price = price;
     }
 
 /*
