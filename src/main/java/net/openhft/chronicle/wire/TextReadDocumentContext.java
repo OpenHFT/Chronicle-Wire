@@ -22,7 +22,7 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
     // The wire instance this context operates on
     @Nullable
-    protected final Wire wire;
+    protected Wire wire;
 
     // Indicators for the state of the document
     protected boolean present, notComplete;

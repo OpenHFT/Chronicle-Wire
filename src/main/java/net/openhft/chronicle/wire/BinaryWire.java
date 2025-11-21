@@ -628,7 +628,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     /**
      * Throw an {@link IORuntimeException} for an unexpected code.
      */
-    protected static void unexpectedCode() throws IORuntimeException{
+    protected static void unexpectedCode() {
         throw new IORuntimeException("Unexpected code in this context");
     }
 
@@ -707,7 +707,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     /**
      * Throw an {@link IllegalArgumentException} if a code cannot be recognised.
      */
-    protected void unknownCode(@NotNull WireOut wire) throws IllegalArgumentException{
+    protected void unknownCode(@NotNull WireOut wire) {
         throw new IllegalArgumentException(stringForCode(bytes.readUnsignedByte()));
     }
 

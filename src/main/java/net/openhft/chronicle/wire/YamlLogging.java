@@ -17,7 +17,7 @@ public enum YamlLogging {
 
     // The title for logging (can be changed during runtime).
     @NotNull
-    public static final String title = "";
+    public static String title = "";
 
     // Flag indicating whether server writes should be shown.
     // TODO Doesn't show all writes. Use clientReads instead.

@@ -17,7 +17,6 @@ import net.openhft.chronicle.core.util.CoreDynamicEnum;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.values.*;
 import net.openhft.chronicle.threads.NamedThreadFactory;
-import net.openhft.chronicle.wire.internal.MapMarshaller;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -214,6 +213,14 @@ public interface ValueOut {
     @NotNull
     default WireOut rawText(CharSequence value) {
         return text(value);
+    }
+
+    /**
+     * Compatibility shim preserving the public nested MapMarshaller type from 2.27ea0.
+     * Delegates to the implementation in {@code net.openhft.chronicle.wire.internal.MapMarshaller}.
+     */
+    class MapMarshaller<K, V> extends net.openhft.chronicle.wire.internal.MapMarshaller<K, V> {
+        // no-op subclass to preserve binary compatibility
     }
 
     /**

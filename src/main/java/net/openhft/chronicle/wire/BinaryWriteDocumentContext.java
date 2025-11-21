@@ -18,7 +18,7 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
 public class BinaryWriteDocumentContext implements WriteDocumentContext {
 
     // The wire instance used for the binary writing process
-    protected final Wire wire;
+    protected Wire wire;
     protected long position = 0;
     protected int tmpHeader;
     // Count of how many times the start() method was invoked

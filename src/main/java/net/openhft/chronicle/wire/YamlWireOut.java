@@ -505,7 +505,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         // A list of separators to be used when writing the value.
         @NotNull
-        protected final List<BytesStore> seps = new ArrayList<>(4);
+        protected List<BytesStore> seps = new ArrayList<>(4);
 
         // The current separator being used.
         @NotNull

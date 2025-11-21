@@ -2206,6 +2206,11 @@ public class TextWire extends YamlWireOut<TextWire> {
             return true;
         }
 
+        @Override
+        public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd) throws InvalidMarshallableException {
+            return sequence(list, buffer, bufferAdd, this::reader0);
+        }
+
         /**
          * Handles the processing of a sequence.
          *
