@@ -79,7 +79,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     /**
      * Constructor that initializes the YamlWire with provided bytes and a flag indicating the use of 8-bit.
      *
-     * @param bytes Bytes from which YamlWire is initialized
+     * @param bytes   Bytes from which YamlWire is initialized
      * @param use8bit A boolean flag to indicate the use of 8-bit
      */
     public YamlWire(@NotNull Bytes<?> bytes, boolean use8bit) {
@@ -141,9 +141,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * This method adheres to the YAML 1.2 specification for escaped characters
      * (see <a href="https://yaml.org/spec/1.2.2/#escaped-characters">YAML Spec 1.2.2</a>).
      *
-     * @param targetBuffer The appendable containing characters to be unescaped.
+     * @param targetBuffer   The appendable containing characters to be unescaped.
      * @param blockQuoteChar The block quote character that determines the escaping scheme (' or ").
-     * @param <S> An appendable that also implements CharSequence interface.
+     * @param <S>            An appendable that also implements CharSequence interface.
      */
     private static <S extends Appendable & CharSequence> void unescape(@NotNull S targetBuffer, char blockQuoteChar) {
         int end = 0;
@@ -257,10 +257,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * as a date/time, based on the YAML specification. If none of these interpretations is successful,
      * it returns the original string content.
      *
-     * @param blockQuoteChar The block quote character (either ' or ") that initiated the string in YAML.
+     * @param blockQuoteChar   The block quote character (either ' or ") that initiated the string in YAML.
      * @param inputTextBuilder The StringBuilder containing the string to be interpreted.
      * @return An Object which might be a Long, Double, Date, Time or the original String itself
-     *         depending on successful interpretation.
+     * depending on successful interpretation.
      */
     @Nullable
     static Object readNumberOrTextFrom(char blockQuoteChar, final @Nullable StringBuilder inputTextBuilder) {
@@ -318,7 +318,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      *     <li>If the first character of the string is not a number, decimal point, or a sign.</li>
      * </ul>
      *
-     * @param blockQuoteChar The block quote character (either ' or ") that initiated the string in YAML.
+     * @param blockQuoteChar   The block quote character (either ' or ") that initiated the string in YAML.
      * @param inputTextBuilder The StringBuilder containing the string to check.
      * @return True if the string should be left unparsed, otherwise false.
      */
@@ -336,7 +336,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * date-times with timezone offsets (ZonedDateTime).
      * If none of these interpretations is successful, a DateTimeParseException is thrown.
      *
-     * @param s The original StringBuilder containing the string to be parsed.
+     * @param s  The original StringBuilder containing the string to be parsed.
      * @param ss The string equivalent of the StringBuilder 's'.
      * @return A TemporalAccessor which could be a LocalTime, LocalDate or ZonedDateTime based on the format.
      * @throws DateTimeParseException If the string cannot be parsed into any known date or time format.
@@ -515,7 +515,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             }
         } else {
             return bytes.toString();
-    }
+        }
     }
 
     @Override
@@ -834,11 +834,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             }
             // Next lines not covered by any tests
         }
+
         YamlTokeniser.YTContext yc = yt.topContext();
         int minIndent = yc.indent;
         // go through remaining keys
         while (yt.current() == YamlToken.MAPPING_KEY) {
-            long lastKeyPosition = yt.lastKeyPosition();
+            long lastKeyPosition = yt.lineStart;
             if (checkForMatch(keyName))
                 return valueIn;
 
@@ -1718,10 +1719,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         /**
          * Reads a sequence of items from the YAML token stream and populates the provided list.
          *
-         * @param list The list to populate with the sequence items.
-         * @param buffer Temporary storage used during sequence processing.
+         * @param list      The list to populate with the sequence items.
+         * @param buffer    Temporary storage used during sequence processing.
          * @param bufferAdd Supplier function to add items to the buffer.
-         * @param reader0 The reader that processes each item in the sequence.
+         * @param reader0   The reader that processes each item in the sequence.
          * @return true if the sequence was successfully read, false otherwise.
          * @throws InvalidMarshallableException If there's a problem with marshalling.
          */
@@ -2028,12 +2029,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         /**
          * Reads a YAML map and populates a Java map with the given key and value types.
          *
-         * @param kClass The class type of the keys.
-         * @param vClass The class type of the values.
+         * @param kClass   The class type of the keys.
+         * @param vClass   The class type of the values.
          * @param usingMap An optional pre-existing map to populate.
          * @return The populated map.
          * @throws InvalidMarshallableException If there's a problem with marshalling.
-         * @throws IORuntimeException If there's an error in the YAML format or during parsing.
+         * @throws IORuntimeException           If there's an error in the YAML format or during parsing.
          */
         @Nullable
         private <K, V> Map<K, V> map(@NotNull final Class<K> kClass,
@@ -2063,13 +2064,13 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         /**
          * Parses a typed map based on specific YAML tags.
          *
-         * @param kClazz The class type for map keys.
-         * @param vClass The class type for map values.
-         * @param usingMap The map to populate based on the YAML data.
+         * @param kClazz       The class type for map keys.
+         * @param vClass       The class type for map values.
+         * @param usingMap     The map to populate based on the YAML data.
          * @param targetBuffer A StringBuilder instance used for temporary string operations.
          * @return Populated map from the YAML data or null.
          * @throws InvalidMarshallableException If there's a problem with marshalling.
-         * @throws IORuntimeException If an unexpected YAML structure or tag is encountered.
+         * @throws IORuntimeException           If an unexpected YAML structure or tag is encountered.
          */
         @Nullable
         private <K, V> Map<K, V> typedMap(@NotNull Class<K> kClazz, @NotNull Class<V> vClass, @NotNull Map<K, V> usingMap, @NotNull StringBuilder targetBuffer) throws InvalidMarshallableException {
@@ -2080,7 +2081,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 text();
                 return null; // Return null to indicate absence of a value.
 
-            // If the current token indicates a sequence map...
+                // If the current token indicates a sequence map...
             } else if (SEQ_MAP.contentEquals(targetBuffer)) {
                 consumePadding();
 
@@ -2278,8 +2279,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * If a YAML ANCHOR is encountered, it's mapped to the parsed object for potential future ALIAS references.
          *
          * @param reusableInstance The object to potentially reuse when reading. Might be null.
-         * @param strategy The serialization strategy to employ while reading the object.
-         * @param defaultType Expected type of the object to be read. If null, the method will attempt to infer the type.
+         * @param strategy         The serialization strategy to employ while reading the object.
+         * @param defaultType      Expected type of the object to be read. If null, the method will attempt to infer the type.
          * @return The read object, possibly of the expected type. Might be null if the YAML token is NONE.
          * @throws InvalidMarshallableException if any error occurs while parsing or constructing the object.
          */
@@ -2424,7 +2425,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * and extract each item, casting them to the specified class if provided.
          *
          * @param clazz The class type to which each item should be casted, can be null.
-         * @param list The target collection to be populated.
+         * @param list  The target collection to be populated.
          */
         private void readCollection(@Nullable Class<?> clazz, @NotNull Collection list) {
             sequence(list, (l, v) -> {
