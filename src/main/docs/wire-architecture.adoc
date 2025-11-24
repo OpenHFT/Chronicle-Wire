@@ -1,8 +1,8 @@
 = Chronicle Wire: Architectural Overview
 :toc:
 :sectnums:
-:source-highlighter: rouge
 :lang: en-GB
+:source-highlighter: rouge
 
 Purpose: To provide a comprehensive understanding of the internal architecture of the Chronicle Wire library, its components, and design principles.
 For the primary, up-to-date architecture entry point that combines system and internal views, see

@@ -24,6 +24,10 @@ import java.util.concurrent.TimeUnit;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
+/**
+ * Microbenchmark exploring the performance characteristics of string interning and allocation
+ * using {@link Bit8StringInterner} and direct string construction from {@link BytesStore}.
+ */
 @State(Scope.Thread)
 public class ObjectPoolMain {
 

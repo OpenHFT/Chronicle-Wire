@@ -1,8 +1,8 @@
 = Chronicle Wire Cookbook: Practical Recipes
 :toc:
 :sectnums:
-:source-highlighter: rouge
 :lang: en-GB
+:source-highlighter: rouge
 
 Purpose :: To provide a collection of practical recipes for common tasks and advanced techniques when using the Chronicle Wire library.
 :sectnums:

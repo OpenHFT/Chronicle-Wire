@@ -1,8 +1,8 @@
 = Chronicle Wire: Error Handling and Diagnostics Guide
 :toc:
 :sectnums:
-:source-highlighter: rouge
 :lang: en-GB
+:source-highlighter: rouge
 
 Purpose: To provide a comprehensive guide on handling errors, diagnosing issues, and debugging when using the Chronicle Wire library.
 

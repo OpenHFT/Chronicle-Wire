@@ -1,10 +1,12 @@
 = Chronicle Reductions
 Per Minborg
-:css-signature: demo
-:toc: macro
-:toclevels: 3
-:icons: font
 :sectnums:
+:toc: macro
+:icons: font
+:lang: en-GB
+:toclevels: 3
+:css-signature: demo
+:source-highlighter: rouge
 
 toc::[]
 

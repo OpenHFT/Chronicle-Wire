@@ -1,9 +1,9 @@
 = Chronicle Wire Testing Strategy
-:doctype: book
 :toc:
-:toclevels: 2
 :sectnums:
 :lang: en-GB
+:toclevels: 2
+:doctype: book
 :source-highlighter: rouge
 
 This document outlines the testing approach for Chronicle Wire and links tests to the requirements catalogues defined in `project-requirements.adoc` and `functional-requirements.adoc`.

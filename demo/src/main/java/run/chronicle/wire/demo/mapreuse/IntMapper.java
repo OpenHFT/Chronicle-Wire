@@ -73,5 +73,4 @@ public class IntMapper<V> extends SelfDescribingMarshallable {
         }
         return -(low + 1);
     }
-
 }

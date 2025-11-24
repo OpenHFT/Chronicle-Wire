@@ -1,5 +1,4 @@
 = Chronicle Wire Interface Control Document
-Chronicle Software
 :toc:
 :sectnums:
 :lang: en-GB

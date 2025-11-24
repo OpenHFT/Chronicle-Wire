@@ -3,6 +3,13 @@
  */
 package net.openhft.chronicle.wire.domestic;
 
+/**
+ * Internal hook used by Chronicle Wire implementations to adjust their state around header
+ * processing.
+ * <p>
+ * Implementations may use {@link #forceNotInsideHeader()} when a nested operation must be treated
+ * as outside any current header scope.
+ */
 public interface InternalWire {
     void forceNotInsideHeader();
 }

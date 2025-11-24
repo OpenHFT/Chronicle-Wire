@@ -1,8 +1,8 @@
 = Chronicle Wire Glossary
 :toc:
+:lang: en-GB
 :toclevels: 2
 :source-highlighter: rouge
-:icons: font
 
 :sectnums:
 :lang: en-GB

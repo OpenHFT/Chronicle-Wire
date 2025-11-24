@@ -10,6 +10,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 
+/**
+ * {@link VanillaFieldInfo} specialisation that uses {@link UnsafeMemory} to access field values by
+ * cached offset.
+ * <p>
+ * Intended for hot paths where reflective access would otherwise be a bottleneck.
+ */
 @SuppressWarnings("deprecation" /* The parent class will either be moved to internal or cease to exist in x.26 */)
 class UnsafeFieldInfo extends VanillaFieldInfo {
     // Offset value to indicate that it hasn't been set yet.

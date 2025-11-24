@@ -20,6 +20,12 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.nio.BufferUnderflowException;
 
+/**
+ * Plain {@link Externalizable} DTO used as a baseline for Chronicle Wire benchmarks.
+ * <p>
+ * Supports reading and writing via JSON, Chronicle Wire and Java serialisation so that different
+ * approaches can be compared.
+ */
 public class ExternalizableData extends SelfDescribingMarshallable implements Externalizable {
     int smallInt = 0;
     long longInt = 0;
@@ -88,6 +94,9 @@ public class ExternalizableData extends SelfDescribingMarshallable implements Ex
         this.side = side;
     }
 
+    /**
+     * Serialise the DTO into a JSON-smart object for comparison with hand-written JSON handling.
+     */
     public void writeTo(JSONObject obj) {
         obj.put("price", price);
         obj.put("flag", flag);
@@ -97,6 +106,9 @@ public class ExternalizableData extends SelfDescribingMarshallable implements Ex
         obj.put("longInt", longInt);
     }
 
+    /**
+     * Populate fields from a JSON-smart object representation.
+     */
     public void readFrom(JSONObject obj) {
         price = obj.getAsNumber("price").doubleValue();
         flag = Boolean.parseBoolean(obj.getAsString("flag"));
@@ -106,6 +118,9 @@ public class ExternalizableData extends SelfDescribingMarshallable implements Ex
         longInt = obj.getAsNumber("longInt").longValue();
     }
 
+    /**
+     * Parse the DTO from a Jackson streaming parser.
+     */
     public void readFrom(JsonParser parser) throws IOException {
         parser.nextToken();
         while (parser.nextToken() != JsonToken.END_OBJECT) {
@@ -134,6 +149,9 @@ public class ExternalizableData extends SelfDescribingMarshallable implements Ex
         }
     }
 
+    /**
+     * Write the DTO using a Jackson streaming generator.
+     */
     public void writeTo(JsonGenerator generator) throws IOException {
         generator.writeStartObject();
         generator.writeNumberField("price", price);

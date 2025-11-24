@@ -1,9 +1,9 @@
 = Chronicle Wire and YAML 1.2.2 Specification Compliance
-:toc: manual
-:css-signature: demo
-:toc-placement: preamble
+:toc:
 :sectnums:
 :lang: en-GB
+:css-signature: demo
+:toc-placement: preamble
 :source-highlighter: rouge
 
 == Overview

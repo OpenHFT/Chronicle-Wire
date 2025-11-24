@@ -22,6 +22,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Keys shared across benchmark DTOs so wire reads and writes remain consistent.
+ */
 enum DataFields implements WireKey {
     unknown, smallInt, longInt, price, flag, text, side;
 
@@ -30,9 +33,19 @@ enum DataFields implements WireKey {
         return ordinal();
     }
 }
+/**
+ * Marker annotation to flag benchmark methods whose output should be rendered as text when run in
+ * debug mode.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @interface PrintAsText {
 }
+/**
+ * Entry point for a suite of Chronicle Wire microbenchmarks.
+ * <p>
+ * Benchmarks serialisation and deserialisation of {@link Data}, {@link Data2} and {@link TCData}
+ * across multiple wire formats and configuration combinations using JMH.
+ */
 @State(Scope.Thread)
 public class Main {
     final Bytes<?> bytes = Bytes.allocateDirect(128).unchecked(true);

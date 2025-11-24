@@ -12,9 +12,10 @@ import static run.chronicle.wire.perf.BytesInBytesMarshallableMain.histoOut;
 import static run.chronicle.wire.perf.MessageHistoryBytesMarshallableMain.createMessageHistory;
 
 /**
- * Benchmarks the performance of serialising and deserialising
- * {@link net.openhft.chronicle.wire.VanillaMessageHistory} using the standard
- * {@link net.openhft.chronicle.wire.WireMarshaller} mechanism (field by field).
+ * Benchmarks serialisation of {@link net.openhft.chronicle.wire.VanillaMessageHistory} using the generic wire marshaller.
+ * <p>
+ * Uses a {@link Wire} and {@link net.openhft.chronicle.wire.WireMarshaller} to write and
+ * read the object field by field, contrasting performance with the direct binary form.
  */
 /*
 .2.21.ea207

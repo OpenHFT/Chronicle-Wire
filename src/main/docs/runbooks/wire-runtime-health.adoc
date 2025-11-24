@@ -1,5 +1,4 @@
 = Chronicle Wire Runtime Health Runbook
-Chronicle Software
 :toc:
 :sectnums:
 :lang: en-GB

@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
  * - The reader (tailer) is blocked until the message is completely written.
  * - Wire by default is single writer, implementations such as Queue can add support for concurrent writers
  */
-
 public class Example5 {
     public static void main(String[] args) {
 

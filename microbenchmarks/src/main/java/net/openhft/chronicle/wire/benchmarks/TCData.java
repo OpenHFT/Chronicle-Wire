@@ -11,6 +11,12 @@ import net.openhft.chronicle.wire.Base85LongConverter;
 import net.openhft.chronicle.wire.LongConversion;
 import net.openhft.chronicle.wire.Marshallable;
 
+/**
+ * Trivially copyable DTO used in Chronicle Wire benchmarks.
+ * <p>
+ * Uses {@link BytesUtil#triviallyCopyableRange(Class)} and base85 text encoding to support very
+ * fast bulk {@link net.openhft.chronicle.bytes.Bytes} operations.
+ */
 public class TCData implements Marshallable, BytesMarshallable {
     int smallInt = 0;
     long longInt = 0;
@@ -43,10 +49,16 @@ public class TCData implements Marshallable, BytesMarshallable {
         bytes.unsafeWriteObject(this, DTO_START, DTO_LENGTH);
     }
 
+    /**
+     * Starting byte offset of the trivially copyable range for the provided class.
+     */
     public static int start(Class<?> c) {
         return BytesUtil.triviallyCopyableRange(c)[0];
     }
 
+    /**
+     * Length in bytes of the trivially copyable range for the provided class.
+     */
     public static int length(Class<?> c) {
         int[] BYTE_RANGE = BytesUtil.triviallyCopyableRange(c);
         return BYTE_RANGE[1] - BYTE_RANGE[0];
@@ -95,10 +107,16 @@ public class TCData implements Marshallable, BytesMarshallable {
         this.text = Base85LongConverter.INSTANCE.parse(text);
     }
 
-       public Side getSide() {
+    /**
+     * Side derived from the compact char representation; 'B' maps to {@link Side#Buy}.
+     */
+    public Side getSide() {
         return side == 'B' ? Side.Buy : Side.Sell;
     }
 
+    /**
+     * Store the side as a single character code to keep the struct trivially copyable.
+     */
     public void setSide(Side side) {
         this.side = side.name().charAt(0);
     }

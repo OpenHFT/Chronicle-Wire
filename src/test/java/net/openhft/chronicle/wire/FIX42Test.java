@@ -50,7 +50,6 @@ BinaryWire, fixed=true, numericField=false, fieldLess=true
 00000020 F1 3F                                            ·?
 
  */
-
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;

@@ -1,5 +1,4 @@
 = Chronicle Wire Functional Requirements
-Chronicle Software
 :toc:
 :sectnums:
 :lang: en-GB

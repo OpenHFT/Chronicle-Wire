@@ -1,9 +1,9 @@
 = Chronicle Wire Documentation
-:toc: left
+:toc:
+:sectnums:
+:lang: en-GB
 :toclevels: 2
 :source-highlighter: rouge
-:lang: en-GB
-:sectnums:
 
 Chronicle Wire is a high performance, low latency serialisation library that forms part of the OpenHFT stack.
 This index links to the documentation set.
@@ -76,5 +76,5 @@ link:EventsByMethod.adoc[Events by Method Guide] ::
 link:YAML2SpecificationCompliance.adoc[YAML 1.2 Compliance Notes] ::
   Details how Chronicle Wire aligns with the YAML 1.2 specification.
 
-link:systemProperties.adoc[System Properties Guide] ::
+link:system-properties.adoc[System Properties Guide] ::
   Lists Java system properties influencing Chronicle components.

@@ -576,7 +576,6 @@ class Data extends SelfDescribingMarshallable {
 /*
 ```
  */
-
 }
 
 // CHECKSTYLE:ON

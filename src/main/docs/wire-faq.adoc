@@ -1,7 +1,7 @@
 = Chronicle Wire FAQ: Common Questions Answered
 :toc:
-:source-highlighter: rouge
 :lang: en-GB
+:source-highlighter: rouge
 
 Purpose: To provide answers to frequently asked questions about the Chronicle Wire library.
 :sectnums:

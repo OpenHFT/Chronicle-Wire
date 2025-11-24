@@ -1,12 +1,11 @@
 = Chronicle Wire
-Chronicle Software
 :pp: ++
-:css-signature: demo
+:sectnums:
 :toc: macro
-:toclevels: 2
 :icons: font
 :lang: en-GB
-:sectnums:
+:toclevels: 2
+:css-signature: demo
 :source-highlighter: rouge
 
 image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire/badge.svg[link=https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-wire]
@@ -2190,7 +2189,7 @@ try (ChronicleContext context = ChronicleContext.newContext(url)) {
 * link:src/main/docs/wire-glossary.adoc[Glossary]
 * link:src/main/docs/EventsByMethod.adoc[Events by Method]
 * link:src/main/docs/YAML2SpecificationCompliance.adoc[YAML 1.2 Compliance]
-* link:src/main/docs/systemProperties.adoc[System Properties Guide]
+* link:src/main/docs/system-properties.adoc[System Properties Guide]
 
 == Community and Support
 

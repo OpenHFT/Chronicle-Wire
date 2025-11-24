@@ -1,5 +1,4 @@
 = OpenHFT Knowledge Pack for Chronicle Wire
-Chronicle Software
 :toc:
 :sectnums:
 :lang: en-GB

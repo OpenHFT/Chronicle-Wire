@@ -11,6 +11,11 @@ import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
 
+/**
+ * Variant of {@link Data} used to compare different serialisation strategies in microbenchmarks.
+ * <p>
+ * Uses a different field ordering and access pattern to highlight layout effects.
+ */
 public class Data2 implements Marshallable, BytesMarshallable {
     int smallInt = 0;
     long longInt = 0;
@@ -19,6 +24,10 @@ public class Data2 implements Marshallable, BytesMarshallable {
     transient Bytes<?> text = Bytes.allocateElasticOnHeap(16).unchecked(true);
     Side side;
 
+    /**
+     * Construct a populated DTO using the provided values and append the given text into the
+     * reusable {@link Bytes} buffer.
+     */
     public Data2(int smallInt, long longInt, double price, boolean flag, CharSequence text, Side side) {
         this.smallInt = smallInt;
         this.longInt = longInt;
@@ -88,11 +97,17 @@ public class Data2 implements Marshallable, BytesMarshallable {
         return text.toString();
     }
 
+    /**
+     * Replace the current text content with the supplied string.
+     */
     public void setText(String text) {
         this.text.clear();
         this.text.appendUtf8(text);
     }
 
+    /**
+     * Direct access to the mutable {@link Bytes} backing the text field for zero-copy use.
+     */
     public Bytes<?> textAsBytes() {
         return text;
     }
@@ -105,6 +120,10 @@ public class Data2 implements Marshallable, BytesMarshallable {
         this.side = side;
     }
 
+    /**
+     * Read the DTO using the manual Bytes-based encoding used in the microbenchmarks.
+     * The side is encoded as a boolean and the text as an 8-bit string for compactness.
+     */
     @Override
     public void readMarshallable(BytesIn<?> bytes) {
         price = bytes.readDouble();
@@ -116,6 +135,9 @@ public class Data2 implements Marshallable, BytesMarshallable {
         bytes.read8bit(text);
     }
 
+    /**
+     * Write the DTO using the manual Bytes-based encoding used in the microbenchmarks.
+     */
     @Override
     public void writeMarshallable(BytesOut<?> bytes) {
         bytes.writeDouble(price)

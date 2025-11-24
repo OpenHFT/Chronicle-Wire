@@ -69,5 +69,4 @@ public class Mapper<K, V> extends SelfDescribingMarshallable {
         }
         return -(low + 1);
     }
-
 }

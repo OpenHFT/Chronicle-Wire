@@ -1,5 +1,4 @@
 = Chronicle Wire Decision Log
-Chronicle Software
 :toc:
 :sectnums:
 :lang: en-GB

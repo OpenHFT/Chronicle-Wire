@@ -1,9 +1,9 @@
 = Chronicle System Properties Guide
-:toc: preamble
-:icons: font
+:toc:
 :sectnums:
-:source-highlighter: rouge
+:icons: font
 :lang: en-GB
+:source-highlighter: rouge
 
 This document lists Java system properties that influence Chronicle libraries such as Chronicle Wire and Chronicle Core.
 These options are commonly used for debugging or performance tuning.

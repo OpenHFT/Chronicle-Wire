@@ -1,5 +1,4 @@
 = Chronicle Wire System Architecture
-Chronicle Software
 :toc:
 :sectnums:
 :lang: en-GB

@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -138,7 +139,8 @@ public class CSVWire extends TextWire {
             // Checks if the code point represents a comment.
             if (codePoint == '#') {
                 // If so, skip characters until the end of the line.
-                while (readCode() >= ' ') ;
+                while (readCode() >= ' ')
+                    Jvm.nanoPause();
                 continue;
             }
             if (Character.isWhitespace(codePoint)) {

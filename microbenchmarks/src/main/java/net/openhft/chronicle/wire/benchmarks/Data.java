@@ -14,6 +14,12 @@ import net.openhft.chronicle.wire.benchmarks.bytes.NativeData;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Simple DTO used in Chronicle Wire microbenchmarks.
+ * <p>
+ * Contains an int, long, double, boolean, text and side field and supports Chronicle
+ * {@link Marshallable} and {@link BytesMarshallable} serialisation.
+ */
 public class Data implements Marshallable, BytesMarshallable {
     int smallInt = 0;
     long longInt = 0;
@@ -108,11 +114,20 @@ public class Data implements Marshallable, BytesMarshallable {
         this.side = side;
     }
 
+    /**
+     * Writes the current text bytes into the provided buffer without resizing it.
+     */
     public void copyTextTo(ByteBuffer textBuffer) {
         for (int i = 0; i < text.length(); i++)
             textBuffer.put((byte) text.charAt(i));
     }
 
+    /**
+     * Intended hook for copying this DTO into the equivalent {@link NativeData} structure.
+     * <p>
+     * Left unimplemented in the benchmark harness because {@link NativeData} lives in a separate
+     * module; the method documents the expected direction for future comparisons.
+     */
     public void copyTo(NativeData nd) {
         throw new UnsupportedOperationException();
     }

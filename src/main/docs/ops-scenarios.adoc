@@ -1,5 +1,4 @@
 = Chronicle Wire Operational Scenarios
-Chronicle Software
 :toc:
 :sectnums:
 :lang: en-GB

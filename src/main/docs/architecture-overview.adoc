@@ -1,9 +1,8 @@
 = Chronicle Wire Architecture Overview
-Chronicle Software
 :toc:
-:toclevels: 3
 :sectnums:
 :lang: en-GB
+:toclevels: 3
 :source-highlighter: rouge
 
 This document combines and supersedes the earlier `wire-architecture.adoc` and
