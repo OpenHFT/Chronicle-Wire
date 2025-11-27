@@ -26,6 +26,7 @@ import static net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor.bu
 import static net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor.extractingIndex;
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.replacingMerger;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class StreamingDemoMain {
 
     public static void main(String[] args) {

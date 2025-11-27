@@ -18,6 +18,7 @@ import java.util.function.Supplier;
  * The specific wire type is determined dynamically based on the provided bytes.
  * This class provides flexibility in reading from wires that could be in either format.
  */
+@SuppressWarnings("deprecation")
 public class ReadAnyWire extends AbstractAnyWire implements Wire {
 
     /**

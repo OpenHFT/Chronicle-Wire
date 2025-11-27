@@ -25,6 +25,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class RawWireTest extends WireTestCommon {
 
     // Suppressing raw type warnings for the Bytes<?> object.

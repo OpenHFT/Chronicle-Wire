@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Covers empty, single, and larger sequences to hit hasNextSequenceItem boundaries.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public class ValueInSequenceBoundariesTest extends WireTestCommon {
 
     @Test

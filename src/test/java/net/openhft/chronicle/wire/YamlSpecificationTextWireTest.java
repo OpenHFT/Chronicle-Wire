@@ -20,6 +20,7 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
+@SuppressWarnings({"deprecation", "removal"})
 public class YamlSpecificationTextWireTest extends WireTestCommon {
 
     // Holds the input data for each test case

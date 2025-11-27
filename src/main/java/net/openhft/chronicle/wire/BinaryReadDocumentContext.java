@@ -17,6 +17,7 @@ import static net.openhft.chronicle.wire.Wires.lengthOf;
  * It provides an implementation tailored for reading from binary document contexts and ensures
  * full read capability if required.
  */
+@SuppressWarnings("deprecation")
 public class BinaryReadDocumentContext implements ReadDocumentContext {
 
     public long start = -1;

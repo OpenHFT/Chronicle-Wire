@@ -18,6 +18,7 @@ import java.lang.reflect.Proxy;
 import static org.junit.Assert.*;
 
 // Test class extending WireTestCommon to test method writing and reading via interface implementations
+@SuppressWarnings({"deprecation", "removal"})
 public class MethodWriterByInterfaceTest extends WireTestCommon {
 
     // Setup method to configure default object creation for interfaces before each test

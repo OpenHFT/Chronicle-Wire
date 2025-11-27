@@ -24,7 +24,7 @@ import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
  * {@link #MESSAGE_HISTORY_LENGTH}. The object can be marshalled in a compact
  * binary form or as a verbose textual structure.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class VanillaMessageHistory extends SelfDescribingMarshallable implements MessageHistory {
 
     /**

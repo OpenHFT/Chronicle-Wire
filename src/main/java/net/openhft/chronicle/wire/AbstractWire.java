@@ -32,6 +32,7 @@ import static net.openhft.chronicle.wire.Wires.*;
  * Represents the AbstractWire class which serves as a base for all Wire implementations.
  * This class provides fundamental shared behaviors, configurations, and initializations for Wire types.
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractWire implements Wire, InternalWire {
 
     // Default padding configuration loaded from the system properties.

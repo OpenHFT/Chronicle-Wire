@@ -23,6 +23,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
+@SuppressWarnings({"deprecation", "removal"})
 public class WireToOutputStreamTest extends WireTestCommon {
 
     private final WireType currentWireType;

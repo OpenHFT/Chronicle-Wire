@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * Verify that unicode characters can be properly represented in JSON output.
  */
-@SuppressWarnings("UnnecessaryUnicodeEscape")
+@SuppressWarnings({"UnnecessaryUnicodeEscape", "deprecation", "removal"})
 class JsonWireToStringAcceptanceTest {
 
     private static final Collection<WireType> WIRE_TYPES = Arrays.asList(WireType.JSON, WireType.JSON_ONLY);

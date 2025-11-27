@@ -47,7 +47,7 @@ import static net.openhft.chronicle.wire.TextStopCharTesters.END_OF_TYPE;
  * <p><b>Important:</b> Some configurations and methods in this class are marked as deprecated
  * and are slated for removal in future versions, suggesting that its behavior might evolve in future releases.
  */
-@SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape", "deprecation"})
 public class TextWire extends YamlWireOut<TextWire> {
 
     // Constants representing specific textual constructs in YAML.

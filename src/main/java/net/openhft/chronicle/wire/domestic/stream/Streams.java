@@ -5,7 +5,6 @@ package net.openhft.chronicle.wire.domestic.stream;
 
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
-import net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor;
 import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
 import net.openhft.chronicle.wire.internal.stream.StreamsUtil;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +28,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * Generally, these objects will create underlying objects and should not be used in JVMs running
  * deterministic low-latency code. Instead, they are suitable for convenient <em>off-line analysis of queue content</em>.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public final class Streams {
 
     // Suppresses default constructor, ensuring non-instantiability.
@@ -105,7 +105,7 @@ public final class Streams {
     @NotNull
     @Deprecated(/* to be removed in 2027 */)
     public static DoubleStream ofDouble(@NotNull final MarshallableIn documentProvider,
-                                        @NotNull final ToDoubleDocumentExtractor extractor) {
+                                        @NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor) {
         requireNonNull(documentProvider);
         requireNonNull(extractor);
         return StreamSupport.doubleStream(spliteratorOfDouble(documentProvider, extractor), false);
@@ -184,7 +184,7 @@ public final class Streams {
      */
     @NotNull
     public static Spliterator.OfDouble spliteratorOfDouble(@NotNull final MarshallableIn documentProvider,
-                                                           @NotNull final ToDoubleDocumentExtractor extractor) {
+                                                           @NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor) {
         requireNonNull(documentProvider);
         requireNonNull(extractor);
         return new StreamsUtil.VanillaSpliteratorOfDouble(iteratorOfDouble(documentProvider, extractor));
@@ -251,7 +251,7 @@ public final class Streams {
      */
     @NotNull
     public static PrimitiveIterator.OfDouble iteratorOfDouble(@NotNull final MarshallableIn documentProvider,
-                                                              @NotNull final ToDoubleDocumentExtractor extractor) {
+                                                              @NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor) {
         requireNonNull(documentProvider);
         requireNonNull(extractor);
 

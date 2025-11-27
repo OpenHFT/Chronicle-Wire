@@ -21,6 +21,7 @@ import java.util.function.BiConsumer;
  * It extends the WireTestCommon from the `net.openhft.chronicle.wire` package for common test setup and utilities.
  */
 @RunWith(value = Parameterized.class)
+@SuppressWarnings({"deprecation", "removal"})
 public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
     private final ArrayBlockingQueue<Object> singleQ = new ArrayBlockingQueue<>(1);
     private final ArrayBlockingQueue<Object> doubleQ = new ArrayBlockingQueue<>(2);

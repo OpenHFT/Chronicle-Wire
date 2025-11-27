@@ -21,6 +21,7 @@ import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.throwingMerger;
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class MethodWriterTest extends WireTestCommon {
 
     private static final List<MarketData> MARKET_DATA_SET = Arrays.asList(

@@ -30,6 +30,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Before each test case, obtain a thread dump

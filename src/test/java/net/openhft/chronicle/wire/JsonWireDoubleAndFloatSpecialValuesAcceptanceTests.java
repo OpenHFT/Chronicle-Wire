@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *     <li>{@link JSONWire.JSONValueOut#writeSpecialFloatValueToBytes(Bytes, float)} </li>
  * </ul>
  */
+@SuppressWarnings({"deprecation", "removal"})
 class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
 
     @ParameterizedTest

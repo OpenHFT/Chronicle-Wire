@@ -37,7 +37,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  * The YamlWire class extends YamlWireOut and utilizes a custom tokenizer to convert YAML tokens into byte sequences.
  * It provides utility methods to read from and write to both byte buffers and files.
  */
-@SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape", "deprecation"})
 public class YamlWire extends YamlWireOut<YamlWire> {
 
     // YAML-specific tag constants for representing special constructs.

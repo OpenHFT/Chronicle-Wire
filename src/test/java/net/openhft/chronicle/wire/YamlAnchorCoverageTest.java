@@ -9,6 +9,7 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class YamlAnchorCoverageTest extends WireTestCommon {
 
     @Test(expected = UnsupportedOperationException.class)

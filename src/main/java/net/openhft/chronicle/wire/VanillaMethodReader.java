@@ -40,7 +40,7 @@ import static net.openhft.chronicle.wire.VanillaWireParser.SKIP_READABLE_BYTES;
  * Supports interception via {@link MethodReaderInterceptorReturns} and custom
  * parsing through {@link WireParselet} and {@link FieldNumberParselet}.
  */
-@SuppressWarnings({"rawtypes", "this-escape"})
+@SuppressWarnings({"rawtypes", "this-escape", "deprecation"})
 public class VanillaMethodReader implements MethodReader {
 
     // beware enabling DEBUG_ENABLED as logMessage will not work unless Wire marshalling used - https://github.com/ChronicleEnterprise/Chronicle-Services/issues/240

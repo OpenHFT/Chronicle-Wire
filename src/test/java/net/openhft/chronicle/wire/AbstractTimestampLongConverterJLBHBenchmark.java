@@ -9,6 +9,7 @@ import net.openhft.chronicle.jlbh.JLBHOptions;
 import net.openhft.chronicle.jlbh.JLBHTask;
 import net.openhft.chronicle.jlbh.TeamCityHelper;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class AbstractTimestampLongConverterJLBHBenchmark implements JLBHTask {
 
     // Constants for testing

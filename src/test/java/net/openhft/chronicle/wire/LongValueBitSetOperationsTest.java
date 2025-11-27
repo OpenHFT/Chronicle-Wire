@@ -11,6 +11,7 @@ import static org.junit.Assert.*;
 /**
  * Exercises {@link LongValueBitSet} across word boundaries and common operations.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public class LongValueBitSetOperationsTest extends WireTestCommon {
 
     private static LongValueBitSet newSet(int bits) {

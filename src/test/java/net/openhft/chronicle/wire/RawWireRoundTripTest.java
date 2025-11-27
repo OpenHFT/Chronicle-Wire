@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class RawWireRoundTripTest extends WireTestCommon {
 
     @Test

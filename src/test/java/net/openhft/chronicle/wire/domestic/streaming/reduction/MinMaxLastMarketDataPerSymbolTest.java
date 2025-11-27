@@ -19,6 +19,7 @@ import static java.util.stream.Collectors.*;
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
 
     private static final List<MarketData> MARKET_DATA_SET = Arrays.asList(

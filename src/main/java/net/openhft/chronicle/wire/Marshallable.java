@@ -34,6 +34,7 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
  * forms.
  */
 @DontChain
+@SuppressWarnings("deprecation")
 public interface Marshallable extends WriteMarshallable, ReadMarshallable, Resettable {
 
     /**

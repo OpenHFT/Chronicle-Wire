@@ -9,7 +9,6 @@ import net.openhft.chronicle.wire.ExcerptListener;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
-import net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor;
 import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
 import net.openhft.chronicle.wire.internal.reduction.ReductionUtil;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +23,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * It provides a means to consume excerpts from a given wire and apply reductions on them.
  * The implementations of this interface should be thread-safe, especially if they are referenced as an {@link ExcerptListener}.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public interface Reduction<T> extends ExcerptListener {
 
     /**
@@ -111,7 +111,8 @@ public interface Reduction<T> extends ExcerptListener {
      * @see #of(DocumentExtractor)
      * @see #ofLong(ToLongDocumentExtractor)
      */
-    static DoubleReductionBuilder ofDouble(@NotNull final ToDoubleDocumentExtractor extractor) {
+    @SuppressWarnings({"deprecation", "removal"})
+    static DoubleReductionBuilder ofDouble(@NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor) {
         requireNonNull(extractor);
         return new ReductionUtil.VanillaDoubleReductionBuilder(extractor);
     }

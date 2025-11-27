@@ -3,7 +3,6 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.wire.internal.StringConsumerMarshallableOut;
 import org.junit.Test;
 
 import java.io.StringWriter;
@@ -11,6 +10,7 @@ import java.io.StringWriter;
 import static org.junit.Assert.assertEquals;
 
 // Unit test class extending from WireTestCommon to get basic setup for the Chronicle Wire tests.
+@SuppressWarnings({"deprecation", "removal"})
 public class StringConsumerMarshallableOutTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Test case to check if serialization to the YAML format works correctly.
@@ -43,7 +43,7 @@ public class StringConsumerMarshallableOutTest extends net.openhft.chronicle.wir
         StringWriter sw = new StringWriter(); // StringWriter to hold the serialized data.
 
         // Create an instance of MarshallableOut which will write to the StringWriter.
-        MarshallableOut out = new StringConsumerMarshallableOut(s -> {
+        MarshallableOut out = new net.openhft.chronicle.wire.internal.StringConsumerMarshallableOut(s -> {
             sw.append(s); // Append serialized string.
             if (!s.endsWith("\n"))
                 sw.append('\n'); // Add newline if not already present.

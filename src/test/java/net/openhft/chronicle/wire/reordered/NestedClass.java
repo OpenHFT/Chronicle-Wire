@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
  * Class representing a nested structure for testing serialization and deserialization in Chronicle Wire.
  * It demonstrates custom read and write logic for marshalling, handling nested objects and different data types.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public class NestedClass implements Marshallable {
     private String text;
     private String text2;

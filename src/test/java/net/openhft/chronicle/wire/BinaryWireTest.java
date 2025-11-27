@@ -38,6 +38,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
 @RunWith(value = Parameterized.class)
+@SuppressWarnings({"deprecation", "removal"})
 public class BinaryWireTest extends WireTestCommon {
 
     private final int testId;

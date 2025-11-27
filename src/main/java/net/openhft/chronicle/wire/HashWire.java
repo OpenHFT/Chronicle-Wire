@@ -35,7 +35,7 @@ import java.util.function.BiConsumer;
  * instance is obtained from a {@linkplain ThreadLocal thread-local} and the hash
  * is cleared on retrieval.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class HashWire implements WireOut, HexDumpBytesDescription {
     // Thread-local storage for HashWire instances.
     private static final ThreadLocal<HashWire> hwTL = new ThreadLocal<HashWire>() {

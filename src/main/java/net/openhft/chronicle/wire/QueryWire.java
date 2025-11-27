@@ -7,7 +7,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.StopCharTester;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
-import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -30,7 +29,7 @@ import java.util.function.BiFunction;
  * Extends {@link TextWire} and supplies {@link QueryValueIn} and
  * {@link QueryValueOut} for query specific value handling.
  */
-@SuppressWarnings({"rawtypes", "java:S2387"})
+@SuppressWarnings({"rawtypes", "java:S2387", "deprecation"})
 public class QueryWire extends TextWire {
 
     // The specialized output handler for query string values.
@@ -87,7 +86,6 @@ public class QueryWire extends TextWire {
      * Skips any leading whitespace from the current read position.
      */
     @Override
-    @ForceInline
     public void consumePadding() {
         int codePoint = peekCode();
         while (Character.isWhitespace(codePoint)) {

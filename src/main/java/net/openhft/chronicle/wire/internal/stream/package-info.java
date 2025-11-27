@@ -1,10 +1,5 @@
 /*
- * Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: LicenseRef-Proprietary
+ * Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
  */
-/**
- * Internal stream helpers for Chronicle Wire.
- *
- * <p>Utilities here support the stream adapters in {@code domestic.stream},
- * handling low-level traversal and buffer reuse concerns.
- */
+@SuppressWarnings({"deprecation", "removal"})
 package net.openhft.chronicle.wire.internal.stream;

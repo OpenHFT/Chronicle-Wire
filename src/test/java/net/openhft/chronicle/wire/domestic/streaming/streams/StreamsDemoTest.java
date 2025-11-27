@@ -32,6 +32,7 @@ import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SuppressWarnings({"deprecation", "removal"})
 final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @Test

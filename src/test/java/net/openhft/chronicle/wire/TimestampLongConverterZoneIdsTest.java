@@ -24,6 +24,7 @@ import static org.junit.Assume.assumeFalse;
 
 // Running the test class in a parameterized manner.
 @RunWith(value = Parameterized.class)
+@SuppressWarnings({"deprecation", "removal"})
 public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
 
     private final Future<?> future;

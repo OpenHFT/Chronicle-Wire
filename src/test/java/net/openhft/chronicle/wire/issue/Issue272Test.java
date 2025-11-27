@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Test class to validate the behavior and serialization of Wire objects with arrays.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public class Issue272Test {
 
     /**

@@ -28,6 +28,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class JSONWireTest extends WireTestCommon {
 
     // Utility function to test copying from a JSONWire to a binary wire and back to a JSONWire.

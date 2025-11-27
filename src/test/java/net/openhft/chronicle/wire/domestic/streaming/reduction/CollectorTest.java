@@ -23,6 +23,7 @@ import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.replacingMerger;
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class CollectorTest extends WireTestCommon {
 
     private static final String Q_NAME = CollectorTest.class.getSimpleName();

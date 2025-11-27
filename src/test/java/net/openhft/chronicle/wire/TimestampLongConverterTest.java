@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * This class replaces the need for separate Milli, Micro, and Nano test classes,
  * reducing code duplication and improving maintainability.
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "deprecation", "removal"})
 class TimestampLongConverterTest extends WireTestCommon {
 
     // Defines the data sets for each converter (Milli, Micro, Nano)

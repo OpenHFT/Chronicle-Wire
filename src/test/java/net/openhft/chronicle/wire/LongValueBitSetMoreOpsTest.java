@@ -9,6 +9,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class LongValueBitSetMoreOpsTest extends WireTestCommon {
 
     private static LongValueBitSet bound(int bits) {

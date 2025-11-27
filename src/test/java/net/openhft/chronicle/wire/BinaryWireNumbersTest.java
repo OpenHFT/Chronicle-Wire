@@ -16,6 +16,7 @@ import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(value = Parameterized.class)
+@SuppressWarnings({"deprecation", "removal"})
 public class BinaryWireNumbersTest extends WireTestCommon {
     private static final float VAL1 = 12345678901234567.0f;
     private static int counter = 0;

@@ -30,6 +30,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * Subclasses implement {@link #readOneGenerated(WireIn)} and
  * {@link #readOneMetaGenerated(WireIn)} with optimised dispatch logic.
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
     // A no-operation {@link Consumer} for {@link MessageHistory}.

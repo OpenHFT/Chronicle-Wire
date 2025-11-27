@@ -36,7 +36,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
  * The core capability of this class is to handle JSON data structures as {@code Bytes}
  * objects, allowing for efficient manipulation and parsing.
  */
-@SuppressWarnings("this-escape")
+@SuppressWarnings({"this-escape", "deprecation"})
 public class JSONWire extends TextWire {
 
     // The rest of null

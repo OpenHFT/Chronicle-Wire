@@ -25,6 +25,7 @@ import static net.openhft.chronicle.wire.VanillaMethodReaderBuilder.DISABLE_READ
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
+@SuppressWarnings({"deprecation", "removal"})
 public class MethodReaderDelegationTest extends WireTestCommon {
     private final boolean useMethodId;
 

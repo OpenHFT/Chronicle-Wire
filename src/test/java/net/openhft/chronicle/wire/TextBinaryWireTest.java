@@ -22,6 +22,7 @@ import static org.junit.Assume.assumeTrue;
 
 // Use Parameterized runner for performing tests with different WireType instances.
 @RunWith(value = Parameterized.class)
+@SuppressWarnings({"deprecation", "removal"})
 public class TextBinaryWireTest extends WireTestCommon {
 
     // The specific WireType for the current test run.

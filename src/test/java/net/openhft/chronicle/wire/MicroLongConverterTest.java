@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
  * This class tests the functionality of the MicroLongConverter.
  * It extends the WireTestCommon for common test setup and utilities.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public class MicroLongConverterTest extends WireTestCommon {
 
     /**

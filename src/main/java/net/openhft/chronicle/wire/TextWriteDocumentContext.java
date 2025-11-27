@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
  * While writing, it can be ensured that meta-data is correctly specified, and the position of the write
  * operation is recorded.
  */
+@SuppressWarnings("deprecation")
 public class TextWriteDocumentContext implements WriteDocumentContext {
 
     // The wire used for writing.

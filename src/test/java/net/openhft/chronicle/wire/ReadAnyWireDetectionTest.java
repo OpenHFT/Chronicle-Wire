@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class ReadAnyWireDetectionTest extends WireTestCommon {
 
     @Test

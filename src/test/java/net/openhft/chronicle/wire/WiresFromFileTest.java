@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class WiresFromFileTest extends WireTestCommon {
     @Test
     public void testFromFile() throws IOException {

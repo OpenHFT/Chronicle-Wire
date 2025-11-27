@@ -21,6 +21,7 @@ import static net.openhft.chronicle.wire.WireType.YAML;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
+@SuppressWarnings({"deprecation", "removal"})
 public class YamlSpecificationTest extends WireTestCommon {
 
     // Register class aliases for String, Circle, Shape, Line, and Label

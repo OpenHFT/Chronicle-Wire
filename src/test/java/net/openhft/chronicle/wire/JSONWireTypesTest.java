@@ -14,6 +14,7 @@ import static net.openhft.chronicle.wire.WireType.JSON_ONLY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class JSONWireTypesTest extends WireTestCommon {
     @SuppressWarnings("unchecked")
     @Test

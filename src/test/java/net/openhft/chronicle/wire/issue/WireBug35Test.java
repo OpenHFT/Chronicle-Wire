@@ -17,6 +17,7 @@ import static org.junit.Assume.assumeFalse;
 /**
  * @author ryanlea
  */
+@SuppressWarnings({"deprecation", "removal"})
 public class WireBug35Test extends WireTestCommon {
 
     @Test

@@ -25,6 +25,7 @@ import static org.junit.Assume.assumeFalse;
  * between YamlWire and TextWire in processing YAML formatted text.
  */
 @RunWith(value = Parameterized.class)
+@SuppressWarnings({"deprecation", "removal"})
 public class YamlTextWireTest extends WireTestCommon {
 
     // Static block to register class alias for Fields

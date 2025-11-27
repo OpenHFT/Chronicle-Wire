@@ -9,6 +9,7 @@ import net.openhft.chronicle.wire.WireOut;
 import org.jetbrains.annotations.NotNull;
 
 // AClass extends the functionality of SelfDescribingMarshallable, providing custom serialization and deserialization for its fields.
+@SuppressWarnings({"deprecation", "removal"})
 class AClass extends SelfDescribingMarshallable {
     // Member variables
     int id;

@@ -15,6 +15,7 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
  * documents that are currently being written. The binary format uses headers to
  * denote metadata, data length, and completion status.
  */
+@SuppressWarnings("deprecation")
 public class BinaryWriteDocumentContext implements WriteDocumentContext {
 
     // The wire instance used for the binary writing process

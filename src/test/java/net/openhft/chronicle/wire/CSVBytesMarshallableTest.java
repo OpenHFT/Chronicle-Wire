@@ -14,6 +14,7 @@ import org.junit.Test;
 import static net.openhft.chronicle.wire.Wires.acquireStringBuilderScoped;
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class CSVBytesMarshallableTest extends WireTestCommon {
 
     // Bytes representing raw data for the tests
@@ -98,7 +99,7 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
  * Class representing a foreign exchange price.
  * Implements the BytesMarshallable interface to support reading and writing of its values from/to bytes.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation", "removal"})
 class FXPrice implements BytesMarshallable {
     // Fields to store price data and related attributes
     private double bidprice;
@@ -158,6 +159,7 @@ class FXPrice implements BytesMarshallable {
  * Class representing a foreign exchange price.
  * Implements the Marshallable interface to support reading and writing of its values using the Wire format.
  */
+@SuppressWarnings({"deprecation", "removal"})
 class FXPrice2 implements Marshallable {
     public transient double midPrice;
     // Fields to store price data and related attributes

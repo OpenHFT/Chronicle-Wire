@@ -19,6 +19,7 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class TextDocumentTest extends WireTestCommon {
 
     // A helper function that performs the test on documents given a wireType.

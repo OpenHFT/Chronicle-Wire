@@ -23,6 +23,7 @@ import static org.junit.Assume.assumeFalse;
 /**
  * This class tests the behavior of BinaryWire with mapped bytes.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public class BinaryWireWithMappedBytesTest extends WireTestCommon {
 
     // Defines if the MappedFile should retain its contents

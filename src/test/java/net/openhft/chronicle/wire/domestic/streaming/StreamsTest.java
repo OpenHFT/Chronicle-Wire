@@ -17,6 +17,7 @@ import static java.util.stream.Collectors.toList;
 import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.createThenValueOuts;
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings({"deprecation", "removal"})
 class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @Test

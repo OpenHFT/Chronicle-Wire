@@ -7,7 +7,6 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -55,7 +54,7 @@ import static net.openhft.chronicle.wire.WireType.YAML_ONLY;
  * {@link StringBuilder} pools and {@link net.openhft.compiler.CachedCompiler}
  * instances.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public enum Wires {
     ; // No specific enumeration values
 
@@ -601,7 +600,6 @@ public enum Wires {
      * @return the position after writing the data
      * @throws InvalidMarshallableException if marshalling fails
      */
-    @ForceInline
     @Deprecated(/* to be removed in 2027 */)
     public static <T extends WriteMarshallable> long writeData(
             @NotNull WireOut wireOut,
@@ -618,7 +616,6 @@ public enum Wires {
      * @return the position in the bytes after reading
      * @throws InvalidMarshallableException if there's an issue during marshalling
      */
-    @ForceInline
     @Deprecated(/* to be removed in 2027 */)
     public static long readWire(@NotNull WireIn wireIn, long size, @NotNull ReadMarshallable readMarshallable) throws InvalidMarshallableException {
         @NotNull final Bytes<?> bytes = wireIn.bytes();

@@ -15,6 +15,7 @@ import static net.openhft.chronicle.bytes.MethodReader.MESSAGE_HISTORY_METHOD_ID
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class MessageHistoryTest extends WireTestCommon {
 
     // Test to check if clearing and retrieving the MessageHistory works correctly.

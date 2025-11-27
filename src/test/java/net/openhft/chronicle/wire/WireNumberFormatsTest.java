@@ -11,6 +11,7 @@ import static org.junit.Assert.*;
 /**
  * Exercises number formats and booleans across wire types.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public class WireNumberFormatsTest extends WireTestCommon {
 
     @Test
@@ -61,4 +62,3 @@ public class WireNumberFormatsTest extends WireTestCommon {
         assertEquals(0.0, w.read("mz").float64(), 0.0);
     }
 }
-

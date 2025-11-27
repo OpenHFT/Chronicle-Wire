@@ -17,6 +17,7 @@ import java.util.stream.Collector;
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.throwingMerger;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class CountAccumulationTest extends WireTestCommon {
 
     @Test

@@ -11,7 +11,6 @@ import net.openhft.chronicle.wire.ExcerptListener;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
-import net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor;
 import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
 import org.jetbrains.annotations.NotNull;
@@ -26,6 +25,7 @@ import static java.util.Objects.requireNonNull;
  * It offers functionalities to work with marshallable objects and listeners to read excerpts
  * from documents and perform various reduction operations on them.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public final class ReductionUtil {
 
     // Suppresses default constructor, ensuring non-instantiability.
@@ -198,7 +198,7 @@ public final class ReductionUtil {
     public static final class DoubleSupplierReduction<A> implements Reduction<DoubleSupplier> {
 
         // Extracts double values from a wire.
-        private final ToDoubleDocumentExtractor extractor;
+        private final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor;
 
         // The accumulator to accumulate double values.
         private final ObjDoubleConsumer<A> accumulator;
@@ -219,7 +219,7 @@ public final class ReductionUtil {
          * @param finisher The function to finish the reduction.
          */
         @Deprecated(/* to be removed in 2027 */)
-        public DoubleSupplierReduction(@NotNull final ToDoubleDocumentExtractor extractor,
+        public DoubleSupplierReduction(@NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor,
                                        @NotNull final Supplier<A> supplier,
                                        @NotNull final ObjDoubleConsumer<A> accumulator,
                                        @NotNull final ToDoubleFunction<A> finisher) {
@@ -313,9 +313,9 @@ public final class ReductionUtil {
     @Deprecated(/* to be removed in 2027 */)
     public static final class VanillaDoubleReductionBuilder implements Reduction.DoubleReductionBuilder {
 
-        private final ToDoubleDocumentExtractor extractor;
+        private final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor;
 
-        public VanillaDoubleReductionBuilder(@NotNull final ToDoubleDocumentExtractor extractor) {
+        public VanillaDoubleReductionBuilder(@NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor) {
             this.extractor = extractor;
         }
 

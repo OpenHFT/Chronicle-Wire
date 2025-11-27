@@ -43,7 +43,7 @@ import static net.openhft.chronicle.wire.Wires.isScalar;
  * Defines an interface for writing out values after writing a field.
  * Implementations of this interface should provide methods to handle writing various data types.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public interface ValueOut {
 
     /**

@@ -11,6 +11,7 @@ import static org.junit.Assert.*;
 /**
  * Covers scalar edge cases across common wire types to exercise ValueIn/ValueOut branches.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public class WireScalarEdgeCasesTest extends WireTestCommon {
 
     private static final WireType[] TYPES = new WireType[]{

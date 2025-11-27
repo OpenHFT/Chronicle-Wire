@@ -11,6 +11,7 @@ import static org.junit.Assert.*;
 /**
  * Exercises ValueIn array readers using sequences for common wire types.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test

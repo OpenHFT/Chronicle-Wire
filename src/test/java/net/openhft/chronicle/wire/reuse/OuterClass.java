@@ -18,6 +18,7 @@ import java.util.List;
  * and deserialization using Chronicle Wire. It contains lists of NestedClass objects
  * and some basic properties.
  */
+@SuppressWarnings({"deprecation", "removal"})
 class OuterClass implements Marshallable {
     // Lists for storing NestedClass instances. Separate lists are maintained
     // for free and used instances to optimize object reuse.

@@ -5,7 +5,6 @@ package net.openhft.chronicle.wire.domestic.reduction;
 
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor;
 import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,6 +24,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * It provides static methods to create various types of Reductions, offering functionalities
  * related to longs, doubles, and counting excerpts.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public final class Reductions {
 
     // Suppresses default constructor, ensuring non-instantiability.
@@ -75,7 +75,8 @@ public final class Reductions {
      * @throws NullPointerException if any objects provided are {@code null}.
      */
     @Deprecated(/* to be removed in 2027 */)
-    public static Reduction<DoubleSupplier> reducingDouble(@NotNull final ToDoubleDocumentExtractor extractor,
+    @SuppressWarnings({"deprecation", "removal"})
+    public static Reduction<DoubleSupplier> reducingDouble(@NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor,
                                                            final double identity,
                                                            @NotNull final DoubleBinaryOperator accumulator) {
         requireNonNull(extractor);

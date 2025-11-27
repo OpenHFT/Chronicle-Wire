@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class StreamsUtilTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @Test

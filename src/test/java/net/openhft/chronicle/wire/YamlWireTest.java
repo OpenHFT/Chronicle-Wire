@@ -48,7 +48,7 @@ import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings({"rawtypes", "unchecked", "try", "serial"})
+@SuppressWarnings({"rawtypes", "unchecked", "try", "serial", "deprecation", "removal"})
 @RunWith(value = Parameterized.class)
 public class YamlWireTest extends WireTestCommon {
     private static final Wire wire = Wire.newYamlWireOnHeap(); // Initialize a static YAML wire

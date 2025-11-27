@@ -21,6 +21,7 @@ package net.openhft.chronicle.wire;
  * @see AbstractLongConverter
  * @see ShortTextLongConverter
  */
+@SuppressWarnings("deprecation")
 public class Base85LongConverter extends AbstractLongConverter {
 
     /**

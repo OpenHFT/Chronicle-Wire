@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class WireTypeConverterTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     private final String json =

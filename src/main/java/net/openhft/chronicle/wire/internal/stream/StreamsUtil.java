@@ -7,7 +7,6 @@ import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
-import net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor;
 import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,6 +22,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * A utility class to provide additional functionality and support for streams.
  * This class is not meant to be instantiated.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public final class StreamsUtil {
 
     private static final int BATCH_UNIT_INCREASE = 1 << 10; // Increment size for batch unit
@@ -402,7 +402,7 @@ public final class StreamsUtil {
 
     /**
      * Represents an iterator that extracts documents containing double values from a {@link MarshallableIn}
-     * stream using a {@link ToDoubleDocumentExtractor}. This iterator traverses the underlying data source
+     * stream using a {@link net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor}. This iterator traverses the underlying data source
      * and uses the extractor to transform each document into a double value.
      */
     public static final class ExcerptIteratorOfDouble implements PrimitiveIterator.OfDouble {
@@ -411,7 +411,7 @@ public final class StreamsUtil {
         private final MarshallableIn tailer;
 
         // The extractor used to transform the raw document into a double value
-        private final ToDoubleDocumentExtractor extractor;
+        private final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor;
 
         // Sentinel value indicating the absence of a next item. If 'next' equals this value,
         // then the next item is yet to be determined.
@@ -424,7 +424,7 @@ public final class StreamsUtil {
          * @param extractor The extractor used to transform the raw document into a double value.
          */
         public ExcerptIteratorOfDouble(@NotNull final MarshallableIn tailer,
-                                       @NotNull final ToDoubleDocumentExtractor extractor) {
+                                       @NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor) {
             this.tailer = tailer;
             this.extractor = extractor;
         }

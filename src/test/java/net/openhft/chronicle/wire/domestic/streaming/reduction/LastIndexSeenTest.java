@@ -15,6 +15,7 @@ import static net.openhft.chronicle.wire.domestic.reduction.Reductions.reducingL
 import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.createThenValueOuts;
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class LastIndexSeenTest extends WireTestCommon {
 
     @Test

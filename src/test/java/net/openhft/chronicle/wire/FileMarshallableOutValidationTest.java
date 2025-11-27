@@ -12,6 +12,7 @@ import java.net.URL;
 /**
  * Tests for URL validation when creating file based MarshallableOut instances.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public class FileMarshallableOutValidationTest extends WireTestCommon {
 
     @Test(expected = IllegalArgumentException.class)

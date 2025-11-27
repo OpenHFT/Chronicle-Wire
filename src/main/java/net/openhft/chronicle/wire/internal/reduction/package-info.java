@@ -1,10 +1,5 @@
 /*
- * Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: LicenseRef-Proprietary
+ * Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
  */
-/**
- * Internal reduction utilities supporting Chronicle Wire stream folding.
- *
- * <p>Helpers here underpin the public reduction APIs, keeping aggregation logic
- * reusable without exposing low-level threading or buffering details.
- */
+@SuppressWarnings({"deprecation", "removal"})
 package net.openhft.chronicle.wire.internal.reduction;

@@ -12,6 +12,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class VanillaMethodWriterBuilderOptionsTest extends WireTestCommon {
 
     @Test

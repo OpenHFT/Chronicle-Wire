@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
-@SuppressWarnings({"rawtypes", "try"})
+@SuppressWarnings({"rawtypes", "try", "deprecation", "removal"})
 @RunWith(value = Parameterized.class)
 public class BinaryWire2Test extends WireTestCommon {
     private final boolean usePadding;

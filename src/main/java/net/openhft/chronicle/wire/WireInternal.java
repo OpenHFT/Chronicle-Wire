@@ -34,7 +34,7 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
  * direct instances (as signified by the empty enum declaration). Instead, it serves as
  * a container for static members.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public enum WireInternal {
     ; // none
     static final StringInterner INTERNER = new StringInterner(Jvm.getInteger("wire.interner.size", 4096));

@@ -19,6 +19,7 @@ import static org.junit.Assume.assumeFalse;
  * Test class to validate behaviors associated with class aliases in the context of Wire.
  * This test extends the WireTestCommon for utility behaviors related to Wire tests.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public class Issue277Test extends WireTestCommon {
 
     /**

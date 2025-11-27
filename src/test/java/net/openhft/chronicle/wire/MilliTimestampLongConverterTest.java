@@ -8,6 +8,7 @@ import org.junit.Test;
 import static net.openhft.chronicle.wire.MilliTimestampLongConverter.INSTANCE;
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class MilliTimestampLongConverterTest extends WireTestCommon {
 
     // Define constant strings for different timestamp representations

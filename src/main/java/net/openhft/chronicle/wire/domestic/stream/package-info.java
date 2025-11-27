@@ -1,11 +1,5 @@
 /*
- * Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: LicenseRef-Proprietary
+ * Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
  */
-/**
- * Stream utilities for Chronicle Wire data.
- *
- * <p>Provides adapters that expose wire documents through Java stream-like APIs
- * to simplify functional processing without compromising Chronicle performance
- * expectations.
- */
+@SuppressWarnings({"deprecation", "removal"})
 package net.openhft.chronicle.wire.domestic.stream;

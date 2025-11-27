@@ -11,6 +11,7 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 // Main class to demonstrate the serialization of data in various Wire formats.
+@SuppressWarnings({"deprecation", "removal"})
 public class StreamMain {
     public static void main(String[] args) {
         // Register the class alias for FileFormat class for efficient serialization.
@@ -51,6 +52,7 @@ public class StreamMain {
 }
 
 // Represents a file format with version, timestamp, creator, and other metadata.
+@SuppressWarnings({"deprecation", "removal"})
 class FileFormat extends SelfDescribingMarshallable {
     private int version = 100;
     private ZonedDateTime createdTime = ZonedDateTime.now();

@@ -17,6 +17,7 @@ import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.Assert.*;
 
 // This class tests the functionalities related to the QueryWire's read and write operations.
+@SuppressWarnings({"deprecation", "removal"})
 public class QueryWireTest extends WireTestCommon {
 
     // Byte storage to hold serialized data

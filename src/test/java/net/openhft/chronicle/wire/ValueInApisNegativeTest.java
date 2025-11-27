@@ -12,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Drives less common ValueIn APIs and empty sequence paths.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public class ValueInApisNegativeTest extends WireTestCommon {
 
     @Test

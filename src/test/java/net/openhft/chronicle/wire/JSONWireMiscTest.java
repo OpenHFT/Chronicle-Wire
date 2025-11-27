@@ -23,6 +23,7 @@ import static org.junit.Assume.assumeFalse;
  * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
 @RunWith(value = Parameterized.class)
+@SuppressWarnings({"deprecation", "removal"})
 public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Constant representing the text value for tests

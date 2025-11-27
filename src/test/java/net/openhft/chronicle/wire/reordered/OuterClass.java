@@ -14,6 +14,7 @@ import java.util.List;
  * OuterClass extends SelfDescribingMarshallable to facilitate serialization and deserialization.
  * It contains multiple lists of NestedClass objects and handles custom serialization logic.
  */
+@SuppressWarnings({"deprecation", "removal"})
 class OuterClass extends SelfDescribingMarshallable {
     // Lists for maintaining instances of NestedClass and their free pools
     private final List<NestedClass> listAFree = new ArrayList<>();

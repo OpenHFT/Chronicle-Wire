@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class LongArrayValueBitSetMoreOpsTest extends WireTestCommon {
 
     @Test
@@ -24,4 +25,3 @@ public class LongArrayValueBitSetMoreOpsTest extends WireTestCommon {
         }
     }
 }
-

@@ -14,6 +14,7 @@ import java.util.Objects;
  * It provides methods and utilities for understanding the structure and boundaries
  * of the document within a given wire format.
  */
+@SuppressWarnings("deprecation")
 public class TextReadDocumentContext implements ReadDocumentContext {
 
     // Byte sequences for start and end of the document

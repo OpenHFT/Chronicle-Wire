@@ -33,6 +33,7 @@ interface GMBZ extends GMBA, GMBB {
 }
 
 // A JUnit test class
+@SuppressWarnings({"deprecation", "removal"})
 public class GenerateMethodBridgeTest extends WireTestCommon {
 
     @Test

@@ -15,6 +15,7 @@ import static org.junit.Assert.*;
  * Drives YamlValueOut formatting paths (strings needing quoting, multi-line, sequences, maps)
  * and validates via round-trip parsing.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public class YamlValueOutFormattingBranchesTest extends WireTestCommon {
 
     @Test

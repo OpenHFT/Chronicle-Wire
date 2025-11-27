@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Test class extending `WireTestCommon` to verify the deserialization of `ChronicleServicesCfg` from YAML.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public class Issue609Test extends WireTestCommon {
 
     /**

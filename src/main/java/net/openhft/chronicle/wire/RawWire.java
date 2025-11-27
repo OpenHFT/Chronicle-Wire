@@ -45,7 +45,7 @@ import static net.openhft.chronicle.wire.BinaryWire.requireReference;
  * Used for performance-critical exchanges where writer and reader share a
  * fixed layout. Unlike {@link BinaryWire} no field identifiers are emitted
  */
-@SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape", "deprecation"})
 public class RawWire extends AbstractWire implements Wire {
 
     // Output mechanism for writing raw values

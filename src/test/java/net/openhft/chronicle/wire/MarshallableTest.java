@@ -18,6 +18,7 @@ import java.util.List;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.Assert.*;
 
+@SuppressWarnings({"deprecation", "removal"})
 public class MarshallableTest extends WireTestCommon {
 
     // Test to check if the fromFile() method of Marshallable throws an IOException for an empty file.

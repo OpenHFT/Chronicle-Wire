@@ -22,6 +22,7 @@ import java.util.TreeMap;
  * fields that are not explicitly registered and {@link #fieldNumberParselet} deals with
  * unmapped numeric identifiers.
  */
+@SuppressWarnings("deprecation")
 public class VanillaWireParser implements WireParser {
 
     // Map of field names to parselets. {@link CharSequenceComparator#INSTANCE} provides stable ordering and lookup semantics

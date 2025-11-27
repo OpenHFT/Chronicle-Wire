@@ -22,7 +22,7 @@ import java.util.function.Supplier;
  *
  * @author Rob Austin.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public abstract class AbstractAnyWire extends AbstractWire implements Wire {
 
     @NotNull

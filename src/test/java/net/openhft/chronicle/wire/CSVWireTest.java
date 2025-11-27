@@ -10,6 +10,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 // CSVWireTest class extends from WireTestCommon and tests functionality related to CSV-based wire processing.
+@SuppressWarnings({"deprecation", "removal"})
 public class CSVWireTest extends WireTestCommon {
 
     // Test parsing a CSV string into a wire and reading its contents.
