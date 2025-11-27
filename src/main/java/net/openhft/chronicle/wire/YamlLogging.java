@@ -17,6 +17,7 @@ public enum YamlLogging {
 
     // The title for logging (can be changed during runtime).
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public static String title = "";
 
     // Flag indicating whether server writes should be shown.
@@ -53,6 +54,7 @@ public enum YamlLogging {
      *
      * @param level The {@link YamlLoggingLevel} determining whether to set or unset the logging flags.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static void setAll(@NotNull YamlLoggingLevel level) {
         showServerReads = showServerWrites = clientWrites = clientReads = level.isSet();
     }
@@ -71,6 +73,7 @@ public enum YamlLogging {
      *
      * @param message The new message to be set.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static void writeMessage(@NotNull String message) {
         writeMessage = message;
     }
@@ -80,6 +83,7 @@ public enum YamlLogging {
      *
      * @param flag {@code true} to enable logging for server writes; {@code false} to disable.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static void showServerWrites(boolean flag) {
         showServerWrites = flag;
     }
@@ -89,6 +93,7 @@ public enum YamlLogging {
      *
      * @return {@code true} if logging for client writes is enabled; {@code false} otherwise.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static boolean showClientWrites() {
         return clientWrites;
     }
@@ -99,6 +104,7 @@ public enum YamlLogging {
      * @return The message currently associated with a write operation.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public static String writeMessage() {
         return writeMessage;
     }
@@ -108,6 +114,7 @@ public enum YamlLogging {
      *
      * @return {@code true} if heartbeat logging is enabled; {@code false} otherwise.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static boolean showHeartBeats() {
         return showHeartBeats;
     }
@@ -126,6 +133,7 @@ public enum YamlLogging {
      *
      * @param flag {@code true} to enable heartbeat logging; {@code false} to disable.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static void showHeartBeats(boolean flag) {
         showHeartBeats = flag;
     }
@@ -135,6 +143,7 @@ public enum YamlLogging {
      *
      * @param flag {@code true} to enable logging for client writes; {@code false} to disable.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static void showClientWrites(boolean flag) {
         clientWrites = flag;
     }
@@ -144,6 +153,7 @@ public enum YamlLogging {
      *
      * @param flag {@code true} to enable logging for client reads; {@code false} to disable.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static void showClientReads(boolean flag) {
         clientReads = flag;
     }
@@ -162,6 +172,7 @@ public enum YamlLogging {
      *
      * @param flag {@code true} to enable logging for server reads; {@code false} to disable.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static void showServerReads(boolean flag) {
         showServerReads = flag;
     }
@@ -170,6 +181,7 @@ public enum YamlLogging {
      * Enum representing the various logging levels for Yaml.
      * The levels include OFF (no logging), DEBUG_ONLY (logs only when in debug mode), and ON (always logs).
      */
+    @Deprecated(/* to be removed in 2027 */)
     public enum YamlLoggingLevel {
         OFF {
             @Override

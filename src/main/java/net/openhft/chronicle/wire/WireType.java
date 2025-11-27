@@ -384,6 +384,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      *
      * @return A supplier that creates a new BinaryIntReference.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public Supplier<IntValue> newIntReference() {
         return BinaryIntReference::new;
     }
@@ -393,6 +394,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      *
      * @return A supplier that creates a new BinaryBooleanReference.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public Supplier<BooleanValue> newBooleanReference() {
         return BinaryBooleanReference::new;
     }
@@ -480,6 +482,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * @throws ClassCastException if the object is not of type {@code T}
      */
     @Nullable
+    @Deprecated(/* to be removed in 2027 */)
     public <T> T fromString(@NotNull CharSequence cs) throws InvalidMarshallableException {
         return (T) fromString(/* Allow Marshallable tuples by not requesting  Object */ null, cs);
     }
@@ -656,6 +659,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * @throws IOException                   if the file cannot be written
      * @throws InvalidMarshallableException if encoding fails
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public void toFile(@NotNull String filename, WriteMarshallable marshallable) throws IOException, InvalidMarshallableException {
         String tempFilename = tempName(filename);
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
@@ -719,6 +723,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * @throws InvalidMarshallableException if parsing fails
      */
     @Nullable
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public Map<String, Object> asMap(@NotNull CharSequence cs) throws InvalidMarshallableException {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();

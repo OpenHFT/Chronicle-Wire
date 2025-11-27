@@ -25,6 +25,7 @@ import java.nio.file.StandardCopyOption;
  * The class is designed to handle output operations to a file represented by a URL and manages
  * the lifecycle of the associated Wire data structure.
  */
+@Deprecated(/* to be removed in 2027, as it is only used in tests */)
 public class FileMarshallableOut implements MarshallableOut {
 
     private final URL url; // The URL pointing to the file being written to

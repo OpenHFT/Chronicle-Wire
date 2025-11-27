@@ -54,6 +54,7 @@ public interface Sequence {
      * @param sequence The lower-order sequence number within the header.
      * @return A combined index representing the header and sequence.
      */
+    @Deprecated(/* to be removed in 2027 */)
     long toIndex(long headerNumber, long sequence);
 
     /**

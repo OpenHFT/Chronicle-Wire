@@ -269,6 +269,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      *   <li>{@code false} &ndash; never write type information</li>
      * </ul>
      */
+    @Deprecated(/* to be removed in 2027 */)
     public Boolean getOverrideSelfDescribing() {
         return overrideSelfDescribing;
     }
@@ -2384,24 +2385,6 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
-        /**
-         * Writes a 32-bit integer value to the byte storage in an order-preserving binary format.
-         * <p>
-         * Additionally, if hex dump description is retained, it writes a hex dump description.
-         *
-         * @param i32 The 32-bit integer value to be written.
-         * @return The current WireOut instance.
-         */
-        @NotNull
-        public WireOut fixedOrderedInt32(int i32) {
-            // Check if hex dump description should be written.
-            if (bytes.retainedHexDumpDescription())
-                bytes.writeHexDumpDescription(Integer.toString(i32));
-            // Write the integer value in an ordered format.
-            writeCode(INT32).writeOrderedInt(i32);
-            return BinaryWire.this;
-        }
-
         @NotNull
         @Override
         public WireOut uint32checked(long u32) {
@@ -3288,42 +3271,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                 break;
             }
             return BracketType.NONE;
-        }
-
-        /**
-         * Reads text from the wire and consumes it using the provided string consumer.
-         *
-         * @param s A {@link Consumer} that accepts and processes the read string.
-         * @return The instance of BinaryWire that this handler belongs to.
-         */
-        @NotNull
-        WireIn text(@NotNull Consumer<String> s) {
-            // Consume any padding before reading text
-            consumePadding();
-            int code = readCode();
-            switch (code) {
-                case NULL:
-                    s.accept(null);
-                    break;
-
-                case STRING_ANY:
-                    // Read the UTF-8 string from bytes and consume it
-                    s.accept(bytes.readUtf8());
-                    break;
-                default:
-                    // Check for special string codes
-                    if (code >= STRING_0 && code <= STRING_31) {
-                        @NotNull StringBuilder sb = acquireStringBuilder();
-                        // Parse the UTF-8 string based on its length code and consume it
-                        bytes.parseUtf8(sb, code & 0b11111);
-                        s.accept(WireInternal.INTERNER.intern(sb));
-
-                    } else {
-                        // If an unrecognized code is found, throw an exception
-                        cantRead(code);
-                    }
-            }
-            return BinaryWire.this;
         }
 
         /**

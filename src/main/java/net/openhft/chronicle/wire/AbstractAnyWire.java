@@ -56,6 +56,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
      * @return A supplier yielding the {@code WireType}.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public Supplier<WireType> underlyingType() {
         return wireAcquisition.underlyingType();
     }
@@ -222,6 +223,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
          * @return A supplier yielding the {@code WireType}.
          */
         @NotNull
+        @Deprecated(/* to be removed in 2027 */)
         Supplier<WireType> underlyingType();
 
         /**

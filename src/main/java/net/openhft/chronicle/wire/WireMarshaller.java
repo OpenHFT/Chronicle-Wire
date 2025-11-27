@@ -389,6 +389,7 @@ public class WireMarshaller<T> {
      * @param fieldNames Names of the fields to be excluded.
      * @return A new instance of the {@link WireMarshaller} with the specified fields excluded.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public WireMarshaller<T> excludeFields(String... fieldNames) {
         Set<String> fieldSet = new HashSet<>(Arrays.asList(fieldNames));
         return new WireMarshaller<>(Stream.of(fields)
@@ -427,6 +428,7 @@ public class WireMarshaller<T> {
      * @param t     The object to write.
      * @param bytes The destination {@link Bytes} where the object representation will be written.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public void writeMarshallable(T t, Bytes<?> bytes) {
         for (@NotNull FieldAccess field : fields) {
             try {
@@ -2563,54 +2565,6 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * The ByteIntConversionFieldAccess class extends IntConversionFieldAccess to provide specialized access
-     * and conversion between fields that are of type byte and their representation as int.
-     * <p>
-     * This extension leverages unsafe operations to get and set the byte value directly from or to an object
-     * while converting to or from an int respectively. This helps in preserving the value of the byte as an
-     * unsigned integer representation.
-     */
-    static class ByteIntConversionFieldAccess extends IntConversionFieldAccess {
-        public ByteIntConversionFieldAccess(@NotNull Field field, @NotNull LongConversion conversion) {
-            super(field, conversion);
-        }
-
-        @Override
-        protected int getInt(Object o) {
-            return unsafeGetByte(o, offset) & 0xFF;
-        }
-
-        @Override
-        protected void putInt(Object o, int i) {
-            unsafePutByte(o, offset, (byte) i);
-        }
-    }
-
-    /**
-     * The ShortIntConversionFieldAccess class extends IntConversionFieldAccess to provide specialized access
-     * and conversion between fields that are of type short and their representation as int.
-     * <p>
-     * This extension leverages unsafe operations to get and set the short value directly from or to an object
-     * while converting to or from an int respectively. This helps in preserving the value of the short as an
-     * unsigned integer representation.
-     */
-    static class ShortIntConversionFieldAccess extends IntConversionFieldAccess {
-        public ShortIntConversionFieldAccess(@NotNull Field field, @NotNull LongConversion conversion) {
-            super(field, conversion);
-        }
-
-        @Override
-        protected int getInt(Object o) {
-            return unsafeGetShort(o, offset) & 0xFFFF;
-        }
-
-        @Override
-        protected void putInt(Object o, int i) {
-            unsafePutShort(o, offset, (short) i);
-        }
-    }
-
-    /**
      * A field access that provides a way to interact with a byte field as if it's a long,
      * by using a {@link LongConverter} for any necessary transformations.
      */
@@ -2807,89 +2761,6 @@ public class WireMarshaller<T> {
         @Override
         protected void setLong(Object o, long i) {
             unsafePutInt(o, offset, (int) i);
-        }
-    }
-
-    static class IntConversionFieldAccess extends FieldAccess {
-        @NotNull
-        private final LongConverter converter;
-
-        IntConversionFieldAccess(@NotNull Field field, @NotNull LongConversion conversion) {
-            super(field);
-            this.converter = (LongConverter) ObjectUtils.newInstance(conversion.value());
-        }
-
-        @Override
-        protected void getValue(Object o, @NotNull ValueOut write, @Nullable Object previous) {
-            int anInt = getInt(o);
-            if (write.isBinary()) {
-                write.int32(anInt);
-            } else {
-                try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
-                    StringBuilder sb = stlSb.get();
-                    converter.append(sb, anInt);
-                    if (!write.isBinary() && sb.length() == 0)
-                        write.text("");
-                    else
-                        write.rawText(sb);
-                }
-            }
-        }
-
-        /**
-         * A helper method to retrieve the integer from the object using the provided offset.
-         *
-         * @param o The object containing the field
-         * @return  The retrieved integer value
-         */
-        protected int getInt(Object o) {
-            return unsafeGetInt(o, offset);
-        }
-
-        @Override
-        protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
-            long i;
-            if (read.isBinary()) {
-                i = read.int64();
-
-            } else {
-                try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
-                    StringBuilder sb = stlSb.get();
-                    read.text(sb);
-                    i = converter.parse(sb);
-                }
-            }
-            unsafePutLong(o, offset, i);
-        }
-
-        /**
-         * A helper method to set the integer value on the object using the provided offset.
-         *
-         * @param o The object to set the value on
-         * @param i The integer value to set
-         */
-        protected void putInt(Object o, int i) {
-            unsafePutInt(o, offset, i);
-        }
-
-        @Override
-        public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
-            try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
-                StringBuilder sb = stlSb.get();
-                bytes.readUtf8(sb);
-                long i = converter.parse(sb);
-                bytes.writeLong(i);
-            }
-        }
-
-        @Override
-        protected boolean sameValue(Object o, Object o2) {
-            return getInt(o) == getInt(o2);
-        }
-
-        @Override
-        protected void copy(Object from, Object to) {
-            putInt(to, getInt(from));
         }
     }
 

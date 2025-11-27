@@ -39,6 +39,7 @@ public interface ExcerptListener {
      * @throws NullPointerException if {@code after} is {@code null }
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     default ExcerptListener andThen(@NotNull final ExcerptListener after) {
         requireNonNull(after);
         return ((wire, index) -> {

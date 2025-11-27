@@ -98,6 +98,7 @@ public class JSONWire extends TextWire {
      * @return A new instance of JSONWire.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static JSONWire from(@NotNull String text) {
         return new JSONWire(Bytes.from(text));
     }
@@ -109,6 +110,7 @@ public class JSONWire extends TextWire {
      * @return The string representation of the JSON content.
      * @throws InvalidMarshallableException If there's an error during conversion.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static String asText(@NotNull Wire wire) throws InvalidMarshallableException {
         long pos = wire.bytes().readPosition();
         @NotNull JSONWire tw = new JSONWire(nativeBytes());
@@ -156,6 +158,7 @@ public class JSONWire extends TextWire {
      *
      * @return {@code true} if types are being used in the current instance, otherwise {@code false}.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public boolean useTypes() {
         return useTypes;
     }
@@ -1298,6 +1301,7 @@ public class JSONWire extends TextWire {
          *
          * @return true if types are being used, false otherwise.
          */
+        @Deprecated(/* to be removed in 2027 */)
         public boolean useTypes() {
             return useTypes;
         }

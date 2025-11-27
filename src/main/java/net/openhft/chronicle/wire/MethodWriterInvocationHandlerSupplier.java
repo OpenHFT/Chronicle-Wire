@@ -83,6 +83,7 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
     /**
      * Determines whether method identifiers are emitted.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public void useMethodIds(boolean useMethodIds) {
         this.useMethodIds = useMethodIds;
     }

@@ -788,14 +788,17 @@ public class RawWire extends AbstractWire implements Wire {
             stack.reset();
         }
 
+        @Deprecated(/* to be removed in 2027 */)
         public void pushState() {
             stack.push();
         }
 
+        @Deprecated(/* to be removed in 2027 */)
         public void popState() {
             stack.pop();
         }
 
+        @Deprecated(/* to be removed in 2027, as it is only used in tests */)
         public ValueInState curr() {
             return stack.curr();
         }

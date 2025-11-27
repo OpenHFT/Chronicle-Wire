@@ -48,6 +48,7 @@ public interface ToLongDocumentExtractor {
      * @return a new mapped ToLongDocumentExtractor
      * @throws NullPointerException if the provided {@code mapper} is {@code null}
      */
+    @Deprecated(/* to be removed in 2027 */)
     default ToLongDocumentExtractor map(@NotNull final LongUnaryOperator mapper) {
         requireNonNull(mapper);
         return (wire, index) -> {
@@ -69,6 +70,7 @@ public interface ToLongDocumentExtractor {
      * @return a new mapped DocumentExtractor
      * @throws NullPointerException if the provided {@code mapper} is {@code null}
      */
+    @Deprecated(/* to be removed in 2027 */)
     default <T> DocumentExtractor<T> mapToObj(@NotNull final LongFunction<? extends T> mapper) {
         requireNonNull(mapper);
         return (wire, index) -> {
@@ -90,6 +92,7 @@ public interface ToLongDocumentExtractor {
      * @return a new mapped ToDoubleDocumentExtractor
      * @throws NullPointerException if the provided {@code mapper} is {@code null}
      */
+    @Deprecated(/* to be removed in 2027 */)
     default ToDoubleDocumentExtractor mapToDouble(@NotNull final LongToDoubleFunction mapper) {
         requireNonNull(mapper);
         return (wire, index) -> {
@@ -110,6 +113,7 @@ public interface ToLongDocumentExtractor {
      * @return a ToLongDocumentExtractor consisting of the elements of this ToLongDocumentExtractor that match
      * @throws NullPointerException if the provided {@code predicate} is {@code null}
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default ToLongDocumentExtractor filter(@NotNull final LongPredicate predicate) {
         requireNonNull(predicate);
         return (wire, index) -> {
@@ -131,6 +135,7 @@ public interface ToLongDocumentExtractor {
      *
      * @return a ToLongDocumentExtractor that returns the index
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     static ToLongDocumentExtractor extractingIndex() {
         return (wire, index) -> index;
     }

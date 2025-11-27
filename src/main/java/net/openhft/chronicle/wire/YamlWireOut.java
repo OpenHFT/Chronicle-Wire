@@ -90,6 +90,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
      *
      * @return True if timestamps should be added, otherwise false.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public boolean addTimeStamps() {
         return addTimeStamps;
     }
@@ -411,6 +412,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
      * @param o The object to be serialized.
      * @throws InvalidMarshallableException if an error occurs during serialization.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public void writeObject(Object o) throws InvalidMarshallableException {
         if (o instanceof Iterable) {
             for (Object o2 : (Iterable) o) {
@@ -1568,6 +1570,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         /**
          * Sets the separator to denote the end of a field.
          */
+        @Deprecated(/* to be removed in 2027 */)
         protected void endField() {
             sep = END_FIELD;
         }

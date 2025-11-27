@@ -50,6 +50,7 @@ public class WireTypeConverter {
      * @param newClass   the target {@link Class} object
      * @param oldTypeName the alternative or old type name string that should map to {@code newClass}
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public void addAlias(Class<?> newClass, String oldTypeName) {
         delegate.addAlias(newClass, oldTypeName);
     }

@@ -27,6 +27,7 @@ import java.nio.ByteBuffer;
  * @see InputStream
  * @see DataInputStream
  */
+@Deprecated(/* to be removed in 2027, as it is only used in tests */)
 public class InputStreamToWire {
 
     /**

@@ -418,6 +418,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
          *
          * @return The generic event string.
          */
+        @Deprecated(/* to be removed in 2027, as it is only used in tests */)
         public String genericEvent() {
             return genericEvent;
         }

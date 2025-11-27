@@ -50,6 +50,7 @@ public interface DocumentExtractor<T> {
      * @return a new mapped DocumentExtractor
      * @throws NullPointerException if the provided {@code mapper} is {@code null}
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default <R> DocumentExtractor<R> map(@NotNull final Function<? super T, ? extends R> mapper) {
         requireNonNull(mapper);
         return (wire, index) -> {
@@ -71,6 +72,7 @@ public interface DocumentExtractor<T> {
      * @return a new mapped DocumentExtractor
      * @throws NullPointerException if the provided {@code mapper} is {@code null}
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default ToLongDocumentExtractor mapToLong(@NotNull final ToLongFunction<? super T> mapper) {
         requireNonNull(mapper);
         return (wire, index) -> {
@@ -91,6 +93,7 @@ public interface DocumentExtractor<T> {
      * @return a DocumentExtractor consisting of the elements of this DocumentExtractor that match
      * @throws NullPointerException if the provided {@code predicate} is {@code null}
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default DocumentExtractor<T> filter(@NotNull final Predicate<? super T> predicate) {
         requireNonNull(predicate);
         return (wire, index) -> {
@@ -130,6 +133,7 @@ public interface DocumentExtractor<T> {
          * @return this Builder
          */
         @NotNull
+        @Deprecated(/* to be removed in 2027, as it is only used in tests */)
         Builder<E> withReusing(@NotNull Supplier<? extends E> supplier);
 
         /**
@@ -141,6 +145,7 @@ public interface DocumentExtractor<T> {
          * @return this Builder
          */
         @NotNull
+        @Deprecated(/* to be removed in 2027 */)
         Builder<E> withThreadConfinedReuse();
 
         /**
@@ -159,6 +164,7 @@ public interface DocumentExtractor<T> {
          * @param <I>             interface type
          * @return this Builder
          */
+        @Deprecated(/* to be removed in 2027, as it is only used in tests */)
         @NotNull <I> Builder<E> withMethod(@NotNull final Class<I> interfaceType,
                                            @NotNull final BiConsumer<? super I, ? super E> methodReference);
 
@@ -172,6 +178,7 @@ public interface DocumentExtractor<T> {
      * @param <E>         element type
      * @return a new Builder
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     static <E> Builder<E> builder(@NotNull final Class<E> elementType) {
         requireNonNull(elementType);
         return new DocumentExtractorBuilder<>(elementType);

@@ -88,8 +88,6 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         return rollback;
     }
 
-    static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal(1);
-
     @Override
     public void close() {
         if (rollbackIfNeeded())

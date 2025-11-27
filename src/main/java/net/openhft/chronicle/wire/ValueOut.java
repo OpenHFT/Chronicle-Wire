@@ -125,6 +125,7 @@ public interface ValueOut {
      * Alias for {@link #text(char)}.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default WireOut character(char c) {
         return text(c);
     }
@@ -201,6 +202,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     WireOut rawBytes(byte[] value);
 
     /**
@@ -230,6 +232,7 @@ public interface ValueOut {
      * @return A ValueOut instance for chained calls.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     ValueOut writeLength(long remaining);
 
     /**
@@ -249,6 +252,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     WireOut bytes(String type, byte[] fromBytes);
 
     /**
@@ -326,6 +330,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     WireOut utf8(int codepoint);
 
     /**
@@ -644,6 +649,7 @@ public interface ValueOut {
      * Throws an unsupported operation exception by default. May be overridden by specific implementations.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default WireOut int128forBinding(long value, long value2) {
         throw new UnsupportedOperationException();
     }
@@ -658,6 +664,7 @@ public interface ValueOut {
      * Writes a boolean value for binding with the given BooleanValue. This may be used for additional metadata or configuration.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     WireOut boolForBinding(boolean value, @NotNull BooleanValue longValue);
 
     /**
@@ -742,6 +749,7 @@ public interface ValueOut {
      * @param length The length of the sequence.
      * @return The WireOut instance for chained calls.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default WireOut array(Bytes[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -756,6 +764,7 @@ public interface ValueOut {
      * @param length The length of the sequence.
      * @return The WireOut instance for chained calls.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default WireOut array(double[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -770,6 +779,7 @@ public interface ValueOut {
      * @param length to write
      * @return this
      */
+    @Deprecated(/* to be removed in 2027 */)
     default WireOut arrayDelta(double[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             if (len <= 0) return;
@@ -788,6 +798,7 @@ public interface ValueOut {
      * @param length The number of elements from the array to write.
      * @return The current instance of the WireOut.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default WireOut array(boolean[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -802,6 +813,7 @@ public interface ValueOut {
      * @param length The number of elements from the array to write.
      * @return The current instance of the WireOut.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default WireOut array(long[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -818,6 +830,7 @@ public interface ValueOut {
      * @param length The number of elements from the array to write.
      * @return The current instance of the WireOut.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default WireOut arrayDelta(long[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             if (len <= 0) return;
@@ -835,6 +848,7 @@ public interface ValueOut {
      * @param length The number of elements from the array to write.
      * @return The current instance of the WireOut.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default WireOut array(int[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -849,6 +863,7 @@ public interface ValueOut {
      * @param length The number of elements from the array to write.
      * @return The current instance of the WireOut.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default WireOut array(byte[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -1028,6 +1043,7 @@ public interface ValueOut {
      * @throws InvalidMarshallableException If the set cannot be marshalled.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default <V> WireOut set(Set<V> coll) throws InvalidMarshallableException {
         return set(coll, null);
     }
@@ -1055,6 +1071,7 @@ public interface ValueOut {
      * @throws InvalidMarshallableException If the list cannot be marshalled.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     default <V> WireOut list(List<V> coll) throws InvalidMarshallableException {
         return list(coll, null);
     }
@@ -1629,6 +1646,7 @@ public interface ValueOut {
     }
 
     // Gets the size of the compressed data, if available, or returns max int value as a default
+    @Deprecated(/* to be removed in 2027 */)
     default int compressedSize() {
         return Integer.MAX_VALUE;
     }
@@ -1658,6 +1676,7 @@ public interface ValueOut {
      * @param x The boolean value to be written.
      * @return The WireOut instance after the operation.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default WireOut writeBoolean(boolean x) {
         return bool(x);
     }
@@ -1680,6 +1699,7 @@ public interface ValueOut {
      * @param x The char value to be written.
      * @return The WireOut instance after the operation.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default WireOut writeChar(char x) {
         return uint16(x);
     }
@@ -1691,6 +1711,7 @@ public interface ValueOut {
      * @param x The short value to be written.
      * @return The WireOut instance after the operation.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default WireOut writeShort(short x) {
         return int16(x);
     }
@@ -1724,6 +1745,7 @@ public interface ValueOut {
      * @param x The float value to be written.
      * @return The WireOut instance after the operation.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default WireOut writeFloat(float x) {
         return float32(x);
     }
@@ -1758,6 +1780,7 @@ public interface ValueOut {
      * @param i The integer to be converted and written.
      * @return The WireOut instance after the operation.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default WireOut writeInt(LongConverter converter, int i) {
         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
             StringBuilder sb = stlSb.get();

@@ -173,6 +173,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
      *
      * @return True if source details are being added, false otherwise.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public boolean addSourceDetails() {
         return addSourceDetails;
     }

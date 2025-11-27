@@ -159,6 +159,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
      * @return the WireIn instance for method chaining.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     WireIn readComment(@NotNull StringBuilder sb);
 
     /**
@@ -207,6 +208,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
      * @return the WireIn instance for method chaining.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     default WireIn readAlignTo(int alignment) {
         return this;
     }
@@ -235,6 +237,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
      * @return true if the document was successfully read from the given position, otherwise false.
      * @throws InvalidMarshallableException if there's an error during marshalling.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default boolean readDocument(long position,
                                  @Nullable ReadMarshallable metaDataConsumer,
                                  @Nullable ReadMarshallable dataConsumer) throws InvalidMarshallableException {
@@ -247,6 +250,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
      * @param marshallable Data to be read in its raw form.
      * @throws InvalidMarshallableException if there's an error during marshalling.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default void rawReadData(@NotNull ReadMarshallable marshallable) throws InvalidMarshallableException {
         WireInternal.rawReadData(this, marshallable);
     }

@@ -214,6 +214,7 @@ public enum Wires {
      * @param <T>    the type of the specified interface
      * @return a proxy of the specified interface that writes to the PrintStream in Yaml
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static <T> T recordAsYaml(Class<T> tClass, PrintStream ps) {
         MarshallableOut out = new StringConsumerMarshallableOut(s -> {
             if (!s.startsWith("---\n"))
@@ -235,6 +236,7 @@ public enum Wires {
      * @throws IOException is thrown if there's an error reading the file
      * @throws InvalidMarshallableException is thrown if the serialized data is invalid or corrupted
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static void replay(String file, Object obj) throws IOException, InvalidMarshallableException {
         Bytes bytes = BytesUtil.readFile(file);
         Wire wire = new YamlWire(bytes).useTextDocuments();
@@ -277,6 +279,7 @@ public enum Wires {
      * @param abbrev if {@code true} long fields are abbreviated
      * @return textual dump of the blobs
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, boolean abbrev) {
         return WireDumper.of(bytes).asString(abbrev);
     }
@@ -315,6 +318,7 @@ public enum Wires {
      * @param abbrev  whether long content should be abbreviated
      * @return textual dump of the blobs
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, boolean padding, boolean abbrev) {
         return WireDumper.of(bytes, padding).asString(abbrev);
     }
@@ -419,6 +423,7 @@ public enum Wires {
      * @return {@code output} containing the textual form
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static CharSequence asText(@NotNull WireIn wireIn, Bytes<?> output) {
         ValidatableUtil.startValidateDisabled();
         try {
@@ -441,6 +446,7 @@ public enum Wires {
     /**
      * Copies the contents of {@code wireIn} into {@code output} using a binary wire.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static Bytes<?> asBinary(@NotNull WireIn wireIn, Bytes<?> output) throws InvalidMarshallableException {
         return asType(wireIn, BinaryWire::new, output);
     }
@@ -466,6 +472,7 @@ public enum Wires {
     /**
      * Converts {@code wireIn} to JSON and writes the result into {@code output}.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static Bytes<?> asJson(@NotNull WireIn wireIn, Bytes<?> output) throws InvalidMarshallableException {
         return asType(wireIn, Wires::newJsonWire, output);
     }
@@ -534,6 +541,7 @@ public enum Wires {
     /**
      * Returns {@code true} if the header has a definite length value.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static boolean isKnownLength(int len) {
         return (len & (META_DATA | LENGTH_MASK)) != UNKNOWN_LENGTH;
     }
@@ -541,6 +549,7 @@ public enum Wires {
     /**
      * Returns {@code true} if the header has not been initialised.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static boolean isNotInitialized(int len) {
         return len == NOT_INITIALIZED;
     }
@@ -567,6 +576,7 @@ public enum Wires {
      * @param position offset of the header
      * @return {@code true} if the lock was acquired
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static boolean acquireLock(@NotNull BytesStore<?, ?> store, long position) {
         return store.compareAndSwapInt(position, NOT_INITIALIZED, NOT_COMPLETE);
     }
@@ -577,6 +587,7 @@ public enum Wires {
      * @param length the length to check
      * @return true if the length exceeds the maximum, false otherwise
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static boolean exceedsMaxLength(long length) {
         return length > LENGTH_MASK;
     }
@@ -591,6 +602,7 @@ public enum Wires {
      * @throws InvalidMarshallableException if marshalling fails
      */
     @ForceInline
+    @Deprecated(/* to be removed in 2027 */)
     public static <T extends WriteMarshallable> long writeData(
             @NotNull WireOut wireOut,
             @NotNull T writer) throws InvalidMarshallableException {
@@ -607,6 +619,7 @@ public enum Wires {
      * @throws InvalidMarshallableException if there's an issue during marshalling
      */
     @ForceInline
+    @Deprecated(/* to be removed in 2027 */)
     public static long readWire(@NotNull WireIn wireIn, long size, @NotNull ReadMarshallable readMarshallable) throws InvalidMarshallableException {
         @NotNull final Bytes<?> bytes = wireIn.bytes();
         final long limit0 = bytes.readLimit();
@@ -727,6 +740,7 @@ public enum Wires {
      * @param copy         indicates if the previous state should be copied
      * @throws InvalidMarshallableException if there's an error during the marshalling process
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static void writeMarshallable(@NotNull Object marshallable, @NotNull WireOut wire, @NotNull Object previous, boolean copy) throws InvalidMarshallableException {
         assert marshallable.getClass() == previous.getClass();
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass());
@@ -850,6 +864,7 @@ public enum Wires {
      * @param name   Field name
      * @return Information about the field
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static FieldInfo fieldInfo(@NotNull Class<?> aClass, String name) {
         return FIELD_INFOS.get(aClass).map.get(name);
     }
@@ -934,6 +949,7 @@ public enum Wires {
      * @param header The header with a potentially masked thread ID
      * @return The header without the masked thread ID
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static int removeMaskedTidFromHeader(final int header) {
         return header & INVERSE_TID_MASK;
     }
@@ -1037,6 +1053,7 @@ public enum Wires {
      * @return A Date object representing the read date
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public static <E> E objectDate(ValueIn in, @Nullable E using) {
         // skip the field if it is there.
         in.wireIn().read();
@@ -1514,6 +1531,7 @@ public enum Wires {
          * @param in The ValueIn object which contains the class name.
          * @return The Class object associated with the name.
          */
+        @Deprecated(/* to be removed in 2027 */)
         private static Class<?> forName(Class<?> o, ValueIn in) {
             final StringBuilder sb0 = sb.get();
 

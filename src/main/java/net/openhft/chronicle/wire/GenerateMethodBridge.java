@@ -45,6 +45,7 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
      * @param ui        optional {@link UpdateInterceptor} applied to bridge invocations
      * @return a new instance of the generated bridge class
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static Object bridgeFor(Class<?> destType, List<Object> toInvoke, UpdateInterceptor ui) {
         GenerateMethodBridge gmb = new GenerateMethodBridge();
         MethodBridgeMetaData md = gmb.metaData();
@@ -171,6 +172,7 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
         /**
          * Returns the handler types.
          */
+        @Deprecated(/* to be removed in 2027, as it is only used in tests */)
         public List<Class<?>> invokes() {
             return invokes;
         }

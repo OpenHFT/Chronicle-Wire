@@ -163,6 +163,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
      *
      * @return The position in the wire where the current document starts.
      */
+    @Deprecated(/* to be removed in 2027 */)
     protected long position() {
         return position;
     }

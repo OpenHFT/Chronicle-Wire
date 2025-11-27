@@ -46,6 +46,7 @@ public final class Reductions {
      * @return a new Reduction reducing long values
      * @throws NullPointerException if any objects provided are {@code null}.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static Reduction<LongSupplier> reducingLong(@NotNull final ToLongDocumentExtractor extractor,
                                                        final long identity,
                                                        @NotNull final LongBinaryOperator accumulator) {
@@ -73,6 +74,7 @@ public final class Reductions {
      * @return a new Reduction reducing double values
      * @throws NullPointerException if any objects provided are {@code null}.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static Reduction<DoubleSupplier> reducingDouble(@NotNull final ToDoubleDocumentExtractor extractor,
                                                            final double identity,
                                                            @NotNull final DoubleBinaryOperator accumulator) {
@@ -94,6 +96,7 @@ public final class Reductions {
      *
      * @return a new Reduction counting excerpts
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static Reduction<LongSupplier> counting() {
         return Reduction.ofLong(
                         (wire, index) -> 1L)
@@ -110,6 +113,7 @@ public final class Reductions {
      * This is an example of a public class with configurable properties that can be
      * referenced in a YAML configuration file.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static final class Counting extends SelfDescribingMarshallable implements Reduction<LongSupplier> {
 
         // An atomic field updater to provide thread-safe updates to the counter

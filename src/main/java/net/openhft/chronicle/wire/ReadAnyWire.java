@@ -141,6 +141,7 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
             return null;
         }
 
+        @Deprecated(/* to be removed in 2027 */)
         public Bytes<?> bytes() {
             return bytes;
         }

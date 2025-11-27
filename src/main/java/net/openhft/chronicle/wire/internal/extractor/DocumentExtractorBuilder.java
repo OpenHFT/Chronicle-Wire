@@ -16,6 +16,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * Responsible for building and configuring document extractors for a specified type {@code E}.
  * This class provides flexibility in the extraction process, enabling efficient document extraction.
  */
+@Deprecated(/* to be removed in 2027, as it is only used in tests */)
 public final class DocumentExtractorBuilder<E> implements DocumentExtractor.Builder<E> {
 
     // Represents the type of element to be extracted.
@@ -48,6 +49,7 @@ public final class DocumentExtractorBuilder<E> implements DocumentExtractor.Buil
 
     @NotNull
     @Override
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public DocumentExtractor.Builder<E> withThreadConfinedReuse() {
         threadConfinedReuse = true;
         return this;
@@ -105,6 +107,7 @@ public final class DocumentExtractorBuilder<E> implements DocumentExtractor.Buil
     /**
      * A supplier backed by a ThreadLocal instance, ensuring separate values for each thread.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     static final class ThreadLocalSupplier<E> implements Supplier<E> {
 
         // ThreadLocal instance to provide thread-specific values.
@@ -115,6 +118,7 @@ public final class DocumentExtractorBuilder<E> implements DocumentExtractor.Buil
          *
          * @param supplier The supplier to initialize the thread-local with.
          */
+        @Deprecated(/* to be removed in 2027, as it is only used in tests */)
         public ThreadLocalSupplier(@NotNull final Supplier<? extends E> supplier) {
             this.threadLocal = ThreadLocal.withInitial(supplier);
         }
@@ -128,6 +132,7 @@ public final class DocumentExtractorBuilder<E> implements DocumentExtractor.Buil
     /**
      * A supplier that ensures its use is confined to a single thread, providing thread safety.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     static final class ThreadConfinedSupplier<E> implements Supplier<E> {
 
         // Utility to assert that the current thread is the one this supplier is confined to.
@@ -141,6 +146,7 @@ public final class DocumentExtractorBuilder<E> implements DocumentExtractor.Buil
          *
          * @param supplier The supplier to provide the delegate object.
          */
+        @Deprecated(/* to be removed in 2027, as it is only used in tests */)
         public ThreadConfinedSupplier(@NotNull final Supplier<? extends E> supplier) {
             // Eagerly create the reuse object
             this.delegate = requireNonNull(supplier.get());
@@ -156,6 +162,7 @@ public final class DocumentExtractorBuilder<E> implements DocumentExtractor.Buil
     /**
      * Represents a reference to a method for extracting data.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     private static final class MethodRef<I, E> {
 
         // Type of interface the method belongs to.
@@ -171,6 +178,7 @@ public final class DocumentExtractorBuilder<E> implements DocumentExtractor.Buil
          * @param methodReference The actual method reference for extraction.
          */
         @SuppressWarnings("unchecked")
+        @Deprecated(/* to be removed in 2027, as it is only used in tests */)
         public MethodRef(@NotNull final Class<I> interfaceType,
                          @NotNull final BiConsumer<? super I, ? super E> methodReference) {
             this.interfaceType = interfaceType;

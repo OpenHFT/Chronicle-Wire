@@ -106,6 +106,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * @throws IOException If there's an error in reading the file
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public static YamlWire fromFile(String name) throws IOException {
         return new YamlWire(BytesUtil.readFile(name), true);
     }
@@ -117,6 +118,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * @return A new YamlWire instance initialized from the given string
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static YamlWire from(@NotNull String text) {
         return new YamlWire(Bytes.from(text));
     }
@@ -128,6 +130,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * @return The string representation of the wire's content.
      * @throws InvalidMarshallableException If the given wire's content cannot be marshalled.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static String asText(@NotNull Wire wire) throws InvalidMarshallableException {
         long pos = wire.bytes().readPosition();
         @NotNull Wire tw = Wire.newYamlWireOnHeap();
@@ -872,6 +875,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      *
      * @return A string representation of the current parsing context.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public String dumpContext() {
         ValidatableUtil.startValidateDisabled();
         try {
@@ -940,6 +944,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * Consumes and skips the start of a YAML document, e.g., '---'.
      * For specific keywords (like "!!data" and "!!meta-data"), the cursor position remains unchanged.
      */
+    @Deprecated(/* to be removed in 2027 */)
     protected void consumeDocumentStart() {
         // Check if there are more than 4 bytes left to read
         if (bytes.readRemaining() > 4) {
@@ -1809,6 +1814,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Override
+        @Deprecated(/* to be removed in 2027 */)
         public <T> T applyToMarshallable(@NotNull Function<WireIn, T> marshallableReader) {
             throw new UnsupportedOperationException(yt.toString());
         }
@@ -1979,6 +1985,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * @throws IORuntimeException If there's an error in the YAML format or during demarshalling.
          */
         @NotNull
+        @Deprecated(/* to be removed in 2027, as it is only used in tests */)
         public Demarshallable demarshallable(@NotNull Class<?> clazz) {
             consumePadding();
             switch (yt.current()) {

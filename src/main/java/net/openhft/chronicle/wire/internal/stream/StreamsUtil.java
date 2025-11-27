@@ -38,6 +38,7 @@ public final class StreamsUtil {
      *
      * @param <T> the type of elements returned by this spliterator.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static final class VanillaSpliterator<T> implements Spliterator<T> {
 
         private final Iterator<T> iterator; // The iterator this spliterator works on
@@ -105,6 +106,7 @@ public final class StreamsUtil {
      * providing basic spliterator functionalities for long elements.
      */
     @SuppressWarnings("overloads")
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static final class VanillaSpliteratorOfLong
             extends AbstractPrimitiveSpliterator<Long, LongConsumer, Spliterator.OfLong, PrimitiveIterator.OfLong>
             implements Spliterator.OfLong {
@@ -140,6 +142,7 @@ public final class StreamsUtil {
      * providing basic spliterator functionalities for double elements.
      */
     @SuppressWarnings("overloads")
+    @Deprecated(/* to be removed in 2027 */)
     public static final class VanillaSpliteratorOfDouble
             extends AbstractPrimitiveSpliterator<Double, DoubleConsumer, Spliterator.OfDouble, PrimitiveIterator.OfDouble>
             implements Spliterator.OfDouble {

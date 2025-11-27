@@ -21,6 +21,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * methods for transformations and mapping to different object types after extraction.
  */
 @FunctionalInterface
+@Deprecated(/* to be removed in 2027 */)
 public interface ToDoubleDocumentExtractor {
 
     /**

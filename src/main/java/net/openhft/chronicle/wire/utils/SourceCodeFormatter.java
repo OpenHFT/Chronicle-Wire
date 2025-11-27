@@ -114,6 +114,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      *
      * @param len The new length for the formatted string.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public void setLength(int len) {
         formattedCode.setLength(len);
     }
@@ -166,6 +167,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      * @param d The double value to append.
      * @return The current SourceCodeFormatter instance.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public SourceCodeFormatter append(double d) {
         formattedCode.append(d);
         return this;
@@ -190,6 +192,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      * @param value The object whose string representation will be appended.
      * @return The current SourceCodeFormatter instance.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public <T> SourceCodeFormatter append(T value) {
         formattedCode.append(value);
         return this;

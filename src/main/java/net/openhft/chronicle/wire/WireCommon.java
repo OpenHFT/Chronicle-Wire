@@ -47,6 +47,7 @@ public interface WireCommon {
      *
      * @return the current {@link Pauser} implementation being used for blocking operations
      */
+    @Deprecated(/* to be removed in 2027 */)
     Pauser pauser();
 
     /**
@@ -109,6 +110,7 @@ public interface WireCommon {
      * @return a new {@link IntArrayValues}
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     IntArrayValues newIntArrayReference();
 
     /**
@@ -146,6 +148,7 @@ public interface WireCommon {
      *
      * @param notCompleteArePresent true to expose incomplete messages, false to hide them
      */
+    @Deprecated(/* to be removed in 2027 */)
     default void notCompleteIsNotPresent(boolean notCompleteArePresent) {
         throw new UnsupportedOperationException();
     }
@@ -187,6 +190,7 @@ public interface WireCommon {
      * @return a new {@link BooleanValue}.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     BooleanValue newBooleanReference();
 
     /**

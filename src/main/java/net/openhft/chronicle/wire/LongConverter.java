@@ -123,6 +123,7 @@ public interface LongConverter {
      * @param numericValue the integer value to convert
      * @return The CharSequence representation of the value.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default CharSequence asText(int numericValue) {
         return asText(numericValue & 0xFFFF_FFFFL);
     }
@@ -180,6 +181,7 @@ public interface LongConverter {
      *
      * @return {@code true} if no characters need escaping or additional quoting for JSON or YAML, {@code false} otherwise.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default boolean allSafeChars() {
         return true;
     }

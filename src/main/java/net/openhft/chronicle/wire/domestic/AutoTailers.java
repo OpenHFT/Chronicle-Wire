@@ -40,6 +40,7 @@ public final class AutoTailers {
         void close();
     }
 
+    @Deprecated(/* to be removed in 2027 */)
     public static long replayOnto(@NotNull final MarshallableIn tailer,
                                   @NotNull final ExcerptListener excerptListener) throws InvalidMarshallableException {
         requireNonNull(tailer);
@@ -49,6 +50,7 @@ public final class AutoTailers {
     }
 
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static CloseableRunnable createRunnable(@NotNull final Supplier<? extends MarshallableIn> tailerSupplier,
                                                    @NotNull final ExcerptListener excerptListener,
                                                    @NotNull final Supplier<Pauser> pauserSupplier) {
@@ -60,6 +62,7 @@ public final class AutoTailers {
     }
 
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public static CloseableEventHandler createEventHandler(@NotNull final Supplier<? extends MarshallableIn> tailerSupplier,
                                                            @NotNull final ExcerptListener excerptListener) {
         requireNonNull(tailerSupplier);

@@ -74,9 +74,6 @@ public class YamlTokeniser {
     // Flag to indicate if a sequence entry has been encountered
     boolean hasSequenceEntry;
 
-    // Position marker for the last key in a key-value pair
-    long lastKeyPosition = -1;
-
     // The last token that was processed
     private YamlToken last = YamlToken.STREAM_START;
 
@@ -114,7 +111,6 @@ public class YamlTokeniser {
         flowDepth = Integer.MAX_VALUE;
         blockQuote = 0;
         hasSequenceEntry = false;
-        lastKeyPosition = -1;
         pushed.clear();
         last = YamlToken.STREAM_START;
         pushContext0(YamlToken.STREAM_START, NO_INDENT);
@@ -128,10 +124,6 @@ public class YamlTokeniser {
      */
     public YamlToken context() {
         return contexts.isEmpty() ? YamlToken.STREAM_START : topContext().token;
-    }
-
-    long lastKeyPosition() {
-        return lastKeyPosition >= 0 ? lastKeyPosition : lineStart;
     }
 
     /**
@@ -235,7 +227,6 @@ public class YamlTokeniser {
             case '"':
                 if (wouldChangeContext(minIndent, indent2))
                     return dontRead();
-                lastKeyPosition = in.readPosition() - 1;
                 readDoublyQuoted();
                 if (isFieldEnd())
                     return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent2);
@@ -243,7 +234,6 @@ public class YamlTokeniser {
             case '\'':
                 if (wouldChangeContext(minIndent, indent2))
                     return dontRead();
-                lastKeyPosition = in.readPosition() - 1;
                 readSinglyQuoted();
                 if (isFieldEnd())
                     return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent2);
@@ -253,7 +243,6 @@ public class YamlTokeniser {
             case '?': {
                 if (wouldChangeContext(minIndent, indent2))
                     return dontRead();
-                lastKeyPosition = in.readPosition() - 1;
                 YamlToken indentB = indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.STREAM_START, indent2);
                 contextPush(YamlToken.MAPPING_KEY, indent2);
                 return indentB;
@@ -651,7 +640,6 @@ public class YamlTokeniser {
 
         // If we've reached the end of a field, determine if this is a key in a mapping.
         if (isFieldEnd()) {
-            lastKeyPosition = pos;
             if (topContext().token != YamlToken.MAPPING_KEY)
                 return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, currentIndentLevel);
         }
@@ -823,20 +811,6 @@ public class YamlTokeniser {
     }
 
     /**
-     * Drops contexts until the stack reaches the supplied {@code contextSize}.
-     */
-    void revertToContext(int contextSize) {
-        pushed.clear(); // Clear the pushed tokens.
-        // Remove contexts until reaching the desired context size.
-        while (contextSize() > contextSize) {
-            YTContext context0 = contexts.remove(contextSize() - 1);
-            if (flowDepth == contextSize())
-                flowDepth = Integer.MAX_VALUE; // Reset the flow depth if required.
-            freeContexts.add(context0); // Store the removed context for future reuse.
-        }
-    }
-
-    /**
      * Pushes a new parsing context.
      * Inserts an implicit {@link YamlToken#DIRECTIVES_END}
      * if starting from{@link YamlToken#STREAM_START}.
@@ -976,6 +950,7 @@ public class YamlTokeniser {
      *
      * @return the position of the start of the current line.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public long lineStart() {
         return lineStart;
     }
@@ -1003,6 +978,7 @@ public class YamlTokeniser {
      *
      * @return the position of the end of the current block.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public long blockEnd() {
         return blockEnd;
     }

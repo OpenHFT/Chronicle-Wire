@@ -37,6 +37,7 @@ public class MilliTimestampLongConverter extends AbstractTimestampLongConverter 
      *               to be used for formatting date-time strings. This converter
      *               handles timestamps with millisecond precision.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public MilliTimestampLongConverter(String zoneId) {
         super(zoneId, TimeUnit.MILLISECONDS);
     }

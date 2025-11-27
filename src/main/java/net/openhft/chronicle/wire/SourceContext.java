@@ -31,5 +31,6 @@ public interface SourceContext {
      * @return index of the current entry, for example the queue index
      * @throws IORuntimeException if the index cannot be determined
      */
+    @Deprecated(/* to be removed in 2027 */)
     long index() throws IORuntimeException;
 }

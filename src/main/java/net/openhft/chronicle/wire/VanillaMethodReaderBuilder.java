@@ -141,6 +141,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         return msg.toString();
     }
 
+    @Deprecated(/* to be removed in 2027 */)
     public WireParselet defaultParselet() {
         return defaultParselet;
     }
@@ -151,6 +152,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
      * @param defaultParselet The new default parselet.
      * @return This builder for chaining.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public MethodReaderBuilder defaultParselet(WireParselet defaultParselet) {
         this.defaultParselet = defaultParselet;
         return this;
@@ -162,6 +164,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
      * @param ignore flag indicating whether to ignore defaults
      * @return this builder for chaining
      */
+    @Deprecated(/* to be removed in 2027 */)
     public VanillaMethodReaderBuilder ignoreDefaults(boolean ignore) {
         this.ignoreDefaults = ignore;
         return this;
@@ -189,6 +192,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
      *
      * @return The {@code wireType} of the reader.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public WireType wireType() {
         return wireType;
     }
@@ -222,6 +226,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
      * @param multipleNonMarshallableParamTypes Whether the reader should handle multiple non-marshallable parameter types.
      * @return This builder instance for chaining.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public VanillaMethodReaderBuilder multipleNonMarshallableParamTypes(Boolean multipleNonMarshallableParamTypes) {
         this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
         return this;

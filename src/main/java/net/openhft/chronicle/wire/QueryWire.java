@@ -54,6 +54,7 @@ public class QueryWire extends TextWire {
      */
     @NotNull
     @Override
+    @Deprecated(/* to be removed in 2027 */)
     protected QueryValueOut createValueOut() {
         return new QueryValueOut();
     }
@@ -63,6 +64,7 @@ public class QueryWire extends TextWire {
      */
     @NotNull
     @Override
+    @Deprecated(/* to be removed in 2027 */)
     protected TextValueIn createValueIn() {
         return new QueryValueIn();
     }

@@ -32,6 +32,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * @param url The URL which will dictate the specific type of {@code MarshallableOut} to create.
      * @return A new instance of {@code MarshallableOutBuilder}.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     static MarshallableOutBuilder builder(URL url) {
         return new MarshallableOutBuilder(url);
     }
@@ -88,6 +89,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * @param key   to write
      * @param value to write with it.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default void writeMessage(WireKey key, Object value) throws UnrecoverableTimeoutException {
         @NotNull DocumentContext dc = writingDocument();
         try {

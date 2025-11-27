@@ -78,6 +78,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param bytes The byte array to be used for constructing the {@code BitSet}.
      * @return A new {@code BitSet} containing all bits from the given byte array.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static BitSet valueOf(byte[] bytes) {
         return BitSet.valueOf(ByteBuffer.wrap(bytes));
     }
@@ -170,6 +171,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param word     The {@code LongValue} instance representing the word to set.
      * @param newValue The new value to set for the word.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public void set(LongValue word, long newValue) {
         throwExceptionIfClosed();
 
@@ -186,6 +188,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @return A byte array containing all the bits in this bit set.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public byte[] toByteArray() {
         throwExceptionIfClosed();
 
@@ -569,6 +572,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param fromIndex The index to start the reverse search from (inclusive).
      * @return Index of the previous set bit or {@code -1} if no set bit is found.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public int previousSetBit(int fromIndex) {
         throwExceptionIfClosed();
 
@@ -606,6 +610,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param fromIndex The index to start the reverse search from (inclusive).
      * @return Index of the previous clear bit or {@code -1} if no clear bit is found.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public int previousClearBit(int fromIndex) {
         throwExceptionIfClosed();
 
@@ -860,6 +865,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @return An ordered IntStream of indices of bits set to true.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public IntStream stream() {
         throwExceptionIfClosed();
 

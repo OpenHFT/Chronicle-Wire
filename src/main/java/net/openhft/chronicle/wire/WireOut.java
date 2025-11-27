@@ -85,6 +85,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @param methodId The ID of the method representing the event.
      * @return An interface to further define the output for the written value.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default ValueOut writeEventId(String name, int methodId) {
         return write(new MethodWireKey(name, methodId));
     }

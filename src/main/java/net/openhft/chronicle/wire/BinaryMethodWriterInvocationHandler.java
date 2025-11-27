@@ -71,6 +71,7 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
      *
      * @return {@code true} if metadata is enabled, {@code false} otherwise.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public boolean metaData() {
         return metaData;
     }

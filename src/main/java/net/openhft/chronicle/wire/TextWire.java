@@ -71,7 +71,6 @@ public class TextWire extends YamlWireOut<TextWire> {
     static final Supplier<StopCharTester> SINGLE_QUOTES_ESCAPING = StopCharTesters.SINGLE_QUOTES::escaping;
     static final Supplier<StopCharTester> END_OF_TEXT_ESCAPING = TextStopCharTesters.END_OF_TEXT::escaping;
     static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT::escaping;
-    static final Supplier<StopCharsTester> END_EVENT_NAME_ESCAPING = TextStopCharsTesters.END_EVENT_NAME::escaping;
 
     // Metadata representation in bytes.
     static final Bytes<?> META_DATA = Bytes.from("!!meta-data");
@@ -170,6 +169,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * @param wire The wire format to be converted.
      * @return The text representation of the wire format.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static String asText(@NotNull Wire wire) {
         NativeBytes<Void> bytes = nativeBytes();
         ValidatableUtil.startValidateDisabled();
@@ -293,6 +293,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * @return an instance of the object created from the data in the file
      * @throws IOException if the file can not be found or read
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static <T> T load(String filename) throws IOException, InvalidMarshallableException {
         return (T) TextWire.fromFile(filename).readObject();
     }
@@ -307,6 +308,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      *
      * @return A boolean indicating whether strict mode is enabled (true) or disabled (false).
      */
+    @Deprecated(/* to be removed in 2027 */)
     public boolean strict() {
         return strict;
     }
@@ -318,6 +320,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * @param strict A boolean value to set the strict mode. True to enable, false to disable.
      * @return The current TextWire instance, allowing for method chaining.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public TextWire strict(boolean strict) {
         this.strict = strict;
         return this;
@@ -486,6 +489,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      *
      * @return A string representation of the TextWire's underlying bytes in ISO-8859-1 encoding.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public String to8bitString() {
         return bytes.to8bitString();
     }
@@ -708,15 +712,6 @@ public class TextWire extends YamlWireOut<TextWire> {
     protected StopCharsTester getStrictEscapingEndOfText() {
         StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT, STRICT_END_OF_TEXT_ESCAPING);
         // reset it.
-        escaping.isStopChar(' ', ' ');
-        return escaping;
-    }
-
-    @NotNull
-    protected StopCharsTester getEscapingEndEventName() {
-        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT, END_EVENT_NAME_ESCAPING);
-
-        // Reset the stop characters tester to stop at space characters.
         escaping.isStopChar(' ', ' ');
         return escaping;
     }
@@ -1110,6 +1105,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * @param sb         The StringBuilder to which the parsed characters will be appended.
      * @param stopTester A StopCharsTester which determines which characters should stop the parsing.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public void parseUntil(@NotNull StringBuilder sb, @NotNull StopCharsTester stopTester) {
         sb.setLength(0);
         if (use8bit) {
@@ -2566,6 +2562,7 @@ public class TextWire extends YamlWireOut<TextWire> {
          * @return A new instance of the class initialized with the data from the wire.
          */
         @NotNull
+        @Deprecated(/* to be removed in 2027 */)
         public Demarshallable demarshallable(@NotNull Class<?> clazz) {
             pushState();
 

@@ -443,6 +443,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         /** Mixes the type name and array content. */
         @NotNull
         @Override
+        @Deprecated(/* to be removed in 2027 */)
         public WireOut bytes(@NotNull String type, @NotNull byte[] fromBytes) {
             hash = hash * M1 + Maths.hash64(type) ^ Maths.hash64(Bytes.wrapForRead(fromBytes));
             return HashWire.this;

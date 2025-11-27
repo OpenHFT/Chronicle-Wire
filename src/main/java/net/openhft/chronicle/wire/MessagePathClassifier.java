@@ -24,6 +24,7 @@ import java.util.stream.IntStream;
  * Implements {@link IntSupplier} so the current thread's
  * {@link MessageHistory} can be classified directly via {@link #getAsInt()}.
  */
+@Deprecated(/* to be removed in 2027, as it is only used in tests */)
 public class MessagePathClassifier implements IntSupplier {
 
     /**
@@ -52,6 +53,7 @@ public class MessagePathClassifier implements IntSupplier {
      * @throws IllegalArgumentException if the same sequence is registered with a
      *                                  different {@code pathId}
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public MessagePathClassifier addPathForSourcesEnding(int pathId, int... sources) {
         OptionalInt duplicate = IntStream.range(0, sourcePattern.size())
                 .filter(s -> Arrays.equals(sources, sourcePattern.get(s)))

@@ -41,6 +41,7 @@ public interface Wire extends WireIn, WireOut {
      *
      * @return true if tuples should be generated, false otherwise.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default boolean generateTuples() {
         return Wires.GENERATE_TUPLES;
     }
@@ -50,6 +51,7 @@ public interface Wire extends WireIn, WireOut {
      *
      * @param generateTuples true to enable tuple generation, false to disable it.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default Wire generateTuples(boolean generateTuples) {
         return this;
     }

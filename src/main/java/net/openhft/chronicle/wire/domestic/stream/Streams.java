@@ -53,6 +53,7 @@ public final class Streams {
      * @throws NullPointerException if any of the provided parameters are {@code null}
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static <T> Stream<T> of(@NotNull final MarshallableIn documentProvider,
                                    @NotNull final DocumentExtractor<T> extractor) {
         requireNonNull(documentProvider);
@@ -77,6 +78,7 @@ public final class Streams {
      * @throws NullPointerException if any of the provided parameters are {@code null}
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static LongStream ofLong(@NotNull final MarshallableIn documentProvider,
                                     @NotNull final ToLongDocumentExtractor extractor) {
         requireNonNull(documentProvider);
@@ -101,6 +103,7 @@ public final class Streams {
      * @throws NullPointerException if any of the provided parameters are {@code null}
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public static DoubleStream ofDouble(@NotNull final MarshallableIn documentProvider,
                                         @NotNull final ToDoubleDocumentExtractor extractor) {
         requireNonNull(documentProvider);

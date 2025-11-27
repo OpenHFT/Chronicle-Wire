@@ -42,10 +42,6 @@ public enum WireInternal {
     private static final int BYTES_SCOPED_INSTANCES_PER_THREAD = Jvm.getInteger("chronicle.wireInternal.pool.bytes.instancesPerThread", 2);
 
     // Thread-local storage for various utility instances.
-    static final ThreadLocal<WeakReference<Bytes<?>>> BYTES_TL = new ThreadLocal<>();
-    static final ThreadLocal<WeakReference<Bytes<?>>> BYTES_F2S_TL = new ThreadLocal<>();
-    static final ThreadLocal<WeakReference<Wire>> BINARY_WIRE_TL = new ThreadLocal<>();
-    static final ThreadLocal<WeakReference<Bytes<?>>> INTERNAL_BYTES_TL = new ThreadLocal<>();
     static final ScopedThreadLocal<Wire> BINARY_WIRE_SCOPED_TL = new ScopedThreadLocal<>(
             () -> new BinaryWire(Wires.unmonitoredDirectBytes())
                     .setOverrideSelfDescribing(true),
@@ -409,19 +405,6 @@ public enum WireInternal {
             throw Jvm.rethrow(e);
         }
         return throwable;
-    }
-
-    /**
-     * Merges two strings with a space in between. If one of the strings is null,
-     * the other string is returned. If both are null, null is returned.
-     *
-     * @param a The first string.
-     * @param b The second string.
-     * @return The merged string or one of the strings if the other is null.
-     */
-    @Nullable
-    static String merge(@Nullable String a, @Nullable String b) {
-        return a == null ? b : b == null ? a : a + " " + b;
     }
 
     /**

@@ -148,6 +148,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * @return A stream of marshallable objects of type {@code T}.
      */
     @Nullable
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     static <T> Stream<T> streamFromFile(@NotNull Class<T> expectedType, String filename) throws IOException {
         return TEXT.streamFromFile(expectedType, filename);
     }
@@ -191,6 +192,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * @param name  The name of the field.
      * @param value The new long value for the specified field.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default void setLongField(String name, long value) throws NoSuchFieldException {
         Wires.setLongField(this, name, value);
     }

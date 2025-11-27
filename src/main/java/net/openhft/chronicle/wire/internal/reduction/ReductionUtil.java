@@ -68,6 +68,7 @@ public final class ReductionUtil {
      * @param <A> Intermediate accumulation type of the collector.
      * @param <R> Result type of the reduction.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static final class CollectorReduction<E, A, R> implements Reduction<R> {
 
         // Extracts elements of type E from a wire.
@@ -130,6 +131,7 @@ public final class ReductionUtil {
      *
      * @param <A> Intermediate accumulation type.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static final class LongSupplierReduction<A> implements Reduction<LongSupplier> {
 
         // Extracts long values from a wire.
@@ -192,6 +194,7 @@ public final class ReductionUtil {
      *
      * @param <A> Intermediate accumulation type.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static final class DoubleSupplierReduction<A> implements Reduction<DoubleSupplier> {
 
         // Extracts double values from a wire.
@@ -215,6 +218,7 @@ public final class ReductionUtil {
          * @param accumulator The accumulator to accumulate double values.
          * @param finisher The function to finish the reduction.
          */
+        @Deprecated(/* to be removed in 2027 */)
         public DoubleSupplierReduction(@NotNull final ToDoubleDocumentExtractor extractor,
                                        @NotNull final Supplier<A> supplier,
                                        @NotNull final ObjDoubleConsumer<A> accumulator,
@@ -306,6 +310,7 @@ public final class ReductionUtil {
         }
     }
 
+    @Deprecated(/* to be removed in 2027 */)
     public static final class VanillaDoubleReductionBuilder implements Reduction.DoubleReductionBuilder {
 
         private final ToDoubleDocumentExtractor extractor;

@@ -121,6 +121,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * @return The current instance of VanillaMethodWriterBuilder for chaining method calls.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public MethodWriterBuilder<T> classLoader(ClassLoader classLoader) {
         this.classLoader = classLoader;
         return this;
@@ -188,6 +189,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * @return this builder
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public MethodWriterBuilder<T> disableThreadSafe(boolean theadSafe) {
         handlerSupplier.disableThreadSafe(theadSafe);
         return this;
@@ -232,6 +234,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      *
      * @return this builder
      */
+    @Deprecated(/* to be removed in 2027 */)
     public VanillaMethodWriterBuilder<T> wireType(final WireType wireType) {
         this.wireType = wireType;
         return this;
@@ -430,6 +433,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     /**
      * @return pre-compiled proxy class if set
      */
+    @Deprecated(/* to be removed in 2027 */)
     public Class<?> proxyClass() {
         return proxyClass;
     }
@@ -441,6 +445,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * @return The current instance of the {@link MethodWriterBuilder}, allowing chained method calls.
      * @throws IllegalArgumentException If the provided class is an interface.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public MethodWriterBuilder<T> proxyClass(Class<?> proxyClass) {
         // Check if the provided class is an interface.
         if (proxyClass.isInterface())

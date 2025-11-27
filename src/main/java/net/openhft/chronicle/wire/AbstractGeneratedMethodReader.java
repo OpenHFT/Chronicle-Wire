@@ -41,6 +41,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private static final ConcurrentHashMap<String, MessageHistoryThreadLocal>
             TEMP_MESSAGE_HISTORY_BY_SERVICE_NAME = new ConcurrentHashMap<>();
     // The parselet used for debug logging when {@link Jvm#isDebug()} is true.
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     protected final WireParselet debugLoggingParselet;
     // Input providing documents for this reader.
     private final MarshallableIn in;
@@ -73,6 +74,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * @param in                   input providing documents
      * @param debugLoggingParselet parselet used when debug logging is enabled
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     protected AbstractGeneratedMethodReader(MarshallableIn in,
                                             WireParselet debugLoggingParselet) {
         this.in = in;
@@ -110,6 +112,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * @param parameterTypes The parameter types of the method
      * @return The method if found, otherwise throws an AssertionError
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     protected static Method lookupMethod(Class<?> clazz, String name, Class<?>... parameterTypes) {
         try {
             final Method method = clazz.getMethod(name, parameterTypes);
@@ -390,6 +393,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * {@code null} or an array. If the object is a collection or map, the method will clear its
      * content and return the object.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     protected <T> T checkRecycle(T o) {
         if (o == null || o.getClass().isArray()) // If the object is null or an array, return null to prevent recycling.
             return null;
@@ -420,6 +424,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * @return Returns the result of the method invocation.
      * @throws RuntimeException if the method invocation throws an exception.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     protected Object actualInvoke(Method method, Object o, Object[] objects) {
         try {
             return method.invoke(o, objects);
@@ -453,6 +458,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      * Thread-local holder for {@link VanillaMessageHistory} instances with source
      * details enabled.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     private static final class MessageHistoryThreadLocal {
 
         private final ThreadLocal<MessageHistory> messageHistoryTL = withInitial(() -> {
