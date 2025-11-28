@@ -7,5 +7,4 @@
  * <p>Collectors and utilities here fold documents into aggregated results while
  * respecting the threading and allocation constraints of Chronicle pipelines.
  */
-@SuppressWarnings({"deprecation", "removal"})
 package net.openhft.chronicle.wire.domestic.reduction;

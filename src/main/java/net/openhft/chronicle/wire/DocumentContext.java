@@ -44,7 +44,6 @@ public interface DocumentContext extends Closeable, SourceContext {
      * @return {@code true} if the context is open (i.e., the NOT_COMPLETE flag is set),
      * {@code false} otherwise.
      */
-    @Deprecated(/* to be removed in 2027 */)
     default boolean isData() {
         return isPresent() && !isMetaData();
     }
