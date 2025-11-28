@@ -20,7 +20,6 @@ public interface KeyedMarshallable {
      * @param bytes The {@code Bytes} object into which the key of the current instance is written.
      */
     @SuppressWarnings("rawtypes")
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default void writeKey(@NotNull Bytes<?> bytes) {
         Wires.writeKey(this, bytes);
     }
