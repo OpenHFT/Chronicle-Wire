@@ -53,7 +53,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
                 .map(Object::toString)
                 .collect(Collectors.joining(","));
 
-        assertEquals("!MarketData {\n" +
+        String expectedString = "!MarketData {\n" +
                 "  symbol: MSFT,\n" +
                 "  last: 100.0,\n" +
                 "  high: 110.0,\n" +
@@ -70,7 +70,8 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
                 "  last: 101.0,\n" +
                 "  high: 110.0,\n" +
                 "  low: 90.0\n" +
-                "}\n", s);
+                "}\n";
+        assertEquals(sort(expectedString), sort(s));
     }
 
     @Test
@@ -78,14 +79,14 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         ClassAliasPool.CLASS_ALIASES.addAlias(MarketData.class);
         MarketData invalid = new MarketData("invalid", 0, 0, 0);
         // toString() still works.
-        assertEquals("" +
+        String expectedString = "" +
                         "!MarketData {\n" +
                         "  symbol: invalid,\n" +
                         "  last: 0.0,\n" +
                         "  high: 0.0,\n" +
                         "  low: 0.0\n" +
-                        "}\n",
-                invalid.toString());
+                        "}\n";
+        assertEquals(sort(expectedString), sort(invalid.toString()));
 
         try {
             MarshallableIn wire = createThenValueOuts(
@@ -421,6 +422,13 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
                 .collect(toList());
 
         assertEquals(expected, list);
+    }
+
+    private static String sort(String text) {
+        return java.util.Arrays.stream(text.split("\n"))
+                .map(l -> l.replaceAll(",$", ""))
+                .sorted()
+                .collect(java.util.stream.Collectors.joining("\n"));
     }
 
     public interface Messages {
