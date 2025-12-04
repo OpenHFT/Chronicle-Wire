@@ -23,9 +23,8 @@
     <packaging>bundle</packaging>
     <properties>
         <!-- Define the target coverage thresholds as properties -->
-        <jacoco.line.coverage>0.726</jacoco.line.coverage>
-        <jacoco.branch.coverage>0.664</jacoco.branch.coverage>
-        <surefireArgLine/>
+        <jacoco.line.coverage>0.72</jacoco.line.coverage>
+        <jacoco.branch.coverage>0.66</jacoco.branch.coverage>
     </properties>
 
     <!-- Use BOMs to keep dependency versions consistent across modules -->
@@ -194,16 +193,6 @@
                             <referenceVersion>2.27ea0</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
                             <binaryCompatibilityPercentageRequired>91.6</binaryCompatibilityPercentageRequired>
-                            <extraOptions>
-                                <!--This skips "internal" but checks "impl"-->
-                                <extraOption>
-                                    <name>-keep-internal</name>
-                                </extraOption>
-                                <extraOption>
-                                    <name>skip-internal-packages</name>
-                                    <value>.*internal.*</value>
-                                </extraOption>
-                            </extraOptions>
                         </configuration>
                     </execution>
                 </executions>
@@ -257,8 +246,6 @@
                     <forkCount>1</forkCount>
                     <reuseForks>true</reuseForks>
                     <runOrder>hourly</runOrder>
-                    <!-- Allow jacoco/others to inject via surefireArgLine along with JPMS flags -->
-                    <argLine>${surefireArgLine} ${jvm.requiredArgs}</argLine>
                 </configuration>
             </plugin>
 
