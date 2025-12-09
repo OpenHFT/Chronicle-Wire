@@ -41,30 +41,25 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     static {
         // Initialize the TEMPLATE_METHODS with predefined method structures.
         TEMPLATE_METHODS.put("close",
-                singletonMap(singletonList(void.class), "" +
-                        "public void close() {\n" +
+                singletonMap(singletonList(void.class), "public void close() {\n" +
                         "   if (this.closeable != null) {\n" +
                         "        this.closeable.close();\n" +
                         "   }\n" +
                         "}\n"));
         TEMPLATE_METHODS.put("recordHistory",
-                singletonMap(singletonList(boolean.class), "" +
-                        "public boolean recordHistory() {\n" +
+                singletonMap(singletonList(boolean.class), "public boolean recordHistory() {\n" +
                         "    return this.outSupplier.get().recordHistory();\n" +
                         "}\n"));
         List<Class<?>> dcBoolean = Stream.of(DocumentContext.class, boolean.class).collect(Collectors.toList());
         TEMPLATE_METHODS.put("acquireWritingDocument",
-                singletonMap(dcBoolean, "" +
-                        "public " + DOCUMENT_CONTEXT + " acquireWritingDocument(boolean metaData) {\n" +
+                singletonMap(dcBoolean, "public " + DOCUMENT_CONTEXT + " acquireWritingDocument(boolean metaData) {\n" +
                         "    return this.outSupplier.get().acquireWritingDocument(metaData);\n" +
                         "}\n"));
         Map<List<Class<?>>, String> wd = new LinkedHashMap<>();
-        wd.put(singletonList(DocumentContext.class), "" +
-                "public " + DOCUMENT_CONTEXT + " writingDocument() {\n" +
+        wd.put(singletonList(DocumentContext.class), "public " + DOCUMENT_CONTEXT + " writingDocument() {\n" +
                 "    return this.outSupplier.get().writingDocument();\n" +
                 "}\n");
-        wd.put(dcBoolean, "" +
-                "public " + DOCUMENT_CONTEXT + " writingDocument(boolean metaData) {\n" +
+        wd.put(dcBoolean, "public " + DOCUMENT_CONTEXT + " writingDocument(boolean metaData) {\n" +
                 "    return this.outSupplier.get().writingDocument(metaData);\n" +
                 "}\n");
         TEMPLATE_METHODS.put("writingDocument", wd);
@@ -154,7 +149,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
             mainCode.append("private transient final ").append(nameForClass(UpdateInterceptor.class)).append(" updateInterceptor;\n");
 
         mainCode.append("private transient ")
-                .append(nameForClass(Supplier.class)).append("<").append(nameForClass(MarshallableOut.class)).append("> outSupplier;\n");
+                .append(nameForClass(Supplier.class)).append('<').append(nameForClass(MarshallableOut.class)).append("> outSupplier;\n");
     }
 
     /**
@@ -165,8 +160,8 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     protected void generateConstructors(SourceCodeFormatter mainCode) {
         super.generateConstructors(mainCode);
         withLineNumber(mainCode)
-                .append("public ").append(className()).append("(")
-                .append(nameForClass(Supplier.class)).append("<").append(nameForClass(MarshallableOut.class)).append("> outSupplier, ")
+                .append("public ").append(className()).append('(')
+                .append(nameForClass(Supplier.class)).append('<').append(nameForClass(MarshallableOut.class)).append("> outSupplier, ")
                 .append(nameForClass(Closeable.class)).append(" closeable, ")
                 .append(nameForClass(UpdateInterceptor.class)).append(" updateInterceptor) {\n" +
                         "this.outSupplier = outSupplier;\n" +
@@ -203,7 +198,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
                     .append("try (");
         mainCode.append("final ").append(wdc).append(" _dc_ = (").append(wdc).append(") _out_.acquireWritingDocument(")
                 .append(metaData().metaData())
-                .append(")");
+                .append(')');
         if (passthrough)
             mainCode.append(";\n");
         else mainCode.append(") {\n");
@@ -263,12 +258,12 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         if (methodId.isPresent()) {
             long value = ((MethodId) methodId.get()).value();
             withLineNumber(body)
-                    .append("_dc_.wire().writeEventId(").append(eventName).append(", ").append(String.valueOf(value)).append(")");
+                    .append("_dc_.wire().writeEventId(").append(eventName).append(", ").append(String.valueOf(value)).append(')');
 
         } else {
             // Otherwise, simply write the event name
             withLineNumber(body)
-                    .append("_dc_.wire().write(").append(eventName).append(")");
+                    .append("_dc_.wire().write(").append(eventName).append(')');
         }
     }
 
@@ -292,7 +287,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
             final Parameter p = parameters[j];
             // For primitive types and CharSequences, write directly
             if (p.getType().isPrimitive() || CharSequence.class.isAssignableFrom(p.getType())) {
-                body.append(multipleParams ? "v." : ".").append(asString(p.getType())).append("(").append(p.getName()).append(");\n");
+                body.append(multipleParams ? "v." : ".").append(asString(p.getType())).append('(').append(p.getName()).append(");\n");
             } else {
                 // For non-primitive types, delegate to writeValue
                 writeValue(dm, body, startJ, p);

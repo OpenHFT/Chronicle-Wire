@@ -15,7 +15,7 @@ import java.util.function.LongSupplier;
 import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.createThenValueOuts;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings({"deprecation", "removal"})
+@SuppressWarnings("deprecation")
 public class LastIndexSeenTailerTest extends WireTestCommon {
 
     @Test

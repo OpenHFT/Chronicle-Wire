@@ -69,13 +69,9 @@ public class MessageHistoryTest extends WireTestCommon {
         // this is the limit, one more timing should fail
         assertEquals(256, container1.timings());
         // Attempt to copy again and expect an exception.
-        try {
-            Wires.copyTo(container1, container2);
-            fail("timings=" + container2.timings());
-        } catch (ArithmeticException e) {
-            assertTrue(e.getMessage().contains("257 out of range"));
-        } catch (java.lang.IllegalStateException ignore) {
-            //expected
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> Wires.copyTo(container1, container2));
+        if (thrown instanceof ArithmeticException) {
+            assertTrue(thrown.getMessage().contains("257 out of range"));
         }
     }
 
@@ -142,8 +138,7 @@ public class MessageHistoryTest extends WireTestCommon {
             // Serialize the message history into hex dump bytes.
             BinaryWire bw = new BinaryWire(new HexDumpBytes());
             bw.writeEventName(MethodReader.HISTORY).marshallable(history);
-            assertEquals("" +
-                            "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
+            assertEquals("b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
                             "81 4b 00                                        # SetTimeMessageHistory\n" +
                             "c7 73 6f 75 72 63 65 73                         # sources:\n" +
                             "82 16 00 00 00                                  # sequence\n" +
@@ -171,8 +166,7 @@ public class MessageHistoryTest extends WireTestCommon {
             BinaryWire bw2 = new BinaryWire(new HexDumpBytes());
             history.useBytesMarshallable(true);
             bw2.writeEventName(MethodReader.HISTORY).marshallable(history);
-            assertEquals("" +
-                            "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
+            assertEquals("b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
                             "81 33 00 86                                     # SetTimeMessageHistory\n" +
                             "02 01 00 00 00 02 00 00 00 ff 00 00 00 00 00 00 # sources\n" +
                             "00 ff 0f 00 00 00 00 00 00 03 00 00 64 a7 b3 b6 # timings\n" +
@@ -223,8 +217,7 @@ public class MessageHistoryTest extends WireTestCommon {
             vmh.useBytesMarshallable(true);
             wire.writeEventId(MESSAGE_HISTORY_METHOD_ID).object(SetTimeMessageHistory.class, vmh);
 
-            assertEquals("" +
-                            "b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
+            assertEquals("b9 07 68 69 73 74 6f 72 79                      # history: (event)\n" +
                             "81 34 00                                        # SetTimeMessageHistory\n" +
                             "c7 73 6f 75 72 63 65 73                         # sources:\n" +
                             "82 0b 00 00 00                                  # sequence\n" +

@@ -125,6 +125,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @return The number of words in use, converted to an integer.
      */
+    @Override
     public int getWordsInUse() {
         return Math.toIntExact(words.getUsed());
     }
@@ -224,6 +225,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @param bitIndex The index of the bit to flip.
      */
+    @Override
     public void flip(int bitIndex) {
         throwExceptionIfClosed();
 
@@ -261,6 +263,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param fromIndex The starting index of the range, inclusive.
      * @param toIndex   The ending index of the range, exclusive.
      */
+    @Override
     public void flip(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
 
@@ -297,6 +300,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @param bitIndex The index of the bit to be set.
      */
+    @Override
     public void set(int bitIndex) {
         throwExceptionIfClosed();
 
@@ -322,6 +326,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param bitIndex The index of the bit to be modified.
      * @param value    If {@code true}, the bit will be set; if {@code false}, the bit will be cleared.
      */
+    @Override
     public void set(int bitIndex, boolean value) {
         throwExceptionIfClosed();
 
@@ -337,6 +342,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param fromIndex The starting index of the range, inclusive.
      * @param toIndex   The ending index of the range, exclusive.
      */
+    @Override
     public void set(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
 
@@ -375,6 +381,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @param bitIndex The index of the bit to be cleared.
      */
+    @Override
     public void clear(int bitIndex) {
         throwExceptionIfClosed();
 
@@ -395,6 +402,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param fromIndex Starting index of the range (inclusive).
      * @param toIndex Ending index of the range (exclusive).
      */
+    @Override
     public void clear(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
 
@@ -443,6 +451,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * Sets all bits in this ChronicleBitSet to {@code false}.
      * Post invocation, the ChronicleBitSet is effectively empty with no bits set to {@code true}.
      */
+    @Override
     public void clear() {
         throwExceptionIfClosed();
 
@@ -464,6 +473,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @return the value of the bit with the specified index
      * @throws IndexOutOfBoundsException if the specified index is negative
      */
+    @Override
     public boolean get(int bitIndex) {
         throwExceptionIfClosed();
 
@@ -481,6 +491,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param fromIndex The index to start checking from (inclusive).
      * @return Index of the next set bit, or -1 if there's no set bit found.
      */
+    @Override
     public int nextSetBit(int fromIndex) {
         throwExceptionIfClosed();
 
@@ -511,6 +522,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param toIndex The index to stop checking at (exclusive).
      * @return Index of the next set bit in the specified range, or {@code -1} if there's no set bit found.
      */
+    @Override
     public int nextSetBit(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
 
@@ -542,6 +554,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param fromIndex The index to start checking from (inclusive).
      * @return Index of the next clear bit or the length of this ChronicleBitSet if no clear bit is found.
      */
+    @Override
     public int nextClearBit(int fromIndex) {
         throwExceptionIfClosed();
 
@@ -647,6 +660,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param set The {@code ChronicleBitSet} to compare against.
      * @return {@code true} if there's an intersecting bit set to {@code true} between the two sets, {@code false} otherwise.
      */
+    @Override
     public boolean intersects(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
@@ -662,6 +676,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @return The count of bits set to {@code true}.
      */
+    @Override
     public int cardinality() {
         throwExceptionIfClosed();
 
@@ -678,6 +693,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @param set The {@code ChronicleBitSet} to perform the AND operation with.
      */
+    @Override
     public void and(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
@@ -702,6 +718,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * Performs a logical <b>OR</b> of this bit set with the bit set argument. This bit set is modified so that a bit in it has the value {@code true}
      * if and only if it either already had the value {@code true} or the corresponding bit in the bit set argument has the value {@code true}.
      */
+    @Override
     public void or(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
@@ -733,6 +750,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * corresponding bit in the argument has the value {@code true}.
      * </ul>
      */
+    @Override
     public void xor(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
@@ -764,6 +782,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @param set The {@code ChronicleBitSet} whose set bits will be used to clear the corresponding bits in this set.
      */
+    @Override
     public void andNot(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
@@ -780,6 +799,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @return The hash code for this bit set.
      */
+    @Override
     public int hashCode() {
         long h = 1234;
         OS.memory().loadFence();  // Ensuring recent changes to memory are visible
@@ -795,6 +815,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @return The number of bits this bit set can represent.
      */
+    @Override
     public int size() {
         return Math.toIntExact(words.getCapacity() * BITS_PER_WORD);
     }
@@ -806,6 +827,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param obj The object to compare with.
      * @return {@code true} if the specified object is equivalent to this bit set, {@code false} otherwise.
      */
+    @Override
     public boolean equals(Object obj) {
         throwExceptionIfClosed();
 

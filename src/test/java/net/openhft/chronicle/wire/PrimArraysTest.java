@@ -18,7 +18,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 // Use the Parameterized runner for JUnit to execute tests with different combinations of parameters
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class PrimArraysTest extends WireTestCommon {
 
     // Class variables to hold the parameters

@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 // Test class extending WireTestCommon to test method identification in binary wire format
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
 public class MethodIdTest extends WireTestCommon {
 
     // Test method to verify serialization and deserialization of methods with various IDs

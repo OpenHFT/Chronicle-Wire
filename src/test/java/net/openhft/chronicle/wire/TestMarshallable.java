@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 // Defining a class named TestMarshallable, which extends SelfDescribingMarshallable
 // to utilize its self-describing marshallable capabilities
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 class TestMarshallable extends SelfDescribingMarshallable {
 
     // Defining a non-null StringBuilder field named 'name' to store a name value,

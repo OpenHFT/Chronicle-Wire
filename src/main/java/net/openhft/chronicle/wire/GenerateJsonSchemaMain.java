@@ -96,22 +96,20 @@ public class GenerateJsonSchemaMain {
         sb.append(str);
         String sep = "";
         for (Map.Entry<Class<?>, String> entry : definitions.entrySet()) {
-            sb.append(sep);
-            sb.append("\"").append(entry.getKey().getSimpleName()).append("\": {\n");
-            sb.append(entry.getValue());
-            sb.append("}");
+            sb.append(sep)
+                    .append("\"").append(entry.getKey().getSimpleName()).append("\": {\n")
+                    .append(entry.getValue())
+                    .append('}');
             sep = ",\n";
         }
-        sb.append("\n");
-        sb.append("},\n" +
-                "\"properties\": {\n");
+        sb.append('\n')
+                .append("},\n\"properties\": {\n");
         for (Map.Entry<String, String> entry : events.entrySet()) {
-            sb.append("\"").append(entry.getKey()).append("\": {\n");
-            sb.append(entry.getValue());
-            sb.append("},\n");
+            sb.append("\"").append(entry.getKey()).append("\": {\n")
+                    .append(entry.getValue())
+                    .append("},\n");
         }
-        sb.append("}\n" +
-                "}\n");
+        sb.append("}\n}\n");
         return sb.toString();
     }
 
@@ -132,7 +130,7 @@ public class GenerateJsonSchemaMain {
             generateEventSchemaFor(method.getReturnType());
             Stream.of(method.getParameterTypes())
                     .forEach(this::generateObjectSchemaFor);
-            StringBuilder desc = new StringBuilder();
+            StringBuilder desc = new StringBuilder(64);
             Class<?>[] pTypes = method.getParameterTypes();
             Annotation[][] pAnnotations = method.getParameterAnnotations();
             switch (pTypes.length) {
@@ -165,14 +163,13 @@ public class GenerateJsonSchemaMain {
         sb.append("\"properties\": {");
         String sep = "\n";
         for (Map.Entry<String, String> entry : properties.entrySet()) {
-            sb.append(sep);
-            sb.append("\"").append(entry.getKey()).append("\": {\n");
-            sb.append(entry.getValue());
-            sb.append("}");
+            sb.append(sep)
+                    .append('\"').append(entry.getKey()).append("\": {\n")
+                    .append(entry.getValue())
+                    .append('}');
             sep = ",\n";
         }
-        sb.append("\n" +
-                "}\n");
+        sb.append('\n').append('}').append('\n');
     }
 
     /**
@@ -192,7 +189,7 @@ public class GenerateJsonSchemaMain {
         aliases.put(type, "#/definitions/" + type.getSimpleName());
         Set<String> required = new LinkedHashSet<>();
         Map<String, String> properties = new LinkedHashMap<>();
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(192);
         Map<String, Field> fieldMap = new LinkedHashMap<>();
         WireMarshaller.getAllField(type, fieldMap);
         for (Map.Entry<String, Field> entry : fieldMap.entrySet()) {
@@ -208,12 +205,11 @@ public class GenerateJsonSchemaMain {
         }
         sb.append("\"type\": \"object\",\n");
         if (!required.isEmpty()) {
-            sb.append("\"required\": [\n");
-            sb.append(required.stream()
-                    .map(s -> '"' + s + '"')
-                    .collect(Collectors.joining(",\n")));
-            sb.append("\n" +
-                    "],\n");
+            sb.append("\"required\": [\n")
+                    .append(required.stream()
+                            .map(s -> '"' + s + '"')
+                            .collect(Collectors.joining(",\n")))
+                    .append("\n],\n");
         }
         Comment comment = Jvm.findAnnotation(type, Comment.class);
         if (comment != null)
@@ -263,23 +259,23 @@ public class GenerateJsonSchemaMain {
      */
     private void addTypeForFieldOrParam(StringBuilder desc, Class<?> pType, Annotation[] annotations) {
         LongConversion lc = find(annotations, LongConversion.class);
+        final String typeSnippet;
         if (lc != null) {
             Class<?> value = lc.value();
-            if (value.getName().contains("Timestamp"))
-                desc.append("\"type\": \"string\",\n" +
-                        "\"format\": \"date-time\"");
-            else
-                desc.append("\"type\": \"string\"\n");
+            typeSnippet = value.getName().contains("Timestamp")
+                    ? "\"type\": \"string\",\n\"format\": \"date-time\""
+                    : "\"type\": \"string\"\n";
         } else if (Collection.class.isAssignableFrom(pType)) {
-            desc.append("\"type\": \"array\"\n");
+            typeSnippet = "\"type\": \"array\"\n";
         } else if (Map.class.isAssignableFrom(pType)) {
-            desc.append("\"type\": \"object\"\n");
+            typeSnippet = "\"type\": \"object\"\n";
         } else {
             generateObjectSchemaFor(pType);
             String alias = aliases.get(pType);
             String key = alias.startsWith("#") ? "$ref" : "type";
-            desc.append("\"").append(key).append("\": \"").append(alias).append("\"\n");
+            typeSnippet = "\"" + key + "\": \"" + alias + "\"\n";
         }
+        desc.append(typeSnippet);
     }
 
     /**

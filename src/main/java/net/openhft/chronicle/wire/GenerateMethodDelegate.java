@@ -99,7 +99,7 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
         if (method.getReturnType() != void.class)
             mainCode.append("return ");
         getDelegate(mainCode, method)
-                .append(".").append(method.getName()).append("(").append(params).append(");\n");
+                .append('.').append(method.getName()).append('(').append(params).append(");\n");
     }
 
     /**

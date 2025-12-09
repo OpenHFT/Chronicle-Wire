@@ -46,7 +46,7 @@ public class ClassAliasPoolTest extends WireTestCommon {
 
             @Override
             public void appendTo(StringBuffer buffer) {
-                buffer.append("charSequence(\"").append(text).append("\")");
+                buffer.append("charSequence(\"").append(text).append("\\')");
             }
         });
         return null;
@@ -119,8 +119,7 @@ public class ClassAliasPoolTest extends WireTestCommon {
         // Read events from the wire and validate their output
         assertTrue(reader.readOne()); // Expect one event to be read
         assertFalse(reader.readOne()); // No more events expected
-        assertEquals("" +
-                        "handle[!net.openhft.chronicle.wire.ClassAliasPoolTest$CAPTData {\n" +
+        assertEquals("handle[!net.openhft.chronicle.wire.ClassAliasPoolTest$CAPTData {\n" +
                         "  value: 0\n" +
                         "}\n" +
                         "]\n",

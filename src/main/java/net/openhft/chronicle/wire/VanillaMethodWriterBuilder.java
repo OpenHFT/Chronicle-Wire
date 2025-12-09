@@ -144,6 +144,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * @return this builder after setting whether type names should be written verbosely
      */
     @NotNull
+    @Override
     public MethodWriterBuilder<T> verboseTypes(boolean verboseTypes) {
         this.verboseTypes = verboseTypes;
         return this;
@@ -204,6 +205,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * @throws NullPointerException if {@link #marshallableOut(MarshallableOut)} was not configured
      */
     @NotNull
+    @Override
     public T build() {
         return get();
     }
@@ -216,6 +218,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * @return The current instance of VanillaMethodWriterBuilder for chaining method calls.
      */
     @NotNull
+    @Override
     public MethodWriterBuilder<T> onClose(Closeable closeable) {
         this.closeable = closeable;
         handlerSupplier.onClose(closeable);
@@ -396,6 +399,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * @param genericEvent name
      * @return this
      */
+    @Override
     public MethodWriterBuilder<T> genericEvent(String genericEvent) {
         handlerSupplier.genericEvent(genericEvent);
         this.genericEvent = genericEvent;

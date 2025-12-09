@@ -15,7 +15,7 @@ import java.util.Collection;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class AbstractFieldTest extends WireTestCommon {
 
     // The specific WireType configuration to be used for each test.

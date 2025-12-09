@@ -1199,7 +1199,15 @@ public interface ValueOut {
         if (value == null)
             return nu11();
         // Look for exact class matches for optimized serialization
-        final Class<?> valueClass = value.getClass();
+        Class<?> valueClass = value.getClass();
+        if ("java.util.GregorianCalendar".equals(valueClass.getName())) {
+            try {
+                final Object zonedDateTime = valueClass.getMethod("toZonedDateTime").invoke(value);
+                return object(zonedDateTime);
+            } catch (ReflectiveOperationException e) {
+                throw new IllegalStateException("Unable to convert GregorianCalendar to ZonedDateTime", e);
+            }
+        }
         switch (valueClass.getName()) {
             case "[B": { // Byte array
                 typePrefix(byte[].class).bytes((byte[]) value);
@@ -1317,13 +1325,6 @@ public interface ValueOut {
                 return result;
             }
 
-            case "java.util.GregorianCalendar": {
-                GregorianCalendar gc = (GregorianCalendar) value;
-                final WireOut result = typePrefix(GregorianCalendar.class).untypedObject(gc.toZonedDateTime());
-                endTypePrefix();
-                return result;
-            }
-
             case "java.math.BigInteger":
             case "java.math.BigDecimal":
             case "java.time.Duration":
@@ -1386,7 +1387,7 @@ public interface ValueOut {
             return wireOut();
         } else if (Object[].class.isAssignableFrom(valueClass)) {
             @NotNull Class<?> type = valueClass.getComponentType();
-            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object((Class) type, val)), valueClass);
+            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), valueClass);
         } else if (value instanceof Thread) {
             return text(((Thread) value).getName());
         } else if (value instanceof Serializable) {
@@ -1560,7 +1561,7 @@ public interface ValueOut {
         // Handle object arrays
         if (Object[].class.isAssignableFrom(value.getClass())) {
             @NotNull Class<?> type = value.getClass().getComponentType();
-            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object((Class) type, val)), Object[].class);
+            return array(v -> Stream.of((Object[]) value).forEach(val -> v.object(type, val)), Object[].class);
         }
         // Default serialization for other types
         return object(value);

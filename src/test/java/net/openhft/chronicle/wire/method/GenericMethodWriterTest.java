@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * Test class for verifying the behavior of generic method writers in Chronicle Wire.
  */
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
 public class GenericMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     /**
@@ -34,8 +35,7 @@ public class GenericMethodWriterTest extends net.openhft.chronicle.wire.WireTest
         event.sendingTimeNS((long) 2e9); // Set sending time to 2 billion nanoseconds (2 second)
         writer.onEvent(event); // Write the event to the wire
 
-        assertEquals("" +
-                "event: {\n" +
+        assertEquals("event: {\n" +
                 "  sendingTimeNS: 1970-01-01T00:00:01,\n" +
                 "  transactTimeNS: 0,\n" +
                 "  text1: \"\",\n" +
@@ -61,8 +61,7 @@ public class GenericMethodWriterTest extends net.openhft.chronicle.wire.WireTest
         assertFalse(reader.readOne()); // No more events to read
 
         // Assert the second wire's content matches the first wire's
-        assertEquals("" +
-                "event: {\n" +
+        assertEquals("event: {\n" +
                 "  sendingTimeNS: 1970-01-01T00:00:01,\n" +
                 "  transactTimeNS: 0,\n" +
                 "  text1: \"\",\n" +

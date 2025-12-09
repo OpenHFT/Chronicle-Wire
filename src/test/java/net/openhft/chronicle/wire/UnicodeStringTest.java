@@ -18,7 +18,7 @@ import java.util.List;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class UnicodeStringTest extends WireTestCommon {
 
     // Suppressing unchecked warnings as Bytes class may handle various types
@@ -45,11 +45,13 @@ public class UnicodeStringTest extends WireTestCommon {
     @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         List<Object[]> chars = new ArrayList<>();
-        int a = 1, b = 1;
+        int a = 1;
+        int b = 1;
         while (a < Character.MAX_VALUE) {
-            int i = a++;
+            int i = a;
+            int next = a + b;
             a = b;
-            b += i;
+            b = next;
             if (!Character.isValidCodePoint(i))
                 continue;
             chars.add(new Object[]{(char) i});

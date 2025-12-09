@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * Test class to validate the behavior of the marshalling process within an EventGroup context.
  */
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
 public class MarshallingEventGroupTest extends WireTestCommon {
 
     /**
@@ -45,8 +46,7 @@ public class MarshallingEventGroupTest extends WireTestCommon {
             final String actual = WireType.TEXT.asString(eg);
 
             // An updated expected serialized string for the EventGroup object
-            String expected = "" +
-                    "!net.openhft.chronicle.threads.EventGroup {\n" +
+            String expected = "!net.openhft.chronicle.threads.EventGroup {\n" +
                     "  referenceId: 0,\n" +
                     "  lifecycle: !net.openhft.chronicle.threads.EventLoopLifecycle NEW,\n" +
                     "  name: test,\n" +

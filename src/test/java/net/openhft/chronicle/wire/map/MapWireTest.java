@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
  * Test suite for validating Map serialization and deserialization using different wire types.
  * Inherits from WireTestCommon for common test setup and teardown functionalities.
  */
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class MapWireTest extends WireTestCommon {
 
     // The wire type for serialization and deserialization (TEXT or BINARY)

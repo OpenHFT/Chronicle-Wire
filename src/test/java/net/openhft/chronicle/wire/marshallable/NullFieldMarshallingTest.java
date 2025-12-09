@@ -28,6 +28,7 @@ public class NullFieldMarshallingTest extends WireTestCommon {
     }
 
     @After
+    @Override
     public void checkExceptions() {
         // find any discarded resources.
         System.gc();

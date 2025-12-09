@@ -40,6 +40,7 @@ import static net.openhft.chronicle.core.UnsafeMemory.*;
  */
 @SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public class WireMarshaller<T> {
+    private static final Type[] EMPTY_TYPES = new Type[0];
     private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     // An empty array of {@link FieldAccess}, used for classes that have no marshallable fields such as interfaces or some enum types
     private static final FieldAccess[] NO_FIELDS = {};
@@ -292,7 +293,7 @@ public class WireMarshaller<T> {
     private static Type[] computeActualTypeArguments(Class<?> iface, Field field) {
         Type[] actual = consumeActualTypeArguments(new HashMap<>(), iface, field.getGenericType());
 
-        if (actual == null)
+        if (actual == null || actual.length == 0)
             return iface.getTypeParameters();
 
         return actual;
@@ -379,7 +380,7 @@ public class WireMarshaller<T> {
             return consumeActualTypeArguments(typeParameters, iface, cls.getGenericSuperclass());
         }
 
-        return null;
+        return EMPTY_TYPES;
     }
 
     /**

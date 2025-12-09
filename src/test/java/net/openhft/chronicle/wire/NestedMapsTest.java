@@ -15,7 +15,7 @@ import static java.util.Collections.addAll;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class NestedMapsTest extends WireTestCommon {
 
     // Instance variable to store the type of wire for this test

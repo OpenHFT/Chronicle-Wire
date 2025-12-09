@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 // This class tests the internal interning behavior of the Wire component.
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class WireInternalInternTest extends WireTestCommon {
 
     // Static initializer block to add aliases to the WireInternal component upon class loading.

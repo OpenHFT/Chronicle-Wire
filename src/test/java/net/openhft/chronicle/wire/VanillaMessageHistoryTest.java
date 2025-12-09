@@ -13,6 +13,7 @@ import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
 public class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Test to check the equality and hashcode of a VanillaMessageHistory object
@@ -38,8 +39,7 @@ public class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTe
         wire.write("vmh").object(vmh);
 
         // Assert the wire's content matches the expected hex format
-        assertEquals("" +
-                        "c3 76 6d 68                                     # vmh:\n" +
+        assertEquals("c3 76 6d 68                                     # vmh:\n" +
                         "b6 03 56 4d 48                                  # VMH\n" +
                         "81 33 00                                        # VanillaMessageHistory\n" +
                         "c7 73 6f 75 72 63 65 73                         # sources:\n" +

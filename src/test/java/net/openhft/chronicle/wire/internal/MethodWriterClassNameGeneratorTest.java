@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 // Testing the generation of class names for MethodWriter
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
 public class MethodWriterClassNameGeneratorTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Instance of the class name generator to be tested

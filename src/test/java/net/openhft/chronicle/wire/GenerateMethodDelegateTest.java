@@ -91,7 +91,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
             @Override
             protected SourceCodeFormatter getDelegate(SourceCodeFormatter mainCode, Method method) {
                 String method2 = StringUtils.firstLowerCase(method.getDeclaringClass().getSimpleName());
-                return super.getDelegate(mainCode, method).append(".").append(method2).append("(\"one\")");
+                return super.getDelegate(mainCode, method).append('.').append(method2).append("(\"one\")");
             }
         };
 

@@ -90,7 +90,7 @@ public class YamlSpecificationTextWireTest extends WireTestCommon {
     private byte[] getBytes(String file) throws IOException {
         // Locate the file resource
         InputStream is = getClass().getResourceAsStream("/yaml/spec/" + file);
-        if (is == null) return null;
+        if (is == null) return new byte[0];
 
         // Read the bytes into a byte array
         int len = is.available();

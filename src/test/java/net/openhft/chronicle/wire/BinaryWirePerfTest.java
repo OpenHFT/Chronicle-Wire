@@ -17,7 +17,7 @@ import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.Assert.assertTrue;
 
 @Ignore("Long running test")
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class BinaryWirePerfTest extends WireTestCommon {
 
     // Define test parameters

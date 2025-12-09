@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 /**
  * Test class for verifying method writer generation and inheritance behaviors in the Chronicle Wire system.
  */
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
 public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
 
     /**

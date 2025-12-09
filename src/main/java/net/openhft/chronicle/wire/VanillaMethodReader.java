@@ -500,6 +500,7 @@ public class VanillaMethodReader implements MethodReader {
      * Control whether {@link #close()} also closes the input.
      */
     @NotNull
+    @Override
     public VanillaMethodReader closeIn(boolean closeIn) {
         throwExceptionIfClosed();
 
@@ -792,6 +793,7 @@ public class VanillaMethodReader implements MethodReader {
     /**
      * Read and dispatch a single message.
      */
+    @Override
     public boolean readOne() throws InvocationTargetRuntimeException {
         // Ensure that the reader isn't closed
         throwExceptionIfClosed();
@@ -856,6 +858,7 @@ public class VanillaMethodReader implements MethodReader {
     /**
      * Return the configured {@link MethodReaderInterceptorReturns} if any.
      */
+    @Override
     public MethodReaderInterceptorReturns methodReaderInterceptorReturns() {
         throwExceptionIfClosed();
 

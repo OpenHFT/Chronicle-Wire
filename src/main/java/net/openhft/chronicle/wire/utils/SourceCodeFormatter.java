@@ -57,6 +57,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      * @return The formatted code string.
      */
     @NotNull
+    @Override
     public String toString() {
         return formattedCode.toString();
     }
@@ -136,6 +137,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      *
      * @return The length of the formatted string.
      */
+    @Override
     public int length() {
         return formattedCode.length();
     }

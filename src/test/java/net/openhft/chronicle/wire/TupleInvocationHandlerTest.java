@@ -35,7 +35,7 @@ public class TupleInvocationHandlerTest extends WireTestCommon {
         assertTrue(tuple.usesSelfDescribingMessage());
 
         int hash = tuple.hashCode();
-        assertTrue(hash != 0);
+        assertNotEquals(0, hash);
         assertEquals(tuple, tuple);
         assertNotEquals("other", tuple);
 
@@ -58,10 +58,13 @@ public class TupleInvocationHandlerTest extends WireTestCommon {
     }
 
     interface SampleTuple extends Marshallable {
+        @Override
         void setField(String name, Object value);
 
+        @Override
         <T> T getField(String name, Class<T> type);
 
+        @Override
         List<FieldInfo> $fieldInfos();
     }
 }

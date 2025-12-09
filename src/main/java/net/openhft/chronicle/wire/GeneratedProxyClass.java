@@ -44,20 +44,22 @@ public enum GeneratedProxyClass {
         Set<Method> methods = new LinkedHashSet<>(16);
 
         // Builds the initial portion of the proxy class's Java code.
-        StringBuilder sb = new StringBuilder("package " + packageName + ";\n\n" +
+        StringBuilder sb = new StringBuilder(512);
+        sb.append(String.format("package %s;\n" +
+                "\n" +
                 "import net.openhft.chronicle.core.Jvm;\n" +
                 "import net.openhft.chronicle.wire.MethodWriterInvocationHandlerSupplier;\n" +
                 "import java.lang.reflect.InvocationHandler;\n" +
                 "import java.lang.reflect.Method;\n" +
                 "import java.util.stream.IntStream;\n" +
                 "import java.util.ArrayList;\n" +
-                "import java.util.List;\n");
+                "import java.util.List;\n", packageName));
 
         sb.append("public class ")
                 .append(className)
                 .append(" implements ");
 
-        final StringBuilder methodArray = new StringBuilder();
+        final StringBuilder methodArray = new StringBuilder(128);
         int count = 0;
 
         String sep = "";
@@ -179,9 +181,9 @@ public enum GeneratedProxyClass {
             methodIndex++;
 
             // Append method signature to the StringBuilder
-            sb.append(createMethodSignature(dm, returnType));
-            sb.append("    Method _method_ = this.methods[").append(methodIndex).append("];\n");
-            sb.append("    Object[] _a_ = this.argsTL.get()[").append(dm.getParameterCount()).append("];\n");
+            sb.append(createMethodSignature(dm, returnType))
+                    .append("    Method _method_ = this.methods[").append(methodIndex).append("];\n")
+                    .append("    Object[] _a_ = this.argsTL.get()[").append(dm.getParameterCount()).append("];\n");
 
             // Assign method parameters to local array
             assignParametersToArgs(sb, dm);
@@ -241,7 +243,7 @@ public enum GeneratedProxyClass {
     private static CharSequence createMethodSignature(final Method dm, final Class<?> returnType) {
         // Get the number of parameters in the method
         final int len = dm.getParameters().length;
-        final StringBuilder result = new StringBuilder();
+        final StringBuilder result = new StringBuilder(64);
 
         // Determine the return type name
         final String typeName = nameForClass(returnType);

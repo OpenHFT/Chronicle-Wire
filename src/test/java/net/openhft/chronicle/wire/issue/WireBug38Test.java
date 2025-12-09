@@ -59,54 +59,6 @@ public class WireBug38Test extends WireTestCommon {
         bytes.releaseLast();
     }
 
-    /**
-     * Class representing an object that implements Marshallable interface.
-     * The object primarily manages StringBuilder data and supports read/write operations
-     * using Wire.
-     */
-    static class MarshallableObj implements Marshallable {
-        private final StringBuilder builder = new StringBuilder();
-
-        public void clear() {
-            builder.setLength(0);
-        }
-
-        void append(CharSequence cs) {
-            builder.append(cs);
-        }
-
-        @Override
-        public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
-            builder.setLength(0);
-            assertNotNull(wire.getValueIn().textTo(builder));
-        }
-
-        @Override
-        public void writeMarshallable(@NotNull WireOut wire) {
-            wire.getValueOut().text(builder);
-        }
-
-        @Override
-        public boolean equals(@Nullable Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            @Nullable MarshallableObj that = (MarshallableObj) o;
-
-            return builder.toString().contentEquals(that.builder);
-        }
-
-        @Override
-        public int hashCode() {
-            return builder.toString().hashCode();
-        }
-
-        @NotNull
-        @Override
-        public String toString() {
-            return builder.toString();
-        }
-    }
 
     /**
      * Class representing an outer object that encapsulates an instance

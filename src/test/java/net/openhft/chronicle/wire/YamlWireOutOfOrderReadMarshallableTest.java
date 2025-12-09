@@ -47,11 +47,8 @@ public class YamlWireOutOfOrderReadMarshallableTest extends WireTestCommon {
     private static String flowYaml(String... order) {
         StringBuilder sb = new StringBuilder("---\nrm: {\n");
         for (int i = 0; i < order.length; i++) {
-            sb.append("  ").append(order[i]).append(": ").append(valueFor(order[i]));
-            if (i < order.length - 1)
-                sb.append(",\n");
-            else
-                sb.append("\n");
+            sb.append("  ").append(order[i]).append(": ").append(valueFor(order[i]))
+                    .append(i < order.length - 1 ? ",\n" : "\n");
         }
         sb.append("}\n...\n");
         return sb.toString();
@@ -60,7 +57,7 @@ public class YamlWireOutOfOrderReadMarshallableTest extends WireTestCommon {
     private static String indentedYaml(String... order) {
         StringBuilder sb = new StringBuilder("---\nrm:\n");
         for (String key : order) {
-            sb.append("  ").append(key).append(": ").append(valueFor(key)).append("\n");
+            sb.append("  ").append(key).append(": ").append(valueFor(key)).append('\n');
         }
         sb.append("...\n");
         return sb.toString();

@@ -55,6 +55,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * }
      * </pre>
      */
+    @Override
     @NotNull
     default DocumentContext writingDocument() throws UnrecoverableTimeoutException {
         return writingDocument(false);
@@ -68,11 +69,13 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * @return A new instance of {@code DocumentContext}.
      * @throws UnrecoverableTimeoutException if the operation times out in an unrecoverable manner.
      */
+    @Override
     DocumentContext writingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 
     /**
      * Start or reuse an existing a DocumentContext, optionally call close() when done.
      */
+    @Override
     DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 
     /**

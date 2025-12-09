@@ -46,6 +46,7 @@ public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
     /**
      * Not resettable, treat as immutable.
      */
+    @Override
     default void reset() {
         throw new UnsupportedOperationException();
     }

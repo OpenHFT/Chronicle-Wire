@@ -127,6 +127,7 @@ public final class StreamsUtil {
          * @return a new Spliterator.OfLong covering the elements taken from this spliterator.
          */
         @NotNull
+        @Override
         protected OfLong split(int n) {
             final long[] a = new long[n];
             int j = 0;
@@ -163,6 +164,7 @@ public final class StreamsUtil {
          * @return a new Spliterator.OfDouble covering the elements taken from this spliterator.
          */
         @NotNull
+        @Override
         protected OfDouble split(int n) {
             final double[] a = new double[n];
             int j = 0;

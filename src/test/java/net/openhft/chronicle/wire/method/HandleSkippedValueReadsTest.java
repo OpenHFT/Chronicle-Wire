@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(Parameterized.class)
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
 public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     private final WireType wireType;

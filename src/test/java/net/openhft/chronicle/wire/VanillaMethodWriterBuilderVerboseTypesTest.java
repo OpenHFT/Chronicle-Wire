@@ -20,7 +20,7 @@ import java.util.Collection;
 
 import static org.junit.Assume.assumeFalse;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Static initialization block to alias two classes
@@ -29,7 +29,7 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
     }
 
     // Flag to determine if verbose types should be used
-    private boolean verboseTypes;
+    private final boolean verboseTypes;
 
     // Expected string representation for the current test run
     private final String expects;

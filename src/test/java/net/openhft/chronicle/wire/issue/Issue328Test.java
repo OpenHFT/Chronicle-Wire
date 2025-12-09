@@ -36,7 +36,7 @@ public class Issue328Test extends WireTestCommon {
         // Creates a map with keys as integers and values as their string representations.
         final Map<Integer, String> map = IntStream.range(0, size)
                 .boxed()
-                .collect(Collectors.toMap(Function.identity(), i -> Integer.toString(i)));
+                .collect(Collectors.toMap(Function.identity(), String::valueOf));
 
         // Writes the map to the wire.
         wire.getValueOut().object(map);

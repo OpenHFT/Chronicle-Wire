@@ -172,6 +172,7 @@ public class SymbolsLongConverter implements LongConverter {
      * @param alias The character to treat as an alias.
      * @param as The character that the alias should be treated as.
      */
+    @Override
     public void addEncode(char alias, char as) {
         encode[alias] = encode[as];
     }

@@ -19,7 +19,7 @@ import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.toConcurrentSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SuppressWarnings({"deprecation", "removal"})
+@SuppressWarnings("deprecation")
 public class LastMarketDataPerSymbolTest extends WireTestCommon {
 
     private static final List<MarketData> MARKET_DATA_SET = Arrays.asList(

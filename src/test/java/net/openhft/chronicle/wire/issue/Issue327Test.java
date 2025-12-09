@@ -26,7 +26,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class Issue327Test extends WireTestCommon {
 
     private final boolean useTypes;

@@ -44,7 +44,7 @@ public class YamlSpecificationTest extends WireTestCommon {
     // Defining parameterized test cases
     @Parameterized.Parameters(name = "case={0}")
     public static Collection<Object[]> tests() {
-        return Arrays.asList((Object[][]) new String[][]{
+        return Arrays.asList(new String[][]{
                 {"2_1_SequenceOfScalars"},
                 {"2_2_MappingScalarsToScalars"},
                 {"2_3_MappingScalarsToSequences"},
@@ -115,7 +115,7 @@ public class YamlSpecificationTest extends WireTestCommon {
     @Nullable
     private byte[] getBytes(String file) throws IOException {
         InputStream is = getClass().getResourceAsStream("/yaml/spec/" + file);
-        if (is == null) return null;
+        if (is == null) return new byte[0];
         int len = is.available();
         @NotNull byte[] byteArr = new byte[len];
         is.read(byteArr);

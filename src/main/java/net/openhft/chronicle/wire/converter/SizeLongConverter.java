@@ -82,17 +82,20 @@ public class SizeLongConverter implements LongConverter {
      */
     @Override
     public void append(StringBuilder text, long value) {
-        if (value == 0)
-            text.append('0');
-        else if (value >> 40 << 40 == value)
-            text.append(value >> 40).append('T');
-        else if (value >> 30 << 30 == value)
-            text.append(value >> 30).append('G');
-        else if (value >> 20 << 20 == value)
-            text.append(value >> 20).append('M');
-        else if (value >> 10 << 10 == value)
-            text.append(value >> 10).append('K');
-        else
-            text.append(value);
+        final String valueText;
+        if (value == 0) {
+            valueText = "0";
+        } else if (value >> 40 << 40 == value) {
+            valueText = (value >> 40) + "T";
+        } else if (value >> 30 << 30 == value) {
+            valueText = (value >> 30) + "G";
+        } else if (value >> 20 << 20 == value) {
+            valueText = (value >> 20) + "M";
+        } else if (value >> 10 << 10 == value) {
+            valueText = (value >> 10) + "K";
+        } else {
+            valueText = Long.toString(value);
+        }
+        text.append(valueText);
     }
 }

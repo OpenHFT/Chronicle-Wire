@@ -147,7 +147,7 @@ final class SerializableObjectTest extends WireTestCommon {
                 EnumSet.of(TimeUnit.NANOSECONDS, TimeUnit.SECONDS),
                 new EventObject("A"),
                 compose(new HashMap<>(), m -> m.put(1, 1)),
-                compose(new Hashtable<>(), m -> m.put(1, 1)),
+                compose(Collections.synchronizedMap(new HashMap<>()), m -> m.put(1, 1)),
                 compose(new IdentityHashMap<>(), m -> m.put(1, 1)),
                 IntStream.of(1, 2, 3).summaryStatistics(),
                 compose(new LinkedHashMap<>(), m -> m.put(2, 2), m -> m.put(1, 1), m -> m.put(3, 3)),
@@ -169,7 +169,7 @@ final class SerializableObjectTest extends WireTestCommon {
                 compose(new TreeMap<>(), m -> m.put(2, 2), m -> m.put(1, 1), m -> m.put(3, 3)),
                 compose(new TreeSet<>(), m -> m.add(2), m -> m.add(1), m -> m.add(3)),
                 UUID.randomUUID(),
-                compose(new Vector<>(), v -> v.add("a"), v -> v.add("b")),
+                compose(Collections.synchronizedList(new ArrayList<>()), v -> v.add("a"), v -> v.add("b")),
                 //
                 Instant.ofEpochMilli(TIME_MS),
                 Color.BLUE,

@@ -63,6 +63,7 @@ public class Issue344Test extends WireTestCommon {
      * Test data class used for the serialization and deserialization tests.
      * It contains a single field testChar of type char.
      */
+    @SuppressWarnings("PMD.TestClassWithoutTestCases")
     private static class TestData implements Marshallable {
         char testChar;
     }

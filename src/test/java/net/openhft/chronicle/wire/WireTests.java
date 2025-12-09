@@ -28,7 +28,7 @@ import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
 @SuppressWarnings("rawtypes")
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class WireTests {
 
     // Member variables for parameterized tests
@@ -280,14 +280,12 @@ public class WireTests {
         assertEquals("", wire.readingPeekYaml());
 
         try (@NotNull DocumentContext dc = wire.readingDocument()) {
-            assertEquals("" +
-                    "--- !!data #binary\n" +
+            assertEquals("--- !!data #binary\n" +
                     "some-data!: {\n" +
                     "  some-other-data: 0\n" +
                     "}\n", wire.readingPeekYaml());
             dc.wire().read("some-data");
-            assertEquals("" +
-                    "--- !!data #binary\n" +
+            assertEquals("--- !!data #binary\n" +
                     "some-data!: {\n" +
                     "  some-other-data: 0\n" +
                     "}\n", wire.readingPeekYaml());
@@ -304,15 +302,13 @@ public class WireTests {
 
         try (@NotNull DocumentContext dc = wire.readingDocument()) {
             int position = usePadding ? 40 : 37;
-            assertEquals("" +
-                    "# position: " + position + ", header: 0\n" +
+            assertEquals("# position: " + position + ", header: 0\n" +
                     "--- !!data #binary\n" +
                     "some-new: {\n" +
                     "  some-other--new-data: 0\n" +
                     "}\n", wire.readingPeekYaml());
             dc.wire().read("some-data");
-            assertEquals("" +
-                    "# position: " + position + ", header: 0\n" +
+            assertEquals("# position: " + position + ", header: 0\n" +
                     "--- !!data #binary\n" +
                     "some-new: {\n" +
                     "  some-other--new-data: 0\n" +
@@ -349,6 +345,7 @@ public class WireTests {
     }
 
     // Inner class to represent a test object with a Class field
+    @SuppressWarnings("PMD.TestClassWithoutTestCases")
     static class TestClass extends SelfDescribingMarshallable {
         final Class<?> o;
 

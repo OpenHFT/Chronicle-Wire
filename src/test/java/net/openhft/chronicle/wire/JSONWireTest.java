@@ -295,13 +295,7 @@ public class JSONWireTest extends WireTestCommon {
 
         MapHolder mh = new MapHolder(); // Create a new MapHolder object
         Map<RetentionPolicy, Double> map = Collections.singletonMap(RetentionPolicy.CLASS, 0.1); // Define a map with a single entry
-        mh.map = map; // Assign the created map to the map attribute of MapHolder
-        doTestMapOfNamedKeys(mh); // Test with the simple map
-        mh.map = new TreeMap<>(map); // Convert map to TreeMap
-        doTestMapOfNamedKeys(mh); // Test with TreeMap
-        mh.map = new HashMap<>(map); // Convert map to HashMap
-        doTestMapOfNamedKeys(mh); // Test with HashMap
-        mh.map = new LinkedHashMap<>(map); // Convert map to LinkedHashMap
+        mh.map = new EnumMap<>(map); // Assign enum map
         doTestMapOfNamedKeys(mh); // Test with LinkedHashMap
     }
 

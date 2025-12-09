@@ -64,6 +64,7 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
          * @param wire WireIn instance containing serialized data
          * @throws IORuntimeException If an IO error occurs during reading
          */
+        @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
             // Use the Wires utility to read the data
             // The following line works, but is commented out for this test

@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 // A parameterized test class that tests various string serialization behaviors for different WireTypes.
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireTestCommon {
     private final WireType wireType;
 

@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
 // This test class aims to test the deserialization from "naked" files using different wire types.
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class DeserializeFromNakedFileTest extends WireTestCommon {
 
     // WireType instance to be used for the deserialization test.

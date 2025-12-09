@@ -10,6 +10,7 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -21,8 +22,8 @@ public class WireDumperTest extends WireTestCommon {
     private final Bytes<?> bytes;
     private final Wire wire;
     private final WireType wireType;
-    private final Map<WireType, String> expectedContentByType = new HashMap<>();
-    private final Map<WireType, String> expectedPartialContent = new HashMap<>();
+    private final Map<WireType, String> expectedContentByType = new EnumMap<>(WireType.class);
+    private final Map<WireType, String> expectedPartialContent = new EnumMap<>(WireType.class);
 
     // Constructor to set up the test environment based on a WireType
     public WireDumperTest(final String name, final WireType wireType) {
@@ -95,32 +96,27 @@ public class WireDumperTest extends WireTestCommon {
     private void initTestData() {
 
         // Adding the expected serialized output for TEXT WireType
-        expectedContentByType.put(WireType.TEXT, "" +
-                "--- !!data\n" +
+        expectedContentByType.put(WireType.TEXT, "--- !!data\n" +
                 "17\n" +
                 "# position: 8, header: 1\n" +
                 "--- !!data\n" +
                 "bark\n" +
                 "# position: 20, header: 2\n" +
                 "--- !!data\n" +
-                "3.14\n" +
-                "");
+                "3.14\n");
 
         // Adding expected serialized content for YAML WireType
-        expectedContentByType.put(WireType.YAML, "" +
-                "--- !!data\n" +
+        expectedContentByType.put(WireType.YAML, "--- !!data\n" +
                 "17\n" +
                 "# position: 8, header: 1\n" +
                 "--- !!data\n" +
                 "bark\n" +
                 "# position: 20, header: 2\n" +
                 "--- !!data\n" +
-                "3.14\n" +
-                "");
+                "3.14\n");
 
         // Using a common string to represent the expected binary content for several WireTypes
-        final String expectedBinary = "" +
-                "--- !!data #binary\n" +
+        final String expectedBinary = "--- !!data #binary\n" +
                 "17\n" +
                 "# position: 8, header: 1\n" +
                 "--- !!data #binary\n" +
@@ -138,22 +134,18 @@ public class WireDumperTest extends WireTestCommon {
 
         expectedContentByType.put(WireType.COMPRESSED_BINARY, expectedBinary);
 
-        expectedContentByType.put(WireType.JSON, "" +
-                "--- !!data\n" +
+        expectedContentByType.put(WireType.JSON, "--- !!data\n" +
                 "17\n" +
                 "# position: 8, header: 1\n" +
                 "--- !!data\n" +
                 "\"bark\"\n" +
                 "# position: 20, header: 2\n" +
                 "--- !!data\n" +
-                "3.14\n" +
-                "");
-        expectedContentByType.put(WireType.JSON_ONLY, "" +
-                "17\n" +
+                "3.14\n");
+        expectedContentByType.put(WireType.JSON_ONLY, "17\n" +
                 "\"bark\"\n" +
                 "3.14\n");
-        expectedContentByType.put(WireType.RAW, "" +
-                "--- !!data #binary\n" +
+        expectedContentByType.put(WireType.RAW, "--- !!data #binary\n" +
                 "00000000             11 00 00 00  00 00 00 00                 ···· ····    \n" +
                 "# position: 12, header: 1\n" +
                 "--- !!data #binary\n" +
@@ -163,8 +155,7 @@ public class WireDumperTest extends WireTestCommon {
                 "00000010                                      1f 85 eb 51              ···Q\n" +
                 "00000020 b8 1e 09 40                                      ···@             \n");
 
-        expectedContentByType.put(WireType.YAML_ONLY, "" +
-                "17\n" +
+        expectedContentByType.put(WireType.YAML_ONLY, "17\n" +
                 "...\n" +
                 "bark\n" +
                 "...\n" +
@@ -172,24 +163,19 @@ public class WireDumperTest extends WireTestCommon {
                 "...\n");
 
         // Setting the expected partial serialized content for different WireTypes
-        expectedPartialContent.put(WireType.TEXT, "" +
-                "--- !!data\n" +
+        expectedPartialContent.put(WireType.TEXT, "--- !!data\n" +
                 "17\n" +
                 "# position: 8, header: 0 or 1\n" +
                 "--- !!not-ready-data\n" +
                 "...\n" +
-                "# 5 bytes remaining\n" +
-                "");
-        expectedPartialContent.put(WireType.YAML, "" +
-                "--- !!data\n" +
+                "# 5 bytes remaining\n");
+        expectedPartialContent.put(WireType.YAML, "--- !!data\n" +
                 "17\n" +
                 "# position: 8, header: 0 or 1\n" +
                 "--- !!not-ready-data\n" +
                 "...\n" +
-                "# 5 bytes remaining\n" +
-                "");
-        final String expectedPartialBinary = "" +
-                "--- !!data #binary\n" +
+                "# 5 bytes remaining\n");
+        final String expectedPartialBinary = "--- !!data #binary\n" +
                 "17\n" +
                 "# position: 8, header: 0 or 1\n" +
                 "--- !!not-ready-data\n" +
@@ -205,30 +191,24 @@ public class WireDumperTest extends WireTestCommon {
 
         expectedPartialContent.put(WireType.COMPRESSED_BINARY, expectedPartialBinary);
 
-        expectedPartialContent.put(WireType.JSON, "" +
-                "--- !!data\n" +
+        expectedPartialContent.put(WireType.JSON, "--- !!data\n" +
                 "17\n" +
                 "# position: 8, header: 0 or 1\n" +
                 "--- !!not-ready-data\n" +
                 "...\n" +
-                "# 6 bytes remaining\n" +
-                "");
+                "# 6 bytes remaining\n");
 
-        expectedPartialContent.put(WireType.JSON_ONLY, "" +
-                "17\n" +
+        expectedPartialContent.put(WireType.JSON_ONLY, "17\n" +
                 "\"meow\"");
 
-        expectedPartialContent.put(WireType.RAW, "" +
-                "--- !!data #binary\n" +
+        expectedPartialContent.put(WireType.RAW, "--- !!data #binary\n" +
                 "00000000             11 00 00 00  00 00 00 00                 ···· ····    \n" +
                 "# position: 12, header: 0 or 1\n" +
                 "--- !!not-ready-data\n" +
                 "...\n" +
-                "# 5 bytes remaining\n" +
-                "");
+                "# 5 bytes remaining\n");
 
-        expectedPartialContent.put(WireType.YAML_ONLY, "" +
-                "17\n" +
+        expectedPartialContent.put(WireType.YAML_ONLY, "17\n" +
                 "...\n" +
                 "meow\n");
 

@@ -25,7 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
 // Runner to enable parameterized tests for the MarshallableWireTest class
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class MarshallableWireTest extends WireTestCommon {
 
     // Type of wire to be tested

@@ -53,6 +53,7 @@ public class ReadAnyWireDetectionTest extends WireTestCommon {
         return copy;
     }
 
+    @SuppressWarnings("PMD.TestClassWithoutTestCases")
     private static final class TestCase {
         final WireType type;
         final String payload;

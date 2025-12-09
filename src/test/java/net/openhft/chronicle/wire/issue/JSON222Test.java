@@ -28,7 +28,7 @@ import java.util.List;
 import static java.nio.charset.StandardCharsets.*;
 import static org.junit.Assert.assertEquals;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class JSON222Test extends WireTestCommon {
 
     @NotNull

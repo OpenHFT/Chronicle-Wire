@@ -38,6 +38,7 @@ public class MethodWriterProxyTest extends MethodWriterTest {
     // Test method inherited from the parent class but ignored due to a known issue
     @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     @Test
+    @Override
     public void multiOut() {
         // Calls the same test method from the parent class
         super.multiOut();
@@ -47,6 +48,7 @@ public class MethodWriterProxyTest extends MethodWriterTest {
     // Test method for testing primitives, ignored on specific conditions and known issues
     @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     @Test
+    @Override
     public void testPrimitives() {
         // Calls the test method for primitives from the parent class
         super.doTestPrimitives(true);

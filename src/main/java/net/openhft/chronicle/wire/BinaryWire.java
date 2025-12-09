@@ -77,6 +77,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     private static final AtomicBoolean FIRST_WARN_MISSING_CLASS = new AtomicBoolean();
 
     // Thread-local storage for {@link VanillaMessageHistory}
+    static final byte[] EMPTY_BYTES = new byte[0];
+    private static final int SEQ_MAP = -1;
     private static final ThreadLocal<VanillaMessageHistory> VANILLA_MESSAGE_HISTORY_TL = ThreadLocal.withInitial(VanillaMessageHistory::new);
 
     /**
@@ -1732,15 +1734,10 @@ public class BinaryWire extends AbstractWire implements Wire {
     private void writeEventIdDescription(String name, int methodId) {
         try (ScopedResource<StringBuilder> sbTl = SBP.get()) {
             final StringBuilder sb = sbTl.get();
-            sb.append(name).append(" (");
-
-            // Check if the methodId falls within the printable ASCII character range.
-            if (' ' < methodId && methodId <= '~')
-                sb.append('\'').append((char) methodId).append('\''); // Represent methodId as a character.
-            else
-                sb.append(methodId); // Use the integer representation.
-
-            sb.append(')');
+            final String idText = (' ' < methodId && methodId <= '~')
+                    ? "'" + (char) methodId + "'"
+                    : Integer.toString(methodId);
+            sb.append(name).append(" (").append(idText).append(')');
 
             // Write the description to bytes in hexadecimal format.
             bytes.writeHexDumpDescription(sb);
@@ -2022,6 +2019,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @return A string representation of the bytes.
      */
     @NotNull
+    @Override
     public String toString() {
         return bytes.toDebugString();
     }
@@ -2085,6 +2083,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @param object The object whose self-describing status needs to be checked.
      * @return true if the object should use the self-describing message format, false otherwise.
      */
+    @Override
     public boolean useSelfDescribingMessage(@NotNull CommonMarshallable object) {
         // Check for override or get the value from the object.
         return overrideSelfDescribing == null ? object.usesSelfDescribingMessage() : overrideSelfDescribing;
@@ -3600,7 +3599,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             long length = readLength();
             int code = readCode();
             if (code == NULL) {
-                return null;
+                return using != null ? using : EMPTY_BYTES;
             }
 
             if (code == TYPE_PREFIX) {

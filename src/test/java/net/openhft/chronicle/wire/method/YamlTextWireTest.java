@@ -24,7 +24,7 @@ import static org.junit.Assume.assumeFalse;
  * Parameterized test class extending WireTestCommon to validate the consistency
  * between YamlWire and TextWire in processing YAML formatted text.
  */
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 @SuppressWarnings({"deprecation", "removal"})
 public class YamlTextWireTest extends WireTestCommon {
 

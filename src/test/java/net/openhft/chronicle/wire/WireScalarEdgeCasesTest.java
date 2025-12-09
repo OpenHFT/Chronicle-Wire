@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 @SuppressWarnings({"deprecation", "removal"})
 public class WireScalarEdgeCasesTest extends WireTestCommon {
 
-    private static final WireType[] TYPES = new WireType[]{
+    private static final WireType[] TYPES = {
             WireType.BINARY,
             WireType.TEXT,
             WireType.YAML
@@ -64,7 +64,7 @@ public class WireScalarEdgeCasesTest extends WireTestCommon {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 
             byte[] empty = new byte[0];
-            byte[] small = new byte[]{1, 2, 3, 4, 5};
+            byte[] small = {1, 2, 3, 4, 5};
             // Limit bytes round‑trip to binary where semantics are unambiguous
             if (wt == WireType.BINARY) {
                 w.write("b0").bytes(empty);

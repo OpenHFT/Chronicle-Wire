@@ -18,7 +18,7 @@ import java.util.Collection;
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
 // Using the Parameterized runner for JUnit tests to enable parameter-driven tests
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
 
     // Holds the WireType for this test instance

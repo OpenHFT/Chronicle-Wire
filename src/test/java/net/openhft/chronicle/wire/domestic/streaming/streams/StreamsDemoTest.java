@@ -79,8 +79,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         ClassAliasPool.CLASS_ALIASES.addAlias(MarketData.class);
         MarketData invalid = new MarketData("invalid", 0, 0, 0);
         // toString() still works.
-        assertEquals("" +
-                        "!MarketData {\n" +
+        assertEquals("!MarketData {\n" +
                         "  symbol: invalid,\n" +
                         "  last: 0.0,\n" +
                         "  high: 0.0,\n" +
@@ -88,18 +87,12 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
                         "}\n",
                 invalid.toString());
 
-        try {
-            MarshallableIn wire = createThenValueOuts(
-                    vo -> vo.object(new MarketData("MSFT", 100, 110, 90)),
-                    vo -> vo.object(new MarketData("AAPL", 200, 220, 180)),
-                    vo -> vo.object(new MarketData("MSFT", 101, 110, 90)),
-                    vo -> vo.object(invalid)
-            );
-
-            Assertions.fail(wire.toString());
-        } catch (InvalidMarshallableException expected) {
-            // expected
-        }
+        Assertions.assertThrows(InvalidMarshallableException.class, () -> createThenValueOuts(
+                vo -> vo.object(new MarketData("MSFT", 100, 110, 90)),
+                vo -> vo.object(new MarketData("AAPL", 200, 220, 180)),
+                vo -> vo.object(new MarketData("MSFT", 101, 110, 90)),
+                vo -> vo.object(invalid)
+        ));
     }
 
     @Test

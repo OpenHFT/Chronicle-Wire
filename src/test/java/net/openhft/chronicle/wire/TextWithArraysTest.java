@@ -37,9 +37,9 @@ public class TextWithArraysTest extends WireTestCommon {
         wa.shorts = new short[]{-1, 0, 1};
         wa.chars = "Hello".toCharArray();
         wa.ints = new int[]{-1, 0, 1};
-        wa.longs = new long[]{-1, 0, 1};
-        wa.floats = new float[]{-1, 0, 1};
-        wa.doubles = new double[]{-1, 0, 1};
+        wa.longs = new long[]{-1L, 0L, 1L};
+        wa.floats = new float[]{-1.0f, 0.0f, 1.0f};
+        wa.doubles = new double[]{-1.0d, 0.0d, 1.0d};
         wa.words = "Hello World Bye for now".split(" ");
 
         // Validate the string representation of the initialized object

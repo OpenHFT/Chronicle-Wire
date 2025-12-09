@@ -555,12 +555,11 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     private CharSequence toStringTimings() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < timings; i++) {
-            if (i > 0)
-                sb.append(',');
-            if (historyWallClock)
-                sb.append(' ').append(NanoTime.INSTANCE.asString(timingsArray[i]));
-            else
-                sb.append(timingsArray[i]);
+            if (historyWallClock) {
+                sb.append(i > 0 ? ", " : " ").append(NanoTime.INSTANCE.asString(timingsArray[i]));
+            } else {
+                sb.append(i > 0 ? "," : "").append(timingsArray[i]);
+            }
         }
         if (historyWallClock)
             sb.append(' ');

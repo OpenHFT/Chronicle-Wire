@@ -124,8 +124,8 @@ public class WiresTest extends WireTestCommon {
         Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
 
         BytesContainerMarshallable container1 = new BytesContainerMarshallable();
-        container1.bytesField.append("1");
-        container1.bytesField.append("2");
+        container1.bytesField.append('1');
+        container1.bytesField.append('2');
         BytesContainerMarshallable container2 = new BytesContainerMarshallable();
         Bytes<?> container2Bytes = container2.bytesField;
         Wires.copyTo(container1, container2);

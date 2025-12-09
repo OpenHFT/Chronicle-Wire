@@ -29,7 +29,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      */
     @Test
     public void testInterface() {
-        Simple simple = name -> queue.add(name);
+        Simple simple = queue::add;
         checkWriteRead(simple);
     }
 
@@ -38,7 +38,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      */
     @Test
     public void testInterfaceDescend() {
-        SimpleDescendant simple = name -> queue.add(name);
+        SimpleDescendant simple = queue::add;
         checkWriteRead(simple);
     }
 

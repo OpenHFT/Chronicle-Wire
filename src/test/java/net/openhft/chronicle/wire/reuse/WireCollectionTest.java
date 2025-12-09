@@ -26,7 +26,7 @@ import static org.junit.Assert.assertEquals;
  * Test class for WireCollection, using various wire types.
  */
 @Ignore("TODO FIX")
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class WireCollectionTest extends WireTestCommon {
 
     // Registering WireProperty class with the ClassAliasPool for serialization/deserialization

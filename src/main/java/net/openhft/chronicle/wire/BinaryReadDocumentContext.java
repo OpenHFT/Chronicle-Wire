@@ -145,9 +145,9 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         @NotNull final Bytes<?> bytes = wire.bytes();
         setStart(bytes.readPosition());
 
-        present = false;
         if (bytes.readRemaining() < 4) {
             notComplete = false;
+            present = false;
             return;
         }
 
@@ -157,6 +157,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         int header = bytes.readVolatileInt(position);
         notComplete = Wires.isNotComplete(header); // || isEndOfFile
         if (header == 0 || (wire.notCompleteIsNotPresent() && notComplete)) {
+            present = false;
             return;
         }
 
@@ -166,6 +167,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
 
         if (len > bytes.readRemaining()) {
             bytes.readSkip(-4);
+            present = false;
             return;
         }
 

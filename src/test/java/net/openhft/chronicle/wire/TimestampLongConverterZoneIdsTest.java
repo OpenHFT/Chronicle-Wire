@@ -23,7 +23,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeFalse;
 
 // Running the test class in a parameterized manner.
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 @SuppressWarnings({"deprecation", "removal"})
 public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
 
@@ -66,16 +66,19 @@ public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
     // Enum representing the different converter types: Milli, Micro, and Nano.
     enum ConverterType implements ConverterFactory {
         Milli(MilliTimestampLongConverter.INSTANCE.parse("2020/09/18T01:02:03.123")) {
+            @Override
             public MilliTimestampLongConverter createConverter(String zoneId) {
                 return new MilliTimestampLongConverter(zoneId);
             }
         },
         Micro(MicroTimestampLongConverter.INSTANCE.parse("2020/09/18T01:02:03.123456")) {
+            @Override
             public MicroTimestampLongConverter createConverter(String zoneId) {
                 return new MicroTimestampLongConverter(zoneId);
             }
         },
         Nano(NanoTimestampLongConverter.INSTANCE.parse("2020/09/18T01:02:03.123456789")) {
+            @Override
             public NanoTimestampLongConverter createConverter(String zoneId) {
                 return new NanoTimestampLongConverter(zoneId);
             }

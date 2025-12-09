@@ -47,6 +47,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
      *
      * @param metaData A flag indicating whether the write includes metadata.
      */
+    @Override
     public void start(boolean metaData) {
         count++;
         // If start() was called more than once, validate the metadata flag.

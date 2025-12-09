@@ -35,6 +35,7 @@ public interface Reduction<T> extends ExcerptListener {
      * If this method is referenced as an {@link ExcerptListener} then the Reduction must be
      * thread-safe.
      **/
+    @Override
     void onExcerpt(@NotNull Wire wire, @NonNegative long index) throws InvalidMarshallableException;
 
     /**

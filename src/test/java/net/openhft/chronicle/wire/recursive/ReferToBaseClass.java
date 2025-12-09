@@ -13,6 +13,7 @@ public class ReferToBaseClass extends ReferToSameClass {
         super(name);
     }
 
+    @Override
     public List<ReferToSameClass> list() {
         return list;
     }

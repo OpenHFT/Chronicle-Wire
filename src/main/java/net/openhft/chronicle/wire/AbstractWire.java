@@ -638,6 +638,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     }
 
     @Deprecated(/* to be removed as soon as is practical */)
+    @Override
     public void usePadding(boolean usePadding) {
         this.usePadding = usePadding;
     }
@@ -647,6 +648,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
      *
      * @return True if padding is used, false otherwise.
      */
+    @Override
     public boolean usePadding() {
         return usePadding;
     }

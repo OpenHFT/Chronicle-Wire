@@ -25,8 +25,7 @@ public class WordsLongConverterTest extends WireTestCommon {
         words.words(Words.INSTANCE.parse("blue.clay,sets"));
         words.words(Words.INSTANCE.parse("many.looks.now"));
         words.words(Words.INSTANCE.parse("square.army.plan.player.wash.disk"));
-        assertEquals("" +
-                "words: eat.red.apple\n" +
+        assertEquals("words: eat.red.apple\n" +
                 "...\n" +
                 "words: blue.clay.sets\n" +
                 "...\n" +
@@ -47,10 +46,9 @@ public class WordsLongConverterTest extends WireTestCommon {
 
         // Loop through various long values, convert them to strings and validate
         for (long i = 1; i > 0; i *= 17)
-            sb.append(i).append(": ").append(bic.asString(i)).append("\n");
+            sb.append(i).append(": ").append(bic.asString(i)).append('\n');
         System.out.println(sb);
-        assertEquals("" +
-                        "1: aid\n" +
+        assertEquals("1: aid\n" +
                         "17: by\n" +
                         "289: dish\n" +
                         "4913: strip.aim\n" +

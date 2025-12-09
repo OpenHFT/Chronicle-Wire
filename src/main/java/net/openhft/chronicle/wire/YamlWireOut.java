@@ -69,7 +69,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         WireInternal.INTERNER.valueCount();
     }
 
-    protected final YamlValueOut valueOut = createValueOut();
+    protected final YamlValueOut valueOut = (YamlValueOut) createValueOut();
     protected final StringBuilder sb = new StringBuilder();
     private boolean addTimeStamps = false;
     private boolean trimFirstCurly = true;
@@ -113,7 +113,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
      * @return A new YamlValueOut instance.
      */
     @NotNull
-    protected YamlValueOut createValueOut() {
+    protected ValueOut createValueOut() {
         return new YamlValueOut();
     }
 
@@ -915,7 +915,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 // Append the date and time in milliseconds as a comment in the output
                 bytes.append(", # ");
                 bytes.appendDateMillis(i64);
-                bytes.append("T");
+                bytes.append('T');
                 bytes.appendTimeMillis(i64);
                 sep = NEW_LINE;
             } else if ((long) 1e18 < i64 && i64 < (long) 4.111e18) {
@@ -923,7 +923,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 long nanos = i64 % 1_000_000;
                 bytes.append(", # ");
                 bytes.appendDateMillis(millis);
-                bytes.append("T");
+                bytes.append('T');
                 bytes.appendTimeMillis(millis);
                 bytes.append((char) ('0' + nanos / 100000));
                 bytes.append((char) ('0' + nanos / 100000 % 10));

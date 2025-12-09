@@ -17,7 +17,7 @@ import java.util.Collection;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class ValueOutTest extends TestCase {
 
     private final WireType wireType;

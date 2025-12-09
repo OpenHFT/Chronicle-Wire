@@ -153,6 +153,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * Returns the number of {@link LongValue} words available in the backing
      * array. This is the fixed capacity rather than a logical size.
      */
+    @Override
     public int getWordsInUse() {
         return words.length;
     }
@@ -242,6 +243,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * Atomically toggles the bit at {@code bitIndex}.
      */
+    @Override
     public void flip(int bitIndex) {
         throwExceptionIfClosed();
 
@@ -270,6 +272,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * Atomically flips bits in the range [{@code fromIndex}, {@code toIndex}).
      */
+    @Override
     public void flip(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
 
@@ -307,6 +310,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * Atomically sets the bit at {@code bitIndex}.
      */
+    @Override
     public void set(int bitIndex) {
         // Check if the BitSet is closed, if so, throws an exception
         throwExceptionIfClosed();
@@ -333,6 +337,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * Sets the bit at {@code bitIndex} to {@code value}.
      */
+    @Override
     public void set(int bitIndex, boolean value) {
         throwExceptionIfClosed();
 
@@ -345,6 +350,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * Atomically sets all bits in the range [{@code fromIndex}, {@code toIndex}) to {@code true}.
      */
+    @Override
     public void set(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
 
@@ -382,6 +388,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * Atomically sets all bits in the range to {@code value}.
      */
+    @Override
     public void set(int fromIndex, int toIndex, boolean value) {
         throwExceptionIfClosed();
 
@@ -394,6 +401,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * Sets the bit specified by the index to {@code false}.
      */
+    @Override
     public void clear(int bitIndex) {
         throwExceptionIfClosed();
 
@@ -410,6 +418,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * Sets the bits from the specified {@code fromIndex} (inclusive) to the specified {@code toIndex} (exclusive) to {@code false}.
      */
+    @Override
     public void clear(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
 
@@ -455,6 +464,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * Sets all of the bits in this ChronicleBitSet to {@code false}.
      */
+    @Override
     public void clear() {
         throwExceptionIfClosed();
 
@@ -470,6 +480,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @param bitIndex the index of the bit to check
      * @return true if the bit at the specified index is set, false otherwise
      */
+    @Override
     public boolean get(int bitIndex) {
         throwExceptionIfClosed();
 
@@ -488,6 +499,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @param fromIndex the index to start checking from
      * @return the index of the next set bit, or -1 if no such bit is found
      */
+    @Override
     public int nextSetBit(int fromIndex) {
         throwExceptionIfClosed();
 
@@ -526,6 +538,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @param toIndex the index to stop checking (exclusive)
      * @return the index of the next set bit within the specified range, or -1 if no such bit is found
      */
+    @Override
     public int nextSetBit(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
 
@@ -563,6 +576,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @param fromIndex the index to start checking from
      * @return the index of the next unset bit, or the total length if all bits are set
      */
+    @Override
     public int nextClearBit(int fromIndex) {
         throwExceptionIfClosed();
 
@@ -675,6 +689,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @param set The {@code ChronicleBitSet} to compare with the current instance.
      * @return {@code true} if there's an intersection, otherwise {@code false}.
      */
+    @Override
     public boolean intersects(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
@@ -701,6 +716,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * Counts the bits set to {@code true}. Each word is read
      * with {@link LongValue#getVolatileValue()} for visibility.
      */
+    @Override
     public int cardinality() {
         throwExceptionIfClosed();
 
@@ -717,6 +733,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      *
      * @param set The {@code ChronicleBitSet} to perform the logical <b>AND</b> operation with.
      */
+    @Override
     public void and(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
@@ -764,6 +781,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      *
      * @param set The {@code ChronicleBitSet} to perform the logical <b>OR</b> operation with.
      */
+    @Override
     public void or(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
@@ -796,6 +814,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      *
      * @param set The {@code ChronicleBitSet} to perform the logical <b>XOR</b> operation with.
      */
+    @Override
     public void xor(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
@@ -831,6 +850,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      *
      * @param set The {@code ChronicleBitSet} to use for clearing matching bits.
      */
+    @Override
     public void andNot(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
@@ -857,6 +877,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      *
      * @return The computed hash code.
      */
+    @Override
     public int hashCode() {
         long h = 1234;
         OS.memory().loadFence();
@@ -872,6 +893,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      *
      * @return The number of bits of space in use.
      */
+    @Override
     public int size() {
         return Math.toIntExact(words.length * BITS_PER_WORD);
     }
@@ -888,6 +910,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @param obj The object to compare with.
      * @return {@code true} if the objects are the same; {@code false} otherwise.
      */
+    @Override
     public boolean equals(Object obj) {
         throwExceptionIfClosed();
 

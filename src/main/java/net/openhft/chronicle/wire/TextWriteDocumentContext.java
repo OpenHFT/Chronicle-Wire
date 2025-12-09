@@ -55,6 +55,7 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
      *
      * @param metaData Indicates if the data being written is meta-data
      */
+    @Override
     public void start(boolean metaData) {
         count++;
         if (count > 1) {

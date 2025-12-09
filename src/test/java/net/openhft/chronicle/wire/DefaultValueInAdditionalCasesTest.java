@@ -22,7 +22,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
         // bytes/text from non-null default
         Bytes<?> src = Bytes.wrapForRead("hello".getBytes());
-        dvi.defaultValue = (BytesStore<?, ?>) src;
+        dvi.defaultValue = src;
         Bytes<?> out = Bytes.allocateElasticOnHeap(16);
         assertSame(out, dvi.textTo(out));
         assertEquals("hello", out.toString());
@@ -60,7 +60,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
     public void bytesArrayAccessor() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
-        byte[] data = new byte[]{1, 2, 3};
+        byte[] data = {1, 2, 3};
         dvi.defaultValue = data;
         byte[] using = new byte[3];
         assertArrayEquals(data, dvi.bytes(using));

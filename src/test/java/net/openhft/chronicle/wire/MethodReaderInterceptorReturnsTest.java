@@ -83,7 +83,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
         // Defining the interceptor
         final MethodReaderInterceptorReturns interceptor = (m, o, args, invocation) -> {
             try {
-                interceptedMethodNames.append(m.getName()).append(Arrays.toString(args)).append("*");
+                interceptedMethodNames.append(m.getName()).append(Arrays.toString(args)).append('*');
 
                 return invocation.invoke(m, o, args);
             } catch (Exception e) {

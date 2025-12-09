@@ -21,7 +21,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("unchecked")
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class ChronicleBitSetTest extends WireTestCommon {
 
     // Random number generator for tests
@@ -280,7 +280,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
             // Set a random number of bits in random places
             // up to a random maximum
-            int nextBitToSet = 0;
+            int nextBitToSet;
             int numberOfSetBits = generator.nextInt(100) + 1;
             int highestPossibleSetBit = generator.nextInt(1000) + 1;
             for (int x = 0; x < numberOfSetBits; x++) {
@@ -473,7 +473,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
             int[] history = new int[64];
 
             // Set some random bits in first set and remember them
-            int nextBitToSet = 0;
+            int nextBitToSet;
             int x = 0;
             for (; x < 32; x++) {
                 nextBitToSet = generator.nextInt(256);
@@ -819,7 +819,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
             ChronicleBitSet b2 = createBitSet(256);
 
             // Set some random bits in first set
-            int nextBitToSet = 0;
+            int nextBitToSet;
             for (int x = 0; x < 30; x++) {
                 nextBitToSet = generator.nextInt(256);
                 b1.set(nextBitToSet);
@@ -889,7 +889,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
             failCount++;
 
         // Set and clear random bits multiple times and ensure the behavior of isEmpty() is correct
-        int nextBitToSet = 0;
+        int nextBitToSet;
         int numberOfSetBits = generator.nextInt(100) + 1;
         int highestPossibleSetBit = generator.nextInt(1000) + 1;
         for (int x = 0; x < numberOfSetBits; x++) {

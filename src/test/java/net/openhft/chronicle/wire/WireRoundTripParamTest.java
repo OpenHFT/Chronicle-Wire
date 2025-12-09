@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
  */
 public class WireRoundTripParamTest extends WireTestCommon {
 
-    private static final WireType[] TYPES = new WireType[]{
+    private static final WireType[] TYPES = {
             WireType.BINARY,
             WireType.TEXT,
             WireType.YAML

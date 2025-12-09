@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @SuppressWarnings("rawtypes")
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class PrimitiveTypeWrappersTest extends WireTestCommon {
 
     private final boolean isTextWire;  // Variable to determine if using text wire format
@@ -39,11 +39,11 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
     @Test
     public void testNumbers() {
         // Define wrapper classes for numbers
-        @NotNull final Class[] types = new Class[]{Byte.class,
+        @NotNull final Class[] types = {Byte.class,
                 Short.class, Float.class,
                 Integer.class, Long.class, Double.class};
         // Create an array of number instances
-        @NotNull final Number[] nums = new Number[]{(byte) 1, (short) 2, (float) 3, 4, (long) 5, (double) 6};
+        @NotNull final Number[] nums = {(byte) 1, (short) 2, (float) 3, 4, (long) 5, (double) 6};
 
         for (@NotNull Number num : nums) {
             for (@NotNull Class<?> type : types) {
@@ -60,7 +60,7 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
     // Test that writing and reading the number maintains the original type
     @Test
     public void testNumbers2() {
-        @NotNull final Number[] nums = new Number[]{(byte) 1, (short) 1, (float) 1, 1, (long) 1, (double) 1};
+        @NotNull final Number[] nums = {(byte) 1, (short) 1, (float) 1, 1, (long) 1, (double) 1};
 
         for (@NotNull Number num : nums) {
             @NotNull final Wire wire = wireFactory();

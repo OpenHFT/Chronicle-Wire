@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
  * This test class is associated with an issue raised in the Chronicle-Wire repository.
  * Refer: https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class JSONTypesWithMapsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Instance variable to determine if types are to be used in the JSON Wire representation.

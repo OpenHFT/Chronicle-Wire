@@ -19,7 +19,8 @@ import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
 public class Marshallable2Test extends WireTestCommon {
 
     // Instance variable for the WireType being tested in this instance of the test

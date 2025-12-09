@@ -22,7 +22,7 @@ import static org.junit.Assume.assumeFalse;
 /**
  * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 @SuppressWarnings({"deprecation", "removal"})
 public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon {
 
@@ -117,7 +117,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     // Test to write a set of enums to the wire and verify the written content
     @Test
     public void sequenceOfSet() {
-        final Set<A> set = new HashSet<>(Arrays.asList(A.values()));
+        final Set<A> set = EnumSet.allOf(A.class);
         wire.getValueOut().sequence(set);
         final String actual = wire.toString();
         System.out.println("actual = " + actual);
@@ -127,7 +127,7 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     // Test to write a sorted set of enums to the wire and verify the written content
     @Test
     public void sequenceOfSortedSet() {
-        final Set<A> set = new TreeSet<>(Arrays.asList(A.values()));
+        final Set<A> set = EnumSet.allOf(A.class);
         wire.getValueOut().sequence(set);
         final String actual = wire.toString();
         System.out.println("actual = " + actual);

@@ -21,7 +21,7 @@ import static org.junit.Assume.assumeFalse;
 public class UnknownEnumTest extends WireTestCommon {
 
     // Serialized map data, presumably representing an unknown Enum value for testing purposes
-    private static final byte[] SERIALISED_MAP_DATA = new byte[]{
+    private static final byte[] SERIALISED_MAP_DATA = {
             (byte) -59, 101, 118, 101, 110, 116, -126, 60, 0, 0, 0, -71, 3,
             107, 101, 121, -74, 47, 110, 101, 116, 46, 111, 112, 101, 110, 104,
             102, 116, 46, 99, 104, 114, 111, 110, 105, 99, 108, 101, 46, 119,

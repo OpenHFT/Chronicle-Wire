@@ -14,7 +14,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class TextSkipValueTest extends WireTestCommon {
 
     // This will store the input string for each run of the test.

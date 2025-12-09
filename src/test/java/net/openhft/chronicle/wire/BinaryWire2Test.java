@@ -28,7 +28,7 @@ import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
 @SuppressWarnings({"rawtypes", "try", "deprecation", "removal"})
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class BinaryWire2Test extends WireTestCommon {
     private final boolean usePadding;
     @NotNull
@@ -804,7 +804,6 @@ public class BinaryWire2Test extends WireTestCommon {
         wire.readDocument(null, w -> {
             MyMarshallable mm = w.readEvent(MyMarshallable.class);
             assertEquals(parent.toString(), mm.toString());
-            parent.equals(mm);
             assertEquals(parent, mm);
             @Nullable final Map map2 = w.getValueIn()
                     .object(Map.class);

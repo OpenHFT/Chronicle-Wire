@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 @RunWith(Parameterized.class)
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
 public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
 
     // Parameterized value to determine if proxy code generation is disabled
@@ -63,8 +64,7 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
                 .updateInterceptor((methodName, t) -> true)
                 .build()
                 .x("hello world");
-        assertEquals("" +
-                        "--- !!data #binary\n" +
+        assertEquals("--- !!data #binary\n" +
                         "x: hello world\n",
                 Wires.fromSizePrefixedBlobs(wire));
     }
@@ -79,8 +79,7 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
                 .build()
                 .x("hello world");
         assertEquals(0, value);
-        assertEquals("" +
-                        "--- !!data #binary\n" +
+        assertEquals("--- !!data #binary\n" +
                         "x: hello world\n",
                 Wires.fromSizePrefixedBlobs(wire));
     }
@@ -100,15 +99,13 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
 
         // Here, data is written but is on hold until the end of the message is written.
         // WireDumper no longer scans data that is written but not ready
-        assertEquals("" +
-                        "--- !!not-ready-data\n" +
+        assertEquals("--- !!not-ready-data\n" +
                         "...\n" +
                         "# 15 bytes remaining\n",
                 Wires.fromSizePrefixedBlobs(wire));
 
         mw.y("good byte");
-        assertEquals("" +
-                        "--- !!data #binary\n" +
+        assertEquals("--- !!data #binary\n" +
                         "x: hello world\n" +
                         "y: good byte\n",
                 Wires.fromSizePrefixedBlobs(wire));
@@ -123,8 +120,7 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
                 .updateInterceptor((methodName, t) -> true)
                 .build()
                 .ladderByQty("a ladder");
-        assertEquals("" +
-                        "--- !!data #binary\n" +
+        assertEquals("--- !!data #binary\n" +
                         "ladderByQty: a ladder\n",
                 Wires.fromSizePrefixedBlobs(wire));
     }

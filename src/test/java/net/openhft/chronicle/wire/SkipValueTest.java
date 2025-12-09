@@ -32,7 +32,7 @@ import static org.junit.Assume.assumeFalse;
  * Tests the ability to skip certain values in wire formats based on the parameterized input.
  */
 @SuppressWarnings("rawtypes")
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     private final String name; // Represents the name of the binary wire code.
@@ -103,7 +103,7 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
                 {null, ZONED_DATE_TIME, wr(v -> v.zonedDateTime(ZonedDateTime.now()))},
                 {null, TYPE_PREFIX, wr(v -> v.object(new Dto8()))},
                 {null, STRING_ANY, wr(v -> v.text("Long string 012345678901234567890123456789"))},
-                {null, NULL, wr(v -> v.nu11())},
+                {null, NULL, wr(ValueOut::nu11)},
                 {null, TYPE_LITERAL, wr(v -> v.typeLiteral(String.class))},
                 {null, COMMENT, wr(v -> v.wireOut().writeComment("hi").getValueOut().text("hi"))},
                 {null, STRING_0, wr(v -> v.text(""))},

@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
 // Runner to enable parameterized tests for the FieldInfoTest class
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class FieldInfoTest extends WireTestCommon {
 
     // Marshallable object for test scenarios

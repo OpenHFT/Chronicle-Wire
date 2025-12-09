@@ -656,6 +656,7 @@ public class JSONWire extends TextWire {
      * @param quotes Specifies the type of quotes used in the CharSequence and guides escaping.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7159#section-7">RFC 7159, Section 7</a>
      */
+    @Override
     protected void escape0(@NotNull CharSequence s, @NotNull Quotes quotes) {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
@@ -1020,6 +1021,7 @@ public class JSONWire extends TextWire {
             return (JSONWire) super.marshallable(map, (Class<K>) String.class, vClass, leaf);
         }
 
+        @Override
         public @NotNull JSONWire time(final LocalTime localTime) {
             // Todo: fix quoted text
             return (JSONWire) super.time(localTime);

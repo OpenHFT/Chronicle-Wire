@@ -51,7 +51,7 @@ class UIClassGenerator extends AbstractClassGenerator<SimpleMetaData> {
     @Override
     protected void generateConstructors(SourceCodeFormatter mainCode) {
         super.generateConstructors(mainCode);
-        mainCode.append("public ").append(className()).append("(").append(nameForClass(UpdateInterceptor.class)).append(" updateInterceptor) {\n")
+        mainCode.append("public ").append(className()).append('(').append(nameForClass(UpdateInterceptor.class)).append(" updateInterceptor) {\n")
                 .append("this.updateInterceptor = updateInterceptor;\n")
                 .append("}\n");
     }
@@ -63,7 +63,8 @@ class UIClassGenerator extends AbstractClassGenerator<SimpleMetaData> {
         assertEquals("accept", method.getName());
         // Add the generated source code line
         withLineNumber(mainCode)
-                .append("((").append(nameForClass(MyTypes.class)).append(")").append(params).append(").text().append('-').append(\"").append(metaData().message).append("\");\n");
+                .append("((").append(nameForClass(MyTypes.class)).append(')').append(params)
+                .append(").text().append('-').append(\"").append(metaData().message).append("\");\n");
     }
 }
 

@@ -121,6 +121,7 @@ public class TriviallyCopyableJLBH implements JLBHTask {
         private long text4a, text4b, text4c, text4d, text4e;
         private final transient Bytes<?> address = Bytes.forFieldGroup(this, "address");
 
+        @Override
         public BaseHouse address(CharSequence owner) {
             address.clear().append(owner);
             return this;
@@ -149,6 +150,7 @@ public class TriviallyCopyableJLBH implements JLBHTask {
 
         final Bytes<Void> address = Bytes.allocateDirect(128);
 
+        @Override
         public BaseHouse address(CharSequence owner) {
             address.clear().append(owner);
             return this;

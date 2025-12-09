@@ -111,8 +111,7 @@ public class WordsLongConverter implements LongConverter {
     public void append(StringBuilder text, long value) {
         String asep = "";
         do {
-            text.append(asep);
-            text.append(WORDS[(int) (value & 2047)]);
+            text.append(asep).append(WORDS[(int) (value & 2047)]);
             value >>>= 11;
             asep = this.sep;
         } while (value > 0);

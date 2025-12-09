@@ -119,7 +119,7 @@ public class QueryWireTest extends WireTestCommon {
     public void handlesZeroBytesAndDanglingKeys() {
         Bytes<?> storage = allocateElasticOnHeap();
         QueryWire wire = new QueryWire(storage);
-        byte[] raw = new byte[]{'A', 0, 'B'};
+        byte[] raw = {'A', 0, 'B'};
         wire.write("raw").rawBytes(raw);
         wire.write("encoded").bytes(raw);
 

@@ -35,7 +35,7 @@ public class ValueInApisNegativeTest extends WireTestCommon {
 
             // bytesMatch on binary only (text/yaml base64 specifics are covered elsewhere)
             if (wt == WireType.BINARY) {
-                byte[] content = new byte[]{9, 8, 7};
+                byte[] content = {9, 8, 7};
                 w.write("b").bytes(content);
                 final boolean[] res = {false};
                 w.read("b").bytesMatch(Bytes.wrapForRead(content), b -> res[0] = b);

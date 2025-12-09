@@ -240,7 +240,7 @@ public class GenerateMethodReader {
 
         // Import statements required for the generated code.
         boolean hasMultipleNonMarshallableParamTypes = !Boolean.FALSE.equals(multipleNonMarshallableParamTypes);
-        sourceCode.append("" + "import net.openhft.chronicle.core.Jvm;\n" + "import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;\n" + "import net.openhft.chronicle.core.util.ObjectUtils;\n" + "import net.openhft.chronicle.bytes.*;\n" + "import net.openhft.chronicle.wire.*;\n" + "import net.openhft.chronicle.wire.utils.*;\n" + "import net.openhft.chronicle.wire.BinaryWireCode;\n" + "\n").append(hasMultipleNonMarshallableParamTypes ? "import java.util.HashMap;\n" : "").append("import java.util.Map;\n").append(hasMultipleNonMarshallableParamTypes ? "import java.util.function.Function;\n" : "").append("import java.lang.reflect.Method;\n").append("\n");
+        sourceCode.append("import net.openhft.chronicle.core.Jvm;\n" + "import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;\n" + "import net.openhft.chronicle.core.util.ObjectUtils;\n" + "import net.openhft.chronicle.bytes.*;\n" + "import net.openhft.chronicle.wire.*;\n" + "import net.openhft.chronicle.wire.utils.*;\n" + "import net.openhft.chronicle.wire.BinaryWireCode;\n" + "\n").append(hasMultipleNonMarshallableParamTypes ? "import java.util.HashMap;\n" : "").append("import java.util.Map;\n").append(hasMultipleNonMarshallableParamTypes ? "import java.util.function.Function;\n" : "").append("import java.lang.reflect.Method;\n").append("\n");
 
         // Declare the generated class extending AbstractGeneratedMethodReader.
         sourceCode.append(format("public class %s extends AbstractGeneratedMethodReader {%n", generatedClassName()));
@@ -680,7 +680,7 @@ public class GenerateMethodReader {
      * @return Code that performs a method call.
      */
     private String methodCall(Method m, String instanceFieldName, String chainedCallPrefix, @Nullable Class<?> returnType) {
-        StringBuilder res = new StringBuilder();
+        StringBuilder res = new StringBuilder(256);
 
         Class<?>[] parameterTypes = m.getParameterTypes();
 
@@ -690,9 +690,8 @@ public class GenerateMethodReader {
             args[i] = m.getName() + "arg" + i;
 
         // Begin try block for method invocation
-        res.append("try {\n");
-        // Flag indicating a data event has been processed
-        res.append("dataEventProcessed = true;\n");
+        res.append("try {\n")
+                .append("dataEventProcessed = true;\n");
 
         // called for no interceptor and a generating interceptor
         if (!hasRealInterceptorReturns()) {
@@ -705,7 +704,7 @@ public class GenerateMethodReader {
                 final String codeBefore = generatingInterceptor.codeBeforeCall(m, instanceFieldName, args);
 
                 if (codeBefore != null)
-                    res.append(codeBefore).append("\n");
+                    res.append(codeBefore).append('\n');
             }
 
             // Generate the method call code
@@ -718,7 +717,7 @@ public class GenerateMethodReader {
                 final String codeAfter = generatingInterceptor.codeAfterCall(m, instanceFieldName, args);
 
                 if (codeAfter != null)
-                    res.append(codeAfter).append("\n");
+                    res.append(codeAfter).append('\n');
             }
         } else {
             // called for non generating interceptor
@@ -938,7 +937,7 @@ public class GenerateMethodReader {
      */
     @NotNull
     private String generatedClassName0() {
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder(128);
 
         // Append names of instances to the class name.
         for (Object i : instances)
@@ -956,7 +955,7 @@ public class GenerateMethodReader {
 
         // Append multi marshal/non-marshal support
         if (multipleNonMarshallableParamTypes != null) {
-            sb.append(Boolean.TRUE.equals(multipleNonMarshallableParamTypes) ? 'T' : 'F');
+            sb.append(multipleNonMarshallableParamTypes ? 'T' : 'F');
         }
 
         // Append interceptor details to the class name.
@@ -1006,7 +1005,7 @@ public class GenerateMethodReader {
 
         // Further refine the name for specific synthetic class scenarios.
         if (aClass.isSynthetic() && !aClass.isAnonymousClass() && !aClass.isLocalClass()) {
-            int lambdaSlashIndex = nameWithoutPackage.lastIndexOf("/");
+            int lambdaSlashIndex = nameWithoutPackage.lastIndexOf('/');
 
             if (lambdaSlashIndex != -1)
                 nameWithoutPackage = nameWithoutPackage.substring(0, lambdaSlashIndex);

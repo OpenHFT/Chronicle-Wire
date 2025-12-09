@@ -598,7 +598,7 @@ public class GenerateMethodWriter {
         result.append("// result\n" +
                 "private transient final Closeable closeable;\n");
         if (useUpdateInterceptor)
-            result.append("private transient final ").append(UPDATE_INTERCEPTOR).append(" ").append(UPDATE_INTERCEPTOR_FIELD).append(";\n");
+            result.append("private transient final ").append(UPDATE_INTERCEPTOR).append(' ').append(UPDATE_INTERCEPTOR_FIELD).append(";\n");
 
         result.append("private transient Supplier<")
                 .append(MARSHALLABLE_OUT)
@@ -653,7 +653,7 @@ public class GenerateMethodWriter {
         // Get the type name for return type
         final String typeName = nameForClass(importSet, returnType);
 
-        final StringBuilder body = new StringBuilder();
+        final StringBuilder body = new StringBuilder(512);
         final Type[] parameterTypes = getParameterTypes(dm, interfaceClazz);
 
         // UpdateInterceptor logic
@@ -677,21 +677,16 @@ public class GenerateMethodWriter {
         final boolean passthrough = returnType == DocumentContext.class;
 
         // MarshallableOut setup logic
-        if (!passthrough)
-            body.append("try (");
-        body.append("final ")
+        body.append(passthrough ? "final " : "try (final ")
                 .append(WRITE_DOCUMENT_CONTEXT)
                 .append(" _dc_ = (")
                 .append(WRITE_DOCUMENT_CONTEXT).append(") out.acquireWritingDocument(")
                 .append(metaData)
-                .append(")");
-        if (passthrough)
-            body.append(";\n");
-        else
-            body.append(") {\n");
-        body.append("try {\n");
-        body.append("_dc_.chainedElement(").append(!terminating && !passthrough).append(");\n");
-        body.append("if (out.recordHistory()) MessageHistory.writeHistory(_dc_);\n");
+                .append(')')
+                .append(passthrough ? ";\n" : ") {\n")
+                .append("try {\n")
+                .append("_dc_.chainedElement(").append(!terminating && !passthrough).append(");\n")
+                .append("if (out.recordHistory()) MessageHistory.writeHistory(_dc_);\n");
 
         int startJ = 0;
 
@@ -720,10 +715,10 @@ public class GenerateMethodWriter {
             body.append("_valueOut_.text(\"\");\n");
 
         // Handle exceptions during method execution
-        body.append("} catch (Throwable _t_) {\n");
-        body.append("_dc_.rollbackOnClose();\n");
-        body.append("throw Jvm.rethrow(_t_);\n");
-        body.append("}\n");
+        body.append("} catch (Throwable _t_) {\n")
+                .append("_dc_.rollbackOnClose();\n")
+                .append("throw Jvm.rethrow(_t_);\n")
+                .append("}\n");
 
         // Synchronize the method if it belongs to the Syncable class
         if (dm.getDeclaringClass() == Syncable.class) {
@@ -815,10 +810,9 @@ public class GenerateMethodWriter {
             if (!name.isEmpty() && (WireType.TEXT == wireType || WireType.YAML == wireType))
                 body.append(format("_valueOut_.rawText(%s.INSTANCE.asText(%s));%n", name, p.getName()));
             else if (p.getType().isPrimitive() || CharSequence.class.isAssignableFrom(p.getType())) {
-                if (longConversion != null && (p.getType() == long.class || CharSequence.class.isAssignableFrom(p.getType())))
-                    body.append(format("%s.writeLong(%s.INSTANCE, %s);%n", multipleArgs ? "_v_" : "_valueOut_", longConversion.value().getName(), p.getName()));
-                else
-                    body.append(format("%s.%s(%s);%n", multipleArgs ? "_v_" : "_valueOut_", toString(erase(parameterTypes[j])), p.getName()));
+                body.append(longConversion != null && (p.getType() == long.class || CharSequence.class.isAssignableFrom(p.getType()))
+                        ? format("%s.writeLong(%s.INSTANCE, %s);%n", multipleArgs ? "_v_" : "_valueOut_", longConversion.value().getName(), p.getName())
+                        : format("%s.%s(%s);%n", multipleArgs ? "_v_" : "_valueOut_", toString(erase(parameterTypes[j])), p.getName()));
             } else {
                 writeValue(dm, erase(parameterTypes[j]), body, startJ, p);
             }
@@ -880,7 +874,7 @@ public class GenerateMethodWriter {
      * @return A StringBuilder containing the return statement for the method.
      */
     private StringBuilder methodReturn(final Method dm, final Class<?> interfaceClazz) {
-        final StringBuilder result = new StringBuilder();
+        final StringBuilder result = new StringBuilder(64);
         final Class<?> returnType = returnType(dm, interfaceClazz);
 
         if (returnType == Void.class || returnType == void.class)
@@ -894,8 +888,8 @@ public class GenerateMethodWriter {
 
         } else if (returnType.isInterface()) {
             methodWritersMap.computeIfAbsent(returnType, k -> "methodWriter" + k.getSimpleName() + "TL");
-            result.append("// method return\n");
-            result.append(format("return methodWriter%sTL.get();%n", returnType.getSimpleName()));
+            result.append("// method return\n")
+                    .append(format("return methodWriter%sTL.get();%n", returnType.getSimpleName()));
         } else if (!returnType.isPrimitive()) {
             result.append("return null;\n");
         } else if (returnType == boolean.class) {

@@ -89,6 +89,7 @@ public class VanillaWireParser implements WireParser {
      * @throws InvocationTargetRuntimeException if a parselet throws a checked exception
      * @throws InvalidMarshallableException     if the wire data is malformed
      */
+    @Override
     public void parseOne(@NotNull WireIn wireIn) throws InvocationTargetRuntimeException, InvalidMarshallableException {
         long start = wireIn.bytes().readPosition();
 
@@ -186,6 +187,7 @@ public class VanillaWireParser implements WireParser {
      * @return this parser instance
      */
     @NotNull
+    @Override
     public VanillaWireParser register(String keyName, WireParselet valueInConsumer) {
         // Compute the hash code of the keyName and register.
         return register(keyName, keyName.hashCode(), valueInConsumer);

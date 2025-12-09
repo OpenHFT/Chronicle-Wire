@@ -25,7 +25,7 @@ import java.util.Collection;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class BytesMarshallableTest extends WireTestCommon {
     private final WireType wireType;
 
@@ -243,7 +243,9 @@ public class BytesMarshallableTest extends WireTestCommon {
         // Generic method to initialize a ScalarDto or its subtype, using an input integer.
         static <D extends ScalarDto> D init(int i, D d) {
             d.text = "Hello" + i;
-            d.buffer = new StringBuilder("bye " + i);
+            d.buffer = new StringBuilder()
+                    .append("bye ")
+                    .append(i);
             d.bytes = Bytes.allocateElasticOnHeap(8).append("hi ").append(i);
             return d;
         }

@@ -17,7 +17,7 @@ import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class BinaryInTextTest extends WireTestCommon {
 
     // Holds the wire type for each test iteration

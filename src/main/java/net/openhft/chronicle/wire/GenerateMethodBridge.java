@@ -53,7 +53,7 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
         // Set metadata properties based on the destination type and the objects to be invoked.
         md.packageName(Jvm.getPackageName(destType));
         md.baseClassName(destType.getSimpleName());
-        md.invokes(toInvoke.stream().map(o -> findClass(o)).collect(Collectors.toList()));
+        md.invokes(toInvoke.stream().map(GenerateMethodBridge::findClass).collect(Collectors.toList()));
         md.interfaces().add(destType);
         md.useUpdateInterceptor(ui != null);
 
@@ -96,7 +96,7 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
             Class<?> handler = handlers.get(i);
             String fname = fieldCase(handler);
             if (fnameList.contains(fname))
-                fname += fnameList.size();
+                fname = fname + fnameList.size();
             fnameList.add(fname);
             if (i == 0)
                 withLineNumber(mainCode);
@@ -112,7 +112,7 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
     protected void generateConstructors(SourceCodeFormatter mainCode) {
         MethodBridgeMetaData md = metaData();
         withLineNumber(mainCode)
-                .append("public ").append(className()).append("(").append(nameForClass(List.class)).append(" handlers");
+                .append("public ").append(className()).append('(').append(nameForClass(List.class)).append(" handlers");
         if (md.useUpdateInterceptor())
             mainCode.append(", ").append(nameForClass(UpdateInterceptor.class)).append(" updateInterceptor");
 
@@ -137,6 +137,7 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
      * @param paramList  The list of parameters of the method.
      * @param mainCode   The SourceCodeFormatter where the generated code will be appended.
      */
+    @Override
     protected void generateMethod(Method method, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
         MethodBridgeMetaData md = metaData();
         String name = method.getName();
@@ -152,7 +153,7 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
                 if (first)
                     withLineNumber(mainCode);
                 first = false;
-                mainCode.append("this.").append(fname).append(".").append(name).append("(").append(params).append(");\n");
+                mainCode.append("this.").append(fname).append('.').append(name).append('(').append(params).append(");\n");
             } catch (NoSuchMethodException e) {
                 // skip the handler if the method is not found in it.
             }

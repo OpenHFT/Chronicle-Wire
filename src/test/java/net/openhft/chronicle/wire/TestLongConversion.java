@@ -12,7 +12,7 @@ import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class TestLongConversion {
     private static final char SEPARATOR = '/';
     private final LongConverter longConverter;

@@ -126,9 +126,9 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
         // Determine whether the provided sequence is a method name or a method ID based on its first character.
         final String identifierType = s.length() != 0 && Character.isDigit(s.charAt(0)) ? "@MethodId" : "method-name";
-        StringBuilder msg = new StringBuilder()
+        StringBuilder msg = new StringBuilder(128)
                 .append("Unknown ").append(identifierType)
-                .append("='").append(s).append("'");
+                .append("='").append(s).append('\'');
         if (clazz != null) {
             if (clazz.getName().contains("Proxy$") || clazz.getName().contains("$Lambda"))
                 clazz = clazz.getInterfaces()[0];
@@ -176,6 +176,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
      * @param methodReaderInterceptorReturns The interceptor to set.
      * @return This builder for chaining.
      */
+    @Override
     public VanillaMethodReaderBuilder methodReaderInterceptorReturns(MethodReaderInterceptorReturns methodReaderInterceptorReturns) {
         this.methodReaderInterceptorReturns = methodReaderInterceptorReturns;
         return this;
@@ -314,6 +315,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
      * @return A built {@code MethodReader} instance.
      */
     @NotNull
+    @Override
     public MethodReader build(Object... impls) {
         if (this.defaultParselet == null)
             this.defaultParselet = createDefaultParselet(exceptionHandlerOnUnknownMethod, impls.length > 0 ? impls[0].getClass() : null);

@@ -68,7 +68,7 @@ public class MethodWriterClassNameGenerator {
                                @NotNull WireType wireType,
                                boolean verboseTypes) {
 
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder(128);
 
         interfaces.forEach(i -> {
             if (i.getEnclosingClass() != null)
@@ -76,12 +76,13 @@ public class MethodWriterClassNameGenerator {
             sb.append(i.getSimpleName());
         });
         int endOfInterfacesIndex = sb.length();
-        sb.append(genericEvent == null ? "" : genericEvent);
-        sb.append(metaData ? "MetadataAware" : "");
-        sb.append(intercepting ? "Intercepting" : "");
-        sb.append(this.toFirstCapCase(wireType.toString().replace("_", "")));
-        if (verboseTypes)
+        sb.append(genericEvent == null ? "" : genericEvent)
+                .append(metaData ? "MetadataAware" : "")
+                .append(intercepting ? "Intercepting" : "")
+                .append(this.toFirstCapCase(wireType.toString().replace("_", "")));
+        if (verboseTypes) {
             sb.append("Verbose");
+        }
 
         sb.append("MethodWriter");
         if (sb.length() > MAXIMUM_CLASS_NAME_LENGTH) {

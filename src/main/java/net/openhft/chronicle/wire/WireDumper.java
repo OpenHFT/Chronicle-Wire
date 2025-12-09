@@ -149,7 +149,7 @@ public class WireDumper {
             if (missing > 0 && !abbrev)
                 sb.append(" # missing: ").append(missing);
         } catch (Throwable t) {
-            sb.append(" ").append(t);
+            sb.append(' ').append(t);
         } finally {
             bytes.readLimit(limit0);
             bytes.readPosition(position0);
@@ -188,8 +188,8 @@ public class WireDumper {
         // Check for empty header
         if (header == 0) {
             if (!abbrev) {
-                sb.append("...\n");
-                sb.append("# ").append(this.bytes.readRemaining()).append(" bytes remaining\n");
+                sb.append("...\n")
+                        .append("# ").append(this.bytes.readRemaining()).append(" bytes remaining\n");
             }
             return true;
         }
@@ -200,13 +200,12 @@ public class WireDumper {
 
         // Append position and header information if not abbreviated
         if (start > 0 && !abbrev) {
-            sb.append("# position: ").append(start).append(", header: ");
-            sb.append(headerNumber);
+            sb.append("# position: ").append(start).append(", header: ").append(headerNumber);
             if (Wires.isEndOfFile(header))
                 sb.append(" EOF");
             else if (Wires.isNotComplete(header))
                 sb.append(" or ").append(headerNumber + 1);
-            sb.append("\n");
+            sb.append('\n');
         }
 
         // Calculate the length based on the header and check its validity
@@ -241,14 +240,14 @@ public class WireDumper {
             sb.append("--- ").append(type).append(binary ? " #binary" : "");
             if (len > this.bytes.readRemaining())
                 sb.append(" # len: ").append(len).append(", remaining: ").append(this.bytes.readRemaining());
-            sb.append("\n");
+            sb.append('\n');
         }
 
         // Handling the case where length is zero
         if (len == 0) {
             if (!abbrev) {
-                sb.append("...\n");
-                sb.append("# ").append(this.bytes.readRemaining()).append(" bytes remaining\n");
+                sb.append("...\n")
+                        .append("# ").append(this.bytes.readRemaining()).append(" bytes remaining\n");
             }
             return true;
         }
@@ -293,7 +292,7 @@ public class WireDumper {
                 sb.append((char) ch);
             }
         } catch (Exception e) {
-            sb.append(" ").append(e);
+            sb.append(' ').append(e);
         }
 
         // Ensure each entry ends with a newline

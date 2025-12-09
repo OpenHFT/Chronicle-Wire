@@ -132,4 +132,10 @@ public final class InternalAutoTailers {
             };
         }
     }
+
+    public static RunnablePoller newRunnablePoller(@NotNull final Supplier<? extends MarshallableIn> tailerSupplier,
+                                                   @NotNull final ExcerptListener excerptListener,
+                                                   @NotNull final Supplier<Pauser> pauserSupplier) {
+        return new RunnablePoller(tailerSupplier, excerptListener, pauserSupplier);
+    }
 }

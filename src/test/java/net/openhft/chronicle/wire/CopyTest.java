@@ -10,13 +10,14 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class CopyTest extends WireTestCommon {
 
     // Initial source and destination wire types for the copy test
@@ -122,7 +123,7 @@ public class CopyTest extends WireTestCommon {
     // Helper method to create a test instance of 'AClass'
     private AClass create() {
         AClass aClass = new AClass();
-        aClass.map = new HashMap<>();
+        aClass.map = new EnumMap<>(CcyPair.class);
         aClass.map.put(CcyPair.EURUSD, "eurusd");
         aClass.array = new String[]{"hello", "there"};
         aClass.intValue = 11;

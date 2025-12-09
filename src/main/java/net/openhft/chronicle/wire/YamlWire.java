@@ -507,6 +507,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      *
      * @return The string representation of the YamlWire instance.
      */
+    @Override
     public String toString() {
         if (bytes.readRemaining() > (1024 * 1024)) {
             final long l = bytes.readLimit();
@@ -1077,6 +1078,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     /**
      * Resets the state of the YamlWire instance, clearing all buffers and contexts.
      */
+    @Override
     public void reset() {
         // Reset reading and writing contexts if they exist
         if (readContext != null)
@@ -2086,7 +2088,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             yt.next();
             if (NULL_TAG.contentEquals(targetBuffer)) {
                 text();
-                return null; // Return null to indicate absence of a value.
+                return Collections.emptyMap();
 
                 // If the current token indicates a sequence map...
             } else if (SEQ_MAP.contentEquals(targetBuffer)) {

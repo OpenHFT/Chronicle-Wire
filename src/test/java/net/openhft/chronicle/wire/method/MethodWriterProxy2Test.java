@@ -7,6 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 
 // Test class extending MethodWriter2Test to evaluate behavior of method writers with enforced proxy generation
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 public class MethodWriterProxy2Test extends MethodWriter2Test {
 
     // Set up the environment before each test

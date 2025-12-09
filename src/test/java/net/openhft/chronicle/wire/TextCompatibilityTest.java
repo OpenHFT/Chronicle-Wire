@@ -21,7 +21,7 @@ import java.util.List;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 @Ignore("TODO FIX")
 public class TextCompatibilityTest extends WireTestCommon {
 
@@ -69,7 +69,7 @@ public class TextCompatibilityTest extends WireTestCommon {
     // Run the actual compatibility test on a file and its expected content.
     @SuppressWarnings("rawtypes")
     private static void runTest(String filename, String expectedFilename, boolean print) {
-        String expected = null;
+        String expected;
         try {
             Bytes<?> bytes = BytesUtil.readFile(filename);
             if (bytes.readRemaining() > 50)

@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import org.junit.After;
 
 // Test class extending MethodReaderArgumentsRecycleTest to test behavior of method readers when using proxies
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 public class MethodReaderArgumentsRecycleProxyTest extends MethodReaderArgumentsRecycleTest {
     @Override
     public void setUp() {

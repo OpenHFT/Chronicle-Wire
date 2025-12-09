@@ -23,7 +23,7 @@ import static org.junit.Assert.assertNull;
 /**
  * Tests for handling escaped characters in various Wire formats.
  */
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class EscapeCharsTest extends WireTestCommon {
     private final Future<?> future;
 

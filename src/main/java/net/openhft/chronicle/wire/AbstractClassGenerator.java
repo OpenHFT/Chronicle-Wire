@@ -89,14 +89,14 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
                 generateMainCode(mainCode);
 
                 // Append package and import statements.
-                sourceCode.append("" + "package ").append(metaData.packageName()).append(";\n").append("\n");
+                sourceCode.append("package ").append(metaData.packageName()).append(";\n").append("\n");
                 final String implementsSet = metaData.interfaces().stream()
                         .map(this::nameForClass)
                         .sorted()
                         .collect(Collectors.joining(", "));
 
                 for (String import0 : importSet) {
-                    sourceCode.append("" + "import ").append(import0).append(";\n");
+                    sourceCode.append("import ").append(import0).append(";\n");
                 }
                 // can't add classes to imports from this point.
                 importSet = Collections.unmodifiableSortedSet(importSet);
@@ -168,8 +168,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
             if (!"java.lang".equals(packageName) && !packageName.isEmpty()
                     && !importSet.contains(packageName + ".*")) {
                 try {
-                    if (!importSet.contains(s))
-                        importSet.add(s);
+                    importSet.add(s);
                 } catch (Exception e) {
                     Jvm.warn().on(getClass(), "Can't add an import for " + s);
                     throw e;
@@ -218,7 +217,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
         if (code.length() > maxCode())
             code = code.substring(1, maxCode());
         char ch = 'A';
-        ch += (char) ((h >>> 1) % 26);
+        ch = (char) (ch + ((h >>> 1) % 26));
         return metaData.baseClassName() + '$' + ch + code;
     }
 
@@ -310,7 +309,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
 
         // Start the method definition, appending method name and return type.
         withLineNumber(mainCode)
-                .append("public ").append(nameForClass(method.getReturnType())).append(" ").append(name).append("(");
+                .append("public ").append(nameForClass(method.getReturnType())).append(' ').append(name).append('(');
 
         // Append parameters to the method.
         Class<?>[] pts = method.getParameterTypes();
@@ -327,7 +326,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
 
             // Handle duplicate parameter names.
             if (paramList.contains(pname))
-                pname += paramList.size();
+                pname = pname + paramList.size();
             paramList.add(pname);
             params.append(pname);
             mainCode.append(nameForClass(pt)).append(' ').append(pname);

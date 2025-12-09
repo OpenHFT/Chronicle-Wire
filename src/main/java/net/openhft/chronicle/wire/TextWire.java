@@ -53,6 +53,8 @@ public class TextWire extends YamlWireOut<TextWire> {
     // Constants representing specific textual constructs in YAML.
     public static final BytesStore<?, ?> BINARY = BytesStore.from("!!binary");
     public static final @NotNull Bytes<byte[]> TYPE_STR = Bytes.from("type ");
+    static final byte[] EMPTY_BYTES = new byte[0];
+    private static final String TYPE = "type";
     static final String SEQ_MAP = "!seqmap";
 
     // A set of characters considered as "end characters" in this wire format.
@@ -470,6 +472,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      *
      * @return A string representation of the TextWire's underlying bytes.
      */
+    @Override
     public String toString() {
         if (bytes.readRemaining() > (1024 * 1024)) {
             final long l = bytes.readLimit();
@@ -1654,7 +1657,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
                     if ("!null".contentEquals(stringBuilder)) {
                         parseWord(stringBuilder);
-                        return null;
+                        return using != null ? using : EMPTY_BYTES;
                     }
 
                     throw new IllegalStateException("unsupported type=" + stringBuilder);
@@ -2674,7 +2677,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             // If the string represents a null value.
             if (("!!null").contentEquals(sb)) {
                 text();
-                return null;
+                return Collections.emptyMap();
 
                 // If the string indicates a sequence map type.
             } else if (("!" + SEQ_MAP).contentEquals(sb)) {

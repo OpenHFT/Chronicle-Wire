@@ -36,7 +36,7 @@ public class BytesUsageTest extends WireTestCommon {
         // Garbage-free replacement of Bytes in BytesWrapper
         // This demonstrates how to avoid garbage creation by reusing objects
         BytesWrapper bw = new BytesWrapper();  // this instance should be recycled to avoid garbage
-        bw.clOrdId().clear().append("A").append(value); // Direct manipulation of the Bytes
+        bw.clOrdId().clear().append('A').append(value); // Direct manipulation of the Bytes
         assertEquals(Bytes.from("AhelloWorld"), bw.clOrdId());
 
         // Release any resources held by the Bytes instance

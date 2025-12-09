@@ -16,7 +16,7 @@ import java.util.List;
  * Test for JSON wire handling of lists.
  * Related issue: https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class JSONWireWithListsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Determines whether to use types during serialization

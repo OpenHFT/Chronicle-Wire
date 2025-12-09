@@ -26,7 +26,7 @@ import static org.junit.Assume.assumeFalse;
  * using different wire types in Chronicle Wire. This class uses parameterized tests to
  * execute the same set of tests with various wire formats.
  */
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class ReorderedTest extends WireTestCommon {
     // Static instances of OuterClass for test setup
     private static final OuterClass outerClass1 = new OuterClass();

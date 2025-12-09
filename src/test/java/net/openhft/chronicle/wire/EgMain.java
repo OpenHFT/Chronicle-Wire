@@ -27,11 +27,11 @@ public class EgMain {
         for (int t = 0; t < 3; t++) {
             long start = System.nanoTime();
             int runs = 10000000;
-            long time;
+            long last = 0;
             for (int i = 0; i < runs; i++)
-                time = tp.currentTimeNanos();
+                last = tp.currentTimeNanos();
             long delay = (System.nanoTime() - start) / runs;
-            System.out.println(delay);
+            System.out.println(delay + " ns (last=" + last + ")");
         }
     }
 

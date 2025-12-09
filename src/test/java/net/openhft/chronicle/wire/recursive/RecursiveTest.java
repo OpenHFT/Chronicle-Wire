@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * looking up fields of the class. At time of writing this occurs when checking if the component class
  * of a subfield is a leaf and is only a problem when the component class is the same as the parent class.
  */
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
 public class RecursiveTest {
 
     @Test

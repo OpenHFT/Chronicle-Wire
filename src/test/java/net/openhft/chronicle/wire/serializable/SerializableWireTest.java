@@ -21,7 +21,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class SerializableWireTest extends WireTestCommon {
     // Wire type for the test
     private final WireType wireType;
@@ -106,7 +106,7 @@ public class SerializableWireTest extends WireTestCommon {
         try {
             Wire wire = new BinaryWire(bytes);
             TextContainer outerContainer = new TextContainer();
-            outerContainer.innerBuilders = new StringBuilder[] { new StringBuilder("innerText") };
+            outerContainer.innerBuilders = new StringBuilder[]{new StringBuilder("innerText")};
             wire.write("data").object(outerContainer);
 
             TextContainer deserializedContainer = wire.read("data").object(TextContainer.class);

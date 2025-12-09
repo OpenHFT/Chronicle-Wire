@@ -264,10 +264,10 @@ public class MethodReaderDelegationTest extends WireTestCommon {
         };
 
         // Set up the MethodReader to read methods from the wire and handle the designed exception
-        final MethodReader reader = wire.methodReader(useMethodId ? (MyInterfaceMethodId) () -> myInterface.myCall() : myInterface);
+        final MethodReader reader = wire.methodReader(useMethodId ? (MyInterfaceMethodId) myInterface::myCall : myInterface);
 
         // Assert that an InvocationTargetRuntimeException is thrown when trying to read a method
-        assertThrows(InvocationTargetRuntimeException.class, () -> reader.readOne());
+        assertThrows(InvocationTargetRuntimeException.class, reader::readOne);
     }
 
     // TODO: test below with interceptor
@@ -329,13 +329,13 @@ public class MethodReaderDelegationTest extends WireTestCommon {
                 throw new IllegalStateException("This is an exception by design");
             };
             // Set up the MethodReader to read methods from the wire
-            final MethodReader reader = wire.methodReader(useMethodId ? (MyInterfaceMethodId) () -> myInterface.myCall() : myInterface);
+            final MethodReader reader = wire.methodReader(useMethodId ? (MyInterfaceMethodId) myInterface::myCall : myInterface);
 
             // Check if the reader is of type VanillaMethodReader when proxy is enabled
             assertEquals(proxy, reader instanceof VanillaMethodReader);
 
             // Assert that an InvocationTargetRuntimeException is thrown when trying to read a method
-            assertThrows(InvocationTargetRuntimeException.class, () -> reader.readOne());
+            assertThrows(InvocationTargetRuntimeException.class, reader::readOne);
         } finally {
             // Clear the system property to reset its original state
             System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
@@ -373,17 +373,17 @@ public class MethodReaderDelegationTest extends WireTestCommon {
             writer.myCall(1L);
 
             // Create an instance of MyInterfaceLong that throws a designed exception when called
-            final MyInterfaceLong myInterface = (l) -> {
+            final MyInterfaceLong myInterface = l -> {
                 throw new IllegalStateException("This is an exception by design");
             };
             // Set up the MethodReader to read methods from the wire
-            final MethodReader reader = wire.methodReader(useMethodId ? (MyInterfaceLongMethodId) (l) -> myInterface.myCall(l) : myInterface);
+            final MethodReader reader = wire.methodReader(useMethodId ? (MyInterfaceLongMethodId) myInterface::myCall : myInterface);
 
             // Check if the reader is of type VanillaMethodReader when proxy is enabled
             assertEquals(proxy, reader instanceof VanillaMethodReader);
 
             // Assert that an InvocationTargetRuntimeException is thrown when trying to read a method
-            assertThrows(InvocationTargetRuntimeException.class, () -> reader.readOne());
+            assertThrows(InvocationTargetRuntimeException.class, reader::readOne);
         } finally {
             // Clear the system property to reset its original state
             System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
@@ -398,6 +398,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
     // Extension of MyInterface but with a specific method ID
     interface MyInterfaceMethodId extends MyInterface {
         @MethodId(1)
+        @Override
         void myCall();
     }
 
@@ -409,6 +410,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
     // Extension of MyInterfaceLong but with a specific method ID
     interface MyInterfaceLongMethodId extends MyInterfaceLong {
         @MethodId(2)
+        @Override
         void myCall(long l);
     }
 }

@@ -26,7 +26,7 @@ import static org.junit.Assume.assumeFalse;
  * It tests the serialization and deserialization of OuterClass instances
  * with different Wire formats.
  */
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class NestedClassTest extends WireTestCommon {
     // Static instances of OuterClass for testing.
     private static final OuterClass outerClass1 = new OuterClass();

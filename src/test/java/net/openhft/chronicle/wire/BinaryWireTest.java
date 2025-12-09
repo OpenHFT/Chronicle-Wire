@@ -37,7 +37,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 @SuppressWarnings({"deprecation", "removal"})
 public class BinaryWireTest extends WireTestCommon {
 
@@ -1621,7 +1621,7 @@ public class BinaryWireTest extends WireTestCommon {
         }
 
         // Reading using a method reader and processing the DTO
-        final MethodReader reader = wire.methodReader((IDTO) dto -> sb.append("dto: ").append(dto).append("\n"));
+        final MethodReader reader = wire.methodReader((IDTO) dto -> sb.append("dto: ").append(dto).append('\n'));
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
         assertEquals("one\n" +

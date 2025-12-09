@@ -20,7 +20,7 @@ import static org.junit.Assume.assumeFalse;
  * This test class corresponds to an issue raised in the Chronicle-Wire repository.
  * See: https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class JSONTypesWithEnumsAndBoxedTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Instance variable to determine if types are to be used in the JSON Wire representation.
@@ -49,11 +49,11 @@ public class JSONTypesWithEnumsAndBoxedTypesTest extends net.openhft.chronicle.w
     @UsedViaReflection
     static class F1 extends AbstractMarshallableCfg {
 
-        private String surname;  // Surname of the F1 driver.
+        private final String surname;  // Surname of the F1 driver.
 
         // change this to and int from an Integer and, it will work !
-        private Integer car;
-        private Location location;  // Represents the current location of the car.
+        private final Integer car;
+        private final Location location;  // Represents the current location of the car.
 
         // Constructor for the F1 class.
         F1(String surname, int car, Location location) {

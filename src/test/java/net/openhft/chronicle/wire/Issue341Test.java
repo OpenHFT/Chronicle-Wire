@@ -19,7 +19,7 @@ import java.util.Collection;
 
 import static org.junit.Assume.assumeFalse;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class Issue341Test extends WireTestCommon {
 
     // Instance variable to store the current WireType that the test is running for.
@@ -33,15 +33,13 @@ public class Issue341Test extends WireTestCommon {
     // This method specifies the different WireTypes the tests will run for.
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                new Object[]{WireType.BINARY},
+        return Arrays.asList(new Object[]{WireType.BINARY},
                 new Object[]{WireType.BINARY_LIGHT},
                 new Object[]{WireType.JSON},
                 new Object[]{WireType.JSON_ONLY},
                 new Object[]{WireType.TEXT},
                 new Object[]{WireType.YAML},
-                new Object[]{WireType.YAML_ONLY},
-        });
+                new Object[]{WireType.YAML_ONLY});
     }
 
     // Test for serializing and deserializing an instance of MyClass using different WireTypes.

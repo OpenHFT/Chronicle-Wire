@@ -224,6 +224,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @param metaData If true, the returned context will be used for writing metadata.
      * @return A context for the document being written.
      */
+    @Override
     DocumentContext acquireWritingDocument(boolean metaData);
 
     /**
@@ -323,6 +324,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * @return true unless there is an incomplete/chained message
      */
+    @Override
     default boolean writingIsComplete() {
         return true;
     }

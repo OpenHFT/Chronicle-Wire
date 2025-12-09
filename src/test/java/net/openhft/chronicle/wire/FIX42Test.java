@@ -62,7 +62,7 @@ import java.util.Collection;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.Assert.assertEquals;
 
-@RunWith(value = Parameterized.class)
+@RunWith(Parameterized.class)
 public class FIX42Test extends WireTestCommon {
     // Test ID for identification
     private final int testId;
