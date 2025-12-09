@@ -1,10 +1,7 @@
 name: Java Test Coverage
 
 on:
-  push:
-    branches: [main, master, develop]
-  pull_request:
-    branches: [main, master, develop]
+  workflow_dispatch:  # Manual trigger from GitHub UI
 
 jobs:
   test-coverage:
