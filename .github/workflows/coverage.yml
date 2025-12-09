@@ -1,17 +1,32 @@
 name: Java Test Coverage
 
 on:
-  workflow_dispatch:  # Manual trigger from GitHub UI
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number from upstream repo'
+        required: true
+        type: string
+      upstream_repo:
+        description: 'Upstream repo (owner/name)'
+        required: true
+        default: 'owner/repo-name'  # Change this to your upstream
 
 jobs:
   test-coverage:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
+      - name: Checkout fork
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      
+      - name: Fetch and checkout upstream PR
+        run: |
+          git remote add upstream https://github.com/${{ inputs.upstream_repo }}.git
+          git fetch upstream pull/${{ inputs.pr_number }}/head:pr-${{ inputs.pr_number }}
+          git checkout pr-${{ inputs.pr_number }}
       
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -26,49 +41,8 @@ jobs:
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-reports
+          name: coverage-pr-${{ inputs.pr_number }}
           path: |
             target/site/jacoco/
             target/coverage/
           retention-days: 30
-      
-      - name: Coverage comment on PR
-        if: github.event_name == 'pull_request'
-        uses: madrapps/jacoco-report@v1.6.1
-        with:
-          paths: target/site/jacoco/jacoco.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 60
-          min-coverage-changed-files: 80
-
-  diff-coverage:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    needs: test-coverage
-    
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      
-      - uses: actions/download-artifact@v4
-        with:
-          name: coverage-reports
-          path: coverage/
-      
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      
-      - name: Diff coverage
-        run: |
-          pip install diff-cover
-          diff-cover coverage/target/site/jacoco/jacoco.xml \
-            --compare-branch=origin/${{ github.base_ref }} \
-            --html-report diff-coverage.html \
-            --json-report diff-coverage.json
-      
-      - uses: actions/upload-artifact@v4
-        with:
-          name: diff-coverage
-          path: diff-coverage.*
