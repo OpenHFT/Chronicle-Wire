@@ -22,10 +22,7 @@ jobs:
       
       - name: Run tests with coverage
         run: mvn clean test jacoco:report
-      
-      - name: Generate line-level coverage
-        run: python3 scripts/parse_jacoco.py target/site/jacoco/jacoco.xml --output-dir target/coverage
-      
+            
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         with:
