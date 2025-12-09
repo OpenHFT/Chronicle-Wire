@@ -1,0 +1,80 @@
+name: Java Test Coverage
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  test-coverage:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+      
+      - name: Run tests with coverage
+        run: mvn clean test jacoco:report
+      
+      - name: Generate line-level coverage
+        run: python3 scripts/parse_jacoco.py target/site/jacoco/jacoco.xml --output-dir target/coverage
+      
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            target/site/jacoco/
+            target/coverage/
+          retention-days: 30
+      
+      - name: Coverage comment on PR
+        if: github.event_name == 'pull_request'
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: target/site/jacoco/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 60
+          min-coverage-changed-files: 80
+
+  diff-coverage:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    needs: test-coverage
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - uses: actions/download-artifact@v4
+        with:
+          name: coverage-reports
+          path: coverage/
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Diff coverage
+        run: |
+          pip install diff-cover
+          diff-cover coverage/target/site/jacoco/jacoco.xml \
+            --compare-branch=origin/${{ github.base_ref }} \
+            --html-report diff-coverage.html \
+            --json-report diff-coverage.json
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: diff-coverage
+          path: diff-coverage.*
