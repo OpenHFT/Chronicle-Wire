@@ -4,18 +4,15 @@
 package net.openhft.chronicle.wire.domestic.streaming.reduction;
 
 import net.openhft.chronicle.core.io.IOTools;
-import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
-import net.openhft.chronicle.wire.domestic.streaming.CreateUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.stream.Collector;
 
 import static java.util.stream.Collectors.*;
@@ -27,12 +24,6 @@ import static org.junit.Assert.assertEquals;
 public class CollectorTest extends WireTestCommon {
 
     private static final String Q_NAME = CollectorTest.class.getSimpleName();
-
-    private static final List<MarketData> MARKET_DATA_SET = Arrays.asList(
-            new MarketData("MSFT", 10, 11, 9),
-            new MarketData("MSFT", 100, 110, 90),
-            new MarketData("AAPL", 200, 220, 180)
-    );
 
     @Before
     public void clearBefore() {
@@ -56,26 +47,25 @@ public class CollectorTest extends WireTestCommon {
         );
 
         Reduction<MarketData> listener = Reduction.of(
-                        DocumentExtractor.builder(MarketData.class).withMethod(ServiceOut.class, ServiceOut::marketData).build())
+                        DocumentExtractor.builder(MarketData.class).withMethod(StreamingReductionTestSupport.ServiceOut.class, StreamingReductionTestSupport.ServiceOut::marketData).build())
                 .collecting(lastSeen);
 
-        test(listener);
+        StreamingReductionTestSupport.playMarketData(listener);
 
-        MarketData expected = createMarketData();
+        MarketData expected = StreamingReductionTestSupport.createMarketData();
         MarketData actual = listener.reduction();
         assertEquals(expected, actual);
     }
 
     @Test
     public void lastSeen() {
-
         Reduction<Optional<MarketData>> listener = Reduction.of(
-                        DocumentExtractor.builder(MarketData.class).withMethod(ServiceOut.class, ServiceOut::marketData).build())
+                        DocumentExtractor.builder(MarketData.class).withMethod(StreamingReductionTestSupport.ServiceOut.class, StreamingReductionTestSupport.ServiceOut::marketData).build())
                 .collecting(reducingConcurrent(replacingMerger()));
 
-        test(listener);
+        StreamingReductionTestSupport.playMarketData(listener);
 
-        MarketData expected = createMarketData();
+        MarketData expected = StreamingReductionTestSupport.createMarketData();
         MarketData actual = listener.reduction().orElseThrow(NoSuchElementException::new);
         assertEquals(expected, actual);
     }
@@ -83,14 +73,11 @@ public class CollectorTest extends WireTestCommon {
     @Test
     public void map() {
 
-        Reduction<Map<String, MarketData>> listener = Reduction.of(
-                        DocumentExtractor.builder(MarketData.class).withMethod(ServiceOut.class, ServiceOut::marketData).build()
-                )
-                .collecting(collectingAndThen(toConcurrentMap(MarketData::symbol, Function.identity(), replacingMerger()), Collections::unmodifiableMap));
+        Reduction<Map<String, MarketData>> listener = StreamingReductionTestSupport.mapReduction();
 
-        test(listener);
+        StreamingReductionTestSupport.playMarketData(listener);
 
-        MarketData expectedSymbol = createMarketData();
+        MarketData expectedSymbol = StreamingReductionTestSupport.createMarketData();
         Map<String, MarketData> expected = new HashMap<>();
         expected.put(expectedSymbol.symbol(), expectedSymbol);
 
@@ -102,40 +89,15 @@ public class CollectorTest extends WireTestCommon {
     public void composite() {
 
         final Reduction<Map<String, List<Double>>> listener = Reduction.of(
-                        DocumentExtractor.builder(MarketData.class).withMethod(ServiceOut.class, ServiceOut::marketData).build())
+                        DocumentExtractor.builder(MarketData.class).withMethod(StreamingReductionTestSupport.ServiceOut.class, StreamingReductionTestSupport.ServiceOut::marketData).build())
                 .collecting(groupingByConcurrent(MarketData::symbol, mapping(MarketData::last, toList())));
 
-        test(listener);
-        MarketData expectedSymbol = createMarketData();
+        StreamingReductionTestSupport.playMarketData(listener);
+        MarketData expectedSymbol = StreamingReductionTestSupport.createMarketData();
 
         Map<String, List<Double>> expected = new HashMap<>();
         expected.put(expectedSymbol.symbol(), Arrays.asList(0D, expectedSymbol.last()));
 
         assertEquals(expected, listener.reduction());
-    }
-
-    private void test(Reduction<?> listener) {
-        Wire wire = CreateUtil.create();
-        ServiceOut serviceOut = wire.methodWriter(ServiceOut.class);
-
-        MarketData marketData = createMarketData();
-        marketData.last(0);
-
-        serviceOut.marketData(marketData);
-        serviceOut.greeting("Bonjour");
-        serviceOut.marketData(createMarketData());
-        serviceOut.greeting("Guten Tag");
-        listener.accept(wire);
-    }
-
-    private static MarketData createMarketData() {
-        return new MarketData("MSFT", 100, 110, 90);
-    }
-
-    public interface ServiceOut {
-
-        void marketData(MarketData marketData);
-
-        void greeting(String greeting);
     }
 }

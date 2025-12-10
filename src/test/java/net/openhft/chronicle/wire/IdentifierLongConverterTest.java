@@ -67,40 +67,13 @@ public class IdentifierLongConverterTest extends net.openhft.chronicle.wire.Wire
     @Test
     public void allSafeCharsTextWire() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
-        allSafeChars(wire);
+        LongConverterTestSupport.allSafeChars(wire, IdentifierLongConverter.INSTANCE, 31);
     }
 
     // Test using the YamlWire format with safe characters
     @Test
     public void allSafeCharsYamlWire() {
         Wire wire = new YamlWire();
-        allSafeChars(wire);
-    }
-
-    // Helper function to test all safe characters for both TextWire and YamlWire formats
-    private void allSafeChars(Wire wire) {
-        final LongConverter converter = IdentifierLongConverter.INSTANCE;
-
-        // Loop through the first 32 numbers to validate the conversion logic
-        for (long i = 0; i < 32; i++) {
-            wire.clear();
-
-            // Write long values to the wire with the provided converter
-            wire.write("a").writeLong(converter, i);
-
-            // Write sequence values to the wire with the provided converter
-            wire.write("b").sequence(i, (i2, v) -> {
-                v.writeLong(converter, i2);
-                v.writeLong(converter, i2);
-            });
-
-            // Assert that the written values match the expected ones
-            assertEquals(wire.toString(),
-                    i, wire.read("a").readLong(converter));
-            wire.read("b").sequence(i, (i2, v) -> {
-                assertEquals((long) i2, v.readLong(converter));
-                assertEquals((long) i2, v.readLong(converter));
-            });
-        }
+        LongConverterTestSupport.allSafeChars(wire, IdentifierLongConverter.INSTANCE, 31);
     }
 }

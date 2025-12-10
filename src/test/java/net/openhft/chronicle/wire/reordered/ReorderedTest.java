@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
+import net.openhft.chronicle.wire.reuse.OuterClassWireTestSupport;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -92,30 +93,7 @@ public class ReorderedTest extends WireTestCommon {
     public void testWithReorderedFields() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
-        Wire wire = wireType.apply(bytes);
-
-        // Writing two instances of OuterClass with event names
-        wire.writeEventName(() -> "test1").marshallable(outerClass1);
-        // Adding a newline for JSON wire type
-        if (wireType == WireType.JSON)
-            wire.bytes().writeUnsignedByte('\n');
-        wire.writeEventName(() -> "test2").marshallable(outerClass2);
-
-        @NotNull StringBuilder sb = new StringBuilder();
-        @NotNull OuterClass outerClass0 = new OuterClass();
-
-        // Reading back the first OuterClass instance and comparing
-        wire.readEventName(sb).marshallable(outerClass0);
-        assertEquals("test1", sb.toString());
-        assertEquals(outerClass1.toString().replace(',', '\n'), outerClass0.toString().replace(',', '\n'));
-
-        // Reading back the second OuterClass instance and comparing
-        wire.readEventName(sb).marshallable(outerClass0);
-        assertEquals("test2", sb.toString());
-        assertEquals(outerClass2.toString().replace(',', '\n'), outerClass0.toString().replace(',', '\n'));
-
-        bytes.releaseLast();
+        OuterClassWireTestSupport.assertTwoOuterClasses(wireType, OuterClass::new, outerClass1, outerClass2, true);
     }
 
     /**

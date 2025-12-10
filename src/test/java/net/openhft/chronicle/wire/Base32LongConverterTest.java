@@ -47,39 +47,13 @@ public class Base32LongConverterTest extends WireTestCommon {
     @Test
     public void allSafeCharsTextWire() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
-        allSafeChars(wire);
+        LongConverterTestSupport.allSafeChars(wire, Base32LongConverter.INSTANCE, 32 * 32L);
     }
 
     // A test to check the character safety in YamlWire.
     @Test
     public void allSafeCharsYamlWire() {
         Wire wire = new YamlWire();
-        allSafeChars(wire);
-    }
-
-    // A method that performs a check on all safe characters in a given wire format.
-    private void allSafeChars(Wire wire) {
-        // Retrieve an instance of Base32LongConverter
-        final LongConverter converter = Base32LongConverter.INSTANCE;
-
-        // Iterating over a set of long numbers, to validate the consistency
-        // of writing a long to the wire and reading it back.
-        for (long i = 0; i <= 32 * 32; i++) {
-            wire.clear();  // Clear the wire content
-            wire.write("a").writeLong(converter, i); // Write a long value using the converter
-            wire.write("b").sequence(i, (i2, v) -> {
-                // Write a sequence of long values using the converter
-                v.writeLong(converter, i2);
-                v.writeLong(converter, i2);
-            });
-            // Validate that the read value matches the written value.
-            assertEquals(wire.toString(),
-                    i, wire.read("a").readLong(converter));
-            wire.read("b").sequence(i, (i2, v) -> {
-                // Validate that the sequence read values match the written values.
-                assertEquals((long) i2, v.readLong(converter));
-                assertEquals((long) i2, v.readLong(converter));
-            });
-        }
+        LongConverterTestSupport.allSafeChars(wire, Base32LongConverter.INSTANCE, 32 * 32L);
     }
 }

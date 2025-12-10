@@ -169,6 +169,11 @@ public enum Wires {
     // Used to ensure an untyped bytes warning is logged only once
     static volatile boolean warnedUntypedBytesOnce = false;
 
+    /**
+     * Marks that an untyped-bytes warning has been emitted to avoid repeating it.
+     *
+     * @return {@code true} if this call was the first warning emission, {@code false} otherwise
+     */
     static boolean markUntypedBytesWarning() {
         if (warnedUntypedBytesOnce)
             return false;
@@ -1177,7 +1182,7 @@ public enum Wires {
                 @NotNull final Object e = strategy.readUsing(clazz, using, in, BracketType.NONE);
                 return clazz == Base64.class || e == null
                         ? (E) e
-                        : (E) WireInternal.intern(clazz, e);
+                        : WireInternal.intern(clazz, e);
 
             case UNKNOWN:
             case HISTORY_MESSAGE:

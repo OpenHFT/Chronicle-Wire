@@ -12,10 +12,20 @@ import java.util.Spliterators;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
+/**
+ * Support utilities for {@link ChronicleBitSet} implementations (equality, string representation,
+ * and streaming). Isolated here to keep the core class lean while still reusing the shared logic.
+ */
 final class ChronicleBitSetSupport {
+    /**
+     * Utility holder; not instantiable.
+     */
     private ChronicleBitSetSupport() {
     }
 
+    /**
+     * Compares two {@link ChronicleBitSet} instances for equality while honouring close checks.
+     */
     static boolean equalsBitSet(ChronicleBitSet bitSet, Object obj, Runnable closeCheck) {
         closeCheck.run();
 
@@ -35,6 +45,9 @@ final class ChronicleBitSetSupport {
         return true;
     }
 
+    /**
+     * Builds a human-readable representation in the form {@code {0, 3, 4}}.
+     */
     static String toString(ChronicleBitSet bitSet) {
         int numBits = Math.toIntExact((bitSet.getWordsInUse() > 128) ?
                 bitSet.cardinality() : bitSet.getWordsInUse() * ChronicleBitSet.BITS_PER_WORD);
@@ -59,19 +72,32 @@ final class ChronicleBitSetSupport {
         return b.toString();
     }
 
+    /**
+     * Streams the set bit indices with close checks on each iteration. Marked deprecated because
+     * it exposes internal iteration details and will be removed in 2027.
+     */
     @Deprecated(/* to be removed in 2027 */)
     static IntStream stream(ChronicleBitSet bitSet, Runnable closeCheck) {
         closeCheck.run();
 
+        /**
+         * Iterator that walks set bits, rechecking the close guard on each access.
+         */
         class BitSetIterator implements PrimitiveIterator.OfInt {
             int next = bitSet.nextSetBit(0);
 
+            /**
+             * Returns whether any set bits remain.
+             */
             @Override
             public boolean hasNext() {
                 closeCheck.run();
                 return next != -1;
             }
 
+            /**
+             * Returns the next set bit index or throws when none remain.
+             */
             @Override
             public int nextInt() {
                 closeCheck.run();

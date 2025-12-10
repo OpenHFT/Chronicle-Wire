@@ -167,6 +167,7 @@ final class WireTestSupport {
 
     static void assertExceptionRoundTrip(Wire wire, String testClassName) {
         Exception e = new InvalidAlgorithmParameterException("Reference cannot be null") {
+            private static final long serialVersionUID = 1L;
             @NotNull
             @Override
             public StackTraceElement[] getStackTrace() {

@@ -9,9 +9,18 @@ package net.openhft.chronicle.wire;
  */
 final class MethodWriterTypeUtil {
 
+    /**
+     * Utility holder; not instantiable.
+     */
     private MethodWriterTypeUtil() {
     }
 
+    /**
+     * Maps a Java type to the writer alias used in text/binary outputs (e.g. {@code int} -> {@code int32}).
+     *
+     * @param type the Java parameter type
+     * @return the writer method suffix representing that type
+     */
     static CharSequence typeAlias(Class<?> type) {
         if (boolean.class.equals(type)) {
             return "bool";

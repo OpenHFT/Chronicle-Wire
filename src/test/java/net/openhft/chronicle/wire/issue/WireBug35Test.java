@@ -24,26 +24,16 @@ public class WireBug35Test extends WireTestCommon {
     public void objectsInSequence() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
-
-        final Wire wire = WireType.TEXT.apply(bytes);
-        wire.write(() -> "seq").sequence(seq -> {
-            seq.marshallable(obj -> obj.write(() -> "key").text("value"));
-            seq.marshallable(obj -> obj.write(() -> "key").text("value"));
-        });
-
-        final String text = Wires.asText(wire, Bytes.allocateElasticOnHeap()).toString();
-        Object load = new Yaml().load(text);
-
-        assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
-
-        bytes.releaseLast();
+        assertObjectsInSequence(WireType.TEXT.apply(Bytes.elasticByteBuffer()));
     }
 
     @Test
     public void objectsInSequenceBinaryWire() {
         final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
-        final Wire wire = WireType.BINARY.apply(bytes);
+        assertObjectsInSequence(WireType.BINARY.apply(bytes));
+    }
+
+    private void assertObjectsInSequence(Wire wire) {
         wire.write(() -> "seq").sequence(seq -> {
             seq.marshallable(obj -> obj.write(() -> "key").text("value"));
             seq.marshallable(obj -> obj.write(() -> "key").text("value"));
@@ -54,6 +44,6 @@ public class WireBug35Test extends WireTestCommon {
 
         assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
 
-        bytes.releaseLast();
+        wire.bytes().releaseLast();
     }
 }

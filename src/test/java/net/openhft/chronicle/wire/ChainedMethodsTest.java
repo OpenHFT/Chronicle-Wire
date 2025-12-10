@@ -48,15 +48,10 @@ public class ChainedMethodsTest extends WireTestCommon {
         System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
     }
 
-    // Test method for chained methods with TextWire.
-    @Test
-    public void chainedText() {
+    private void assertChainedTextual(Wire wire) {
         if (disableProxyCodegen)
             expectException("Falling back to proxy method writer");
 
-        // Create an instance of TextWire.
-        TextWire wire = new TextWire(Bytes.allocateElasticOnHeap(128))
-                .useTextDocuments();
         ITop top = wire.methodWriter(ITop.class);
 
         // Chain method calls on the created wire instance.
@@ -90,45 +85,21 @@ public class ChainedMethodsTest extends WireTestCommon {
         assertFalse(reader.readOne());
     }
 
+    // Test method for chained methods with TextWire.
+    @Test
+    public void chainedText() {
+        // Create an instance of TextWire.
+        TextWire wire = new TextWire(Bytes.allocateElasticOnHeap(128))
+                .useTextDocuments();
+        assertChainedTextual(wire);
+    }
+
     // Test method for chained methods with YAML Wire.
     @Test
     public void chainedYaml() {
-        if (disableProxyCodegen)
-            expectException("Falling back to proxy method writer");
-
         // Create an instance of YamlWire.
         Wire wire = Wire.newYamlWireOnHeap();
-        ITop top = wire.methodWriter(ITop.class);
-
-        // Chain method calls on the created wire instance.
-        top.mid("mid")
-                .next(1)
-                .echo("echo-1");
-        top.mid2("mid2")
-                .next2("word")
-                .echo("echo-2");
-
-        // Validate the wire's string representation.
-        assertEquals("mid: mid\n" +
-                "next: 1\n" +
-                "echo: echo-1\n" +
-                "...\n" +
-                "mid2: mid2\n" +
-                "next2: word\n" +
-                "echo: echo-2\n" +
-                "...\n", wire.toString());
-
-        // Create a StringBuilder to collect method call representations.
-        StringBuilder sb = new StringBuilder();
-
-        // Create a method reader to read method calls.
-        MethodReader reader = wire.methodReader(Mocker.intercepting(ITop.class, "*", sb::append));
-        assertTrue(reader.readOne());
-        assertTrue(reader.readOne());
-
-        // Validate the string representation of method calls.
-        assertEquals("*mid[mid]*next[1]*echo[echo-1]*mid2[mid2]*next2[word]*echo[echo-2]", sb.toString());
-        assertFalse(reader.readOne());
+        assertChainedTextual(wire);
     }
 
     // Test for chained methods with BinaryWire
@@ -152,8 +123,7 @@ public class ChainedMethodsTest extends WireTestCommon {
                 .echo("echo-2");
 
         // Validate the wire's representation using WireDumper.
-        assertEquals("" +
-                "--- !!data #binary\n" +
+        assertEquals("--- !!data #binary\n" +
                 "mid: mid\n" +
                 "next: 1\n" +
                 "echo: echo-1\n" +
@@ -197,8 +167,7 @@ public class ChainedMethodsTest extends WireTestCommon {
                 .echo("echo-2");
 
         // Validate the wire's representation using WireDumper.
-        assertEquals("" +
-                        "--- !!data #binary\n" +
+        assertEquals("--- !!data #binary\n" +
                         "midNoArg: \"\"\n" +
                         "next: 1\n" +
                         "echo: echo-1\n" +

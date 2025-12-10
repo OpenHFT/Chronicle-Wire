@@ -185,23 +185,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the serialization and deserialization of an object containing a TreeMap
     @Test
     public void writeObjectWithTreeMap() {
-        @NotNull Wire wire = createWire();
-        ObjectWithTreeMap value = new ObjectWithTreeMap();
-        value.map.put("hello", "world");
-        wire.write().object(value);
-        // System.out.println(Bytes.);
-        ObjectWithTreeMap value2 = new ObjectWithTreeMap();
-        wire.read().object(value2, ObjectWithTreeMap.class);
-        assertEquals("{hello=world}", value2.map.toString());
-
-        wire.bytes().readPosition(0);
-        ObjectWithTreeMap value3 = new ObjectWithTreeMap();
-        wire.read().object(value3, Object.class);
-        assertEquals("{hello=world}", value3.map.toString());
-
-        wire.bytes().readPosition(0);
-        ObjectWithTreeMap value4 = wire.read().object(ObjectWithTreeMap.class);
-        assertEquals("{hello=world}", value4.map.toString());
+        WireMapTestSupport.assertObjectWithTreeMap(WireType.BINARY::apply);
     }
 
     // Test reading and writing of 32-bit float values
@@ -245,30 +229,14 @@ public class BinaryWire2Test extends WireTestCommon {
     @Test
     public void testZonedDateTime() {
         @NotNull Wire wire = createWire();
-        ZonedDateTime now = ZonedDateTime.now();
-        ZonedDateTime max = ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault());
-        ZonedDateTime min = ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault());
-        wire.write().zonedDateTime(now)
-                .write().zonedDateTime(max)
-                .write().zonedDateTime(min);
-
-        wire.read().zonedDateTime(now, Assert::assertEquals)
-                .read().zonedDateTime(max, Assert::assertEquals)
-                .read().zonedDateTime(min, Assert::assertEquals);
+        WireTemporalTestSupport.assertZonedDateTimes(wire);
     }
 
     // Test reading and writing of LocalDate values
     @Test
     public void testLocalDate() {
         @NotNull Wire wire = createWire();
-        LocalDate now = LocalDate.now();
-        wire.write().date(now)
-                .write().date(LocalDate.MAX)
-                .write().date(LocalDate.MIN);
-
-        wire.read().date(now, Assert::assertEquals)
-                .read().date(LocalDate.MAX, Assert::assertEquals)
-                .read().date(LocalDate.MIN, Assert::assertEquals);
+        WireTemporalTestSupport.assertLocalDates(wire);
     }
 
     // Test reading and writing of java.util.Date values
@@ -457,6 +425,28 @@ public class BinaryWire2Test extends WireTestCommon {
         assertEquals(WireType.RAW, wire.read().object(Object.class));
     }
 
+    private void writeUpdateEvent(WireOut wireOut, Object oldValue) {
+        wireOut.write("data").typedMarshallable("!UpdateEvent",
+                v -> v.write("assetName").text("/name")
+                        .write("key").object("test")
+                        .write("oldValue").object(oldValue)
+                        .write("value").object("world2"));
+    }
+
+    private void assertUpdateEvent(ValueIn valueIn, boolean expectNullOldValue) {
+        valueIn.typePrefix(this, (o, t) -> assertEquals("!UpdateEvent", t.toString())).marshallable(
+                m -> {
+                    m.read(() -> "assetName").object(String.class, "/name", Assert::assertEquals)
+                            .read(() -> "key").object(String.class, "test", Assert::assertEquals);
+                    if (expectNullOldValue) {
+                        m.read(() -> "oldValue").object(String.class, "error", Assert::assertNull);
+                    } else {
+                        m.read(() -> "oldValue").object(String.class, "world1", Assert::assertEquals);
+                    }
+                    m.read(() -> "value").object(String.class, "world2", Assert::assertEquals);
+                });
+    }
+
     // Test the serialization behavior when there's text data followed by field data
     @Test
     public void fieldAfterText() {
@@ -480,22 +470,14 @@ public class BinaryWire2Test extends WireTestCommon {
                 "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         // Read back the document and assert each field's value
-        wire.readDocument(null, w -> w.read(() -> "data").typePrefix(this, (o, t) -> assertEquals("!UpdateEvent", t.toString())).marshallable(
-                m -> m.read(() -> "assetName").object(String.class, "/name", Assert::assertEquals)
-                        .read(() -> "key").object(String.class, "test", Assert::assertEquals)
-                        .read(() -> "oldValue").object(String.class, "world1", Assert::assertEquals)
-                        .read(() -> "value").object(String.class, "world2", Assert::assertEquals)));
+        wire.readDocument(null, w -> assertUpdateEvent(w.read(() -> "data"), false));
     }
 
     // Test the serialization behavior when there's a null field followed by another field
     @Test
     public void fieldAfterNull() {
         @NotNull Wire wire = createWire();
-        wire.writeDocument(false, w -> w.write("data").typedMarshallable("!UpdateEvent",
-                v -> v.write("assetName").text("/name")
-                        .write("key").object("test")
-                        .write("oldValue").object(null)
-                        .write("value").object("world2")));
+        wire.writeDocument(false, w -> writeUpdateEvent(w, null));
 
         // Validate the serialized format of the document, especially the null field representation
         assertEquals("--- !!data #binary\n" +
@@ -507,11 +489,7 @@ public class BinaryWire2Test extends WireTestCommon {
                 "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         // Read back the document, especially ensuring the null field is read back correctly
-        wire.readDocument(null, w -> w.read(() -> "data").typePrefix(this, (o, t) -> assertEquals("!UpdateEvent", t.toString())).marshallable(
-                m -> m.read(() -> "assetName").object(String.class, "/name", Assert::assertEquals)
-                        .read(() -> "key").object(String.class, "test", Assert::assertEquals)
-                        .read(() -> "oldValue").object(String.class, "error", Assert::assertNull)
-                        .read(() -> "value").object(String.class, "world2", Assert::assertEquals)));
+        wire.readDocument(null, w -> assertUpdateEvent(w.read(() -> "data"), true));
     }
 
     // Test the serialization behavior when there's a null field in the context of other metadata and data fields
@@ -529,11 +507,7 @@ public class BinaryWire2Test extends WireTestCommon {
 
         // Write main data, which includes a null field, to the wire
         try (DocumentContext ignored = wire.writingDocument(false)) {
-            wire.write("data").typedMarshallable("!UpdateEvent",
-                    v -> v.write("assetName").text("/name")
-                            .write("key").object("test")
-                            .write("oldValue").object(null)
-                            .write("value").object("world2"));
+            writeUpdateEvent(wire, null);
         }
 
         // Validate the serialized format of the entire wire content, including metadata and data
@@ -560,11 +534,7 @@ public class BinaryWire2Test extends WireTestCommon {
         try (DocumentContext context = wire.readingDocument()) {
             assertTrue(context.isPresent());
             assertTrue(context.isData());
-            wire.read(() -> "data").typePrefix(this, (o, t) -> assertEquals("!UpdateEvent", t.toString())).marshallable(
-                    m -> m.read(() -> "assetName").object(String.class, "/name", Assert::assertEquals)
-                            .read(() -> "key").object(String.class, "test", Assert::assertEquals)
-                            .read(() -> "oldValue").object(String.class, "error", Assert::assertNull)
-                            .read(() -> "value").object(String.class, "world2", Assert::assertEquals));
+            assertUpdateEvent(wire.read(() -> "data"), true);
         }
 
         // Ensure no more data is available in the wire

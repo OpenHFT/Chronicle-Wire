@@ -21,55 +21,15 @@ public class TestJsonIssue467 {
 
     @Test
     public void test() {
-        CLASS_ALIASES.addAlias(ResponseItem467.class);
-
-        ResponseItem467 responseItem467 = Marshallable.fromString(ResponseItem467.class, "!ResponseItem467 {\n" +
-                "  index: \"4ab100000005\",\n" +
-                "  key: seqNumber,\n" +
-                "  payload: {\n" +
-                "    eventId: periodicUpdate,\n" +
-                "    eventTime: 1652109920838805734,\n" +
-                "    seqNumbers: [\n" +
-                "      {\n" +
-                "        sessionID: {\n" +
-                "          localCompID: SERVER,\n" +
-                "          remoteCompID: CLIENT,\n" +
-                "          localSubID: !!null \"\",\n" +
-                "          remoteSubID: !!null \"\"\n" +
-                "        },\n" +
-                "        rSeq: !short 1517,\n" +
-                "        wSeq: !short 1519,\n" +
-                "        isActive: true,\n" +
-                "        isConnected: false\n" +
-                "      }\n" +
-                "    ]\n" +
-                "  }\n" +
-                "}");
-
-        OnHeapBytes buffer = Bytes.allocateElasticOnHeap();
-        final Wire jsonWire = WireType.JSON_ONLY.apply(buffer);
-        jsonWire.getValueOut().object(responseItem467);
-
-        String actual = buffer.toString();
-
-        int openBracket = 0;
-        int closeBracket = 0;
-        for (int i = 0; i < actual.length(); i++) {
-            if (actual.charAt(i) == '{')
-                openBracket++;
-            if (actual.charAt(i) == '}')
-                closeBracket++;
-        }
-
-        // check the number of '{' match the number of '}'
-        Assert.assertEquals("openBracket and closeBracket should match", openBracket, closeBracket);
-
-        // DON'T CHANGE THE EXPECTED JSON IT IS CORRECT ! - please use this website to validate the json - https://jsonformatter.org
-        Assert.assertEquals("{\"@ResponseItem467\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":{\"eventId\":\"periodicUpdate\",\"eventTime\":1652109920838805734,\"seqNumbers\":[ {\"sessionID\":{\"localCompID\":\"SERVER\",\"remoteCompID\":\"CLIENT\",\"localSubID\":null,\"remoteSubID\":null},\"rSeq\":1517,\"wSeq\":1519,\"isActive\":true,\"isConnected\":false} ]}}}", actual);
+        assertResponseItemJson();
     }
 
     @Test
     public void test2() {
+        assertResponseItemJson();
+    }
+
+    private void assertResponseItemJson() {
         CLASS_ALIASES.addAlias(ResponseItem467.class);
 
         ResponseItem467 responseItem467 = Marshallable.fromString(ResponseItem467.class, "!ResponseItem467 {\n" +

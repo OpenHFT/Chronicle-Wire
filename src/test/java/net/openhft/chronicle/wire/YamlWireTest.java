@@ -288,27 +288,16 @@ public class YamlWireTest extends AbstractWireTest {
     @Test
     public void int8() {
         @NotNull Wire wire = createWire();  // Create a new Wire object
-        // Write 8-bit integers
-        wire.write().int8(1);
-        wire.write(BWKey.field1).int8(2);
-        wire.write(() -> "Test").int8(3);
 
-        // Validate YAML output and string representation
-        expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
-        assertEquals("\"\": 1\n" +
+        WireSmallIntTestSupport.writeInt8Triplet(wire);
+
+        WireSmallIntTestSupport.expectTextLayout(wire, "{=1, field1=2, Test=3}", "\"\": 1\n" +
                 "field1: 2\n" +
-                "Test: 3\n", wire.toString());
+                "Test: 3\n");
 
-        // Read the 8-bit integers back and validate
-        @NotNull AtomicInteger i = new AtomicInteger();
-        IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().int8(i, AtomicInteger::set);
-            assertEquals(e, i.get());
-        });
+        WireSmallIntTestSupport.readInt8Triplet(wire);
 
         assertEquals(0, wire.bytes().readRemaining());  // Ensure no bytes are left to read
-
-        // Verify that it's safe to read beyond the available data
         wire.read();
     }
 
@@ -316,27 +305,16 @@ public class YamlWireTest extends AbstractWireTest {
     @Test
     public void int16() {
         @NotNull Wire wire = createWire();  // Create a new Wire object
-        // Write 16-bit integers
-        wire.write().int16(1);
-        wire.write(BWKey.field1).int16(2);
-        wire.write(() -> "Test").int16(3);
 
-        // Validate YAML output and string representation
-        expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
-        assertEquals("\"\": 1\n" +
+        WireSmallIntTestSupport.writeInt16Triplet(wire);
+
+        WireSmallIntTestSupport.expectTextLayout(wire, "{=1, field1=2, Test=3}", "\"\": 1\n" +
                 "field1: 2\n" +
-                "Test: 3\n", wire.toString());
+                "Test: 3\n");
 
-        // Read the 16-bit integers back and validate
-        @NotNull AtomicInteger i = new AtomicInteger();
-        IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().int16(i, AtomicInteger::set);
-            assertEquals(e, i.get());
-        });
+        WireSmallIntTestSupport.readInt16Triplet(wire);
 
         assertEquals(0, wire.bytes().readRemaining());  // Ensure no bytes are left to read
-
-        // Verify that it's safe to read beyond the available data
         wire.read();
     }
 
@@ -344,26 +322,15 @@ public class YamlWireTest extends AbstractWireTest {
     @Test
     public void uint8() {
         @NotNull Wire wire = createWire(); // Create a new Wire object
-        wire.write().uint8(1); // Write a few 8-bit unsigned integers
-        wire.write(BWKey.field1).uint8(2);
-        wire.write(() -> "Test").uint8(3);
+        WireSmallIntTestSupport.writeUint8Triplet(wire);
 
-        // Validate YAML output and string representation
-        expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
-        assertEquals("\"\": 1\n" +
+        WireSmallIntTestSupport.expectTextLayout(wire, "{=1, field1=2, Test=3}", "\"\": 1\n" +
                 "field1: 2\n" +
-                "Test: 3\n", wire.toString());
+                "Test: 3\n");
 
-        // Read the unsigned integers back and validate
-        @NotNull AtomicInteger i = new AtomicInteger();
-        IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().uint8(i, AtomicInteger::set);
-            assertEquals(e, i.get());
-        });
+        WireSmallIntTestSupport.readUint8Triplet(wire);
 
         assertEquals(0, wire.bytes().readRemaining()); // Ensure no bytes are left to read
-
-        // Verify that it's safe to read beyond the available data
         wire.read();
     }
 
@@ -371,25 +338,15 @@ public class YamlWireTest extends AbstractWireTest {
     @Test
     public void uint16() {
         @NotNull Wire wire = createWire(); // Create a new Wire object
-        wire.write().uint16(1); // Write a few 16-bit unsigned integers
-        wire.write(BWKey.field1).uint16(2);
-        wire.write(() -> "Test").uint16(3);
+        WireSmallIntTestSupport.writeUint16Triplet(wire);
 
-        // Validate YAML output and string representation
-        expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
-        assertEquals("\"\": 1\n" +
+        WireSmallIntTestSupport.expectTextLayout(wire, "{=1, field1=2, Test=3}", "\"\": 1\n" +
                 "field1: 2\n" +
-                "Test: 3\n", wire.toString());
+                "Test: 3\n");
 
-        // Read the unsigned integers back and validate
-        @NotNull AtomicInteger i = new AtomicInteger();
-        IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().uint16(i, AtomicInteger::set);
-            assertEquals(e, i.get());
-        });
+        WireSmallIntTestSupport.readUint16Triplet(wire);
 
         assertEquals(0, wire.bytes().readRemaining());
-        // check it's safe to read too much.
         wire.read();
     }
 
@@ -397,25 +354,15 @@ public class YamlWireTest extends AbstractWireTest {
     @Test
     public void uint32() {
         @NotNull Wire wire = createWire(); // Create a new Wire object
-        wire.write().uint32(1);
-        wire.write(BWKey.field1).uint32(2); // Write a couple 32-bit unsigned integers
-        wire.write(() -> "Test").uint32(3);
+        WireSmallIntTestSupport.writeUint32Triplet(wire);
 
-        // Validate YAML output and string representation
-        expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
-        assertEquals("\"\": 1\n" +
+        WireSmallIntTestSupport.expectTextLayout(wire, "{=1, field1=2, Test=3}", "\"\": 1\n" +
                 "field1: 2\n" +
-                "Test: 3\n", wire.toString());
+                "Test: 3\n");
 
-        // Read the unsigned integers back and validate
-        @NotNull AtomicLong i = new AtomicLong();
-        IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().uint32(i, AtomicLong::set);
-            assertEquals(e, i.get());
-        });
+        WireSmallIntTestSupport.readUint32Triplet(wire);
 
         assertEquals(0, wire.bytes().readRemaining());
-        // check it's safe to read too much.
         wire.read();
     }
 
@@ -423,25 +370,15 @@ public class YamlWireTest extends AbstractWireTest {
     @Test
     public void int32() {
         @NotNull Wire wire = createWire(); // Create a new Wire object
-        wire.write().int32(1); // Write a few 32-bit signed integers
-        wire.write(BWKey.field1).int32(2);
-        wire.write(() -> "Test").int32(3);
+        WireSmallIntTestSupport.writeInt32Triplet(wire);
 
-        // Validate YAML output and string representation
-        expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
-        assertEquals("\"\": 1\n" +
+        WireSmallIntTestSupport.expectTextLayout(wire, "{=1, field1=2, Test=3}", "\"\": 1\n" +
                 "field1: 2\n" +
-                "Test: 3\n", wire.toString());
+                "Test: 3\n");
 
-        // Read the signed integers back and validate
-        @NotNull AtomicInteger i = new AtomicInteger();
-        IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().int32(i, AtomicInteger::set);
-            assertEquals(e, i.get());
-        });
+        WireSmallIntTestSupport.readInt32Triplet(wire);
 
         assertEquals(0, wire.bytes().readRemaining());
-        // check it's safe to read too much.
         wire.read();
     }
 
@@ -562,32 +499,14 @@ public class YamlWireTest extends AbstractWireTest {
     @Test
     public void testBool() {
         @NotNull Wire wire = createWire(); // Create a new Wire object
-        // Write different boolean values
-        wire.write().bool(false)
-                .write().bool(true)
-                .write().bool(null);
-        // Read back and verify
-        wire.read().bool(false, Assert::assertEquals)
-                .read().bool(true, Assert::assertEquals)
-                .read().bool(null, Assert::assertEquals);
+        WirePrimitiveTestSupport.assertBooleanRoundTrip(wire);
     }
 
     // Test case for 32-bit floating point types
     @Test
     public void testFloat32() {
         @NotNull Wire wire = createWire(); // Create a new Wire object
-        // Write float values including edge cases
-        wire.write().float32(0.0F)
-                .write().float32(Float.NaN)
-                .write().float32(Float.POSITIVE_INFINITY)
-                .write().float32(Float.NEGATIVE_INFINITY)
-                .write().float32(123456.0f);
-        // Read back and verify
-        wire.read().float32(this, (o, t) -> assertEquals(0.0F, t, 0.0F))
-                .read().float32(this, (o, t) -> assertTrue(Float.isNaN(t)))
-                .read().float32(this, (o, t) -> assertEquals(Float.POSITIVE_INFINITY, t, 0.0F))
-                .read().float32(this, (o, t) -> assertEquals(Float.NEGATIVE_INFINITY, t, 0.0F))
-                .read().float32(this, (o, t) -> assertEquals(123456.0f, t, 0.0F));
+        WirePrimitiveTestSupport.assertFloat32RoundTrip(wire, this);
     }
 
     // Test case for time representation
@@ -595,82 +514,37 @@ public class YamlWireTest extends AbstractWireTest {
     public void testTime() {
         @NotNull Wire wire = createWire(); // Create a new Wire object
         LocalTime now = LocalTime.now(); // Get current time
-        // Write time values
-        wire.write().time(now)
-                .write().time(LocalTime.MAX)
-                .write().time(LocalTime.MIN);
-        // Verify written time
-        assertEquals("\"\": " + now + "\n" +
-                        "\"\": 23:59:59.999999999\n" +
-                        "\"\": 00:00\n",
-                wire.toString());
-        // Read back and verify
-        wire.read().time(now, Assert::assertEquals)
-                .read().time(LocalTime.MAX, Assert::assertEquals)
-                .read().time(LocalTime.MIN, Assert::assertEquals);
+
+        WirePrimitiveTestSupport.writeTimes(wire, now);
+        assertEquals(WirePrimitiveTestSupport.expectedTimeString(now), wire.toString());
+        WirePrimitiveTestSupport.assertTimes(wire, now);
     }
 
 
     @Test
     public void testDate() {
         final Wire wire = createWire();
-        LocalDate now = LocalDate.now();
-        wire.write().date(now)
-                .write().date(LocalDate.MAX)
-                .write().date(LocalDate.MIN);
-        wire.read().date(now, Assert::assertEquals)
-                .read().date(LocalDate.MAX, Assert::assertEquals)
-                .read().date(LocalDate.MIN, Assert::assertEquals);
+        WireTemporalTestSupport.assertLocalDates(wire);
     }
 
     @Test
     public void testUuid() {
         final Wire wire = createWire();
-        UUID uuid = UUID.randomUUID();
-        wire.write().uuid(uuid)
-                .write().uuid(new UUID(0, 0))
-                .write().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE));
-        wire.read().uuid(uuid, Assert::assertEquals)
-                .read().uuid(new UUID(0, 0), Assert::assertEquals)
-                .read().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), Assert::assertEquals);
+        WireTemporalTestSupport.assertUuids(wire);
     }
 
     @Test
     public void testTypeWithoutSpace() {
         final Wire wire = createWire();
-        wire.bytes().append("A: !").append(MyTypes.class.getName()).append("{}");
 
-        @NotNull MyTypes mt = (MyTypes) wire.read("A")
-                .object();
-        assertEquals("!net.openhft.chronicle.wire.MyTypes {\n" +
-                "  text: \"\",\n" +
-                "  flag: false,\n" +
-                "  b: 0,\n" +
-                "  s: 0,\n" +
-                "  ch: \"\\0\",\n" +
-                "  i: 0,\n" +
-                "  f: 0.0,\n" +
-                "  d: 0.0,\n" +
-                "  l: 0\n" +
-                "}\n", mt.toString());
+        WireTestSupport.assertTypeWithoutSpace(wire);
     }
 
     @Test
     public void testNANValue() {
         @NotNull Wire wire = createWire();
-        wire.bytes().append(
-                "A: NaN,\n" +
-                        "A2: NaN ,\n" +
-                        "A3: Infinity,\n" +
-                        "A4: -Infinity,\n" +
-                        "A5: NaN\n" +
-                        "B: 1.23\n");
-        assertEquals(Double.NaN, wire.read("A").float64(), 0);
-        assertEquals(Double.NaN, wire.read("A2").float64(), 0);
-        assertEquals(Double.POSITIVE_INFINITY, wire.read("A3").float64(), 0);
-        assertEquals(Double.NEGATIVE_INFINITY, wire.read("A4").float64(), 0);
-        assertEquals(Double.NaN, wire.read("A5").float64(), 0);
-        assertEquals(1.23, wire.read("B").float64(), 0);
+
+        WireTestSupport.assertNanValues(wire);
     }
 
     @Test
@@ -712,30 +586,8 @@ public class YamlWireTest extends AbstractWireTest {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         @NotNull Wire wire = createWire();
-        wire.bytes().append(
-                "A : \"hi\",\n" +
-                        "B\t : 'hi',\n" +
-                        "C: hi,\n" +
-                        "D: bye,\n");
-        ABCD abcd = new ABCD();
 
-        try {
-            for (int i = 0; i < 5; i++) {
-                wire.bytes().readPosition(0);
-                wire.getValueIn().resetState();
-                ABCD object = wire.getValueIn()
-                        .object(abcd, ABCD.class);
-                assertEquals("!net.openhft.chronicle.wire.TextWireTest$ABCD {\n" +
-                        "  A: hi,\n" +
-                        "  B: hi,\n" +
-                        "  C: hi,\n" +
-                        "  D: bye\n" +
-                        "}\n", object
-                        .toString());
-            }
-        } finally {
-            abcd.releaseAll();
-        }
+        WireAbcTestSupport.assertAbcdBytes(wire, true);
     }
 
     // Test the string building behavior for ABC objects with Wire.
@@ -743,37 +595,9 @@ public class YamlWireTest extends AbstractWireTest {
     public void testABCStringBuilder() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        String stringA = "A: \"hi\", # This is an A\n";
-        String stringB = "B: 'hi', # This is a B\n";
-        String stringC = "C: hi, # And that's a C\n";
-
-        // Create a wire and append values for A, B, and C
         @NotNull Wire wire = createWire();
-        StringBuilder sb = new StringBuilder();
-        wire.commentListener(s -> sb.append(s).append('\n'));
-        ABC abc = new ABC();
 
-        // Read from wire and assert its value for all permutations
-        for (String input : new String[]{
-                stringA + stringB + stringC,
-                stringB + stringA + stringC,
-                stringC + stringA + stringB,
-                stringA + stringC + stringB,
-                stringB + stringC + stringA,
-                stringC + stringB + stringA}) {
-            wire.reset();
-            wire.bytes().append(input);
-            assertEquals(input, "!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
-                    "  A: hi,\n" +
-                    "  B: hi,\n" +
-                    "  C: hi\n" +
-                    "}\n", wire.getValueIn()
-                    .object(abc, ABC.class)
-                    .toString());
-            assertEquals(sb.toString(), Arrays.asList("This is an A", "This is a B", "And that's a C"),
-                    Arrays.stream(sb.toString().split("\n")).sorted(Collections.reverseOrder()).collect(toList()));
-            sb.setLength(0);
-        }
+        WireAbcTestSupport.assertAbcStringBuilder(wire, Arrays.asList("This is an A", "This is a B", "And that's a C"));
     }
 
     @Test
@@ -782,17 +606,9 @@ public class YamlWireTest extends AbstractWireTest {
         @NotNull byte[] allBytes = new byte[256];
         for (int i = 0; i < 256; i++)
             allBytes[i] = (byte) i;
-        wire.write().bytes(NoBytesStore.NO_BYTES)
-                .write().bytes(Bytes.wrapForRead("Hello".getBytes(ISO_8859_1)))
-                .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
-                .write().bytes(allBytes);
-        // System.out.println(bytes.toString());
+        WireBytesTestSupport.exerciseBytesRoundTrip(wire, WireBytesTestSupport.helloBytes(), WireBytesTestSupport.quoteBytes(), allBytes);
         @NotNull Bytes<?> allBytes2 = allocateElasticOnHeap();
-        wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
-                .read().bytes(b -> assertEquals("Hello", b.toString()))
-                .read().bytes(b -> assertEquals("quotable, text", b.toString()))
-                .read().bytes(allBytes2);
-        assertEquals(Bytes.wrapForRead(allBytes), allBytes2);
+        WireBytesTestSupport.assertBytesRoundTrip(wire, allBytes, allBytes2);
     }
 
 
@@ -906,28 +722,22 @@ public class YamlWireTest extends AbstractWireTest {
 
     @Test
     public void testMapInMap() {
-        String pos = "WithMap: {\n" +
+        WireMapTestSupport.assertMapInMap("WithMap: {\n" +
                 "  innerMap: {\n" +
                 "    AUDUSD: AUDUSD1,\n" +
                 "    USDPLN: USDPLN1\n" +
                 "  },\n" +
-                "}";
-        Map<String, Object> fromString = Marshallable.fromString(pos);
-        assertEquals("{WithMap={innerMap={AUDUSD=AUDUSD1, USDPLN=USDPLN1}}}",
-                fromString.toString());
+                "}");
     }
 
     @Test
     public void testMapInMapWithQuestionMarks() {
-        String pos = "WithMap: {\n" +
+        WireMapTestSupport.assertMapWithQuestionMarks("WithMap: {\n" +
                 "  innerMap: {\n" +
                 "    ? AUDUSD: AUDUSD1,\n" +
                 "    ? USDPLN: USDPLN1\n" +
                 "  },\n" +
-                "}";
-        Map<String, Object> fromString = Marshallable.fromString(pos);
-        assertEquals("{WithMap={innerMap={AUDUSD=AUDUSD1, USDPLN=USDPLN1}}}",
-                fromString.toString());
+                "}");
     }
 
     @Test
@@ -962,71 +772,16 @@ public class YamlWireTest extends AbstractWireTest {
 
     @Test
     public void testMapReadAndWriteMarshable() {
-        @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
-        @NotNull final Wire wire = new YamlWire(bytes);
-
-        @NotNull final Map<MyMarshallable, MyMarshallable> expected = new LinkedHashMap<>();
-
-        expected.put(new MyMarshallable("aKey"), new MyMarshallable("aValue"));
-        expected.put(new MyMarshallable("aKey2"), new MyMarshallable("aValue2"));
-
-        wire.writeDocument(false, o -> o.write(() -> "example").marshallable(expected, MyMarshallable.class, MyMarshallable.class, true));
-
-        assertEquals("--- !!data\n" +
-                        "example: {\n" +
-                        "  ? { MyField: aKey }: { MyField: aValue },\n" +
-                        "  ? { MyField: aKey2 }: { MyField: aValue2 }\n" +
-                        "}\n",
-                Wires.fromSizePrefixedBlobs(bytes));
-        @NotNull final Map<MyMarshallable, MyMarshallable> actual = new LinkedHashMap<>();
-
-        wire.readDocument(null, c -> c.read(() -> "example")
-                .marshallableAsMap(
-                        MyMarshallable.class,
-                        MyMarshallable.class,
-                        actual));
-
-        assertEquals(expected, actual);
-
-        wire.bytes().releaseLast();
+        WireMapTestSupport.assertMarshallableMap(YamlWire::new);
     }
 
     @Test
     public void testException() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        @NotNull Exception e = new InvalidAlgorithmParameterException("Reference cannot be null") {
-            @NotNull
-            @Override
-            public StackTraceElement[] getStackTrace() {
-                @NotNull StackTraceElement[] stack = {
-                        new StackTraceElement("net.openhft.chronicle.wire.YamlWireTest", "testException", "YamlWireTest.java", 783),
-                        new StackTraceElement("net.openhft.chronicle.wire.YamlWireTest", "runTestException", "YamlWireTest.java", 73),
-                        new StackTraceElement("sun.reflect.NativeMethodAccessorImpl", "invoke0", "NativeMethodAccessorImpl.java", -2)
-                };
-                return stack;
-            }
-        };
-        @NotNull final Wire wire = new YamlWire(Bytes.allocateElasticOnHeap());
+        Wire wire = new YamlWire(Bytes.allocateElasticOnHeap());
         wire.usePadding(usePadding);
-
-        wire.writeDocument(false, w -> w.writeEventName(() -> "exception")
-                .object(e));
-
-        assertEquals("--- !!data\n" +
-                "exception: !" + e.getClass().getName() + " {\n" +
-                "  message: Reference cannot be null,\n" +
-                "  stackTrace: [\n" +
-                "    { class: net.openhft.chronicle.wire.YamlWireTest, method: testException, file: YamlWireTest.java, line: 783 },\n" +
-                "    { class: net.openhft.chronicle.wire.YamlWireTest, method: runTestException, file: YamlWireTest.java, line: 73 },\n" +
-                "    { class: sun.reflect.NativeMethodAccessorImpl, method: invoke0, file: NativeMethodAccessorImpl.java, line: -2 }\n" +
-                "  ]\n" +
-                "}\n", Wires.fromSizePrefixedBlobs(wire));
-
-        wire.readDocument(null, r -> {
-            Throwable t = r.read(() -> "exception").throwable(true);
-            assertTrue(t instanceof InvalidAlgorithmParameterException);
-        });
+        WireTestSupport.assertExceptionRoundTrip(wire, "net.openhft.chronicle.wire.YamlWireTest");
     }
 
     @Test
@@ -1034,17 +789,9 @@ public class YamlWireTest extends AbstractWireTest {
         ClassAliasPool.CLASS_ALIASES.addAlias(WireType.class, "WireType");
 
         @NotNull Wire wire = createWire();
-        wire.write().object(WireType.BINARY)
-                .write().object(WireType.TEXT)
-                .write().object(WireType.RAW);
-
-        assertEquals("\"\": !WireType BINARY\n" +
+        WireTestSupport.assertWireTypeRoundTrip(wire, "\"\": !WireType BINARY\n" +
                 "\"\": !WireType TEXT\n" +
-                "\"\": !WireType RAW\n", wire.toString());
-
-        assertEquals(WireType.BINARY, wire.read().object(Object.class));
-        assertEquals(WireType.TEXT, wire.read().object(Object.class));
-        assertEquals(WireType.RAW, wire.read().object(Object.class));
+                "\"\": !WireType RAW\n");
     }
 
 
@@ -1052,58 +799,17 @@ public class YamlWireTest extends AbstractWireTest {
     @Test
     public void testLZWCompressionAsText() {
         @NotNull Wire wire = createWire();
-        @NotNull final String s = "xxxxxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxx";
-        @NotNull String str = s + s + s + s;
-
-        @NotNull byte[] compressedBytes = str.getBytes(ISO_8859_1);
-        wire.write().compress("lzw", Bytes.wrapForRead(compressedBytes));
-
-        @NotNull Bytes<?> bytes = allocateElasticDirect();
-        wire.read().bytes(bytes);
-        assertEquals(str, bytes.toString());
+        WireTestSupport.assertLzwCompressionAsText(wire, Bytes::allocateElasticDirect);
     }
 
     @Test
     public void testStringArrays() {
-        @NotNull Wire wire = createWire();
-
-        @NotNull String[] noObjects = {};
-        wire.write().object(noObjects);
-
-        @Nullable String[] object = wire.read().object(String[].class);
-        assertEquals(0, object.length);
-
-        wire.clear();
-
-        @NotNull String[] threeObjects = {"abc", "def", "ghi"};
-        wire.write().object(threeObjects);
-
-        @Nullable String[] object2 = wire.read()
-                .object(String[].class);
-        assertEquals(3, object2.length);
-        assertEquals("[abc, def, ghi]", Arrays.toString(object2));
+        WireCollectionTestSupport.assertStringArraysRoundTrip(this::createWire);
     }
 
     @Test
     public void testStringList() {
-        @NotNull Wire wire = createWire();
-
-        @NotNull List<String> noObjects = new ArrayList();
-        wire.write().object(noObjects);
-
-        @Nullable List<String> list = wire.read().object(List.class);
-        assertEquals(0, list.size());
-
-        // TODO we shouldn't need to create a new wire.
-        wire = createWire();
-
-        @NotNull List<String> threeObjects = Arrays.asList("abc", "def", "ghi");
-        wire.write().object(threeObjects);
-
-        @Nullable List<String> list2 = wire.read()
-                .object(List.class);
-        assertEquals(3, list2.size());
-        assertEquals("[abc, def, ghi]", list2.toString());
+        WireCollectionTestSupport.assertStringListRoundTrip(this::createWire);
     }
 
     @Test
@@ -1122,45 +828,12 @@ public class YamlWireTest extends AbstractWireTest {
 
     @Test
     public void testStringSet() {
-        @NotNull Wire wire = createWire();
-
-        @NotNull Set<String> noObjects = new HashSet();
-        wire.write().object(noObjects);
-
-        @Nullable Set<String> list = wire.read().object(Set.class);
-        assertEquals(0, list.size());
-
-        // TODO we shouldn't need to create a new wire.
-        wire = createWire();
-
-        @NotNull Set<String> threeObjects = new HashSet(Arrays.asList("abc", "def", "ghi"));
-        wire.write().object(threeObjects);
-
-        @Nullable Set<String> list2 = wire.read()
-                .object(Set.class);
-        assertEquals(3, list2.size());
-        assertEquals("[abc, def, ghi]", list2.toString());
+        WireCollectionTestSupport.assertStringSetRoundTrip(this::createWire);
     }
 
     @Test
     public void testStringMap() {
-        @NotNull Wire wire = createWire();
-
-        @NotNull Map<String, String> noObjects = new HashMap();
-        wire.write().object(noObjects);
-
-        @Nullable Map<String, String> map = wire.read().object(Map.class);
-        assertEquals(0, map.size());
-
-        wire.clear();
-
-        Set<String> threeObjects = new HashSet(Arrays.asList("abc", "def", "ghi"));
-        wire.write().object(threeObjects);
-
-        Set<String> list2 = wire.read()
-                .object(Set.class);
-        assertEquals(3, list2.size());
-        assertEquals("[abc, def, ghi]", list2.toString());
+        WireMapTestSupport.writeAndReadStringMap(YamlWire::new);
     }
 
     @Test
@@ -1253,111 +926,42 @@ public class YamlWireTest extends AbstractWireTest {
     @Test
     public void writeNull() {
         @NotNull Wire wire = createWire();
-        for (int i = 0; i < 4; i++)
-            wire.getValueOut().object(null);
+        String written = WireNullTestSupport.writeNulls(wire, w -> w.getValueOut().object(null), Circle.class);
         assertEquals("!!null \"\"\n" +
                 "!!null \"\"\n" +
                 "!!null \"\"\n" +
-                "!!null \"\"\n", wire.toString());
-
-        @Nullable Object o = wire.read().object(Object.class);
-        assertNull(o);
-        @Nullable String s = wire.read().object(String.class);
-        assertNull(s);
-        @Nullable RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
-        assertNull(rp);
-        @Nullable Circle c = wire.read().object(Circle.class);
-        assertNull(c);
+                "!!null \"\"\n", written);
     }
 
     @Test
     public void testAllChars() {
         @NotNull Wire wire = createWire();
-        @NotNull char[] chars = new char[256];
-        for (int i = 0; i < 1024; i++) {
-            wire.clear();
-            Arrays.fill(chars, (char) i);
-            @NotNull String s = new String(chars);
-            wire.writeDocument(false, w -> w.write(() -> "message").text(s));
 
-            wire.readDocument(null, w -> w.read(() -> "message").text(s, Assert::assertEquals));
-        }
+        WireTestSupport.assertAllCharsRoundTrip(wire);
     }
 
     @Test
     public void readDemarshallable() {
         @NotNull Wire wire = new YamlWire(allocateElasticOnHeap())
                 .useBinaryDocuments();
-        try (DocumentContext $ = wire.writingDocument(true)) {
-            wire.getValueOut().typedMarshallable(new DemarshallableObject("test", 12345));
-        }
 
-        assertEquals("--- !!meta-data\n" +
-                "!net.openhft.chronicle.wire.DemarshallableObject {\n" +
-                "  name: test,\n" +
-                "  value: 12345\n" +
-                "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
-
-        try (DocumentContext $ = wire.readingDocument()) {
-            @Nullable DemarshallableObject dobj = wire.getValueIn()
-                    .typedMarshallable();
-            assertEquals("test", dobj.name);
-            assertEquals(12345, dobj.value);
-        }
+        WireTestSupport.writeDemarshallable(wire);
+        assertEquals(WireTestSupport.expectedDemarshallableBlob(), Wires.fromSizePrefixedBlobs(wire.bytes()));
+        WireTestSupport.assertDemarshallableRead(wire);
     }
 
     @Test
     public void testByteArrayValueWithRealBytesNegative() {
         @NotNull Wire wire = createWire();
 
-        @NotNull final byte[] expected = {-1, -2, -3, -4, -5, -6, -7};
-        wire.writeDocument(false, wir -> {
-            ValueOut out = wir.writeEventName(() -> "put");
-            out.swapLeaf(true);
-            out.marshallable(w -> w.write(() -> "key")
-                    .text("1")
-                    .write(() -> "value")
-                    .object(expected));
-        });
-        assertEquals("--- !!data\n" +
-                "put: { key: \"1\", value: !byte[] !!binary //79/Pv6+Q== }\n", (Wires.fromSizePrefixedBlobs(wire.bytes())));
-
-        wire.readDocument(null, wir -> wire.read(() -> "put")
-                .marshallable(w -> w.read(() -> "key")
-                        .object(Object.class, "1", Assert::assertEquals)
-                        .read(() -> "value").object(byte[].class, expected, Assert::assertArrayEquals)));
+        WireTestSupport.assertByteArrayValueWithSwapLeaf(wire);
     }
 
     @Test
     public void testByteArray() {
         @NotNull Wire wire = createWire();
-        wire.writeDocument(false, w -> w.write("nothing").object(new byte[0]));
-        @NotNull byte[] one = {1};
-        wire.writeDocument(false, w -> w.write("one").object(one));
-        @NotNull byte[] four = {1, 2, 3, 4};
-        wire.writeDocument(false, w -> w.write("four").object(four));
 
-        final String expected1 = "--- !!data\n" +
-                "nothing: !byte[] !!binary\n" +
-                "# position: 32, header: 1\n" +
-                "--- !!data\n" +
-                "one: !byte[] !!binary AQ==\n" +
-                "# position: 64, header: 2\n" +
-                "--- !!data\n" +
-                "four: !byte[] !!binary AQIDBA==\n";
-        final String expected2 = "--- !!data\n" +
-                "nothing: !byte[] !!binary\n" +
-                "# position: 30, header: 1\n" +
-                "--- !!data\n" +
-                "one: !byte[] !!binary AQ==\n" +
-                "# position: 61, header: 2\n" +
-                "--- !!data\n" +
-                "four: !byte[] !!binary AQIDBA==\n";
-        assertEquals(usePadding ? expected1 : expected2,
-                Wires.fromSizePrefixedBlobs(wire.bytes(), 0));
-        wire.readDocument(null, w -> assertArrayEquals(new byte[0], (byte[]) w.read(() -> "nothing").object()));
-        wire.readDocument(null, w -> assertArrayEquals(one, (byte[]) w.read(() -> "one").object()));
-        wire.readDocument(null, w -> assertArrayEquals(four, (byte[]) w.read(() -> "four").object()));
+        WireByteArrayDocSupport.assertByteArrayDocuments(wire, usePadding);
     }
 
     @Test
@@ -1413,12 +1017,7 @@ public class YamlWireTest extends AbstractWireTest {
     @Test
     public void writeCharacter() {
         @NotNull Wire wire = createWire();
-        for (char ch : new char[]{0, '!', 'a', Character.MAX_VALUE}) {
-            wire.clear();
-            wire.write().object(ch);
-            char ch2 = wire.read().object(char.class);
-            assertEquals(ch, ch2);
-        }
+        WireCharacterTestSupport.assertCharacterRoundTrip(wire, true);
     }
 
 
@@ -1426,17 +1025,7 @@ public class YamlWireTest extends AbstractWireTest {
     public void testStringArray() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        @NotNull Wire wire = createWire();
-        wire.bytes().append('!').append(StringArray.class.getName()).append(" { strings: [ a, b, c ] }");
-        StringArray sa = wire.getValueIn()
-                .object(StringArray.class);
-        assertEquals("[a, b, c]", Arrays.toString(sa.strings));
-
-        @NotNull Wire wire2 = createWire();
-        wire2.bytes().append('!').append(StringArray.class.getName()).append(" { strings: abc }");
-        StringArray sa2 = wire2.getValueIn()
-                .object(StringArray.class);
-        assertEquals("[abc]", Arrays.toString(sa2.strings));
+        WireStringArrayTestSupport.assertStringArrayRoundTrip(this::createWire);
     }
 
     @Test
@@ -1542,57 +1131,21 @@ public class YamlWireTest extends AbstractWireTest {
 
     @Test
     public void readsComment() {
-        StringBuilder sb = new StringBuilder();
         Wire wire = createWire();
-        try (DocumentContext dc = wire.writingDocument()) {
-            wire.writeComment("one");
-            wire.writeEventId("dto", 1);
-            wire.writeComment("two");
-            wire.getValueOut().object(new BinaryWireTest.DTO("text"));
-            wire.writeComment("three");
-            wire.commentListener(cs ->
-                    sb.append(cs).append('\n'));
-        }
-        final MethodReader reader = wire.methodReader((BinaryWireTest.IDTO) dto -> sb.append("dto: ").append(dto).append('\n'));
-        assertTrue(reader.readOne());
-        assertFalse(reader.readOne());
+        String actual = WireCommentTestSupport.exerciseReadComments(wire);
+
         assertEquals("one\n" +
                 "two\n" +
                 "dto: !net.openhft.chronicle.wire.BinaryWireTest$DTO {\n" +
                 "  text: text\n" +
                 "}\n" +
                 "\n" +
-                "three\n", sb.toString());
+                "three\n", actual);
     }
 
     @Test
     public void readMetaData() {
-        wire.bytes().append("---\n" +
-                "!!meta-data\n" +
-                "hello-world\n" +
-                "...\n" +
-                "---\n" +
-                "!!data\n" +
-                "hello-world\n" +
-                "...\n" +
-                "---\n" +
-                "!!meta-data\n" +
-                "dto: {\n" +
-                "  text: hello-world\n" +
-                "}\n" +
-                "...\n" +
-                "---\n" +
-                "!!data\n" +
-                "dto: {\n" +
-                "  text: hello-world\n" +
-                "}\n" +
-                "...\n");
-        for (int i = 0; i < 4; i++) {
-            try (DocumentContext dc = wire.readingDocument()) {
-                final boolean metaData = i % 2 == 0;
-                assertEquals("i: " + i, metaData, dc.isMetaData());
-            }
-        }
+        WireTestSupport.assertReadMetaData(wire);
     }
 
     @Test

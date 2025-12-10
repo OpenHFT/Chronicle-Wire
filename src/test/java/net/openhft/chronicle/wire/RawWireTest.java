@@ -86,33 +86,16 @@ public class RawWireTest extends WireTestCommon {
     @Test
     public void testRead() {
         @NotNull Wire wire = createWire();
-        wire.write();
-        wire.write(BWKey.field1);
-        wire.write(() -> "Test");
-
-        wire.read();
-        wire.read();
-        wire.read();
-        assertEquals(0, bytes.readRemaining());
-        // check it's safe to read too much.
-        wire.read();
+        WireReadTestSupport.writeStandardFields(wire);
+        WireReadTestSupport.exerciseRead(wire, 0);
     }
 
     // Test to verify reading specific fields from the wire after writing some data.
     @Test
     public void testRead1() {
         @NotNull Wire wire = createWire();
-        wire.write();
-        wire.write(BWKey.field1);
-        wire.write(() -> "Test");
-
-        // ok as blank matches anything
-        wire.read(BWKey.field1);
-        wire.read(BWKey.field1);
-        wire.read(BWKey.field1);
-        assertEquals(0, bytes.readRemaining());
-        // check it's safe to read too much.
-        wire.read();
+        WireReadTestSupport.writeStandardFields(wire);
+        WireReadTestSupport.exerciseReadWithKey(wire, 0);
     }
 
     // Test to verify reading specific fields from the wire after writing some data with a long name.
@@ -124,41 +107,19 @@ public class RawWireTest extends WireTestCommon {
         @NotNull String name1 = "Long field name which is more than 32 characters, Bye";
         wire.write(() -> name1);
 
-        // ok as blank matches anything
-        @NotNull StringBuilder name = new StringBuilder();
-        wire.read(name);
-        assertEquals(0, name.length());
-
-        wire.read(name);
-        assertEquals(0, name.length());
-
-        wire.read(name);
-        assertEquals(0, name.length());
-
-        assertEquals(0, bytes.readRemaining());
-        // check it's safe to read too much.
-        wire.read();
+        WireReadTestSupport.exerciseReadWithNames(wire, name1, "", "", 0);
     }
 
     // Test for writing and reading 8-bit integers to and from the wire.
     @Test
     public void int8() {
         @NotNull Wire wire = createWire();
-        wire.write().int8(1);
-        wire.write(BWKey.field1).int8(2);
+        WireSmallIntTestSupport.writeInt8Triplet(wire);
+        WireSmallIntTestSupport.expectBinaryDebug(wire.bytes(), "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠٠٠٠٠٠");
 
-        wire.write(() -> "Test").int8(3);
-        assertEquals("[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
-
-        // ok as blank matches anything
-        @NotNull AtomicInteger i = new AtomicInteger();
-        IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().int8(i, AtomicInteger::set);
-            assertEquals(e, i.get());
-        });
+        WireSmallIntTestSupport.readInt8Triplet(wire);
 
         assertEquals(0, bytes.readRemaining());
-        // check it's safe to read too much.
         wire.read();
     }
 
@@ -166,21 +127,12 @@ public class RawWireTest extends WireTestCommon {
     @Test
     public void int16() {
         @NotNull Wire wire = createWire();
-        wire.write().int16(1);
-        wire.write(BWKey.field1).int16(2);
+        WireSmallIntTestSupport.writeInt16Triplet(wire);
+        WireSmallIntTestSupport.expectBinaryDebug(wire.bytes(), "[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] ǁ⒈٠⒉٠⒊٠‡٠٠٠٠٠٠٠٠٠٠");
 
-        wire.write(() -> "Test").int16(3);
-        assertEquals("[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] ǁ⒈٠⒉٠⒊٠‡٠٠٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
-
-        // ok as blank matches anything
-        @NotNull AtomicInteger i = new AtomicInteger();
-        IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().int16(i, AtomicInteger::set);
-            assertEquals(e, i.get());
-        });
+        WireSmallIntTestSupport.readInt16Triplet(wire);
 
         assertEquals(0, bytes.readRemaining());
-        // check it's safe to read too much.
         wire.read();
     }
 
@@ -188,21 +140,12 @@ public class RawWireTest extends WireTestCommon {
     @Test
     public void uint8() {
         @NotNull Wire wire = createWire();
-        wire.write().uint8(1);
-        wire.write(BWKey.field1).uint8(2);
+        WireSmallIntTestSupport.writeUint8Triplet(wire);
+        WireSmallIntTestSupport.expectBinaryDebug(wire.bytes(), "[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠٠٠٠٠٠");
 
-        wire.write(() -> "Test").uint8(3);
-        assertEquals("[pos: 0, rlim: 3, wlim: 8EiB, cap: 8EiB ] ǁ⒈⒉⒊‡٠٠٠٠٠٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
-
-        // ok as blank matches anything
-        @NotNull AtomicInteger i = new AtomicInteger();
-        IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().uint8(i, AtomicInteger::set);
-            assertEquals(e, i.get());
-        });
+        WireSmallIntTestSupport.readUint8Triplet(wire);
 
         assertEquals(0, bytes.readRemaining());
-        // check it's safe to read too much.
         wire.read();
     }
 
@@ -212,27 +155,12 @@ public class RawWireTest extends WireTestCommon {
         // Create a new Wire instance
         @NotNull Wire wire = createWire();
 
-        // Write unsigned 16-bit integers to the wire
-        wire.write().uint16(1);
-        wire.write(BWKey.field1).uint16(2);
+        WireSmallIntTestSupport.writeUint16Triplet(wire);
+        WireSmallIntTestSupport.expectBinaryDebug(wire.bytes(), "[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] ǁ⒈٠⒉٠⒊٠‡٠٠٠٠٠٠٠٠٠٠");
 
-        wire.write(() -> "Test").uint16(3);
+        WireSmallIntTestSupport.readUint16Triplet(wire);
 
-        // Verify the debug representation of the written data
-        @NotNull String actual = wire.bytes().toDebugString();
-        assertEquals("[pos: 0, rlim: 6, wlim: 8EiB, cap: 8EiB ] ǁ⒈٠⒉٠⒊٠‡٠٠٠٠٠٠٠٠٠٠", actual);
-
-        // ok as blank matches anything
-        @NotNull AtomicInteger i = new AtomicInteger();
-        IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().uint16(i, AtomicInteger::set);
-            assertEquals(e, i.get());
-        });
-
-        // Verify no remaining bytes in the wire
         assertEquals(0, bytes.readRemaining());
-
-        // Ensure no issues when attempting to read beyond available data
         wire.read();
     }
 
@@ -301,10 +229,7 @@ public class RawWireTest extends WireTestCommon {
         @NotNull Wire wire = createWire();
 
         // Write signed 64-bit integers to the wire
-        wire.write().int64(1);
-        wire.write(BWKey.field1).int64(2);
-
-        wire.write(() -> "Test").int64(3);
+        WireNumericTestSupport.writeInt64s(wire);
 
         // Verify the debug representation of the written data
         assertEquals("[pos: 0, rlim: 24, wlim: 8EiB, cap: 8EiB ] ǁ⒈٠٠٠٠٠٠٠⒉٠٠٠٠٠٠٠⒊٠٠٠٠٠٠٠‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
@@ -313,16 +238,7 @@ public class RawWireTest extends WireTestCommon {
         @NotNull AtomicLong i = new AtomicLong();
         IntConsumer ic = i::set;
         assertNotNull(ic);
-        LongStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().int64(i, AtomicLong::set);
-            assertEquals(e, i.get());
-        });
-
-        // Verify no remaining bytes in the wire
-        assertEquals(0, bytes.readRemaining());
-
-        // Ensure no issues when attempting to read beyond available data
-        wire.read();
+        WireNumericTestSupport.assertInt64sRead(wire, false);
     }
 
     // Test case for writing and reading 64-bit floating-point numbers using a Wire
@@ -332,35 +248,13 @@ public class RawWireTest extends WireTestCommon {
         @NotNull Wire wire = createWire();
 
         // Write 64-bit floating-point numbers to the wire
-        wire.write().float64(1);
-        wire.write(BWKey.field1).float64(2);
-
-        wire.write(() -> "Test").float64(3);
+        WireNumericTestSupport.writeFloat64s(wire);
 
         // Verify the debug representation of the written data
         assertEquals("[pos: 0, rlim: 24, wlim: 8EiB, cap: 8EiB ] ǁ٠٠٠٠٠٠ð?٠٠٠٠٠٠٠@٠٠٠٠٠٠⒏@‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
 
         // ok as blank matches anything
-        class Floater {
-            double f;
-
-            void set(double d) {
-                f = d;
-            }
-        }
-
-        // Read the 64-bit floating-point numbers from the wire
-        @NotNull Floater n = new Floater();
-        IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().float64(n, Floater::set);
-            assertEquals(e, n.f, 0.0);
-        });
-
-        // Verify no remaining bytes in the wire
-        assertEquals(0, bytes.readRemaining());
-
-        // Ensure no issues when attempting to read beyond available data
-        wire.read();
+        WireNumericTestSupport.assertFloat64sRead(wire);
     }
 
     // Test case for writing and reading textual data using a Wire
@@ -370,23 +264,15 @@ public class RawWireTest extends WireTestCommon {
         @NotNull Wire wire = createWire();
 
         // Write textual data to the wire
-        wire.write().text("Hello");
-        wire.write(BWKey.field1).text("world");
         @NotNull String name1 = "Long field name which is more than 32 characters, \\ \nBye";
-
-        wire.write(() -> "Test")
-                .text(name1);
+        WireStringTestSupport.writeStrings(wire, name1);
         @NotNull String actual = wire.bytes().toDebugString();
 
         // Verify the debug representation of the written data
         assertEquals("[pos: 0, rlim: 69, wlim: 8EiB, cap: 8EiB ] ǁ⒌Hello⒌world8Long field name which is more than 32 characters, \\ ⒑Bye‡٠٠٠٠٠٠٠٠", actual);
 
         // Read the textual data from the wire
-        @NotNull StringBuilder sb = new StringBuilder();
-        Stream.of("Hello", "world", name1).forEach(e -> {
-            assertNotNull(wire.read().textTo(sb));
-            assertEquals(e, sb.toString());
-        });
+        WireStringTestSupport.assertReadStrings(wire, name1);
 
         // Verify no remaining bytes in the wire
         assertEquals(0, bytes.readRemaining());
@@ -430,15 +316,7 @@ public class RawWireTest extends WireTestCommon {
     public void testBool() {
         @NotNull Wire wire = createWire();
 
-        // Writing boolean values to the wire
-        wire.write().bool(false)
-                .write().bool(true)
-                .write().bool(null);
-
-        // Reading and validating boolean values from the wire
-        wire.read().bool(false, Assert::assertEquals)
-                .read().bool(true, Assert::assertEquals)
-                .read().bool(null, Assert::assertEquals);
+        WirePrimitiveTestSupport.assertBooleanRoundTrip(wire);
     }
 
     // Test case for writing and reading 32-bit floating-point numbers using a Wire
@@ -446,19 +324,7 @@ public class RawWireTest extends WireTestCommon {
     public void testFloat32() {
         @NotNull Wire wire = createWire();
 
-        // Writing 32-bit floating-point numbers to the wire
-        wire.write().float32(0.0F)
-                .write().float32(Float.NaN)
-                .write().float32(Float.POSITIVE_INFINITY)
-                .write().float32(Float.NEGATIVE_INFINITY)
-                .write().float32(123456.0f);
-
-        // Reading and validating 32-bit floating-point numbers from the wire
-        wire.read().float32(this, (o, t) -> assertEquals(0.0F, t, 0.0F))
-                .read().float32(this, (o, t) -> assertTrue(Float.isNaN(t)))
-                .read().float32(this, (o, t) -> assertEquals(Float.POSITIVE_INFINITY, t, 0.0F))
-                .read().float32(this, (o, t) -> assertEquals(Float.NEGATIVE_INFINITY, t, 0.0F))
-                .read().float32(this, (o, t) -> assertEquals(123456.0f, t, 0.0F));
+        WirePrimitiveTestSupport.assertFloat32RoundTrip(wire, this);
     }
 
     // Test case for writing and reading LocalTime objects using a Wire
@@ -467,66 +333,29 @@ public class RawWireTest extends WireTestCommon {
         @NotNull Wire wire = createWire();
         LocalTime now = LocalTime.now();
 
-        // Writing LocalTime objects to the wire
-        wire.write().time(now)
-                .write().time(LocalTime.MAX)
-                .write().time(LocalTime.MIN);
-
-        // Reading and validating LocalTime objects from the wire
-        wire.read().time(now, Assert::assertEquals)
-                .read().time(LocalTime.MAX, Assert::assertEquals)
-                .read().time(LocalTime.MIN, Assert::assertEquals);
+        WirePrimitiveTestSupport.writeTimes(wire, now);
+        WirePrimitiveTestSupport.assertTimes(wire, now);
     }
 
     // Test case for writing and reading ZonedDateTime objects using a Wire
     @Test
     public void testZonedDateTime() {
         @NotNull Wire wire = createWire();
-        ZonedDateTime now = ZonedDateTime.now();
-
-        // Writing ZonedDateTime objects to the wire
-        wire.write().zonedDateTime(now)
-                .write().zonedDateTime(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()))
-                .write().zonedDateTime(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()));
-
-        // Reading and validating ZonedDateTime objects from the wire
-        wire.read().zonedDateTime(now, Assert::assertEquals)
-                .read().zonedDateTime(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()), Assert::assertEquals)
-                .read().zonedDateTime(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()), Assert::assertEquals);
+        WireTemporalTestSupport.assertZonedDateTimes(wire);
     }
 
     // Test case for writing and reading LocalDate objects using a Wire
     @Test
     public void testDate() {
         @NotNull Wire wire = createWire();
-        LocalDate now = LocalDate.now();
-
-        // Writing LocalDate objects to the wire
-        wire.write().date(now)
-                .write().date(LocalDate.MAX)
-                .write().date(LocalDate.MIN);
-
-        // Reading and validating LocalDate objects from the wire
-        wire.read().date(now, Assert::assertEquals)
-                .read().date(LocalDate.MAX, Assert::assertEquals)
-                .read().date(LocalDate.MIN, Assert::assertEquals);
+        WireTemporalTestSupport.assertLocalDates(wire);
     }
 
     // Test case for writing and reading UUID objects using a Wire
     @Test
     public void testUuid() {
         @NotNull Wire wire = createWire();
-        UUID uuid = UUID.randomUUID();
-
-        // Writing UUID objects to the wire
-        wire.write().uuid(uuid)
-                .write().uuid(new UUID(0, 0))
-                .write().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE));
-
-        // Reading and validating UUID objects from the wire
-        wire.read().uuid(uuid, Assert::assertEquals)
-                .read().uuid(new UUID(0, 0), Assert::assertEquals)
-                .read().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), Assert::assertEquals);
+        WireTemporalTestSupport.assertUuids(wire);
     }
 
     // Test case for writing and reading byte arrays using a Wire
@@ -540,19 +369,10 @@ public class RawWireTest extends WireTestCommon {
         for (int i = 0; i < 256; i++)
             allBytes[i] = (byte) i;
 
-        // Writing byte arrays to the wire
-        wire.write().bytes(NoBytesStore.NO_BYTES)
-                .write().bytes(Bytes.wrapForRead("Hello".getBytes(ISO_8859_1)))
-                .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
-                .write().bytes(allBytes);
+        WireBytesTestSupport.exerciseBytesRoundTrip(wire, WireBytesTestSupport.helloBytes(), WireBytesTestSupport.quoteBytes(), allBytes);
 
         @NotNull NativeBytes allBytes2 = nativeBytes();
-        // Reading and validating byte arrays from the wire
-        wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
-                .read().bytes(b -> assertEquals("Hello", b.toString()))
-                .read().bytes(b -> assertEquals("quotable, text", b.toString()))
-                .read().bytes(allBytes2);
-        assertEquals(Bytes.wrapForRead(allBytes), allBytes2);
+        WireBytesTestSupport.assertBytesRoundTrip(wire, allBytes, allBytes2);
     }
 
     // Test case for writing and reading custom Marshallable objects using a Wire

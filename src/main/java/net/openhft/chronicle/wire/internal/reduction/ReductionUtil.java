@@ -315,6 +315,11 @@ public final class ReductionUtil {
 
         private final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor;
 
+        /**
+         * Creates a double reduction builder backed by the provided extractor.
+         *
+         * @param extractor source of double values for each document
+         */
         public VanillaDoubleReductionBuilder(@NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor) {
             this.extractor = extractor;
         }

@@ -9,7 +9,6 @@ import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -18,7 +17,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
 /**
@@ -86,30 +84,6 @@ public class NestedClassTest extends WireTestCommon {
     public void testMultipleReads() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
-        Wire wire = wireType.apply(bytes);
-
-        // Writing two OuterClass instances to the wire.
-        wire.writeEventName(() -> "test1").marshallable(outerClass1);
-        if (wireType == WireType.JSON)
-            wire.bytes().writeUnsignedByte('\n');
-        wire.writeEventName(() -> "test2").marshallable(outerClass2);
-
-        // StringBuilder to capture event names during reading.
-        @NotNull StringBuilder sb = new StringBuilder();
-        @NotNull OuterClass outerClass0 = new OuterClass();
-
-        // Reading and verifying the first OuterClass instance.
-        wire.readEventName(sb).marshallable(outerClass0);
-        assertEquals("test1", sb.toString());
-        assertEquals(outerClass1.toString(), outerClass0.toString());
-
-        // Reading and verifying the second OuterClass instance.
-        wire.readEventName(sb).marshallable(outerClass0);
-        assertEquals("test2", sb.toString());
-        assertEquals(outerClass2.toString(), outerClass0.toString());
-
-        // Releasing allocated bytes.
-        bytes.releaseLast();
+        OuterClassWireTestSupport.assertTwoOuterClasses(wireType, OuterClass::new, outerClass1, outerClass2, false);
     }
 }

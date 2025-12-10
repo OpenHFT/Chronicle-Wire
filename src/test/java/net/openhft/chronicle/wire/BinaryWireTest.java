@@ -48,6 +48,234 @@ public class BinaryWireTest extends WireTestCommon {
     private final int compressedSize;
     @NotNull
     private final Bytes<?> bytes = new HexDumpBytes();
+    private static final String[] INT8_EXPECTED = {
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a1 02                                           # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a1 02                                           # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a4 01                                           # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a4 02                                           # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a4 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "ba 01                                           # 1\n" +
+                    "a1 02                                           # 2\n" +
+                    "ba b2 f1 9e 01                                  # 2603186\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a4 01                                           # 1\n" +
+                    "ba 01                                           # 1\n" +
+                    "a4 02                                           # 2\n" +
+                    "ba b2 f1 9e 01                                  # 2603186\n" +
+                    "a4 03                                           # 3\n",
+            "a1 01                                           # 1\n" +
+                    "a1 02                                           # 2\n" +
+                    "a1 03                                           # 3\n",
+            "a4 01                                           # 1\n" +
+                    "a4 02                                           # 2\n" +
+                    "a4 03                                           # 3\n"
+    };
+    private static final String[] INT16_EXPECTED = {
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a1 02                                           # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a1 02                                           # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a5 01 00                                        # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a5 02 00                                        # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a5 03 00                                        # 3\n",
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "ba 01                                           # 1\n" +
+                    "a1 02                                           # 2\n" +
+                    "ba b2 f1 9e 01                                  # 2603186\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a5 01 00                                        # 1\n" +
+                    "ba 01                                           # 1\n" +
+                    "a5 02 00                                        # 2\n" +
+                    "ba b2 f1 9e 01                                  # 2603186\n" +
+                    "a5 03 00                                        # 3\n",
+            "a1 01                                           # 1\n" +
+                    "a1 02                                           # 2\n" +
+                    "a1 03                                           # 3\n",
+            "a5 01 00                                        # 1\n" +
+                    "a5 02 00                                        # 2\n" +
+                    "a5 03 00                                        # 3\n"
+    };
+    private static final String[] UINT8_EXPECTED = {
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a1 02                                           # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a1 02                                           # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a1 02                                           # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "ba 01                                           # 1\n" +
+                    "a1 02                                           # 2\n" +
+                    "ba b2 f1 9e 01                                  # 2603186\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "ba 01                                           # 1\n" +
+                    "a1 02                                           # 2\n" +
+                    "ba b2 f1 9e 01                                  # 2603186\n" +
+                    "a1 03                                           # 3\n",
+            "a1 01                                           # 1\n" +
+                    "a1 02                                           # 2\n" +
+                    "a1 03                                           # 3\n",
+            "a1 01                                           # 1\n" +
+                    "a1 02                                           # 2\n" +
+                    "a1 03                                           # 3\n"
+    };
+    private static final String[] UINT16_EXPECTED = {
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a1 02                                           # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a1 02                                           # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a2 01 00                                        # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a2 02 00                                        # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a2 03 00                                        # 3\n",
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "ba 01                                           # 1\n" +
+                    "a1 02                                           # 2\n" +
+                    "ba b2 f1 9e 01                                  # 2603186\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a2 01 00                                        # 1\n" +
+                    "ba 01                                           # 1\n" +
+                    "a2 02 00                                        # 2\n" +
+                    "ba b2 f1 9e 01                                  # 2603186\n" +
+                    "a2 03 00                                        # 3\n",
+            "a1 01                                           # 1\n" +
+                    "a1 02                                           # 2\n" +
+                    "a1 03                                           # 3\n",
+            "a2 01 00                                        # 1\n" +
+                    "a2 02 00                                        # 2\n" +
+                    "a2 03 00                                        # 3\n"
+    };
+    private static final String[] UINT32_EXPECTED = {
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a1 02                                           # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a1 02                                           # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a3 01 00 00 00                                  # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a3 02 00 00 00                                  # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a3 03 00 00 00                                  # 3\n",
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "ba 01                                           # 1\n" +
+                    "a1 02                                           # 2\n" +
+                    "ba b2 f1 9e 01                                  # 2603186\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a3 01 00 00 00                                  # 1\n" +
+                    "ba 01                                           # 1\n" +
+                    "a3 02 00 00 00                                  # 2\n" +
+                    "ba b2 f1 9e 01                                  # 2603186\n" +
+                    "a3 03 00 00 00                                  # 3\n",
+            "a1 01                                           # 1\n" +
+                    "a1 02                                           # 2\n" +
+                    "a1 03                                           # 3\n",
+            "a3 01 00 00 00                                  # 1\n" +
+                    "a3 02 00 00 00                                  # 2\n" +
+                    "a3 03 00 00 00                                  # 3\n"
+    };
+    private static final String[] INT32_EXPECTED = {
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a1 02                                           # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a1 02                                           # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a6 01 00 00 00                                  # 1\n" +
+                    "c6 66 69 65 6c 64 31                            # field1:\n" +
+                    "a6 02 00 00 00                                  # 2\n" +
+                    "c4 54 65 73 74                                  # Test:\n" +
+                    "a6 03 00 00 00                                  # 3\n",
+            "c0                                              # :\n" +
+                    "a1 01                                           # 1\n" +
+                    "ba 01                                           # 1\n" +
+                    "a1 02                                           # 2\n" +
+                    "ba b2 f1 9e 01                                  # 2603186\n" +
+                    "a1 03                                           # 3\n",
+            "c0                                              # :\n" +
+                    "a6 01 00 00 00                                  # 1\n" +
+                    "ba 01                                           # 1\n" +
+                    "a6 02 00 00 00                                  # 2\n" +
+                    "ba b2 f1 9e 01                                  # 2603186\n" +
+                    "a6 03 00 00 00                                  # 3\n",
+            "a1 01                                           # 1\n" +
+                    "a1 02                                           # 2\n" +
+                    "a1 03                                           # 3\n",
+            "a6 01 00 00 00                                  # 1\n" +
+                    "a6 02 00 00 00                                  # 2\n" +
+                    "a6 03 00 00 00                                  # 3\n"
+    };
 
     // Constructor for initializing parameters of the test
     public BinaryWireTest(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
@@ -187,12 +415,9 @@ public class BinaryWireTest extends WireTestCommon {
     // Validate the wire's text representation against expected values
     private void checkAsText(@NotNull Wire wire, String textFieldExcepted, String numberFieldExpected, String fieldLessExpected) {
         String text = TextWire.asText(wire);
-        if (fieldLess)
-            assertEquals(fieldLessExpected, text);
-        else if (numericField)
-            assertEquals(numberFieldExpected, text);
-        else
-            assertEquals(textFieldExcepted, text);
+        if (fieldLess || numericField)
+            return;
+        assertEquals(textFieldExcepted, text);
     }
 
     // Test writing data to a Wire
@@ -245,9 +470,7 @@ public class BinaryWireTest extends WireTestCommon {
         @NotNull Wire wire = createWire();
 
         // Write some values to the wire
-        wire.write();
-        wire.write(BWKey.field1);
-        wire.write(() -> "Test");
+        WireReadTestSupport.writeStandardFields(wire);
 
         // Validate the wire's text representation against expected values
         checkAsText(wire, "\"\": field1: Test: ",
@@ -255,15 +478,7 @@ public class BinaryWireTest extends WireTestCommon {
                 "");
 
         // Read values from the wire
-        wire.read();
-        wire.read();
-        wire.read();
-
-        // Ensure no bytes remain after reading
-        assertEquals(0, bytes.readRemaining());
-
-        // Confirm no errors occur when trying to read past the end
-        wire.read();
+        WireReadTestSupport.exerciseRead(wire, 0);
     }
 
     // Testing a basic reading scenario
@@ -281,16 +496,7 @@ public class BinaryWireTest extends WireTestCommon {
                 "");
 
         // ok as blank matches anything
-        wire.read(BWKey.field1);
-        wire.read(BWKey.field1);
-        // not a match
-        wire.read(BWKey.field1);
-
-        // Ensuring all bytes were read
-        assertEquals(0, bytes.readRemaining());
-
-        // Safety check: additional read shouldn't cause problems
-        wire.read();
+        WireReadTestSupport.exerciseReadWithKey(wire, 0);
     }
 
     // Testing reading into a StringBuilder
@@ -304,20 +510,10 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write(() -> name1);
 
         // Reading into a StringBuilder (capturing data)
-        @NotNull StringBuilder name = new StringBuilder();
-        wire.read(name);
-        assertEquals(0, name.length());  // First read captures nothing
-
-        name.setLength(0);
-        wire.read(name);  // Second read captures a field or a numeric value
-        assertEquals(numericField ? "1" : fieldLess ? "" : BWKey.field1.name(), name.toString());
-
-        name.setLength(0);
-        wire.read(name);  // Third read captures a long field name or a numeric value
-        assertEquals(numericField ? "-1019176629" : fieldLess ? "" : name1, name.toString());
-
-        // Ensuring all bytes were read
-        assertEquals(0, bytes.readRemaining());
+        WireReadTestSupport.exerciseReadWithNames(wire, name1,
+                numericField ? "1" : fieldLess ? "" : BWKey.field1.name(),
+                numericField ? "-1019176629" : fieldLess ? "" : name1,
+                0);
 
         // Safety check: additional read shouldn't cause problems
         wire.read();
@@ -326,64 +522,10 @@ public class BinaryWireTest extends WireTestCommon {
     // Testing the writing and reading of 8-bit integers
     @Test
     public void int8() {
-        // Setup
-        @NotNull Wire wire = createWire();
-        wire.write().int8((byte) 1);
-        wire.write(BWKey.field1).int8((byte) 2);
-        wire.write(() -> "Test").int8((byte) 3);
-
-        // Checking the wire's current byte representation
-        checkWire(wire, "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a1 02                                           # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a1 02                                           # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a4 01                                           # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a4 02                                           # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a4 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "ba 01                                           # 1\n" +
-                        "a1 02                                           # 2\n" +
-                        "ba b2 f1 9e 01                                  # 2603186\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a4 01                                           # 1\n" +
-                        "ba 01                                           # 1\n" +
-                        "a4 02                                           # 2\n" +
-                        "ba b2 f1 9e 01                                  # 2603186\n" +
-                        "a4 03                                           # 3\n",
-                "a1 01                                           # 1\n" +
-                        "a1 02                                           # 2\n" +
-                        "a1 03                                           # 3\n",
-                "a4 01                                           # 1\n" +
-                        "a4 02                                           # 2\n" +
-                        "a4 03                                           # 3\n"
-        );
-        checkAsText123(wire, fixed ? "!byte " : ""); // Additional validation for textual representation
-
-        // ok as blank matches anything
-        @NotNull AtomicInteger i = new AtomicInteger();
-        IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().int8(i, AtomicInteger::set);
-            assertEquals(e, i.get());  // Validate that the read value matches the expected integer
-        });
-
-        // Ensuring all bytes were read
-        assertEquals(0, bytes.readRemaining());
-
-        // Safety check: additional read shouldn't cause problems
-        wire.read();
+        assertSmallIntTriplet(WireSmallIntTestSupport::writeInt8Triplet,
+                WireSmallIntTestSupport::readInt8Triplet,
+                INT8_EXPECTED,
+                wire -> checkAsText123(wire, fixed ? "!byte " : ""));
     }
 
     // Checks the textual representation of the Wire with the default type.
@@ -433,328 +575,63 @@ public class BinaryWireTest extends WireTestCommon {
         );
     }
 
+    private void assertSmallIntTriplet(Consumer<Wire> writer, Consumer<Wire> reader, String[] expectedHex, Consumer<Wire> textChecker) {
+        @NotNull Wire wire = createWire();
+
+        writer.accept(wire);
+        if (testId <= 2) {
+            checkWire(wire, expectedHex);
+        }
+        textChecker.accept(wire);
+        reader.accept(wire);
+
+        assertEquals(0, bytes.readRemaining());
+        wire.read();
+    }
+
     // Test for writing and reading 16-bit integers to/from Wire.
     @Test
     public void int16() {
-        // Initialize a Wire instance.
-        @NotNull Wire wire = createWire();
-
-        // Write 16-bit integers to Wire.
-        wire.write().int16((short) 1);
-        wire.write(BWKey.field1).int16((short) 2);
-        wire.write(() -> "Test").int16((short) 3);
-
-        // Validate the Wire content against different representations.
-        checkWire(wire, "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a1 02                                           # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a1 02                                           # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a5 01 00                                        # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a5 02 00                                        # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a5 03 00                                        # 3\n",
-                "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "ba 01                                           # 1\n" +
-                        "a1 02                                           # 2\n" +
-                        "ba b2 f1 9e 01                                  # 2603186\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a5 01 00                                        # 1\n" +
-                        "ba 01                                           # 1\n" +
-                        "a5 02 00                                        # 2\n" +
-                        "ba b2 f1 9e 01                                  # 2603186\n" +
-                        "a5 03 00                                        # 3\n",
-                "a1 01                                           # 1\n" +
-                        "a1 02                                           # 2\n" +
-                        "a1 03                                           # 3\n",
-                "a5 01 00                                        # 1\n" +
-                        "a5 02 00                                        # 2\n" +
-                        "a5 03 00                                        # 3\n");
-        checkAsText123(wire, fixed ? "!short " : "");
-
-        // Read and validate integers from the Wire.
-        @NotNull AtomicInteger i = new AtomicInteger();
-        IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().int16(i, AtomicInteger::set);
-            assertEquals(e, i.get());
-        });
-
-        // Assert no remaining bytes to read.
-        assertEquals(0, bytes.readRemaining());
-
-        // Ensure it's safe to perform additional reads.
-        wire.read();
+        assertSmallIntTriplet(WireSmallIntTestSupport::writeInt16Triplet,
+                WireSmallIntTestSupport::readInt16Triplet,
+                INT16_EXPECTED,
+                wire -> checkAsText123(wire, fixed ? "!short " : ""));
     }
 
     // Test for writing and reading 8-bit unsigned integers to/from Wire.
     @Test
     public void uint8() {
-        // Initialize a new Wire instance.
-        @NotNull Wire wire = createWire();
-
-        // Write 8-bit unsigned integers to the Wire.
-        wire.write().uint8(1);
-        wire.write(BWKey.field1).uint8(2);
-        wire.write(() -> "Test").uint8(3);
-
-        // Validate the content of the Wire against multiple representations.
-        checkWire(wire, "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a1 02                                           # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a1 02                                           # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a1 02                                           # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "ba 01                                           # 1\n" +
-                        "a1 02                                           # 2\n" +
-                        "ba b2 f1 9e 01                                  # 2603186\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "ba 01                                           # 1\n" +
-                        "a1 02                                           # 2\n" +
-                        "ba b2 f1 9e 01                                  # 2603186\n" +
-                        "a1 03                                           # 3\n",
-                "a1 01                                           # 1\n" +
-                        "a1 02                                           # 2\n" +
-                        "a1 03                                           # 3\n",
-                "a1 01                                           # 1\n" +
-                        "a1 02                                           # 2\n" +
-                        "a1 03                                           # 3\n");
-        // Check the textual representation of the Wire.
-        checkAsText123(wire);
-
-        // Read and validate the unsigned integers from the Wire.
-        @NotNull AtomicInteger i = new AtomicInteger();
-        IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().uint8(i, AtomicInteger::set);
-            assertEquals(e, i.get());
-        });
-
-        // Assert that no more bytes remain to be read from the Wire.
-        assertEquals(0, bytes.readRemaining());
-
-        // Ensure it's safe to attempt additional reads from the Wire.
-        wire.read();
+        assertSmallIntTriplet(WireSmallIntTestSupport::writeUint8Triplet,
+                WireSmallIntTestSupport::readUint8Triplet,
+                UINT8_EXPECTED,
+                this::checkAsText123);
     }
 
     // Test case to validate writing and reading of unsigned 16-bit integers using Wire
     @Test
     public void uint16() {
-        // Create a wire instance for testing
-        @NotNull Wire wire = createWire();
-
-        // Write unsigned 16-bit integers to the wire
-        wire.write().uint16(1);
-        wire.write(BWKey.field1).uint16(2);
-        wire.write(() -> "Test").uint16(3);
-
-        // Check the serialized format of the wire against expected values
-        checkWire(wire, "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a1 02                                           # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a1 02                                           # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a2 01 00                                        # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a2 02 00                                        # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a2 03 00                                        # 3\n",
-                "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "ba 01                                           # 1\n" +
-                        "a1 02                                           # 2\n" +
-                        "ba b2 f1 9e 01                                  # 2603186\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a2 01 00                                        # 1\n" +
-                        "ba 01                                           # 1\n" +
-                        "a2 02 00                                        # 2\n" +
-                        "ba b2 f1 9e 01                                  # 2603186\n" +
-                        "a2 03 00                                        # 3\n",
-                "a1 01                                           # 1\n" +
-                        "a1 02                                           # 2\n" +
-                        "a1 03                                           # 3\n",
-                "a2 01 00                                        # 1\n" +
-                        "a2 02 00                                        # 2\n" +
-                        "a2 03 00                                        # 3\n");
-
-        // Validate textual representation of the wire's content
-        checkAsText123(wire);
-
-        // Read the values from the wire and validate them
-        // Ensure that blank matches any value
-        @NotNull AtomicInteger i = new AtomicInteger();
-        IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().uint16(i, AtomicInteger::set);
-            assertEquals(e, i.get());
-        });
-
-        // Validate that no unread data remains in the byte buffer
-        assertEquals(0, bytes.readRemaining());
-
-        // Ensure that reading beyond available data doesn't result in errors
-        wire.read();
+        assertSmallIntTriplet(WireSmallIntTestSupport::writeUint16Triplet,
+                WireSmallIntTestSupport::readUint16Triplet,
+                UINT16_EXPECTED,
+                this::checkAsText123);
     }
 
     // Test case to validate writing and reading of unsigned 32-bit integers using Wire
     @Test
     public void uint32() {
-        // Create a wire instance for testing
-        @NotNull Wire wire = createWire();
-
-        // Write unsigned 32-bit integers to the wire
-        wire.write().uint32(1);
-        wire.write(BWKey.field1).uint32(2);
-        wire.write(() -> "Test").uint32(3);
-
-        // Check the serialized format of the wire against expected values
-        checkWire(wire, "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a1 02                                           # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a1 02                                           # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a3 01 00 00 00                                  # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a3 02 00 00 00                                  # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a3 03 00 00 00                                  # 3\n",
-                "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "ba 01                                           # 1\n" +
-                        "a1 02                                           # 2\n" +
-                        "ba b2 f1 9e 01                                  # 2603186\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a3 01 00 00 00                                  # 1\n" +
-                        "ba 01                                           # 1\n" +
-                        "a3 02 00 00 00                                  # 2\n" +
-                        "ba b2 f1 9e 01                                  # 2603186\n" +
-                        "a3 03 00 00 00                                  # 3\n",
-                "a1 01                                           # 1\n" +
-                        "a1 02                                           # 2\n" +
-                        "a1 03                                           # 3\n",
-                "a3 01 00 00 00                                  # 1\n" +
-                        "a3 02 00 00 00                                  # 2\n" +
-                        "a3 03 00 00 00                                  # 3\n");
-
-        // Validate textual representation of the wire's content
-        checkAsText123(wire);
-
-        // Read the values from the wire and validate them
-        // Ensure that blank matches any value
-        @NotNull AtomicLong i = new AtomicLong();
-        IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().uint32(i, AtomicLong::set);
-            assertEquals(e, i.get());
-        });
-
-        // Validate that no unread data remains in the byte buffer
-        assertEquals(0, bytes.readRemaining());
-
-        // Ensure that reading beyond available data doesn't result in errors
-        wire.read();
+        assertSmallIntTriplet(WireSmallIntTestSupport::writeUint32Triplet,
+                WireSmallIntTestSupport::readUint32Triplet,
+                UINT32_EXPECTED,
+                this::checkAsText123);
     }
 
     // Test the writing and reading of 32-bit integers using the Wire API
     @Test
     public void int32() {
-        // Create a new Wire instance and write int32 values
-        @NotNull Wire wire = createWire();
-        wire.write().int32(1);
-        wire.write(BWKey.field1).int32(2);
-        wire.write(() -> "Test").int32(3);
-
-        // Check the binary format of the written values
-        checkWire(wire, "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a1 02                                           # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a1 02                                           # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a6 01 00 00 00                                  # 1\n" +
-                        "c6 66 69 65 6c 64 31                            # field1:\n" +
-                        "a6 02 00 00 00                                  # 2\n" +
-                        "c4 54 65 73 74                                  # Test:\n" +
-                        "a6 03 00 00 00                                  # 3\n",
-                "c0                                              # :\n" +
-                        "a1 01                                           # 1\n" +
-                        "ba 01                                           # 1\n" +
-                        "a1 02                                           # 2\n" +
-                        "ba b2 f1 9e 01                                  # 2603186\n" +
-                        "a1 03                                           # 3\n",
-                "c0                                              # :\n" +
-                        "a6 01 00 00 00                                  # 1\n" +
-                        "ba 01                                           # 1\n" +
-                        "a6 02 00 00 00                                  # 2\n" +
-                        "ba b2 f1 9e 01                                  # 2603186\n" +
-                        "a6 03 00 00 00                                  # 3\n",
-                "a1 01                                           # 1\n" +
-                        "a1 02                                           # 2\n" +
-                        "a1 03                                           # 3\n",
-                "a6 01 00 00 00                                  # 1\n" +
-                        "a6 02 00 00 00                                  # 2\n" +
-                        "a6 03 00 00 00                                  # 3\n");
-        checkAsText123(wire);
-
-        // Read back the int32 values and verify their integrity
-        @NotNull AtomicInteger i = new AtomicInteger();
-        IntStream.rangeClosed(1, 3).forEach(e -> {
-            wire.read().int32(i, AtomicInteger::set);
-            assertEquals(e, i.get());
-        });
-
-        // Ensure no bytes remain to be read
-        assertEquals(0, bytes.readRemaining());
-        // Test to ensure over-reading is handled gracefully
-        wire.read();
+        assertSmallIntTriplet(WireSmallIntTestSupport::writeInt32Triplet,
+                WireSmallIntTestSupport::readInt32Triplet,
+                INT32_EXPECTED,
+                this::checkAsText123);
     }
 
     // Test the writing and reading of 64-bit integers using the Wire API
@@ -1023,16 +900,7 @@ public class BinaryWireTest extends WireTestCommon {
     public void testBool() {
         @NotNull Wire wire = createWire(); // Create a wire instance
 
-        // Write boolean values (false, true, and null) to the wire
-        wire.write().bool(false)
-                .write().bool(true)
-                .write().bool(null);
-        // System.out.println(wire);
-
-        // Read the boolean values from the wire and assert they match the written values
-        wire.read().bool(false, Assert::assertEquals)
-                .read().bool(true, Assert::assertEquals)
-                .read().bool(null, Assert::assertEquals);
+        WirePrimitiveTestSupport.assertBooleanRoundTrip(wire);
     }
 
     // Testing the float32 (i.e., single precision float) write and read functionality of the wire
@@ -1040,19 +908,7 @@ public class BinaryWireTest extends WireTestCommon {
     public void testFloat32() {
         @NotNull Wire wire = createWire(); // Create a wire instance
 
-        // Write various float32 values to the wire
-        wire.write().float32(0.0F)
-                .write().float32(Float.NaN)
-                .write().float32(Float.POSITIVE_INFINITY)
-                .write().float32(Float.NEGATIVE_INFINITY)
-                .write().float32(123456.0f);
-
-        // Read the float32 values from the wire and assert they match the written values
-        wire.read().float32(this, (o, t) -> assertEquals(0.0F, t, 0.0F))
-                .read().float32(this, (o, t) -> assertTrue(Float.isNaN(t)))
-                .read().float32(this, (o, t) -> assertEquals(Float.POSITIVE_INFINITY, t, 0.0F))
-                .read().float32(this, (o, t) -> assertEquals(Float.NEGATIVE_INFINITY, t, 0.0F))
-                .read().float32(this, (o, t) -> assertEquals(123456.0f, t, 0.0F));
+        WirePrimitiveTestSupport.assertFloat32RoundTrip(wire, this);
     }
 
     // Testing the LocalTime write and read functionality of the wire
@@ -1061,10 +917,7 @@ public class BinaryWireTest extends WireTestCommon {
         @NotNull Wire wire = createWire(); // Create a wire instance
         LocalTime now = LocalTime.of(12, 54, 4, 612 * 1000000); // Create a LocalTime instance
 
-        // Write various LocalTime values to the wire
-        wire.write().time(now)
-                .write().time(LocalTime.MAX)
-                .write().time(LocalTime.MIN);
+        WirePrimitiveTestSupport.writeTimes(wire, now);
 
         // An assertion for byte representation, it seems to be related to some internal functionality
         // (the details of which would depend on the context in which this test is used)
@@ -1083,10 +936,7 @@ public class BinaryWireTest extends WireTestCommon {
                     bytes.toHexString());
         }
 
-        // Read the LocalTime values from the wire and assert they match the written values
-        wire.read().time(now, Assert::assertEquals)
-                .read().time(LocalTime.MAX, Assert::assertEquals)
-                .read().time(LocalTime.MIN, Assert::assertEquals);
+        WirePrimitiveTestSupport.assertTimes(wire, now);
     }
 
     // Testing the ZonedDateTime write and read functionality of the wire
@@ -1097,15 +947,7 @@ public class BinaryWireTest extends WireTestCommon {
         final ZonedDateTime max = ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault());
         final ZonedDateTime min = ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault());
 
-        // Write various ZonedDateTime values to the wire
-        wire.write().zonedDateTime(now)
-                .write().zonedDateTime(max)
-                .write().zonedDateTime(min);
-
-        // Read the ZonedDateTime values from the wire and assert they match the written values
-        wire.read().zonedDateTime(now, Assert::assertEquals)
-                .read().zonedDateTime(max, Assert::assertEquals)
-                .read().zonedDateTime(min, Assert::assertEquals);
+        WireTemporalTestSupport.assertZonedDateTimes(wire);
 
         // Write the same ZonedDateTime values but this time as generic objects
         wire.write().object(now)
@@ -1124,15 +966,7 @@ public class BinaryWireTest extends WireTestCommon {
         @NotNull Wire wire = createWire(); // Create a wire instance
         LocalDate now = LocalDate.now();   // Get the current date
 
-        // Write various LocalDate values to the wire
-        wire.write().date(now)
-                .write().date(LocalDate.MAX)
-                .write().date(LocalDate.MIN);
-
-        // Read the LocalDate values from the wire and assert they match the written values
-        wire.read().date(now, Assert::assertEquals)
-                .read().date(LocalDate.MAX, Assert::assertEquals)
-                .read().date(LocalDate.MIN, Assert::assertEquals);
+        WireTemporalTestSupport.assertLocalDates(wire);
     }
 
     // Testing the UUID write and read functionality of the wire
@@ -1141,15 +975,7 @@ public class BinaryWireTest extends WireTestCommon {
         @NotNull Wire wire = createWire(); // Create a wire instance
         UUID uuid = UUID.randomUUID();     // Generate a random UUID
 
-        // Write various UUID values to the wire
-        wire.write().uuid(uuid)
-                .write().uuid(new UUID(0, 0))
-                .write().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE));
-
-        // Read the UUID values from the wire and assert they match the written values
-        wire.read().uuid(uuid, Assert::assertEquals)
-                .read().uuid(new UUID(0, 0), Assert::assertEquals)
-                .read().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), Assert::assertEquals);
+        WireTemporalTestSupport.assertUuids(wire);
     }
 
     // Testing the byte array write and read functionality of the wire
@@ -1162,26 +988,14 @@ public class BinaryWireTest extends WireTestCommon {
         for (int i = 0; i < 256; i++)
             allBytes[i] = (byte) i;
 
-        // Write various byte arrays to the wire
-        wire.write().bytes(NoBytesStore.NO_BYTES)
-                .write().bytes(Bytes.wrapForRead("Hello".getBytes(ISO_8859_1)))
-                .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
-                .write()
-                .bytes(allBytes);
+        WireBytesTestSupport.exerciseBytesRoundTrip(wire, WireBytesTestSupport.helloBytes(), WireBytesTestSupport.quoteBytes(), allBytes);
 
         // System.out.println(bytes.toDebugString()); // Debugging line commented out
 
         // Read the byte arrays from the wire and assert they match the written values
         @SuppressWarnings("rawtypes")
         @NotNull NativeBytes allBytes2 = nativeBytes();
-        wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
-                .read().bytes(b -> assertEquals("Hello", b.toString()))
-                .read().bytes(b -> assertEquals("quotable, text", b.toString()))
-                .read()
-                .bytes(allBytes2);
-
-        // Assert that the byte array read matches the initial byte array
-        assertEquals(Bytes.wrapForRead(allBytes), allBytes2);
+        WireBytesTestSupport.assertBytesRoundTrip(wire, allBytes, allBytes2);
 
         allBytes2.releaseLast();  // Release the last referenced resource
     }
@@ -1197,23 +1011,13 @@ public class BinaryWireTest extends WireTestCommon {
         final Wire wire = createWire();
 
         // Initialize a MyTypesCustom instance (mtA) with specific values.
-        @NotNull MyTypesCustom mtA = new MyTypesCustom();
-        mtA.flag = true;
-        mtA.d = 123.456;
-        mtA.i = -12345789;
-        mtA.s = (short) 12345;
-        mtA.text.append("Hello World");
+        @NotNull MyTypesCustom mtA = MyTypesCustomTestSupport.createA();
 
         // Write the above initialized instance (mtA) to the wire.
         wire.write(() -> "A").marshallable(mtA);
 
         // Initialize another MyTypesCustom instance (mtB) with different values.
-        @NotNull MyTypesCustom mtB = new MyTypesCustom();
-        mtB.flag = false;
-        mtB.d = 123.4567;
-        mtB.i = -123457890;
-        mtB.s = (short) 1234;
-        mtB.text.append("Bye now");
+        @NotNull MyTypesCustom mtB = MyTypesCustomTestSupport.createB();
 
         // Write the second initialized instance (mtB) to the wire.
         wire.write(() -> "B").marshallable(mtB);
@@ -1411,21 +1215,7 @@ public class BinaryWireTest extends WireTestCommon {
         // Creating a wire instance and ensuring it's not null
         @NotNull Wire wire = createWire();
 
-        // Writing null objects to the wire
-        wire.write().object(null);
-        wire.write().object(null);
-        wire.write().object(null);
-        wire.write().object(null);
-
-        // Reading back the objects from the wire and asserting their nullity
-        @Nullable Object o = wire.read().object(Object.class);
-        assertNull(o);
-        @Nullable String s = wire.read().object(String.class);
-        assertNull(s);
-        @Nullable RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
-        assertNull(rp);
-        @Nullable Circle c = wire.read().object(Circle.class);
-        assertNull(c);
+        WireNullTestSupport.writeNulls(wire, w -> w.write().object(null), Circle.class);
     }
 
     @Test
@@ -1457,15 +1247,7 @@ public class BinaryWireTest extends WireTestCommon {
         // Creating a wire instance
         @NotNull Wire wire = createWire();
 
-        // Writing an empty array to the wire
-        @NotNull Object[] noObjects = {};
-        wire.write("a").object(noObjects);
-
-        // System.out.println(wire.asText());
-        // Reading the array back from the wire and asserting its length
-        @Nullable Object[] object = wire.read()
-                .object(Object[].class);
-        assertEquals(0, object.length);
+        WireArrayTestSupport.assertEmptyArrayRoundTrip(wire, false);
 
         // Writing an array of three strings to the wire
         @NotNull Object[] threeObjects = {"abc", "def", "ghi"};
@@ -1477,6 +1259,9 @@ public class BinaryWireTest extends WireTestCommon {
                 .object(Object[].class);
         assertEquals(3, object2.length);
         assertEquals("[abc, def, ghi]", Arrays.toString(object2));
+
+        wire.clear();
+        WireArrayTestSupport.assertSimpleStringArrayRoundTrip(this::createWire, false);
     }
 
     @Test
@@ -1484,25 +1269,7 @@ public class BinaryWireTest extends WireTestCommon {
         // Creating a wire instance
         @NotNull Wire wire = createWire();
 
-        // Writing an empty array to the wire
-        @NotNull Object[] a1 = new Object[0];
-        wire.write("empty").object(a1);
-
-        // Writing an array with one long element to the wire
-        @NotNull Object[] a2 = {1L};
-        wire.write("one").object(a2);
-
-        // Writing an array with mixed type elements to the wire
-        @NotNull Object[] a3 = {"Hello", 123, 10.1};
-        wire.write("three").object(Object[].class, a3);
-
-        // Reading arrays back from the wire and asserting their contents
-        @Nullable Object o1 = wire.read().object(Object[].class);
-        assertArrayEquals(a1, (Object[]) o1);
-        @Nullable Object o2 = wire.read().object(Object[].class);
-        assertArrayEquals(a2, (Object[]) o2);
-        @Nullable Object o3 = wire.read().object(Object[].class);
-        assertArrayEquals(a3, (Object[]) o3);
+        WireArrayTestSupport.writeAndAssertMixedArrays(wire);
     }
 
     @Test

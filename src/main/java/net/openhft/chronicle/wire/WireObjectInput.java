@@ -34,6 +34,9 @@ class WireObjectInput implements ObjectInput {
         return wire.getValueIn().object();
     }
 
+    /**
+     * Reads the next byte as an unsigned int (0-255) or returns {@code -1} on end of stream.
+     */
     @Override
     public int read() {
         if (wire.bytes().readRemaining() <= 0)

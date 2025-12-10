@@ -84,41 +84,13 @@ public class Base85LongConverterTest extends WireTestCommon {
     // Validate the append operation for a known input string
     @Test
     public void testAppend() {
-        // Create an elastic byte buffer
-        final Bytes<?> b = Bytes.allocateElasticOnHeap();
-        try {
-            // Obtain the singleton instance of Base85LongConverter
-            final Base85LongConverter idLongConverter = Base85LongConverter.INSTANCE;
-            // Parse the TEST_STRING into a long value
-            final long helloWorld = idLongConverter.parse(TEST_STRING);
-            // Append the parsed value back into a byte buffer
-            idLongConverter.append(b, helloWorld);
-            // Validate the byte buffer content against the TEST_STRING
-            assertEquals(TEST_STRING, b.toString());
-        } finally {
-            // Release the allocated buffer
-            b.releaseLast();
-        }
+        LongConverterTestSupport.assertAppend(TEST_STRING, Base85LongConverter.INSTANCE);
     }
 
     // Validate appending data with pre-existing content in the buffer
     @Test
     public void testAppendWithExistingData() {
-        // Create an elastic byte buffer and append "hello" to it
-        final Bytes<?> b = Bytes.allocateElasticOnHeap().append("hello");
-        try {
-            // Obtain the singleton instance of Base85LongConverter
-            final Base85LongConverter idLongConverter = Base85LongConverter.INSTANCE;
-            // Parse the TEST_STRING into a long value
-            final long helloWorld = idLongConverter.parse(TEST_STRING);
-            // Append the parsed value to the already partially filled byte buffer
-            idLongConverter.append(b, helloWorld);
-            // Validate the byte buffer content against the concatenated string "hello" + TEST_STRING
-            assertEquals("hello" + TEST_STRING, b.toString());
-        } finally {
-            // Release the allocated buffer
-            b.releaseLast();
-        }
+        LongConverterTestSupport.assertAppendWithPrefix(TEST_STRING, Base85LongConverter.INSTANCE, "hello");
     }
 
     // Ensure safe character conversion using TextWire
@@ -127,7 +99,7 @@ public class Base85LongConverterTest extends WireTestCommon {
         // Create a TextWire instance with elastic on heap bytes and configure it to use text documents
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         // Execute the generic safe character check
-        allSafeChars(wire);
+        LongConverterTestSupport.allSafeChars(wire, Base85LongConverter.INSTANCE);
     }
 
     // Ensure safe character conversion using YamlWire
@@ -136,32 +108,6 @@ public class Base85LongConverterTest extends WireTestCommon {
         // Create a YamlWire instance with elastic on heap bytes and configure it to use text documents
         Wire wire = new YamlWire();
         // Execute the generic safe character check
-        allSafeChars(wire);
-    }
-
-    // Validate all safe characters within the provided Wire instance
-    private void allSafeChars(Wire wire) {
-        // Obtain the singleton instance of Base85LongConverter
-        final Base85LongConverter converter = Base85LongConverter.INSTANCE;
-        // Iterate through long numbers, validating their conversion and sequencing in the Wire
-        for (long i = 0; i <= 85 * 85; i++) {
-            // Clear the wire data
-            wire.clear();
-            // Write the long number i into the wire with a tag "a" using the converter
-            wire.write("a").writeLong(converter, i);
-            // Write a sequence of the same number tagged as "b"
-            wire.write("b").sequence(i, (i2, v) -> {
-                v.writeLong(converter, i2);
-                v.writeLong(converter, i2);
-            });
-            // Validate that the wire representation is accurate
-            assertEquals(wire.toString(),
-                    i, wire.read("a").readLong(converter));
-            // Check the sequence integrity and correctness in the wire
-            wire.read("b").sequence(i, (i2, v) -> {
-                assertEquals((long) i2, v.readLong(converter));
-                assertEquals((long) i2, v.readLong(converter));
-            });
-        }
+        LongConverterTestSupport.allSafeChars(wire, Base85LongConverter.INSTANCE);
     }
 }

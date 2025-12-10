@@ -655,37 +655,11 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
         for (int i = 0; i < 200; i++) {
             int size = 100 + i;
-            ChronicleBitSet b1 = createBitSet(size);
-
-            // Make a fairly random ChronicleBitSet
-            int numberOfSetBits = generator.nextInt(100) + 1;
-            int highestPossibleSetBit = generator.nextInt(size) + 1;
-
-            for (int x = 0; x < numberOfSetBits; x++)
-                b1.set(generator.nextInt(highestPossibleSetBit));
+            ChronicleBitSet b1 = createRandomBitSet(size);
 
             ChronicleBitSet b2 = cloneBitSet(b1, size);
 
-            // Clear out a random range
-            int rangeStart = generator.nextInt(100);
-            int rangeEnd = rangeStart + generator.nextInt(size - rangeStart) + 1;
-
-            // Use the clear(int, int) call on b1
-            b1.clear(rangeStart, rangeEnd);
-
-            // Use a loop on b2
-            for (int x = rangeStart; x < rangeEnd; x++)
-                b2.clear(x);
-
-            // Verify their equality
-            if (!b1.equals(b2)) {
-                System.out.println("rangeStart = " + rangeStart);
-                System.out.println("rangeEnd = " + rangeEnd);
-                System.out.println("b1 = " + b1);
-                System.out.println("b2 = " + b2);
-                failCount++;
-            }
-            checkEquality(b1, b2);
+            failCount += clearRangeAndCompare(size, b1, b2);
         }
 
         assertEquals(0, failCount);
@@ -700,36 +674,12 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
             // Make a fairly random ChronicleBitSet
             final int size = 100 + i;
-            ChronicleBitSet b1 = createBitSet(size);
-            int numberOfSetBits = generator.nextInt(100) + 1;
             int possibleSetBit = generator.nextInt(size) + 1;
-
-            for (int x = 0; x < numberOfSetBits; x++)
-                b1.set(generator.nextInt(possibleSetBit));
+            ChronicleBitSet b1 = createRandomBitSet(size, possibleSetBit);
 
             ChronicleBitSet b2 = cloneBitSet(b1, size);
 
-            // Set a random range
-            int rangeStart = generator.nextInt(100);
-            int rangeEnd = rangeStart + generator.nextInt(size - rangeStart);
-
-            // Use the set(int, int) call on b1
-            b1.set(rangeStart, rangeEnd);
-
-            // Use a loop on b2
-            for (int x = rangeStart; x < rangeEnd; x++)
-                b2.set(x);
-
-            // Verify their equality
-            if (!b1.equals(b2)) {
-                System.out.println("Set 1");
-                System.out.println("rangeStart = " + rangeStart);
-                System.out.println("rangeEnd = " + rangeEnd);
-                System.out.println("b1 = " + b1);
-                System.out.println("b2 = " + b2);
-                failCount++;
-            }
-            checkEquality(b1, b2);
+            failCount += setRangeAndCompare(size, b1, b2, true, false);
         }
 
         // Test set(int, int, boolean)
@@ -737,37 +687,13 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
             // Make a fairly random ChronicleBitSet
             final int size = 100 + i;
-            ChronicleBitSet b1 = createBitSet(size);
-            int numberOfSetBits = generator.nextInt(100) + 1;
             int possibleSetBit = generator.nextInt(size) + 1;
-
-            for (int x = 0; x < numberOfSetBits; x++)
-                b1.set(generator.nextInt(possibleSetBit));
+            ChronicleBitSet b1 = createRandomBitSet(size, possibleSetBit);
 
             ChronicleBitSet b2 = cloneBitSet(b1, size);
             boolean setOrClear = generator.nextBoolean();
 
-            // Set a random range
-            int rangeStart = generator.nextInt(100);
-            int rangeEnd = rangeStart + generator.nextInt(size - rangeStart) + 1;
-
-            // Use the set(int, int, boolean) call on b1
-            b1.set(rangeStart, rangeEnd, setOrClear);
-
-            // Use a loop on b2
-            for (int x = rangeStart; x < rangeEnd; x++)
-                b2.set(x, setOrClear);
-
-            // Verify their equality
-            if (!b1.equals(b2)) {
-                System.out.println("Set 2");
-                System.out.println("b1 = " + b1);
-                System.out.println("b2 = " + b2);
-                failCount++;
-            }
-            b1.set(0);
-            b2.set(0);
-            checkEquality(b1, b2);
+            failCount += setRangeAndCompare(size, b1, b2, setOrClear, true);
         }
 
         assertEquals(0, failCount);
@@ -779,35 +705,87 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
         for (int i = 0; i < 200; i++) {
             int size = 100 + i;
-            ChronicleBitSet b1 = createBitSet(size);
-
-            // Make a fairly random ChronicleBitSet
-            int numberOfSetBits = generator.nextInt(100) + 1;
-            int highestPossibleSetBit = generator.nextInt(size) + 1;
-
-            for (int x = 0; x < numberOfSetBits; x++)
-                b1.set(generator.nextInt(highestPossibleSetBit));
+            ChronicleBitSet b1 = createRandomBitSet(size);
 
             ChronicleBitSet b2 = cloneBitSet(b1, size);
 
-            // Flip a random range
-            int rangeStart = generator.nextInt(100);
-            int rangeEnd = rangeStart + generator.nextInt(size - rangeStart) + 1;
-
-            // Use the flip(int, int) call on b1
-            b1.flip(rangeStart, rangeEnd);
-
-            // Use a loop on b2
-            for (int x = rangeStart; x < rangeEnd; x++)
-                b2.flip(x);
-
-            // Verify their equality
-            if (!b1.equals(b2))
-                failCount++;
-            checkEquality(b1, b2);
+            failCount += flipRangeAndCompare(size, b1, b2);
         }
 
         assertEquals(0, failCount);
+    }
+
+    private ChronicleBitSet createRandomBitSet(int size) {
+        return createRandomBitSet(size, generator.nextInt(size) + 1);
+    }
+
+    private ChronicleBitSet createRandomBitSet(int size, int highestPossibleSetBit) {
+        ChronicleBitSet bitSet = createBitSet(size);
+        populateRandomBits(bitSet, generator.nextInt(100) + 1, highestPossibleSetBit);
+        return bitSet;
+    }
+
+    private void populateRandomBits(ChronicleBitSet bitSet, int numberOfSetBits, int highestPossibleSetBit) {
+        for (int x = 0; x < numberOfSetBits; x++) {
+            bitSet.set(generator.nextInt(highestPossibleSetBit));
+        }
+    }
+
+    private int clearRangeAndCompare(int size, ChronicleBitSet b1, ChronicleBitSet b2) {
+        return compareRangeOperation(size, b1, b2, ChronicleBitSet::clear, () -> {
+        }, "clearRange");
+    }
+
+    private int setRangeAndCompare(int size, ChronicleBitSet b1, ChronicleBitSet b2, boolean setOrClear, boolean setBitZeroAfter) {
+        return compareRangeOperation(size, b1, b2,
+                (bitSet, start, end) -> bitSet.set(start, end, setOrClear),
+                () -> {
+                    if (setBitZeroAfter) {
+                        b1.set(0);
+                        b2.set(0);
+                    }
+                }, setOrClear ? "Set 1" : "Set 2");
+    }
+
+    private int flipRangeAndCompare(int size, ChronicleBitSet b1, ChronicleBitSet b2) {
+        return compareRangeOperation(size, b1, b2, ChronicleBitSet::flip, () -> {
+        }, "flipRange");
+    }
+
+    private int compareRangeOperation(int size,
+                                      ChronicleBitSet b1,
+                                      ChronicleBitSet b2,
+                                      RangeOperation operation,
+                                      Runnable afterSuccess,
+                                      String label) {
+        int rangeStart = generator.nextInt(100);
+        int rangeEnd = rangeStart + generator.nextInt(size - rangeStart) + 1;
+
+        operation.apply(b1, rangeStart, rangeEnd);
+        for (int x = rangeStart; x < rangeEnd; x++) {
+            operation.apply(b2, x, x + 1);
+        }
+
+        if (!b1.equals(b2)) {
+            if (!label.isEmpty()) {
+                System.out.println(label);
+            }
+            System.out.println("rangeStart = " + rangeStart);
+            System.out.println("rangeEnd = " + rangeEnd);
+            System.out.println("b1 = " + b1);
+            System.out.println("b2 = " + b2);
+            checkEquality(b1, b2);
+            return 1;
+        }
+
+        afterSuccess.run();
+        checkEquality(b1, b2);
+        return 0;
+    }
+
+    @FunctionalInterface
+    private interface RangeOperation {
+        void apply(ChronicleBitSet bitSet, int start, int end);
     }
 
     @Test
@@ -1030,6 +1008,34 @@ public class ChronicleBitSetTest extends WireTestCommon {
         }
     }
 
+    private void assertLogicalIdentityXorAndOr(int numberOfIterations, int numberOfSetBits, int possibleSetBit) {
+        for (int i = 0; i < numberOfIterations; i++) {
+            ChronicleBitSet b1 = createBitSet(possibleSetBit);
+            ChronicleBitSet b2 = createBitSet(possibleSetBit);
+
+            for (int x = 0; x < numberOfSetBits; x++) {
+                b1.set(generator.nextInt(possibleSetBit));
+                b2.set(generator.nextInt(possibleSetBit));
+            }
+
+            ChronicleBitSet b3 = cloneBitSet(b1, possibleSetBit);
+            ChronicleBitSet b4 = cloneBitSet(b2, possibleSetBit);
+            ChronicleBitSet b5 = cloneBitSet(b1, possibleSetBit);
+            ChronicleBitSet b6 = cloneBitSet(b2, possibleSetBit);
+
+            for (int x = 0; x < possibleSetBit; x++)
+                b2.flip(x);
+            b1.and(b2);
+            for (int x = 0; x < possibleSetBit; x++)
+                b3.flip(x);
+            b3.and(b4);
+            b1.or(b3);
+            b5.xor(b6);
+            assertEquals(b1, b5);
+            checkSanity(b1, b2, b3, b4, b5, b6);
+        }
+    }
+
     @Test
     public void testLogicalIdentities() {
         int failCount = 0;
@@ -1066,37 +1072,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         }
 
         // Verify that (b1&(!b2)|(b2&(!b1) == b1^b2
-        for (int i = 0; i < 50; i++) {
-            // Construct two fairly random ChronicleBitSets
-
-            int numberOfSetBits = generator.nextInt(10) + 1;
-            int possibleSetBit = generator.nextInt(200 - numberOfSetBits) + numberOfSetBits;
-
-            ChronicleBitSet b1 = createBitSet(possibleSetBit);
-            ChronicleBitSet b2 = createBitSet(possibleSetBit);
-
-            for (int x = 0; x < numberOfSetBits; x++) {
-                b1.set(generator.nextInt(possibleSetBit));
-                b2.set(generator.nextInt(possibleSetBit));
-            }
-
-            ChronicleBitSet b3 = cloneBitSet(b1, possibleSetBit);
-            ChronicleBitSet b4 = cloneBitSet(b2, possibleSetBit);
-            ChronicleBitSet b5 = cloneBitSet(b1, possibleSetBit);
-            ChronicleBitSet b6 = cloneBitSet(b2, possibleSetBit);
-
-            for (int x = 0; x < possibleSetBit; x++)
-                b2.flip(x);
-            b1.and(b2);
-            for (int x = 0; x < possibleSetBit; x++)
-                b3.flip(x);
-            b3.and(b4);
-            b1.or(b3);
-            b5.xor(b6);
-            if (!b1.equals(b5))
-                failCount++;
-            checkSanity(b1, b2, b3, b4, b5, b6);  // Checks for some sanity conditions in the ChronicleBitSet instances
-        }
+        assertLogicalIdentityXorAndOr(50, 10, 200);
 
         // Ensure that no logical identities were violated
         assertEquals(0, failCount);

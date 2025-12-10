@@ -121,6 +121,9 @@ public class FileMarshallableOut implements MarshallableOut {
         boolean append; // Indicates if data should be appended to the existing file
     }
 
+    /**
+     * Parses {@code append=true|false} from a URI query string.
+     */
     private static boolean parseAppendFlag(String query) {
         for (String pair : query.split("&")) {
             if (pair.isEmpty())
@@ -135,6 +138,9 @@ public class FileMarshallableOut implements MarshallableOut {
         return false;
     }
 
+    /**
+     * URL-decodes a single query component using UTF-8.
+     */
     private static String decodeComponent(String value) {
         try {
             return URLDecoder.decode(value, "UTF-8");

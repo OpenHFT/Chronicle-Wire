@@ -3,7 +3,13 @@
  */
 package net.openhft.chronicle.wire;
 
+/**
+ * Utilities for decoding escaped characters used in YAML/text wire formats.
+ */
 final class TextEscapeUtil {
+    /**
+     * Utility holder; not instantiable.
+     */
     private TextEscapeUtil() {
     }
 

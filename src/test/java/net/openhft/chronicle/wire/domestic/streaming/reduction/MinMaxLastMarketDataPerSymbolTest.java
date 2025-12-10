@@ -3,12 +3,9 @@
  */
 package net.openhft.chronicle.wire.domestic.streaming.reduction;
 
-import net.openhft.chronicle.wire.DocumentContext;
-import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
-import net.openhft.chronicle.wire.domestic.streaming.CreateUtil;
 import org.junit.Test;
 
 import java.util.*;
@@ -45,8 +42,8 @@ public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
                         collectingAndThen(toConcurrentMap(MarketData::symbol, MinMax::new, MinMax::merge), Collections::unmodifiableMap)
                 );
 
-        test(globalListener);
-        test(listener);
+        MarketDataReductionTestSupport.acceptData(globalListener, MARKET_DATA_SET);
+        MarketDataReductionTestSupport.acceptData(listener, MARKET_DATA_SET);
 
         final MinMax expectedGlobal = MARKET_DATA_SET.stream()
                 .reduce(new MinMax(), MinMax::merge, MinMax::merge);
@@ -67,7 +64,7 @@ public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
                         collectingAndThen(toConcurrentMap(MarketData::symbol, Function.identity(), replacingMerger()), Collections::unmodifiableMap)
                 );
 
-        test(listener);
+        MarketDataReductionTestSupport.acceptData(listener, MARKET_DATA_SET);
 
         final Map<String, MarketData> expected = MARKET_DATA_SET.stream()
                 .collect(toMap(MarketData::symbol, Function.identity(), replacingMerger()));
@@ -85,7 +82,7 @@ public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
                                 .map(MarketData::symbol))
                 .collecting(toConcurrentSet());
 
-        test(listener);
+        MarketDataReductionTestSupport.acceptData(listener, MARKET_DATA_SET);
 
         final Set<String> expected = MARKET_DATA_SET.stream()
                 .map(MarketData::symbol)
@@ -94,15 +91,4 @@ public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
         assertEquals(expected, listener.reduction());
     }
 
-    private void test(Reduction<?> listener) {
-        Wire wire = CreateUtil.create();
-        MARKET_DATA_SET.forEach(md -> write(wire, md));
-        listener.accept(wire);
-    }
-
-    private static void write(Wire appender, MarketData marketData) {
-        try (final DocumentContext dc = appender.writingDocument()) {
-            dc.wire().getValueOut().object(marketData);
-        }
-    }
 }

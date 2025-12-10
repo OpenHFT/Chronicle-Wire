@@ -3,33 +3,28 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesOut;
-import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.PointerBytesStore;
-import net.openhft.chronicle.bytes.ReadBytesMarshallable;
-import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.ref.TextLongArrayReference;
+import net.openhft.chronicle.core.values.LongArrayValues;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 
+/**
+ * Shared text/YAML helpers for handling large byte sequences and int64 array marshalling.
+ */
 final class TextYamlCommon {
+    /**
+     * Utility holder; not instantiable.
+     */
     private TextYamlCommon() {
     }
 
-    static DocumentContext readDocument(WireOut owner,
-                                        ReadDocumentContext readContext,
-                                        long readLocation) {
-        final long readPosition = owner.bytes().readPosition();
-        final long readLimit = owner.bytes().readLimit();
-        owner.bytes().readPosition(readLocation);
-        owner.initReadContext();
-        readContext.closeReadLimit(readLimit);
-        readContext.closeReadPosition(readPosition);
-        return readContext;
-    }
-
+    /**
+     * Produces a string view of {@code bytes}, truncating to 1MB to avoid giant log output while
+     * preserving the original read limit.
+     */
     static String largeToString(Bytes<?> bytes) {
         if (bytes.readRemaining() > (1024 * 1024)) {
             final long l = bytes.readLimit();
@@ -44,27 +39,11 @@ final class TextYamlCommon {
         }
     }
 
-    static WireIn bytesCommon(WireIn owner, @NotNull BytesOut<?> toBytes) {
-        toBytes.clear();
-        return owner.bytes(b -> toBytes.write((BytesStore) b));
-    }
-
-    static WireIn bytesSetCommon(WireIn owner, @NotNull PointerBytesStore toBytes) {
-        return owner.bytes(bytes -> {
-            long capacity = bytes.readRemaining();
-            Bytes<Void> bytes2 = Bytes.allocateDirect(capacity);
-            bytes2.write((BytesStore) bytes);
-            toBytes.set(bytes2.addressForRead(bytes2.start()), capacity);
-        });
-    }
-
-    static WireIn bytesMarshallableCommon(WireIn owner,
-                                          @NotNull ReadBytesMarshallable bytesConsumer) {
-        owner.consumePadding();
-        bytesConsumer.readMarshallable(owner.bytes());
-        return owner;
-    }
-
+    /**
+     * Common logic for reading an int64 array from text wire into a {@link LongArrayValues}, wiring
+     * the provided target via the supplied setter. Reuses a {@link TextLongArrayReference} when
+     * possible to avoid allocations.
+     */
     static <T> WireIn int64arrayCommon(Bytes<?> bytes,
                                        @Nullable LongArrayValues values,
                                        T target,

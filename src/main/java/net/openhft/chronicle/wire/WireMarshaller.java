@@ -1774,20 +1774,24 @@ public class WireMarshaller<T> {
 
         @Override
         public boolean isEqual(Object o1, Object o2) {
-            try {
-                Object a1 = field.get(o1);
-                Object a2 = field.get(o2);
-                if (a1 == null) return a2 == null;
-                if (a2 == null) return false;
-                Class<?> aClass1 = a1.getClass();
-                Class<?> aClass2 = a2.getClass();
-                if (aClass1 != aClass2)
-                    if (!aClass1.isAssignableFrom(aClass2) && !aClass2.isAssignableFrom(aClass1))
-                        return false;
-                return Arrays.equals((byte[]) a1, (byte[]) a2);
-            } catch (IllegalAccessException e) {
-                throw new AssertionError(e);
-            }
+            return isEqualByteArray(o1, o2, field);
+        }
+    }
+
+    private static boolean isEqualByteArray(Object o1, Object o2, Field field) {
+        try {
+            Object a1 = field.get(o1);
+            Object a2 = field.get(o2);
+            if (a1 == null) return a2 == null;
+            if (a2 == null) return false;
+            Class<?> aClass1 = a1.getClass();
+            Class<?> aClass2 = a2.getClass();
+            if (aClass1 != aClass2)
+                if (!aClass1.isAssignableFrom(aClass2) && !aClass2.isAssignableFrom(aClass1))
+                    return false;
+            return Arrays.equals((byte[]) a1, (byte[]) a2);
+        } catch (IllegalAccessException e) {
+            throw new AssertionError(e);
         }
     }
 
@@ -2064,28 +2068,12 @@ public class WireMarshaller<T> {
 
         @Override
         protected void copy(Object from, Object to) throws IllegalAccessException {
-            Collection fromColl = (Collection) field.get(from);
-            if (fromColl == null) {
-                field.set(to, null);
-                return;
-            }
-            Collection coll = (Collection) field.get(to);
-            if (coll == null) {
-                coll = collectionSupplier.get();
-                field.set(to, coll);
-            }
-            coll.clear();
-            if (!fromColl.isEmpty())
-                coll.addAll(fromColl);
+            copyCollection(field, collectionSupplier, from, to);
         }
 
         @Override
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
-            Collection coll = (Collection) field.get(o);
-            if (coll == null) {
-                coll = collectionSupplier.get();
-                field.set(o, coll);
-            }
+            Collection coll = ensureCollection(field, collectionSupplier, o);
             if (!read.sequence(coll, (c, in2) -> {
                 if (!c.isEmpty())
                     c.clear();
@@ -2199,30 +2187,13 @@ public class WireMarshaller<T> {
 
         @Override
         protected void copy(Object from, Object to) throws IllegalAccessException {
-            Collection fromColl = (Collection) field.get(from);
-            if (fromColl == null) {
-                field.set(to, null);
-                return;
-            }
-            Collection coll = (Collection) field.get(to);
-            if (coll == null) {
-                coll = collectionSupplier.get();
-                field.set(to, coll);
-            }
-            coll.clear();
-            if (!fromColl.isEmpty())
-                coll.addAll(fromColl);
+            copyCollection(field, collectionSupplier, from, to);
         }
 
         @Override
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
-            Collection coll = (Collection) field.get(o);
-            if (coll == null) {
-                coll = collectionSupplier.get();
-                field.set(o, coll);
-            } else if (!coll.isEmpty()) {
-                coll.clear();
-            }
+            Collection coll = ensureCollection(field, collectionSupplier, o);
+            coll.clear();
             boolean sequenced = read.sequence(coll, seqConsumer);
             if (overwrite && !sequenced) {
                 field.set(o, null);
@@ -2238,6 +2209,32 @@ public class WireMarshaller<T> {
         public void getAsBytes(Object o, Bytes<?> bytes) {
             throw new UnsupportedOperationException();
         }
+    }
+
+    private static Collection copyCollection(Field field, Supplier<Collection> collectionSupplier, Object from, Object to) throws IllegalAccessException {
+        Collection fromColl = (Collection) field.get(from);
+        if (fromColl == null) {
+            field.set(to, null);
+            return null;
+        }
+        Collection coll = (Collection) field.get(to);
+        if (coll == null) {
+            coll = collectionSupplier.get();
+            field.set(to, coll);
+        }
+        coll.clear();
+        if (!fromColl.isEmpty())
+            coll.addAll(fromColl);
+        return coll;
+    }
+
+    private static Collection ensureCollection(Field field, Supplier<Collection> collectionSupplier, Object target) throws IllegalAccessException {
+        Collection coll = (Collection) field.get(target);
+        if (coll == null) {
+            coll = collectionSupplier.get();
+            field.set(target, coll);
+        }
+        return coll;
     }
 
     /**

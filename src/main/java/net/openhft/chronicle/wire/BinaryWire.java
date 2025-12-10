@@ -3284,6 +3284,10 @@ public class BinaryWire extends AbstractWire implements Wire {
                     (code >= STRING_0 && code <= STRING_31);
         }
 
+        /**
+         * Renders the current value as text and writes it into the supplied {@link BytesOut},
+         * using a temporary buffer when the target is not itself a {@link Bytes} instance.
+         */
         private void copyTextToBytesOut(BytesOut<?> target) {
             if (target instanceof Bytes) {
                 textTo((Bytes) target);
@@ -5078,6 +5082,16 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 
+    /**
+     * Ensures a reference of the expected type is present or throws with a clear action hint.
+     *
+     * @param value    the object to check
+     * @param expected expected reference type
+     * @param action   description of the operation requiring the reference (for error messages)
+     * @param <T>      resolved expected type
+     * @return the value cast to the expected type
+     * @throws IllegalArgumentException when the value is null or of an unexpected type
+     */
     static <T> T requireReference(Object value, Class<T> expected, String action) {
         if (expected.isInstance(value))
             return expected.cast(value);

@@ -12,17 +12,27 @@ import java.util.BitSet;
 import java.util.function.LongBinaryOperator;
 import java.util.function.LongSupplier;
 
+/**
+ * Shared low-level operations used by Chronicle bitset implementations. Provides checked range
+ * helpers and retrying CAS operations while honouring {@link AbstractCloseable#throwExceptionIfClosed()}.
+ */
 abstract class AbstractBitSetSupport extends AbstractCloseable {
 
     protected static final long WORD_MASK = ~0L;
     private transient Pauser pauser;
 
+    /**
+     * Lazily builds a pauser for spin-wait loops used during CAS retries.
+     */
     protected Pauser pauser() {
         if (this.pauser == null)
             this.pauser = Pauser.busy();
         return this.pauser;
     }
 
+    /**
+     * CAS-writes a single word, pausing and retrying until success.
+     */
     protected void casSet(LongValue word, long newValue) {
         throwExceptionIfClosed();
 
@@ -34,6 +44,10 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
         }
     }
 
+    /**
+     * Generic compare-and-swap loop that computes a new value and retries until the supplied CAS
+     * function succeeds or the computed value is unchanged.
+     */
     protected void updateWithRetry(LongSupplier currentSupplier,
                                    LongBinaryOperator compute,
                                    long param,
@@ -52,6 +66,9 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
         }
     }
 
+    /**
+     * Validates a bit index range.
+     */
     protected static void checkRange(int fromIndex, int toIndex) {
         if (fromIndex < 0)
             throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
@@ -62,41 +79,74 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
                     " > toIndex: " + toIndex);
     }
 
+    /**
+     * Wraps the given bytes into a {@link BitSet} assuming little-endian layout.
+     */
     protected static BitSet valueOfBytes(byte[] bytes) {
         return BitSet.valueOf(ByteBuffer.wrap(bytes));
     }
 
+    /**
+     * Converts a bit index to the backing word index with bounds checking.
+     */
     protected int toWordIndex(int bitIndex) {
         if (bitIndex < 0)
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
         return (int) (bitIndex / ChronicleBitSet.BITS_PER_WORD);
     }
 
+    /**
+     * Returns the current bits for a backing word.
+     */
     protected abstract long wordBits(int wordIndex);
 
+    /**
+     * Writes a backing word directly without extra checks.
+     */
     protected abstract void setWordDirect(int wordIndex, long bits);
 
+    /**
+     * Ensures the storage can hold at least {@code wordIndex + 1} words.
+     */
     protected abstract void ensureWordCapacity(int wordIndex);
 
+    /**
+     * Returns the number of active words used by the bitset.
+     */
     protected abstract int wordsInUse();
 
+    /**
+     * ORs a mask into the given word.
+     */
     protected void orWord(int wordIndex, long mask) {
         setWordDirect(wordIndex, wordBits(wordIndex) | mask);
     }
 
+    /**
+     * ANDs a mask with the given word.
+     */
     protected void andWord(int wordIndex, long mask) {
         setWordDirect(wordIndex, wordBits(wordIndex) & mask);
     }
 
+    /**
+     * Fills the target word with all ones.
+     */
     protected void fillWordFully(int wordIndex) {
         setWordDirect(wordIndex, WORD_MASK);
     }
 
+    /**
+     * Zeros out the target word.
+     */
     protected void clearWordFully(int wordIndex) {
         setWordDirect(wordIndex, 0L);
     }
 
-    protected void setRange(int fromIndex, int toIndex, boolean value) {
+    /**
+     * Sets or clears a contiguous bit range, expanding storage on demand when setting.
+     */
+    protected void setRange(int fromIndex, int toIndex, int length, boolean value) {
         throwExceptionIfClosed();
         checkRange(fromIndex, toIndex);
         if (fromIndex == toIndex)
@@ -111,7 +161,7 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
             if (startWordIndex >= currentWords)
                 return;
             if (endWordIndex >= currentWords) {
-                toIndex = Math.min(toIndex, length());
+                toIndex = Math.min(toIndex, length);
                 if (toIndex <= fromIndex)
                     return;
                 endWordIndex = toWordIndex(toIndex - 1);
@@ -138,6 +188,9 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
         applyMask(endWordIndex, lastWordMask, value);
     }
 
+    /**
+     * Applies a mask to a word either by OR or AND.
+     */
     private void applyMask(int wordIndex, long mask, boolean value) {
         if (mask == 0)
             return;
@@ -147,6 +200,9 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
             andWord(wordIndex, ~mask);
     }
 
+    /**
+     * Functional form of a CAS to allow lambdas without extra allocations.
+     */
     @FunctionalInterface
     protected interface LongBiPredicate {
         boolean test(long expected, long value);

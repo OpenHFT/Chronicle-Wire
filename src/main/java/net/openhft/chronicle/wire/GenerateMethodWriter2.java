@@ -102,40 +102,6 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
     }
 
     /**
-     * Converts a given {@link Class} type to a corresponding string representation.
-     * <p>
-     * This method provides string representations for various primitive types, {@link CharSequence}, and
-     * {@link Marshallable}. If the type does not match any predefined types, it defaults to returning "object".
-     *
-     * @param type The class type to convert
-     * @return The corresponding string representation of the type
-     */
-    private static CharSequence asString(Class<?> type) {
-        if (boolean.class.equals(type)) {
-            return "bool";
-        } else if (byte.class.equals(type)) {
-            return "writeByte";
-        } else if (char.class.equals(type)) {
-            return "character";
-        } else if (short.class.equals(type)) {
-            return "int16";
-        } else if (int.class.equals(type)) {
-            return "int32";
-        } else if (long.class.equals(type)) {
-            return "int64";
-        } else if (float.class.equals(type)) {
-            return "float32";
-        } else if (double.class.equals(type)) {
-            return "float64";
-        } else if (CharSequence.class.isAssignableFrom(type)) {
-            return "text";
-        } else if (Marshallable.class.isAssignableFrom(type)) {
-            return "marshallable";
-        }
-        return "object";
-    }
-
-    /**
      * Adds fields used by the generated proxy such as the {@code Closeable},
      * optional {@link UpdateInterceptor} and the supplier of
      * {@link MarshallableOut} instances.
@@ -287,7 +253,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
             final Parameter p = parameters[j];
             // For primitive types and CharSequences, write directly
             if (p.getType().isPrimitive() || CharSequence.class.isAssignableFrom(p.getType())) {
-                body.append(multipleParams ? "v." : ".").append(asString(p.getType())).append('(').append(p.getName()).append(");\n");
+                body.append(multipleParams ? "v." : ".").append(MethodWriterTypeUtil.typeAlias(p.getType())).append('(').append(p.getName()).append(");\n");
             } else {
                 // For non-primitive types, delegate to writeValue
                 writeValue(dm, body, startJ, p);

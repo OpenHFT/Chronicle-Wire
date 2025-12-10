@@ -3,11 +3,8 @@
  */
 package net.openhft.chronicle.wire.domestic.streaming.reduction;
 
-import net.openhft.chronicle.wire.DocumentContext;
-import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
-import net.openhft.chronicle.wire.domestic.streaming.CreateUtil;
 import org.junit.Test;
 
 import java.util.*;
@@ -35,7 +32,7 @@ public class LastMarketDataPerSymbolTest extends WireTestCommon {
                         builder(MarketData.class).build())
                 .collecting(collectingAndThen(toConcurrentMap(MarketData::symbol, Function.identity(), replacingMerger()), Collections::unmodifiableMap));
 
-        test(listener);
+        MarketDataReductionTestSupport.acceptData(listener, MARKET_DATA_SET);
 
         final Map<String, MarketData> expected = MARKET_DATA_SET.stream()
                 .collect(toMap(MarketData::symbol, Function.identity(), (a, b) -> b));
@@ -50,7 +47,7 @@ public class LastMarketDataPerSymbolTest extends WireTestCommon {
                         builder(MarketData.class).build().map(MarketData::symbol))
                 .collecting(toConcurrentSet());
 
-        test(listener);
+        MarketDataReductionTestSupport.acceptData(listener, MARKET_DATA_SET);
 
         final Set<String> expected = MARKET_DATA_SET.stream()
                 .map(MarketData::symbol)
@@ -59,15 +56,4 @@ public class LastMarketDataPerSymbolTest extends WireTestCommon {
         assertEquals(expected, listener.reduction());
     }
 
-    private void test(Reduction<?> listener) {
-        Wire wire = CreateUtil.create();
-        MARKET_DATA_SET.forEach(md -> write(wire, md));
-        listener.accept(wire);
-    }
-
-    private static void write(Wire appender, MarketData marketData) {
-        try (final DocumentContext dc = appender.writingDocument()) {
-            dc.wire().getValueOut().object(marketData);
-        }
-    }
 }

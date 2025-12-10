@@ -204,63 +204,9 @@ public class TextWire extends YamlWireOut<TextWire> {
             char ch = sb.charAt(i);
             // Check if the character is an escape character and if there's a character after it
             if (ch == '\\' && i < length - 1) {
-                char ch3 = sb.charAt(++i);
-                // Handle different escaped characters
-                switch (ch3) {
-                    case '0':
-                        ch = 0;
-                        break;
-                    case 'a':
-                        ch = 7;
-                        break;
-                    case 'b':
-                        ch = '\b';
-                        break;
-                    case 't':
-                        ch = '\t';
-                        break;
-                    case 'n':
-                        ch = '\n';
-                        break;
-                    case 'v':
-                        ch = 0xB;
-                        break;
-                    case 'f':
-                        ch = 0xC;
-                        break;
-                    case 'r':
-                        ch = '\r';
-                        break;
-                    case 'e':
-                        ch = 0x1B;
-                        break;
-                    case 'N':
-                        ch = 0x85;
-                        break;
-                    case '_':
-                        ch = 0xA0;
-                        break;
-                    case 'L':
-                        ch = 0x2028;
-                        break;
-                    case 'P':
-                        ch = 0x2029;
-                        break;
-                    case 'x':
-                        ch = (char)
-                                (Character.getNumericValue(sb.charAt(++i)) * 16 +
-                                        Character.getNumericValue(sb.charAt(++i)));
-                        break;
-                    case 'u':
-                        ch = (char)
-                                (Character.getNumericValue(sb.charAt(++i)) * 4096 +
-                                        Character.getNumericValue(sb.charAt(++i)) * 256 +
-                                        Character.getNumericValue(sb.charAt(++i)) * 16 +
-                                        Character.getNumericValue(sb.charAt(++i)));
-                        break;
-                    default:
-                        ch = ch3;
-                }
+                int[] indexRef = {i};
+                ch = TextEscapeUtil.decodeEscapedChar(sb, indexRef);
+                i = indexRef[0];
             }
             // Set the unescaped character into the sequence
             AppendableUtil.setCharAt(sb, end++, ch);
@@ -331,42 +277,13 @@ public class TextWire extends YamlWireOut<TextWire> {
     @Override
     @NotNull
     public <T> T methodWriter(@NotNull Class<T> tClass, Class<?>... additional) {
-        VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
-                WireType.TEXT,
-                () -> newTextMethodWriterInvocationHandler(tClass));
-        for (Class<?> aClass : additional)
-            builder.addInterface(aClass);
-        useTextDocuments();
-        builder.marshallableOut(this);
-        return builder.build();
-    }
-
-    /**
-     * Creates a new textual method writer invocation handler based on provided interface(s).
-     * If any of the provided interfaces have a {@link Comment} annotation,
-     * the associated comment is written to the wire.
-     *
-     * @param interfaces One or more interfaces that the created handler should be aware of.
-     * @return A newly instantiated {@link TextMethodWriterInvocationHandler} for the provided interface(s).
-     */
-    @NotNull
-    TextMethodWriterInvocationHandler newTextMethodWriterInvocationHandler(Class<?>... interfaces) {
-        for (Class<?> anInterface : interfaces) {
-            Comment c = Jvm.findAnnotation(anInterface, Comment.class);
-            if (c != null)
-                writeComment(c.value());
-        }
-        return new TextMethodWriterInvocationHandler(interfaces[0], this);
+        return TextMethodWriterSupport.writer(this, WireType.TEXT, this::useTextDocuments, tClass, additional);
     }
 
     @Override
     @NotNull
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
-        VanillaMethodWriterBuilder<T> text = new VanillaMethodWriterBuilder<>(tClass,
-                WireType.TEXT,
-                () -> newTextMethodWriterInvocationHandler(tClass));
-        text.marshallableOut(this);
-        return text;
+        return TextMethodWriterSupport.builder(this, WireType.TEXT, tClass);
     }
 
     @Override
@@ -474,17 +391,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      */
     @Override
     public String toString() {
-        if (bytes.readRemaining() > (1024 * 1024)) {
-            final long l = bytes.readLimit();
-            try {
-                bytes.readLimit(bytes.readPosition() + (1024 * 1024));
-                return bytes + "..";
-            } finally {
-                bytes.readLimit(l);
-            }
-        } else {
-            return bytes.toString();
-        }
+        return TextYamlCommon.largeToString(bytes);
     }
 
     /**
@@ -2102,15 +2009,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         @Override
         public <T> WireIn int64array(@Nullable LongArrayValues values, T t, @NotNull BiConsumer<T, LongArrayValues> setter) {
             consumePadding();
-            if (!(values instanceof TextLongArrayReference)) {
-                values = new TextLongArrayReference();
-            }
-            @NotNull Byteable b = (Byteable) values;
-            long length = TextLongArrayReference.peakLength(bytes, bytes.readPosition());
-            b.bytesStore(bytes, bytes.readPosition(), length);
-            bytes.readSkip(length);
-            setter.accept(t, values);
-            return TextWire.this;
+            return TextYamlCommon.int64arrayCommon(bytes, values, t, setter);
         }
 
         @NotNull
@@ -2205,6 +2104,10 @@ public class TextWire extends YamlWireOut<TextWire> {
             return true;
         }
 
+        /**
+         * Reads a sequence into {@code list} reusing {@code buffer} and {@code bufferAdd} to limit
+         * allocations when creating element instances.
+         */
         @Override
         public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd) throws InvalidMarshallableException {
             return sequence(list, buffer, bufferAdd, this::reader0);
@@ -2704,6 +2607,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             }
         }
 
+        // CPD-OFF: duplicated with YamlWire for identical parsing semantics
         @Override
         public boolean bool() {
             consumePadding();
@@ -2751,6 +2655,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                         ".MAX_VALUE/ZERO");
             return (int) l;
         }
+        // CPD-ON
 
         @Override
         public long int64() {

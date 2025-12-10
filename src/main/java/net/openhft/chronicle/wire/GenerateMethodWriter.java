@@ -247,38 +247,6 @@ public class GenerateMethodWriter {
     }
 
     /**
-     * Converts a class type into a representative string, e.g., int to "int32", boolean to "bool", etc.
-     * For types not explicitly mapped, a default representation is returned.
-     *
-     * @param type The class type to be converted.
-     * @return A representative string for the given class type.
-     */
-    private static CharSequence toString(Class<?> type) {
-        if (boolean.class.equals(type)) {
-            return "bool";
-        } else if (byte.class.equals(type)) {
-            return "writeByte";
-        } else if (char.class.equals(type)) {
-            return "character";
-        } else if (short.class.equals(type)) {
-            return "int16";
-        } else if (int.class.equals(type)) {
-            return "int32";
-        } else if (long.class.equals(type)) {
-            return "int64";
-        } else if (float.class.equals(type)) {
-            return "float32";
-        } else if (double.class.equals(type)) {
-            return "float64";
-        } else if (CharSequence.class.isAssignableFrom(type)) {
-            return "text";
-        } else if (Marshallable.class.isAssignableFrom(type)) {
-            return "marshallable";
-        }
-        return "object";
-    }
-
-    /**
      * Retrieves the full canonical name of a class, with any '$' characters replaced by '.'.
      *
      * @param type The class for which the name is required.
@@ -812,7 +780,7 @@ public class GenerateMethodWriter {
             else if (p.getType().isPrimitive() || CharSequence.class.isAssignableFrom(p.getType())) {
                 body.append(longConversion != null && (p.getType() == long.class || CharSequence.class.isAssignableFrom(p.getType()))
                         ? format("%s.writeLong(%s.INSTANCE, %s);%n", multipleArgs ? "_v_" : "_valueOut_", longConversion.value().getName(), p.getName())
-                        : format("%s.%s(%s);%n", multipleArgs ? "_v_" : "_valueOut_", toString(erase(parameterTypes[j])), p.getName()));
+                        : format("%s.%s(%s);%n", multipleArgs ? "_v_" : "_valueOut_", MethodWriterTypeUtil.typeAlias(erase(parameterTypes[j])), p.getName()));
             } else {
                 writeValue(dm, erase(parameterTypes[j]), body, startJ, p);
             }

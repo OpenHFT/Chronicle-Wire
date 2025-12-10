@@ -45,9 +45,15 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
     @Override
     protected String generateGenericType() {
         return "OUT extends Object & " + metaData().interfaces().stream()
-                .map(this::nameForClass)
-                .map(s -> s.equals("MethodDelegate") ? "MethodDelegate<OUT>" : s)
+                .map(this::canonicalName)
+                .map(name -> name.equals(MethodDelegate.class.getName())
+                        ? MethodDelegate.class.getName() + "<OUT>"
+                        : name)
                 .collect(Collectors.joining(" & "));
+    }
+
+    private String canonicalName(Class<?> clazz) {
+        return clazz.getName().replace('$', '.');
     }
 
     /**

@@ -14,6 +14,9 @@ import java.util.UUID;
 
 @SuppressWarnings("rawtypes")
 public class ScalarValues extends SelfDescribingMarshallable {
+    public static net.openhft.chronicle.wire.serializable.ScalarValues fromSerializable(int i) {
+        return new net.openhft.chronicle.wire.serializable.ScalarValues(i);
+    }
     private boolean flag;
     private byte b;
     private short s;
@@ -57,7 +60,7 @@ public class ScalarValues extends SelfDescribingMarshallable {
         ch = (char) i;
         this.i = i;
         f = i;
-        l = i * i;
+        l = (long) i * i;
         d = i * i;
 
         flag2 = i != 0;

@@ -82,57 +82,23 @@ public class ShortTextLongConverterTest extends WireTestCommon {
 
     @Test
     public void testAppend() {
-        final Bytes<?> b = Bytes.allocateElasticOnHeap();
-        try {
-            final LongConverter idLongConverter = ShortTextLongConverter.INSTANCE;
-            final long helloWorld = idLongConverter.parse(TEST_STRING);
-            idLongConverter.append(b, helloWorld);
-            assertEquals(TEST_STRING, b.toString());
-        } finally {
-            b.releaseLast();
-        }
+        LongConverterTestSupport.assertAppend(TEST_STRING, ShortTextLongConverter.INSTANCE);
     }
 
     @Test
     public void testAppendWithExistingData() {
-        final Bytes<?> b = Bytes.allocateElasticOnHeap().append("hello");
-        try {
-            final LongConverter idLongConverter = ShortTextLongConverter.INSTANCE;
-            final long helloWorld = idLongConverter.parse(TEST_STRING);
-            idLongConverter.append(b, helloWorld);
-            assertEquals("hello" + TEST_STRING, b.toString());
-        } finally {
-            b.releaseLast();
-        }
+        LongConverterTestSupport.assertAppendWithPrefix(TEST_STRING, ShortTextLongConverter.INSTANCE, "hello");
     }
 
     @Test
     public void allSafeCharsTextWire() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
-        allSafeChars(wire);
+        LongConverterTestSupport.allSafeChars(wire, ShortTextLongConverter.INSTANCE);
     }
 
     @Test
     public void allSafeCharsYamlWire() {
         Wire wire = new YamlWire();
-        allSafeChars(wire);
-    }
-
-    private void allSafeChars(Wire wire) {
-        final LongConverter converter = ShortTextLongConverter.INSTANCE;
-        for (long i = 0; i <= 85 * 85; i++) {
-            wire.clear();
-            wire.write("a").writeLong(converter, i);
-            wire.write("b").sequence(i, (i2, v) -> {
-                v.writeLong(converter, i2);
-                v.writeLong(converter, i2);
-            });
-            assertEquals(wire.toString(),
-                    i, wire.read("a").readLong(converter));
-            wire.read("b").sequence(i, (i2, v) -> {
-                assertEquals((long) i2, v.readLong(converter));
-                assertEquals((long) i2, v.readLong(converter));
-            });
-        }
+        LongConverterTestSupport.allSafeChars(wire, ShortTextLongConverter.INSTANCE);
     }
 }
