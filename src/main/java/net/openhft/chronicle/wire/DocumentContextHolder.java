@@ -17,6 +17,12 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
     // The encapsulated DocumentContext instance.
     DocumentContext dc;
 
+    /**
+     * Creates an empty holder; set a {@link DocumentContext} before use.
+     */
+    public DocumentContextHolder() {
+    }
+
     @Override
     public boolean isMetaData() {
         return dc.isMetaData();

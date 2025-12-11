@@ -33,6 +33,7 @@ public interface SerializationStrategy {
      * @return the populated or newly created object, or {@code null} if no
      * instance could be obtained
      * @throws InvalidMarshallableException if the deserialisation fails
+     * @param <T> concrete object type being deserialised
      */
     @Nullable
     <T> T readUsing(Class<?> clazz, T using, ValueIn in, BracketType bracketType) throws InvalidMarshallableException;
@@ -43,6 +44,7 @@ public interface SerializationStrategy {
      * {@code null} is returned.
      *
      * @param type The class type for which a new instance is required.
+     * @param <T>  concrete object type to instantiate
      * @return A new instance of the provided {@code type} or {@code null} if instantiation is not possible.
      */
     @Nullable
@@ -52,6 +54,8 @@ public interface SerializationStrategy {
      * Returns the primary Java {@link Class} that this strategy deals with.
      * It may be a concrete type, an interface or a broad category such as
      * {@code java.lang.Enum}.
+     *
+     * @return handled class type
      */
     Class<?> type();
 

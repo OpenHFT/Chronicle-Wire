@@ -147,6 +147,10 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
      * {@code function} computes a new value from the current one and
      * {@code param}. A pauser is used between failed CAS
      * attempts to reduce contention.
+     *
+     * @param word     word reference to update
+     * @param param    parameter passed to the computation
+     * @param function function computing a new value from the current one
      */
     public void set(LongValue word, long param, LongFunction function) {
         final Pauser internalPauser = pauser();
@@ -164,6 +168,9 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
     /**
      * Atomically sets {@code word} to {@code newValue}. A CAS loop is used
      * with pausing between attempts when contention occurs.
+     *
+     * @param word     word reference to update
+     * @param newValue value to assign
      */
     @Deprecated(/* to be removed in 2027 */)
     public void set(LongValue word, long newValue) {
@@ -173,6 +180,8 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
     /**
      * Returns a little‑endian byte array representing this set. Each word
      * is written in sequence.
+     *
+     * @return byte array containing the bitset contents
      */
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public byte[] toByteArray() {
@@ -812,6 +821,8 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
     /**
      * Returns a stream of indices for which this {@code ChronicleBitSet} contains a bit in the set state. The indices are returned in order, from lowest to
      * highest. The size of the stream is the number of bits in the set state, equal to the value returned by the {@link #cardinality()} method.
+     *
+     * @return stream of set bit indices
      */
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public IntStream stream() {

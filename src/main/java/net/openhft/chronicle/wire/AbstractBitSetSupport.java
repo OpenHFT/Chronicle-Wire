@@ -18,11 +18,16 @@ import java.util.function.LongSupplier;
  */
 abstract class AbstractBitSetSupport extends AbstractCloseable {
 
+    /**
+     * Mask for a fully set 64-bit word.
+     */
     protected static final long WORD_MASK = ~0L;
     private transient Pauser pauser;
 
     /**
      * Lazily builds a pauser for spin-wait loops used during CAS retries.
+     *
+     * @return busy pauser reused across operations
      */
     protected Pauser pauser() {
         if (this.pauser == null)
@@ -32,6 +37,9 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
 
     /**
      * CAS-writes a single word, pausing and retrying until success.
+     *
+     * @param word     target word reference
+     * @param newValue value to install
      */
     protected void casSet(LongValue word, long newValue) {
         throwExceptionIfClosed();
@@ -47,6 +55,11 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
     /**
      * Generic compare-and-swap loop that computes a new value and retries until the supplied CAS
      * function succeeds or the computed value is unchanged.
+     *
+     * @param currentSupplier supplies the current value
+     * @param compute         computes a candidate new value
+     * @param param           parameter passed to {@code compute}
+     * @param cas             CAS function that attempts to apply the new value
      */
     protected void updateWithRetry(LongSupplier currentSupplier,
                                    LongBinaryOperator compute,
@@ -68,6 +81,9 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
 
     /**
      * Validates a bit index range.
+     *
+     * @param fromIndex inclusive start bit
+     * @param toIndex   exclusive end bit
      */
     protected static void checkRange(int fromIndex, int toIndex) {
         if (fromIndex < 0)
@@ -81,6 +97,9 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
 
     /**
      * Wraps the given bytes into a {@link BitSet} assuming little-endian layout.
+     *
+     * @param bytes source bytes
+     * @return decoded bit set
      */
     protected static BitSet valueOfBytes(byte[] bytes) {
         return BitSet.valueOf(ByteBuffer.wrap(bytes));
@@ -88,6 +107,9 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
 
     /**
      * Converts a bit index to the backing word index with bounds checking.
+     *
+     * @param bitIndex bit index to translate
+     * @return word index
      */
     protected int toWordIndex(int bitIndex) {
         if (bitIndex < 0)
@@ -97,26 +119,39 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
 
     /**
      * Returns the current bits for a backing word.
+     *
+     * @param wordIndex index of the word to read
+     * @return bits for that word
      */
     protected abstract long wordBits(int wordIndex);
 
     /**
      * Writes a backing word directly without extra checks.
+     *
+     * @param wordIndex index to update
+     * @param bits      new word bits
      */
     protected abstract void setWordDirect(int wordIndex, long bits);
 
     /**
      * Ensures the storage can hold at least {@code wordIndex + 1} words.
+     *
+     * @param wordIndex highest word index needed
      */
     protected abstract void ensureWordCapacity(int wordIndex);
 
     /**
      * Returns the number of active words used by the bitset.
+     *
+     * @return count of populated words
      */
     protected abstract int wordsInUse();
 
     /**
      * ORs a mask into the given word.
+     *
+     * @param wordIndex index of the word to update
+     * @param mask      bits to OR in
      */
     protected void orWord(int wordIndex, long mask) {
         setWordDirect(wordIndex, wordBits(wordIndex) | mask);
@@ -124,6 +159,9 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
 
     /**
      * ANDs a mask with the given word.
+     *
+     * @param wordIndex index of the word to update
+     * @param mask      bits to retain
      */
     protected void andWord(int wordIndex, long mask) {
         setWordDirect(wordIndex, wordBits(wordIndex) & mask);
@@ -131,6 +169,8 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
 
     /**
      * Fills the target word with all ones.
+     *
+     * @param wordIndex index of the word to fill
      */
     protected void fillWordFully(int wordIndex) {
         setWordDirect(wordIndex, WORD_MASK);
@@ -138,6 +178,8 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
 
     /**
      * Zeros out the target word.
+     *
+     * @param wordIndex index of the word to clear
      */
     protected void clearWordFully(int wordIndex) {
         setWordDirect(wordIndex, 0L);
@@ -145,6 +187,11 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
 
     /**
      * Sets or clears a contiguous bit range, expanding storage on demand when setting.
+     *
+     * @param fromIndex first bit index (inclusive)
+     * @param toIndex   last bit index (exclusive)
+     * @param length    total logical length allowed
+     * @param value     {@code true} to set bits, {@code false} to clear
      */
     protected void setRange(int fromIndex, int toIndex, int length, boolean value) {
         throwExceptionIfClosed();

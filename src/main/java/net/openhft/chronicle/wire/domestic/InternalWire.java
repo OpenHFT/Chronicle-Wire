@@ -11,5 +11,8 @@ package net.openhft.chronicle.wire.domestic;
  * as outside any current header scope.
  */
 public interface InternalWire {
+    /**
+     * Force the wire to treat subsequent operations as if no header is currently open.
+     */
     void forceNotInsideHeader();
 }

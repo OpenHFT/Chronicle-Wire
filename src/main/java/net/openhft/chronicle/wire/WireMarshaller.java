@@ -112,6 +112,7 @@ public class WireMarshaller<T> {
      * Determines the appropriate marshaller type (basic or one that handles unexpected fields)
      * based on the characteristics of the provided class.
      *
+     * @param <T>    type of object being marshalled
      * @param tClass The class type for which the marshaller is to be created.
      * @return A new instance of WireMarshaller for the provided class type.
      */
@@ -719,6 +720,8 @@ public class WireMarshaller<T> {
     }
 
     /**
+     * Indicates whether this marshaller represents a leaf type with no nested marshallables.
+     *
      * @return true if this marshaller is for a leaf type
      */
     public boolean isLeaf() {

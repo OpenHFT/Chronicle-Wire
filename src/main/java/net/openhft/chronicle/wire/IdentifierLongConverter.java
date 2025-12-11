@@ -16,12 +16,17 @@ import net.openhft.chronicle.wire.converter.SymbolsLongConverter;
  * Negative ids are reserved for application specific encodings.
  */
 public class IdentifierLongConverter implements LongConverter {
+    /**
+     * Singleton instance for reuse.
+     */
     public static final IdentifierLongConverter INSTANCE = new IdentifierLongConverter();
 
     // Converter for short base 66 encoded strings
+    /** Converter for base-66 encoded identifiers up to ten characters. */
     protected static final SymbolsLongConverter SMALL_POSITIVE = new SymbolsLongConverter(
             "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz._~^");
     // Maximum possible id for base 66 encoded strings of length up to 10
+    /** Maximum supported value for the short base-66 representation. */
     protected static final long MAX_SMALL_ID = 1568336880910795775L;
 
     // The specified start and end timestamps for which the converter can operate

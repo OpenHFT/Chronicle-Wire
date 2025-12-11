@@ -23,6 +23,12 @@ public class YamlKeys {
     long[] offsets = NO_OFFSETS;
 
     /**
+     * Creates an empty keys container.
+     */
+    public YamlKeys() {
+    }
+
+    /**
      * Adds a new offset to the collection.
      *
      * @param offset The offset value to be added.
@@ -37,6 +43,8 @@ public class YamlKeys {
 
     /**
      * Returns the number of stored offsets in the collection.
+     *
+     * @return number of stored offsets
      */
     public int count() {
         return count;
@@ -61,6 +69,8 @@ public class YamlKeys {
 
     /**
      * Removes the offset at {@code i}, shifting remaining values left by one.
+     *
+     * @param i index to remove
      */
     public void removeIndex(int i) {
         count--;

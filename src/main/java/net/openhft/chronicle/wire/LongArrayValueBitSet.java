@@ -32,6 +32,8 @@ public class LongArrayValueBitSet extends AbstractBitSetSupport implements Marsh
     /**
      * Create a bit set capable of holding {@code maxNumberOfBits} bits.
      * The backing {@link BinaryLongArrayReference} is sized once during construction.
+     *
+     * @param maxNumberOfBits maximum number of bits to support
      */
     public LongArrayValueBitSet(final long maxNumberOfBits) {
         words = new BinaryLongArrayReference((maxNumberOfBits + BITS_PER_WORD - 1) / BITS_PER_WORD);
@@ -42,6 +44,9 @@ public class LongArrayValueBitSet extends AbstractBitSetSupport implements Marsh
      * Create a bit set of {@code maxNumberOfBits} bits and immediately marshal its state
      * to and from the provided {@link Wire}. The {@link #words} field is initialised using
      * a {@link BinaryLongArrayReference} before marshalling occurs.
+     *
+     * @param maxNumberOfBits maximum number of bits to support
+     * @param w               wire used to write and read the initial state
      */
     public LongArrayValueBitSet(final long maxNumberOfBits, Wire w) {
         this(maxNumberOfBits);
@@ -158,6 +163,12 @@ public class LongArrayValueBitSet extends AbstractBitSetSupport implements Marsh
     public void set(LongValue word, long newValue) {
         casSet(word, newValue);
     }
+
+    /**
+     * Serialises the current bits to a newly allocated byte array.
+     *
+     * @return byte array containing the bitset contents
+     */
     @Deprecated(/* to be removed in 2027 */)
     public byte[] toByteArray() {
         throwExceptionIfClosed();

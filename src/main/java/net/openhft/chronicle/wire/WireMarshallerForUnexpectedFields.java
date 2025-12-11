@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
  * It maps fields by their name (both in their original form and lower-cased) for easy access.
  * It overrides the method to read marshallable objects and provides specialized logic to
  * handle unexpected fields that might be present in the data source.
+ *
+ * @param <T> target type this marshaller reads into
  */
 public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
     /**
@@ -23,6 +25,13 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
     @SuppressWarnings("java:S2387")
     final CharSequenceObjectMap<FieldAccess> fieldMap;
 
+    /**
+     * Creates a marshaller able to delegate unexpected fields back to the target instance.
+     *
+     * @param fields       known fields for the target type
+     * @param isLeaf       whether the type is considered a leaf
+     * @param defaultValue default instance used for defaults and sizing
+     */
     public WireMarshallerForUnexpectedFields(@NotNull FieldAccess[] fields, boolean isLeaf, T defaultValue) {
         super(fields, isLeaf, defaultValue);
         fieldMap = new CharSequenceObjectMap<>(fields.length * 3);

@@ -9,26 +9,43 @@ package net.openhft.chronicle.wire;
  * for tasks such as parsing or tokenization of YAML documents.
  */
 public enum YamlToken {
+    /**
+     * No token identified.
+     */
     NONE,
+    /** YAML comment starting with '#'. */
     COMMENT,
+    /** Tag declaration such as {@code !type}. */
     TAG,
+    /** YAML directive (e.g. %YAML). */
     DIRECTIVE,
+    /** Marks the end of a document. */
     DOCUMENT_END(),
     /** Represents the end of the directives in a YAML document. */
     DIRECTIVES_END(DOCUMENT_END),
+    /** Key within a mapping. */
     MAPPING_KEY(NONE),
+    /** End of a mapping block. */
     MAPPING_END(),
     /** Represents the start of a key-value mapping in a YAML document. */
     MAPPING_START(MAPPING_END),
+    /** End of a sequence block. */
     SEQUENCE_END(),
+    /** Entry within a sequence. */
     SEQUENCE_ENTRY,
     /** Represents the start of a sequence in a YAML document. */
     SEQUENCE_START(SEQUENCE_END),
+    /** Plain scalar text. */
     TEXT,
+    /** Literal block scalar. */
     LITERAL,
+    /** Anchor declaration (&amp;). */
     ANCHOR,
+    /** Anchor alias (*). */
     ALIAS,
+    /** Reserved token type. */
     RESERVED,
+    /** Marks the end of a stream. */
     STREAM_END,
     /** Represents the start of a YAML document stream. */
     STREAM_START(STREAM_END);

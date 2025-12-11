@@ -50,6 +50,9 @@ public interface ValueIn {
      * Deserialises the current value as text and passes it to {@code consumer} along
      * with the supplied object.
      *
+     * @param <T>      type of the target holder
+     * @param target   holder to receive the value
+     * @param consumer callback that receives {@code target} and the text value
      * @return the parent {@link WireIn}
      */
     @NotNull
@@ -199,6 +202,9 @@ public interface ValueIn {
     /**
      * Supplies the byte stream to {@code bytesMarshallable#readMarshallable} for
      * custom deserialisation.
+     *
+     * @param bytesMarshallable destination that consumes the bytes
+     * @return the parent {@link WireIn}
      */
     @NotNull
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
@@ -217,11 +223,16 @@ public interface ValueIn {
      * Populates {@code using} with the value’s bytes when possible to avoid
      * allocation.  Returns the array containing the data, or {@code null} if the
      * value is null.
+     *
+     * @param using reusable buffer to fill, may be {@code null}
+     * @return the filled buffer or {@code null} if no value
      */
     byte @Nullable [] bytes(byte[] using);
 
     /**
      * Wraps the value’s byte array in a new {@link BytesStore}.
+     *
+     * @return a {@link BytesStore} view of the bytes, or {@code null} if no value
      */
     @Nullable
     default BytesStore<?, ?> bytesStore() {
@@ -268,6 +279,8 @@ public interface ValueIn {
      * {@code target}, to {@code flagConsumer}.
      *
      * @param <T> type of the context object
+     * @param target context object to supply
+     * @param flagConsumer consumer invoked with {@code target} and the flag
      * @return the parent {@link WireIn}
      */
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
@@ -276,6 +289,11 @@ public interface ValueIn {
     /**
      * Reads the value as a signed byte and passes it to {@code byteConsumer} together with
      * {@code target}.
+     *
+     * @param <T> type of the context object
+     * @param target context object to supply
+     * @param byteConsumer consumer invoked with {@code target} and the value
+     * @return the parent {@link WireIn}
      */
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     @NotNull <T> WireIn int8(@NotNull T target, @NotNull ObjByteConsumer<T> byteConsumer);
@@ -283,12 +301,22 @@ public interface ValueIn {
     /**
      * Reads the value as an unsigned byte and passes it to {@code shortConsumer} with
      * {@code target}.
+     *
+     * @param <T> type of the context object
+     * @param target context object to supply
+     * @param shortConsumer consumer invoked with {@code target} and the unsigned value
+     * @return the parent {@link WireIn}
      */
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     @NotNull <T> WireIn uint8(@NotNull T target, @NotNull ObjShortConsumer<T> shortConsumer);
 
     /**
      * Reads the value as a short and passes it to {@code shortConsumer} with {@code target}.
+     *
+     * @param <T> type of the context object
+     * @param target context object to supply
+     * @param shortConsumer consumer invoked with {@code target} and the value
+     * @return the parent {@link WireIn}
      */
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     @NotNull <T> WireIn int16(@NotNull T target, @NotNull ObjShortConsumer<T> shortConsumer);
@@ -296,6 +324,11 @@ public interface ValueIn {
     /**
      * Reads the value as an unsigned short and passes it to {@code intConsumer} with
      * {@code target}.
+     *
+     * @param <T> type of the context object
+     * @param target context object to supply
+     * @param intConsumer consumer invoked with {@code target} and the unsigned value
+     * @return the parent {@link WireIn}
      */
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     @NotNull <T> WireIn uint16(@NotNull T target, @NotNull ObjIntConsumer<T> intConsumer);
@@ -303,12 +336,22 @@ public interface ValueIn {
     /**
      * Reads the value as an {@code int} and passes it to {@code intConsumer} with
      * {@code target}.
+     *
+     * @param <T> type of the context object
+     * @param target context object to supply
+     * @param intConsumer consumer invoked with {@code target} and the value
+     * @return the parent {@link WireIn}
      */
     @NotNull <T> WireIn int32(@NotNull T target, @NotNull ObjIntConsumer<T> intConsumer);
 
     /**
      * Reads the value as an unsigned int and passes it to {@code longConsumer} with
      * {@code target}.
+     *
+     * @param <T> type of the context object
+     * @param target context object to supply
+     * @param longConsumer consumer invoked with {@code target} and the unsigned value
+     * @return the parent {@link WireIn}
      */
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     @NotNull <T> WireIn uint32(@NotNull T target, @NotNull ObjLongConsumer<T> longConsumer);
@@ -316,12 +359,22 @@ public interface ValueIn {
     /**
      * Reads the value as a {@code long} and passes it to {@code longConsumer} with
      * {@code target}.
+     *
+     * @param <T> type of the context object
+     * @param target context object to supply
+     * @param longConsumer consumer invoked with {@code target} and the value
+     * @return the parent {@link WireIn}
      */
     @NotNull <T> WireIn int64(@NotNull T target, @NotNull ObjLongConsumer<T> longConsumer);
 
     /**
      * Reads the value as a {@code float} and passes it to {@code floatConsumer} with
      * {@code target}.
+     *
+     * @param <T> type of the context object
+     * @param target context object to supply
+     * @param floatConsumer consumer invoked with {@code target} and the value
+     * @return the parent {@link WireIn}
      */
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     @NotNull <T> WireIn float32(@NotNull T target, @NotNull ObjFloatConsumer<T> floatConsumer);
@@ -329,9 +382,22 @@ public interface ValueIn {
     /**
      * Reads the value as a {@code double} and passes it to {@code doubleConsumer} with
      * {@code target}.
+     *
+     * @param <T> type of the context object
+     * @param target context object to supply
+     * @param doubleConsumer consumer invoked with {@code target} and the value
+     * @return the parent {@link WireIn}
      */
     @NotNull <T> WireIn float64(@NotNull T target, @NotNull ObjDoubleConsumer<T> doubleConsumer);
 
+    /**
+     * Reads the value as a {@link LocalTime} and applies it to {@code t} using {@code setLocalTime}.
+     *
+     * @param <T>          type of the context object
+     * @param t            context object to supply
+     * @param setLocalTime consumer invoked with {@code t} and the parsed time
+     * @return the parent {@link WireIn}
+     */
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     @NotNull <T> WireIn time(@NotNull T t, @NotNull BiConsumer<T, LocalTime> setLocalTime);
 
@@ -517,6 +583,7 @@ public interface ValueIn {
     /**
      * Processes a sequence of values from the wire, storing them in a list. It uses a buffer to minimize object creation.
      *
+     * @param <T>       The element type.
      * @param list      The list to store the processed items.
      * @param buffer    The buffer for reusing objects.
      * @param bufferAdd Supplier to provide new instances for the buffer.
@@ -541,6 +608,7 @@ public interface ValueIn {
     /**
      * Helper method to read a sequence of values into a list using a buffer.
      *
+     * @param <T>     The element type.
      * @param v         The ValueIn to read from.
      * @param list      The list to store the read values.
      * @param buffer    The buffer for reusing objects.
@@ -562,6 +630,7 @@ public interface ValueIn {
     /**
      * sequence to use when using a cached buffer
      *
+     * @param <T>      The element type.
      * @param list      of items to populate
      * @param buffer    of objects of the same type to reuse
      * @param bufferAdd supplier to call when the buffer needs extending
@@ -873,6 +942,7 @@ public interface ValueIn {
     /**
      * Reads a typed marshallable object from the wire.
      *
+     * @param <T> The type of object expected
      * @return The marshallable object read from the wire, or null if it cannot be read.
      * @throws IORuntimeException           if an I/O error occurs
      * @throws InvalidMarshallableException if the marshallable object is invalid
@@ -882,6 +952,7 @@ public interface ValueIn {
     /**
      * Reads a typed marshallable object from the wire, using the provided function to create instances.
      *
+     * @param <T>                 The type of object expected
      * @param marshallableFunction The function to create marshallable object instances.
      * @return The marshallable object read from the wire, or null if it cannot be read.
      * @throws IORuntimeException           if an I/O error occurs
@@ -1109,6 +1180,7 @@ public interface ValueIn {
     /**
      * Reads a Class type literal from the wire.
      *
+     * @param <T> the expected class type
      * @return The Class corresponding to the type literal read from the wire, or null if it cannot be resolved.
      * @throws IORuntimeException       if an I/O error occurs
      * @throws BufferUnderflowException if the buffer underflows while reading
@@ -1154,6 +1226,7 @@ public interface ValueIn {
     /**
      * Reads an Enum value of the specified type from the wire.
      *
+     * @param <E>   the enum type
      * @param eClass The class of the Enum type.
      * @return The Enum value read from the wire, or null if it cannot be read.
      */
@@ -1169,6 +1242,7 @@ public interface ValueIn {
     /**
      * Reads an Enum value of the specified type from the wire and applies it to a Consumer.
      *
+     * @param <E>      the enum type
      * @param eClass    The class of the Enum type.
      * @param eConsumer The Consumer to apply the Enum value to.
      * @return The WireIn instance for method chaining.
@@ -1183,6 +1257,8 @@ public interface ValueIn {
     /**
      * Reads an Enum value of the specified type from the wire and applies it to a given object using a BiConsumer.
      *
+     * @param <E>        the enum type
+     * @param <T>        the context type
      * @param eClass     The class of the Enum type.
      * @param t          The object to apply the Enum value to.
      * @param teConsumer The BiConsumer that accepts the object and the Enum value.
@@ -1198,6 +1274,7 @@ public interface ValueIn {
     /**
      * Reads an object of the specified class from the wire.
      *
+     * @param <E>   The expected type.
      * @param clazz The class of the object to read.
      * @return The object read from the wire, or null if it cannot be read.
      * @throws InvalidMarshallableException if the object is invalid
@@ -1207,6 +1284,12 @@ public interface ValueIn {
         return Wires.object0(this, null, clazz);
     }
 
+    /**
+     * Reads the next value as an untyped object, inferring type information from the stream where possible.
+     *
+     * @return deserialized object or {@code null} if none is present
+     * @throws InvalidMarshallableException if the value cannot be converted to an object
+     */
     @Nullable
     default Object object() throws InvalidMarshallableException {
         @Nullable final Object o = objectWithInferredType(null, SerializationStrategies.ANY_OBJECT, null);

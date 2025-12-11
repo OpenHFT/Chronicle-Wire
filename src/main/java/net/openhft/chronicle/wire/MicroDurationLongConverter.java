@@ -15,6 +15,12 @@ import java.time.Duration;
 public class MicroDurationLongConverter implements LongConverter {
 
     /**
+     * Creates a converter for durations expressed in microseconds.
+     */
+    public MicroDurationLongConverter() {
+    }
+
+    /**
      * Parses the provided {@link CharSequence} into a duration and returns the equivalent duration in microseconds.
      *
      * @param text The character sequence representing a duration in ISO-8601

@@ -329,6 +329,9 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     /**
      * Serialises {@code marshallable} using this wire type into an in-memory
      * buffer and returns the result as a UTF-8 string.
+     *
+     * @param marshallable object to serialise
+     * @return UTF-8 encoded representation
      */
     protected @NotNull String asUtf8String(Object marshallable) {
         ValidatableUtil.startValidateDisabled();
@@ -484,12 +487,13 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     @Nullable
     @Deprecated(/* to be removed in 2027 */)
     public <T> T fromString(@NotNull CharSequence cs) throws InvalidMarshallableException {
-        return (T) fromString(/* Allow Marshallable tuples by not requesting  Object */ null, cs);
+        return fromString(/* Allow Marshallable tuples by not requesting  Object */ null, cs);
     }
 
     /**
      * Deserialises an object of the given type from the provided text.
      *
+     * @param <T>   type to create
      * @param tClass the expected type
      * @param cs     text to parse
      * @return the object deserialised

@@ -45,6 +45,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
+    /**
+     * YAML tag used when emitting explicit type declarations.
+     */
     public static final BytesStore<?, ?> TYPE = BytesStore.from("!type ");
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
@@ -69,7 +72,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         WireInternal.INTERNER.valueCount();
     }
 
+    /** Writer used to emit YAML values. */
     protected final YamlValueOut valueOut = (YamlValueOut) createValueOut();
+    /** Reusable string builder for formatting output. */
     protected final StringBuilder sb = new StringBuilder();
     private boolean addTimeStamps = false;
     private boolean trimFirstCurly = true;

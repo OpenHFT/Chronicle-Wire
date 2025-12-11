@@ -18,18 +18,23 @@ import static net.openhft.chronicle.wire.Wires.toIntU30;
 @SuppressWarnings("deprecation")
 public class BinaryWriteDocumentContext implements WriteDocumentContext {
 
-    // The wire instance used for the binary writing process
+    /**
+     * Wire instance used for the binary writing process.
+     */
     protected Wire wire;
+    /** Position where the current document header was written. */
     protected long position = 0;
+    /** Temporary header value written before the final length is known. */
     protected int tmpHeader;
-    // Count of how many times the start() method was invoked
+    /** Depth counter for nested start/close calls. */
     protected int count = 0;
-    // Bit representing whether meta data is present
+    /** Bit representing whether meta data is present. */
     private int metaDataBit;
-    // Flag to indicate if the document write is complete
+    /** Flag indicating if the document write is still in progress. */
     private volatile boolean notComplete;
-    // Flag to check if the current element is chained
+    /** Flag to check if the current element is chained. */
     private boolean chainedElement;
+    /** Flag to mark the document for rollback. */
     private boolean rollback;
 
     /**
@@ -134,7 +139,11 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         notComplete = false;
     }
 
-    // TODO remove asap
+    /**
+     * Temporary hook to clear the not-complete flag for compatibility.
+     *
+     * @return always {@code false}, retained for legacy callers
+     */
     protected boolean checkResetOpened() {
         notComplete = false;
         return false;

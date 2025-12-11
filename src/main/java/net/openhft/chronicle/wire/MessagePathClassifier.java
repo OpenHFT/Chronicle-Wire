@@ -28,6 +28,12 @@ import java.util.stream.IntStream;
 public class MessagePathClassifier implements IntSupplier {
 
     /**
+     * Creates an empty classifier with no registered routes.
+     */
+    public MessagePathClassifier() {
+    }
+
+    /**
      * Patterns of source IDs for classification. A message history matches a
      * pattern when its source IDs end with the sequence.
      */

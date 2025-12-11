@@ -125,6 +125,11 @@ public interface ChronicleBitSet extends Marshallable, Closeable {
      */
     void clear();
 
+    /**
+     * Tests whether no bits are currently set.
+     *
+     * @return {@code true} if all words are zero
+     */
     default boolean isEmpty() {
         final int wordsInUse = getWordsInUse();
         for (int i = 0; i < wordsInUse; i++)

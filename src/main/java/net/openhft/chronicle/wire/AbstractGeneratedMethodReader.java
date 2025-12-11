@@ -36,21 +36,24 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     // A no-operation {@link Consumer} for {@link MessageHistory}.
     private static final Consumer<MessageHistory> NO_OP_MH_CONSUMER =
             Jvm.uncheckedCast(Mocker.ignored(Consumer.class));
-    // Optional per-thread service name used to select a temporary history cache.
+    /**
+     * Optional per-thread service name used to select a temporary history cache.
+     */
     public static final ThreadLocal<String> SERVICE_NAME = new ThreadLocal<>();
     // Cache of temporary message histories by service name.
     private static final ConcurrentHashMap<String, MessageHistoryThreadLocal>
             TEMP_MESSAGE_HISTORY_BY_SERVICE_NAME = new ConcurrentHashMap<>();
-    // The parselet used for debug logging when {@link Jvm#isDebug()} is true.
+    /** Parselet used for debug logging when {@link Jvm#isDebug()} is true. */
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     protected final WireParselet debugLoggingParselet;
     // Input providing documents for this reader.
     private final MarshallableIn in;
     // Temporary buffer for cooperative message history writing.
     private final MessageHistoryThreadLocal tempMessageHistory;
-    // Message history currently in use.
+    /** Message history currently in use. */
     protected MessageHistory messageHistory;
     // True if {@link #readOneGenerated(WireIn)} processed a data event.
+    /** Tracks whether a data event was handled in the current document. */
     protected boolean dataEventProcessed;
 
     // Whether the underlying input should be closed with this reader.
@@ -150,6 +153,9 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
     /**
      * As {@link #readOneGenerated(WireIn)} but for metadata events.
+     *
+     * @param wireIn input wire
+     * @return result of the dispatch
      */
     protected abstract MethodReaderStatus readOneMetaGenerated(WireIn wireIn);
 
@@ -450,6 +456,8 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     /**
      * Sets whether this reader is in scanning mode. When scanning the reader may
      * skip metadata until a relevant message is encountered.
+     *
+     * @param scanning true to enable scanning mode
      */
     public void scanning(boolean scanning) {
         this.scanning = scanning;

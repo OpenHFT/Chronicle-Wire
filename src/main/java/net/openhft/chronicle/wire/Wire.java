@@ -50,6 +50,7 @@ public interface Wire extends WireIn, WireOut {
      * Sets whether tuples should be generated.
      *
      * @param generateTuples true to enable tuple generation, false to disable it.
+     * @return this wire for chaining
      */
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default Wire generateTuples(boolean generateTuples) {

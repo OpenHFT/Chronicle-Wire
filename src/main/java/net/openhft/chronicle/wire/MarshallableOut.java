@@ -79,8 +79,9 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 
     /**
-     * @return true if this output is configured to expect the history of the message to be written
-     * to.
+     * Indicates whether this output is configured to record message history.
+     *
+     * @return true if history is expected to be written
      */
     default boolean recordHistory() {
         return false;
@@ -241,6 +242,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * The primary interface is always implemented by the proxy, whereas any additional interfaces have to be cast
      * to be accessed on the proxy.
      *
+     * @param <T>        primary interface type
      * @param tClass     primary interface
      * @param additional any additional interfaces
      * @return a proxy which implements the primary interface (additional interfaces have to be
@@ -260,6 +262,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * Each message called on the proxy will be written for replay. This is a convenience method
      * that assumes metadata is not required.
      *
+     * @param <T>    interface type
      * @param tClass The primary interface that the builder will cater to.
      * @return A {@code MethodWriterBuilder} tailored for the given interface class.
      */
@@ -273,6 +276,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * Depending on the {@code metaData} parameter, every method may be written as metadata. Each
      * message called on the proxy will be written to a file for method replay.
      *
+     * @param <T>     interface type
      * @param metaData If set to true, every method call will be written as metadata.
      * @param tClass   The primary interface that the builder will cater to.
      * @return A {@code MethodWriterBuilder} tailored for the given interface class and metadata preference.

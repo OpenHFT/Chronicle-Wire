@@ -22,7 +22,9 @@ import java.lang.reflect.InvocationTargetException;
  */
 public interface Demarshallable {
 
-    // Holds a cache for constructors of Demarshallable implementing classes, optimized for retrieval performance.
+    /**
+     * Cache for constructors of Demarshallable implementations, optimised for reuse.
+     */
     ClassValue<Constructor<Demarshallable>> DEMARSHALLABLES = new ClassValue<Constructor<Demarshallable>>() {
         @NotNull
         @Override

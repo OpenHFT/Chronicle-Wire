@@ -301,6 +301,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
      *
      * @param includeMetaData If true, metadata headers are included in the read attempt.
      * @return The type of header that was read.
+     * @throws EOFException if the end of wire marker is reached
      */
     @NotNull
     HeaderType readDataHeader(boolean includeMetaData) throws EOFException;
@@ -384,9 +385,21 @@ public interface WireIn extends WireCommon, MarshallableIn {
      * Enumeration representing possible header types that can be read from a WireIn instance.
      */
     enum HeaderType {
-        NONE,       // No header was found or read.
-        DATA,       // Data header was found or read.
-        META_DATA,  // Metadata header was found or read.
-        EOF         // End-of-file marker was found or read.
+        /**
+         * No header was found or read.
+         */
+        NONE,
+        /**
+         * Data header was found or read.
+         */
+        DATA,
+        /**
+         * Metadata header was found or read.
+         */
+        META_DATA,
+        /**
+         * End-of-file marker was found or read.
+         */
+        EOF
     }
 }

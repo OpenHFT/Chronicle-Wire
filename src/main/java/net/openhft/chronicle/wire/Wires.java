@@ -449,6 +449,11 @@ public enum Wires {
 
     /**
      * Copies the contents of {@code wireIn} into {@code output} using a binary wire.
+     *
+     * @param wireIn source wire
+     * @param output destination byte buffer
+     * @return bytes containing the binary representation
+     * @throws InvalidMarshallableException if marshalling fails
      */
     @Deprecated(/* to be removed in 2027 */)
     public static Bytes<?> asBinary(@NotNull WireIn wireIn, Bytes<?> output) throws InvalidMarshallableException {
@@ -458,8 +463,9 @@ public enum Wires {
     /**
      * Converts the given WireIn instance into a specified wire type representation.
      *
-     * @param wireIn the input wire
+     * @param wireIn       the input wire
      * @param wireProvider a function that provides a specific type of wire based on bytes
+     * @param output       destination buffer
      * @return the representation of the wire data in the specified type
      * @throws InvalidMarshallableException if marshalling fails
      */
@@ -475,6 +481,11 @@ public enum Wires {
 
     /**
      * Converts {@code wireIn} to JSON and writes the result into {@code output}.
+     *
+     * @param wireIn source wire
+     * @param output destination bytes
+     * @return bytes containing the JSON representation
+     * @throws InvalidMarshallableException if marshalling fails
      */
     @Deprecated(/* to be removed in 2027 */)
     public static Bytes<?> asJson(@NotNull WireIn wireIn, Bytes<?> output) throws InvalidMarshallableException {
@@ -494,6 +505,8 @@ public enum Wires {
     /**
      * Obtains a {@link StringBuilder} from the thread-local pool wrapped in a
      * {@link ScopedResource} so it is automatically returned when the scope is closed.
+     *
+     * @return pooled string builder wrapped in a scoped resource
      */
     public static ScopedResource<StringBuilder> acquireStringBuilderScoped() {
         return STRING_BUILDER_SCOPED_RESOURCE_POOL.get();
@@ -502,6 +515,9 @@ public enum Wires {
     /**
      * Extracts the pure length from a 4&nbsp;byte header value, removing
      * flags such as {@link #NOT_COMPLETE} and {@link #META_DATA}.
+     *
+     * @param len header value containing flags and length
+     * @return raw length value
      */
     public static int lengthOf(int len) {
         return len & LENGTH_MASK;
@@ -509,6 +525,9 @@ public enum Wires {
 
     /**
      * Returns {@code true} if the header denotes a complete document.
+     *
+     * @param header header bits to test
+     * @return {@code true} when the not-complete flag is clear and header is non-zero
      */
     public static boolean isReady(int header) {
         return (header & NOT_COMPLETE) == 0 && header != 0;
@@ -516,6 +535,9 @@ public enum Wires {
 
     /**
      * Returns {@code true} if the header indicates an incomplete document or zero length.
+     *
+     * @param header header bits to test
+     * @return {@code true} when the not-complete flag is set or header is zero
      */
     public static boolean isNotComplete(int header) {
         return (header & NOT_COMPLETE) != 0 || header == 0;
@@ -523,6 +545,9 @@ public enum Wires {
 
     /**
      * Tests whether a header represents completed data (not meta-data) and is non-zero.
+     *
+     * @param header header bits to test
+     * @return {@code true} when the header is ready data
      */
     public static boolean isReadyData(int header) {
         return ((header & (META_DATA | NOT_COMPLETE)) == 0) && (header != 0);
@@ -530,6 +555,9 @@ public enum Wires {
 
     /**
      * Returns {@code true} if the header denotes data rather than meta-data.
+     *
+     * @param len header bits to test
+     * @return {@code true} if the meta-data bit is clear
      */
     public static boolean isData(int len) {
         return (len & META_DATA) == 0;
@@ -537,6 +565,9 @@ public enum Wires {
 
     /**
      * Returns {@code true} if the header is marked as meta-data and the document is complete.
+     *
+     * @param len header bits to test
+     * @return {@code true} if meta-data and complete
      */
     public static boolean isReadyMetaData(int len) {
         return (len & (META_DATA | NOT_COMPLETE)) == META_DATA;
@@ -544,6 +575,9 @@ public enum Wires {
 
     /**
      * Returns {@code true} if the header has a definite length value.
+     *
+     * @param len header bits to test
+     * @return {@code true} when the length is known
      */
     @Deprecated(/* to be removed in 2027 */)
     public static boolean isKnownLength(int len) {
@@ -552,6 +586,9 @@ public enum Wires {
 
     /**
      * Returns {@code true} if the header has not been initialised.
+     *
+     * @param len header bits to test
+     * @return {@code true} when the header is {@link #NOT_INITIALIZED}
      */
     @Deprecated(/* to be removed in 2027 */)
     public static boolean isNotInitialized(int len) {
@@ -604,6 +641,7 @@ public enum Wires {
      * @param writer  the WriteMarshallable instance to write data
      * @return the position after writing the data
      * @throws InvalidMarshallableException if marshalling fails
+     * @param <T>     type of marshallable being written
      */
     @Deprecated(/* to be removed in 2027 */)
     public static <T extends WriteMarshallable> long writeData(
@@ -661,6 +699,8 @@ public enum Wires {
     /**
      * Obtains a pooled {@link BinaryWire} wrapped in a {@link ScopedResource}
      * for temporary serialisation tasks.
+     *
+     * @return scoped binary wire
      */
     public static ScopedResource<Wire> acquireBinaryWireScoped() {
         return WireInternal.BINARY_WIRE_SCOPED_TL.get();
@@ -873,6 +913,9 @@ public enum Wires {
 
     /**
      * Returns {@code true} if the supplied header value denotes end of data.
+     *
+     * @param num header value to test
+     * @return {@code true} when the header equals {@link #END_OF_DATA}
      */
     public static boolean isEndOfFile(int num) {
         return num == END_OF_DATA;
@@ -1318,6 +1361,11 @@ public enum Wires {
     /**
      * Provides a thread-local {@link BinaryWire} configured to read from the supplied
      * byte store.  The returned wire shares the underlying bytes; no copy is made.
+     *
+     * @param in       backing bytes
+     * @param position start position for reading
+     * @param length   readable length
+     * @return thread-local binary wire positioned for reading
      */
     @NotNull
     public static BinaryWire binaryWireForRead(Bytes<?> in, long position, long length) {
@@ -1331,6 +1379,11 @@ public enum Wires {
     /**
      * Provides a thread-local {@link BinaryWire} configured for writing to the supplied
      * byte store.  The returned wire views the given bytes without copying.
+     *
+     * @param in       backing bytes
+     * @param position start position for writing
+     * @param length   maximum writable length
+     * @return thread-local binary wire positioned for writing
      */
     @NotNull
     public static BinaryWire binaryWireForWrite(Bytes<?> in, long position, long length) {

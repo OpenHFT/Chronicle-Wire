@@ -242,6 +242,11 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * INTERNAL METHOD, call writingDocument instead
      * <p>
      * Update/end a header for a document
+     *
+     * @param position       position of the header to update
+     * @param metaData       true if the header is for metadata
+     * @param expectedHeader expected header value to verify
+     * @throws StreamCorruptedException if the header does not match expectations
      */
     void updateHeader(long position, boolean metaData, int expectedHeader) throws StreamCorruptedException;
 
@@ -277,6 +282,8 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * INTERNAL METHOD, call writingDocument instead
      * <p>
      * update the first header after writing {@code headerEndPos} bytes.
+     *
+     * @param headerLen number of bytes written after the header
      */
     void updateFirstHeader(long headerLen);
 
@@ -310,12 +317,30 @@ public interface WireOut extends WireCommon, MarshallableOut {
      */
     void writeStartEvent();
 
+    /**
+     * Finish an event object, mostly for internal use.
+     */
     void writeEndEvent();
 
+    /**
+     * Writes all entries of the provided map as key/value events.
+     *
+     * @param <K>    key type
+     * @param <V>    value type
+     * @param kClass key type
+     * @param vClass value type
+     * @param map    entries to write
+     */
     default <K, V> void writeAllAsMap(Class<K> kClass, Class<V> vClass, @NotNull Map<K, V> map) {
         map.forEach((k, v) -> writeEvent(kClass, k).object(vClass, v));
     }
 
+    /**
+     * Enables or disables dropping of default values during writing.
+     *
+     * @param dropDefault whether to drop defaults
+     * @return this for chaining
+     */
     @NotNull
     default WireOut dropDefault(boolean dropDefault) {
         return this;
@@ -329,6 +354,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
         return true;
     }
 
+    /** Indicates the EOF marker state when writing documents. */
     enum EndOfWire {
         /**
          * EOF marker is not present and was not written

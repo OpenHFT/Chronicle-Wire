@@ -17,6 +17,8 @@ package net.openhft.chronicle.wire;
  * <p>
  * The type parameter {@code <O>} specifies the type of the delegate object to
  * which methods will be forwarded.
+ *
+ * @param <O> delegate type
  */
 public interface MethodDelegate<O> {
 

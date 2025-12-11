@@ -29,13 +29,16 @@ import java.util.function.Supplier;
  * interceptors. By default a thread-local invocation handler is used but this
  * can be overridden via {@link #disableThreadSafe(boolean)}.
  *
+ * @param <T> primary interface the writer implements
  * @see MethodWriter
  * @see MarshallableOut#methodWriterBuilder(Class)
  */
 @SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
 public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBuilder<T> {
 
-    // System property to disable proxy code generation
+    /**
+     * System property to disable proxy code generation.
+     */
     public static final String DISABLE_WRITER_PROXY_CODEGEN = "disableProxyCodegen";
 
     // Marker inserted into {@link #classCache} when compilation fails
@@ -187,6 +190,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * Controls whether the same invocation handler instance can be reused across threads.
      * When {@code true} a single non-thread-safe handler may be shared.
      *
+     * @param theadSafe {@code true} to share a single handler instance
      * @return this builder
      */
     @NotNull
@@ -226,6 +230,8 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     }
 
     /**
+     * Returns the currently configured {@link WireType} for the writer.
+     *
      * @return current {@link WireType} for the writer
      */
     public WireType wireType() {
@@ -235,6 +241,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     /**
      * Sets the {@link WireType} used by the generated writer.
      *
+     * @param wireType wire format to use
      * @return this builder
      */
     @Deprecated(/* to be removed in 2027 */)
@@ -408,6 +415,9 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
 
     /**
      * Sends method calls to the given {@link MarshallableOut}.
+     *
+     * @param out destination for method calls
+     * @return this builder
      */
     public MethodWriterBuilder<T> marshallableOut(@NotNull final MarshallableOut out) {
         this.outSupplier = () -> out;
@@ -416,6 +426,9 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
 
     /**
      * Uses a supplier to obtain the {@link MarshallableOut} for each call.
+     *
+     * @param out supplier providing destinations
+     * @return this builder
      */
     public MethodWriterBuilder<T> marshallableOutSupplier(@NotNull final Supplier<MarshallableOut> out) {
         this.outSupplier = out;
@@ -435,6 +448,8 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     }
 
     /**
+     * Returns a pre-compiled proxy class if one was provided.
+     *
      * @return pre-compiled proxy class if set
      */
     @Deprecated(/* to be removed in 2027 */)

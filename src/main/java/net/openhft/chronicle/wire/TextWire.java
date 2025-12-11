@@ -51,7 +51,11 @@ import static net.openhft.chronicle.wire.TextStopCharTesters.END_OF_TYPE;
 public class TextWire extends YamlWireOut<TextWire> {
 
     // Constants representing specific textual constructs in YAML.
+    /**
+     * YAML tag used to denote binary data.
+     */
     public static final BytesStore<?, ?> BINARY = BytesStore.from("!!binary");
+    /** Prefix used to write explicit type declarations. */
     public static final @NotNull Bytes<byte[]> TYPE_STR = Bytes.from("type ");
     static final byte[] EMPTY_BYTES = new byte[0];
     private static final String TYPE = "type";
@@ -194,6 +198,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * For instance, "\\n" is converted to a newline character, "\\t" to a tab, etc.
      * This method modifies the given sequence directly and adjusts its length if needed.
      *
+     * @param <S> type that is both {@link Appendable} and {@link CharSequence}
      * @param sb A {@link CharSequence} that is also an {@link Appendable}, containing potentially escaped sequences.
      *           This sequence will be modified directly.
      */
@@ -1232,6 +1237,12 @@ public class TextWire extends YamlWireOut<TextWire> {
         // Flag to denote if any kind of reading should be consumed
         private boolean consumeAny;
 
+        /**
+         * Creates a reader bound to the enclosing {@link TextWire}.
+         */
+        public TextValueIn() {
+        }
+
         @Override
         public void resetState() {
             stack.reset();
@@ -1465,6 +1476,11 @@ public class TextWire extends YamlWireOut<TextWire> {
             consumePadding(1);
         }
 
+        /**
+         * Peeks backwards to find the previous non-space character.
+         *
+         * @return the previous byte value or {@code -1} if none exists
+         */
         protected int peekBack() {
             while (bytes.readPosition() > bytes.start()) {
                 int prev = bytes.readUnsignedByte(bytes.readPosition() - 1);
@@ -1604,6 +1620,11 @@ public class TextWire extends YamlWireOut<TextWire> {
             return TextWire.this;
         }
 
+        /**
+         * Reads and returns the length of the next marshallable payload without consuming it.
+         *
+         * @return number of bytes that comprise the marshallable value
+         */
         protected long readLengthMarshallable() {
             long start = bytes.readPosition();
             this.consumeAny = true;
@@ -1621,6 +1642,9 @@ public class TextWire extends YamlWireOut<TextWire> {
             }
         }
 
+        /**
+         * Consumes the next value from the underlying bytes regardless of type.
+         */
         protected void consumeAny() {
             consumePadding();
             int code = peekCode();

@@ -27,6 +27,9 @@ import static net.openhft.chronicle.wire.WireParser.SKIP_READABLE_BYTES;
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
     // System property name to disable proxy generation.
+    /**
+     * System property that disables generated reader proxies.
+     */
     public static final String DISABLE_READER_PROXY_CODEGEN = "disableReaderProxyCodegen";
 
     // Cache of generated reader classes keyed by name.
@@ -141,6 +144,11 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         return msg.toString();
     }
 
+    /**
+     * Returns the current default parselet used for unrecognised methods.
+     *
+     * @return default parselet
+     */
     @Deprecated(/* to be removed in 2027 */)
     public WireParselet defaultParselet() {
         return defaultParselet;

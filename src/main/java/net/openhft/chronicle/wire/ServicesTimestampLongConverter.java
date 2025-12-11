@@ -23,7 +23,9 @@ import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
  */
 public class ServicesTimestampLongConverter implements LongConverter {
 
-    // A singleton instance of this class, primarily for access via reflection.
+    /**
+     * Singleton instance, primarily for reflective access.
+     */
     @UsedViaReflection
     public static final ServicesTimestampLongConverter INSTANCE = new ServicesTimestampLongConverter();
 
@@ -41,6 +43,12 @@ public class ServicesTimestampLongConverter implements LongConverter {
 
     // The TimeUnit representing the time unit in use.
     private static final TimeUnit timeUnit;
+
+    /**
+     * Creates a converter that honours the {@code service.time.unit} system property.
+     */
+    public ServicesTimestampLongConverter() {
+    }
 
     // Static block to initialize the functions and time unit converters.
     static {

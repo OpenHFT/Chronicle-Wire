@@ -66,6 +66,7 @@ public interface ToLongDocumentExtractor {
      * <p>
      * Values mapped to {@link Long#MIN_VALUE } are removed.
      *
+     * @param <T>    mapped object type
      * @param mapper to apply
      * @return a new mapped DocumentExtractor
      * @throws NullPointerException if the provided {@code mapper} is {@code null}

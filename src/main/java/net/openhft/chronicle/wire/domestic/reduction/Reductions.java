@@ -124,6 +124,12 @@ public final class Reductions {
         // A volatile counter to ensure atomic read/write operations across multiple threads
         private volatile long counter;
 
+        /**
+         * Creates a counter reduction with an initial value of zero.
+         */
+        public Counting() {
+        }
+
         @Override
         public void onExcerpt(@NotNull Wire wire, long index) {
             UPDATER.getAndIncrement(this);

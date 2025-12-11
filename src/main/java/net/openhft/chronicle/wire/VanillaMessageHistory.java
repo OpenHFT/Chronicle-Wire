@@ -58,6 +58,12 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     private static final boolean HISTORY_SELF_DESCRIBING = Jvm.getBoolean("history.self.describing");
 
     /**
+     * Creates an empty history ready to record sources and timings.
+     */
+    public VanillaMessageHistory() {
+    }
+
+    /**
      * System property ({@code history.as.bytes}) flag. If true (default unless
      * {@code history.self.describing} is true), this history object will attempt
      * to use its compact binary marshallable form when written to a binary wire.
@@ -406,7 +412,11 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         b.writeSkip(addr - start);
     }
 
-    /** Fallback binary serialisation when direct memory is unavailable. */
+    /**
+     * Fallback binary serialisation when direct memory is unavailable.
+     *
+     * @param b destination buffer
+     */
     public void writeMarshallable0(@NotNull BytesOut<?> b) {
         b.writeHexDumpDescription("sources")
                 .writeUnsignedByte(sources);
@@ -427,6 +437,8 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     /**
      * Returns the timestamp used for new timing entries. Uses wall-clock time
      * when {@link #historyWallClock} is true, otherwise {@link System#nanoTime()}.
+     *
+     * @return timestamp in nanoseconds for the next timing entry
      */
     protected long nanoTime() {
         return historyWallClock ? CLOCK.currentTimeNanos() : System.nanoTime();
@@ -465,6 +477,9 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     /**
      * Helper to obtain a {@link HexDumpBytesDescription} if available for adding comment
      * to hex dumps when the wire supports it.
+     *
+     * @param out value output to inspect
+     * @return hex dump description when available, otherwise {@code null}
      */
     @Nullable
     private HexDumpBytesDescription<?> bytesComment(ValueOut out) {
@@ -497,6 +512,8 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     /**
      * Adds a timing entry. Throws {@link IllegalStateException} if the capacity is exceeded.
+     *
+     * @param l timing value to record
      */
     public void addTiming(long l) {
         // Check if the timings array is full
@@ -580,12 +597,20 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         valueOut.marshallable(this);
     }
 
-    /** Sets whether to use the compact binary form when writing. */
+    /**
+     * Sets whether to use the compact binary form when writing.
+     *
+     * @param useBytesMarshallable {@code true} to use the compact binary encoding
+     */
     public void useBytesMarshallable(boolean useBytesMarshallable) {
         this.useBytesMarshallable = useBytesMarshallable;
     }
 
-    /** Sets whether to use wall-clock time for new timings. */
+    /**
+     * Sets whether to use wall-clock time for new timings.
+     *
+     * @param historyWallClock {@code true} to use wall-clock timestamps
+     */
     public void historyWallClock(boolean historyWallClock) {
         this.historyWallClock = historyWallClock;
     }

@@ -16,6 +16,12 @@ import org.jetbrains.annotations.NotNull;
 public abstract class AbstractMarshallableCfg extends SelfDescribingMarshallable {
 
     /**
+     * Creates an empty configuration DTO.
+     */
+    protected AbstractMarshallableCfg() {
+    }
+
+    /**
      * Reads the state of this configuration object from the given wire input.
      * It uses the {@link WireMarshaller} corresponding to the class of the current object
      * to perform the reading.

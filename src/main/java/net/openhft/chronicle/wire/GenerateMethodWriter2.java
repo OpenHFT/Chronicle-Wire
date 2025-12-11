@@ -335,6 +335,12 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         private String genericEvent;
 
         /**
+         * Creates metadata with all options disabled by default.
+         */
+        public GMWMetaData() {
+        }
+
+        /**
          * Gets the meta data usage status.
          *
          * @return {@code true} if metadata is to be used; {@code false} otherwise.

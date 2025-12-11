@@ -23,6 +23,12 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMarshallable {
 
     /**
+     * Constructs a trivially copyable, self-describing instance.
+     */
+    protected SelfDescribingTriviallyCopyable() {
+    }
+
+    /**
      * Combined limit for primitive fields to avoid unreasonable copies.
      * A description requesting more fields than this is rejected.
      */

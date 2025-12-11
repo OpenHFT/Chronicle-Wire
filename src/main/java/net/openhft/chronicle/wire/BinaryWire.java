@@ -94,7 +94,9 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     private final FixedBinaryValueOut valueOut;
 
-    // Deserialises values from this wire
+    /**
+     * Deserialises values from this wire.
+     */
     @NotNull
     protected final BinaryValueIn valueIn;
 
@@ -270,6 +272,8 @@ public class BinaryWire extends AbstractWire implements Wire {
      *   <li>{@code true} &ndash; always write type information</li>
      *   <li>{@code false} &ndash; never write type information</li>
      * </ul>
+     *
+     * @return override flag for self-describing output, or {@code null} to use defaults
      */
     @Deprecated(/* to be removed in 2027 */)
     public Boolean getOverrideSelfDescribing() {
@@ -304,6 +308,9 @@ public class BinaryWire extends AbstractWire implements Wire {
     /**
      * Factory hook for subclasses. Returns {@link #fixedValueOut} when
      * {@code fixed} is {@code true}; otherwise a fresh {@link BinaryValueOut}.
+     *
+     * @param fixed true to return the shared fixed value-out
+     * @return a {@link FixedBinaryValueOut} configured per {@code fixed}
      */
     @NotNull
     protected FixedBinaryValueOut getFixedBinaryValueOut(boolean fixed) {
@@ -709,6 +716,8 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     /**
      * Throw an {@link IllegalArgumentException} if a code cannot be recognised.
+     *
+     * @param wire destination being written to when the code is unknown
      */
     protected void unknownCode(@NotNull WireOut wire) {
         throw new IllegalArgumentException(stringForCode(bytes.readUnsignedByte()));
@@ -2113,6 +2122,12 @@ public class BinaryWire extends AbstractWire implements Wire {
      */
     protected class FixedBinaryValueOut implements ValueOut {
 
+        /**
+         * Creates a new fixed-length binary value writer bound to the enclosing wire.
+         */
+        protected FixedBinaryValueOut() {
+        }
+
         @NotNull
         @Override
         public WireOut bool(@Nullable Boolean flag) {
@@ -2805,6 +2820,13 @@ public class BinaryWire extends AbstractWire implements Wire {
      * and writing different types of numbers, namely integers and longs.
      */
      protected class BinaryValueOut extends FixedBinaryValueOut {
+
+        /**
+         * Creates a new binary value writer bound to the enclosing wire.
+         */
+        protected BinaryValueOut() {
+        }
+
         @Override
         public boolean isBinary() {
             return true;
@@ -3206,6 +3228,10 @@ public class BinaryWire extends AbstractWire implements Wire {
      * and a reader for handling the binary data.
      */
     protected class BinaryValueIn implements ValueIn {
+
+        /** Creates a new binary value reader bound to the enclosing wire. */
+        protected BinaryValueIn() {
+        }
 
         // Stack for managing the state of the binary input
         final ValueInStack stack = new ValueInStack();

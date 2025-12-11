@@ -20,15 +20,26 @@ import static net.openhft.chronicle.wire.Wires.lengthOf;
 @SuppressWarnings("deprecation")
 public class BinaryReadDocumentContext implements ReadDocumentContext {
 
+    /**
+     * Start position of current document, or -1 when none.
+     */
     public long start = -1;
+    /** Start position of previous document, or -1 when none. */
     public long lastStart = -1;
+    /** Wire providing the bytes to read. */
     @Nullable
     protected Wire wire;
+    /** Whether a document is currently present. */
     protected boolean present;
+    /** Whether the document is not complete. */
     protected boolean notComplete;
+    /** Current read position. */
     protected long readPosition;
+    /** Current read limit. */
     protected long readLimit;
+    /** True if the current document is metadata. */
     protected boolean metaData;
+    /** True if the document should be rolled back on close. */
     protected boolean rollback;
 
     /**

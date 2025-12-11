@@ -16,6 +16,9 @@ public enum YamlLogging {
     ; // No enum instances are intended for this utility enum.
 
     // The title for logging (can be changed during runtime).
+    /**
+     * Optional title prefix used when emitting YAML logs.
+     */
     @NotNull
     @Deprecated(/* to be removed in 2027 */)
     public static String title = "";
@@ -183,18 +186,21 @@ public enum YamlLogging {
      */
     @Deprecated(/* to be removed in 2027 */)
     public enum YamlLoggingLevel {
+        /** Logging disabled. */
         OFF {
             @Override
             public boolean isSet() {
                 return false;
             }
         },
+        /** Logging enabled only when debugging. */
         DEBUG_ONLY {
             @Override
             public boolean isSet() {
                 return Jvm.isDebug();
             }
         },
+        /** Logging always enabled. */
         ON {
             @Override
             public boolean isSet() {

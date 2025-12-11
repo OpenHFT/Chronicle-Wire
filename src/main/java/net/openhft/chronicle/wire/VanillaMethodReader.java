@@ -307,6 +307,9 @@ public class VanillaMethodReader implements MethodReader {
 
     /**
      * Write a debug log entry for the incoming event if the debug mode is enabled..
+     *
+     * @param eventName name of the event being read
+     * @param valueIn   value input containing the payload
      */
     public static void logMessage(@NotNull CharSequence eventName, @NotNull ValueIn valueIn) {
         if (!DEBUG_ENABLED) {
@@ -579,6 +582,12 @@ public class VanillaMethodReader implements MethodReader {
 
     /**
      * Register a zero argument method with {@code wireParser}.
+     *
+     * @param wireParser     parser to register against
+     * @param target         target instance for invocation
+     * @param contextHolder  holder of the current invocation context
+     * @param contextSupplier supplies context when absent
+     * @param method         method to invoke
      */
     public void addParseletForMethod(WireParser wireParser, Object target, Object[] contextHolder, Supplier contextSupplier, @NotNull Method method) {
         throwExceptionIfClosed();

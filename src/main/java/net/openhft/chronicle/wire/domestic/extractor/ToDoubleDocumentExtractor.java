@@ -67,6 +67,7 @@ public interface ToDoubleDocumentExtractor {
      * <p>
      * Values mapped to {@link Double#NaN } are removed.
      *
+     * @param <T>    mapped object type
      * @param mapper to apply
      * @return a new mapped DocumentExtractor
      * @throws NullPointerException if the provided {@code mapper} is {@code null}

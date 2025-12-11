@@ -196,6 +196,7 @@ public interface WireCommon {
     /**
      * Should this wire write the object as a Marshallable or BytesMarshallable
      *
+     * @param object candidate marshallable to test
      * @return use Marshallable
      */
     boolean useSelfDescribingMessage(@NotNull CommonMarshallable object);

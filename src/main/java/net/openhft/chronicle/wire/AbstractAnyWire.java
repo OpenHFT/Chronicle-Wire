@@ -25,8 +25,11 @@ import java.util.function.Supplier;
 @SuppressWarnings({"rawtypes", "deprecation"})
 public abstract class AbstractAnyWire extends AbstractWire implements Wire {
 
+    /**
+     * Strategy used to acquire the concrete wire (TextWire or BinaryWire).
+     */
     @NotNull
-    protected final WireAcquisition wireAcquisition;  // Responsible for acquiring the actual wire type (TextWire or BinaryWire).
+    protected final WireAcquisition wireAcquisition;
 
     /**
      * Constructs a new instance of {@code AbstractAnyWire} using the specified bytes and wire acquisition strategy.

@@ -42,6 +42,9 @@ public class YamlTokeniser {
     static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal(1);
 
     // Stack to manage contextual information during tokenization
+    /**
+     * Stack of active parsing contexts.
+     */
     protected final List<YTContext> contexts = new ArrayList<>();
 
     // The input source containing the raw YAML content

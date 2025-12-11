@@ -28,22 +28,24 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unchecked")
 public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.MetaData<M>> {
 
-    // TODO Use Wires.loadFromJava() instead of a public static final
+    /**
+     * Shared compiler used for generating proxy classes (tests may dump sources).
+     */
     public static final CachedCompiler CACHED_COMPILER = new CachedCompiler(Jvm.isDebug() ? new File(OS.getTarget(), "generated-test-sources") : null, null);
 
     // Flag to determine if the generated source code should be displayed.
     private static final boolean DUMP_CODE = Jvm.getBoolean("dumpCode");
 
-    // Formatter for generating Java source code.
+    /** Formatter for generated Java source code. */
     protected final SourceCodeFormatter sourceCode = new JavaSourceCodeFormatter();
 
-    // Set of imports to be included in the generated code.
+    /** Imports to include in the generated code. */
     protected SortedSet<String> importSet = new TreeSet<>();
 
     // The associated meta-data used for code generation.
     private final M metaData;
 
-    // For some internal purpose; its exact use isn't clarified from the provided code.
+    /** Maximum nesting level used when generating code. */
     private int maxCode = 6;
 
     /**
@@ -448,6 +450,12 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
         private String baseClassName = "";
         private Set<Class<?>> interfaces = new LinkedHashSet<>();
         private boolean useUpdateInterceptor;
+
+        /**
+         * Creates empty metadata for a generated class.
+         */
+        protected MetaData() {
+        }
 
         /**
          * Retrieves the package name for the class to be generated.

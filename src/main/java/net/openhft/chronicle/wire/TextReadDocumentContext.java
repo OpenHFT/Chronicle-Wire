@@ -18,26 +18,36 @@ import java.util.Objects;
 public class TextReadDocumentContext implements ReadDocumentContext {
 
     // Byte sequences for start and end of the document
+    /**
+     * Document start marker {@code ---}.
+     */
     public static final BytesStore<?, ?> SOD_SEP = BytesStore.from("---");
+    /** Document end marker {@code ...}. */
     public static final BytesStore<?, ?> EOD_SEP = BytesStore.from("...");
 
     // The wire instance this context operates on
+    /** Wire this context reads from. */
     @Nullable
     protected Wire wire;
 
     // Indicators for the state of the document
+    /** Flags indicating presence and completeness. */
     protected boolean present, notComplete;
 
     // Metadata flag
+    /** Flag indicating whether the current document is metadata. */
     private boolean metaData;
 
     // Position and limits for reading within the wire
+    /** Current read position and limit within the wire. */
     private long readPosition, readLimit;
 
     // Starting position (initialized to an invalid position)
+    /** Start offset of the current document, {@code -1} when unknown. */
     private long start = -1;
 
     // Rollback flag
+    /** Whether the current document should be rolled back on close. */
     private boolean rollback;
 
     /**
