@@ -42,8 +42,6 @@ import static net.openhft.chronicle.bytes.BytesStore.empty;
  */
 @SuppressWarnings({"rawtypes", "unchecked", "this-escape", "deprecation"})
 public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire {
-    @Deprecated(/* to remove in x.28 */)
-    private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
     public static final BytesStore<?, ?> TYPE = BytesStore.from("!type ");
     static final String NULL = "!null \"\"";
