@@ -92,7 +92,9 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     private final FixedBinaryValueOut valueOut;
 
-    // Deserialises values from this wire
+    /**
+     * Deserialises values from this wire.
+     */
     @NotNull
     protected final BinaryValueIn valueIn;
 
@@ -268,7 +270,10 @@ public class BinaryWire extends AbstractWire implements Wire {
      *   <li>{@code true} &ndash; always write type information</li>
      *   <li>{@code false} &ndash; never write type information</li>
      * </ul>
+     *
+     * @return override flag for self-describing output, or {@code null} to use defaults
      */
+    @Deprecated(/* to be removed in 2027 */)
     public Boolean getOverrideSelfDescribing() {
         return overrideSelfDescribing;
     }
@@ -706,6 +711,8 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     /**
      * Throw an {@link IllegalArgumentException} if a code cannot be recognised.
+     *
+     * @param wire destination being written to when the code is unknown
      */
     protected void unknownCode(@NotNull WireOut wire) throws IllegalArgumentException{
         throw new IllegalArgumentException(stringForCode(bytes.readUnsignedByte()));
@@ -994,9 +1001,6 @@ public class BinaryWire extends AbstractWire implements Wire {
     public <K> K readEvent(@NotNull Class<K> expectedClass) throws InvalidMarshallableException {
         int peekCode = peekCodeAfterPadding();
         switch (peekCode >> 4) {
-            case BinaryWireHighCode.END_OF_STREAM:
-                return null;
-
             case BinaryWireHighCode.CONTROL:
             case BinaryWireHighCode.SPECIAL:
                 return readSpecialField(peekCode, expectedClass);
@@ -1005,6 +1009,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             case BinaryWireHighCode.FIELD1:
                 return readSmallField(peekCode, expectedClass);
 
+            case BinaryWireHighCode.END_OF_STREAM:
             default:
                 return null;
         }
@@ -2019,6 +2024,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @return A string representation of the bytes.
      */
     @NotNull
+    @Override
     public String toString() {
         return bytes.toDebugString();
     }
@@ -2082,6 +2088,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @param object The object whose self-describing status needs to be checked.
      * @return true if the object should use the self-describing message format, false otherwise.
      */
+    @Override
     public boolean useSelfDescribingMessage(@NotNull CommonMarshallable object) {
         // Check for override or get the value from the object.
         return overrideSelfDescribing == null ? object.usesSelfDescribingMessage() : overrideSelfDescribing;
@@ -2110,6 +2117,12 @@ public class BinaryWire extends AbstractWire implements Wire {
      * This inner class offers various methods to output values in a binary format that retains its order.
      */
     protected class FixedBinaryValueOut implements ValueOut {
+
+        /**
+         * Creates a new fixed-length binary value writer bound to the enclosing wire.
+         */
+        protected FixedBinaryValueOut() {
+        }
 
         @NotNull
         @Override
@@ -2816,6 +2829,13 @@ public class BinaryWire extends AbstractWire implements Wire {
      * and writing different types of numbers, namely integers and longs.
      */
      protected class BinaryValueOut extends FixedBinaryValueOut {
+
+        /**
+         * Creates a new binary value writer bound to the enclosing wire.
+         */
+        protected BinaryValueOut() {
+        }
+
         @Override
         public boolean isBinary() {
             return true;

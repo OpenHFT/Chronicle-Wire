@@ -32,9 +32,12 @@ import static net.openhft.chronicle.wire.Wires.*;
  * Represents the AbstractWire class which serves as a base for all Wire implementations.
  * This class provides fundamental shared behaviors, configurations, and initializations for Wire types.
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractWire implements Wire, InternalWire {
 
-    // Default padding configuration loaded from the system properties.
+    /**
+     * Default padding configuration loaded from system property {@code wire.usePadding}.
+     */
     public static final boolean DEFAULT_USE_PADDING = Jvm.getBoolean("wire.usePadding", false);
 
     // Message used when a header is detected inside another header.
@@ -47,15 +50,22 @@ public abstract class AbstractWire implements Wire, InternalWire {
         WireInternal.addAliases();
     }
 
-    // The underlying bytes representation used by the Wire.
+    /** The underlying bytes representation used by the Wire. */
     @NotNull
     protected final Bytes<?> bytes;
+    /** Whether to allow 8-bit encoding in this wire. */
     protected final boolean use8bit;
+    /** Lookup used to resolve class aliases. */
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
+    /** Optional parent object associated with this wire. */
     protected Object parent;
+    /** Listener invoked for comments encountered while reading. */
     protected Consumer<CharSequence> commentListener = IgnoringConsumer.IGNORING_CONSUMER;
+    /** Optional pauser used when blocking. */
     private Pauser pauser;
+    /** Optional timed pauser used while parsing. */
     private TimingPauser timedParser;
+    /** Current header number, Long.MIN_VALUE when unset. */
     private long headerNumber = Long.MIN_VALUE;
     private boolean notCompleteIsNotPresent;
     private ObjectOutput objectOutput;
@@ -637,6 +647,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     }
 
     @Deprecated(/* to be removed as soon as is practical */)
+    @Override
     public void usePadding(boolean usePadding) {
         this.usePadding = usePadding;
     }
@@ -646,6 +657,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
      *
      * @return True if padding is used, false otherwise.
      */
+    @Override
     public boolean usePadding() {
         return usePadding;
     }

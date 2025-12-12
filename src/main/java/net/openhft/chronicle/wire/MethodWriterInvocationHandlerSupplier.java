@@ -54,6 +54,8 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
 
     /**
      * Enable or disable invocation history recording on new handlers.
+     *
+     * @param recordHistory whether history recording should be enabled
      */
     public void recordHistory(boolean recordHistory) {
         this.recordHistory = recordHistory;
@@ -61,6 +63,8 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
 
     /**
      * Assign a resource to be closed when the handler closes.
+     *
+     * @param closeable resource to close
      */
     public void onClose(Closeable closeable) {
         this.closeable = closeable;
@@ -68,6 +72,8 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
 
     /**
      * Sets the configuration for thread safety.
+     *
+     * @param disableThreadSafe {@code true} to use a shared, non-thread-local handler
      */
     public void disableThreadSafe(boolean disableThreadSafe) {
         this.disableThreadSafe = disableThreadSafe;
@@ -75,6 +81,8 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
 
     /**
      * Set the event name used by generic method writers.
+     *
+     * @param genericEvent event name to emit
      */
     public void genericEvent(String genericEvent) {
         this.genericEvent = genericEvent;
@@ -82,7 +90,10 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
 
     /**
      * Determines whether method identifiers are emitted.
+     *
+     * @param useMethodIds whether to write method ids
      */
+    @Deprecated(/* to be removed in 2027 */)
     public void useMethodIds(boolean useMethodIds) {
         this.useMethodIds = useMethodIds;
     }

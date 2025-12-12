@@ -30,7 +30,7 @@ import java.util.function.*;
  * It returns either {@code null}, a primitive zero or the value configured by the {@link WireMarshaller}.
  * This allows optional fields to be skipped without breaking deserialisation.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class DefaultValueIn implements ValueIn {
 
     // The underlying WireIn source for fetching default values

@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
  * @param <T> the type produced after parsing the input value
  */
 @FunctionalInterface
+@Deprecated(/* to be removed in 2027 */)
 public interface MarshallableParser<T> {
 
     /**

@@ -44,11 +44,15 @@ import static net.openhft.chronicle.wire.TextStopCharTesters.END_OF_TYPE;
  * <p><b>Important:</b> Some configurations and methods in this class are marked as deprecated
  * and are slated for removal in future versions, suggesting that its behavior might evolve in future releases.
  */
-@SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape", "deprecation"})
 public class TextWire extends YamlWireOut<TextWire> {
 
     // Constants representing specific textual constructs in YAML.
+    /**
+     * YAML tag used to denote binary data.
+     */
     public static final BytesStore<?, ?> BINARY = BytesStore.from("!!binary");
+    /** Prefix used to write explicit type declarations. */
     public static final @NotNull Bytes<byte[]> TYPE_STR = Bytes.from("type ");
     static final String SEQ_MAP = "!seqmap";
 
@@ -116,6 +120,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         this(Bytes.allocateElasticOnHeap());
         useTextDocuments();
     }
+
     /**
      * Constructor to initialize the `TextWire` with a specific bytes representation
      * and a flag to determine if 8-bit encoding is to be used.
@@ -166,6 +171,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * @param wire The wire format to be converted.
      * @return The text representation of the wire format.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static String asText(@NotNull Wire wire) {
         NativeBytes<Void> bytes = nativeBytes();
         ValidatableUtil.startValidateDisabled();
@@ -187,6 +193,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * For instance, "\\n" is converted to a newline character, "\\t" to a tab, etc.
      * This method modifies the given sequence directly and adjusts its length if needed.
      *
+     * @param <S> type that is both {@link Appendable} and {@link CharSequence}
      * @param sb A {@link CharSequence} that is also an {@link Appendable}, containing potentially escaped sequences.
      *           This sequence will be modified directly.
      */
@@ -288,6 +295,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * @return an instance of the object created from the data in the file
      * @throws IOException if the file can not be found or read
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static <T> T load(String filename) throws IOException, InvalidMarshallableException {
         return (T) TextWire.fromFile(filename).readObject();
     }
@@ -302,6 +310,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      *
      * @return A boolean indicating whether strict mode is enabled (true) or disabled (false).
      */
+    @Deprecated(/* to be removed in 2027 */)
     public boolean strict() {
         return strict;
     }
@@ -313,6 +322,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * @param strict A boolean value to set the strict mode. True to enable, false to disable.
      * @return The current TextWire instance, allowing for method chaining.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public TextWire strict(boolean strict) {
         this.strict = strict;
         return this;
@@ -462,6 +472,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      *
      * @return A string representation of the TextWire's underlying bytes.
      */
+    @Override
     public String toString() {
         if (bytes.readRemaining() > (1024 * 1024)) {
             final long l = bytes.readLimit();
@@ -480,6 +491,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      *
      * @return A string representation of the TextWire's underlying bytes in ISO-8859-1 encoding.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public String to8bitString() {
         return bytes.to8bitString();
     }
@@ -741,6 +753,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     // TODO Move to valueIn
+
     /**
      * Consumes padding characters from the current reading position.
      * Padding characters include spaces, tabs, new lines, commas, and comments. This method also
@@ -1103,6 +1116,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * @param sb       The StringBuilder to which the parsed characters will be appended.
      * @param stopTester  A StopCharsTester which determines which characters should stop the parsing.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public void parseUntil(@NotNull StringBuilder sb, @NotNull StopCharsTester stopTester) {
         sb.setLength(0);
         if (use8bit) {
@@ -1552,6 +1566,11 @@ public class TextWire extends YamlWireOut<TextWire> {
             consumePadding(1);
         }
 
+        /**
+         * Peeks backwards to find the previous non-space character.
+         *
+         * @return the previous byte value or {@code -1} if none exists
+         */
         protected int peekBack() {
             while (bytes.readPosition() > bytes.start()) {
                 int prev = bytes.readUnsignedByte(bytes.readPosition() - 1);
@@ -1691,6 +1710,11 @@ public class TextWire extends YamlWireOut<TextWire> {
             return TextWire.this;
         }
 
+        /**
+         * Reads and returns the length of the next marshallable payload without consuming it.
+         *
+         * @return number of bytes that comprise the marshallable value
+         */
         protected long readLengthMarshallable() {
             long start = bytes.readPosition();
             this.consumeAny = true;
@@ -1708,6 +1732,9 @@ public class TextWire extends YamlWireOut<TextWire> {
             }
         }
 
+        /**
+         * Consumes the next value from the underlying bytes regardless of type.
+         */
         protected void consumeAny() {
             consumePadding();
             int code = peekCode();
@@ -2556,6 +2583,7 @@ public class TextWire extends YamlWireOut<TextWire> {
          * @return A new instance of the class initialized with the data from the wire.
          */
         @NotNull
+        @Deprecated(/* to be removed in 2027 */)
         public Demarshallable demarshallable(@NotNull Class<?> clazz) {
             pushState();
 
@@ -2695,6 +2723,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             }
         }
 
+        // CPD-OFF: duplicated with YamlWire for identical parsing semantics
         @Override
         public boolean bool() {
             consumePadding();
@@ -2742,6 +2771,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                         ".MAX_VALUE/ZERO");
             return (int) l;
         }
+        // CPD-ON
 
         @Override
         public long int64() {
@@ -3040,7 +3070,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         /**
          * Reads a sequence from the current stream context and attempts to interpret
          * it based on the provided class type. This method has specialized handling
-         * for arrays and collections including {@link Object[]}, {@link String[]},
+         * for arrays and collections including {@code Object[]}, {@code String[]},
          * {@link List}, and {@link Set}.
          * <p>
          * If the class type isn't one of the recognized specialized types, an

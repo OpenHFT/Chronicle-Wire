@@ -41,6 +41,8 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
     /**
      * Create a bit set capable of holding {@code maxNumberOfBits} bits.
      * The backing {@link BinaryLongArrayReference} is sized once during construction.
+     *
+     * @param maxNumberOfBits maximum number of bits to support
      */
     public LongArrayValueBitSet(final long maxNumberOfBits) {
         words = new BinaryLongArrayReference((maxNumberOfBits + BITS_PER_WORD - 1) / BITS_PER_WORD);
@@ -51,6 +53,9 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * Create a bit set of {@code maxNumberOfBits} bits and immediately marshal its state
      * to and from the provided {@link Wire}. The {@link #words} field is initialised using
      * a {@link BinaryLongArrayReference} before marshalling occurs.
+     *
+     * @param maxNumberOfBits maximum number of bits to support
+     * @param w               wire used to write and read the initial state
      */
     public LongArrayValueBitSet(final long maxNumberOfBits, Wire w) {
         this(maxNumberOfBits);
@@ -65,7 +70,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @return The word index containing the given bit index.
      * @throws IndexOutOfBoundsException if the provided bitIndex is negative.
      */
-    private static int wordIndex(int bitIndex) {
+    private static int toWordIndex(int bitIndex) {
         if (bitIndex < 0)
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
@@ -124,6 +129,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @return The number of words in use, converted to an integer.
      */
+    @Override
     public int getWordsInUse() {
         return Math.toIntExact(words.getUsed());
     }
@@ -170,6 +176,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param word     The {@code LongValue} instance representing the word to set.
      * @param newValue The new value to set for the word.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public void set(LongValue word, long newValue) {
         throwExceptionIfClosed();
 
@@ -186,6 +193,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @return A byte array containing all the bits in this bit set.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public byte[] toByteArray() {
         throwExceptionIfClosed();
 
@@ -221,10 +229,11 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @param bitIndex The index of the bit to flip.
      */
+    @Override
     public void flip(int bitIndex) {
         throwExceptionIfClosed();
 
-        int wordIndex = wordIndex(bitIndex);
+        int wordIndex = toWordIndex(bitIndex);
         expandTo(wordIndex);
         caret(wordIndex, 1L << bitIndex);
     }
@@ -258,6 +267,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param fromIndex The starting index of the range, inclusive.
      * @param toIndex   The ending index of the range, exclusive.
      */
+    @Override
     public void flip(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
 
@@ -266,8 +276,8 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
         if (fromIndex == toIndex)
             return;
 
-        int startWordIndex = wordIndex(fromIndex);
-        int endWordIndex = wordIndex(toIndex - 1);
+        int startWordIndex = toWordIndex(fromIndex);
+        int endWordIndex = toWordIndex(toIndex - 1);
         expandTo(endWordIndex);
 
         long firstWordMask = WORD_MASK << fromIndex;
@@ -294,10 +304,11 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @param bitIndex The index of the bit to be set.
      */
+    @Override
     public void set(int bitIndex) {
         throwExceptionIfClosed();
 
-        int wordIndex = wordIndex(bitIndex);
+        int wordIndex = toWordIndex(bitIndex);
 
         pipe(wordIndex, (1L << bitIndex)); // Activates the bit at the specified index
     }
@@ -319,6 +330,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param bitIndex The index of the bit to be modified.
      * @param value    If {@code true}, the bit will be set; if {@code false}, the bit will be cleared.
      */
+    @Override
     public void set(int bitIndex, boolean value) {
         throwExceptionIfClosed();
 
@@ -334,6 +346,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param fromIndex The starting index of the range, inclusive.
      * @param toIndex   The ending index of the range, exclusive.
      */
+    @Override
     public void set(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
 
@@ -343,8 +356,8 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
             return;
 
         // Increase capacity if necessary
-        int startWordIndex = wordIndex(fromIndex);
-        int endWordIndex = wordIndex(toIndex - 1);
+        int startWordIndex = toWordIndex(fromIndex);
+        int endWordIndex = toWordIndex(toIndex - 1);
         expandTo(endWordIndex);
 
         long firstWordMask = WORD_MASK << fromIndex;
@@ -372,10 +385,11 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @param bitIndex The index of the bit to be cleared.
      */
+    @Override
     public void clear(int bitIndex) {
         throwExceptionIfClosed();
 
-        int wordIndex = wordIndex(bitIndex);
+        int wordIndex = toWordIndex(bitIndex);
 
         // If the wordIndex is beyond current words in use, there's nothing to clear
         if (wordIndex >= getWordsInUse())
@@ -392,6 +406,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param fromIndex Starting index of the range (inclusive).
      * @param toIndex Ending index of the range (exclusive).
      */
+    @Override
     public void clear(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
 
@@ -401,13 +416,13 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
         if (fromIndex == toIndex)
             return;
 
-        int startWordIndex = wordIndex(fromIndex);
+        int startWordIndex = toWordIndex(fromIndex);
 
         // If the startWordIndex is beyond current words in use, there's nothing to clear
         if (startWordIndex >= getWordsInUse())
             return;
 
-        int endWordIndex = wordIndex(toIndex - 1);
+        int endWordIndex = toWordIndex(toIndex - 1);
 
         // Adjust the range if the endWordIndex is beyond words in use
         if (endWordIndex >= getWordsInUse()) {
@@ -440,6 +455,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * Sets all bits in this ChronicleBitSet to {@code false}.
      * Post invocation, the ChronicleBitSet is effectively empty with no bits set to {@code true}.
      */
+    @Override
     public void clear() {
         throwExceptionIfClosed();
 
@@ -461,10 +477,11 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @return the value of the bit with the specified index
      * @throws IndexOutOfBoundsException if the specified index is negative
      */
+    @Override
     public boolean get(int bitIndex) {
         throwExceptionIfClosed();
 
-        int wordIndex = wordIndex(bitIndex);
+        int wordIndex = toWordIndex(bitIndex);
 
         // Check if the bit at the specified index is set and within the current words in use
         return (wordIndex < getWordsInUse())
@@ -478,10 +495,11 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param fromIndex The index to start checking from (inclusive).
      * @return Index of the next set bit, or -1 if there's no set bit found.
      */
+    @Override
     public int nextSetBit(int fromIndex) {
         throwExceptionIfClosed();
 
-        int u = wordIndex(fromIndex);
+        int u = toWordIndex(fromIndex);
 
         // If the word index is beyond the current words in use, no set bit exists
         if (u >= getWordsInUse())
@@ -508,10 +526,11 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param toIndex The index to stop checking at (exclusive).
      * @return Index of the next set bit in the specified range, or {@code -1} if there's no set bit found.
      */
+    @Override
     public int nextSetBit(int fromIndex, int toIndex) {
         throwExceptionIfClosed();
 
-        int u = wordIndex(fromIndex);
+        int u = toWordIndex(fromIndex);
 
         // If the word index is beyond the current words in use, no set bit exists
         if (u >= getWordsInUse())
@@ -539,10 +558,11 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param fromIndex The index to start checking from (inclusive).
      * @return Index of the next clear bit or the length of this ChronicleBitSet if no clear bit is found.
      */
+    @Override
     public int nextClearBit(int fromIndex) {
         throwExceptionIfClosed();
 
-        int u = wordIndex(fromIndex);
+        int u = toWordIndex(fromIndex);
 
         // If the word index is beyond the current words in use, return the fromIndex as no bit is set
         if (u >= getWordsInUse())
@@ -569,6 +589,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param fromIndex The index to start the reverse search from (inclusive).
      * @return Index of the previous set bit or {@code -1} if no set bit is found.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public int previousSetBit(int fromIndex) {
         throwExceptionIfClosed();
 
@@ -580,7 +601,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
                     "fromIndex < -1: " + fromIndex);
         }
 
-        int u = wordIndex(fromIndex);
+        int u = toWordIndex(fromIndex);
 
         // If the word index surpasses the number of words currently in use
         if (u >= getWordsInUse())
@@ -606,6 +627,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param fromIndex The index to start the reverse search from (inclusive).
      * @return Index of the previous clear bit or {@code -1} if no clear bit is found.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public int previousClearBit(int fromIndex) {
         throwExceptionIfClosed();
 
@@ -617,7 +639,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
                     "fromIndex < -1: " + fromIndex);
         }
 
-        int u = wordIndex(fromIndex);
+        int u = toWordIndex(fromIndex);
 
         // If the word index surpasses the number of words currently in use
         if (u >= getWordsInUse())
@@ -642,6 +664,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param set The {@code ChronicleBitSet} to compare against.
      * @return {@code true} if there's an intersecting bit set to {@code true} between the two sets, {@code false} otherwise.
      */
+    @Override
     public boolean intersects(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
@@ -657,6 +680,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @return The count of bits set to {@code true}.
      */
+    @Override
     public int cardinality() {
         throwExceptionIfClosed();
 
@@ -673,6 +697,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @param set The {@code ChronicleBitSet} to perform the AND operation with.
      */
+    @Override
     public void and(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
@@ -697,6 +722,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * Performs a logical <b>OR</b> of this bit set with the bit set argument. This bit set is modified so that a bit in it has the value {@code true}
      * if and only if it either already had the value {@code true} or the corresponding bit in the bit set argument has the value {@code true}.
      */
+    @Override
     public void or(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
@@ -728,6 +754,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * corresponding bit in the argument has the value {@code true}.
      * </ul>
      */
+    @Override
     public void xor(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
@@ -759,6 +786,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @param set The {@code ChronicleBitSet} whose set bits will be used to clear the corresponding bits in this set.
      */
+    @Override
     public void andNot(ChronicleBitSet set) {
         throwExceptionIfClosed();
 
@@ -775,6 +803,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @return The hash code for this bit set.
      */
+    @Override
     public int hashCode() {
         long h = 1234;
         OS.memory().loadFence();  // Ensuring recent changes to memory are visible
@@ -790,6 +819,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @return The number of bits this bit set can represent.
      */
+    @Override
     public int size() {
         return Math.toIntExact(words.getCapacity() * BITS_PER_WORD);
     }
@@ -801,6 +831,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      * @param obj The object to compare with.
      * @return {@code true} if the specified object is equivalent to this bit set, {@code false} otherwise.
      */
+    @Override
     public boolean equals(Object obj) {
         throwExceptionIfClosed();
 
@@ -860,6 +891,7 @@ public class LongArrayValueBitSet extends AbstractCloseable implements Marshalla
      *
      * @return An ordered IntStream of indices of bits set to true.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public IntStream stream() {
         throwExceptionIfClosed();
 

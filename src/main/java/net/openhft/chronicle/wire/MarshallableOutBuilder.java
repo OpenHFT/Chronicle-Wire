@@ -15,6 +15,7 @@ import java.util.function.Supplier;
  * The class follows the builder pattern, enabling the caller to set desired configurations and then retrieve
  * the appropriate {@code MarshallableOut} implementation based on the URL's protocol.
  */
+@Deprecated(/* to be removed in 2027, as it is only used in tests */)
 public class MarshallableOutBuilder implements Supplier<MarshallableOut> {
 
     // The URL for which the MarshallableOut instance will be created.

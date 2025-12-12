@@ -26,6 +26,7 @@ public interface WireKey {
      * @return {@code true} if all codes are unique.
      * @throws AssertionError if two or more keys share the same code.
      */
+    @Deprecated(/* to be removed in 2027 */)
     static boolean checkKeys(@NotNull WireKey[] keys) {
         @NotNull Map<Integer, WireKey> codes = new HashMap<>();
         for (@NotNull WireKey key : keys) {
@@ -79,6 +80,7 @@ public interface WireKey {
      *
      * @return the associated type.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default Type type() {
         @Nullable Object o = defaultValue();
         return o == null ? Void.class : o.getClass();

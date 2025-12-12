@@ -17,6 +17,12 @@ import java.util.function.Supplier;
 
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
+/**
+ * Internal utilities for building auto tailing pollers over {@link MarshallableIn} sources.
+ * <p>
+ * Provides runnable and event handler driven pollers that repeatedly apply a reduction function to
+ * tailed excerpts while managing pausing and clean shutdown.
+ */
 public final class InternalAutoTailers {
 
     private InternalAutoTailers() {
@@ -26,6 +32,10 @@ public final class InternalAutoTailers {
 
         private final Pauser pauser;
 
+        /**
+         * Runnable poller that continuously tails a {@link MarshallableIn} source using a supplied
+         * {@link Pauser} between reads.
+         */
         public RunnablePoller(@NotNull final Supplier<? extends MarshallableIn> tailerSupplier,
                               @NotNull final ExcerptListener excerptListener,
                               @NotNull final Supplier<Pauser> pauserSupplier) {
@@ -72,6 +82,9 @@ public final class InternalAutoTailers {
         private final Runnable closer;
         private volatile boolean running = true;
 
+        /**
+         * Base poller that wires together the tailer, listener and close handling.
+         */
         protected AbstractPoller(@NotNull final Supplier<? extends MarshallableIn> tailerSupplier,
                                  @NotNull final ExcerptListener excerptListener) {
             requireNonNull(tailerSupplier);

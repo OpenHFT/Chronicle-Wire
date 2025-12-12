@@ -57,6 +57,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      * @return The formatted code string.
      */
     @NotNull
+    @Override
     public String toString() {
         return formattedCode.toString();
     }
@@ -114,6 +115,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      *
      * @param len The new length for the formatted string.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public void setLength(int len) {
         formattedCode.setLength(len);
     }
@@ -135,6 +137,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      *
      * @return The length of the formatted string.
      */
+    @Override
     public int length() {
         return formattedCode.length();
     }
@@ -166,6 +169,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      * @param d The double value to append.
      * @return The current SourceCodeFormatter instance.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public SourceCodeFormatter append(double d) {
         formattedCode.append(d);
         return this;
@@ -186,12 +190,13 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      * Appends the provided object's string representation to the formatted string.
      * The object should have a meaningful string representation for this operation to be effective.
      *
-     * @param <Stringable> The type of the object to be appended.
-     * @param stringable The object whose string representation will be appended.
+     * @param <T> The type of the object to be appended.
+     * @param value The object whose string representation will be appended.
      * @return The current SourceCodeFormatter instance.
      */
-    public <Stringable> SourceCodeFormatter append(Stringable stringable) {
-        formattedCode.append(stringable);
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
+    public <T> SourceCodeFormatter append(T value) {
+        formattedCode.append(value);
         return this;
     }
 

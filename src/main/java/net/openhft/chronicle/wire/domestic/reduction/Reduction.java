@@ -23,7 +23,10 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * This is the Reduction interface which extends ExcerptListener.
  * It provides a means to consume excerpts from a given wire and apply reductions on them.
  * The implementations of this interface should be thread-safe, especially if they are referenced as an {@link ExcerptListener}.
+ *
+ * @param <T> accumulated reduction type
  */
+@SuppressWarnings({"deprecation", "removal"})
 public interface Reduction<T> extends ExcerptListener {
 
     /**
@@ -35,6 +38,7 @@ public interface Reduction<T> extends ExcerptListener {
      * If this method is referenced as an {@link ExcerptListener} then the Reduction must be
      * thread-safe.
      **/
+    @Override
     void onExcerpt(@NotNull Wire wire, @NonNegative long index) throws InvalidMarshallableException;
 
     /**
@@ -43,6 +47,7 @@ public interface Reduction<T> extends ExcerptListener {
      * @return Reduction view.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     T reduction();
 
     /**
@@ -58,6 +63,7 @@ public interface Reduction<T> extends ExcerptListener {
      * @return the last index seen or -1 if no index was seen
      * @throws NullPointerException if the provided {@code tailer} is {@code null}
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default long accept(@NotNull final MarshallableIn tailer) throws InvalidMarshallableException {
         requireNonNull(tailer);
         return ReductionUtil.accept(tailer, this);
@@ -77,6 +83,7 @@ public interface Reduction<T> extends ExcerptListener {
      * @see LongReductionBuilder
      * @see DoubleReductionBuilder
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     static <E> ReductionBuilder<E> of(@NotNull final DocumentExtractor<E> extractor) {
         requireNonNull(extractor);
         return new ReductionUtil.VanillaReductionBuilder<>(extractor);
@@ -108,7 +115,8 @@ public interface Reduction<T> extends ExcerptListener {
      * @see #of(DocumentExtractor)
      * @see #ofLong(ToLongDocumentExtractor)
      */
-    static DoubleReductionBuilder ofDouble(@NotNull final ToDoubleDocumentExtractor extractor) {
+    @SuppressWarnings({"deprecation", "removal"})
+    static DoubleReductionBuilder ofDouble(@NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor) {
         requireNonNull(extractor);
         return new ReductionUtil.VanillaDoubleReductionBuilder(extractor);
     }
@@ -116,7 +124,10 @@ public interface Reduction<T> extends ExcerptListener {
     /**
      * ReductionBuilder is an interface that defines the contract for creating new Reductions using a specific collector.
      * Implementations of this interface should cater to the specific type of element being reduced.
+     *
+     * @param <E> element type consumed by the reduction
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     interface ReductionBuilder<E> {
 
         /**
@@ -130,6 +141,7 @@ public interface Reduction<T> extends ExcerptListener {
          * @return a new Reduction of type R
          * @throws NullPointerException if the provided {@code collector} is {@code null}
          */
+        @Deprecated(/* to be removed in 2027, as it is only used in tests */)
         <A, R> Reduction<R> collecting(@NotNull final Collector<E, A, ? extends R> collector);
     }
 

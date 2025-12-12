@@ -159,6 +159,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
      * @return the WireIn instance for method chaining.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     WireIn readComment(@NotNull StringBuilder sb);
 
     /**
@@ -207,6 +208,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
      * @return the WireIn instance for method chaining.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     default WireIn readAlignTo(int alignment) {
         return this;
     }
@@ -235,6 +237,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
      * @return true if the document was successfully read from the given position, otherwise false.
      * @throws InvalidMarshallableException if there's an error during marshalling.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default boolean readDocument(long position,
                                  @Nullable ReadMarshallable metaDataConsumer,
                                  @Nullable ReadMarshallable dataConsumer) throws InvalidMarshallableException {
@@ -297,7 +300,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
      *
      * @param includeMetaData If true, metadata headers are included in the read attempt.
      * @return The type of header that was read.
-     * @throws EOFException if an end-of-file marker is encountered.
+     * @throws EOFException if the end of wire marker is reached
      */
     @NotNull
     HeaderType readDataHeader(boolean includeMetaData) throws EOFException;
@@ -381,9 +384,21 @@ public interface WireIn extends WireCommon, MarshallableIn {
      * Enumeration representing possible header types that can be read from a WireIn instance.
      */
     enum HeaderType {
-        NONE,       // No header was found or read.
-        DATA,       // Data header was found or read.
-        META_DATA,  // Metadata header was found or read.
-        EOF         // End-of-file marker was found or read.
+        /**
+         * No header was found or read.
+         */
+        NONE,
+        /**
+         * Data header was found or read.
+         */
+        DATA,
+        /**
+         * Metadata header was found or read.
+         */
+        META_DATA,
+        /**
+         * End-of-file marker was found or read.
+         */
+        EOF
     }
 }

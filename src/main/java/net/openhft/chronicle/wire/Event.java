@@ -52,6 +52,7 @@ public interface Event<E extends Event<E>> extends BaseEvent<E> {
      * @return this event instance after the update
      */
     @SuppressWarnings("unchecked")
+    @Deprecated(/* to be removed in 2027 */)
     default E updateEvent(final String eventName) {
         // Set the event ID to the given name if it's currently unset
         if (this.eventId().length() == 0)

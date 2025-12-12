@@ -20,6 +20,7 @@ import java.util.Set;
  * format for the proxy class. Furthermore, it provides an option to dump the generated code for debugging purposes.
  */
 @SuppressWarnings("restriction")
+@Deprecated(/* to be removed in 2027 */)
 public enum GeneratedProxyClass {
     ; // This enum does not have any instances; it is used solely for its static members.
 
@@ -37,6 +38,7 @@ public enum GeneratedProxyClass {
      * @return The proxy class based on the provided interface classes, or null if it cannot be created.
      */
     @SuppressWarnings("rawtypes")
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static Class<?> from(String packageName, Set<Class> interfaces, String className, ClassLoader classLoader) {
         int maxArgs = 0;
         Set<Method> methods = new LinkedHashSet<>(16);

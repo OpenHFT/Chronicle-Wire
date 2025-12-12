@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.ToLongFunction;
 
 import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
+
 /**
  * This is the ServicesTimestampLongConverter class implementing the {@link LongConverter} interface.
  * The class is specifically designed to convert timestamps representing service times across different
@@ -21,7 +22,9 @@ import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
  */
 public class ServicesTimestampLongConverter implements LongConverter {
 
-    // A singleton instance of this class, primarily for access via reflection.
+    /**
+     * Singleton instance, primarily for reflective access.
+     */
     @UsedViaReflection
     public static final ServicesTimestampLongConverter INSTANCE = new ServicesTimestampLongConverter();
 
@@ -39,6 +42,12 @@ public class ServicesTimestampLongConverter implements LongConverter {
 
     // The TimeUnit representing the time unit in use.
     private static final TimeUnit timeUnit;
+
+    /**
+     * Creates a converter that honours the {@code service.time.unit} system property.
+     */
+    public ServicesTimestampLongConverter() {
+    }
 
     // Static block to initialize the functions and time unit converters.
     static {
@@ -109,6 +118,7 @@ public class ServicesTimestampLongConverter implements LongConverter {
 
     /**
      * Parses the provided {@link CharSequence} into a timestamp in the configured time unit.
+     *
      * @param text The character sequence representing a date-time string, which will be parsed by
      *             the underlying timestamp converter (for example
      *             {@link NanoTimestampLongConverter} or {@link MicroTimestampLongConverter}) based

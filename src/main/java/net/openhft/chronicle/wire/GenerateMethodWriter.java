@@ -32,6 +32,7 @@ import static java.util.Arrays.stream;
 import static java.util.Collections.*;
 import static net.openhft.chronicle.core.util.GenericReflection.erase;
 import static net.openhft.chronicle.core.util.GenericReflection.getParameterTypes;
+
 /**
  * Dynamically generates and compiles Java code for method writer proxies.  The
  * generated proxy serialises invocations to a {@link MarshallableOut}
@@ -52,6 +53,9 @@ import static net.openhft.chronicle.core.util.GenericReflection.getParameterType
 public class GenerateMethodWriter {
 
     // Constants for class names to be used in the generated method writer code
+    /**
+     * Simple name for {@link UpdateInterceptor}; used in generated source.
+     */
     public static final String UPDATE_INTERCEPTOR = UpdateInterceptor.class.getSimpleName();
 
     // Constant for the DocumentContext class's simple name

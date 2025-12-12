@@ -21,6 +21,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * methods for transformations and mapping to different object types after extraction.
  */
 @FunctionalInterface
+@Deprecated(/* to be removed in 2027 */)
 public interface ToDoubleDocumentExtractor {
 
     /**
@@ -66,6 +67,7 @@ public interface ToDoubleDocumentExtractor {
      * <p>
      * Values mapped to {@link Double#NaN } are removed.
      *
+     * @param <T>    mapped object type
      * @param mapper to apply
      * @return a new mapped DocumentExtractor
      * @throws NullPointerException if the provided {@code mapper} is {@code null}

@@ -42,7 +42,7 @@ import java.util.function.*;
  * Used for performance-critical exchanges where writer and reader share a
  * fixed layout. Unlike {@link BinaryWire} no field identifiers are emitted
  */
-@SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape", "deprecation"})
 public class RawWire extends AbstractWire implements Wire {
 
     // Output mechanism for writing raw values
@@ -780,14 +780,17 @@ public class RawWire extends AbstractWire implements Wire {
             stack.reset();
         }
 
+        @Deprecated(/* to be removed in 2027 */)
         public void pushState() {
             stack.push();
         }
 
+        @Deprecated(/* to be removed in 2027 */)
         public void popState() {
             stack.pop();
         }
 
+        @Deprecated(/* to be removed in 2027, as it is only used in tests */)
         public ValueInState curr() {
             return stack.curr();
         }

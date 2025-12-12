@@ -18,6 +18,10 @@ import java.io.Closeable;
  * Implementations must ensure proper handling of resources and consistency of the document state.
  */
 public interface DocumentContext extends Closeable, SourceContext {
+    /**
+     * A no-op instance that ignores all calls; retained for legacy wiring.
+     */
+    @Deprecated(/* to be removed in 2027 */)
     DocumentContext NOOP = Mocker.ignored(DocumentContext.class);
 
     /**
@@ -57,11 +61,15 @@ public interface DocumentContext extends Closeable, SourceContext {
     Wire wire();
 
     /**
+     * Indicates whether the NOT_COMPLETE flag is set for this document.
+     *
      * @return whether the NOT_COMPLETE flag has been set.
      */
     boolean isNotComplete();
 
     /**
+     * Indicates whether this document context remains open (not complete).
+     *
      * @return {@code true} if the context is complete, {@code false} otherwise.
      */
     default boolean isOpen() {

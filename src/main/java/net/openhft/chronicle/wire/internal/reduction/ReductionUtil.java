@@ -26,6 +26,7 @@ import static java.util.Objects.requireNonNull;
  * It offers functionalities to work with marshallable objects and listeners to read excerpts
  * from documents and perform various reduction operations on them.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public final class ReductionUtil {
 
     // Suppresses default constructor, ensuring non-instantiability.
@@ -68,6 +69,7 @@ public final class ReductionUtil {
      * @param <A> Intermediate accumulation type of the collector.
      * @param <R> Result type of the reduction.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static final class CollectorReduction<E, A, R> implements Reduction<R> {
 
         // Extracts elements of type E from a wire.
@@ -130,6 +132,7 @@ public final class ReductionUtil {
      *
      * @param <A> Intermediate accumulation type.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static final class LongSupplierReduction<A> implements Reduction<LongSupplier> {
 
         // Extracts long values from a wire.
@@ -192,10 +195,11 @@ public final class ReductionUtil {
      *
      * @param <A> Intermediate accumulation type.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static final class DoubleSupplierReduction<A> implements Reduction<DoubleSupplier> {
 
         // Extracts double values from a wire.
-        private final ToDoubleDocumentExtractor extractor;
+        private final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor;
 
         // The accumulator to accumulate double values.
         private final ObjDoubleConsumer<A> accumulator;
@@ -215,7 +219,8 @@ public final class ReductionUtil {
          * @param accumulator The accumulator to accumulate double values.
          * @param finisher The function to finish the reduction.
          */
-        public DoubleSupplierReduction(@NotNull final ToDoubleDocumentExtractor extractor,
+        @Deprecated(/* to be removed in 2027 */)
+        public DoubleSupplierReduction(@NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor,
                                        @NotNull final Supplier<A> supplier,
                                        @NotNull final ObjDoubleConsumer<A> accumulator,
                                        @NotNull final ToDoubleFunction<A> finisher) {
@@ -306,11 +311,17 @@ public final class ReductionUtil {
         }
     }
 
+    @Deprecated(/* to be removed in 2027 */)
     public static final class VanillaDoubleReductionBuilder implements Reduction.DoubleReductionBuilder {
 
-        private final ToDoubleDocumentExtractor extractor;
+        private final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor;
 
-        public VanillaDoubleReductionBuilder(@NotNull final ToDoubleDocumentExtractor extractor) {
+        /**
+         * Creates a double reduction builder backed by the provided extractor.
+         *
+         * @param extractor source of double values for each document
+         */
+        public VanillaDoubleReductionBuilder(@NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor) {
             this.extractor = extractor;
         }
 

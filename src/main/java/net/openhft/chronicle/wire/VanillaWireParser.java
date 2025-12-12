@@ -22,6 +22,7 @@ import java.util.TreeMap;
  * fields that are not explicitly registered and {@link #fieldNumberParselet} deals with
  * unmapped numeric identifiers.
  */
+@SuppressWarnings("deprecation")
 public class VanillaWireParser implements WireParser {
 
     // Map of field names to parselets. {@link CharSequenceComparator#INSTANCE} provides stable ordering and lookup semantics
@@ -88,6 +89,7 @@ public class VanillaWireParser implements WireParser {
      * @throws InvocationTargetRuntimeException if a parselet throws a checked exception
      * @throws InvalidMarshallableException     if the wire data is malformed
      */
+    @Override
     public void parseOne(@NotNull WireIn wireIn) throws InvocationTargetRuntimeException, InvalidMarshallableException {
         long start = wireIn.bytes().readPosition();
 

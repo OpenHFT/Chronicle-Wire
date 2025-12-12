@@ -36,11 +36,14 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
  * The core capability of this class is to handle JSON data structures as {@code Bytes}
  * objects, allowing for efficient manipulation and parsing.
  */
-@SuppressWarnings("this-escape")
+@SuppressWarnings({"this-escape", "deprecation"})
 public class JSONWire extends TextWire {
 
     // The rest of null
     private static final @NotNull Bytes<byte[]> _ULL = Bytes.from("ull");
+    /**
+     * Constant bytes for JSON literal {@code null} suffix.
+     */
     @Deprecated(/* to be removed in x.28 */)
     public static final @NotNull Bytes<byte[]> ULL = _ULL;
     // the rest of true
@@ -98,6 +101,7 @@ public class JSONWire extends TextWire {
      * @return A new instance of JSONWire.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static JSONWire from(@NotNull String text) {
         return new JSONWire(Bytes.from(text));
     }
@@ -109,6 +113,7 @@ public class JSONWire extends TextWire {
      * @return The string representation of the JSON content.
      * @throws InvalidMarshallableException If there's an error during conversion.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static String asText(@NotNull Wire wire) throws InvalidMarshallableException {
         long pos = wire.bytes().readPosition();
         @NotNull JSONWire tw = new JSONWire(nativeBytes());
@@ -156,6 +161,7 @@ public class JSONWire extends TextWire {
      *
      * @return {@code true} if types are being used in the current instance, otherwise {@code false}.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public boolean useTypes() {
         return useTypes;
     }
@@ -1017,6 +1023,7 @@ public class JSONWire extends TextWire {
             return (JSONWire) super.marshallable(map, (Class<K>) String.class, vClass, leaf);
         }
 
+        @Override
         public @NotNull JSONWire time(final LocalTime localTime) {
             // Todo: fix quoted text
             return (JSONWire) super.time(localTime);
@@ -1298,6 +1305,7 @@ public class JSONWire extends TextWire {
          *
          * @return true if types are being used, false otherwise.
          */
+        @Deprecated(/* to be removed in 2027 */)
         public boolean useTypes() {
             return useTypes;
         }

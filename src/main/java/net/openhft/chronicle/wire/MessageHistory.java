@@ -85,6 +85,7 @@ public interface MessageHistory extends Marshallable {
     /**
      * Returns a timing at a position specified by the input {@code n}.
      *
+     * @param n position within the timing array
      * @return a timing at a position specified by the input {@code n}.
      */
     long timing(int n);
@@ -99,6 +100,7 @@ public interface MessageHistory extends Marshallable {
     /**
      * Returns the source id at a position specified by the input {@code n}.
      *
+     * @param n position within the source id array
      * @return the source id at a position specified by the input {@code n}.
      */
     int sourceId(int n);
@@ -107,6 +109,7 @@ public interface MessageHistory extends Marshallable {
      * Returns {@code true} if the source ids contained in this
      * {@code MessageHistory} end with the provided {@code sourceIds}.
      *
+     * @param sourceIds suffix to check for
      * @return {@code true} if the source ids contained in this
      * {@code MessageHistory} end with the provided {@code sourceIds}.
      */
@@ -116,6 +119,7 @@ public interface MessageHistory extends Marshallable {
      * Returns the index of the source at a position specified by the
      * input {@code n}.
      *
+     * @param n position within the source index array
      * @return the index of the source at a position specified by the
      * input {@code n}.
      */
@@ -130,6 +134,9 @@ public interface MessageHistory extends Marshallable {
     /**
      * Resets the {@code MessageHistory} with the provided {@code sourceId}
      * and {@code sourceIndex} as a starting point.
+     *
+     * @param sourceId   initial source id to record
+     * @param sourceIndex initial source index to record
      */
     void reset(int sourceId, long sourceIndex);
 
@@ -148,6 +155,8 @@ public interface MessageHistory extends Marshallable {
     long lastSourceIndex();
 
     /**
+     * Indicates whether the message history has pending, unwritten state.
+     *
      * @return {@code true} if the message history has not been written using
      * {@link Marshallable#writeMarshallable(net.openhft.chronicle.wire.WireOut)}
      */

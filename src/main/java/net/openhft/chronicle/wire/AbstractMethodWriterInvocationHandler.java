@@ -23,7 +23,9 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
     // Cache of analysed parameter writers keyed by method
     private final Map<Method, ParameterHolderSequenceWriter> parameterMap = new ConcurrentHashMap<>();
 
-    // If true a {@link MessageHistory} is written before each event
+    /**
+     * If true a {@link MessageHistory} is written before each event.
+     */
     protected boolean recordHistory;
 
     /**

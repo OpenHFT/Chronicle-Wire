@@ -16,6 +16,9 @@ import java.util.Map;
  * MapMarshaller is a utility for serializing a Map into a Wire format.
  * This is an inner class used for handling the custom marshalling process for Map objects.
  * Its primary function is to loop through a Map's entries and write each key-value pair to the Wire.
+ *
+ * @param <K> map key type
+ * @param <V> map value type
  */
 public class MapMarshaller<K, V> implements WriteMarshallable {
     private Map<K, V> map;

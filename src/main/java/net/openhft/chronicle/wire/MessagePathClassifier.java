@@ -24,7 +24,14 @@ import java.util.stream.IntStream;
  * Implements {@link IntSupplier} so the current thread's
  * {@link MessageHistory} can be classified directly via {@link #getAsInt()}.
  */
+@Deprecated(/* to be removed in 2027, as it is only used in tests */)
 public class MessagePathClassifier implements IntSupplier {
+
+    /**
+     * Creates an empty classifier with no registered routes.
+     */
+    public MessagePathClassifier() {
+    }
 
     /**
      * Patterns of source IDs for classification. A message history matches a

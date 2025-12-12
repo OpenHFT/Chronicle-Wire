@@ -5,9 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
-import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.scoped.ScopedResourcePool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,17 +17,29 @@ import static net.openhft.chronicle.wire.Wires.lengthOf;
  * It provides an implementation tailored for reading from binary document contexts and ensures
  * full read capability if required.
  */
+@SuppressWarnings("deprecation")
 public class BinaryReadDocumentContext implements ReadDocumentContext {
 
+    /**
+     * Start position of current document, or -1 when none.
+     */
     public long start = -1;
+    /** Start position of previous document, or -1 when none. */
     public long lastStart = -1;
+    /** Wire providing the bytes to read. */
     @Nullable
     protected Wire wire;
+    /** Whether a document is currently present. */
     protected boolean present;
+    /** Whether the document is not complete. */
     protected boolean notComplete;
+    /** Current read position. */
     protected long readPosition;
+    /** Current read limit. */
     protected long readLimit;
+    /** True if the current document is metadata. */
     protected boolean metaData;
+    /** True if the document should be rolled back on close. */
     protected boolean rollback;
 
     /**

@@ -12,6 +12,13 @@ import net.openhft.chronicle.threads.Pauser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Common operations and configuration hooks shared by Chronicle Wire implementations.
+ * <p>
+ * Implementations provide access to the underlying {@link Bytes}, reference value factories,
+ * class lookup and parent relationships and expose knobs such as padding, binary vs text mode and
+ * self describing message behaviour.
+ */
 public interface WireCommon {
 
     /**
@@ -40,6 +47,7 @@ public interface WireCommon {
      *
      * @return the current {@link Pauser} implementation being used for blocking operations
      */
+    @Deprecated(/* to be removed in 2027 */)
     Pauser pauser();
 
     /**
@@ -102,6 +110,7 @@ public interface WireCommon {
      * @return a new {@link IntArrayValues}
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     IntArrayValues newIntArrayReference();
 
     /**
@@ -134,17 +143,44 @@ public interface WireCommon {
         return true;
     }
 
+    /**
+     * Configure whether documents marked as NOT_COMPLETE should remain visible to readers.
+     *
+     * @param notCompleteArePresent true to expose incomplete messages, false to hide them
+     */
+    @Deprecated(/* to be removed in 2027 */)
     default void notCompleteIsNotPresent(boolean notCompleteArePresent) {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Set the header number to write with the next document.
+     *
+     * @param headerNumber header to assign
+     * @return this wire for chaining
+     */
     @NotNull
     WireOut headerNumber(long headerNumber);
 
+    /**
+     * Current header number in use for the wire stream.
+     *
+     * @return header number or zero when unset
+     */
     long headerNumber();
 
+    /**
+     * Enable or disable insertion of padding bytes between documents.
+     *
+     * @param usePadding true to align documents with padding
+     */
     void usePadding(boolean usePadding);
 
+    /**
+     * Whether the wire currently uses padding to align documents.
+     *
+     * @return true if padding is enabled
+     */
     boolean usePadding();
 
     /**
@@ -154,11 +190,13 @@ public interface WireCommon {
      * @return a new {@link BooleanValue}.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     BooleanValue newBooleanReference();
 
     /**
      * Should this wire write the object as a Marshallable or BytesMarshallable
      *
+     * @param object candidate marshallable to test
      * @return use Marshallable
      */
     boolean useSelfDescribingMessage(@NotNull CommonMarshallable object);

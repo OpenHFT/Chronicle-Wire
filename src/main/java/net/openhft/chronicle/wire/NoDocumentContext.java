@@ -12,6 +12,7 @@ package net.openhft.chronicle.wire;
  * that works with document contexts. Using `NoDocumentContext.INSTANCE` denotes
  * a guaranteed uninitialized state for a document context.
  */
+@SuppressWarnings("deprecation")
 public enum NoDocumentContext implements DocumentContext {
     /** The singleton instance of the NoDocumentContext */
     INSTANCE;

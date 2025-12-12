@@ -31,6 +31,7 @@ public class JavaSourceCodeFormatter extends SourceCodeFormatter {
      *
      * @param indent Initial indentation level.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public JavaSourceCodeFormatter(int indent) {
         super(INDENT_SPACES, indent);
     }

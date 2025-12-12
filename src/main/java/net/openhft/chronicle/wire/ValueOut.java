@@ -44,7 +44,7 @@ import static net.openhft.chronicle.wire.Wires.isScalar;
  * Defines an interface for writing out values after writing a field.
  * Implementations of this interface should provide methods to handle writing various data types.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public interface ValueOut {
 
     /**
@@ -64,6 +64,9 @@ public interface ValueOut {
 
     /**
      * Utility to check whether {@code v} is a standard {@link Enum} or a {@link DynamicEnum}.
+     *
+     * @param v object to test
+     * @return true if the object represents an enum value
      */
     @SuppressWarnings("deprecation")
     static boolean isAnEnum(Object v) {
@@ -124,8 +127,12 @@ public interface ValueOut {
 
     /**
      * Alias for {@link #text(char)}.
+     *
+     * @param c character to write
+     * @return parent wire for chaining
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default WireOut character(char c) {
         return text(c);
     }
@@ -202,6 +209,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     WireOut rawBytes(byte[] value);
 
     /**
@@ -223,6 +231,7 @@ public interface ValueOut {
      * @return A ValueOut instance for chained calls.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     ValueOut writeLength(long remaining);
 
     /**
@@ -242,6 +251,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     WireOut bytes(String type, byte[] fromBytes);
 
     /**
@@ -319,6 +329,7 @@ public interface ValueOut {
      * @return The WireOut instance for chained calls.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     WireOut utf8(int codepoint);
 
     /**
@@ -617,44 +628,71 @@ public interface ValueOut {
 
     /**
      * Writes a 32-bit integer for binding. The specifics of "for binding" may be implementation dependent.
+     *
+     * @param value integer to write
+     * @return parent wire for chaining
      */
     @NotNull
     WireOut int32forBinding(int value);
 
     /**
      * Writes a 32-bit integer for binding with the given IntValue. This may be used for additional metadata or configuration.
+     *
+     * @param value    integer to write
+     * @param intValue holder associated with the binding
+     * @return parent wire for chaining
      */
     @NotNull
     WireOut int32forBinding(int value, @NotNull IntValue intValue);
 
     /**
      * Writes a 64-bit integer for binding. The specifics of "for binding" may be implementation dependent.
+     *
+     * @param value long to write
+     * @return parent wire for chaining
      */
     @NotNull
     WireOut int64forBinding(long value);
 
     /**
      * Throws an unsupported operation exception by default. May be overridden by specific implementations.
+     *
+     * @param value  high bits
+     * @param value2 low bits
+     * @return parent wire for chaining
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default WireOut int128forBinding(long value, long value2) {
         throw new UnsupportedOperationException();
     }
 
     /**
      * Writes a 64-bit integer for binding with the given LongValue. This may be used for additional metadata or configuration.
+     *
+     * @param value     long to write
+     * @param longValue holder associated with the binding
+     * @return parent wire for chaining
      */
     @NotNull
     WireOut int64forBinding(long value, @NotNull LongValue longValue);
 
     /**
      * Writes a boolean value for binding with the given BooleanValue. This may be used for additional metadata or configuration.
+     *
+     * @param value     boolean to write
+     * @param longValue holder associated with the binding
+     * @return parent wire for chaining
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     WireOut boolForBinding(boolean value, @NotNull BooleanValue longValue);
 
     /**
      * Writes a sequence of values to the wire using the provided writer. The default behavior uses the writer's `writeValue` method.
+     *
+     * @param writer writer that outputs each element
+     * @return parent wire for chaining
      */
     @NotNull
     default WireOut sequence(WriteValue writer) {
@@ -665,6 +703,7 @@ public interface ValueOut {
      * Writes a sequence of values from an {@link Iterator}. This method handles different types of iterables,
      * applying type prefixes as appropriate for Sets and SortedSets.
      *
+     * @param <T> element type
      * @param t The Iterable of values to be written.
      * @return The WireOut instance for chained calls.
      */
@@ -696,6 +735,7 @@ public interface ValueOut {
     /**
      * Writes a sequence of values using the provided writer.
      *
+     * @param <T> element type or input type
      * @param t The input to be consumed by the writer.
      * @param writer A bi-consumer that writes values using the given ValueOut instance.
      * @return The WireOut instance for chained calls.
@@ -705,6 +745,8 @@ public interface ValueOut {
     /**
      * Writes a sequence of values using the provided parametrized writer.
      *
+     * @param <T>    element type
+     * @param <K>    secondary parameter type
      * @param t The primary input to be consumed by the writer.
      * @param param A secondary input parameter for the writer.
      * @param writer A tri-consumer that writes values using the given ValueOut instance and additional parameter.
@@ -716,6 +758,7 @@ public interface ValueOut {
     /**
      * Writes a sequence of values of a specified length.
      *
+     * @param <T>    element type
      * @param t The input to be consumed by the writer.
      * @param length The length of the sequence.
      * @param writer An object-int-object consumer that writes values using the given ValueOut instance.
@@ -735,6 +778,7 @@ public interface ValueOut {
      * @param length The length of the sequence.
      * @return The WireOut instance for chained calls.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default WireOut array(Bytes[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -749,6 +793,7 @@ public interface ValueOut {
      * @param length The length of the sequence.
      * @return The WireOut instance for chained calls.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default WireOut array(double[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -763,6 +808,7 @@ public interface ValueOut {
      * @param length to write
      * @return this
      */
+    @Deprecated(/* to be removed in 2027 */)
     default WireOut arrayDelta(double[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             if (len <= 0) return;
@@ -781,6 +827,7 @@ public interface ValueOut {
      * @param length The number of elements from the array to write.
      * @return The current instance of the WireOut.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default WireOut array(boolean[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -795,6 +842,7 @@ public interface ValueOut {
      * @param length The number of elements from the array to write.
      * @return The current instance of the WireOut.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default WireOut array(long[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -811,6 +859,7 @@ public interface ValueOut {
      * @param length The number of elements from the array to write.
      * @return The current instance of the WireOut.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default WireOut arrayDelta(long[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             if (len <= 0) return;
@@ -828,6 +877,7 @@ public interface ValueOut {
      * @param length The number of elements from the array to write.
      * @return The current instance of the WireOut.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default WireOut array(int[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -842,6 +892,7 @@ public interface ValueOut {
      * @param length The number of elements from the array to write.
      * @return The current instance of the WireOut.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default WireOut array(byte[] array, int length) {
         return sequenceWithLength(array, length, (a, len, out) -> {
             for (int i = 0; i < len; i++)
@@ -1021,6 +1072,7 @@ public interface ValueOut {
      * @throws InvalidMarshallableException If the set cannot be marshalled.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default <V> WireOut set(Set<V> coll) throws InvalidMarshallableException {
         return set(coll, null);
     }
@@ -1048,6 +1100,7 @@ public interface ValueOut {
      * @throws InvalidMarshallableException If the list cannot be marshalled.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     default <V> WireOut list(List<V> coll) throws InvalidMarshallableException {
         return list(coll, null);
     }
@@ -1407,6 +1460,9 @@ public interface ValueOut {
     /**
      * Serialize an object implementing the WriteBytesMarshallable interface.
      * However, this is unsupported in the default implementation and will throw an exception.
+     *
+     * @param value object to serialise
+     * @return never returns; always throws by default
      */
     default WireOut bytesMarshallable(WriteBytesMarshallable value) throws InvalidMarshallableException {
         throw new UnsupportedOperationException();
@@ -1426,6 +1482,9 @@ public interface ValueOut {
 
     /**
      * Serialize a float value prefixed with its type.
+     *
+     * @param value float to write
+     * @return parent wire for chaining
      */
     @NotNull
     default WireOut fixedFloat32(float value) {
@@ -1434,6 +1493,9 @@ public interface ValueOut {
 
     /**
      * Serialize a byte (signed 8-bit) value prefixed with its type.
+     *
+     * @param value byte to write
+     * @return parent wire for chaining
      */
     @NotNull
     default WireOut fixedInt8(byte value) {
@@ -1442,6 +1504,9 @@ public interface ValueOut {
 
     /**
      * Serialize a short (signed 16-bit) value prefixed with its type.
+     *
+     * @param value short to write
+     * @return parent wire for chaining
      */
     @NotNull
     default WireOut fixedInt16(short value) {
@@ -1450,6 +1515,9 @@ public interface ValueOut {
 
     /**
      * Serialize an int (signed 32-bit) value prefixed with its type.
+     *
+     * @param value int to write
+     * @return parent wire for chaining
      */
     @NotNull
     default WireOut fixedInt32(int value) {
@@ -1459,6 +1527,9 @@ public interface ValueOut {
     /**
      * Serialize a double value.
      * Notice that there's no type prefixing in this default implementation.
+     *
+     * @param value double to write
+     * @return parent wire for chaining
      */
     @NotNull
     default WireOut fixedFloat64(double value) {
@@ -1468,6 +1539,9 @@ public interface ValueOut {
     /**
      * Serialize a long (signed 64-bit) value.
      * Again, there's no type prefixing in this default implementation.
+     *
+     * @param value long to write
+     * @return parent wire for chaining
      */
     @NotNull
     default WireOut fixedInt64(long value) {
@@ -1478,6 +1552,9 @@ public interface ValueOut {
      * Write an untyped object value.
      * This method attempts to serialize an object without the caller explicitly specifying the object type.
      * This is done by checking the object's class name against a list of known class names and using appropriate serialization methods.
+     *
+     * @param value object to serialise (may be null)
+     * @return parent wire for chaining
      */
     @SuppressWarnings("deprecation")
     @NotNull
@@ -1545,6 +1622,9 @@ public interface ValueOut {
     /**
      * Write a typed scalar value as type prefixed text.
      * This method ensures the serialized value is prefixed with its type to aid deserialization.
+     *
+     * @param value value to write
+     * @return parent wire for chaining
      */
     @NotNull
     default WireOut typedScalar(@NotNull Object value) {
@@ -1570,6 +1650,9 @@ public interface ValueOut {
      * Write a throwable value.
      * This method serializes a Throwable object into the wire format. It captures the message, stack trace,
      * and any nested cause of the Throwable.
+     *
+     * @param t throwable to write
+     * @return parent wire for chaining
      */
     @NotNull
     default WireOut throwable(@NotNull Throwable t) throws InvalidMarshallableException {
@@ -1596,13 +1679,21 @@ public interface ValueOut {
         return wireOut();
     }
 
-    // This method seems to provide an interface to the underlying wire format object
+    /**
+     * Accesses the underlying {@link WireOut} implementation used to emit data.
+     *
+     * @return backing wire output
+     */
     @NotNull
     WireOut wireOut();
 
     /**
      * Compresses the given bytes using the specified compression technique.
      * If the byte size is below a certain threshold (SMALL_MESSAGE), the bytes are written uncompressed.
+     *
+     * @param compression       compressor identifier
+     * @param uncompressedBytes bytes to compress, may be {@code null}
+     * @return parent wire for chaining
      */
     @NotNull
     default WireOut compress(@NotNull String compression, @Nullable Bytes<?> uncompressedBytes) {
@@ -1621,17 +1712,25 @@ public interface ValueOut {
         }
     }
 
-    // Gets the size of the compressed data, if available, or returns max int value as a default
+    /**
+     * Gets the size of the compressed data, if available, or returns {@link Integer#MAX_VALUE}.
+     *
+     * @return compressed size hint or max value if unknown
+     */
+    @Deprecated(/* to be removed in 2027 */)
     default int compressedSize() {
         return Integer.MAX_VALUE;
     }
 
-    // Resets the state of the wire to allow for handling multiple documents in the wire format
+    /** Resets the state of the wire to allow handling multiple documents. */
     default void resetBetweenDocuments() {
         resetState();
     }
 
-    // Resets the state of the wire, preparing it for the next operation or data write
+    /**
+     * Clears any document-specific state so the wire can emit the next document cleanly.
+     * Implementations should reset transient markers or buffers but leave the underlying sink open.
+     */
     void resetState();
 
     /**
@@ -1651,6 +1750,7 @@ public interface ValueOut {
      * @param x The boolean value to be written.
      * @return The WireOut instance after the operation.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default WireOut writeBoolean(boolean x) {
         return bool(x);
     }
@@ -1673,6 +1773,7 @@ public interface ValueOut {
      * @param x The char value to be written.
      * @return The WireOut instance after the operation.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default WireOut writeChar(char x) {
         return uint16(x);
     }
@@ -1684,6 +1785,7 @@ public interface ValueOut {
      * @param x The short value to be written.
      * @return The WireOut instance after the operation.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default WireOut writeShort(short x) {
         return int16(x);
     }
@@ -1717,6 +1819,7 @@ public interface ValueOut {
      * @param x The float value to be written.
      * @return The WireOut instance after the operation.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default WireOut writeFloat(float x) {
         return float32(x);
     }
@@ -1751,6 +1854,7 @@ public interface ValueOut {
      * @param i The integer to be converted and written.
      * @return The WireOut instance after the operation.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default WireOut writeInt(LongConverter converter, int i) {
         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
             StringBuilder sb = stlSb.get();
@@ -1784,5 +1888,4 @@ public interface ValueOut {
     default void elementSeparator() {
         // Do nothing in the default implementation
     }
-
 }

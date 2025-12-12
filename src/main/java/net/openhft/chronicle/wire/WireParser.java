@@ -84,6 +84,7 @@ public interface WireParser extends Consumer<WireIn> {
      *
      * @return the default consumer for unmatched field names.
      */
+    @Deprecated(/* to be removed in 2027 */)
     WireParselet getDefaultConsumer();
 
     /**

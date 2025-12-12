@@ -16,6 +16,12 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Objects;
 
+/**
+ * Reflection based {@link FieldInfo} implementation that uses standard {@link Field} access.
+ * <p>
+ * Responsible for reading and writing field values, handling primitive special cases and reporting
+ * generic type information for collection like fields.
+ */
 @SuppressWarnings("rawtypes")
 public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
 
@@ -126,6 +132,9 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         }
     }
 
+    /**
+     * Lazily resolve and return the reflective {@link Field}, enabling access checks as needed.
+     */
     public Field getField() throws NoSuchFieldException {
         if (field == null) {
             field = parent.getDeclaredField(name);
@@ -134,6 +143,12 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         return field;
     }
 
+    /**
+     * Return the erased class of the {@code index}th generic parameter for the field.
+     * <p>
+     * Only supports fields declared with concrete generic arguments; callers should guard for
+     * {@link ClassCastException} when the argument is not a {@link Class}.
+     */
     @Override
     public Class<?> genericType(int index) {
         ParameterizedType genericType = (ParameterizedType) field.getGenericType();

@@ -23,6 +23,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * A utility class to provide additional functionality and support for streams.
  * This class is not meant to be instantiated.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public final class StreamsUtil {
 
     private static final int BATCH_UNIT_INCREASE = 1 << 10; // Increment size for batch unit
@@ -38,6 +39,7 @@ public final class StreamsUtil {
      *
      * @param <T> the type of elements returned by this spliterator.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static final class VanillaSpliterator<T> implements Spliterator<T> {
 
         private final Iterator<T> iterator; // The iterator this spliterator works on
@@ -105,6 +107,7 @@ public final class StreamsUtil {
      * providing basic spliterator functionalities for long elements.
      */
     @SuppressWarnings("overloads")
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static final class VanillaSpliteratorOfLong
             extends AbstractPrimitiveSpliterator<Long, LongConsumer, Spliterator.OfLong, PrimitiveIterator.OfLong>
             implements Spliterator.OfLong {
@@ -125,6 +128,7 @@ public final class StreamsUtil {
          * @return a new Spliterator.OfLong covering the elements taken from this spliterator.
          */
         @NotNull
+        @Override
         protected OfLong split(int n) {
             final long[] a = new long[n];
             int j = 0;
@@ -140,6 +144,7 @@ public final class StreamsUtil {
      * providing basic spliterator functionalities for double elements.
      */
     @SuppressWarnings("overloads")
+    @Deprecated(/* to be removed in 2027 */)
     public static final class VanillaSpliteratorOfDouble
             extends AbstractPrimitiveSpliterator<Double, DoubleConsumer, Spliterator.OfDouble, PrimitiveIterator.OfDouble>
             implements Spliterator.OfDouble {
@@ -160,6 +165,7 @@ public final class StreamsUtil {
          * @return a new Spliterator.OfDouble covering the elements taken from this spliterator.
          */
         @NotNull
+        @Override
         protected OfDouble split(int n) {
             final double[] a = new double[n];
             int j = 0;
@@ -205,8 +211,8 @@ public final class StreamsUtil {
         /**
          * Constructs an AbstractPrimitiveSpliterator instance with the provided iterator, advancer, and forEachRemainer.
          *
-         * @param iterator The iterator to be used by this spliterator.
-         * @param advancer The advancer to dictate the advance mechanism of this iterator.
+         * @param iterator        The iterator to be used by this spliterator.
+         * @param advancer        The advancer to dictate the advance mechanism of this iterator.
          * @param forEachRemainer The bi-consumer to process remaining elements from the iterator.
          */
         protected AbstractPrimitiveSpliterator(@NotNull final I iterator,
@@ -291,7 +297,7 @@ public final class StreamsUtil {
         /**
          * Constructs an instance of the ExcerptIterator with the provided tailer and extractor.
          *
-         * @param tailer The data source from which documents will be read.
+         * @param tailer    The data source from which documents will be read.
          * @param extractor The extractor used to transform the raw document into an object of type T.
          */
         public ExcerptIterator(@NotNull final MarshallableIn tailer,
@@ -356,7 +362,7 @@ public final class StreamsUtil {
         /**
          * Constructs an instance of the ExcerptIteratorOfLong with the provided tailer and extractor.
          *
-         * @param tailer The data source from which documents will be read.
+         * @param tailer    The data source from which documents will be read.
          * @param extractor The extractor used to transform the raw document into a long value.
          */
         public ExcerptIteratorOfLong(@NotNull final MarshallableIn tailer,
@@ -421,11 +427,12 @@ public final class StreamsUtil {
         /**
          * Constructs an instance of the ExcerptIteratorOfDouble with the provided tailer and extractor.
          *
-         * @param tailer The data source from which documents will be read.
+         * @param tailer    The data source from which documents will be read.
          * @param extractor The extractor used to transform the raw document into a double value.
          */
-        public ExcerptIteratorOfDouble(@NotNull final MarshallableIn tailer,
-                                       @NotNull final ToDoubleDocumentExtractor extractor) {
+        public ExcerptIteratorOfDouble(
+                @NotNull final MarshallableIn tailer,
+                @NotNull final ToDoubleDocumentExtractor extractor) {
             this.tailer = tailer;
             this.extractor = extractor;
         }

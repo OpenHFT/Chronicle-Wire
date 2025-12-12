@@ -25,7 +25,10 @@ import org.jetbrains.annotations.NotNull;
 @DontChain
 public interface ReadMarshallable extends CommonMarshallable {
 
-    // An instance of ReadMarshallable that doesn't perform any action when reading.
+    /**
+     * An instance that ignores all input when reading.
+     */
+    @Deprecated(/* to be removed in 2027 */)
     ReadMarshallable DISCARD = w -> {};
 
     /**

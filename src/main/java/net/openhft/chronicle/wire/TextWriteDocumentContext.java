@@ -15,27 +15,37 @@ import org.jetbrains.annotations.NotNull;
  * While writing, it can be ensured that meta-data is correctly specified, and the position of the write
  * operation is recorded.
  */
+@SuppressWarnings("deprecation")
 public class TextWriteDocumentContext implements WriteDocumentContext {
 
     // The wire used for writing.
+    /**
+     * Wire used for writing text documents.
+     */
     protected Wire wire;
 
     // Flag to check if the current data being written is meta-data.
+    /** Whether the current document is metadata. */
     private boolean metaData;
 
     // Indicates if the write operation is completed.
+    /** Whether the document write is still open. */
     private volatile boolean notComplete;
 
     // Maintains the count of start operations.
+    /** Nesting depth of start/close calls. */
     protected int count = 0;
 
     // Indicates if the current element is chained to the previous one.
+    /** Whether the current document is chained to the next entry. */
     private boolean chainedElement;
 
     // Indicates if the current write operation should be rolled back.
+    /** Whether to roll back the current document on close. */
     private boolean rollback;
 
     // Maintains the current position of the write operation.
+    /** Position where the header was written. */
     protected long position;
 
     /**
@@ -54,6 +64,7 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
      *
      * @param metaData Indicates if the data being written is meta-data
      */
+    @Override
     public void start(boolean metaData) {
         count++;
         if (count > 1) {

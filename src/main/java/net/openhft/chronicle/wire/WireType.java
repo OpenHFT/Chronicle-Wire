@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.Collection;
@@ -329,6 +328,9 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     /**
      * Serialises {@code marshallable} using this wire type into an in-memory
      * buffer and returns the result as a UTF-8 string.
+     *
+     * @param marshallable object to serialise
+     * @return UTF-8 encoded representation
      */
     protected @NotNull String asUtf8String(Object marshallable) {
         ValidatableUtil.startValidateDisabled();
@@ -384,6 +386,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      *
      * @return A supplier that creates a new BinaryIntReference.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public Supplier<IntValue> newIntReference() {
         return BinaryIntReference::new;
     }
@@ -393,6 +396,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      *
      * @return A supplier that creates a new BinaryBooleanReference.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public Supplier<BooleanValue> newBooleanReference() {
         return BinaryBooleanReference::new;
     }
@@ -449,7 +453,6 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * objects to a byte buffer, e.g., WriteMarshallable, Map, Iterable, etc.
      *
      * @param marshallable The object to be converted to bytes.
-     * @return A Bytes buffer containing the serialized form of the object.
      * @throws InvalidMarshallableException If the object cannot be serialized properly.
      */
     @NotNull
@@ -481,6 +484,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * @throws ClassCastException if the object is not of type {@code T}
      */
     @Nullable
+    @Deprecated(/* to be removed in 2027 */)
     public <T> T fromString(@NotNull CharSequence cs) throws InvalidMarshallableException {
         return (T) fromString(/* Allow Marshallable tuples by not requesting  Object */ null, cs);
     }
@@ -488,6 +492,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     /**
      * Deserialises an object of the given type from the provided text.
      *
+     * @param <T>   type to create
      * @param tClass the expected type
      * @param cs     text to parse
      * @return the object deserialised
@@ -657,6 +662,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * @throws IOException                   if the file cannot be written
      * @throws InvalidMarshallableException if encoding fails
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public void toFile(@NotNull String filename, WriteMarshallable marshallable) throws IOException, InvalidMarshallableException {
         String tempFilename = tempName(filename);
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
@@ -718,6 +724,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * @throws InvalidMarshallableException if parsing fails
      */
     @Nullable
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public Map<String, Object> asMap(@NotNull CharSequence cs) throws InvalidMarshallableException {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();

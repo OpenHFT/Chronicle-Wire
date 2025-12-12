@@ -26,7 +26,9 @@ import static net.openhft.chronicle.wire.WireParser.SKIP_READABLE_BYTES;
  */
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
-    // System property name to disable proxy generation.
+    /**
+     * System property that disables generated reader proxies.
+     */
     public static final String DISABLE_READER_PROXY_CODEGEN = "disableReaderProxyCodegen";
 
     // Cache of generated reader classes keyed by name.
@@ -141,6 +143,12 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         return msg.toString();
     }
 
+    /**
+     * Returns the current default parselet used for unrecognised methods.
+     *
+     * @return default parselet
+     */
+    @Deprecated(/* to be removed in 2027 */)
     public WireParselet defaultParselet() {
         return defaultParselet;
     }
@@ -151,8 +159,21 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
      * @param defaultParselet The new default parselet.
      * @return This builder for chaining.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public MethodReaderBuilder defaultParselet(WireParselet defaultParselet) {
         this.defaultParselet = defaultParselet;
+        return this;
+    }
+
+    /**
+     * Configures whether default values should be ignored when reading messages.
+     *
+     * @param ignore flag indicating whether to ignore defaults
+     * @return this builder for chaining
+     */
+    @Deprecated(/* to be removed in 2027 */)
+    public VanillaMethodReaderBuilder ignoreDefaults(boolean ignore) {
+        this.ignoreDefaults = ignore;
         return this;
     }
 
@@ -162,6 +183,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
      * @param methodReaderInterceptorReturns The interceptor to set.
      * @return This builder for chaining.
      */
+    @Override
     public VanillaMethodReaderBuilder methodReaderInterceptorReturns(MethodReaderInterceptorReturns methodReaderInterceptorReturns) {
         this.methodReaderInterceptorReturns = methodReaderInterceptorReturns;
         return this;
@@ -178,6 +200,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
      *
      * @return The {@code wireType} of the reader.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public WireType wireType() {
         return wireType;
     }
@@ -211,6 +234,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
      * @param multipleNonMarshallableParamTypes Whether the reader should handle multiple non-marshallable parameter types.
      * @return This builder instance for chaining.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public VanillaMethodReaderBuilder multipleNonMarshallableParamTypes(Boolean multipleNonMarshallableParamTypes) {
         this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
         return this;

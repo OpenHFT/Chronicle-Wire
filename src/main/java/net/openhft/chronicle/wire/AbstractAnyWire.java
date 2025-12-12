@@ -22,9 +22,12 @@ import java.util.function.Supplier;
  *
  * @author Rob Austin.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public abstract class AbstractAnyWire extends AbstractWire implements Wire {
 
+    /**
+     * Strategy used to acquire the concrete wire (TextWire or BinaryWire).
+     */
     @NotNull
     protected final WireAcquisition wireAcquisition;  // Responsible for acquiring the actual wire type (TextWire or BinaryWire).
 
@@ -56,6 +59,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
      * @return A supplier yielding the {@code WireType}.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public Supplier<WireType> underlyingType() {
         return wireAcquisition.underlyingType();
     }
@@ -222,6 +226,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
          * @return A supplier yielding the {@code WireType}.
          */
         @NotNull
+        @Deprecated(/* to be removed in 2027 */)
         Supplier<WireType> underlyingType();
 
         /**

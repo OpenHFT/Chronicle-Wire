@@ -25,6 +25,7 @@ public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
      * Leveraging this method to update the cached enum details is essential for maintaining
      * data consistency, especially during frequent deserialization operations.
      *
+     * @param <E> enum type implementing {@link DynamicEnum}
      * @param e The {@code DynamicEnum} template used to refresh the cached version.
      */
     static <E extends DynamicEnum> void updateEnum(E e) {
@@ -46,6 +47,7 @@ public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
     /**
      * Not resettable, treat as immutable.
      */
+    @Override
     default void reset() {
         throw new UnsupportedOperationException();
     }

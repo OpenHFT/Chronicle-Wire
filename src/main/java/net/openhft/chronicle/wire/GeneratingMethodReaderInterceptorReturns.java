@@ -52,6 +52,8 @@ public interface GeneratingMethodReaderInterceptorReturns extends MethodReaderIn
     String generatorId();
 
     /**
+     * Generates source to emit before invoking the intercepted method.
+     *
      * @param m             Calling method.
      * @param objectName    Object instance name.
      * @param argumentNames Call argument names.
@@ -60,6 +62,8 @@ public interface GeneratingMethodReaderInterceptorReturns extends MethodReaderIn
     String codeBeforeCall(Method m, String objectName, String[] argumentNames);
 
     /**
+     * Generates source to emit after invoking the intercepted method.
+     *
      * @param m             Calling method.
      * @param objectName    Object instance name.
      * @param argumentNames Call argument names.

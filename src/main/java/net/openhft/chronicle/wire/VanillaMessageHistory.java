@@ -24,7 +24,7 @@ import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
  * {@link #MESSAGE_HISTORY_LENGTH}. The object can be marshalled in a compact
  * binary form or as a verbose textual structure.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class VanillaMessageHistory extends SelfDescribingMarshallable implements MessageHistory {
 
     /**
@@ -56,6 +56,12 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
      * always uses the verbose self-describing format.
      */
     private static final boolean HISTORY_SELF_DESCRIBING = Jvm.getBoolean("history.self.describing");
+
+    /**
+     * Creates an empty history ready to record sources and timings.
+     */
+    public VanillaMessageHistory() {
+    }
 
     /**
      * System property ({@code history.as.bytes}) flag. If true (default unless
@@ -173,6 +179,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
      *
      * @return True if source details are being added, false otherwise.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public boolean addSourceDetails() {
         return addSourceDetails;
     }
@@ -405,7 +412,11 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         b.writeSkip(addr - start);
     }
 
-    /** Fallback binary serialisation when direct memory is unavailable. */
+    /**
+     * Fallback binary serialisation when direct memory is unavailable.
+     *
+     * @param b destination buffer
+     */
     public void writeMarshallable0(@NotNull BytesOut<?> b) {
         BytesOut<?> bytes = b;
         bytes.writeHexDumpDescription("sources")
@@ -427,6 +438,8 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     /**
      * Returns the timestamp used for new timing entries. Uses wall-clock time
      * when {@link #historyWallClock} is true, otherwise {@link System#nanoTime()}.
+     *
+     * @return timestamp in nanoseconds for the next timing entry
      */
     protected long nanoTime() {
         return historyWallClock ? CLOCK.currentTimeNanos() : System.nanoTime();
@@ -465,6 +478,9 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     /**
      * Helper to obtain a {@link HexDumpBytesDescription} if available for adding comment
      * to hex dumps when the wire supports it.
+     *
+     * @param out value output to inspect
+     * @return hex dump description when available, otherwise {@code null}
      */
     @Nullable
     private HexDumpBytesDescription<?> bytesComment(ValueOut out) {
@@ -581,12 +597,20 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         valueOut.marshallable(this);
     }
 
-    /** Sets whether to use the compact binary form when writing. */
+    /**
+     * Sets whether to use the compact binary form when writing.
+     *
+     * @param useBytesMarshallable {@code true} to use the compact binary encoding
+     */
     public void useBytesMarshallable(boolean useBytesMarshallable) {
         this.useBytesMarshallable = useBytesMarshallable;
     }
 
-    /** Sets whether to use wall-clock time for new timings. */
+    /**
+     * Sets whether to use wall-clock time for new timings.
+     *
+     * @param historyWallClock {@code true} to use wall-clock timestamps
+     */
     public void historyWallClock(boolean historyWallClock) {
         this.historyWallClock = historyWallClock;
     }

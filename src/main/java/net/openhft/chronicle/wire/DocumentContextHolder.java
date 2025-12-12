@@ -11,10 +11,17 @@ import org.jetbrains.annotations.Nullable;
  * and {@link WriteDocumentContext}. It acts as a wrapper or a delegate around an instance of
  * {@link DocumentContext}, providing methods to interact with the encapsulated context.
  */
+@SuppressWarnings("deprecation")
 public class DocumentContextHolder implements DocumentContext, WriteDocumentContext {
 
     // The encapsulated DocumentContext instance.
     DocumentContext dc;
+
+    /**
+     * Creates an empty holder; set a {@link DocumentContext} before use.
+     */
+    public DocumentContextHolder() {
+    }
 
     @Override
     public boolean isMetaData() {

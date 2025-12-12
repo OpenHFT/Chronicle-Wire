@@ -38,6 +38,7 @@ public final class ConcurrentCollectors {
      * {@code List}, in encounter order
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static <T>
     Collector<T, ?, List<T>> toConcurrentList() {
         // Creates a synchronized list for concurrent access and sets up accumulation and combination operations.
@@ -64,6 +65,7 @@ public final class ConcurrentCollectors {
      * {@code Set}
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static <T>
     Collector<T, ?, Set<T>> toConcurrentSet() {
         // Collects elements into a synchronized map and then retrieves the key set.
@@ -90,6 +92,7 @@ public final class ConcurrentCollectors {
      * @return a {@code Collector} which implements the reduction operation
      * @see Collectors#reducing(Object, BinaryOperator)
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static <T>
     Collector<T, ?, T> reducingConcurrent(final T identity,
                                           @NotNull final BinaryOperator<T> op) {
@@ -127,6 +130,7 @@ public final class ConcurrentCollectors {
      * @see Collectors#reducing(BinaryOperator)
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static <T>
     Collector<T, ?, Optional<T>> reducingConcurrent(@NotNull final BinaryOperator<T> op) {
         requireNonNull(op);
@@ -206,6 +210,7 @@ public final class ConcurrentCollectors {
      * @param <V> value type
      * @return a merger that will replace values
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static <V> BinaryOperator<V> replacingMerger() {
         return (u, v) -> v;
     }
@@ -226,6 +231,7 @@ public final class ConcurrentCollectors {
      * @param <V> value type
      * @return a merger that will throw an Exception if duplicate keys are detected
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static <V> BinaryOperator<V> throwingMerger() {
         return (u, v) -> {
             throw new IllegalStateException(String.format("Duplicate value for %s", u));

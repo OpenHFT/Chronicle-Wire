@@ -3,12 +3,9 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.annotation.SingleThreaded;
 import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
 
 /**
  * Defines the standard interface for sequentially writing to and reading from a Bytes stream.
@@ -41,16 +38,21 @@ public interface Wire extends WireIn, WireOut {
     /**
      * Indicates whether tuples should be generated.
      * By default, this method returns the value of Wires.GENERATE_TUPLES
+     *
      * @return true if tuples should be generated, false otherwise.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default boolean generateTuples() {
         return Wires.GENERATE_TUPLES;
     }
 
     /**
      * Sets whether tuples should be generated.
+     *
      * @param generateTuples true to enable tuple generation, false to disable it.
+     * @return this wire for chaining
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default Wire generateTuples(boolean generateTuples) {
         return this;
     }

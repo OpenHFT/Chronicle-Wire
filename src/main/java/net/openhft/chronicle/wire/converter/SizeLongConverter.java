@@ -20,6 +20,12 @@ public class SizeLongConverter implements LongConverter {
     public static final SizeLongConverter INSTANCE = new SizeLongConverter();
 
     /**
+     * Creates a converter that understands K/M/G/T suffixes.
+     */
+    public SizeLongConverter() {
+    }
+
+    /**
      * Parses a string representation of a number with a size suffix
      * (K, M, G, T) and converts it into a long value. The suffix indicates
      * the magnitude (kilo for K, mega for M, giga for G, tera for T) of the

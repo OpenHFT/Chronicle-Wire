@@ -110,6 +110,7 @@ public class WireMarshaller<T> {
      * Determines the appropriate marshaller type (basic or one that handles unexpected fields)
      * based on the characteristics of the provided class.
      *
+     * @param <T>    type of object being marshalled
      * @param tClass The class type for which the marshaller is to be created.
      * @return A new instance of WireMarshaller for the provided class type.
      */
@@ -389,6 +390,7 @@ public class WireMarshaller<T> {
      * @param fieldNames Names of the fields to be excluded.
      * @return A new instance of the {@link WireMarshaller} with the specified fields excluded.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public WireMarshaller<T> excludeFields(String... fieldNames) {
         Set<String> fieldSet = new HashSet<>(Arrays.asList(fieldNames));
         return new WireMarshaller<>(Stream.of(fields)
@@ -427,6 +429,7 @@ public class WireMarshaller<T> {
      * @param t     The object to write.
      * @param bytes The destination {@link Bytes} where the object representation will be written.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public void writeMarshallable(T t, Bytes<?> bytes) {
         for (@NotNull FieldAccess field : fields) {
             try {

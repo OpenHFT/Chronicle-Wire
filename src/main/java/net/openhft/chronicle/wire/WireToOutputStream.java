@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
  * before flushing it to the actual OutputStream. The provided {@link OutputStream} is not
  * closed by this class
  */
+@Deprecated(/* to be removed in 2027, as it is only used in tests */)
 public class WireToOutputStream {
 
     // Internal, elastically-sized heap {@link Bytes} buffer that backs the {@link #wire}. Data is serialised into this buffer before being flushed

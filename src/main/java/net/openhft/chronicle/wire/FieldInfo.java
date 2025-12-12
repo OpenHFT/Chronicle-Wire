@@ -23,6 +23,15 @@ import static net.openhft.chronicle.wire.Wires.*;
  */
 public interface FieldInfo {
 
+    /**
+     * Creates a {@link FieldInfo} instance matching the given reflected field type.
+     *
+     * @param name        logical field name
+     * @param type        field type
+     * @param bracketType bracket type describing collection semantics
+     * @param field       backing reflective {@link Field}
+     * @return a {@link FieldInfo} specialised for the provided field type
+     */
     static FieldInfo createForField(String name, Class<?> type, BracketType bracketType, @NotNull Field field) {
         // Choose the FieldInfo type based on the field's type.
         if (!type.isPrimitive()) {
@@ -111,6 +120,7 @@ public interface FieldInfo {
      * as an {@link Object}. The provided {@code object} is used as a target to
      * extract the field from.
      *
+     * @param object target instance from which to read
      * @return the value of the field represented by this {@code FieldInfo} object
      * as an {@link Object}.
      */
@@ -122,6 +132,7 @@ public interface FieldInfo {
      * as a {@code long} primitive. The provided {@code object} is used as a target
      * to extract the field from.
      *
+     * @param object target instance from which to read
      * @return the value of the field represented by this {@code FieldInfo} object
      * as a {@code long} primitive.
      */
@@ -132,6 +143,7 @@ public interface FieldInfo {
      * as an {@code int} primitive. The provided {@code object} is used as a target
      * to extract the field from.
      *
+     * @param object target instance from which to read
      * @return the value of the field represented by this {@code FieldInfo} object
      * as an {@code int} primitive.
      */
@@ -142,6 +154,7 @@ public interface FieldInfo {
      * as a {@code char} primitive. The provided {@code object} is used as a target
      * to extract the field from.
      *
+     * @param object target instance from which to read
      * @return the value of the field represented by this {@code FieldInfo} object
      * as a {@code char} primitive.
      */
@@ -152,6 +165,7 @@ public interface FieldInfo {
      * as a {@code double} primitive. The provided {@code object} is used as a target
      * to extract the field from.
      *
+     * @param object target instance from which to read
      * @return the value of the field represented by this {@code FieldInfo} object
      * as a {@code double} primitive.
      */
@@ -161,6 +175,9 @@ public interface FieldInfo {
      * Sets the value of the field represented by this {@code FieldInfo} object
      * to the provided {@code value}. The provided {@code object} is used as a
      * target to the extract eh field from.
+     *
+     * @param object target instance to modify
+     * @param value  new value to set
      */
     void set(Object object, Object value) throws IllegalArgumentException;
 
@@ -168,6 +185,9 @@ public interface FieldInfo {
      * Sets the value of the field represented by this {@code FieldInfo} object
      * to the provided {@code value}. The provided {@code object} is used as a
      * target to the extract eh field from.
+     *
+     * @param object target instance to modify
+     * @param value  new value to set
      */
     void set(Object object, char value) throws IllegalArgumentException;
 
@@ -175,6 +195,9 @@ public interface FieldInfo {
      * Sets the value of the field represented by this {@code FieldInfo} object
      * to the provided {@code value}. The provided {@code object} is used as a
      * target to the extract eh field from.
+     *
+     * @param object target instance to modify
+     * @param value  new value to set
      */
     void set(Object object, int value) throws IllegalArgumentException;
 

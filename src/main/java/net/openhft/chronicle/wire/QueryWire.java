@@ -7,7 +7,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.StopCharTester;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
-import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -30,7 +29,7 @@ import java.util.function.BiFunction;
  * Extends {@link TextWire} and supplies {@link QueryValueIn} and
  * {@link QueryValueOut} for query specific value handling.
  */
-@SuppressWarnings({"rawtypes", "java:S2387"})
+@SuppressWarnings({"rawtypes", "java:S2387", "deprecation"})
 public class QueryWire extends TextWire {
 
     // The specialized output handler for query string values.
@@ -54,6 +53,7 @@ public class QueryWire extends TextWire {
      */
     @NotNull
     @Override
+    @Deprecated(/* to be removed in 2027 */)
     protected QueryValueOut createValueOut() {
         return new QueryValueOut();
     }
@@ -63,6 +63,7 @@ public class QueryWire extends TextWire {
      */
     @NotNull
     @Override
+    @Deprecated(/* to be removed in 2027 */)
     protected TextValueIn createValueIn() {
         return new QueryValueIn();
     }
@@ -85,7 +86,6 @@ public class QueryWire extends TextWire {
      * Skips any leading whitespace from the current read position.
      */
     @Override
-    @ForceInline
     public void consumePadding() {
         int codePoint = peekCode();
         while (Character.isWhitespace(codePoint)) {
@@ -154,28 +154,36 @@ public class QueryWire extends TextWire {
         return bytes.readUnsignedByte(bytes.readPosition() - 1);
     }
 
-    /** Unsupported for query strings. */
+    /**
+     * Unsupported for query strings.
+     */
     @NotNull
     @Override
     public LongValue newLongReference() {
         throw new UnsupportedOperationException();
     }
 
-    /** Unsupported for query strings. */
+    /**
+     * Unsupported for query strings.
+     */
     @NotNull
     @Override
     public IntValue newIntReference() {
         throw new UnsupportedOperationException();
     }
 
-    /** Unsupported for query strings. */
+    /**
+     * Unsupported for query strings.
+     */
     @NotNull
     @Override
     public BinaryLongArrayReference newLongArrayReference() {
         throw new UnsupportedOperationException();
     }
 
-    /** Unsupported for query strings. */
+    /**
+     * Unsupported for query strings.
+     */
     @Override
     public @NotNull IntArrayValues newIntArrayReference() {
         throw new UnsupportedOperationException();
@@ -215,7 +223,7 @@ public class QueryWire extends TextWire {
 
         // The separator to prepend before writing the next value.
         @NotNull
-        String sep = "";
+        String separator = "";
 
         // The field name to prepend before writing the next value.
         @Nullable
@@ -226,8 +234,8 @@ public class QueryWire extends TextWire {
          */
         @Override
         void prependSeparator() {
-            bytes.appendUtf8(sep);
-            sep = "";
+            bytes.appendUtf8(separator);
+            separator = "";
             if (fieldName != null) {
                 bytes.appendUtf8(fieldName).appendUtf8('=');
                 fieldName = null;
@@ -236,7 +244,7 @@ public class QueryWire extends TextWire {
 
         @Override
         public void elementSeparator() {
-            sep = "&";
+            separator = "&";
         }
 
         /**
@@ -279,7 +287,9 @@ public class QueryWire extends TextWire {
             return QueryWire.this;
         }
 
-        /** Unsupported for query strings. */
+        /**
+         * Unsupported for query strings.
+         */
         @NotNull
         @Override
         public QueryWire bytes(@Nullable BytesStore<?, ?> fromBytes) {
@@ -313,14 +323,18 @@ public class QueryWire extends TextWire {
             return QueryWire.this;
         }
 
-        /** Unsupported for query strings. */
+        /**
+         * Unsupported for query strings.
+         */
         @NotNull
         @Override
         public QueryWire int64array(long capacity) {
             throw new UnsupportedOperationException();
         }
 
-        /** Unsupported for query strings. */
+        /**
+         * Unsupported for query strings.
+         */
         @NotNull
         @Override
         public QueryWire int64array(long capacity, @NotNull LongArrayValues values) {
@@ -335,60 +349,74 @@ public class QueryWire extends TextWire {
         public QueryValueOut typePrefix(@NotNull CharSequence typeName) {
             prependSeparator();
             bytes.appendUtf8(typeName);
-            sep = " ";
+            separator = " ";
             return this;
         }
 
-        /** Unsupported for query strings. */
+        /**
+         * Unsupported for query strings.
+         */
         @NotNull
         @Override
         public QueryWire typeLiteral(@Nullable CharSequence type) {
             throw new UnsupportedOperationException();
         }
 
-        /** Unsupported for query strings. */
+        /**
+         * Unsupported for query strings.
+         */
         @NotNull
         @Override
         public QueryWire typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @NotNull Class<?> type) {
             throw new UnsupportedOperationException();
         }
 
-        /** Unsupported for query strings. */
+        /**
+         * Unsupported for query strings.
+         */
         @NotNull
         @Override
         public QueryWire int32forBinding(int value) {
             throw new UnsupportedOperationException();
         }
 
-        /** Unsupported for query strings. */
+        /**
+         * Unsupported for query strings.
+         */
         @NotNull
         @Override
         public QueryWire int32forBinding(int value, @NotNull IntValue intValue) {
             throw new UnsupportedOperationException();
         }
 
-        /** Unsupported for query strings. */
+        /**
+         * Unsupported for query strings.
+         */
         @NotNull
         @Override
         public QueryWire int64forBinding(long value) {
             throw new UnsupportedOperationException();
         }
 
-        /** Unsupported for query strings. */
+        /**
+         * Unsupported for query strings.
+         */
         @NotNull
         @Override
         public QueryWire int64forBinding(long value, @NotNull LongValue longValue) {
             throw new UnsupportedOperationException();
         }
 
-        /** Writes a sequence using comma separated values. */
+        /**
+         * Writes a sequence using comma separated values.
+         */
         @NotNull
         @Override
         public <T> QueryWire sequence(T t, @NotNull BiConsumer<T, ValueOut> writer) {
             prependSeparator();
             pushState();
             bytes.appendUtf8("[");
-            sep = ",";
+            separator = ",";
             long pos = bytes.writePosition();
             writer.accept(t, this);
             if (pos != bytes.writePosition())
@@ -400,14 +428,16 @@ public class QueryWire extends TextWire {
             return QueryWire.this;
         }
 
-        /** Writes a sequence with a provided class. */
+        /**
+         * Writes a sequence with a provided class.
+         */
         @NotNull
         @Override
         public <T, K> QueryWire sequence(T t, K kls, @NotNull TriConsumer<T, K, ValueOut> writer) throws InvalidMarshallableException {
             prependSeparator();
             pushState();
             bytes.appendUtf8("[");
-            sep = ",";
+            separator = ",";
             long pos = bytes.writePosition();
             writer.accept(t, kls, this);
             if (pos != bytes.writePosition())
@@ -427,7 +457,9 @@ public class QueryWire extends TextWire {
         protected void pushState() {
         }
 
-        /** Writes a marshallable object in braces. */
+        /**
+         * Writes a marshallable object in braces.
+         */
         @NotNull
         @Override
         public QueryWire marshallable(@NotNull WriteMarshallable object) throws InvalidMarshallableException {
@@ -435,7 +467,7 @@ public class QueryWire extends TextWire {
 
             prependSeparator();
             bytes.appendUtf8("{");
-            sep = ",";
+            separator = ",";
 
             object.writeMarshallable(QueryWire.this);
 
@@ -446,14 +478,18 @@ public class QueryWire extends TextWire {
             return QueryWire.this;
         }
 
-        /** Unsupported for query strings. */
+        /**
+         * Unsupported for query strings.
+         */
         @NotNull
         @Override
         public QueryWire map(@NotNull final Map map) {
             throw new UnsupportedOperationException();
         }
 
-        /** Unsupported for query strings. */
+        /**
+         * Unsupported for query strings.
+         */
         @Override
         @NotNull
         public QueryValueOut write() {
@@ -479,7 +515,9 @@ public class QueryWire extends TextWire {
      * {@link ValueIn} implementation for query strings.
      */
     class QueryValueIn extends TextValueIn {
-        /** Returns the value text of the current parameter. */
+        /**
+         * Returns the value text of the current parameter.
+         */
         @Override
         public String text() {
             try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {

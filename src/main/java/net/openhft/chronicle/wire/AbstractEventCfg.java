@@ -16,6 +16,12 @@ import org.jetbrains.annotations.NotNull;
 @SuppressWarnings("unchecked")
 public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMarshallableCfg implements Event<E> {
 
+    /**
+     * Creates an empty event configuration.
+     */
+    public AbstractEventCfg() {
+    }
+
     // The unique identifier for the event (defaults to an empty string)
     private String eventId = "";
 

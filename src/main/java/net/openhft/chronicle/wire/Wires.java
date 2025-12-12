@@ -55,7 +55,7 @@ import static net.openhft.chronicle.wire.WireType.YAML_ONLY;
  * {@link StringBuilder} pools and {@link net.openhft.compiler.CachedCompiler}
  * instances.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public enum Wires {
     ; // No specific enumeration values
 
@@ -176,10 +176,9 @@ public enum Wires {
     // Shared {@link net.openhft.compiler.CachedCompiler} for dynamic class generation
     static CachedCompiler CACHED_COMPILER = null;
 
-    /**
-     * Static initializer block for the Wires enum. It populates the list of
-     * class strategy functions and adds some default strategies for serialization.
-     * It also sets up wire aliases.
+    /*
+     * Static initializer block. It populates the list of class strategy functions and adds some
+     * default strategies for serialization. It also sets up wire aliases.
      */
     static {
         Jvm.addToClassPath(Wires.class);
@@ -208,6 +207,7 @@ public enum Wires {
      * @param <T>    the type of the specified interface
      * @return a proxy of the specified interface that writes to the PrintStream in Yaml
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static <T> T recordAsYaml(Class<T> tClass, PrintStream ps) {
         MarshallableOut out = new StringConsumerMarshallableOut(s -> {
             if (!s.startsWith("---\n"))
@@ -229,11 +229,14 @@ public enum Wires {
      * @throws IOException is thrown if there's an error reading the file
      * @throws InvalidMarshallableException is thrown if the serialized data is invalid or corrupted
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static void replay(String file, Object obj) throws IOException, InvalidMarshallableException {
         Bytes bytes = BytesUtil.readFile(file);
         Wire wire = new YamlWire(bytes).useTextDocuments();
         MethodReader readerObj = wire.methodReader(obj);
         while (readerObj.readOne()) {
+            // Intentionally empty; loop drains the reader.
+            continue;
         }
         bytes.releaseLast();
     }
@@ -269,6 +272,7 @@ public enum Wires {
      * @param abbrev if {@code true} long fields are abbreviated
      * @return textual dump of the blobs
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, boolean abbrev) {
         return WireDumper.of(bytes).asString(abbrev);
     }
@@ -307,6 +311,7 @@ public enum Wires {
      * @param abbrev  whether long content should be abbreviated
      * @return textual dump of the blobs
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, boolean padding, boolean abbrev) {
         return WireDumper.of(bytes, padding).asString(abbrev);
     }
@@ -411,6 +416,7 @@ public enum Wires {
      * @return {@code output} containing the textual form
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static CharSequence asText(@NotNull WireIn wireIn, Bytes<?> output) {
         ValidatableUtil.startValidateDisabled();
         try {
@@ -432,7 +438,13 @@ public enum Wires {
 
     /**
      * Copies the contents of {@code wireIn} into {@code output} using a binary wire.
+     *
+     * @param wireIn source wire
+     * @param output destination byte buffer
+     * @return bytes containing the binary representation
+     * @throws InvalidMarshallableException if marshalling fails
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static Bytes<?> asBinary(@NotNull WireIn wireIn, Bytes<?> output) throws InvalidMarshallableException {
         return asType(wireIn, BinaryWire::new, output);
     }
@@ -442,6 +454,7 @@ public enum Wires {
      *
      * @param wireIn the input wire
      * @param wireProvider a function that provides a specific type of wire based on bytes
+     * @param output       destination buffer
      * @return the representation of the wire data in the specified type
      * @throws InvalidMarshallableException if marshalling fails
      */
@@ -457,7 +470,13 @@ public enum Wires {
 
     /**
      * Converts {@code wireIn} to JSON and writes the result into {@code output}.
+     *
+     * @param wireIn source wire
+     * @param output destination bytes
+     * @return bytes containing the JSON representation
+     * @throws InvalidMarshallableException if marshalling fails
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static Bytes<?> asJson(@NotNull WireIn wireIn, Bytes<?> output) throws InvalidMarshallableException {
         return asType(wireIn, Wires::newJsonWire, output);
     }
@@ -475,6 +494,8 @@ public enum Wires {
     /**
      * Obtains a {@link StringBuilder} from the thread-local pool wrapped in a
      * {@link ScopedResource} so it is automatically returned when the scope is closed.
+     *
+     * @return pooled string builder wrapped in a scoped resource
      */
     public static ScopedResource<StringBuilder> acquireStringBuilderScoped() {
         return STRING_BUILDER_SCOPED_RESOURCE_POOL.get();
@@ -483,6 +504,9 @@ public enum Wires {
     /**
      * Extracts the pure length from a 4&nbsp;byte header value, removing
      * flags such as {@link #NOT_COMPLETE} and {@link #META_DATA}.
+     *
+     * @param len header value containing flags and length
+     * @return raw length value
      */
     public static int lengthOf(int len) {
         return len & LENGTH_MASK;
@@ -490,6 +514,9 @@ public enum Wires {
 
     /**
      * Returns {@code true} if the header denotes a complete document.
+     *
+     * @param header header bits to test
+     * @return {@code true} when the not-complete flag is clear and header is non-zero
      */
     public static boolean isReady(int header) {
         return (header & NOT_COMPLETE) == 0 && header != 0;
@@ -497,6 +524,9 @@ public enum Wires {
 
     /**
      * Returns {@code true} if the header indicates an incomplete document or zero length.
+     *
+     * @param header header bits to test
+     * @return {@code true} when the not-complete flag is set or header is zero
      */
     public static boolean isNotComplete(int header) {
         return (header & NOT_COMPLETE) != 0 || header == 0;
@@ -504,6 +534,9 @@ public enum Wires {
 
     /**
      * Tests whether a header represents completed data (not meta-data) and is non-zero.
+     *
+     * @param header header bits to test
+     * @return {@code true} when the header is ready data
      */
     public static boolean isReadyData(int header) {
         return ((header & (META_DATA | NOT_COMPLETE)) == 0) && (header != 0);
@@ -511,6 +544,9 @@ public enum Wires {
 
     /**
      * Returns {@code true} if the header denotes data rather than meta-data.
+     *
+     * @param len header bits to test
+     * @return {@code true} if the meta-data bit is clear
      */
     public static boolean isData(int len) {
         return (len & META_DATA) == 0;
@@ -518,6 +554,9 @@ public enum Wires {
 
     /**
      * Returns {@code true} if the header is marked as meta-data and the document is complete.
+     *
+     * @param len header bits to test
+     * @return {@code true} if meta-data and complete
      */
     public static boolean isReadyMetaData(int len) {
         return (len & (META_DATA | NOT_COMPLETE)) == META_DATA;
@@ -525,14 +564,22 @@ public enum Wires {
 
     /**
      * Returns {@code true} if the header has a definite length value.
+     *
+     * @param len header bits to test
+     * @return {@code true} when the length is known
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static boolean isKnownLength(int len) {
         return (len & (META_DATA | LENGTH_MASK)) != UNKNOWN_LENGTH;
     }
 
     /**
      * Returns {@code true} if the header has not been initialised.
+     *
+     * @param len header bits to test
+     * @return {@code true} when the header is {@link #NOT_INITIALIZED}
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static boolean isNotInitialized(int len) {
         return len == NOT_INITIALIZED;
     }
@@ -559,6 +606,7 @@ public enum Wires {
      * @param position offset of the header
      * @return {@code true} if the lock was acquired
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static boolean acquireLock(@NotNull BytesStore<?, ?> store, long position) {
         return store.compareAndSwapInt(position, NOT_INITIALIZED, NOT_COMPLETE);
     }
@@ -569,6 +617,7 @@ public enum Wires {
      * @param length the length to check
      * @return true if the length exceeds the maximum, false otherwise
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static boolean exceedsMaxLength(long length) {
         return length > LENGTH_MASK;
     }
@@ -581,8 +630,9 @@ public enum Wires {
      * @param writer  the WriteMarshallable instance to write data
      * @return the position after writing the data
      * @throws InvalidMarshallableException if marshalling fails
+     * @param <T>     type of marshallable being written
      */
-    @ForceInline
+    @Deprecated(/* to be removed in 2027 */)
     public static <T extends WriteMarshallable> long writeData(
             @NotNull WireOut wireOut,
             @NotNull T writer) throws InvalidMarshallableException {
@@ -598,7 +648,7 @@ public enum Wires {
      * @return the position in the bytes after reading
      * @throws InvalidMarshallableException if there's an issue during marshalling
      */
-    @ForceInline
+    @Deprecated(/* to be removed in 2027 */)
     public static long readWire(@NotNull WireIn wireIn, long size, @NotNull ReadMarshallable readMarshallable) throws InvalidMarshallableException {
         @NotNull final Bytes<?> bytes = wireIn.bytes();
         final long limit0 = bytes.readLimit();
@@ -638,6 +688,8 @@ public enum Wires {
     /**
      * Obtains a pooled {@link BinaryWire} wrapped in a {@link ScopedResource}
      * for temporary serialisation tasks.
+     *
+     * @return scoped binary wire
      */
     public static ScopedResource<Wire> acquireBinaryWireScoped() {
         return WireInternal.BINARY_WIRE_SCOPED_TL.get();
@@ -719,6 +771,7 @@ public enum Wires {
      * @param copy         indicates if the previous state should be copied
      * @throws InvalidMarshallableException if there's an error during the marshalling process
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static void writeMarshallable(@NotNull Object marshallable, @NotNull WireOut wire, @NotNull Object previous, boolean copy) throws InvalidMarshallableException {
         assert marshallable.getClass() == previous.getClass();
         WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(marshallable.getClass());
@@ -842,12 +895,16 @@ public enum Wires {
      * @param name   Field name
      * @return Information about the field
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static FieldInfo fieldInfo(@NotNull Class<?> aClass, String name) {
         return FIELD_INFOS.get(aClass).map.get(name);
     }
 
     /**
      * Returns {@code true} if the supplied header value denotes end of data.
+     *
+     * @param num header value to test
+     * @return {@code true} when the header equals {@link #END_OF_DATA}
      */
     public static boolean isEndOfFile(int num) {
         return num == END_OF_DATA;
@@ -1029,6 +1086,7 @@ public enum Wires {
      * @return A Date object representing the read date
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public static <E> E objectDate(ValueIn in, @Nullable E using) {
         // skip the field if it is there.
         in.wireIn().read();
@@ -1290,6 +1348,11 @@ public enum Wires {
     /**
      * Provides a thread-local {@link BinaryWire} configured to read from the supplied
      * byte store.  The returned wire shares the underlying bytes; no copy is made.
+     *
+     * @param in       backing bytes
+     * @param position start position for reading
+     * @param length   readable length
+     * @return thread-local binary wire positioned for reading
      */
     @NotNull
     public static BinaryWire binaryWireForRead(Bytes<?> in, long position, long length) {
@@ -1303,6 +1366,11 @@ public enum Wires {
     /**
      * Provides a thread-local {@link BinaryWire} configured for writing to the supplied
      * byte store.  The returned wire views the given bytes without copying.
+     *
+     * @param in       backing bytes
+     * @param position start position for writing
+     * @param length   maximum writable length
+     * @return thread-local binary wire positioned for writing
      */
     @NotNull
     public static BinaryWire binaryWireForWrite(Bytes<?> in, long position, long length) {
@@ -1502,6 +1570,7 @@ public enum Wires {
          * @param in The ValueIn object which contains the class name.
          * @return The Class object associated with the name.
          */
+        @Deprecated(/* to be removed in 2027 */)
         private static Class<?> forName(Class<?> o, ValueIn in) {
             final StringBuilder sb0 = sb.get();
 

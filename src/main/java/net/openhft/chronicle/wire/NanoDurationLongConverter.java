@@ -14,6 +14,12 @@ import java.time.Duration;
 public class NanoDurationLongConverter implements LongConverter {
 
     /**
+     * Creates a converter for durations expressed in nanoseconds.
+     */
+    public NanoDurationLongConverter() {
+    }
+
+    /**
      * Parse a duration in ISO-8601 format and return the equivalent value in nanoseconds.
      *
      * @param text The character sequence representing a duration in ISO-8601 format (e.g., "PT20.345S") to be parsed into total nanoseconds.

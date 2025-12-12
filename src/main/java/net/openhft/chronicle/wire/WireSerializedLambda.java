@@ -24,6 +24,12 @@ import java.util.List;
 @SuppressWarnings("rawtypes")
 public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
 
+    /**
+     * Creates an empty container for a serialised lambda.
+     */
+    public WireSerializedLambda() {
+    }
+
     // The class that captured the lambda
     private Class<?> capturingClass;
     // Fully qualified name of the functional interface

@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 import static java.util.Collections.*;
+
 /**
  * The {@code GenerateMethodWriter2} class is responsible for generating method writers based on the provided metadata.
  * <p>
@@ -372,6 +373,12 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         private String genericEvent;
 
         /**
+         * Creates metadata with all options disabled by default.
+         */
+        public GMWMetaData() {
+        }
+
+        /**
          * Gets the meta data usage status.
          *
          * @return {@code true} if metadata is to be used; {@code false} otherwise.
@@ -416,6 +423,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
          *
          * @return The generic event string.
          */
+        @Deprecated(/* to be removed in 2027, as it is only used in tests */)
         public String genericEvent() {
             return genericEvent;
         }

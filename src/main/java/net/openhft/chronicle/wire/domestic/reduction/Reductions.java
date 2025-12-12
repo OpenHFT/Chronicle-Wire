@@ -5,7 +5,6 @@ package net.openhft.chronicle.wire.domestic.reduction;
 
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
-import net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor;
 import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,6 +24,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * It provides static methods to create various types of Reductions, offering functionalities
  * related to longs, doubles, and counting excerpts.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public final class Reductions {
 
     // Suppresses default constructor, ensuring non-instantiability.
@@ -46,6 +46,7 @@ public final class Reductions {
      * @return a new Reduction reducing long values
      * @throws NullPointerException if any objects provided are {@code null}.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static Reduction<LongSupplier> reducingLong(@NotNull final ToLongDocumentExtractor extractor,
                                                        final long identity,
                                                        @NotNull final LongBinaryOperator accumulator) {
@@ -73,9 +74,12 @@ public final class Reductions {
      * @return a new Reduction reducing double values
      * @throws NullPointerException if any objects provided are {@code null}.
      */
-    public static Reduction<DoubleSupplier> reducingDouble(@NotNull final ToDoubleDocumentExtractor extractor,
-                                                           final double identity,
-                                                           @NotNull final DoubleBinaryOperator accumulator) {
+    @Deprecated(/* to be removed in 2027 */)
+    @SuppressWarnings({"deprecation", "removal"})
+    public static Reduction<DoubleSupplier> reducingDouble(
+            @NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor,
+            final double identity,
+            @NotNull final DoubleBinaryOperator accumulator) {
         requireNonNull(extractor);
         requireNonNull(accumulator);
 
@@ -94,6 +98,7 @@ public final class Reductions {
      *
      * @return a new Reduction counting excerpts
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static Reduction<LongSupplier> counting() {
         return Reduction.ofLong(
                         (wire, index) -> 1L)
@@ -110,6 +115,7 @@ public final class Reductions {
      * This is an example of a public class with configurable properties that can be
      * referenced in a YAML configuration file.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static final class Counting extends SelfDescribingMarshallable implements Reduction<LongSupplier> {
 
         // An atomic field updater to provide thread-safe updates to the counter
@@ -118,6 +124,12 @@ public final class Reductions {
 
         // A volatile counter to ensure atomic read/write operations across multiple threads
         private volatile long counter;
+
+        /**
+         * Creates a counter reduction with an initial value of zero.
+         */
+        public Counting() {
+        }
 
         @Override
         public void onExcerpt(@NotNull Wire wire, long index) {

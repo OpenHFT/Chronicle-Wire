@@ -23,7 +23,7 @@ import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
  * The class encapsulates a {@link Wire} which holds the serialized representation. On closure of a document context,
  * the serialized content is posted to the given URL.
  */
-@SuppressWarnings("this-escape")
+@SuppressWarnings({"this-escape", "deprecation"})
 public class HTTPMarshallableOut implements MarshallableOut {
 
     // The target URL to which serialized data is posted

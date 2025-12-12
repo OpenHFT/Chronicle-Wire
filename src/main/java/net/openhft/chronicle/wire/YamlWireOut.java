@@ -45,6 +45,9 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
+    /**
+     * YAML tag used when emitting explicit type declarations.
+     */
     public static final BytesStore<?, ?> TYPE = BytesStore.from("!type ");
     static final String NULL = "!null \"\"";
     static final BitSet STARTS_QUOTE_CHARS = new BitSet();
@@ -90,6 +93,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
      *
      * @return True if timestamps should be added, otherwise false.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public boolean addTimeStamps() {
         return addTimeStamps;
     }
@@ -411,6 +415,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
      * @param o The object to be serialized.
      * @throws InvalidMarshallableException if an error occurs during serialization.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public void writeObject(Object o) throws InvalidMarshallableException {
         if (o instanceof Iterable) {
             for (Object o2 : (Iterable) o) {
@@ -1568,6 +1573,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         /**
          * Sets the separator to denote the end of a field.
          */
+        @Deprecated(/* to be removed in 2027 */)
         protected void endField() {
             sep = END_FIELD;
         }

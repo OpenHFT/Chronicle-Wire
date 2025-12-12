@@ -15,10 +15,12 @@ package net.openhft.chronicle.wire;
  * set via the {@link #delegate(Object)} method, provided that the delegate also
  * implements {@code MyService}.
  * <p>
- * The type parameter {@code <OUT>} specifies the type of the delegate object to
+ * The type parameter {@code <O>} specifies the type of the delegate object to
  * which methods will be forwarded.
+ *
+ * @param <O> delegate type
  */
-public interface MethodDelegate<OUT> {
+public interface MethodDelegate<O> {
 
     /**
      * Sets the delegate to which method invocations will be forwarded.
@@ -29,8 +31,8 @@ public interface MethodDelegate<OUT> {
      * proxy that implements this {@code MethodDelegate} interface so that calls can be
      * successfully forwarded.
      *
-     * @param delegate The target object of type {@code OUT} that will receive the
+     * @param delegate The target object of type {@code O} that will receive the
      *                 forwarded method calls.
      */
-    void delegate(OUT delegate);
+    void delegate(O delegate);
 }

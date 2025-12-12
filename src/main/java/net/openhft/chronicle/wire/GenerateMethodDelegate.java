@@ -60,6 +60,8 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
 
     /**
      * Returns the name used for the delegate type in generated code.
+     *
+     * @return delegate type token used in generated source
      */
     protected String getDelegateType() {
         return "OUT";
@@ -118,6 +120,10 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
      * {@link AbstractClassGenerator.MetaData} without extra fields.
      */
     public static class GMDMetaData extends AbstractClassGenerator.MetaData<GMDMetaData> {
-        // Intentionally left blank
+        /**
+         * Creates metadata with default settings.
+         */
+        public GMDMetaData() {
+        }
     }
 }

@@ -47,6 +47,7 @@ public interface TriConsumer<T, U, V> {
      * @throws NullPointerException if {@code after} is null
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     default TriConsumer<T, U, V> andThen(@NotNull TriConsumer<? super T, ? super U, ? super V> after) {
         Objects.requireNonNull(after);
 

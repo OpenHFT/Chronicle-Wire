@@ -11,7 +11,14 @@ import java.time.Duration;
  * Implementation of {@link LongConverter} to convert durations represented as microseconds.
  * This class operates on long values, converting them to and from Java's {@link Duration}.
  */
+@Deprecated(/* to be removed in 2027, as it is only used in tests */)
 public class MicroDurationLongConverter implements LongConverter {
+
+    /**
+     * Creates a converter for durations expressed in microseconds.
+     */
+    public MicroDurationLongConverter() {
+    }
 
     /**
      * Parses the provided {@link CharSequence} into a duration and returns the equivalent duration in microseconds.

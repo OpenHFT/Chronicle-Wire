@@ -26,5 +26,8 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @LongConversion(Id.class)
 public @interface Id {
+    /**
+     * Shared converter for ID values using nanosecond timestamp encoding.
+     */
     LongConverter INSTANCE = IdentifierLongConverter.INSTANCE;
 }

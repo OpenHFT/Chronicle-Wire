@@ -37,7 +37,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  * The YamlWire class extends YamlWireOut and utilizes a custom tokenizer to convert YAML tokens into byte sequences.
  * It provides utility methods to read from and write to both byte buffers and files.
  */
-@SuppressWarnings({"rawtypes", "unchecked", "this-escape"})
+@SuppressWarnings({"rawtypes", "unchecked", "this-escape", "deprecation"})
 public class YamlWire extends YamlWireOut<YamlWire> {
 
     // YAML-specific tag constants for representing special constructs.
@@ -106,6 +106,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * @throws IOException If there's an error in reading the file
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public static YamlWire fromFile(String name) throws IOException {
         return new YamlWire(BytesUtil.readFile(name), true);
     }
@@ -117,6 +118,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * @return A new YamlWire instance initialized from the given string
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static YamlWire from(@NotNull String text) {
         return new YamlWire(Bytes.from(text));
     }
@@ -128,6 +130,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * @return The string representation of the wire's content.
      * @throws InvalidMarshallableException If the given wire's content cannot be marshalled.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static String asText(@NotNull Wire wire) throws InvalidMarshallableException {
         long pos = wire.bytes().readPosition();
         @NotNull Wire tw = Wire.newYamlWireOnHeap();
@@ -143,9 +146,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      *
      * @param targetBuffer The appendable containing characters to be unescaped.
      * @param blockQuoteChar The block quote character that determines the escaping scheme (' or ").
-     * @param <ACS> An appendable that also implements CharSequence interface.
+     * @param <S>            An appendable that also implements CharSequence interface.
      */
-    private static <ACS extends Appendable & CharSequence> void unescape(@NotNull ACS targetBuffer, char blockQuoteChar) {
+    private static <S extends Appendable & CharSequence> void unescape(@NotNull S targetBuffer, char blockQuoteChar) {
         int end = 0;
         int length = targetBuffer.length();
         boolean skip = false;
@@ -504,6 +507,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      *
      * @return The string representation of the YamlWire instance.
      */
+    @Override
     public String toString() {
         if (bytes.readRemaining() > (1024 * 1024)) {
             final long l = bytes.readLimit();
@@ -833,6 +837,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             }
             // Next lines not covered by any tests
         }
+
         YamlTokeniser.YTContext yc = yt.topContext();
         int minIndent = yc.indent;
         // go through remaining keys
@@ -870,6 +875,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      *
      * @return A string representation of the current parsing context.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public String dumpContext() {
         ValidatableUtil.startValidateDisabled();
         try {
@@ -938,6 +944,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * Consumes and skips the start of a YAML document, e.g., '---'.
      * For specific keywords (like "!!data" and "!!meta-data"), the cursor position remains unchanged.
      */
+    @Deprecated(/* to be removed in 2027 */)
     protected void consumeDocumentStart() {
         // Check if there are more than 4 bytes left to read
         if (bytes.readRemaining() > 4) {
@@ -1099,6 +1106,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     /**
      * Resets the state of the YamlWire instance, clearing all buffers and contexts.
      */
+    @Override
     public void reset() {
         // Reset reading and writing contexts if they exist
         if (readContext != null)
@@ -1252,6 +1260,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         /**
          * Extracts the text from the current token and appends it to a StringBuilder.
          * Handles various YAML tokens like TEXT, LITERAL, and TAG.
+         *
          * @return StringBuilder containing the text.
          */
         @Nullable
@@ -1411,6 +1420,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         /**
          * Reads the length of a marshallable.
+         *
          * @return The length of the marshallable.
          */
         protected long readLengthMarshallable() {
@@ -1425,6 +1435,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         /**
          * Consumes any token type based on its indentation level.
+         *
          * @param minIndent Minimum indentation level to consume.
          */
         protected void consumeAny(int minIndent) {
@@ -1829,6 +1840,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         @Override
+        @Deprecated(/* to be removed in 2027 */)
         public <T> T applyToMarshallable(@NotNull Function<WireIn, T> marshallableReader) {
             throw new UnsupportedOperationException(yt.toString());
         }
@@ -2000,6 +2012,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * @throws IORuntimeException If there's an error in the YAML format or during demarshalling.
          */
         @NotNull
+        @Deprecated(/* to be removed in 2027, as it is only used in tests */)
         public Demarshallable demarshallable(@NotNull Class<?> clazz) {
             consumePadding();
             switch (yt.current()) {
@@ -2128,6 +2141,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             }
         }
 
+        // CPD-OFF: duplicated with TextWire for identical parsing semantics
         @Override
         public boolean bool() {
             consumePadding();
@@ -2175,6 +2189,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                         ".MAX_VALUE/ZERO");
             return (int) l;
         }
+        // CPD-ON
 
         @Override
         public long int64() {

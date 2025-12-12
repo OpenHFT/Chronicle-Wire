@@ -35,7 +35,7 @@ import java.util.function.BiConsumer;
  * instance is obtained from a {@linkplain ThreadLocal thread-local} and the hash
  * is cleared on retrieval.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class HashWire implements WireOut, HexDumpBytesDescription {
     // Thread-local storage for HashWire instances.
     private static final ThreadLocal<HashWire> hwTL = new ThreadLocal<HashWire>() {
@@ -66,6 +66,12 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
     long hash = 0;
 
     /**
+     * Creates a hashing wire. Instances are normally obtained via the thread-local {@link #hwTL}.
+     */
+    public HashWire() {
+    }
+
+    /**
      * Computes a 64-bit hash for the provided {@link WriteMarshallable} value.
      *
      * @param value The {@link WriteMarshallable} value to be hashed.
@@ -89,6 +95,9 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
 
     /**
      * As {@link #hash64(WriteMarshallable)} but returning 32 bits.
+     *
+     * @param value value to hash
+     * @return 32-bit hash
      */
     public static int hash32(WriteMarshallable value) {
         return hash32((Object) value);
@@ -96,6 +105,9 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
 
     /**
      * As {@link #hash64(Object)} but returning 32 bits.
+     *
+     * @param value value to hash
+     * @return 32-bit hash
      */
     public static int hash32(Object value) {
         @NotNull HashWire hashWire = hwTL.get();
@@ -443,6 +455,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         /** Mixes the type name and array content. */
         @NotNull
         @Override
+        @Deprecated(/* to be removed in 2027 */)
         public WireOut bytes(@NotNull String type, @NotNull byte[] fromBytes) {
             hash = hash * M1 + Maths.hash64(type) ^ Maths.hash64(Bytes.wrapForRead(fromBytes));
             return HashWire.this;
@@ -709,7 +722,6 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         /** No-op. */
         @Override
         public void elementSeparator() {
-
         }
     }
 }

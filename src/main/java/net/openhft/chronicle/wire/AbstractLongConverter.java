@@ -12,7 +12,9 @@ import net.openhft.chronicle.bytes.Bytes;
  */
 public abstract class AbstractLongConverter implements LongConverter {
 
-    // Encapsulated instance of LongConverter that provides core conversion functionality.
+    /**
+     * Encapsulated instance of LongConverter that provides core conversion functionality.
+     */
     protected final LongConverter converter;
 
     /**

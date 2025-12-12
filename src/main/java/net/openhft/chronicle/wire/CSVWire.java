@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -73,6 +74,7 @@ public class CSVWire extends TextWire {
      * @throws IOException if the file cannot be read
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static CSVWire fromFile(String name) throws IOException {
         return new CSVWire(BytesUtil.readFile(name), true);
     }
@@ -84,6 +86,7 @@ public class CSVWire extends TextWire {
      * @return new instance containing the text
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static CSVWire from(@NotNull String text) {
         return new CSVWire(Bytes.from(text));
     }

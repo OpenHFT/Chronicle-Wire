@@ -15,6 +15,7 @@ import java.util.function.Consumer;
  * The class encapsulates a {@link Wire} to hold the serialized representation. Upon closing of a document context,
  * the serialized content is converted to a string and passed to the given string consumer.
  */
+@Deprecated(/* to be removed in 2027, as it is only used in tests */)
 public class StringConsumerMarshallableOut implements MarshallableOut {
 
     // Consumer to process the serialized string representation

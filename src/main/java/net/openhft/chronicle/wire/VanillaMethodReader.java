@@ -40,7 +40,7 @@ import static net.openhft.chronicle.wire.VanillaWireParser.SKIP_READABLE_BYTES;
  * Supports interception via {@link MethodReaderInterceptorReturns} and custom
  * parsing through {@link WireParselet} and {@link FieldNumberParselet}.
  */
-@SuppressWarnings({"rawtypes","this-escape"})
+@SuppressWarnings({"rawtypes", "this-escape", "deprecation"})
 public class VanillaMethodReader implements MethodReader {
 
     // beware enabling DEBUG_ENABLED as logMessage will not work unless Wire marshalling used - https://github.com/ChronicleEnterprise/Chronicle-Services/issues/240
@@ -307,6 +307,9 @@ public class VanillaMethodReader implements MethodReader {
 
     /**
      * Write a debug log entry for the incoming event if the debug mode is enabled..
+     *
+     * @param eventName name of the event being read
+     * @param valueIn   value input containing the payload
      */
     public static void logMessage(@NotNull CharSequence eventName, @NotNull ValueIn valueIn) {
         if (!DEBUG_ENABLED) {
@@ -578,6 +581,12 @@ public class VanillaMethodReader implements MethodReader {
 
     /**
      * Register a zero argument method with {@code wireParser}.
+     *
+     * @param wireParser     parser to register against
+     * @param target         target instance for invocation
+     * @param contextHolder  holder of the current invocation context
+     * @param contextSupplier supplies context when absent
+     * @param method         method to invoke
      */
     public void addParseletForMethod(WireParser wireParser, Object target, Object[] contextHolder, Supplier contextSupplier, @NotNull Method method) {
         throwExceptionIfClosed();
@@ -856,6 +865,7 @@ public class VanillaMethodReader implements MethodReader {
     /**
      * Return the configured {@link MethodReaderInterceptorReturns} if any.
      */
+    @Override
     public MethodReaderInterceptorReturns methodReaderInterceptorReturns() {
         throwExceptionIfClosed();
 

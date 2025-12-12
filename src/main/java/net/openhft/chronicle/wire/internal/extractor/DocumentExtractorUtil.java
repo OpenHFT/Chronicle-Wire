@@ -21,6 +21,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * The class serves as a hub for constructing specific types of document extractors using
  * various parameters such as method references, suppliers, and type specifications.
  */
+@Deprecated(/* to be removed in 2027, as it is only used in tests */)
 public final class DocumentExtractorUtil {
 
     // Suppresses default constructor, ensuring non-instantiability.
@@ -119,6 +120,7 @@ public final class DocumentExtractorUtil {
      *
      * @param <M> The type of the message associated with the method.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static final class MethodNameAndMessageType<M> {
         private final String name;
         private final Class<M> messageType;
@@ -129,6 +131,7 @@ public final class DocumentExtractorUtil {
          * @param name The name of the method.
          * @param messageType The type of the message associated with the method.
          */
+        @Deprecated(/* to be removed in 2027, as it is only used in tests */)
         public MethodNameAndMessageType(@NotNull final String name,
                                         @NotNull final Class<M> messageType) {
             this.name = name;
