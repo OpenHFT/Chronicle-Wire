@@ -7,9 +7,8 @@ Chronicle Software
 
 == Overview
 
-Chronicle Wire is a library, yet it still has operational expectations for release engineering,
-compatibility, and observability. This document anchors those expectations with `OPS` and `NF-O`
-tags from the Nine-Box taxonomy.
+Chronicle Wire is a library, yet it still has operational expectations for release engineering, compatibility, and observability.
+This document anchors those expectations with `OPS` and `NF-O` tags from the Nine-Box taxonomy.
 
 == Operational Targets
 
@@ -23,13 +22,13 @@ tags from the Nine-Box taxonomy.
 |Run the command locally prior to opening a PR and after each rebase.
 
 |OPS-002
-|Release builds must be reproducible. Dependencies are pinned via the Chronicle BOM and validated by
-`project-requirements.adoc`. Enforced by the build scan that fails when SNAPSHOT dependencies leak in.
+|Release builds must be reproducible. Dependencies are pinned via the Chronicle BOM and validated by `project-requirements.adoc`.
+Enforced by the build scan that fails when SNAPSHOT dependencies leak in.
 |Check the output of `mvn -q -Dchronicletag=release verify` if a release candidate is prepared.
 
 |NF-O-001
-|Provide actionable diagnostics when serialisation fails. Exceptions must include the field name, type,
-and offset where possible. Logging must stay off by default to avoid polluting low-latency workloads.
+|Provide actionable diagnostics when serialisation fails. Exceptions must include the field name, type, and offset where possible.
+Logging must stay off by default to avoid polluting low-latency workloads.
 |`wire-error-handling.adoc` captures the message templates; parser suites such as
 `InvalidYamWithCommonMistakesTest.java` and `TextWireTest.java` guard regressions.
 
@@ -47,8 +46,7 @@ to `functional-requirements.adoc`, the relevant runbook, and at least one regres
 == Maintenance Windows
 
 * Patch releases follow Chronicle's standard Tuesday cadence.
-* API-breaking changes are bundled into LTS drops and called out under `decision-log.adoc`
-  together with mitigation steps.
+* API-breaking changes are bundled into LTS drops and called out under `decision-log.adoc` together with mitigation steps.
 
 == Runbook Links
 

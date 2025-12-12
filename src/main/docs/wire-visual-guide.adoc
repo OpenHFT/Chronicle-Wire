@@ -1,9 +1,10 @@
 = Chronicle Wire: Visual Guide
 :toc:
+:sectnums:
+:lang: en-GB
 :source-highlighter: rouge
 
 Purpose: To provide visual representations of key concepts, processes, and components in the Chronicle Wire library.
-:sectnums:
 
 == Introduction
 
@@ -14,10 +15,8 @@ It complements the text-based documentation by providing visual representations 
 
 === Layered Architecture
 
-ifdef::env-github[[source,mermaid]
-]
-ifndef::env-github[[mermaid]
-]
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
 
 ----
 graph TD

@@ -31,5 +31,4 @@ OPS-SC-003 :: Schema Drift Between Producers and Consumers
 == Usage
 
 * Each scenario ties back to a requirement ID so reviewers can confirm coverage.
-* Update this file whenever new operational runbooks are added or when incident reviews
-  uncover a missing scenario.
+* Update this file whenever new operational runbooks are added or when incident reviews uncover a missing scenario.

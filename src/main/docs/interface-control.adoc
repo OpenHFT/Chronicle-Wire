@@ -36,11 +36,11 @@ applications.
 
 == Document Lifecycle
 
-1. Allocate a document context (`Wire.acquireWritingDocument`). The context carries metadata such as
+. Allocate a document context (`Wire.acquireWritingDocument`). The context carries metadata such as
    source ID and thread ID.
-2. Write fields via `ValueOut`. Each call translates to an entry in the current document.
-3. Close the context to publish the bytes downstream.
-4. Readers obtain a matching `DocumentContext` from `Wire.readingDocument()` and consume the fields.
+. Write fields via `ValueOut`. Each call translates to an entry in the current document.
+. Close the context to publish the bytes downstream.
+. Readers obtain a matching `DocumentContext` from `Wire.readingDocument()` and consume the fields.
 
 All code paths must honour this lifecycle; skipping the closing step can leak buffers or block queue tailers.
 
