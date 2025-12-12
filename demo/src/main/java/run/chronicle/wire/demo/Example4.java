@@ -69,5 +69,4 @@ c5 70 72 69 63 65 90 00 00 28 41                # price
         wire.bytes().releaseLast();
         wire2.bytes().releaseLast();
     }
-
 }
