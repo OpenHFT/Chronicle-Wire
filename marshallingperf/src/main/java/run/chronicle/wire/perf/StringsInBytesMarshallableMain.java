@@ -13,9 +13,10 @@ import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 import static run.chronicle.wire.perf.BytesInBytesMarshallableMain.histoOut;
 /**
  * Benchmarks the performance of serialising and deserialising an object
- * containing string fields using {@link net.openhft.chronicle.bytes.BytesMarshallable}.
+ * containing string fields using Chronicle {@link Bytes} based marshalling.
+ * <p>
+ * Measures latency for writing and reading a fixed structure of eight strings.
  */
-
 /*
 .2.21ea74
 read: 50/90 97/99 99.7/99.9 99.97/99.99 99.997/99.999 99.9997/99.9999 - worst was 0.542 / 0.566  0.586 / 0.610  0.690 / 1.092  16.1 / 19.9  29.4 / 29.9  32.9 / 33.9 - 178
@@ -25,7 +26,6 @@ write: 50/90 97/99 99.7/99.9 99.97/99.99 99.997/99.999 99.9997/99.9999 - worst w
 read: 50/90 97/99 99.7/99.9 99.97/99.99 99.997/99.999 99.9997/99.9999 - worst was 0.233 / 0.245  0.253 / 0.259  0.303 / 0.439  0.574 / 15.9  21.2 / 29.1  29.2 / 32.6 - 58.2
 write: 50/90 97/99 99.7/99.9 99.97/99.99 99.997/99.999 99.9997/99.9999 - worst was 0.062 / 0.066  0.068 / 0.073  0.081 / 0.126  0.172 / 0.305  15.6 / 19.4  28.7 / 29.0 - 41.9
  */
-
 public class StringsInBytesMarshallableMain {
 
     /**

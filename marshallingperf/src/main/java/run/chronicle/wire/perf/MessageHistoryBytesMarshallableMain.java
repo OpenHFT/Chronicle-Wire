@@ -10,9 +10,10 @@ import net.openhft.chronicle.wire.VanillaMessageHistory;
 import static run.chronicle.wire.perf.BytesInBytesMarshallableMain.histoOut;
 
 /**
- * Benchmarks the performance of serialising and deserialising
- * {@link net.openhft.chronicle.wire.VanillaMessageHistory} objects using their
- * compact binary form.
+ * Benchmarks serialisation of {@link VanillaMessageHistory} using its compact binary form.
+ * <p>
+ * Measures read and write latency when marshalling message history directly as a
+ * {@code BytesMarshallable}, avoiding the generic wire marshaller path.
  */
 /*
 .2.21.ea207
