@@ -492,7 +492,23 @@ public class WireMarshaller<T> {
         try {
             for (@NotNull FieldAccess field : fields) {
                 ValueIn vin = in.read(field.key);
-                field.readValue(t, defaultValue, vin, overwrite);
+
+                if (vin.getObjectToInject() != null) {
+                    Object object = vin.getObjectToInject();
+                    if (object.equals("DEPENDENCY_OBJECT_MISSING_FROM_DEPENDENCY_RESOLVER")) {
+                        // TODO: decide on whether to throw an exception here or not,
+                        //  similar to how byte's replaceTokensWithProperties does if the
+                        //  expected system property is missing
+                        System.out.println("Object was missing from the dependency resolver...");
+                    } else {
+                        System.out.println("Setting object manually...");
+                        field.field.set(t, vin.getObjectToInject());
+                    }
+
+                    vin.resetObjectToInject();
+                } else {
+                    field.readValue(t, defaultValue, vin, overwrite);
+                }
             }
             ValidatableUtil.validate(t);
         } catch (IllegalAccessException e) {

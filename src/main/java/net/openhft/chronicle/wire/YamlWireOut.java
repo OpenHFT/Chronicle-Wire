@@ -71,6 +71,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
     protected final YamlValueOut valueOut = createValueOut();
     protected final StringBuilder sb = new StringBuilder();
+    protected final StringBuilder sb2 = new StringBuilder();
     private boolean addTimeStamps = false;
     private boolean trimFirstCurly = true;
 
@@ -126,6 +127,18 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     protected StringBuilder acquireStringBuilder() {
         sb.setLength(0);
         return sb;
+    }
+
+    /**
+     * Acquires and clears the second internal StringBuilder {@code sb2} for use.
+     * The method ensures the StringBuilder's count is reset to 0 before returning.
+     *
+     * @return The second internal StringBuilder after it has been cleared.
+     */
+    @NotNull
+    protected StringBuilder acquireStringBuilder2() {
+        sb2.setLength(0);
+        return sb2;
     }
 
     @NotNull
