@@ -6,7 +6,8 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.StringReader;
@@ -18,7 +19,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("deprecation")
 public abstract class AbstractWireTest extends WireTestCommon {
@@ -47,12 +48,13 @@ public abstract class AbstractWireTest extends WireTestCommon {
         // Validate the string representation of the wire content
         assertEquals("\"\": \"" + now + "\"\n" +
                 "\"\": \"+999999999-12-31T23:59:59.999999999Z[Europe/London]\"\n" +
-                "\"\": \"-999999999-01-01T00:00-00:01:15[Europe/London]\"\n", wire.toString());
+                        "\"\": \"-999999999-01-01T00:00-00:01:15[Europe/London]\"\n", wire.toString(),
+                "wire should serialize ZonedDateTime values with timezone information");
 
         // Read back the ZonedDateTime values and validate
-        wire.read().zonedDateTime(now, org.junit.Assert::assertEquals)
-                .read().zonedDateTime(max, org.junit.Assert::assertEquals)
-                .read().zonedDateTime(min, org.junit.Assert::assertEquals);
+        wire.read().zonedDateTime(now, Assertions::assertEquals)
+                .read().zonedDateTime(max, Assertions::assertEquals)
+                .read().zonedDateTime(min, Assertions::assertEquals);
 
         // Repeat the process but write as a generic object
         wire.clear();
@@ -61,10 +63,11 @@ public abstract class AbstractWireTest extends WireTestCommon {
                 .write().object(min);
         assertEquals("\"\": !ZonedDateTime \"" + now + "\"\n" +
                 "\"\": !ZonedDateTime \"+999999999-12-31T23:59:59.999999999Z[Europe/London]\"\n" +
-                "\"\": !ZonedDateTime \"-999999999-01-01T00:00-00:01:15[Europe/London]\"\n", wire.toString());
-        wire.read().object(Object.class, now, org.junit.Assert::assertEquals)
-                .read().object(Object.class, max, org.junit.Assert::assertEquals)
-                .read().object(Object.class, min, org.junit.Assert::assertEquals);
+                        "\"\": !ZonedDateTime \"-999999999-01-01T00:00-00:01:15[Europe/London]\"\n", wire.toString(),
+                "wire should serialize ZonedDateTime objects with type tag");
+        wire.read().object(Object.class, now, Assertions::assertEquals)
+                .read().object(Object.class, max, Assertions::assertEquals)
+                .read().object(Object.class, min, Assertions::assertEquals);
 
         // Write as a ZonedDateTime object
         wire.clear();
@@ -73,10 +76,11 @@ public abstract class AbstractWireTest extends WireTestCommon {
                 .write().object(ZonedDateTime.class, min);
         assertEquals("\"\": \"" + now + "\"\n" +
                 "\"\": \"+999999999-12-31T23:59:59.999999999Z[Europe/London]\"\n" +
-                "\"\": \"-999999999-01-01T00:00-00:01:15[Europe/London]\"\n", wire.toString());
-        wire.read().object(ZonedDateTime.class, now, org.junit.Assert::assertEquals)
-                .read().object(ZonedDateTime.class, max, org.junit.Assert::assertEquals)
-                .read().object(ZonedDateTime.class, min, org.junit.Assert::assertEquals);
+                        "\"\": \"-999999999-01-01T00:00-00:01:15[Europe/London]\"\n", wire.toString(),
+                "wire should serialize ZonedDateTime class objects without type tag");
+        wire.read().object(ZonedDateTime.class, now, Assertions::assertEquals)
+                .read().object(ZonedDateTime.class, max, Assertions::assertEquals)
+                .read().object(ZonedDateTime.class, min, Assertions::assertEquals);
     }
 
     // Test to ensure a SortedSet is correctly written to and read from the Wire.
@@ -100,13 +104,14 @@ public abstract class AbstractWireTest extends WireTestCommon {
                     "  one,\n" +
                     "  three,\n" +
                     "  two\n" +
-                    "]\n", wire.toString());
+                            "]\n", wire.toString(),
+                    "wire should serialize SortedSet with YAML ordered set tag");
         }
 
         // Read back the SortedSet from the Wire and validate its type and contents.
         @Nullable Object o = wire.read().object();
-        assertTrue(o instanceof SortedSet);
-        assertEquals(set, o);
+        assertInstanceOf(SortedSet.class, o, "wire should deserialize to SortedSet instance");
+        assertEquals(set, o, "wire should preserve SortedSet contents and ordering");
     }
 
     // Test to ensure a SortedMap is correctly written to and read from the Wire.
@@ -130,13 +135,14 @@ public abstract class AbstractWireTest extends WireTestCommon {
                     "  one: 1,\n" +
                     "  three: 3,\n" +
                     "  two: 2\n" +
-                    "}\n", wire.toString());
+                            "}\n", wire.toString(),
+                    "wire should serialize SortedMap with YAML ordered map tag");
         }
 
         // Read back the SortedMap from the Wire and validate its type and contents.
         @Nullable Object o = wire.read().object();
-        assertTrue(o instanceof SortedMap);
-        assertEquals(set, o);
+        assertInstanceOf(SortedMap.class, o, "wire should deserialize to SortedMap instance");
+        assertEquals(set, o, "wire should preserve SortedMap contents and ordering");
     }
 
     // Test to validate the behavior of writing and reading simple boolean values
@@ -150,15 +156,16 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
         // Verify that the written values are correctly represented in string format
         assertEquals("F: false\n" +
-                "T: true\n", wire.toString());
+                        "T: true\n", wire.toString(),
+                "wire should serialize boolean values as 'true' and 'false'");
 
         // Check the wire content using the SnakeYaml parser
         @NotNull String expected = "{F=false, T=true}";
         expectWithSnakeYaml(expected, wire);
 
         // Read and validate the written boolean values
-        assertFalse(wire.read(() -> "F").bool());
-        assertTrue(wire.read(() -> "T").bool());
+        assertFalse(wire.read(() -> "F").bool(), "wire should read false boolean value correctly");
+        assertTrue(wire.read(() -> "T").bool(), "wire should read true boolean value correctly");
     }
 
     // Test to validate the behavior when writing strings that cannot be converted to boolean
@@ -172,15 +179,16 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
         // Verify the written strings
         assertEquals("A: \"\"\n" +
-                "B: other\n", wire.toString());
+                        "B: other\n", wire.toString(),
+                "wire should serialize non-boolean text values as strings");
 
         // Check the wire content using the SnakeYaml parser
         @NotNull String expected = "{A=, B=other}";
         expectWithSnakeYaml(expected, wire);
 
         // Ensure the written strings are not mistakenly interpreted as boolean values
-        assertFalse(wire.read(() -> "A").bool());
-        assertFalse(wire.read(() -> "B").bool());
+        assertFalse(wire.read(() -> "A").bool(), "wire should read empty string as false when read as boolean");
+        assertFalse(wire.read(() -> "B").bool(), "wire should read non-boolean string as false when read as boolean");
     }
 
     // Test to validate the reading of non-boolean strings as Boolean objects
@@ -194,7 +202,8 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
         // Verify the written strings
         assertEquals("A: \"\"\n" +
-                "B: other\n", wire.toString());
+                        "B: other\n", wire.toString(),
+                "wire should serialize non-boolean text values as strings");
 
         // Check the wire content using the SnakeYaml parser
         @NotNull String expected = "{A=, B=other}";
@@ -202,7 +211,8 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
         // TODO: Handle the potential issue when reading a string as a Boolean object
         // assertEquals(null, wire.read(() -> "A").object(Boolean.class));
-        assertEquals(false, wire.read(() -> "B").object(Boolean.class));
+        assertEquals(false, wire.read(() -> "B").object(Boolean.class),
+                "wire should read non-boolean string as false when read as Boolean object");
     }
 
     // Test to validate the behavior when writing text with a leading space
@@ -214,7 +224,8 @@ public abstract class AbstractWireTest extends WireTestCommon {
         wire.write().text(" leadingspace");
 
         // Ensure that the leading space is retained when reading back the string
-        assertEquals(" leadingspace", wire.read().text());
+        assertEquals(" leadingspace", wire.read().text(),
+                "wire should preserve leading whitespace in text values");
     }
 
     // Helper method to validate the wire content using the SnakeYaml parser
@@ -227,7 +238,8 @@ public abstract class AbstractWireTest extends WireTestCommon {
         } catch (Exception e) {
             throw e;
         }
-        assertEquals(expected, load.toString());
+        assertEquals(expected, load.toString(),
+                "wire output should be valid YAML parseable by SnakeYaml");
     }
 
     @NotNull
@@ -253,7 +265,19 @@ public abstract class AbstractWireTest extends WireTestCommon {
         // Create a wire instance
         @NotNull Wire wire = createWire();
 
-        WireArrayTestSupport.writeAndAssertMixedArrays(wire);
+        Object[] a1 = new Object[0];
+        wire.write("empty").object(a1);
+        Object[] a2 = {1L};
+        wire.write("one").object(a2);
+        Object[] a3 = {"Hello", 123, 10.1};
+        wire.write("three").object(Object[].class, a3);
+
+        Object o1 = wire.read().object(Object[].class);
+        assertArrayEquals(a1, (Object[]) o1, "array[0]: empty");
+        Object o2 = wire.read().object(Object[].class);
+        assertArrayEquals(a2, (Object[]) o2, "array[1]: one");
+        Object o3 = wire.read().object(Object[].class);
+        assertArrayEquals(a3, (Object[]) o3, "array[2]: three");
     }
 
     // Test GZIP compression of text strings written to a Wire.
@@ -272,7 +296,8 @@ public abstract class AbstractWireTest extends WireTestCommon {
         // Read the compressed string from the wire, decompress it, and assert its content
         @NotNull Bytes<?> bytes = allocateElasticOnHeap();
         wire.read().bytes(bytes);
-        assertEquals(str, bytes.toString());
+        assertEquals(str, bytes.toString(),
+                "wire should decompress GZIP compressed text correctly");
     }
 
     // Test to validate the behavior of writing and reading a long value
@@ -288,7 +313,8 @@ public abstract class AbstractWireTest extends WireTestCommon {
         expectWithSnakeYaml("{VALUE=1234567890123456789}", wire);
 
         // Read and validate the written long value
-        assertEquals(expected, wire.read(() -> "VALUE").int64());
+        assertEquals(expected, wire.read(() -> "VALUE").int64(),
+                "wire should preserve long value precision");
     }
 
     // Test to validate the behavior of writing and reading a short value
@@ -304,19 +330,22 @@ public abstract class AbstractWireTest extends WireTestCommon {
         expectWithSnakeYaml("{VALUE=12345}", wire);
 
         // Read and validate the written short value
-        assertEquals(expected, wire.read(() -> "VALUE").int16());
+        assertEquals(expected, wire.read(() -> "VALUE").int16(),
+                "wire should read short value within range correctly");
     }
 
     // Test to ensure that reading a value too large for a short throws an exception
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testInt16TooLarge() {
-        @NotNull Wire wire = createWire();
+        assertThrows(IllegalStateException.class, () -> {
+            @NotNull Wire wire = createWire();
 
-        // Write the maximum long value with the key "VALUE"
-        wire.write(() -> "VALUE").int64(Long.MAX_VALUE);
+            // Write the maximum long value with the key "VALUE"
+            wire.write(() -> "VALUE").int64(Long.MAX_VALUE);
 
-        // Attempt to read the value as a short, which should throw an exception
-        wire.read(() -> "VALUE").int16();
+            // Attempt to read the value as a short, which should throw an exception
+            wire.read(() -> "VALUE").int16();
+        });
     }
 
     // Test to validate the behavior of writing and reading an integer value
@@ -333,20 +362,24 @@ public abstract class AbstractWireTest extends WireTestCommon {
         expectWithSnakeYaml("{VALUE=1, VALUE2=1}", wire);
 
         // Read and validate the written integer values
-        assertEquals(expected, wire.read(() -> "VALUE").int16());
-        assertEquals(expected, wire.read(() -> "VALUE2").int16());
+        assertEquals(expected, wire.read(() -> "VALUE").int16(),
+                "wire should read first int32 value as int16 when within range");
+        assertEquals(expected, wire.read(() -> "VALUE2").int16(),
+                "wire should read second int32 value as int16 when within range");
     }
 
     // Test to ensure that reading a value too large for an integer throws an exception
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testInt32TooLarge() {
-        @NotNull Wire wire = createWire();
+        assertThrows(IllegalStateException.class, () -> {
+            @NotNull Wire wire = createWire();
 
-        // Write the maximum integer value with the key "VALUE"
-        wire.write(() -> "VALUE").int64(Integer.MAX_VALUE);
+            // Write the maximum integer value with the key "VALUE"
+            wire.write(() -> "VALUE").int64(Integer.MAX_VALUE);
 
-        // Attempt to read the value as a short, which should throw an exception
-        wire.read(() -> "VALUE").int16();
+            // Attempt to read the value as a short, which should throw an exception
+            wire.read(() -> "VALUE").int16();
+        });
     }
 
     // Test to validate writing using keys from the BWKey enum
@@ -360,7 +393,8 @@ public abstract class AbstractWireTest extends WireTestCommon {
         wire.write(BWKey.field3);
 
         // Verify the wire content
-        assertEquals("field1: field2: field3: ", wire.toString());
+        assertEquals("field1: field2: field3: ", wire.toString(),
+                "wire should write enum keys as field names without values");
     }
 
     // Test to validate writing with different string lengths
@@ -374,7 +408,8 @@ public abstract class AbstractWireTest extends WireTestCommon {
         wire.write(() -> "Long field name which is more than 32 characters, Bye");
 
         // Verify the wire content
-        assertEquals("Hello: World: \"Long field name which is more than 32 characters, Bye\": ", wire.toString());
+        assertEquals("Hello: World: \"Long field name which is more than 32 characters, Bye\": ", wire.toString(),
+                "wire should handle field names of varying lengths including those exceeding 32 characters");
     }
 
     // Test to validate reading from the wire
@@ -386,6 +421,13 @@ public abstract class AbstractWireTest extends WireTestCommon {
         wire.write();
         wire.write(BWKey.field1);
         wire.write(() -> "Test");
+
+        long remainingBefore = wire.bytes().readRemaining();
+        wire.read();
+        wire.read();
+        wire.read();
+        assertTrue(wire.bytes().readRemaining() < remainingBefore,
+                "wire read operations should consume bytes from the underlying buffer");
     }
 
     // Test the write behavior of custom Marshallable objects with Wire.
@@ -420,7 +462,8 @@ public abstract class AbstractWireTest extends WireTestCommon {
                     "  L_NUM: 0,\n" +
                     "  I_NUM: -123457890,\n" +
                     "  TEXT: Bye now\n" +
-                    "}\n", wire.bytes().toString());
+                            "}\n", wire.bytes().toString(),
+                    "wire should serialize Marshallable objects with nested field structure");
         }
         expectWithSnakeYaml("{A={B_FLAG=true, S_NUM=12345, D_NUM=123.456, L_NUM=0, I_NUM=-12345789, TEXT=Hello World}, " +
                 "B={B_FLAG=false, S_NUM=1234, D_NUM=123.4567, L_NUM=0, I_NUM=-123457890, TEXT=Bye now}}", wire);
@@ -429,10 +472,10 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
         // Read the Marshallable instances from wire and assert equality
         wire.read(() -> "A").marshallable(mt2);
-        assertEquals(mt2, mtA);
+        assertEquals(mt2, mtA, "wire should deserialize first Marshallable object correctly");
 
         wire.read(() -> "B").marshallable(mt2);
-        assertEquals(mt2, mtB);
+        assertEquals(mt2, mtB, "wire should deserialize second Marshallable object correctly");
     }
 
     // Test the write behavior of custom Marshallable objects with Wire,
@@ -450,7 +493,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
         @NotNull ValueOut write = wire.write(() -> "A");
 
         // Determine the start position for field length calculation
-        final long start = wire.bytes().writePosition() + 1; // including one space for "sep".
+        final long start = wire.bytes().writePosition();
 
         // Write the Marshallable instance to wire
         write.marshallable(mtA);
@@ -462,6 +505,10 @@ public abstract class AbstractWireTest extends WireTestCommon {
         expectWithSnakeYaml("{A={B_FLAG=true, S_NUM=12345, D_NUM=123.456, L_NUM=0, I_NUM=-12345789, TEXT=}}", wire);
 
         @NotNull ValueIn read = wire.read(() -> "A");
+        assertTrue(fieldLen > 0, "wire should report positive field length for written Marshallable");
+        long readLength = read.readLength();
+        assertTrue(Math.abs(fieldLen - readLength) <= 1,
+                "wire field length should match read length within one byte fieldLen=" + fieldLen + ", readLength=" + readLength);
     }
 
 

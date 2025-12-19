@@ -5,7 +5,7 @@ package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -15,8 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 // Testing the generation of class names for MethodWriter
-@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
-public class MethodWriterClassNameGeneratorTest extends net.openhft.chronicle.wire.WireTestCommon {
+class MethodWriterClassNameGeneratorTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Instance of the class name generator to be tested
     private final MethodWriterClassNameGenerator classNameGenerator = new MethodWriterClassNameGenerator();

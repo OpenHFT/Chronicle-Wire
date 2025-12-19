@@ -4,22 +4,22 @@
 package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.core.Jvm;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // Test class extending MethodWriterTest to test behavior of method writers when using proxies
 public class MethodWriterProxyTest extends MethodWriterTest {
 
     // Method to set up the test environment before each test method
-    @Before
+    @BeforeEach
     public void before() {
         // Disable proxy code generation for the duration of the tests
         System.setProperty("disableProxyCodegen", "true");
@@ -29,14 +29,14 @@ public class MethodWriterProxyTest extends MethodWriterTest {
     }
 
     // Method to clean up and reset the environment after each test method
-    @After
+    @AfterEach
     public void after() {
         // Clear the property to re-enable proxy code generation
         System.clearProperty("disableProxyCodegen");
     }
 
     // Test method inherited from the parent class but ignored due to a known issue
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
+    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     @Test
     @Override
     public void multiOut() {
@@ -46,7 +46,7 @@ public class MethodWriterProxyTest extends MethodWriterTest {
     }
 
     // Test method for testing primitives, ignored on specific conditions and known issues
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
+    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     @Test
     @Override
     public void testPrimitives() {

@@ -10,7 +10,7 @@ import net.openhft.chronicle.wire.WireType;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public final class OuterClassWireTestSupport {
     private OuterClassWireTestSupport() {

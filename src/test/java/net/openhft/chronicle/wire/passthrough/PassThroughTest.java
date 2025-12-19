@@ -7,11 +7,11 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test class extending WireTestCommon to validate the pass-through functionality of method writers
@@ -25,8 +25,7 @@ public class PassThroughTest extends WireTestCommon {
      */
     @Test
     public void testPassThroughputText() {
-        String input = "" +
-                "to: dest1\n" +
+        String input = "to: dest1\n" +
                 "send: message\n" +
                 "...\n" +
                 "to: dest2\n" +
@@ -77,8 +76,7 @@ public class PassThroughTest extends WireTestCommon {
         }
 
         // Assert the content written to wire2
-        assertEquals("" +
-                        "to: dest\n" +
+        assertEquals("to: dest\n" +
                         "send: message\n" +
                         "...\n",
                 wire2.toString());
@@ -90,8 +88,7 @@ public class PassThroughTest extends WireTestCommon {
      */
     @Test
     public void testPassThroughputYaml() {
-        String input = "" +
-                "to: dest1\n" +
+        String input = "to: dest1\n" +
                 "send: message\n" +
                 "...\n" +
                 "to: dest2\n" +
@@ -145,8 +142,7 @@ public class PassThroughTest extends WireTestCommon {
         }
 
         // Assert the content written to wire2
-        assertEquals("" +
-                        "to: dest\n" +
+        assertEquals("to: dest\n" +
                         "send: message\n" +
                         "...\n",
                 wire2.toString());
@@ -158,8 +154,7 @@ public class PassThroughTest extends WireTestCommon {
      */
     @Test
     public void testPassThroughputBinary() {
-        String input = "" +
-                "to: dest1\n" +
+        String input = "to: dest1\n" +
                 "send: message\n" +
                 "...\n" +
                 "to: dest2\n" +
@@ -181,8 +176,7 @@ public class PassThroughTest extends WireTestCommon {
             assertEquals(i > 0, reader.readOne());
 
         // Assert the binary output
-        assertEquals("" +
-                        "18 00 00 00                                     # msg-length\n" +
+        assertEquals("18 00 00 00                                     # msg-length\n" +
                         "b9 02 74 6f                                     # to: (event)\n" +
                         "e5 64 65 73 74 31                               # dest1\n" +
                         "b9 04 73 65 6e 64                               # send: (event)\n" +
@@ -213,8 +207,7 @@ public class PassThroughTest extends WireTestCommon {
         });
         for (int i = 2; i >= 0; i--)
             assertEquals(i > 0, reader2.readOne());
-        assertEquals("" +
-                        "17 00 00 00                                     # msg-length\n" +
+        assertEquals("17 00 00 00                                     # msg-length\n" +
                         "c2 74 6f                                        # to:\n" +
                         "e5 64 65 73 74 31                               # dest1\n" +
                         "b9 04 73 65 6e 64 e7 6d 65 73 73 61 67 65       # passed-through\n" +
@@ -256,8 +249,7 @@ public class PassThroughTest extends WireTestCommon {
         }
 
         // Assert the content written to wire2 in binary format
-        assertEquals("" +
-                        "16 00 00 00                                     # msg-length\n" +
+        assertEquals("16 00 00 00                                     # msg-length\n" +
                         "b9 02 74 6f                                     # to: (event)\n" +
                         "e4 64 65 73 74                                  # dest\n" +
                         "c4 73 65 6e 64                                  # send:\n" +

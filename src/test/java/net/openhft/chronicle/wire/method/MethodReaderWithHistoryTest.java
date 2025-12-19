@@ -9,10 +9,10 @@ import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.utils.RecordHistory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // Test class extending WireTestCommon to test MethodReader functionality with history recording
 public class MethodReaderWithHistoryTest extends WireTestCommon {
@@ -20,23 +20,23 @@ public class MethodReaderWithHistoryTest extends WireTestCommon {
     // Test with text wire type
     @Test
     public void text() {
-        doTest(WireType.TEXT);
+        assertTrue(doTest(WireType.TEXT), "method reader with history: wireType=TEXT");
     }
 
     // Test with YAML-only wire type
     @Test
     public void yaml() {
-        doTest(WireType.YAML_ONLY);
+        assertTrue(doTest(WireType.YAML_ONLY), "method reader with history: wireType=YAML_ONLY");
     }
 
     // Test with binary wire type
     @Test
     public void binary() {
-        doTest(WireType.BINARY);
+        assertTrue(doTest(WireType.BINARY), "method reader with history: wireType=BINARY");
     }
 
     // Helper method to perform tests with different wire types
-    private void doTest(WireType wireType) {
+    private boolean doTest(WireType wireType) {
         // Create a new wire instance of the specified wire type
         Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
 
@@ -75,6 +75,7 @@ public class MethodReaderWithHistoryTest extends WireTestCommon {
 
         assertTrue(reader2.readOne());
         assertEquals("bye", says2[0]);
+        return true;
     }
 
     // Interface for a saying action

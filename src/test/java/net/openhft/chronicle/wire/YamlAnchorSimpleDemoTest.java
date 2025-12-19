@@ -3,10 +3,10 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
  * Demonstrates YAML anchor functionality in Chronicle Wire
@@ -26,8 +26,7 @@ public class YamlAnchorSimpleDemoTest extends WireTestCommon {
 
     @Test
     public void shouldShareFieldValuesUsingAnchors() {
-        String yaml = "" +
-                "!net.openhft.chronicle.wire.YamlAnchorSimpleDemoTest$MultiConfig {\n" +
+        String yaml = "!net.openhft.chronicle.wire.YamlAnchorSimpleDemoTest$MultiConfig {\n" +
                 "  first: {\n" +
                 "    text: &sharedText hello,\n" +
                 "    value: &sharedValue 42\n" +
@@ -57,8 +56,7 @@ public class YamlAnchorSimpleDemoTest extends WireTestCommon {
 
     @Test
     public void shouldShareObjectInstancesUsingAnchors() {
-        String yaml = "" +
-                "first: &shared !net.openhft.chronicle.wire.YamlAnchorSimpleDemoTest$Config {\n" +
+        String yaml = "first: &shared !net.openhft.chronicle.wire.YamlAnchorSimpleDemoTest$Config {\n" +
                 "  text: shared config,\n" +
                 "  value: 999\n" +
                 "}\n" +

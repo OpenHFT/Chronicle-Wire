@@ -3,10 +3,10 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.wire.MilliTimestampLongConverter.INSTANCE;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"deprecation", "removal"})
 public class MilliTimestampLongConverterTest extends WireTestCommon {
@@ -86,6 +86,8 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
     // Test the round-trip conversion for various timezones, ensuring consistency in parsing and conversion back to string
     @Test
     public void roundTripTest() {
+        MilliTimestampLongConverter utc = new MilliTimestampLongConverter("UTC");
+        assertEquals(TIMESTAMP, utc.parse(TIMESTAMP_STRING_UTC_NO_SUFFIX), "roundTrip: utc parse");
         roundTrip(TIMESTAMP_STRING_UTC_NO_SUFFIX, TIMESTAMP, new MilliTimestampLongConverter("UTC"));
         roundTrip(TIMESTAMP_STRING_MELBOURNE, TIMESTAMP, new MilliTimestampLongConverter("Australia/Melbourne"));
     }

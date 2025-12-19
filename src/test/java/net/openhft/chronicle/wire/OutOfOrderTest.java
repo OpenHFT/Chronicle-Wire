@@ -5,12 +5,12 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class OutOfOrderTest extends WireTestCommon {
     // Define JSON snippets to be used in tests
@@ -24,12 +24,12 @@ public class OutOfOrderTest extends WireTestCommon {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Test JSON with just the start and end
-        doTest(start + end, "{\"a\":1,\"b\":null,\"records\":null,\"z\":99}");
+        assertEquals("{\"a\":1,\"b\":null,\"records\":null,\"z\":99}", doTest(start + end), "out of order: minimal");
         // Test JSON with all segments included
-        doTest(start + missing + records + end, "{\"a\":1,\"b\":null,\"records\":[ {\"id\":1} ],\"z\":99}");
+        assertEquals("{\"a\":1,\"b\":null,\"records\":[ {\"id\":1} ],\"z\":99}", doTest(start + missing + records + end), "out of order: all segments");
     }
 
-    private void doTest(String input, String expected) {
+    private String doTest(String input) {
         // Convert the input string to bytes
         Bytes<?> from = Bytes.from(input);
         // Create a JSONWire object from the bytes
@@ -41,8 +41,7 @@ public class OutOfOrderTest extends WireTestCommon {
         // Serialize the OOOT object back into a new JSONWire
         JSONWire wire2 = new JSONWire(Bytes.allocateElasticOnHeap(64));
         wire2.getValueOut().object(ooot);
-        // Assert the serialized result
-        assertEquals(expected, wire2.toString());
+        return wire2.toString();
     }
 
     // Helper class with various fields for testing

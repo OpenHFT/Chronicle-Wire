@@ -5,11 +5,11 @@ package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.Consumer;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test class for the WithDefaults functionality.
@@ -22,21 +22,40 @@ public class WithDefaultsTest extends WireTestCommon {
      */
     @Test
     public void writeMarshallable() {
-        // Default test without any modification
-        doTest(w -> {
-        });
+        for (Scenario scenario : new Scenario[]{
+                new Scenario("default", w -> {
+                }),
+                new Scenario("clear-bytes", w -> w.bytes.clear()),
+                new Scenario("text", w -> w.text = "bye"),
+                new Scenario("flag", w -> w.flag = false),
+                new Scenario("num", w -> w.num = 5),
+        }) {
+            RoundTripResult result = roundTrip(scenario.mutation);
+            assertEquals(result.serialised, result.roundTripped.toString(), "withDefaults: serialised (" + scenario.name + ")");
+            assertEquals(result.original, result.roundTripped, "withDefaults: object (" + scenario.name + ")");
+        }
+    }
 
-        // Test the scenario after clearing the bytes data
-        doTest(w -> w.bytes.clear());
+    private static final class Scenario {
+        private final String name;
+        private final Consumer<WithDefaults> mutation;
 
-        // Test with changing the default text value
-        doTest(w -> w.text = "bye");
+        private Scenario(String name, Consumer<WithDefaults> mutation) {
+            this.name = name;
+            this.mutation = mutation;
+        }
+    }
 
-        // Test with changing the flag value to false
-        doTest(w -> w.flag = false);
+    private static final class RoundTripResult {
+        private final WithDefaults original;
+        private final WithDefaults roundTripped;
+        private final String serialised;
 
-        // Test with changing the default numerical value
-        doTest(w -> w.num = 5);
+        private RoundTripResult(WithDefaults original, WithDefaults roundTripped, String serialised) {
+            this.original = original;
+            this.roundTripped = roundTripped;
+            this.serialised = serialised;
+        }
     }
 
     /**
@@ -46,7 +65,7 @@ public class WithDefaultsTest extends WireTestCommon {
      *
      * @param consumer Consumer action to apply on the WithDefaults instance.
      */
-    private void doTest(Consumer<WithDefaults> consumer) {
+    private RoundTripResult roundTrip(Consumer<WithDefaults> consumer) {
         // Initialize the WithDefaults instance
         WithDefaults wd = new WithDefaults();
 
@@ -58,11 +77,6 @@ public class WithDefaultsTest extends WireTestCommon {
 
         // Convert the string representation back to a WithDefaults object
         WithDefaults o = Marshallable.fromString(cs);
-
-        // Validate the string representation remains consistent
-        assertEquals(cs, o.toString());
-
-        // Validate the original and recreated objects are equal
-        assertEquals(wd, o);
+        return new RoundTripResult(wd, o, cs);
     }
 }

@@ -3,11 +3,11 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
 import static net.openhft.chronicle.wire.NanoTimestampLongConverter.INSTANCE;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NanoTimestampLongConverterTest extends WireTestCommon {
 
@@ -79,6 +79,8 @@ public class NanoTimestampLongConverterTest extends WireTestCommon {
     // Testing round-trip conversions (from string to long and back) for different timezones and formats.
     @Test
     public void roundTripTest() {
+        NanoTimestampLongConverter utc = new NanoTimestampLongConverter("UTC");
+        assertEquals(TIMESTAMP, utc.parse(TIMESTAMP_STRING_UTC_NO_SUFFIX), "roundTrip: utc parse");
         roundTrip(TIMESTAMP_STRING_MELBOURNE, TIMESTAMP, new NanoTimestampLongConverter("Australia/Melbourne"));
         roundTrip(TIMESTAMP_STRING_UTC_NO_SUFFIX, TIMESTAMP, new NanoTimestampLongConverter("UTC"));
     }

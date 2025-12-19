@@ -5,11 +5,10 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,7 +17,6 @@ import java.util.List;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
-@RunWith(Parameterized.class)
 public class UnicodeStringTest extends WireTestCommon {
 
     // Suppressing unchecked warnings as Bytes class may handle various types
@@ -34,15 +32,14 @@ public class UnicodeStringTest extends WireTestCommon {
     private static final char[] chars = new char[128];
 
     // Character under test
-    private final char ch;
+    private char ch;
 
     // Constructor initializes the character under test
-    public UnicodeStringTest(char ch) {
+    public void initUnicodeStringTest(char ch) {
         this.ch = ch;
     }
 
     // Define the parameters for the test: a collection of characters
-    @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         List<Object[]> chars = new ArrayList<>();
         int a = 1;
@@ -76,14 +73,16 @@ public class UnicodeStringTest extends WireTestCommon {
     }
 
     // Release the byte buffer after all tests have been executed
-    @AfterClass
+    @AfterAll
     public static void release() {
         bytes.releaseLast();
     }
 
     // Test case to validate serialization and deserialization of long strings
-    @Test
-    public void testLongString() {
+    @MethodSource("combinations")
+    @ParameterizedTest
+    public void testLongString(char ch) {
+        initUnicodeStringTest(ch);
         wire.clear(); // Clear the wire for a fresh start
 
         // Fill the char array with the character under test
@@ -99,6 +98,8 @@ public class UnicodeStringTest extends WireTestCommon {
         // System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         // Read the string from the wire and validate it matches the original
-        wire.readDocument(null, w -> w.read(() -> "msg").text(s, Assert::assertEquals));
+        String[] actual = {null};
+        wire.readDocument(null, w -> actual[0] = w.read(() -> "msg").text());
+        Assertions.assertEquals(s, actual[0], "long string: roundtrip ch=0x" + Integer.toHexString(ch));
     }
 }

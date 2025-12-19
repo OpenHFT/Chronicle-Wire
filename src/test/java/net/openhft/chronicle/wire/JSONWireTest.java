@@ -10,8 +10,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
@@ -22,11 +21,9 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.IntStream;
 
-import static junit.framework.TestCase.assertNull;
 import static net.openhft.chronicle.wire.WireType.JSON;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"deprecation", "removal"})
 public class JSONWireTest extends WireTestCommon {
@@ -56,7 +53,8 @@ public class JSONWireTest extends WireTestCommon {
                         .replaceAll(" ?\\] ?", "]"),
                 json2.toString()
                         .replaceAll(" ?\\[ ?", "[")
-                        .replaceAll(" ?\\] ?", "]"));
+                        .replaceAll(" ?\\] ?", "]"),
+                "JSON should roundtrip correctly through binary format preserving structure and values");
         hexDump.releaseLast();
     }
 
@@ -85,7 +83,8 @@ public class JSONWireTest extends WireTestCommon {
                         .replaceAll(" ?\\] ?", "]"),
                 json2.toString()
                         .replaceAll(" ?\\[ ?", "[")
-                        .replaceAll(" ?\\] ?", "]"));
+                        .replaceAll(" ?\\] ?", "]"),
+                "JSON should roundtrip correctly through YAML format preserving structure and values");
     }
 
     // Utility function to create a JSONWire from a string
@@ -107,30 +106,30 @@ public class JSONWireTest extends WireTestCommon {
 
         @NotNull Wire wire1 = createWire("\"echo\":\"Hello\"\n\"echo2\":\"Hello2\"\n");
         @Nullable String text1 = wire1.readEventName(sb).text();
-        assertEquals("echo", sb.toString());
-        assertEquals("Hello", text1);
+        assertEquals("echo", sb.toString(), "first event name should be read correctly from JSON without brackets");
+        assertEquals("Hello", text1, "first event value should be read correctly from JSON");
         @Nullable String text2 = wire1.readEventName(sb).text();
-        assertEquals("echo2", sb.toString());
-        assertEquals("Hello2", text2);
+        assertEquals("echo2", sb.toString(), "second event name should be read correctly from JSON");
+        assertEquals("Hello2", text2, "second event value should be read correctly from JSON");
 
         @NotNull JSONWire wire2 = createWire("{ \"echoB\":\"HelloB\" }\n{ \"echo2B\":\"Hello2B\" }\n");
         @Nullable String textB = wire2.readEventName(sb).text();
-        assertEquals("echoB", sb.toString());
-        assertEquals("HelloB", textB);
+        assertEquals("echoB", sb.toString(), "first event name should be read correctly from JSON with opening bracket");
+        assertEquals("HelloB", textB, "first event value should be read correctly from JSON with brackets");
 
         // finish up one object but keep reading.
         readExpect(wire2, '}');
         wire2.valueIn.stack.reset();
 
         @Nullable String textB2 = wire2.readEventName(sb).text();
-        assertEquals("echo2B", sb.toString());
-        assertEquals("Hello2B", textB2);
+        assertEquals("echo2B", sb.toString(), "second event name should be read correctly after closing bracket");
+        assertEquals("Hello2B", textB2, "second event value should be read correctly after bracket reset");
     }
 
     // Helper function to ensure the next character in the wire matches the expected character
     private void readExpect(Wire wire2, char expected) {
         wire2.consumePadding();
-        assertEquals(expected, (char) wire2.bytes().readByte());
+        assertEquals(expected, (char) wire2.bytes().readByte(), "next character in JSON stream should match expected");
     }
 
     // Test to check if the JSONWire can process JSON strings without spaces correctly
@@ -139,7 +138,7 @@ public class JSONWireTest extends WireTestCommon {
         @NotNull Wire wire = createWire("\"echo\":\"\"");
         @NotNull VanillaWireParser parser = new VanillaWireParser(soutWireParselet(), VanillaWireParser.SKIP_READABLE_BYTES);
         parser.parseOne(wire);
-        assertEquals("", wire.bytes().toString());
+        assertEquals("", wire.bytes().toString(), "wire bytes should be empty after parsing JSON with no spaces");
     }
 
     // Returns a wire parselet for printing purposes
@@ -166,7 +165,8 @@ public class JSONWireTest extends WireTestCommon {
         assertEquals("\"myEvent\":[{\"name\":\"item1\",\"number1\":1235666,\"number2\":1.1231231}," +
                 "{\"name\":\"item2\",\"number1\":2235666,\"number2\":1.0987987}," +
                 "{\"name\":\"item3\",\"number1\":3235666,\"number2\":1.12312}," +
-                "{\"name\":\"item4\",\"number1\":4235666,\"number2\":1.51231}]", out.toString());
+                        "{\"name\":\"item4\",\"number1\":4235666,\"number2\":1.51231}]", out.toString(),
+                "JSON list should be formatted with quoted field names and compact array syntax");
 
         testCopyToBinaryAndBack(out.toString());
         testCopyToYAMLAndBack("{" + out + '}');
@@ -189,9 +189,9 @@ public class JSONWireTest extends WireTestCommon {
         w.read(() -> "item").marshallable(item2);
 
         // Assertions to ensure proper reading and writing of the null name
-        assertNull(item2.name);
-        assertEquals(item1, item2);
-        assertEquals(item1.toString(), item2.toString());
+        assertNull(item2.name, "null string field should deserialize as null in JSON");
+        assertEquals(item1, item2, "marshallable object with null field should roundtrip correctly");
+        assertEquals(item1.toString(), item2.toString(), "toString should match for objects with null fields");
 
         // Release memory occupied by the wire's bytes
         w.bytes().releaseLast();
@@ -211,14 +211,15 @@ public class JSONWireTest extends WireTestCommon {
 
         // Create another wire instance from the bytes of the first wire
         Wire w2 = WireType.JSON.apply(w.bytes());
-        assertEquals("\"a\":123,\"somebytes\":\"blablabla\"", w2.toString());
+        assertEquals("\"a\":123,\"somebytes\":\"blablabla\"", w2.toString(),
+                "JSON output should contain quoted field names and text values");
 
         // Read the data back from the wire into a ByteBuffer
         Bytes<java.nio.ByteBuffer> bb = Bytes.elasticByteBuffer();
-        assertEquals(123, w2.read("a").int64());
+        assertEquals(123, w2.read("a").int64(), "int64 value should deserialize correctly from JSON");
 
         w2.read("somebytes").text(bb);
-        assertEquals(bs, bb);
+        assertEquals(bs, bb, "text bytes should deserialize correctly from JSON string");
 
         // Release occupied memory
         w2.bytes().releaseLast();
@@ -235,10 +236,10 @@ public class JSONWireTest extends WireTestCommon {
 
         // Convert the FooEvent to a JSON string
         @NotNull CharSequence str = WireType.JSON.asString(foo);
-        assertEquals("{\"foo\":0.1}", str);
+        assertEquals("{\"foo\":0.1}", str, "float value should serialize as decimal in JSON");
         // 0.1 when cast to a double is 0.10000000149011612. We used to throw an exception here because of this difference
         FooEvent foo2 = WireType.JSON.fromString(FooEvent.class, str);
-        assertEquals(foo, foo2);
+        assertEquals(foo, foo2, "float value should deserialize correctly from JSON despite precision differences");
     }
 
     @Test
@@ -280,7 +281,7 @@ public class JSONWireTest extends WireTestCommon {
                     "    { name: !!null \"\", number1: 3, number2: 30.0 },\n" +
                     "    { name: !!null \"\", number1: 4, number2: 40.0 }\n" +
                     "  ]\n" +
-                    "}\n", lists1.toString());
+                    "}\n", lists1.toString(), "marshallable with two lists should format with type information and null handling");
             final String str = JSON.asString(lists1);
             testCopyToBinaryAndBack(str);
         } finally {
@@ -296,19 +297,18 @@ public class JSONWireTest extends WireTestCommon {
         MapHolder mh = new MapHolder(); // Create a new MapHolder object
         Map<RetentionPolicy, Double> map = Collections.singletonMap(RetentionPolicy.CLASS, 0.1); // Define a map with a single entry
         mh.map = new EnumMap<>(map); // Assign enum map
-        doTestMapOfNamedKeys(mh); // Test with LinkedHashMap
+        assertEquals("{\"map\":{\"CLASS\":0.1}}", JSON.asString(mh), "map of named keys");
     }
 
     @Test
     public void testMapOfNamedKeys2() {
         String str = "{\"map\":{\"CLASS\":0.1}}";
+        MapHolder mh = JSON.fromString(MapHolder.class, str);
+        assertNotNull(mh.map, "deserialized map should not be null");
+        assertEquals(1, mh.map.size(), "map should contain single entry from JSON");
+        assertEquals(0.1, mh.map.get(RetentionPolicy.CLASS), 0.0, "enum key should map to correct double value from JSON");
         testCopyToBinaryAndBack(str); // Test binary and back with the specified string
         testCopyToYAMLAndBack(str);
-    }
-
-    private void doTestMapOfNamedKeys(MapHolder mh) {
-        // Convert MapHolder to JSON string and assert its format
-        assertEquals("{\"map\":{\"CLASS\":0.1}}", JSON.asString(mh));
     }
 
     @Test
@@ -321,12 +321,12 @@ public class JSONWireTest extends WireTestCommon {
         dates.zdateTime = ZonedDateTime.of(dates.dateTime, ZoneId.of("UTC")); // Set ZonedDateTime based on LocalDateTime
         @NotNull CharSequence str = WireType.JSON.asString(dates); // Convert Dates object to JSON string
         String expected = "{\"date\":\"2021-05-28\",\"dateTime\":\"2020-04-26T06:35:11\",\"zdateTime\":\"2020-04-26T06:35:11Z[UTC]\"}";
-        assertEquals(expected, str); // Assert that the JSON string matches the expected format
+        assertEquals(expected, str, "date/time fields should serialize in ISO-8601 format in JSON");
 
         JSONWire jw = new JSONWire(Bytes.allocateElasticOnHeap()); // Create a new JSONWire with allocated bytes
         jw.trimFirstCurly(false);
         jw.getValueOut().typedMarshallable(dates); // Write the dates to the wire
-        assertEquals(expected, jw.toString()); // Assert that the JSONWire output matches the expected format
+        assertEquals(expected, jw.toString(), "typed marshallable dates should produce same JSON format");
 
         testCopyToBinaryAndBack(str); // Test binary and back with the provided string
         testCopyToYAMLAndBack(str);
@@ -338,12 +338,12 @@ public class JSONWireTest extends WireTestCommon {
         Wire wire = createWire(); // Create a new wire
         wire.bytes().append(text); // Append the list string to the wire
         final Object list = wire.getValueIn().object(); // Extract the list from the wire
-        assertEquals("[1, 2, 3]", "" + list); // Assert that the extracted list matches the expected format
+        assertEquals("[1, 2, 3]", "" + list, "JSON array without spaces should parse correctly");
 
         String text2 = "[ 1, 2, 3 ]"; // Define another string representation with spaces
         wire.bytes().clear().append(text2); // Clear the wire and append the new string
         final Object list2 = wire.getValueIn().object(); // Extract the list from the wire
-        assertEquals("[1, 2, 3]", "" + list2); // Assert that the extracted list matches the expected format
+        assertEquals("[1, 2, 3]", "" + list2, "JSON array with spaces should parse to same result");
     }
 
     @Test
@@ -351,7 +351,7 @@ public class JSONWireTest extends WireTestCommon {
         String text = "[320 , {\"as\":[1 ,\n2\n, 3]}]"; // Define a string with a list that contains an integer and a dictionary
         final JSONWire jsonWire = new JSONWire(Bytes.from(text)); // Create a new JSONWire with the given text
         final Object list = jsonWire.getValueIn().object(); // Extract the object from the JSONWire
-        assertEquals("[320, {as=[1, 2, 3]}]", "" + list); // Assert that the extracted object matches the expected format
+        assertEquals("[320, {as=[1, 2, 3]}]", "" + list, "JSON array with nested dictionary and whitespace should parse correctly");
     }
 
     @Test
@@ -361,7 +361,8 @@ public class JSONWireTest extends WireTestCommon {
         Dates dates = new Dates(); // Create a new Dates object with presumably null fields
         @NotNull CharSequence str = WireType.JSON.asString(dates); // Convert the Dates object to a JSON string
         // Assert that all date fields in the JSON string are null
-        assertEquals("{\"date\":null,\"dateTime\":null,\"zdateTime\":null}", str);
+        assertEquals("{\"date\":null,\"dateTime\":null,\"zdateTime\":null}", str,
+                "null date fields should serialize as JSON null values");
         testCopyToBinaryAndBack(str); // Test binary conversion and back with the JSON string
         testCopyToYAMLAndBack(str);
     }
@@ -373,7 +374,8 @@ public class JSONWireTest extends WireTestCommon {
         final JSONWire jsonWire = new JSONWire(Bytes.from(str)); // Create a JSONWire object from the str
         final Object list = jsonWire.getValueIn().object(); // Extract the content of the wire
         // Assert that the extracted content matches the expected format
-        assertEquals("[320, {as=[[32905.50000, 1.60291699, 1625822573.857656], [32905.60000, 0.10415889, 1625822573.194909]], bs=[[32893.60000, 0.15042948, 1625822574.220475]]}, book-10]", "" + list);
+        assertEquals("[320, {as=[[32905.50000, 1.60291699, 1625822573.857656], [32905.60000, 0.10415889, 1625822573.194909]], bs=[[32893.60000, 0.15042948, 1625822574.220475]]}, book-10]", "" + list,
+                "complex nested JSON array with multi-level dictionaries should parse correctly");
         testCopyToBinaryAndBack(str); // Test binary conversion and back with the provided JSON string
         testCopyToYAMLAndBack('{' + str + '}');
     }
@@ -391,7 +393,7 @@ public class JSONWireTest extends WireTestCommon {
         final JSONWire jsonWire = new JSONWire(byteBufferBytes); // Create a JSONWire object using the byte buffer
 
         final List<Object> list = jsonWire.getValueIn().list(Object.class); // Extract the content of the wire into a list
-        assertNotNull(list); // Assert that the extracted list is not null
+        assertNotNull(list, "parsed list from complex JSON array should not be null");
         testCopyToBinaryAndBack(str); // Test binary conversion and back with the JSON string
         testCopyToYAMLAndBack('{' + str + '}');
         byteBufferBytes.releaseLast(); // Release the last buffer to free up resources
@@ -418,7 +420,8 @@ public class JSONWireTest extends WireTestCommon {
         wire.getValueIn().object(f, SimpleTwoLists.class); // Read the content of the wire into the object
 
         // Assert that the resulting JSON string from the object matches the expected format
-        assertEquals("{\"field1\":1234,\"field2\":456,\"field3\":[ ],\"field4\":[\"abc\",\"xyz\" ]}", JSON.asString(f));
+        assertEquals("{\"field1\":1234,\"field2\":456,\"field3\":[ ],\"field4\":[\"abc\",\"xyz\" ]}", JSON.asString(f),
+                "JSON with quoted fields and empty array should deserialize and reserialize correctly");
     }
 
     @Test
@@ -436,10 +439,10 @@ public class JSONWireTest extends WireTestCommon {
         final String str = JSON.asString(mh); // Convert the populated object to its JSON string representation
         // Assert the generated JSON string matches the expected JSON string
         assertEquals("{\"intMap\":{\"1111\":\"ones\",\"2222\":\"twos\"},\"longMap\":{\"888888888888\":\"eights\",\"999999999999\":\"nines\"},\"doubleMap\":{\"1.28\":\"number\",\"2.56\":\"number\"}}",
-                str);
+                str, "maps with numeric keys should serialize with quoted string keys in JSON");
         // Convert the JSON string back to a new instance of MapWithIntegerKeysHolder
         MapWithIntegerKeysHolder mh2 = JSON.fromString(MapWithIntegerKeysHolder.class, str);
-        assertEquals(mh, mh2); // Assert that the original and reconverted objects are the same
+        assertEquals(mh, mh2, "maps with integer/long/double keys should roundtrip correctly through JSON");
         testCopyToBinaryAndBack(str); // Test binary conversion and back with the JSON string
         testCopyToYAMLAndBack(str);
     }
@@ -456,52 +459,56 @@ public class JSONWireTest extends WireTestCommon {
         wire.getValueOut().marshallable(foo); // Write the Value object to the wire
 
         // Assert the content of the wire (in string format) matches the expected JSON string
-        assertEquals("{\"a\":{\"b\":\"c\"}}", bytes.toString());
+        assertEquals("{\"a\":{\"b\":\"c\"}}", bytes.toString(),
+                "nested marshallable should serialize with correct JSON nesting structure");
     }
 
     @Test
     public void escapeUnicodeValues() {
         Map<Object, Object> map = new HashMap<>(); // Create a new HashMap
-        // Stream over a range of Unicode code points
-        IntStream.rangeClosed(0x0000, 0x0020)
-                .forEach(code -> {
-                    map.put("key", (char) code); // Add an entry to the map with the character representation of the current code point
+        for (int code = 0x0000; code <= 0x0020; code++) {
+            map.put("key", (char) code); // Add an entry to the map with the character representation of the current code point
 
-                    final String text = JSON.asString(map); // Convert the map to a JSON string
-                    String val;
-                    // Map the current code point to its escaped string representation
-                    switch (code) {
-                        case '\b':
-                            val = "\\b";
-                            break;
-                        case '\f':
-                            val = "\\f";
-                            break;
-                        case '\n':
-                            val = "\\n";
-                            break;
-                        case '\r':
-                            val = "\\r";
-                            break;
-                        case '\t':
-                            val = "\\t";
-                            break;
-                        case ' ':
-                            val = " ";
-                            break;
-                        default:
-                            val = String.format("\\u%04X", code);
-                            break;
-                    }
-                    // Assert the generated JSON string matches the expected format
-                    assertEquals("{\"key\":\"" + val + "\"}", text);
-                });
+            final String text = JSON.asString(map); // Convert the map to a JSON string
+            String val;
+            // Map the current code point to its escaped string representation
+            switch (code) {
+                case '\b':
+                    val = "\\b";
+                    break;
+                case '\f':
+                    val = "\\f";
+                    break;
+                case '\n':
+                    val = "\\n";
+                    break;
+                case '\r':
+                    val = "\\r";
+                    break;
+                case '\t':
+                    val = "\\t";
+                    break;
+                case ' ':
+                    val = " ";
+                    break;
+                default:
+                    val = String.format("\\u%04X", code);
+                    break;
+            }
+            // Assert the generated JSON string matches the expected format
+            assertEquals("{\"key\":\"" + val + "\"}", text, "escape unicode: code=" + code);
+        }
     }
 
     @Test
     public void copyTypedDataToBinaryAndBack() {
         ignoreException("Unable to copy object safely, message will not be repeated");
         String str = "{\"a\":{\"@Mapped\":{\"b\":\"c\",\"d\":123.4}},\"e\":{\"@Scalar\":\"Value\"},\"f\":{\"@Mapped2\":{\"b\":\"c\"}},\"g\":{\"@Scalar2\":12345.6}}";
+        assertTrue(str.contains("\"@Mapped\"")
+                        && str.contains("\"@Scalar\"")
+                        && str.contains("\"@Mapped2\"")
+                        && str.contains("\"@Scalar2\""),
+                "typed data: input contains expected type tags");
         testCopyToBinaryAndBack(str);
         testCopyToYAMLAndBack(str);
     }
@@ -513,7 +520,7 @@ public class JSONWireTest extends WireTestCommon {
         String expected = "{\"@net.openhft.chronicle.wire.JSONWireTest$DtoWithClassReference\":{\"implClass\":{\"@type\":\"net.openhft.chronicle.wire.JSONWireTest\"},\"bool\":false}}";
         Object o = WireType.JSON_ONLY.fromString(expected);
         String json = WireType.JSON_ONLY.asString(o);
-        Assert.assertEquals(expected, json);
+        assertEquals(expected, json, "JSON with type literals should preserve @ prefixed type information during roundtrip");
     }
 
     @Test
@@ -525,8 +532,9 @@ public class JSONWireTest extends WireTestCommon {
         String json = WireType.JSON_ONLY.asString(dtoWithClassReference);
         assertEquals("{\"@net.openhft.chronicle.wire.JSONWireTest$DtoWithClassReference\"" +
                         ":{\"implClass\":{\"@type\":\"net.openhft.chronicle.wire.JSONWireTest\"},\"bool\":false}}",
-                json);
-        assertEquals(dtoWithClassReference, WireType.JSON_ONLY.fromString(json));
+                json, "DTO with class reference should serialize with fully qualified type name using @ notation");
+        assertEquals(dtoWithClassReference, WireType.JSON_ONLY.fromString(json),
+                "DTO with class reference should deserialize correctly from JSON with type information");
     }
 
     @Test
@@ -536,8 +544,8 @@ public class JSONWireTest extends WireTestCommon {
         ClassAliasPool.CLASS_ALIASES.addAlias(CollectionContainer.class);
         CollectionContainer container = WireType.JSON_ONLY.fromString("{ \"@CollectionContainer\": { \"collection\": [null, \"testValue\"] } }");
         Object[] array = container.collection.toArray();
-        Assert.assertNull(array[0]);
-        Assert.assertEquals("testValue", array[1]);
+        assertNull(array[0], "null element in JSON array should deserialize as null in collection");
+        assertEquals("testValue", array[1], "non-null element in JSON array should deserialize correctly after null element");
     }
 
     // A static class to demonstrate a holder of maps with different types of numeric keys and string values

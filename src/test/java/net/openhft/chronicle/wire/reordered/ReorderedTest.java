@@ -10,24 +10,22 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.reuse.OuterClassWireTestSupport;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * Test class extending WireTestCommon to validate serialization and deserialization behaviors
  * using different wire types in Chronicle Wire. This class uses parameterized tests to
  * execute the same set of tests with various wire formats.
  */
-@RunWith(Parameterized.class)
 public class ReorderedTest extends WireTestCommon {
     // Static instances of OuterClass for test setup
     private static final OuterClass outerClass1 = new OuterClass();
@@ -63,16 +61,15 @@ public class ReorderedTest extends WireTestCommon {
 
     // Function to dynamically select the wire type for each test iteration
     @SuppressWarnings("rawtypes")
-    private final Function<Bytes<?>, Wire> wireType;
+    private Function<Bytes<?>, Wire> wireType;
 
     // Constructor accepting the wire type function
     @SuppressWarnings("rawtypes")
-    public ReorderedTest(Function<Bytes<?>, Wire> wireType) {
+    public void initReorderedTest(Function<Bytes<?>, Wire> wireType) {
         this.wireType = wireType;
     }
 
     // Parameterized test configurations
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         return Arrays.asList(new Object[][]{
                 {WireType.JSON},
@@ -88,9 +85,11 @@ public class ReorderedTest extends WireTestCommon {
      * It writes and then reads back `OuterClass` objects to ensure the data remains consistent
      * across these operations.
      */
+    @MethodSource("combinations")
     @SuppressWarnings("rawtypes")
-    @Test
-    public void testWithReorderedFields() {
+    @ParameterizedTest(name = "{0}")
+    public void testWithReorderedFields(Function<Bytes<?>, Wire> wireType) {
+        initReorderedTest(wireType);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         OuterClassWireTestSupport.assertTwoOuterClasses(wireType, OuterClass::new, outerClass1, outerClass2, true);
@@ -100,8 +99,10 @@ public class ReorderedTest extends WireTestCommon {
      * Test to verify serialization and deserialization of a collection of objects.
      * It writes a collection of `NestedReadSubset` objects and then reads them back.
      */
-    @Test
-    public void testWithSubsetFields() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "{0}")
+    public void testWithSubsetFields(Function<Bytes<?>, Wire> wireType) {
+        initReorderedTest(wireType);
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
 
@@ -120,9 +121,11 @@ public class ReorderedTest extends WireTestCommon {
      * not nested within a marshallable object. This test runs a loop to perform
      * multiple iterations with different values.
      */
+    @MethodSource("combinations")
     @SuppressWarnings("rawtypes")
-    @Test
-    public void testTopLevel() {
+    @ParameterizedTest(name = "{0}")
+    public void testTopLevel(Function<Bytes<?>, Wire> wireType) {
+        initReorderedTest(wireType);
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
         for (int i = 1; i < 5; i++) {

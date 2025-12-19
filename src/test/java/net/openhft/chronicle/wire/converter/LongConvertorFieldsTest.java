@@ -4,9 +4,9 @@
 package net.openhft.chronicle.wire.converter;
 
 import net.openhft.chronicle.wire.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for validating the behavior of field converters with long data types.
@@ -57,24 +57,22 @@ public class LongConvertorFieldsTest {
     @Test
     public void base16() {
         // Validate Base16 encoding with a range of positive values
-        doTest(new Base16DTO((byte) 1, '2', (short) 3, 4, 5), "" +
-                "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base16DTO {\n" +
+        assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base16DTO {\n" +
                 "  b: 1,\n" +
                 "  ch: 32,\n" +
                 "  s: 3,\n" +
                 "  i: 4,\n" +
                 "  l: 5\n" +
-                "}\n");
+                "}\n", doTest(new Base16DTO((byte) 1, '2', (short) 3, 4, 5)), "base16 converter should serialize small positive values as compact hexadecimal without leading zeros");
         // Validate Base16 encoding with maximum negative values
         // Note: shorter types yield shorter strings, not all ffffffffffffffff
-        doTest(new Base16DTO((byte) -1, (char) -1, (short) -1, -1, -1), "" +
-                "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base16DTO {\n" +
+        assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base16DTO {\n" +
                 "  b: ff,\n" +
                 "  ch: ffff,\n" +
                 "  s: ffff,\n" +
                 "  i: ffffffff,\n" +
                 "  l: ffffffffffffffff\n" +
-                "}\n");
+                "}\n", doTest(new Base16DTO((byte) -1, (char) -1, (short) -1, -1, -1)), "base16 converter should serialize negative values with hexadecimal width matching primitive type size, not uniform padding");
     }
 
     /**
@@ -121,24 +119,22 @@ public class LongConvertorFieldsTest {
     @Test
     public void base64() {
         // Validate Base64 encoding with a range of positive values
-        doTest(new Base64DTO((byte) 1, '2', (short) 3, 4, 5), "" +
-                "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base64DTO {\n" +
+        assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base64DTO {\n" +
                 "  b: A,\n" +
                 "  ch: x,\n" +
                 "  s: C,\n" +
                 "  i: D,\n" +
                 "  l: E\n" +
-                "}\n");
+                "}\n", doTest(new Base64DTO((byte) 1, '2', (short) 3, 4, 5)), "base64 converter should serialize small positive values as single-character base64 strings");
         // Validate Base64 encoding with maximum negative values
         // Note: shorter types yield shorter strings, not all ffffffffffffffff
-        doTest(new Base64DTO((byte) -1, (char) -1, (short) -1, -1, -1), "" +
-                "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base64DTO {\n" +
+        assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base64DTO {\n" +
                 "  b: C_,\n" +
                 "  ch: O__,\n" +
                 "  s: O__,\n" +
                 "  i: C_____,\n" +
                 "  l: O__________\n" +
-                "}\n");
+                "}\n", doTest(new Base64DTO((byte) -1, (char) -1, (short) -1, -1, -1)), "base64 converter should serialize negative values with underscore padding proportional to primitive type width");
     }
 
     /**
@@ -185,30 +181,27 @@ public class LongConvertorFieldsTest {
     @Test
     public void base85() {
         // Validate Base85 encoding with a range of positive values
-        doTest(new Base85DTO((byte) 1, '2', (short) 3, 4, 5), "" +
-                "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base85DTO {\n" +
+        assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base85DTO {\n" +
                 "  b: 1,\n" +
                 "  ch: g,\n" +
                 "  s: 3,\n" +
                 "  i: 4,\n" +
                 "  l: 5\n" +
-                "}\n");
+                "}\n", doTest(new Base85DTO((byte) 1, '2', (short) 3, 4, 5)), "base85 converter should serialize small positive values as compact single-character strings");
         // Validate Base85 encoding with maximum negative values
         // Note: the encoded values for negative numbers are not straightforward like Base16 and Base64
-        doTest(new Base85DTO((byte) -1, (char) -1, (short) -1, -1, -1), "" +
-                "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base85DTO {\n" +
+        assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base85DTO {\n" +
                 "  b: 30,\n" +
                 "  ch: 960,\n" +
                 "  s: 960,\n" +
                 "  i: .Gk<0,\n" +
                 "  l: +ko2&)z.H0\n" +
-                "}\n");
+                "}\n", doTest(new Base85DTO((byte) -1, (char) -1, (short) -1, -1, -1)), "base85 converter should serialize negative values as variable-length strings that grow with primitive type width");
     }
 
     @Test
     public void detectSpecialCharBase85() {
-        final String CHARS = "" +
-                "0123456789" +
+        final String CHARS = "0123456789" +
                 ":;<=>?@" +
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ_" +
                 "abcdefghijklmnopqrstuvwxyz" +
@@ -217,7 +210,7 @@ public class LongConvertorFieldsTest {
         for (int i = 0; i < 85; i++) {
             char ch = CHARS.charAt(i);
             Base85DTO dto = new Base85DTO((byte) i, (char) i, (short) c.parse("0" + ch), (int) c.parse(ch + "a"), c.parse(ch + " "));
-            assertEquals(dto, Marshallable.fromString(dto.toString()));
+            assertEquals(dto, Marshallable.fromString(dto.toString()), "base85 converter should preserve all 85 character combinations in roundtrip serialization");
         }
     }
 
@@ -249,23 +242,21 @@ public class LongConvertorFieldsTest {
 
     @Test
     public void shortText() {
-        doTest(new ShortTextDTO((byte) 1, '2', (short) 3, 4, 5), "" +
-                "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$ShortTextDTO {\n" +
+        assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$ShortTextDTO {\n" +
                 "  b: 1,\n" +
                 "  ch: g,\n" +
                 "  s: 3,\n" +
                 "  i: 4,\n" +
                 "  l: 5\n" +
-                "}\n");
+                "}\n", doTest(new ShortTextDTO((byte) 1, '2', (short) 3, 4, 5)), "shorttext converter should serialize small positive values as unquoted single characters");
         // note shorter types are shorter strings and not all ffffffffffffffff
-        doTest(new ShortTextDTO((byte) -1, (char) -1, (short) -1, -1, -1), "" +
-                "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$ShortTextDTO {\n" +
+        assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$ShortTextDTO {\n" +
                 "  b: \"3 \",\n" +
                 "  ch: \"96 \",\n" +
                 "  s: \"96 \",\n" +
                 "  i: \".Gk< \",\n" +
                 "  l: \"+ko2&)z.H \"\n" +
-                "}\n");
+                "}\n", doTest(new ShortTextDTO((byte) -1, (char) -1, (short) -1, -1, -1)), "shorttext converter should serialize negative values as quoted strings with trailing space, length growing with primitive type width");
     }
 
     @Test
@@ -280,7 +271,7 @@ public class LongConvertorFieldsTest {
         for (int i = 0; i < 85; i++) {
             char ch = CHARS.charAt(i);
             ShortTextDTO dto = new ShortTextDTO((byte) i, (char) i, (short) c.parse("0" + ch), (int) c.parse(ch + "a"), c.parse(ch + " "));
-            assertEquals(dto, Marshallable.fromString(dto.toString()));
+            assertEquals(dto, Marshallable.fromString(dto.toString()), "shorttext converter should preserve all 85 character combinations in roundtrip serialization");
         }
     }
 
@@ -326,25 +317,23 @@ public class LongConvertorFieldsTest {
     public void words() {
         // Validate Words encoding with a range of positive values.
         // The expected results are arbitrary word mappings for demonstration.
-        doTest(new WordsDTO((byte) 1, '2', (short) 3, 4, 5), "" +
-                "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$WordsDTO {\n" +
+        assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$WordsDTO {\n" +
                 "  b: aid,\n" +
                 "  ch: joy,\n" +
                 "  s: air,\n" +
                 "  i: all,\n" +
                 "  l: and\n" +
-                "}\n");
+                "}\n", doTest(new WordsDTO((byte) 1, '2', (short) 3, 4, 5)), "words converter should encode small positive values as single human-readable dictionary words");
 
         // Validate Words encoding with maximum negative values.
         // Note: shorter types yield different word combinations based on the negative value.
-        doTest(new WordsDTO((byte) -1, (char) -1, (short) -1, -1, -1), "" +
-                "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$WordsDTO {\n" +
+        assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$WordsDTO {\n" +
                 "  b: corn,\n" +
                 "  ch: writer.eight,\n" +
                 "  s: writer.eight,\n" +
                 "  i: writer.writer.among,\n" +
                 "  l: writer.writer.writer.writer.writer.leg\n" +
-                "}\n");
+                "}\n", doTest(new WordsDTO((byte) -1, (char) -1, (short) -1, -1, -1)), "words converter should encode negative values as dot-separated word chains that grow longer with primitive type width");
     }
 
     /**
@@ -354,11 +343,12 @@ public class LongConvertorFieldsTest {
      * @param dto      The object to be serialized.
      * @param expected The expected string representation of the serialized object.
      */
-    private void doTest(Marshallable dto, String expected) {
+    private String doTest(Marshallable dto) {
         Wire wire = new YamlWire();
         wire.getValueOut().object(dto);
-        assertEquals(expected, wire.toString());
+        String actual = wire.toString();
         Object object = wire.getValueIn().object();
-        assertEquals(dto, object);
+        assertEquals(dto, object, "long converters should preserve exact values during yaml roundtrip serialization");
+        return actual;
     }
 }

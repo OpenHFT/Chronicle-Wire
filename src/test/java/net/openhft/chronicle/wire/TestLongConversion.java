@@ -3,33 +3,33 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(Parameterized.class)
 public class TestLongConversion {
     private static final char SEPARATOR = '/';
-    private final LongConverter longConverter;
+    private LongConverter longConverter;
 
-    @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[]{Base32LongConverter.INSTANCE},
                 new Object[]{Base64LongConverter.INSTANCE},
                 new Object[]{Base85LongConverter.INSTANCE});
     }
 
-    public TestLongConversion(LongConverter longConverter) {
+    public void initTestLongConversion(LongConverter longConverter) {
         this.longConverter = longConverter;
     }
 
-    @Test
-    public void parseRawIntsV1() {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void parseRawIntsV1(LongConverter longConverter) {
+
+        initTestLongConversion(longConverter);
 
         final StringBuilder builder = new StringBuilder();
 
@@ -46,8 +46,11 @@ public class TestLongConversion {
         assertEquals("VAL2/VAL3/VAL4", builder.toString());
     }
 
-    @Test
-    public void parseRawIntsV2() {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void parseRawIntsV2(LongConverter longConverter) {
+
+        initTestLongConversion(longConverter);
 
         final StringBuilder builder = new StringBuilder();
 

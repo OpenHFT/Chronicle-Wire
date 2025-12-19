@@ -7,10 +7,9 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,19 +17,17 @@ import java.util.Collection;
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
 // Using the Parameterized runner for JUnit tests to enable parameter-driven tests
-@RunWith(Parameterized.class)
 public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
 
     // Holds the WireType for this test instance
-    private final WireType wireType;
+    private WireType wireType;
 
     // Constructor that sets the WireType
-    public ForwardAndBackwardCompatibilityTest(WireType wireType) {
+    public void initForwardAndBackwardCompatibilityTest(WireType wireType) {
         this.wireType = wireType;
     }
 
     // Provides the set of WireTypes to be used as parameters for the tests
-    @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 // {WireType.TEXT},
@@ -39,8 +36,10 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     }
 
     // Test for checking backward compatibility of DTO classes
-    @Test
-    public void backwardsCompatibility() {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void backwardsCompatibility(WireType wireType) {
+        initForwardAndBackwardCompatibilityTest(wireType);
         // Expecting an exception due to class replacement
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2");
 
@@ -61,11 +60,11 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         // Reading the written document and expecting to get DTO2 instance
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
-                Assert.fail();
+                Assertions.fail("document should be present when reading DTO1 as DTO2");
             @Nullable DTO2 dto2 = dc.wire().getValueIn().typedMarshallable();
-            Assert.assertEquals(1, dto2.one);
-            Assert.assertEquals(0, dto2.two);
-            Assert.assertNull(dto2.three);
+            Assertions.assertEquals(1, dto2.one, "field 'one' should preserve value when reading DTO1 as DTO2");
+            Assertions.assertEquals(0, dto2.two, "field 'two' should default to 0 when reading DTO1 as DTO2");
+            Assertions.assertNull(dto2.three, "field 'three' should be null when reading DTO1 as DTO2");
         }
 
         // Releasing memory
@@ -73,8 +72,10 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     }
 
     // Test for checking forward compatibility of DTO classes
-    @Test
-    public void forwardCompatibility() {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void forwardCompatibility(WireType wireType) {
+        initForwardAndBackwardCompatibilityTest(wireType);
         // Expecting an exception due to class replacement
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1");
 
@@ -95,9 +96,9 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         // Reading the written document and expecting to get DTO1 instance
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
-                Assert.fail();
+                Assertions.fail("document should be present when reading DTO2 as DTO1");
             @Nullable DTO1 dto1 = dc.wire().getValueIn().typedMarshallable();
-            Assert.assertEquals(1, dto1.one);
+            Assertions.assertEquals(1, dto1.one, "field 'one' should preserve value when reading DTO2 as DTO1");
         }
 
         // Releasing memory
@@ -105,8 +106,11 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     }
 
     // Test to ensure that new data added to a document doesn't affect old reads
-    @Test
-    public void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads() {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads(WireType wireType) {
+
+        initForwardAndBackwardCompatibilityTest(wireType);
 
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
@@ -126,11 +130,11 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
 
             // Reading back the documents and verifying the data
             try (DocumentContext dc = w.readingDocument()) {
-                Assert.assertEquals("hello world", dc.wire().read("hello").text());
+                Assertions.assertEquals("hello world", dc.wire().read("hello").text(), "first document should contain 'hello world'");
             }
 
             try (DocumentContext dc = w.readingDocument()) {
-                Assert.assertEquals("other data", dc.wire().read("other data").text());
+                Assertions.assertEquals("other data", dc.wire().read("other data").text(), "second document should contain 'other data'");
             }
         } finally {
             // Releasing memory

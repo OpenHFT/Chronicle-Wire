@@ -4,13 +4,12 @@
 package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.wire.WireTypeConverter;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class WireTypeConverterTest {
 
-    private final String json = "" +
-            "{\"@FixEngineCfg\":{\"SERVER-CLIENT\":{\"connectionType\":\"initiator\",\n" +
+    private final String json = "{\"@FixEngineCfg\":{\"SERVER-CLIENT\":{\"connectionType\":\"initiator\",\n" +
             "\"connectionStrategy\":{\"@AlwaysStartOnPrimaryConnectionStrategy\":{}},\n" +
             "\"senderCompID\":\"CLIENT\",\n" +
             "\"fixVersion\":\"V4_4\",\n" +
@@ -28,8 +27,7 @@ public class WireTypeConverterTest {
             "\"autoLogon\":true,\n" +
             "\"compIdValidation\":\"strict\"}}}";
 
-    private final String yaml = "" +
-            "!FixEngineCfg {\n" +
+    private final String yaml = "!FixEngineCfg {\n" +
             "  SERVER-CLIENT: {\n" +
             "    connectionType: initiator,\n" +
             "    connectionStrategy: !AlwaysStartOnPrimaryConnectionStrategy { },\n" +
@@ -54,12 +52,12 @@ public class WireTypeConverterTest {
 
     @Test
     public void testYamlToJson() {
-        Assert.assertEquals(json,
+        Assertions.assertEquals(json,
                 new WireTypeConverter().yamlToJson(yaml).toString().replaceAll(",", ",\n"));
     }
 
     @Test
     public void testJsonToYaml() {
-        Assert.assertEquals(yaml, new WireTypeConverter().jsonToYaml(json).toString());
+        Assertions.assertEquals(yaml, new WireTypeConverter().jsonToYaml(json).toString());
     }
 }

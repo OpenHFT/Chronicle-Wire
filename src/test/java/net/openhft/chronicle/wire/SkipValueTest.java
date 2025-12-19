@@ -8,9 +8,8 @@ import net.openhft.chronicle.bytes.BytesMarshallable;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -24,23 +23,22 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import static net.openhft.chronicle.wire.BinaryWireCode.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * Tests the ability to skip certain values in wire formats based on the parameterized input.
  */
 @SuppressWarnings("rawtypes")
-@RunWith(Parameterized.class)
 public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
 
-    private final String name; // Represents the name of the binary wire code.
-    private final int code;   // Represents the binary wire code.
-    private final Consumer<ValueOut> valueOutConsumer; // A consumer function to operate on a ValueOut.
+    private String name; // Represents the name of the binary wire code.
+    private int code;   // Represents the binary wire code.
+    private Consumer<ValueOut> valueOutConsumer; // A consumer function to operate on a ValueOut.
 
     // Constructor for parameterized test.
-    public SkipValueTest(String name, int code, Consumer<ValueOut> valueOutConsumer) {
+    public void initSkipValueTest(String name, int code, Consumer<ValueOut> valueOutConsumer) {
         this.name = name;
         this.code = code;
         this.valueOutConsumer = valueOutConsumer;
@@ -56,7 +54,6 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
      * and a consumer function that indicates how to produce the value to be skipped.
      */
     @NotNull
-    @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<Object[]> data() throws IllegalAccessException {
 
         Object[][] list = {
@@ -127,8 +124,10 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
         return Arrays.asList(list);
     }
 
-    @Test
-    public void test() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{index}: {0}")
+    public void test(String name, int code, Consumer<ValueOut> valueOutConsumer) {
+        initSkipValueTest(name, code, valueOutConsumer);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Creates a new wire using the BINARY WireType.

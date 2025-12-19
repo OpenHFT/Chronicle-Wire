@@ -5,8 +5,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +37,7 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
         // Fetch the read message from the blocking queue with a timeout
         Bytes result = q.poll(10, TimeUnit.SECONDS);
         // Verify that the fetched message matches the expected content
-        Assert.assertEquals("hello", result.toString());
+        Assertions.assertEquals("hello", result.toString());
         if (result != null) {
             result.releaseLast();
         }
@@ -70,10 +70,10 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
                 sink.add(bytes.readUtf8());
             });
 
-            Assert.assertTrue(reader.readOne());
-            Assert.assertEquals("alpha", sink.poll(5, TimeUnit.SECONDS));
-            Assert.assertTrue(reader.readOne());
-            Assert.assertEquals("beta", sink.poll(5, TimeUnit.SECONDS));
+            Assertions.assertTrue(reader.readOne());
+            Assertions.assertEquals("alpha", sink.poll(5, TimeUnit.SECONDS));
+            Assertions.assertTrue(reader.readOne());
+            Assertions.assertEquals("beta", sink.poll(5, TimeUnit.SECONDS));
         } finally {
             reusable.releaseLast();
             wire.bytes().releaseLast();
@@ -98,8 +98,8 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
                 sink.add(bytes.readUtf8());
             });
 
-            Assert.assertTrue(reader.readOne());
-            Assert.assertEquals("original", sink.poll(5, TimeUnit.SECONDS));
+            Assertions.assertTrue(reader.readOne());
+            Assertions.assertEquals("original", sink.poll(5, TimeUnit.SECONDS));
         } finally {
             shared.releaseLast();
             wire.bytes().releaseLast();

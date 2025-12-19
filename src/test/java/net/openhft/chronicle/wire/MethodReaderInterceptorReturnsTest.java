@@ -7,8 +7,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.Invocation;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -18,13 +18,13 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
 
     // Setting up before the tests
     @Override
-    @Before
+    @BeforeEach
     public void threadDump() {
         super.threadDump();
     }
@@ -35,7 +35,9 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      */
     @Test
     public void testInterceptorSupportedInGeneratedCode() {
-        doTestInterceptorSupportedInGeneratedCode(new CountDownLatch(1), false);
+        CountDownLatch readerCreateLatch = new CountDownLatch(1);
+        doTestInterceptorSupportedInGeneratedCode(readerCreateLatch, false);
+        assertEquals(0, readerCreateLatch.getCount(), "reader create latch released");
     }
 
     /**
@@ -64,6 +66,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
             for (Future<?> future : futureList) {
                 future.get(10, TimeUnit.SECONDS);
             }
+            assertEquals(0, readerCreateLatch.getCount(), "reader create latch released");
         } finally {
             executor.shutdownNow();
         }

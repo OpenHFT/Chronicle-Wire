@@ -10,23 +10,21 @@ import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test class for WireCollection, using various wire types.
  */
-@Ignore("TODO FIX")
-@RunWith(Parameterized.class)
+@Disabled("TODO FIX")
 public class WireCollectionTest extends WireTestCommon {
 
     // Registering WireProperty class with the ClassAliasPool for serialization/deserialization
@@ -34,7 +32,7 @@ public class WireCollectionTest extends WireTestCommon {
         ClassAliasPool.CLASS_ALIASES.addAlias(WireProperty.class);
     }
 
-    private final Function<Bytes<?>, Wire> wireType;
+    private Function<Bytes<?>, Wire> wireType;
     private WireCollection collection;// = new WireModel();
 
     /**
@@ -42,7 +40,7 @@ public class WireCollectionTest extends WireTestCommon {
      *
      * @param wireType A function that defines the type of Wire to be tested.
      */
-    public WireCollectionTest(Function<Bytes<?>, Wire> wireType) {
+    public void initWireCollectionTest(Function<Bytes<?>, Wire> wireType) {
         this.wireType = wireType;
     }
 
@@ -51,7 +49,6 @@ public class WireCollectionTest extends WireTestCommon {
      *
      * @return A collection of wire type configurations to be tested.
      */
-    @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         return Arrays.asList(
                 // Test with various wire types
@@ -68,7 +65,7 @@ public class WireCollectionTest extends WireTestCommon {
     /**
      * Sets up the test environment before each test.
      */
-    @Before
+    @BeforeEach
     public void setUp() {
         collection = WireUtils.randomWireCollection();
     }
@@ -76,8 +73,10 @@ public class WireCollectionTest extends WireTestCommon {
     /**
      * Tests multiple reads of WireCollection using various wire types.
      */
-    @Test
-    public void testMultipleReads() {
+    @MethodSource("combinations")
+    @ParameterizedTest
+    public void testMultipleReads(Function<Bytes<?>, Wire> wireType) {
+        initWireCollectionTest(wireType);
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
 

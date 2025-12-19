@@ -5,9 +5,9 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * This class tests the capability of the MethodReader to handle parametrized interfaces hierarchy and chained calls.
@@ -50,9 +50,10 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
             }
         });
 
-        methodReader.readOne();
-        methodReader.readOne();
-        methodReader.readOne();
+        assertTrue(methodReader.readOne(), "definitive: event[0]");
+        assertTrue(methodReader.readOne(), "definitive: event[1]");
+        assertTrue(methodReader.readOne(), "definitive: event[2]");
+        assertFalse(methodReader.readOne(), "definitive: no more events");
     }
 
     @SuppressWarnings("deprecation")
@@ -91,9 +92,10 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
             }
         });
 
-        methodReader.readOne();
-        methodReader.readOne();
-        methodReader.readOne();
+        assertTrue(methodReader.readOne(), "indefinite: event[0]");
+        assertTrue(methodReader.readOne(), "indefinite: event[1]");
+        assertTrue(methodReader.readOne(), "indefinite: event[2]");
+        assertFalse(methodReader.readOne(), "indefinite: no more events");
     }
 
     @SuppressWarnings("deprecation")
@@ -138,10 +140,11 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
             }
         });
 
-        methodReader.readOne();
-        methodReader.readOne();
-        methodReader.readOne();
-        methodReader.readOne();
+        assertTrue(methodReader.readOne(), "nested: event[0]");
+        assertTrue(methodReader.readOne(), "nested: event[1]");
+        assertTrue(methodReader.readOne(), "nested: event[2]");
+        assertTrue(methodReader.readOne(), "nested: event[3]");
+        assertFalse(methodReader.readOne(), "nested: no more events");
     }
 
     /**

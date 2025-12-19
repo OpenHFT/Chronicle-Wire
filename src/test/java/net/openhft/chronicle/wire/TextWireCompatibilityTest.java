@@ -7,8 +7,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 // This test suite is designed to verify compatibility behaviors of the TextWire class,
 // especially when fields are added or modified.
@@ -28,7 +28,7 @@ public class TextWireCompatibilityTest extends WireTestCommon {
         // System.out.println(wire.toString());
 
         // Read an object from the wire and ensure it's not null
-        Assert.assertNotNull(wire.getValueIn().object());
+        Assertions.assertNotNull(wire.getValueIn().object());
     }
 
     // A superclass designed to be marshallable with basic incompatibility checks.
@@ -37,7 +37,7 @@ public class TextWireCompatibilityTest extends WireTestCommon {
         @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
             // Verify the value of the "a" field
-            Assert.assertEquals(1, wire.read("a").int32());
+            Assertions.assertEquals(1, wire.read("a").int32());
 
             // Check if the "c" field is missing, and log an error if present
             @Nullable String missingValue = wire.read("c").text();
@@ -61,9 +61,9 @@ public class TextWireCompatibilityTest extends WireTestCommon {
             super.readMarshallable(wire);
 
             // Verify the value of the "b" field and the presence of "object" and "object2" fields
-            Assert.assertEquals(TextWireCompatibilityTest.class, wire.read("b").typeLiteral());
-            Assert.assertNotNull(wire.read(() -> "object").object());
-            Assert.assertNotNull(wire.read(() -> "object2").object());
+            Assertions.assertEquals(TextWireCompatibilityTest.class, wire.read("b").typeLiteral());
+            Assertions.assertNotNull(wire.read(() -> "object").object());
+            Assertions.assertNotNull(wire.read(() -> "object2").object());
         }
 
         @Override

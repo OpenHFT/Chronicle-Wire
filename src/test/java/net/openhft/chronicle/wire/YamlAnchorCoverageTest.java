@@ -3,25 +3,27 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({"deprecation", "removal"})
 public class YamlAnchorCoverageTest extends WireTestCommon {
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void readsAnchorsAndAliases() {
-        String yaml = "common: &base { num: 7, text: 'hello' }\nfirst: *base\n";
-        YamlWire wire = YamlWire.from(yaml);
+        assertThrows(UnsupportedOperationException.class, () -> {
+            String yaml = "common: &base { num: 7, text: 'hello' }\nfirst: *base\n";
+            YamlWire wire = YamlWire.from(yaml);
 
-        Map<String, Object> common = wire.read("common").marshallableAsMap(String.class, Object.class);
-        Object first = wire.read("first").object(null, Object.class, true);
-        assertNotNull(first);
-        if (first instanceof Map) {
-            assertEquals(common, first);
-        }
+            Map<String, Object> common = wire.read("common").marshallableAsMap(String.class, Object.class);
+            Object first = wire.read("first").object(null, Object.class, true);
+            assertNotNull(first);
+            if (first instanceof Map) {
+                assertEquals(common, first);
+            }
+        });
     }
 }

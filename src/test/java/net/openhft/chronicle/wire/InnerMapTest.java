@@ -8,13 +8,13 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class InnerMapTest extends WireTestCommon {
 
@@ -31,7 +31,7 @@ public class InnerMapTest extends WireTestCommon {
         // Convert the instance to a string representation
         String asString = myMarshable.toString();
         // Assert that the string representation matches the expected format
-        Assert.assertEquals("!net.openhft.chronicle.wire.InnerMapTest$MyMarshable {\n" +
+        Assertions.assertEquals("!net.openhft.chronicle.wire.InnerMapTest$MyMarshable {\n" +
                 "  name: rob,\n" +
                 "  commission: {\n" +
                 "    hello: 123.4\n" +
@@ -57,7 +57,7 @@ public class InnerMapTest extends WireTestCommon {
         // Read the MyMarshable instance from the wire and assert its string representation
         try (DocumentContext dc = w.readingDocument()) {
             @Nullable MyMarshable tm = dc.wire().read(() -> "marshable").typedMarshallable();
-            Assert.assertEquals(asString, tm.toString());
+            Assertions.assertEquals(asString, tm.toString());
         }
 
         // Release the byte buffer resources

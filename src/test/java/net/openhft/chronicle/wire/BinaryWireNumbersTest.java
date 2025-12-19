@@ -5,34 +5,31 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(Parameterized.class)
 @SuppressWarnings({"deprecation", "removal"})
 public class BinaryWireNumbersTest extends WireTestCommon {
     private static final float VAL1 = 12345678901234567.0f;
     private static int counter = 0;
-    private final int len;
-    private final WriteValue expected;
-    private final WriteValue perform;
+    private int len;
+    private WriteValue expected;
+    private WriteValue perform;
 
     // Constructor initializes values for each test iteration
-    public BinaryWireNumbersTest(int len, WriteValue expected, WriteValue perform) {
+    public void initBinaryWireNumbersTest(int len, WriteValue expected, WriteValue perform) {
         this.len = len;
         this.expected = expected;
         this.perform = perform;
     }
 
     // Provides a collection of parameters to run the tests with
-    @Parameterized.Parameters
     public static Collection<Object[]> data() {
         // Each sub-array represents a set of parameters: length, expected write value, and actual write value
         return Arrays.asList(new Object[][]{
@@ -78,8 +75,13 @@ public class BinaryWireNumbersTest extends WireTestCommon {
     }
 
     // Test the BinaryWire number serialization using the given parameters
-    @Test
-    public void doTest() {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void doTest(int len, WriteValue expected, WriteValue perform) {
+        initBinaryWireNumbersTest(len, expected, perform);
+        assertTrue(len > 0, "len must be positive");
+        assertNotNull(expected, "expected value writer");
+        assertNotNull(perform, "performed value writer");
         if (counter++ == 18)
             Thread.yield();
         test(expected, perform);
@@ -95,7 +97,7 @@ public class BinaryWireNumbersTest extends WireTestCommon {
         expected.writeValue(wire1.write());
 
         // Check if the length of the serialized value matches the expected length
-        assertEquals("Length for fixed length doesn't match for " + TextWire.asText(wire1), len, bytes1.readRemaining());
+        assertEquals(len, bytes1.readRemaining(), "Length for fixed length doesn't match for " + TextWire.asText(wire1));
 
         @SuppressWarnings("rawtypes")
         @NotNull Bytes<?> bytes2 = allocateElasticOnHeap();
@@ -105,9 +107,9 @@ public class BinaryWireNumbersTest extends WireTestCommon {
         perform.writeValue(wire2.write());
 
         // Compare the lengths of the serialized values
-        assertEquals("Lengths for variable length expected " + bytes1
-                        + " and actual " + bytes2 + " don't match for " + TextWire.asText(wire1),
-                bytes1.readRemaining(), bytes2.readRemaining());
+        assertEquals(bytes1.readRemaining(),
+                bytes2.readRemaining(), "Lengths for variable length expected " + bytes1
+                        + " and actual " + bytes2 + " don't match for " + TextWire.asText(wire1));
 
         // If serialized values don't match, log the mismatched values
         if (!bytes1.toString().equals(bytes2.toString()))

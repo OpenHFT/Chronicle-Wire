@@ -11,43 +11,40 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // Runner to enable parameterized tests for the MarshallableWireTest class
-@RunWith(Parameterized.class)
 public class MarshallableWireTest extends WireTestCommon {
 
     // Type of wire to be tested
-    private final WireType wireType;
+    private WireType wireType;
 
     // Marshallable object for test scenarios
-    private final Marshallable m;
+    private Marshallable m;
 
     // Constructor initializes the WireType and Marshallable object for the test scenario
-    public MarshallableWireTest(WireType wireType, Marshallable m) {
+    public void initMarshallableWireTest(WireType wireType, Marshallable m) {
         this.wireType = wireType;
         this.m = m;
     }
 
-    @Before
+    @BeforeEach
     public void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     // Provide test data combinations for the parameterized test
     @NotNull
-    @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
 
         // Collection to store different test combinations
@@ -77,9 +74,12 @@ public class MarshallableWireTest extends WireTestCommon {
     }
 
     // Test method to write a Marshallable object to a wire and then read it back
+    @MethodSource("combinations")
     @SuppressWarnings("rawtypes")
-    @Test
-    public void writeMarshallable() {
+    @ParameterizedTest
+    public void writeMarshallable(WireType wireType, Marshallable m) {
+
+        initMarshallableWireTest(wireType, m);
 
         // Allocate memory for writing data
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();

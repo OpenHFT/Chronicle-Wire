@@ -8,7 +8,7 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
 import net.openhft.chronicle.wire.domestic.reduction.Reductions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.LongSupplier;
 

@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class WireArrayTestSupport {
     private WireArrayTestSupport() {

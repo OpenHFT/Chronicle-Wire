@@ -6,10 +6,10 @@ package net.openhft.chronicle.wire.issue;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class Issue751Test extends WireTestCommon {
 
@@ -53,8 +53,7 @@ public class Issue751Test extends WireTestCommon {
                 new One("hello"), new Two(42)));
 
         Object first = wire.read("first").object();
-        assertEquals("" +
-                "!net.openhft.chronicle.wire.issue.Issue751Test$Three {\n" +
+        assertEquals("!net.openhft.chronicle.wire.issue.Issue751Test$Three {\n" +
                 "  one: {\n" +
                 "    text: hello\n" +
                 "  },\n" +

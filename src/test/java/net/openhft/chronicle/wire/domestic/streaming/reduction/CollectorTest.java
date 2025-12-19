@@ -7,9 +7,9 @@ import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -18,19 +18,19 @@ import java.util.stream.Collector;
 import static java.util.stream.Collectors.*;
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.reducingConcurrent;
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.replacingMerger;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"deprecation", "removal"})
 public class CollectorTest extends WireTestCommon {
 
     private static final String Q_NAME = CollectorTest.class.getSimpleName();
 
-    @Before
+    @BeforeEach
     public void clearBefore() {
         IOTools.deleteDirWithFiles(Q_NAME);
     }
 
-    @After
+    @AfterEach
     public void clearAfter() {
         IOTools.deleteDirWithFiles(Q_NAME);
     }

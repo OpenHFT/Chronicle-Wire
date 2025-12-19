@@ -9,11 +9,11 @@ import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.YamlWire;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test class to validate the behavior and serialization of Wire objects with arrays.
@@ -57,8 +57,7 @@ public class Issue272Test {
         Wire copyWire0 = new BinaryWire(bytes);
         new YamlWire(buffer.readPosition(0)) // Verify the hex representation of the binary wire
                 .copyTo(copyWire0);
-        assertEquals("" +
-                        "28 00 00 00                                     # msg-length\n" +
+        assertEquals("28 00 00 00                                     # msg-length\n" +
                         "b9 03 6f 6e 65                                  # one: (event)\n" +
                         "82 0a 00 00 00                                  # sequence\n" +
                         "a1 01                                           # 1\n" +
@@ -80,8 +79,7 @@ public class Issue272Test {
         try (DocumentContext dc = copyWire0.readingDocument()) {
             dc.wire().copyTo(copyWire);
         }
-        assertEquals("" +
-                        "one: [\n" +
+        assertEquals("one: [\n" +
                         "  1,\n" +
                         "  2,\n" +
                         "  3,\n" +
@@ -107,8 +105,7 @@ public class Issue272Test {
     @Test
     public void map() {
         // Create an input string with Yaml format to be parsed
-        String input = "" +
-                "to: dest1\n" +
+        String input = "to: dest1\n" +
                 "send: message\n" +
                 "...\n" +
                 "to: dest2\n" +
@@ -125,8 +122,7 @@ public class Issue272Test {
         HexDumpBytes bytes = new HexDumpBytes();
         Wire copyWire = new BinaryWire(bytes);
         copyAll(wire, copyWire);
-        assertEquals("" +
-                        "1b 00 00 00                                     # msg-length\n" +
+        assertEquals("1b 00 00 00                                     # msg-length\n" +
                         "82 16 00 00 00                                  # Marshallable\n" +
                         "c2 74 6f                                        # to:\n" +
                         "e5 64 65 73 74 31                               # dest1\n" +

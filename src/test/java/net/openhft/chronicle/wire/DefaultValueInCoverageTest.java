@@ -7,14 +7,14 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.PointerBytesStore;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DefaultValueInCoverageTest extends WireTestCommon {
 
@@ -32,7 +32,7 @@ public class DefaultValueInCoverageTest extends WireTestCommon {
         direct.write("hi".getBytes(ISO_8859_1));
         valueIn.defaultValue = direct.bytesStore();
         valueIn.bytesSet(pointer);
-        assertTrue("pointer should point at direct store", pointer.safeLimit() >= 2);
+        assertTrue(pointer.safeLimit() >= 2, "pointer should point at direct store");
         direct.releaseLast();
     }
 

@@ -5,14 +5,15 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.annotation.RequiredForClient;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.util.Scanner;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.wire.WireType.YAML;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @RequiredForClient
 public class KubernetesYamlTest extends WireTestCommon {
@@ -59,6 +60,7 @@ public class KubernetesYamlTest extends WireTestCommon {
     // Test cases for the "example*.yaml" Kubernetes file
     @Test
     public void testExample1() {
+        assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example1.yaml"), "resource: example1.yaml");
         doTest("example1.yaml",
                 "{apiVersion=v1, kind=Pod, metadata={name=frontend}, spec={containers=[" +
                         "{name=app, image=images.my-company.example/app:v4, resources={requests={memory=64Mi, cpu=250m}, limits={memory=128Mi, cpu=500m}}}, " +
@@ -67,6 +69,7 @@ public class KubernetesYamlTest extends WireTestCommon {
 
     @Test
     public void testExample2() {
+        assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example2.yaml"), "resource: example2.yaml");
         doTest("example2.yaml",
         "{apiVersion=v1, kind=Pod, metadata={name=frontend}, spec={containers=[" +
                 "{name=app, image=images.my-company.example/app:v4, resources={requests={ephemeral-storage=2Gi}, limits={ephemeral-storage=4Gi}}, volumeMounts=[{name=ephemeral, mountPath=/tmp}]}, " +
@@ -76,6 +79,7 @@ public class KubernetesYamlTest extends WireTestCommon {
 
     @Test
     public void testExample3() {
+        assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example3.yaml"), "resource: example3.yaml");
         doTest("example3.yaml",
         "{apiVersion=apps/v1, kind=Deployment, metadata={name=nginx-deployment}, spec={selector={matchLabels={app=nginx}}, " +
                 "replicas=2, template={metadata={labels={app=nginx}}, spec={containers=[{name=nginx, image=nginx:1.14.2, ports=[{containerPort=80}]}]}}}}");
@@ -83,6 +87,7 @@ public class KubernetesYamlTest extends WireTestCommon {
 
     @Test
     public void testExample4() {
+        assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example4.yaml"), "resource: example4.yaml");
         doTest("example4.yaml",
         "{apiVersion=source.toolkit.fluxcd.io/v1beta1, kind=GitRepository, metadata={name=rook-ceph-source, namespace=flux-system}, " +
                 "spec={interval=10m, url=https://github.com/rook/rook.git, ref={tag=v1.5.5}, ignore=# exclude all\n/*\n# include deploy crds dir\n!/cluster/examples/kubernetes/ceph/crds.yaml\n}}",
@@ -104,6 +109,7 @@ public class KubernetesYamlTest extends WireTestCommon {
 
     @Test
     public void testExample5() {
+        assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example5.yaml"), "resource: example5.yaml");
         doTest("example5.yaml",
                 "{apiVersion=rbac.istio.io/v1alpha1, kind=ServiceRole, metadata={name=hello-viewer, namespace=default}, " +
                         "spec={rules=[{services=[hello.default.svc.cluster.local], methods=[GET, HEAD]}]}}",
@@ -146,6 +152,7 @@ public class KubernetesYamlTest extends WireTestCommon {
 
     @Test
     public void testExample6() {
+        assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example6.yaml"), "resource: example6.yaml");
         doTest("example6.yaml", "{apiVersion=v1, items=[{apiVersion=v1, kind=Service, metadata={annotations={" +
                 "external-dns.alpha.kubernetes.io/cloudflare-proxied=false, external-dns.alpha.kubernetes.io/hostname=h.christine.website, external-dns.alpha.kubernetes.io/ttl=120}, " +
                 "labels={app=hlang}, name=hlang, namespace=apps}, spec={ports=[{port=5000, targetPort=5000}], selector={app=hlang}, type=ClusterIP}}, " +
@@ -178,11 +185,13 @@ public class KubernetesYamlTest extends WireTestCommon {
 
     @Test
     public void testExample7() {
+        assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example7.yaml"), "resource: example7.yaml");
         doTest("example7.yaml", "{containers=[{env=[{name=POD_ID, valueFrom=null}, {name=LOG_PATH, value=/var/log/mycompany/$(POD_ID)/logs}]}]}");
     }
 
     @Test
     public void testExample8() {
+        assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example8.yaml"), "resource: example8.yaml");
         doTest("example8.yaml", "{kind=List, apiVersion=v1, items=[" +
                 "{kind=Secret, apiVersion=v1, type=kubernetes.io/basic-auth, metadata={name=secret1, annotations={build.openshift.io/source-secret-match-uri-1=*://*.example.com/*}}, data={username=AA==}}, " +
                 "{kind=Secret, apiVersion=v1, type=kubernetes.io/ssh-auth, metadata={name=secret2, annotations={build.openshift.io/source-secret-match-uri-1=*://*.example.com/*}}, data={ssh-privatekey=AA==}}, " +
@@ -195,6 +204,7 @@ public class KubernetesYamlTest extends WireTestCommon {
 
     @Test
     public void testExample9() {
+        assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example9.yaml"), "resource: example9.yaml");
         doTest("example9.yaml", "{kind=List, apiVersion=v1, items=[" +
                 "{kind=ServiceAccount, apiVersion=v1, metadata={name=sdn, namespace=openshift-sdn}}, " +
                 "{apiVersion=authorization.openshift.io/v1, kind=ClusterRoleBinding, metadata={name=sdn-cluster-reader}, " +

@@ -6,9 +6,9 @@ package net.openhft.chronicle.wire.converter;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * The Base64Test class tests the Base64 encoding and decoding functionalities
@@ -37,8 +37,7 @@ public class Base64Test extends net.openhft.chronicle.wire.WireTestCommon {
         writer.send(new Data64(Byte.MAX_VALUE, Short.MAX_VALUE, Integer.MAX_VALUE, byeNow));
 
         // Define the expected YAML output
-        final String expected = "" +
-                "asByte: A_\n" +
+        final String expected = "asByte: A_\n" +
                 "...\n" +
                 "asShort: G__\n" +
                 "...\n" +

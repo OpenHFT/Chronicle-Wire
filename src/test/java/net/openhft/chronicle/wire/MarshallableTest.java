@@ -5,8 +5,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.lang.annotation.RetentionPolicy;
@@ -16,15 +16,24 @@ import java.util.Arrays;
 import java.util.List;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({"deprecation", "removal"})
 public class MarshallableTest extends WireTestCommon {
+    private static final String EXPECTED_DTO1 = "!net.openhft.chronicle.wire.MarshallableTest$DTO1 {\n" +
+            "  one: CLASS,\n" +
+            "  two: [\n" +
+            "    1,\n" +
+            "    22\n" +
+            "  ],\n" +
+            "  three: 2018-11-02\n" +
+            "}\n";
 
     // Test to check if the fromFile() method of Marshallable throws an IOException for an empty file.
-    @Test(expected = IOException.class)
-    public void fromFile() throws IOException {
-        fail("Got " + Marshallable.fromFile("empty-file.yaml"));
+    @Test
+    public void fromFile() {
+        assertThrows(IOException.class, () ->
+                fail("Got " + Marshallable.fromFile("empty-file.yaml")));
     }
 
     // Test to check if Marshallable.fromString() method returns an empty string when an empty string is provided.
@@ -34,19 +43,23 @@ public class MarshallableTest extends WireTestCommon {
     }
 
     // Test for undefined behavior when a string with a single double-quote is passed.
-    @Ignore("Undefined behaviour")
-    @Test(expected = IllegalArgumentException.class)
+    @Disabled("Undefined behaviour")
+    @Test
     public void testFromString2() {
-        Object o = Marshallable.fromString("\"");
-        assertNotNull(o);
+        assertThrows(IllegalArgumentException.class, () -> {
+            Object o = Marshallable.fromString("\"");
+            assertNotNull(o);
+        });
     }
 
     // Test for undefined behavior when a string with a single single-quote is passed.
-    @Ignore("Undefined behaviour")
-    @Test(expected = IllegalArgumentException.class)
+    @Disabled("Undefined behaviour")
+    @Test
     public void testFromString3() {
-        Object o = Marshallable.fromString("'");
-        assertNotNull(o);
+        assertThrows(IllegalArgumentException.class, () -> {
+            Object o = Marshallable.fromString("'");
+            assertNotNull(o);
+        });
     }
 
     // Test for verifying the marshallable operation on bytes.
@@ -87,7 +100,7 @@ public class MarshallableTest extends WireTestCommon {
     }
 
     // Helper method to test the copy operation across different data transfer objects using the specified wire type.
-    private static void doTestCopy(WireType wireType) {
+    private static String doTestCopy(WireType wireType) {
         DTO2 dto2 = new DTO2();
         dto2.one = RetentionPolicy.CLASS;
         dto2.two = Arrays.asList(1L, 22L);
@@ -96,27 +109,20 @@ public class MarshallableTest extends WireTestCommon {
         String s = wireType.asString(dto2);
         // System.out.println(s);
         DTO1 dto1 = wireType.fromString(DTO1.class, s);
-        assertEquals("!net.openhft.chronicle.wire.MarshallableTest$DTO1 {\n" +
-                "  one: CLASS,\n" +
-                "  two: [\n" +
-                "    1,\n" +
-                "    22\n" +
-                "  ],\n" +
-                "  three: 2018-11-02\n" +
-                "}\n", wireType.asString(dto1));
+        return wireType.asString(dto1);
     }
 
     // Test the copying process using WireType.TEXT
     @Test
     public void testCopy() {
-        doTestCopy(WireType.TEXT);
+        assertEquals(EXPECTED_DTO1, doTestCopy(WireType.TEXT), "copy (text)");
     }
 
     // TODO: This test is currently ignored. The copy process using WireType.YAML_ONLY needs to be fixed.
-    @Ignore(/* TODO FIX */)
+    @Disabled(/* TODO FIX */)
     @Test
     public void testCopyYaml() {
-        doTestCopy(WireType.YAML_ONLY);
+        assertEquals(EXPECTED_DTO1, doTestCopy(WireType.YAML_ONLY), "copy (yaml)");
     }
 
     // Test equality of two objects containing arrays

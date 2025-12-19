@@ -11,9 +11,9 @@ import net.openhft.chronicle.core.onoes.LogLevel;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.threads.CleaningThread;
 import net.openhft.chronicle.core.threads.ThreadDump;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"this-escape"})
 public class WireTestCommon {
@@ -49,7 +49,7 @@ public class WireTestCommon {
     }
 
     // Activates the reference tracing before executing tests
-    @Before
+    @BeforeEach
     public void enableReferenceTracing() {
         AbstractReferenceCounted.enableReferenceTracing();
     }
@@ -72,7 +72,7 @@ public class WireTestCommon {
     }
 
     // Records exceptions before the test runs
-    @Before
+    @BeforeEach
     public void recordExceptions() {
         exceptions = Jvm.recordExceptions();
     }
@@ -134,7 +134,7 @@ public class WireTestCommon {
                             .collect(Collectors.joining(", "));
             Jvm.dumpException(exceptions);
             Jvm.resetExceptionHandlers();
-            Assert.fail(msg);
+            Assertions.fail(msg);
         }
     }
 
@@ -155,7 +155,7 @@ public class WireTestCommon {
         assertEquals(0, comparisons);
     }
 
-    @After
+    @AfterEach
     public void afterChecks() {
         preAfter(); // Any custom operations before the default cleanup
         CleaningThread.performCleanup(Thread.currentThread());
@@ -175,18 +175,18 @@ public class WireTestCommon {
     }
 
     // Store the current value of GENERATE_TUPLES before test execution
-    @Before
+    @BeforeEach
     public void rememberGenerateTuples() {
         gt = Wires.GENERATE_TUPLES;
     }
 
     // Restore the original value of GENERATE_TUPLES after the test execution
-    @After
+    @AfterEach
     public void restoreGenerateTuples() {
         Wires.GENERATE_TUPLES = gt;
     }
 
-    @Before
+    @BeforeEach
     public void throwCNFRE() {
     }
 }

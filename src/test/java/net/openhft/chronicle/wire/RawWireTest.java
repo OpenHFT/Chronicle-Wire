@@ -8,9 +8,8 @@ import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.internal.NoBytesStore;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.time.*;
 import java.util.UUID;
@@ -23,7 +22,7 @@ import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({"deprecation", "removal"})
 public class RawWireTest extends WireTestCommon {
@@ -87,7 +86,11 @@ public class RawWireTest extends WireTestCommon {
     public void testRead() {
         @NotNull Wire wire = createWire();
         WireReadTestSupport.writeStandardFields(wire);
-        WireReadTestSupport.exerciseRead(wire, 0);
+        wire.read();
+        wire.read();
+        wire.read();
+        assertEquals(0, wire.bytes().readRemaining(), "read: remaining after 3 reads");
+        wire.read();
     }
 
     // Test to verify reading specific fields from the wire after writing some data.
@@ -95,7 +98,11 @@ public class RawWireTest extends WireTestCommon {
     public void testRead1() {
         @NotNull Wire wire = createWire();
         WireReadTestSupport.writeStandardFields(wire);
-        WireReadTestSupport.exerciseReadWithKey(wire, 0);
+        wire.read(BWKey.field1);
+        wire.read(BWKey.field1);
+        wire.read(BWKey.field1);
+        assertEquals(0, wire.bytes().readRemaining(), "read(key): remaining after 3 reads");
+        wire.read();
     }
 
     // Test to verify reading specific fields from the wire after writing some data with a long name.
@@ -107,7 +114,20 @@ public class RawWireTest extends WireTestCommon {
         @NotNull String name1 = "Long field name which is more than 32 characters, Bye";
         wire.write(() -> name1);
 
-        WireReadTestSupport.exerciseReadWithNames(wire, name1, "", "", 0);
+        @NotNull StringBuilder name = new StringBuilder();
+        wire.read(name);
+        assertEquals(0, name.length(), "read(name): first name blank");
+
+        name.setLength(0);
+        wire.read(name);
+        assertEquals("", name.toString(), "read(name): second name");
+
+        name.setLength(0);
+        wire.read(name);
+        assertEquals("", name.toString(), "read(name): third name");
+
+        assertEquals(0, wire.bytes().readRemaining(), "read(name): remaining after 3 reads");
+        wire.read();
     }
 
     // Test for writing and reading 8-bit integers to and from the wire.
@@ -300,9 +320,8 @@ public class RawWireTest extends WireTestCommon {
         assertEquals("[pos: 0, rlim: 142, wlim: 8EiB, cap: 8EiB ] ǁ⒍MyType⒑AlsoMyType{" + name1 + "‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
 
         // Read type prefixes from the wire and validate them
-        Stream.of("MyType", "AlsoMyType", name1).forEach(e -> {
-            wire.read().typePrefix(e, StringUtils::isEqual);
-        });
+        Stream.of("MyType", "AlsoMyType", name1).forEach(e ->
+                wire.read().typePrefix(e, StringUtils::isEqual));
 
         // Ensure no remaining bytes in the wire
         assertEquals(0, bytes.readRemaining());
@@ -360,7 +379,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test case for writing and reading byte arrays using a Wire
     // Currently, this test is ignored due to an UnsupportedOperationException
-    @Ignore("todo fix :currently using NoBytesStore so will fail with UnsupportedOperationException")
+    @Disabled("todo fix :currently using NoBytesStore so will fail with UnsupportedOperationException")
     @SuppressWarnings("rawtypes")
     @Test
     public void testBytes() {

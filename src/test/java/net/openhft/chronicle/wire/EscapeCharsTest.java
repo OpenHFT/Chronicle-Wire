@@ -7,29 +7,27 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Tests for handling escaped characters in various Wire formats.
  */
-@RunWith(Parameterized.class)
 public class EscapeCharsTest extends WireTestCommon {
-    private final Future<?> future;
+    private Future<?> future;
 
     // Override the threadDump from WireTestCommon to use the parent implementation
     @Override
-    @Before
+    @BeforeEach
     public void threadDump() {
         super.threadDump();
     }
@@ -40,7 +38,7 @@ public class EscapeCharsTest extends WireTestCommon {
      * @param chs   Characters to test
      * @param future Represents the result of an asynchronous computation
      */
-    public EscapeCharsTest(@NotNull String chs, Future<?> future) {
+    public void initEscapeCharsTest(@NotNull String chs, Future<?> future) {
         this.future = future;
     }
 
@@ -50,7 +48,6 @@ public class EscapeCharsTest extends WireTestCommon {
      * @return Collection of test data
      */
     @NotNull
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
 
@@ -99,18 +96,20 @@ public class EscapeCharsTest extends WireTestCommon {
 
         // Read from wire and validate
         @Nullable String s = wire.read(sb).text();
-        assertEquals("key " + str, str, sb.toString());
-        assertEquals("value " + str, str, s);
+        assertEquals(str, sb.toString(), "key " + str);
+        assertEquals(str, s, "value " + str);
         @Nullable String ss = wire.read(sb).text();
-        assertEquals("key " + str2, str2, sb.toString());
-        assertEquals("value " + str2, str2, ss);
+        assertEquals(str2, sb.toString(), "key " + str2);
+        assertEquals(str2, ss, "value " + str2);
     }
 
     /**
      * Test to ensure escaped characters are handled properly.
      */
-    @Test
-    public void testEscaped() throws ExecutionException, InterruptedException {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "{0}")
+    public void testEscaped(@NotNull String chs, Future<?> future) throws ExecutionException, InterruptedException {
+        initEscapeCharsTest(chs, future);
         assertNull(future.get());
     }
 }

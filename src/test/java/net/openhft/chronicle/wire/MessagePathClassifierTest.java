@@ -3,9 +3,10 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("deprecation")
 public class MessagePathClassifierTest extends WireTestCommon {
@@ -43,17 +44,17 @@ public class MessagePathClassifierTest extends WireTestCommon {
                 .addPathForSourcesEnding(4, 4)
                 .addPathForSourcesEnding(123, 1, 2, 3)
                 .addPathForSourcesEnding(4, 4);
-        assertEquals("" +
-                        "MessagePathClassifier{sourcePattern=[[4], [1, 2, 3]], pathIds=[4, 123]}",
+        assertEquals("MessagePathClassifier{sourcePattern=[[4], [1, 2, 3]], pathIds=[4, 123]}",
                 mpc.toString());
     }
 
     // Test for an exception to be thrown when a source pattern is duplicated in MessagePathClassifier.
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void addPathForSourcesEnding2() {
-        new MessagePathClassifier()
-                .addPathForSourcesEnding(4, 4)
-                .addPathForSourcesEnding(123, 1, 2, 3)
-                .addPathForSourcesEnding(444, 4); // error. Expected to throw IllegalArgumentException
+        assertThrows(IllegalArgumentException.class, () ->
+                new MessagePathClassifier()
+                        .addPathForSourcesEnding(4, 4)
+                        .addPathForSourcesEnding(123, 1, 2, 3)
+                        .addPathForSourcesEnding(444, 4)); // error. Expected to throw IllegalArgumentException
     }
 }

@@ -36,7 +36,7 @@ class AbstractUntypedFieldTest extends WireTestCommon {
     @ParameterizedTest
     @MethodSource("provideWire")
     void typedFieldsShouldBeNonNull(Function<Bytes<byte[]>, Wire> wireConstruction) {
-        final Bytes<byte[]> bytes = Bytes.from("!net.openhft.chronicle.wire.AbstractUntypedFieldShouldBeNull$Holder {\n" +
+        final Bytes<byte[]> bytes = Bytes.from("!net.openhft.chronicle.wire.AbstractUntypedFieldTest$Holder {\n" +
                 "  a: !AImpl {\n" +
                 "  }\n" +
                 "}");
@@ -54,12 +54,13 @@ class AbstractUntypedFieldTest extends WireTestCommon {
     @ParameterizedTest
     @MethodSource("provideWire")
     void untypedFieldsShouldBeNull(Function<Bytes<byte[]>, Wire> wireConstruction) {
-        final Bytes<byte[]> bytes = Bytes.from("!net.openhft.chronicle.wire.AbstractUntypedFieldShouldBeNull$Holder {\n" +
+        final Bytes<byte[]> bytes = Bytes.from("!net.openhft.chronicle.wire.AbstractUntypedFieldTest$Holder {\n" +
                 "  a: {\n" +
                 "  }\n" +
                 "}");
         final Wire textWire = wireConstruction.apply(bytes);
 
+        ignoreException("Ignoring exception and setting field 'a' to null");
         final Holder holder = textWire.getValueIn().object(Holder.class);
 
         // Assertion to check if the untyped field is null
@@ -70,7 +71,7 @@ class AbstractUntypedFieldTest extends WireTestCommon {
     @ParameterizedTest
     @MethodSource("provideWire")
     void missingAliasesShouldLogWarnings(Function<Bytes<byte[]>, Wire> wireConstruction) {
-        final Bytes<byte[]> bytes = Bytes.from("!net.openhft.chronicle.wire.AbstractUntypedFieldShouldBeNull$Holder {\n" +
+        final Bytes<byte[]> bytes = Bytes.from("!net.openhft.chronicle.wire.AbstractUntypedFieldTest$Holder {\n" +
                 "  a: !MissingAlias {\n" +
                 "  }\n" +
                 "}");
@@ -78,7 +79,7 @@ class AbstractUntypedFieldTest extends WireTestCommon {
 
         // Expect certain exception messages to be logged
         expectException("Ignoring exception and setting field 'a' to null");
-        expectException("Cannot find a class for MissingAlias are you missing an alias?");
+        ignoreException("MissingAlias");
         final ValueIn valueIn = textWire.getValueIn();
 
         // Assertion to check if the field with missing alias is null

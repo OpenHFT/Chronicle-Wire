@@ -3,11 +3,11 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ValueInBestEffortTest extends WireTestCommon {
 
@@ -19,7 +19,7 @@ public class ValueInBestEffortTest extends WireTestCommon {
         Object result = wire.read("value").object(null, String.class, false);
         // In strict mode, mismatched types are not coerced into a target class;
         // current behaviour returns a textual representation of the mapping.
-        assertTrue(result instanceof String);
+        assertInstanceOf(String.class, result);
         String s = (String) result;
         assertTrue(s.startsWith("{"));
         assertTrue(s.contains("foo: bar"));

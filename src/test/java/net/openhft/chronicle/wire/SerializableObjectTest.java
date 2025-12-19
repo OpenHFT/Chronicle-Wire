@@ -46,7 +46,8 @@ final class SerializableObjectTest extends WireTestCommon {
                     "sun.",
                     "io.github.",
                     "com.sun.",
-                    "org.junit.",
+                    "org.junit.jupiter.",
+                    "org.junit.platform.",
                     "org.jcp.xml.dsig.internal.",
                     "jdk.nashorn.",
                     "org.easymock.",
@@ -319,14 +320,14 @@ final class SerializableObjectTest extends WireTestCommon {
     // Assert that two objects are "equivalent" based on certain conditions
     private static void assertEqualEnough(Object a, Object b) {
         if (a.getClass() != b.getClass())
-            Assertions.assertEquals(a, b);
+            Assertions.assertEquals(a, b, "objects should be equal despite class mismatch");
         if (a instanceof Throwable) {
-            Assertions.assertEquals(a.getClass(), b.getClass());
-            Assertions.assertEquals(((Throwable) a).getMessage(), ((Throwable) b).getMessage());
+            Assertions.assertEquals(a.getClass(), b.getClass(), "throwable classes should match after serialisation");
+            Assertions.assertEquals(((Throwable) a).getMessage(), ((Throwable) b).getMessage(), "throwable messages should match after serialisation");
         } else if (a instanceof Queue) {
-            Assertions.assertEquals(a.toString(), b.toString());
+            Assertions.assertEquals(a.toString(), b.toString(), "queue string representations should match after serialisation");
         } else {
-            Assertions.assertEquals(a, b);
+            Assertions.assertEquals(a, b, "objects should be equal after serialisation round-trip");
         }
     }
 
@@ -338,7 +339,9 @@ final class SerializableObjectTest extends WireTestCommon {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @TestFactory
     Stream<DynamicTest> test() {
-        return DynamicTest.stream(cases(), Objects::toString, wireTypeObject -> {
+        List<WireTypeObject> caseList = cases().collect(Collectors.toList());
+        Assertions.assertFalse(caseList.isEmpty(), "test case list should contain serializable object test cases");
+        return DynamicTest.stream(caseList.stream(), Objects::toString, wireTypeObject -> {
             final Object source = wireTypeObject.object;
             // Exclude handling of subclasses of Properties
             if (source instanceof Properties && source.getClass() != Properties.class)
@@ -354,7 +357,7 @@ final class SerializableObjectTest extends WireTestCommon {
                 // Assert the source and target objects are equivalent
                 if (!(source instanceof Comparable) || ((Comparable) source).compareTo(target) != 0) {
                     if (wireTypeObject.wireType == WireType.JSON || source instanceof EnumMap)
-                        Assertions.assertEquals(source.toString(), target.toString());
+                        Assertions.assertEquals(source.toString(), target.toString(), "string representations should match after JSON/EnumMap serialisation");
                     else
                         assertEqualEnough(source, target);
                 }

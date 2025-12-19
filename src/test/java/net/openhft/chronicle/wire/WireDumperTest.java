@@ -4,29 +4,27 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.EnumMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(Parameterized.class)
 public class WireDumperTest extends WireTestCommon {
 
     // Instance variables for the test setup and expected outputs
-    private final Bytes<?> bytes;
-    private final Wire wire;
-    private final WireType wireType;
+    private Bytes<?> bytes;
+    private Wire wire;
+    private WireType wireType;
     private final Map<WireType, String> expectedContentByType = new EnumMap<>(WireType.class);
     private final Map<WireType, String> expectedPartialContent = new EnumMap<>(WireType.class);
 
     // Constructor to set up the test environment based on a WireType
-    public WireDumperTest(final String name, final WireType wireType) {
+    public void initWireDumperTest(final String name, final WireType wireType) {
         bytes = Bytes.allocateElasticOnHeap(); // Allocate elastic bytes
         wire = wireType.apply(bytes);          // Create a wire based on the given WireType
         wire.usePadding(true);
@@ -35,7 +33,6 @@ public class WireDumperTest extends WireTestCommon {
         initTestData();  // Populate the expected outputs
     }
 
-    @Parameterized.Parameters(name = "{0}")
     public static Object[][] parameters() {
         return toParams(WireType.values());
     }
@@ -52,8 +49,10 @@ public class WireDumperTest extends WireTestCommon {
     }
 
     // Test case for verifying serialization of content to a wire
-    @Test
-    public void shouldSerialiseContent() {
+    @MethodSource("parameters")
+    @ParameterizedTest(name = "{0}")
+    public void shouldSerialiseContent(final String name, final WireType wireType) {
+        initWireDumperTest(name, wireType);
         // Writing values to the wire
         wire.writeDocument(17L, ValueOut::int64);
         wire.writeDocument("bark", ValueOut::text);
@@ -75,8 +74,10 @@ public class WireDumperTest extends WireTestCommon {
     }
 
     // Test case for verifying serialization of partial content to a wire
-    @Test
-    public void shouldSerialisePartialContent() {
+    @MethodSource("parameters")
+    @ParameterizedTest(name = "{0}")
+    public void shouldSerialisePartialContent(final String name, final WireType wireType) {
+        initWireDumperTest(name, wireType);
         // Writing partial content to the wire
         wire.writeDocument(17L, ValueOut::int64);
         final DocumentContext context = wire.writingDocument();

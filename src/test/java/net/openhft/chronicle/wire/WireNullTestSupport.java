@@ -6,7 +6,7 @@ package net.openhft.chronicle.wire;
 import java.lang.annotation.RetentionPolicy;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 final class WireNullTestSupport {
     private WireNullTestSupport() {

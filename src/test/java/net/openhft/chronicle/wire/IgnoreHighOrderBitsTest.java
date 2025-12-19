@@ -5,12 +5,12 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.DataOutput;
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IgnoreHighOrderBitsTest extends WireTestCommon {
 
@@ -37,8 +37,7 @@ public class IgnoreHighOrderBitsTest extends WireTestCommon {
             out.write(b);  // Only the low-order 8 bits should be written (expecting 0)
 
             // Assert that the byte representation matches the expected output
-            assertEquals("" +
-                            "a1 00                                           # 0\n",
+            assertEquals("a1 00                                           # 0\n",
                     bytes.toHexString());
         } finally {
             bytes.releaseLast();

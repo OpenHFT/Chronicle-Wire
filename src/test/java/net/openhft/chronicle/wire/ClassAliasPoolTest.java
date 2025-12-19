@@ -9,9 +9,8 @@ import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.Mocker;
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.StringWriter;
 import java.util.Arrays;
@@ -19,19 +18,18 @@ import java.util.Collection;
 import java.util.function.Consumer;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(Parameterized.class)
 public class ClassAliasPoolTest extends WireTestCommon {
 
     // Define the type of wire (e.g., TEXT, YAML, BINARY) being tested
-    private final WireType wireType;
+    private WireType wireType;
 
     // Define a consumer that performs checks on the wire's content
-    private final Consumer<Wire> wireChecker;
+    private Consumer<Wire> wireChecker;
 
     // Constructor to initialize wire type and checker
-    public ClassAliasPoolTest(WireType wireType, Consumer<Wire> wireChecker) {
+    public void initClassAliasPoolTest(WireType wireType, Consumer<Wire> wireChecker) {
         this.wireType = wireType;
         this.wireChecker = wireChecker;
     }
@@ -54,7 +52,6 @@ public class ClassAliasPoolTest extends WireTestCommon {
 
     // Define the set of parameters to run the test with
     // Each set represents a wire type and the expected outcome to validate against
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {WireType.TEXT,
@@ -81,9 +78,11 @@ public class ClassAliasPoolTest extends WireTestCommon {
     }
 
     // This test verifies the use of custom class lookups in the wire
+    @MethodSource("data")
     @SuppressWarnings({"rawtypes", "unchecked"})
-    @Test
-    public void testUsesClassLookup() {
+    @ParameterizedTest(name = "{0}")
+    public void testUsesClassLookup(WireType wireType, Consumer<Wire> wireChecker) {
+        initClassAliasPoolTest(wireType, wireChecker);
         // Create a mock for the ClassLookup interface
         final ClassLookup mock = createMock(ClassLookup.class);
 
@@ -114,7 +113,7 @@ public class ClassAliasPoolTest extends WireTestCommon {
         final MethodReader reader = wire.methodReader(
                 Mocker.logging(TestedMethods.class, "", out));
         String name = reader.getClass().getName();
-        assertFalse(name, name.contains("$Proxy"));
+        assertFalse(name.contains("$Proxy"), name);
 
         // Read events from the wire and validate their output
         assertTrue(reader.readOne()); // Expect one event to be read

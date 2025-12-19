@@ -10,9 +10,9 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.Validatable;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import java.util.List;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.util.Arrays.asList;
 import static net.openhft.chronicle.wire.WireType.TEXT;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"deprecation", "removal"})
@@ -40,54 +40,54 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     public void defaultCompilerOptions() throws Exception {
-        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
+        Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Field compiler = Jvm.getField(Wires.class, "CACHED_COMPILER");
         compiler.set(null, null);
         Wires.loadFromJava(this.getClass().getClassLoader(), this.getClass().getName(), "");
-        assertNotNull(compiler.get(null));
+        assertNotNull(compiler.get(null), "wires.loadFromJava should initialize cached compiler instance");
         List<String> options = Jvm.getValue(compiler.get(null), "options");
 
-        assertTrue(options.containsAll(asList("-g", "-nowarn")));
-        assertEquals(2, options.size());
+        assertTrue(options.containsAll(asList("-g", "-nowarn")), "default compiler options should include debug symbols and suppress warnings");
+        assertEquals(2, options.size(), "default compiler options should contain exactly two flags");
     }
 
     @Test
     public void customCompilerOptions() throws Exception {
-        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
+        Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Field compiler = Jvm.getField(Wires.class, "CACHED_COMPILER");
         compiler.set(null, null);
         System.setProperty("compiler.options", "-g -parameters");
         Wires.loadFromJava(this.getClass().getClassLoader(), this.getClass().getName(), "");
-        assertNotNull(compiler.get(null));
+        assertNotNull(compiler.get(null), "wires.loadFromJava should initialize cached compiler with custom options");
         List<String> options = Jvm.getValue(compiler.get(null), "options");
 
-        assertTrue(options.containsAll(asList("-g", "-parameters")));
-        assertEquals(2, options.size());
+        assertTrue(options.containsAll(asList("-g", "-parameters")), "custom compiler options should include debug symbols and parameter names");
+        assertEquals(2, options.size(), "custom compiler options should contain exactly two flags");
 
         System.clearProperty("compiler.options");
     }
 
     @Test
     public void textWireNumberTest() {
-        Assert.assertTrue(Double.isNaN(TEXT.apply(Bytes.from("NaN")).getValueIn().float64()));
-        Assert.assertTrue(Double.isInfinite(TEXT.apply(Bytes.from("Infinity")).getValueIn().float64()));
-        Assert.assertTrue(Double.isInfinite(TEXT.apply(Bytes.from("-Infinity")).getValueIn().float64()));
+        Assertions.assertTrue(Double.isNaN(TEXT.apply(Bytes.from("NaN")).getValueIn().float64()), "text wire should parse 'NaN' as double NaN");
+        Assertions.assertTrue(Double.isInfinite(TEXT.apply(Bytes.from("Infinity")).getValueIn().float64()), "text wire should parse 'Infinity' as positive infinity");
+        Assertions.assertTrue(Double.isInfinite(TEXT.apply(Bytes.from("-Infinity")).getValueIn().float64()), "text wire should parse '-Infinity' as negative infinity");
 
         // -0.0 is sent to denote and error
-        Assert.assertEquals(-0.0, TEXT.apply(Bytes.from("''")).getValueIn().float64(), 0.0);
+        Assertions.assertEquals(-0.0, TEXT.apply(Bytes.from("''")).getValueIn().float64(), 0.0, "text wire should return -0.0 for empty string to denote error");
 
         // -0.0 is sent to denote and error
-        Assert.assertEquals(-0.0, TEXT.apply(Bytes.from("Broken")).getValueIn().float64(), 0);
+        Assertions.assertEquals(-0.0, TEXT.apply(Bytes.from("Broken")).getValueIn().float64(), 0, "text wire should return -0.0 for invalid number string to denote error");
 
         // there is no number after the zero so it is assumed ot be 1e0
-        Assert.assertEquals(1, TEXT.apply(Bytes.from("1e")).getValueIn().float64(), 0);
+        Assertions.assertEquals(1, TEXT.apply(Bytes.from("1e")).getValueIn().float64(), 0, "text wire should parse incomplete exponent '1e' as 1e0");
     }
 
     @Test
     public void resetShouldClearBytes() {
-        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
+        Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0);
 
         container1.bytesField.clear().append("value1");
         container2.bytesField.clear().append("value2");
@@ -96,12 +96,12 @@ public class WiresTest extends WireTestCommon {
         Wires.reset(container2);
 
         container1.bytesField.clear().append("value1");
-        assertEquals("", container2.bytesField.toString());
+        assertEquals("", container2.bytesField.toString(), "wires.reset should prevent cross-contamination between independent container instances");
     }
 
     @Test
     public void resetShouldClearArbitraryMutableFields() {
-        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
+        Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0);
 
         StringBuilderContainer container1 = new StringBuilderContainer();
         container1.stringBuilder.setLength(0);
@@ -116,12 +116,12 @@ public class WiresTest extends WireTestCommon {
 
         container1.stringBuilder.append("value1");
 
-        assertEquals("", container2.stringBuilder.toString());
+        assertEquals("", container2.stringBuilder.toString(), "wires.reset should prevent cross-contamination between arbitrary mutable fields like StringBuilder");
     }
 
     @Test
     public void copyToShouldMutateBytes() {
-        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
+        Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0);
 
         BytesContainerMarshallable container1 = new BytesContainerMarshallable();
         container1.bytesField.append('1');
@@ -129,13 +129,13 @@ public class WiresTest extends WireTestCommon {
         BytesContainerMarshallable container2 = new BytesContainerMarshallable();
         Bytes<?> container2Bytes = container2.bytesField;
         Wires.copyTo(container1, container2);
-        assertEquals(container2Bytes, container2.bytesField);
-        assertEquals("12", container2.bytesField.toString());
+        assertEquals(container2Bytes, container2.bytesField, "wires.copyTo should mutate existing bytes instance rather than replacing it");
+        assertEquals("12", container2.bytesField.toString(), "wires.copyTo should copy bytes field content to destination container");
     }
 
     @Test
     public void unknownType() throws NoSuchFieldException {
-        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
+        Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Marshallable marshallable = Wires.tupleFor(Marshallable.class, "UnknownType");
         marshallable.setField("one", 1);
@@ -146,44 +146,46 @@ public class WiresTest extends WireTestCommon {
                 "  one: !int 1,\n" +
                 "  two: 2.2,\n" +
                 "  three: three\n" +
-                "}\n", toString);
+                "}\n", toString, "wires.tupleFor should create unknown type tuple with dynamic fields");
 
         Wires.GENERATE_TUPLES = true;
 
         Object o = Marshallable.fromString(toString);
-        assertEquals(toString, o.toString());
+        assertEquals(toString, o.toString(), "wires.tupleFor should generate marshallable tuple with matching toString output");
     }
 
-    @Test(expected = ClassNotFoundRuntimeException.class)
+    @Test
     public void unknownType2Throws2() {
-        Wires.GENERATE_TUPLES = false;
+        assertThrows(ClassNotFoundRuntimeException.class, () -> {
+            Wires.GENERATE_TUPLES = false;
 
-        String text = "!FourValues {\n" +
-                "  string: Hello,\n" +
-                "  num: 123,\n" +
-                "  big: 1E6,\n" +
-                "  also: extra\n" +
-                "}\n";
-        ThreeValues tv = Marshallable.fromString(ThreeValues.class, text);
-        assertEquals(text, tv.toString());
-        assertEquals("Hello", tv.string());
-        tv.string("Hello World");
-        assertEquals("Hello World", tv.string());
+            String text = "!FourValues {\n" +
+                    "  string: Hello,\n" +
+                    "  num: 123,\n" +
+                    "  big: 1E6,\n" +
+                    "  also: extra\n" +
+                    "}\n";
+            ThreeValues tv = Marshallable.fromString(ThreeValues.class, text);
+            assertEquals(text, tv.toString(), "generated tuple should preserve extra fields from yaml including type alias");
+            assertEquals("Hello", tv.string(), "generated tuple should read string field from yaml");
+            tv.string("Hello World");
+            assertEquals("Hello World", tv.string(), "generated tuple should support modifying string field");
 
-        assertEquals(123, tv.num());
-        tv.num(1234);
-        assertEquals(1234, tv.num());
+            assertEquals(123, tv.num(), "generated tuple should read num field from yaml");
+            tv.num(1234);
+            assertEquals(1234, tv.num(), "generated tuple should support modifying num field");
 
-        assertEquals(1e6, tv.big(), 0.0);
-        tv.big(0.128);
-        assertEquals(0.128, tv.big(), 0.0);
+            assertEquals(1e6, tv.big(), 0.0, "generated tuple should read big field from yaml");
+            tv.big(0.128);
+            assertEquals(0.128, tv.big(), 0.0, "generated tuple should support modifying big field");
 
-        assertEquals("!FourValues {\n" +
-                "  string: Hello World,\n" +
-                "  num: !int 1234,\n" +
-                "  big: 0.128,\n" +
-                "  also: extra\n" +
-                "}\n", tv.toString());
+            assertEquals("!FourValues {\n" +
+                    "  string: Hello World,\n" +
+                    "  num: !int 1234,\n" +
+                    "  big: 0.128,\n" +
+                    "  also: extra\n" +
+                    "}\n", tv.toString(), "generated tuple should serialize modified fields and preserve extra fields with type alias");
+        });
     }
 
     @Test
@@ -204,7 +206,7 @@ public class WiresTest extends WireTestCommon {
                         "---\n" +
                         "say: Three\n" +
                         "...\n",
-                new String(baos.toByteArray(), ISO_8859_1));
+                new String(baos.toByteArray(), ISO_8859_1), "wires.recordAsYaml should output each method call as separate yaml document");
     }
 
     @Test
@@ -235,17 +237,17 @@ public class WiresTest extends WireTestCommon {
                 "...\n" +
                 "---\n" +
                 "say: Three\n" +
-                "...\n", new String(baos.toByteArray(), ISO_8859_1));
+                "...\n", new String(baos.toByteArray(), ISO_8859_1), "wires.replay should execute yaml documents on target method writer appending to existing output");
     }
 
     @Test
     public void deepCopyNotBoundToThread() {
-        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
+        Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0);
         BytesContainerMarshallable bcm = new BytesContainerMarshallable();
         bcm.bytesField.append("Hello");
         assumeFalse(Jvm.getValue(bcm.bytesField, "usedByThread") == null);
         BytesContainerMarshallable bcm2 = bcm.deepCopy();
-        assertNull(Jvm.getValue(bcm2.bytesField, "usedByThread"));
+        assertNull(Jvm.getValue(bcm2.bytesField, "usedByThread"), "deep copied bytes should not be bound to thread allowing safe transfer between threads");
     }
 
     @Test
@@ -259,7 +261,7 @@ public class WiresTest extends WireTestCommon {
                 "  two: 222,\n" +
                 "  four: 44444,\n" +
                 "  three: 0\n" +
-                "}\n", o243.toString());
+                "}\n", o243.toString(), "wires.copyTo should copy matching fields and reset unmatched destination fields to default values");
     }
 
     @Test
@@ -270,29 +272,29 @@ public class WiresTest extends WireTestCommon {
                 "  two: 2,\n" +
                 "  four: 4,\n" +
                 "  three: 3\n" +
-                "}\n", o243.toString());
+                "}\n", o243.toString(), "validatable object should serialize initial state correctly");
         // Using copyTo to partially hydrate an object is perfectly valid
         Wires.copyTo(o124, o243);
         assertEquals("!net.openhft.chronicle.wire.WiresTest$TwoFourThreeValidatable {\n" +
                 "  two: 222,\n" +
                 "  four: 44444,\n" +
                 "  three: 0\n" +
-                "}\n", o243.toString());
+                "}\n", o243.toString(), "wires.copyTo should allow partial hydration even if result would fail validation");
     }
 
     @Test
     public void copyToContainsBytesMarshallable() {
-        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
+        Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0);
 
         ContainsBM containsBM = new ContainsBM(new BasicBytesMarshallable("Harold"));
         ContainsBM containsBM2 = new ContainsBM(null);
         Wires.copyTo(containsBM, containsBM2);
-        assertEquals(containsBM.inner.name, containsBM2.inner.name);
+        assertEquals(containsBM.inner.name, containsBM2.inner.name, "wires.copyTo should handle nested BytesMarshallable objects copying field values");
     }
 
     @Test
     public void deepCopyWillWorkWhenDynamicEnumIsAnnotatedAsMarshallable() {
-        Assume.assumeFalse(Jvm.maxDirectMemory() == 0);
+        Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0);
 
         ClassAliasPool.CLASS_ALIASES.addAlias(Thing.class, EnumThing.class);
 
@@ -305,7 +307,7 @@ public class WiresTest extends WireTestCommon {
                         "   someString: bla bla,\n" +
                         "}\n");
         final Thing thingCopy = thing2.deepCopy();
-        assertEquals(thing2, thingCopy);
+        assertEquals(thing2, thingCopy, "deep copy should preserve DynamicEnum fields annotated with @AsMarshallable");
     }
 
     @SuppressWarnings("deprecation")

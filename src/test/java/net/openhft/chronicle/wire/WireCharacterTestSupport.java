@@ -3,7 +3,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class WireCharacterTestSupport {
     private WireCharacterTestSupport() {

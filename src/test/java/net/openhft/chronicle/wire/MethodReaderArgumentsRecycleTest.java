@@ -6,14 +6,14 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
@@ -37,7 +37,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
     // This method sets up the test environment before each test case.
     @SuppressWarnings("deprecation")
-    @Before
+    @BeforeEach
     public void setUp() {
         // Create a new BinaryWire backed by a dynamically expanding Bytes object.
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
@@ -109,29 +109,29 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     // Utility method to verify that an argument is not recycled between method calls.
     private <T> void verifyNotRecycled(T firstArg, T secondArg, Consumer<T> call) {
         call.accept(firstArg);
-        assertTrue(reader.readOne());
+        assertTrue(reader.readOne(), "first method call should be successfully read from wire");
         final Object firstRef = lastArgumentRef;
         assertRecycledEquality(firstArg, lastArgumentRef);
 
         call.accept(secondArg);
-        assertTrue(reader.readOne());
+        assertTrue(reader.readOne(), "second method call should be successfully read from wire");
         assertRecycledEquality(secondArg, lastArgumentRef);
 
-        assertNotSame(firstRef, lastArgumentRef);
+        assertNotSame(firstRef, lastArgumentRef, "argument objects should not be recycled between calls");
     }
 
     // Utility method to verify that an argument is recycled between method calls.
     private <T> void verifyRecycled(T firstArg, T secondArg, Consumer<T> call) {
         call.accept(firstArg);
-        assertTrue(reader.readOne());
+        assertTrue(reader.readOne(), "first method call should be successfully read from wire");
         final Object firstRef = lastArgumentRef;
-        assertEquals(firstArg, lastArgumentRef);
+        assertEquals(firstArg, lastArgumentRef, "deserialized argument should match first input value");
 
         call.accept(secondArg);
-        assertTrue(reader.readOne());
-        assertEquals(secondArg, lastArgumentRef);
+        assertTrue(reader.readOne(), "second method call should be successfully read from wire");
+        assertEquals(secondArg, lastArgumentRef, "deserialized argument should match second input value");
 
-        assertSame(firstRef, lastArgumentRef);
+        assertSame(firstRef, lastArgumentRef, "argument object should be recycled between calls for memory efficiency");
     }
 
     @Test
@@ -203,7 +203,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
         verifyRecycled(first, second, writer::configDtoCall);
 
         ConfigDTO dto = (ConfigDTO) lastArgumentRef;
-        Assert.assertFalse(dto.b);
+        Assertions.assertFalse(dto.b, "boolean field should reset to default false value when not set in second call");
     }
 
     // Test to ascertain that a DTO object's list field gets recycled between calls.
@@ -241,7 +241,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
         // Make a call with the first ListContainingDto and read the response.
         writer.wrappedObjectCall(first);
-        assertTrue(reader.readOne());
+        assertTrue(reader.readOne(), "first method call with DTO list should be successfully read from wire");
         final Object firstRef = lastArgumentRef;
         assertEquals("!net.openhft.chronicle.wire.MethodReaderArgumentsRecycleTest$ObjectContainingDto {\n" +
                 "  list: [\n" +
@@ -251,13 +251,13 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
                 "  ]\n" +
                 "}\n", lastArgumentRef.toString());
         final List<?> list1 = (List<?>) ((ObjectContainingDto) lastArgumentRef).list;
-        assertEquals(first.list, list1);
+        assertEquals(first.list, list1, "deserialized list should match first input list values");
         final MyDto dto0 = (MyDto) list1.get(0);
         final MyDto dto1 = (MyDto) list1.get(1);
 
         // Make a call with the second ListContainingDto and read the response.
         writer.wrappedObjectCall(second);
-        assertTrue(reader.readOne());
+        assertTrue(reader.readOne(), "second method call with DTO list should be successfully read from wire");
         assertEquals("!net.openhft.chronicle.wire.MethodReaderArgumentsRecycleTest$ObjectContainingDto {\n" +
                 "  list: [\n" +
                 "    !net.openhft.chronicle.wire.MethodReaderArgumentsRecycleTest$MyDto { a: 7, b: 8 },\n" +
@@ -265,12 +265,12 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
                 "  ]\n" +
                 "}\n", lastArgumentRef.toString());
         final List<?> list2 = (List<?>) ((ObjectContainingDto) lastArgumentRef).list;
-        assertEquals(second.list, list2);
-        assertSame(dto0, list1.get(0));
-        assertSame(dto1, list1.get(1));
+        assertEquals(second.list, list2, "deserialized list should match second input list values");
+        assertSame(dto0, list1.get(0), "first DTO in list should be recycled from previous call");
+        assertSame(dto1, list1.get(1), "second DTO in list should be recycled from previous call");
 
         // Ensure the reference from the first call is the same as the second.
-        assertSame(firstRef, lastArgumentRef);
+        assertSame(firstRef, lastArgumentRef, "container DTO object should be recycled between calls");
     }
 
     // Test to ensure that a List argument gets recycled between calls.

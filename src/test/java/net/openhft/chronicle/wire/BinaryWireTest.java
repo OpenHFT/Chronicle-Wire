@@ -14,10 +14,9 @@ import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.VanillaReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,18 +33,17 @@ import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@RunWith(Parameterized.class)
 @SuppressWarnings({"deprecation", "removal"})
 public class BinaryWireTest extends WireTestCommon {
 
-    private final int testId;
-    private final boolean fixed;
-    private final boolean numericField;
-    private final boolean fieldLess;
-    private final int compressedSize;
+    private int testId;
+    private boolean fixed;
+    private boolean numericField;
+    private boolean fieldLess;
+    private int compressedSize;
     @NotNull
     private final Bytes<?> bytes = new HexDumpBytes();
     private static final String[] INT8_EXPECTED = {
@@ -278,7 +276,7 @@ public class BinaryWireTest extends WireTestCommon {
     };
 
     // Constructor for initializing parameters of the test
-    public BinaryWireTest(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    public void initBinaryWireTest(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -287,7 +285,6 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     // Provides the combinations of test parameters to be used in parameterized tests
-    @Parameterized.Parameters(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
     public static Collection<Object[]> combinations() {
         return Arrays.asList(
                 new Object[]{0, false, false, false, 128},
@@ -308,8 +305,10 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     // Test case to verify the write operation of the Wire
-    @Test
-    public void testWrite() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testWrite(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         @NotNull Wire wire = createWire();
         wire.write();
         wire.write();
@@ -335,12 +334,14 @@ public class BinaryWireTest extends WireTestCommon {
                 "");
 
         // Assert the text representation of the wire based on the fieldLess parameter
-        assertEquals(fieldLess ? "" : "\"\": \"\": \"\": ", TextWire.asText(wire));
+        assertEquals(fieldLess ? "" : "\"\": \"\": \"\": ", TextWire.asText(wire), "text representation should match fieldless mode configuration");
     }
 
     // Test case to verify the reading and writing of a String with special characters
-    @Test
-    public void readWriteString() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void readWriteString(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         String utfCharacter = "ä";
         @NotNull Wire wire = createWire();
         wire.getValueOut()
@@ -348,7 +349,7 @@ public class BinaryWireTest extends WireTestCommon {
 
         // Verify if the string read from the wire is the same as written
         assertEquals(utfCharacter, wire.getValueIn()
-                .readString());
+                .readString(), "binary wire should correctly serialize and deserialize utf-8 characters");
     }
 
     // Create a BinaryWire with pre-defined properties set during initialization
@@ -366,21 +367,23 @@ public class BinaryWireTest extends WireTestCommon {
         if (expected[0].startsWith("["))
             System.out.println("\"\" +\n\"" + (wire.bytes().toHexString().replaceAll("\n", "\\\\n\" +\n\"") + "\",").replace(" +\n\"\",", ","));
         else
-            assertEquals("id: " + testId,
-                    expected[testId],
-                    wire.bytes().toHexString());
+            assertEquals(expected[testId],
+                    wire.bytes().toHexString(),
+                    "id: " + testId);
     }
 
     // A variation of checkWire to compare the wire's debug string output
     private void checkWire2(@NotNull Wire wire, String... expected) {
-        assertEquals("id: " + testId,
-                expected[testId].replaceAll("٠+$", ""),
-                wire.bytes().toDebugString(9999).replaceAll("٠+$", ""));
+        assertEquals(expected[testId].replaceAll("٠+$", ""),
+                wire.bytes().toDebugString(9999).replaceAll("٠+$", ""),
+                "id: " + testId);
     }
 
     // Test case to verify writing fields to the wire and checking their representation
-    @Test
-    public void testWrite1() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testWrite1(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         @NotNull Wire wire = createWire();
         wire.write(BWKey.field1);
         wire.write(BWKey.field2);
@@ -417,12 +420,14 @@ public class BinaryWireTest extends WireTestCommon {
         String text = TextWire.asText(wire);
         if (fieldLess || numericField)
             return;
-        assertEquals(textFieldExcepted, text);
+        assertEquals(textFieldExcepted, text, "text representation should match expected format for binary wire");
     }
 
     // Test writing data to a Wire
-    @Test
-    public void testWrite2() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testWrite2(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         // Create a new Wire instance
         @NotNull Wire wire = createWire();
 
@@ -464,8 +469,10 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     // Test reading data from a Wire
-    @Test
-    public void testRead() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testRead(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         // Create a new Wire instance
         @NotNull Wire wire = createWire();
 
@@ -482,8 +489,10 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     // Testing a basic reading scenario
-    @Test
-    public void testRead1() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testRead1(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         // Setup
         @NotNull Wire wire = createWire();
         wire.write();
@@ -500,8 +509,10 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     // Testing reading into a StringBuilder
-    @Test
-    public void testRead2() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testRead2(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         // Setup
         @NotNull Wire wire = createWire();
         wire.write();
@@ -509,19 +520,33 @@ public class BinaryWireTest extends WireTestCommon {
         @NotNull String name1 = "Long field name which is more than 32 characters, Bye";
         wire.write(() -> name1);
 
-        // Reading into a StringBuilder (capturing data)
-        WireReadTestSupport.exerciseReadWithNames(wire, name1,
-                numericField ? "1" : fieldLess ? "" : BWKey.field1.name(),
-                numericField ? "-1019176629" : fieldLess ? "" : name1,
-                0);
+        String expectedSecond = numericField ? "1" : fieldLess ? "" : BWKey.field1.name();
+        String expectedThird = numericField ? "-1019176629" : fieldLess ? "" : name1;
+
+        @NotNull StringBuilder name = new StringBuilder();
+        wire.read(name);
+        assertEquals(0, name.length(), "read(name): first name blank");
+
+        name.setLength(0);
+        wire.read(name);
+        assertEquals(expectedSecond, name.toString(), "read(name): second name");
+
+        name.setLength(0);
+        wire.read(name);
+        assertEquals(expectedThird, name.toString(), "read(name): third name");
+
+        assertEquals(0, wire.bytes().readRemaining(), "read(name): remaining after 3 reads");
+        wire.read();
 
         // Safety check: additional read shouldn't cause problems
         wire.read();
     }
 
     // Testing the writing and reading of 8-bit integers
-    @Test
-    public void int8() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void int8(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         assertSmallIntTriplet(WireSmallIntTestSupport::writeInt8Triplet,
                 WireSmallIntTestSupport::readInt8Triplet,
                 INT8_EXPECTED,
@@ -585,13 +610,15 @@ public class BinaryWireTest extends WireTestCommon {
         textChecker.accept(wire);
         reader.accept(wire);
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, bytes.readRemaining(), "all bytes should be consumed after reading int triplet");
         wire.read();
     }
 
     // Test for writing and reading 16-bit integers to/from Wire.
-    @Test
-    public void int16() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void int16(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         assertSmallIntTriplet(WireSmallIntTestSupport::writeInt16Triplet,
                 WireSmallIntTestSupport::readInt16Triplet,
                 INT16_EXPECTED,
@@ -599,8 +626,10 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     // Test for writing and reading 8-bit unsigned integers to/from Wire.
-    @Test
-    public void uint8() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void uint8(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         assertSmallIntTriplet(WireSmallIntTestSupport::writeUint8Triplet,
                 WireSmallIntTestSupport::readUint8Triplet,
                 UINT8_EXPECTED,
@@ -608,8 +637,10 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     // Test case to validate writing and reading of unsigned 16-bit integers using Wire
-    @Test
-    public void uint16() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void uint16(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         assertSmallIntTriplet(WireSmallIntTestSupport::writeUint16Triplet,
                 WireSmallIntTestSupport::readUint16Triplet,
                 UINT16_EXPECTED,
@@ -617,8 +648,10 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     // Test case to validate writing and reading of unsigned 32-bit integers using Wire
-    @Test
-    public void uint32() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void uint32(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         assertSmallIntTriplet(WireSmallIntTestSupport::writeUint32Triplet,
                 WireSmallIntTestSupport::readUint32Triplet,
                 UINT32_EXPECTED,
@@ -626,8 +659,10 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     // Test the writing and reading of 32-bit integers using the Wire API
-    @Test
-    public void int32() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void int32(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         assertSmallIntTriplet(WireSmallIntTestSupport::writeInt32Triplet,
                 WireSmallIntTestSupport::readInt32Triplet,
                 INT32_EXPECTED,
@@ -635,8 +670,10 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     // Test the writing and reading of 64-bit integers using the Wire API
-    @Test
-    public void int64() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void int64(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         // Create a new Wire instance and write int64 values
         @NotNull Wire wire = createWire();
         wire.write().int64(1);
@@ -686,18 +723,20 @@ public class BinaryWireTest extends WireTestCommon {
         @NotNull AtomicLong i = new AtomicLong();
         LongStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().int64(i, AtomicLong::set);
-            assertEquals(e, i.get());
+            assertEquals(e, i.get(), "int64 value should deserialize correctly from binary wire");
         });
 
         // Ensure no bytes remain to be read
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, bytes.readRemaining(), "all bytes should be consumed after reading int64 values");
         // Test to ensure over-reading is handled gracefully
         wire.read();
     }
 
     // Test for ensuring correct storage and retrieval of float64 values in Wire
-    @Test
-    public void testFloat64s() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testFloat64s(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         // Create a Wire instance
         @NotNull Wire wire = createWire();
 
@@ -716,15 +755,17 @@ public class BinaryWireTest extends WireTestCommon {
                     .write("t").text("hi");
 
             // Ensure correct retrieval of written values
-            assertEquals(d, wire.read("p").float64(), 0);
-            assertEquals(-d, wire.read("n").float64(), 0);
-            assertEquals("hi", wire.read("t").text());
+            assertEquals(d, wire.read("p").float64(), 0, "positive float64 value should round-trip correctly through binary wire");
+            assertEquals(-d, wire.read("n").float64(), 0, "negative float64 value should round-trip correctly through binary wire");
+            assertEquals("hi", wire.read("t").text(), "text value should be preserved after float64 serialization");
         }
     }
 
     // Test for checking various float64 serialization scenarios in Wire
-    @Test
-    public void float64() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void float64(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         // Create a Wire instance
         @NotNull Wire wire = createWire();
 
@@ -797,21 +838,23 @@ public class BinaryWireTest extends WireTestCommon {
         // Read float64 values from Wire using IntStream and ensure correct retrieval
         IntStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().float64(n, Floater::set);
-            assertEquals(e, n.f, 0.0);
+            assertEquals(e, n.f, 0.0, "float64 value should deserialize correctly with consumer");
         });
 
         // Ensure next float64 value read is 0
-        assertEquals(0.0, wire.read().float64(), 0.0);
+        assertEquals(0.0, wire.read().float64(), 0.0, "zero float64 value should deserialize correctly from binary wire");
 
         // Ensure no remaining bytes in the underlying storage
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, bytes.readRemaining(), "all bytes should be consumed after reading float64 values");
 
         // Check that Wire can safely handle reading beyond available data
         wire.read();
     }
 
-    @Test
-    public void text() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void text(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         // A long field name used for testing
         @NotNull String name = "Long field name which is more than 32 characters, Bye";
 
@@ -845,18 +888,20 @@ public class BinaryWireTest extends WireTestCommon {
         @NotNull StringBuilder sb = new StringBuilder();
         Stream.of("Hello", "world", name).forEach(e -> {
             wire.read().textTo(sb);
-            assertEquals(e, sb.toString());
+            assertEquals(e, sb.toString(), "text value should deserialize correctly into stringbuilder from binary wire");
         });
 
         // Ensure no more bytes are left to read from the wire
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, bytes.readRemaining(), "all bytes should be consumed after reading text values");
 
         // Safeguard: Check if it's safe to read more from the wire even if there's nothing left
         wire.read();
     }
 
-    @Test
-    public void type() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void type(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         // Ignore specific exception for the sake of this test
         ignoreException("Unable to copy object safely, message will not be repeated: net.openhft.chronicle.core.util.ClassNotFoundRuntimeException");
 
@@ -884,36 +929,41 @@ public class BinaryWireTest extends WireTestCommon {
                 "!MyType !AlsoMyType !" + name1 + " ");
 
         // Reading from the wire and verifying the type prefixes
-        Stream.of("MyType", "AlsoMyType", name1).forEach(e -> {
-            wire.read().typePrefix(e, (expected, actual) -> Assert.assertEquals(expected, actual.toString()));
-        });
+        Stream.of("MyType", "AlsoMyType", name1).forEach(e ->
+                wire.read().typePrefix(e, (expected, actual) -> Assertions.assertEquals(expected, actual.toString(), "type prefix should match expected value in binary wire")));
 
         // Ensure no more bytes are left to read from the wire
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, bytes.readRemaining(), "all bytes should be consumed after reading type prefixes");
 
         // Safeguard: Check if it's safe to read more from the wire even if there's nothing left
         wire.read();
     }
 
     // Testing the boolean write and read functionality of the wire
-    @Test
-    public void testBool() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testBool(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         @NotNull Wire wire = createWire(); // Create a wire instance
 
         WirePrimitiveTestSupport.assertBooleanRoundTrip(wire);
     }
 
     // Testing the float32 (i.e., single precision float) write and read functionality of the wire
-    @Test
-    public void testFloat32() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testFloat32(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         @NotNull Wire wire = createWire(); // Create a wire instance
 
         WirePrimitiveTestSupport.assertFloat32RoundTrip(wire, this);
     }
 
     // Testing the LocalTime write and read functionality of the wire
-    @Test
-    public void testTime() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testTime(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         @NotNull Wire wire = createWire(); // Create a wire instance
         LocalTime now = LocalTime.of(12, 54, 4, 612 * 1000000); // Create a LocalTime instance
 
@@ -928,20 +978,22 @@ public class BinaryWireTest extends WireTestCommon {
                             "b2 12 32 33 3a 35 39 3a 35 39 2e 39 39 39 39 39 # 23:59:59.999999999\n" +
                             "39 39 39 39 c0                                  # :\n" +
                             "b2 05 30 30 3a 30 30                            # 00:00\n",
-                    bytes.toHexString());
+                    bytes.toHexString(), "binary wire should serialize localtime with field names included");
         } else {
             assertEquals("b2 0c 31 32 3a 35 34 3a 30 34 2e 36 31 32       # 12:54:04.612\n" +
                             "b2 12 32 33 3a 35 39 3a 35 39 2e 39 39 39 39 39 # 23:59:59.999999999\n" +
                             "39 39 39 39 b2 05 30 30 3a 30 30                # 00:00\n",
-                    bytes.toHexString());
+                    bytes.toHexString(), "fieldless binary wire should serialize localtime without field names");
         }
 
         WirePrimitiveTestSupport.assertTimes(wire, now);
     }
 
     // Testing the ZonedDateTime write and read functionality of the wire
-    @Test
-    public void testZonedDateTime() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testZonedDateTime(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         @NotNull Wire wire = createWire(); // Create a wire instance
         ZonedDateTime now = ZonedDateTime.now(); // Get the current ZonedDateTime
         final ZonedDateTime max = ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault());
@@ -955,14 +1007,16 @@ public class BinaryWireTest extends WireTestCommon {
                 .write().object(min);
 
         // Read the ZonedDateTime values (stored as Objects) from the wire and assert they match the written values
-        wire.read().object(Object.class, now, Assert::assertEquals)
-                .read().object(Object.class, max, Assert::assertEquals)
-                .read().object(Object.class, min, Assert::assertEquals);
+        wire.read().object(Object.class, now, (expected, actual) -> Assertions.assertEquals(expected, actual, "zoneddatetime now should deserialize correctly as object from binary wire"))
+                .read().object(Object.class, max, (expected, actual) -> Assertions.assertEquals(expected, actual, "zoneddatetime max should deserialize correctly as object from binary wire"))
+                .read().object(Object.class, min, (expected, actual) -> Assertions.assertEquals(expected, actual, "zoneddatetime min should deserialize correctly as object from binary wire"));
     }
 
     // Testing the LocalDate write and read functionality of the wire
-    @Test
-    public void testDate() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testDate(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         @NotNull Wire wire = createWire(); // Create a wire instance
         LocalDate now = LocalDate.now();   // Get the current date
 
@@ -970,8 +1024,10 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     // Testing the UUID write and read functionality of the wire
-    @Test
-    public void testUuid() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testUuid(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         @NotNull Wire wire = createWire(); // Create a wire instance
         UUID uuid = UUID.randomUUID();     // Generate a random UUID
 
@@ -979,8 +1035,10 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     // Testing the byte array write and read functionality of the wire
-    @Test
-    public void testBytes() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testBytes(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         @NotNull Wire wire = createWire();  // Create a wire instance
         @NotNull byte[] allBytes = new byte[256];  // Initialize a byte array of length 256
 
@@ -1000,8 +1058,10 @@ public class BinaryWireTest extends WireTestCommon {
         allBytes2.releaseLast();  // Release the last referenced resource
     }
 
-    @Test
-    public void testWriteMarshallable() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testWriteMarshallable(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         // Test the write marshallable functionality for BinaryWire
 
         // Uncomment the line below to set the BinaryWire.SPEC to 18.
@@ -1204,22 +1264,28 @@ public class BinaryWireTest extends WireTestCommon {
                         "e7 42 79 65 20 6e 6f 77                         # Bye now\n");
         @NotNull MyTypesCustom mt2 = new MyTypesCustom();
         wire.read(() -> "A").marshallable(mt2);
-        assertEquals(mt2, mtA);
+        assertEquals(mt2, mtA, "marshallable object A should deserialize correctly from binary wire");
 
         wire.read(() -> "B").marshallable(mt2);
-        assertEquals(mt2, mtB);
+        assertEquals(mt2, mtB, "marshallable object B should deserialize correctly from binary wire");
     }
 
-    @Test
-    public void writeNull() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void writeNull(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         // Creating a wire instance and ensuring it's not null
         @NotNull Wire wire = createWire();
 
-        WireNullTestSupport.writeNulls(wire, w -> w.write().object(null), Circle.class);
+        String text = WireNullTestSupport.writeNulls(wire, w -> w.write().object(null), Circle.class);
+        assertFalse(text.isEmpty(), "null: output empty");
+        assertEquals(0, wire.bytes().readRemaining(), "null: bytes consumed");
     }
 
-    @Test
-    public void testLongString() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testLongString(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         // Creating a wire instance and a character array
         @NotNull Wire wire = createWire();
         @NotNull char[] chars = new char[64];
@@ -1238,12 +1304,16 @@ public class BinaryWireTest extends WireTestCommon {
             wire.writeDocument(false, w -> w.write(() -> "message").text(s));
 
             // System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
-            wire.readDocument(null, w -> w.read(() -> "message").text(s, Assert::assertEquals));
+            String[] actual = {null};
+            assertTrue(wire.readDocument(null, w -> actual[0] = w.read(() -> "message").text()), "long string: read document");
+            assertEquals(s, actual[0], "long string: roundtrip");
         }
     }
 
-    @Test
-    public void testArrays() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testArrays(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         // Creating a wire instance
         @NotNull Wire wire = createWire();
 
@@ -1257,23 +1327,39 @@ public class BinaryWireTest extends WireTestCommon {
         // Reading the string array back from the wire and asserting its contents
         @Nullable Object[] object2 = wire.read()
                 .object(Object[].class);
-        assertEquals(3, object2.length);
-        assertEquals("[abc, def, ghi]", Arrays.toString(object2));
+        assertEquals(3, object2.length, "object array length should be preserved after serialization in binary wire");
+        assertEquals("[abc, def, ghi]", Arrays.toString(object2), "object array contents should match after round-trip through binary wire");
 
         wire.clear();
         WireArrayTestSupport.assertSimpleStringArrayRoundTrip(this::createWire, false);
     }
 
-    @Test
-    public void testArrays2() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testArrays2(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         // Creating a wire instance
         @NotNull Wire wire = createWire();
 
-        WireArrayTestSupport.writeAndAssertMixedArrays(wire);
+        Object[] a1 = new Object[0];
+        wire.write("empty").object(a1);
+        Object[] a2 = {1L};
+        wire.write("one").object(a2);
+        Object[] a3 = {"Hello", 123, 10.1};
+        wire.write("three").object(Object[].class, a3);
+
+        Object o1 = wire.read().object(Object[].class);
+        assertArrayEquals(a1, (Object[]) o1, "array[0]: empty");
+        Object o2 = wire.read().object(Object[].class);
+        assertArrayEquals(a2, (Object[]) o2, "array[1]: one");
+        Object o3 = wire.read().object(Object[].class);
+        assertArrayEquals(a3, (Object[]) o3, "array[2]: three");
     }
 
-    @Test
-    public void testUsingEvents() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testUsingEvents(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         // Creating a wire instance with binary format
         final Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
         w.usePadding(true);
@@ -1293,25 +1379,27 @@ public class BinaryWireTest extends WireTestCommon {
             StringBuilder sb = new StringBuilder();
 
             @NotNull ValueIn valueIn1 = dc.wire().readEventName(sb);
-            Assert.assertTrue("hello1".contentEquals(sb));
+            Assertions.assertTrue("hello1".contentEquals(sb), "first event name should match 'hello1' in binary wire");
             valueIn1.skipValue();
 
             @NotNull ValueIn valueIn2 = dc.wire().readEventName(sb);
-            Assert.assertTrue("hello2".contentEquals(sb));
+            Assertions.assertTrue("hello2".contentEquals(sb), "second event name should match 'hello2' in binary wire");
 
             valueIn2.skipValue(); // if you change this to typed marshable it works
 
             @NotNull ValueIn valueIn3 = dc.wire().readEventName(sb);
-            Assert.assertTrue("hello3".contentEquals(sb));
+            Assertions.assertTrue("hello3".contentEquals(sb), "third event name should match 'hello3' in binary wire");
 
             @Nullable DTO o = valueIn3.typedMarshallable();
-            Assert.assertEquals("world3", o.text);
+            Assertions.assertEquals("world3", o.text, "typed marshallable dto text field should deserialize correctly from binary wire");
         }
         w.bytes().releaseLast();
     }
 
-    @Test
-    public void testSortedSet() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testSortedSet(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         // Creating a wire instance and a sorted set of strings
         final Wire wire = createWire();
         @NotNull SortedSet<String> set = new TreeSet<>();
@@ -1324,12 +1412,14 @@ public class BinaryWireTest extends WireTestCommon {
 
         // Reading back from the wire and asserting the type and content
         @Nullable Object o = wire.read().object();
-        assertTrue(o instanceof SortedSet);
-        assertEquals(set, o);
+        assertInstanceOf(SortedSet.class, o, "deserialized object should be instance of sortedset from binary wire");
+        assertEquals(set, o, "sortedset contents should match after round-trip through binary wire");
     }
 
-    @Test
-    public void testSortedMap() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testSortedMap(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         // Creating a wire instance and a sorted map
         final Wire wire = createWire();
         @NotNull SortedMap<String, Long> set = new TreeMap<>();
@@ -1342,19 +1432,21 @@ public class BinaryWireTest extends WireTestCommon {
 
         // Reading back from the wire and asserting the type and content
         @Nullable Object o = wire.read().object();
-        assertTrue(o instanceof SortedMap);
-        assertEquals(set, o);
+        assertInstanceOf(SortedMap.class, o, "deserialized object should be instance of sortedmap from binary wire");
+        assertEquals(set, o, "sortedmap contents should match after round-trip through binary wire");
     }
 
-    @Test
-    public void testSkipPadding() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void testSkipPadding(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         @NotNull Wire wire = createWire();
 
         // Testing skipping padding for increasing padding values
         for (int i = 1; i <= 128; i *= 2) {
             wire.addPadding(i);
             wire.getValueIn().skipValue();
-            assertEquals(0, wire.bytes().readRemaining());
+            assertEquals(0, wire.bytes().readRemaining(), "all padding bytes should be consumed after skipping value in binary wire");
             wire.clear();
         }
 
@@ -1364,14 +1456,16 @@ public class BinaryWireTest extends WireTestCommon {
             int finalI = i;
             wire.getValueOut().marshallable(w -> w.write("i").int32(finalI));
             wire.getValueIn().skipValue();
-            assertEquals(0, wire.bytes().readRemaining());
+            assertEquals(0, wire.bytes().readRemaining(), "all bytes including padding should be consumed after skipping marshallable in binary wire");
             wire.clear();
         }
     }
 
+    @MethodSource("combinations")
     @SuppressWarnings("try")
-    @Test
-    public void readsComment() {
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void readsComment(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         StringBuilder sb = new StringBuilder();
         Wire wire = createWire();
 
@@ -1389,19 +1483,21 @@ public class BinaryWireTest extends WireTestCommon {
 
         // Reading using a method reader and processing the DTO
         final MethodReader reader = wire.methodReader((IDTO) dto -> sb.append("dto: ").append(dto).append('\n'));
-        assertTrue(reader.readOne());
-        assertFalse(reader.readOne());
+        assertTrue(reader.readOne(), "method reader should successfully read first document from binary wire");
+        assertFalse(reader.readOne(), "method reader should return false when no more documents in binary wire");
         assertEquals("one\n" +
                 "two\n" +
                 "dto: !net.openhft.chronicle.wire.BinaryWireTest$DTO {\n" +
                 "  text: text\n" +
                 "}\n" +
                 "\n" +
-                "three\n", sb.toString());
+                "three\n", sb.toString(), "comments and dto content should be captured correctly from binary wire");
     }
 
-    @Test
-    public void writeEndOfWireDoesNotUpdateModifiedTimeOnNoOpWhenUnderlyingBytesIsFile() throws IOException {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "fixed: {1}, numeric: {2}, fieldless: {3}, compressed: {4}")
+    public void writeEndOfWireDoesNotUpdateModifiedTimeOnNoOpWhenUnderlyingBytesIsFile(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) throws IOException {
+        initBinaryWireTest(testId, fixed, numericField, fieldLess, compressedSize);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Create a temporary file for the test
@@ -1412,7 +1508,7 @@ public class BinaryWireTest extends WireTestCommon {
         createWireFromFileAnd(tempFile, wire -> {
             wire.write("testing-testing").int8(123);
             endOfWirePosition.set(wire.bytes().writePosition());
-            assertTrue(wire.writeEndOfWire(100, TimeUnit.MILLISECONDS, endOfWirePosition.get()));
+            assertTrue(wire.writeEndOfWire(100, TimeUnit.MILLISECONDS, endOfWirePosition.get()), "initial write end of wire should succeed for binary wire backed by file");
         });
 
         // this will wait until any pending resources have been closed
@@ -1422,16 +1518,15 @@ public class BinaryWireTest extends WireTestCommon {
         Jvm.pause(10);
 
         // Create a wire from the temporary file and attempt a no-op
-        createWireFromFileAnd(tempFile, wire -> {
+        createWireFromFileAnd(tempFile, wire ->
             // This should be a no-op and not result in an update to lastModifiedTime
-            assertFalse(wire.writeEndOfWire(100, TimeUnit.MILLISECONDS, endOfWirePosition.get()));
-        });
+                assertFalse(wire.writeEndOfWire(100, TimeUnit.MILLISECONDS, endOfWirePosition.get()), "no-op write end of wire should return false for binary wire backed by file"));
 
         long lastModified2 = tempFile.lastModified();
         if (OS.isMacOSX() && lastModified2 - lastModified == 1)
             return;
 
-        assertEquals(lastModified, lastModified2);
+        assertEquals(lastModified, lastModified2, "file modification time should not change for no-op write end of wire in binary wire");
     }
 
     private void createWireFromFileAnd(File file, Consumer<@ScopeConfined Wire> wireConsumer) throws IOException {

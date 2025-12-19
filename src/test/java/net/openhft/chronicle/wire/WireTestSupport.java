@@ -6,15 +6,13 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.DocumentContext;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import java.util.Arrays;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.function.Supplier;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("deprecation")
 final class WireTestSupport {
@@ -26,11 +24,11 @@ final class WireTestSupport {
                 .write().object(WireType.TEXT)
                 .write().object(WireType.RAW);
 
-        assertEquals(expectedText, wire.toString());
+        Assertions.assertEquals(expectedText, wire.toString());
 
-        assertEquals(WireType.BINARY, wire.read().object(Object.class));
-        assertEquals(WireType.TEXT, wire.read().object(Object.class));
-        assertEquals(WireType.RAW, wire.read().object(Object.class));
+        Assertions.assertEquals(WireType.BINARY, wire.read().object(Object.class));
+        Assertions.assertEquals(WireType.TEXT, wire.read().object(Object.class));
+        Assertions.assertEquals(WireType.RAW, wire.read().object(Object.class));
     }
 
     static void assertLzwCompressionAsText(Wire wire, Supplier<Bytes<?>> bytesSupplier) {
@@ -41,7 +39,7 @@ final class WireTestSupport {
 
         @NotNull Bytes<?> bytes = bytesSupplier.get();
         wire.read().bytes(bytes);
-        assertEquals(str, bytes.toString());
+        Assertions.assertEquals(str, bytes.toString());
         bytes.releaseLast();
     }
 
@@ -69,7 +67,7 @@ final class WireTestSupport {
         for (int i = 0; i < 4; i++) {
             try (DocumentContext dc = wire.readingDocument()) {
                 final boolean metaData = i % 2 == 0;
-                assertEquals("i: " + i, metaData, dc.isMetaData());
+                Assertions.assertEquals(metaData, dc.isMetaData(), "i: " + i);
             }
         }
     }
@@ -82,7 +80,7 @@ final class WireTestSupport {
             @NotNull String s = new String(chars);
             wire.writeDocument(false, w -> w.write(() -> "message").text(s));
 
-            wire.readDocument(null, w -> w.read(() -> "message").text(s, Assert::assertEquals));
+            wire.readDocument(null, w -> w.read(() -> "message").text(s, Assertions::assertEquals));
         }
     }
 
@@ -105,8 +103,8 @@ final class WireTestSupport {
         try (DocumentContext ignored = wire.readingDocument()) {
             ignored.isData();
             DemarshallableObject dobj = wire.getValueIn().typedMarshallable();
-            assertEquals("test", dobj.name);
-            assertEquals(12345, dobj.value);
+            Assertions.assertEquals("test", dobj.name);
+            Assertions.assertEquals(12345, dobj.value);
         }
     }
 
@@ -120,14 +118,14 @@ final class WireTestSupport {
                     .write(() -> "value")
                     .object(expected));
         });
-        assertEquals("--- !!data\n" +
+        Assertions.assertEquals("--- !!data\n" +
                         "put: { key: \"1\", value: !byte[] !!binary //79/Pv6+Q== }\n",
                 Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         wire.readDocument(null, wir -> wire.read(() -> "put")
                 .marshallable(w -> w.read(() -> "key")
-                        .object(Object.class, "1", Assert::assertEquals)
-                        .read(() -> "value").object(byte[].class, expected, Assert::assertArrayEquals)));
+                        .object(Object.class, "1", Assertions::assertEquals)
+                        .read(() -> "value").object(byte[].class, expected, Assertions::assertArrayEquals)));
     }
 
     static void assertTypeWithoutSpace(Wire wire) {
@@ -135,7 +133,7 @@ final class WireTestSupport {
 
         @NotNull MyTypes mt = (MyTypes) wire.read(() -> "A").object();
 
-        assertEquals("!net.openhft.chronicle.wire.MyTypes {\n" +
+        Assertions.assertEquals("!net.openhft.chronicle.wire.MyTypes {\n" +
                 "  text: \"\",\n" +
                 "  flag: false,\n" +
                 "  b: 0,\n" +
@@ -157,12 +155,12 @@ final class WireTestSupport {
                         "A5: NaN\n" +
                         "B: 1.23\n");
 
-        assertEquals(Double.NaN, wire.read("A").float64(), 0);
-        assertEquals(Double.NaN, wire.read("A2").float64(), 0);
-        assertEquals(Double.POSITIVE_INFINITY, wire.read("A3").float64(), 0);
-        assertEquals(Double.NEGATIVE_INFINITY, wire.read("A4").float64(), 0);
-        assertEquals(Double.NaN, wire.read("A5").float64(), 0);
-        assertEquals(1.23, wire.read("B").float64(), 0);
+        Assertions.assertEquals(Double.NaN, wire.read("A").float64(), 0);
+        Assertions.assertEquals(Double.NaN, wire.read("A2").float64(), 0);
+        Assertions.assertEquals(Double.POSITIVE_INFINITY, wire.read("A3").float64(), 0);
+        Assertions.assertEquals(Double.NEGATIVE_INFINITY, wire.read("A4").float64(), 0);
+        Assertions.assertEquals(Double.NaN, wire.read("A5").float64(), 0);
+        Assertions.assertEquals(1.23, wire.read("B").float64(), 0);
     }
 
     static void assertExceptionRoundTrip(Wire wire, String testClassName) {
@@ -182,7 +180,7 @@ final class WireTestSupport {
 
         wire.writeDocument(false, w -> w.writeEventName(() -> "exception").object(e));
 
-        assertEquals("--- !!data\n" +
+        Assertions.assertEquals("--- !!data\n" +
                         "exception: !" + e.getClass().getName() + " {\n" +
                         "  message: Reference cannot be null,\n" +
                         "  stackTrace: [\n" +
@@ -195,7 +193,7 @@ final class WireTestSupport {
 
         wire.readDocument(null, r -> {
             Throwable t = r.read(() -> "exception").throwable(true);
-            Assert.assertTrue(t instanceof InvalidAlgorithmParameterException);
+            Assertions.assertInstanceOf(InvalidAlgorithmParameterException.class, t);
         });
     }
 

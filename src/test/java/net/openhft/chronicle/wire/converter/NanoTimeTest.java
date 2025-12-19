@@ -6,9 +6,9 @@ package net.openhft.chronicle.wire.converter;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * This test class extends the WireTestCommon, a class provided by the Chronicle Wire library
@@ -37,8 +37,7 @@ public class NanoTimeTest extends net.openhft.chronicle.wire.WireTestCommon {
         writer.event(new Event(ts));
 
         // Verify the wire content matches the expected YAML format.
-        assertEquals("" +
-                "time: 2022-06-17T12:35:56\n" +
+        assertEquals("time: 2022-06-17T12:35:56\n" +
                 "...\n" +
                 "event: {\n" +
                 "  start: 2022-06-17T12:35:56\n" +
@@ -65,7 +64,7 @@ public class NanoTimeTest extends net.openhft.chronicle.wire.WireTestCommon {
     static class Event extends SelfDescribingMarshallable {
         @UsedViaReflection
         @NanoTime
-        private long start;
+        private final long start;
 
         Event(long start) {
             this.start = start;

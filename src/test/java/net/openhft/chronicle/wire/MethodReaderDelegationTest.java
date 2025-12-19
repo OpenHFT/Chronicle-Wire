@@ -9,9 +9,8 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.core.util.Mocker;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
@@ -20,22 +19,19 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static junit.framework.TestCase.assertFalse;
 import static net.openhft.chronicle.wire.VanillaMethodReaderBuilder.DISABLE_READER_PROXY_CODEGEN;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(Parameterized.class)
 @SuppressWarnings({"deprecation", "removal"})
 public class MethodReaderDelegationTest extends WireTestCommon {
-    private final boolean useMethodId;
+    private boolean useMethodId;
 
     // Constructor to set parameter
-    public MethodReaderDelegationTest(boolean useMethodId) {
+    public void initMethodReaderDelegationTest(boolean useMethodId) {
         this.useMethodId = useMethodId;
     }
 
     // Define parameters for this parameterized test
-    @Parameterized.Parameters(name = "useMethodId={0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(
                 new Object[]{false},
@@ -44,52 +40,64 @@ public class MethodReaderDelegationTest extends WireTestCommon {
     }
 
     // Testing unsuccessful call delegation with BinaryWire type
-    @Test
-    public void testUnsuccessfulCallIsDelegatedBinaryWire() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "useMethodId={0}")
+    public void testUnsuccessfulCallIsDelegatedBinaryWire(boolean useMethodId) {
+        initMethodReaderDelegationTest(useMethodId);
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfulCallIsDelegated(wire, false);
+        assertEquals("*myCall[]*myCall[]", doTestUnsuccessfulCallIsDelegated(wire, false), "delegation: call log");
     }
 
-    @Test
-    public void testUnsuccessfulCallIsDelegatedBinaryWireScanning() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "useMethodId={0}")
+    public void testUnsuccessfulCallIsDelegatedBinaryWireScanning(boolean useMethodId) {
+        initMethodReaderDelegationTest(useMethodId);
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfulCallIsDelegated(wire, true);
+        assertEquals("*myCall[]*myCall[]", doTestUnsuccessfulCallIsDelegated(wire, true), "delegation (scanning): call log");
     }
 
     // Testing unsuccessful call delegation with TextWire type
-    @Test
-    public void testUnsuccessfulCallIsDelegatedTextWire() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "useMethodId={0}")
+    public void testUnsuccessfulCallIsDelegatedTextWire(boolean useMethodId) {
+        initMethodReaderDelegationTest(useMethodId);
         final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfulCallIsDelegated(wire, false);
+        assertEquals("*myCall[]*myCall[]", doTestUnsuccessfulCallIsDelegated(wire, false), "delegation: call log");
     }
 
-    @Test
-    public void testUnsuccessfulCallIsDelegatedTextWireScanning() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "useMethodId={0}")
+    public void testUnsuccessfulCallIsDelegatedTextWireScanning(boolean useMethodId) {
+        initMethodReaderDelegationTest(useMethodId);
         final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfulCallIsDelegated(wire, true);
+        assertEquals("*myCall[]*myCall[]", doTestUnsuccessfulCallIsDelegated(wire, true), "delegation (scanning): call log");
     }
 
     // Testing unsuccessful call delegation with YamlWire type
-    @Test
-    public void testUnsuccessfulCallIsDelegatedYamlWire() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "useMethodId={0}")
+    public void testUnsuccessfulCallIsDelegatedYamlWire(boolean useMethodId) {
+        initMethodReaderDelegationTest(useMethodId);
         final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfulCallIsDelegated(wire, false);
+        assertEquals("*myCall[]*myCall[]", doTestUnsuccessfulCallIsDelegated(wire, false), "delegation: call log");
     }
 
-    @Test
-    public void testUnsuccessfulCallIsDelegatedYamlWireScanning() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "useMethodId={0}")
+    public void testUnsuccessfulCallIsDelegatedYamlWireScanning(boolean useMethodId) {
+        initMethodReaderDelegationTest(useMethodId);
         final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfulCallIsDelegated(wire, true);
+        assertEquals("*myCall[]*myCall[]", doTestUnsuccessfulCallIsDelegated(wire, true), "delegation (scanning): call log");
     }
 
     // A helper method to test if unsuccessful method calls are properly delegated
-    private void doTestUnsuccessfulCallIsDelegated(Wire wire, boolean scanning) {
+    private String doTestUnsuccessfulCallIsDelegated(Wire wire, boolean scanning) {
         ignoreException("Unknown method-name='myFall' called on class");
         // Reset the wire and enable padding
         wire.reset();
@@ -149,42 +157,50 @@ public class MethodReaderDelegationTest extends WireTestCommon {
 
         // If scanning mode is enabled, verify that all methods have been read and that no unknown methods are left
         if (scanning) {
-            assertEquals("*myCall[]*myCall[]", sb.toString());
             // unknown methods are skipped
             assertFalse(reader.readOne());
         } else {
             assertTrue(reader.readOne());
-            assertEquals("*myCall[]*myCall[]", sb.toString());
         }
+        return sb.toString();
     }
 
     // Test case to ensure that unsuccessful calls are not delegated when certain conditions are met
-    @Test
-    public void testUnsuccessfulCallNoDelegate() {
-        testUnsuccessfulCallNoDelegate(false, false, false);
+    @MethodSource("data")
+    @ParameterizedTest(name = "useMethodId={0}")
+    public void testUnsuccessfulCallNoDelegate(boolean useMethodId) {
+        initMethodReaderDelegationTest(useMethodId);
+        assertEquals("*myCall[]*myCall[]", testUnsuccessfulCallNoDelegate(false, false, false), "no delegation: call log");
     }
 
     // Test case (with scanning) to ensure that unsuccessful calls are not delegated when certain conditions are met
-    @Test
-    public void testUnsuccessfulCallNoDelegateScanning() {
-        testUnsuccessfulCallNoDelegate(false, false, true);
+    @MethodSource("data")
+    @ParameterizedTest(name = "useMethodId={0}")
+    public void testUnsuccessfulCallNoDelegateScanning(boolean useMethodId) {
+        initMethodReaderDelegationTest(useMethodId);
+        assertEquals("*myCall[]*myCall[]", testUnsuccessfulCallNoDelegate(false, false, true), "no delegation (scanning): call log");
     }
 
     // Test case (with proxy) to ensure that unsuccessful calls are not delegated when certain conditions are met
-    @Test
-    public void testUnsuccessfulCallNoDelegateProxy() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "useMethodId={0}")
+    public void testUnsuccessfulCallNoDelegateProxy(boolean useMethodId) {
 
-        testUnsuccessfulCallNoDelegate(true, true, false);
+        initMethodReaderDelegationTest(useMethodId);
+
+        assertEquals("*myCall[]*myCall[]", testUnsuccessfulCallNoDelegate(true, true, false), "no delegation (proxy): call log");
     }
 
     // Test case (with proxy and scanning) to ensure that unsuccessful calls are not delegated when certain conditions are met
-    @Test
-    public void testUnsuccessfulCallNoDelegateProxyScanning() {
-        testUnsuccessfulCallNoDelegate(true, true, true);
+    @MethodSource("data")
+    @ParameterizedTest(name = "useMethodId={0}")
+    public void testUnsuccessfulCallNoDelegateProxyScanning(boolean useMethodId) {
+        initMethodReaderDelegationTest(useMethodId);
+        assertEquals("*myCall[]*myCall[]", testUnsuccessfulCallNoDelegate(true, true, true), "no delegation (proxy, scanning): call log");
     }
 
     // Helper method to test that unsuccessful calls are not delegated under various configurations
-    private void testUnsuccessfulCallNoDelegate(boolean proxy, boolean third, boolean scanning) {
+    private String testUnsuccessfulCallNoDelegate(boolean proxy, boolean third, boolean scanning) {
         // If proxy is enabled, set the system property to disable reader proxy code generation
         if (proxy)
             System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
@@ -221,16 +237,14 @@ public class MethodReaderDelegationTest extends WireTestCommon {
             if (scanning) {
                 assertTrue(reader.readOne());
                 assertEquals(third, reader.readOne());
-                assertEquals("*myCall[]*myCall[]", sb.toString());
                 assertFalse(reader.readOne());
             } else {
                 reader.readOne();
                 assertTrue(reader.readOne());
                 assertFalse(reader.readOne());
-
-                assertEquals("*myCall[]*myCall[]", sb.toString());
             }
 
+            return sb.toString();
         } finally {
             // Clear the system property to reset its original state
             System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
@@ -238,9 +252,11 @@ public class MethodReaderDelegationTest extends WireTestCommon {
     }
 
     // Test to ensure that user exceptions are not delegated during method calls
+    @MethodSource("data")
     @SuppressWarnings("deprecation")
-    @Test
-    public void testUserExceptionsAreNotDelegated() {
+    @ParameterizedTest(name = "useMethodId={0}")
+    public void testUserExceptionsAreNotDelegated(boolean useMethodId) {
+        initMethodReaderDelegationTest(useMethodId);
         // Initialize a wire with BINARY type and allocate space on the heap
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
@@ -273,8 +289,10 @@ public class MethodReaderDelegationTest extends WireTestCommon {
     // TODO: test below with interceptor
 
     // Test to verify that code generation can be disabled via system property
-    @Test
-    public void testCodeGenerationCanBeDisabled() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "useMethodId={0}")
+    public void testCodeGenerationCanBeDisabled(boolean useMethodId) {
+        initMethodReaderDelegationTest(useMethodId);
         // Set system property to disable reader proxy code generation
         System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
 
@@ -287,7 +305,7 @@ public class MethodReaderDelegationTest extends WireTestCommon {
             });
 
             // Assert that the reader is an instance of VanillaMethodReader
-            assertTrue(reader instanceof VanillaMethodReader);
+            assertInstanceOf(VanillaMethodReader.class, reader);
         } finally {
             // Clear the system property to reset its original state
             System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
@@ -295,19 +313,23 @@ public class MethodReaderDelegationTest extends WireTestCommon {
     }
 
     // Test that an exception is thrown from user code under standard conditions
-    @Test
-    public void testExceptionThrownFromUserCode() {
-        testExceptionThrownFromUserCode(false);
+    @MethodSource("data")
+    @ParameterizedTest(name = "useMethodId={0}")
+    public void testExceptionThrownFromUserCode(boolean useMethodId) {
+        initMethodReaderDelegationTest(useMethodId);
+        assertFalse(isVanillaMethodReaderWhenUserExceptionThrown(false), "user exception: reader type");
     }
 
     // Test that an exception is thrown from user code when a proxy is used
-    @Test
-    public void testExceptionThrownFromUserCodeProxy() {
-        testExceptionThrownFromUserCode(true);
+    @MethodSource("data")
+    @ParameterizedTest(name = "useMethodId={0}")
+    public void testExceptionThrownFromUserCodeProxy(boolean useMethodId) {
+        initMethodReaderDelegationTest(useMethodId);
+        assertTrue(isVanillaMethodReaderWhenUserExceptionThrown(true), "user exception (proxy): reader type");
     }
 
     // Helper method to test that an exception is thrown from user code
-    private void testExceptionThrownFromUserCode(boolean proxy) throws InvocationTargetRuntimeException {
+    private boolean isVanillaMethodReaderWhenUserExceptionThrown(boolean proxy) throws InvocationTargetRuntimeException {
         // If proxy is enabled, set the system property to disable reader proxy code generation
         if (proxy)
             System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
@@ -331,11 +353,11 @@ public class MethodReaderDelegationTest extends WireTestCommon {
             // Set up the MethodReader to read methods from the wire
             final MethodReader reader = wire.methodReader(useMethodId ? (MyInterfaceMethodId) myInterface::myCall : myInterface);
 
-            // Check if the reader is of type VanillaMethodReader when proxy is enabled
-            assertEquals(proxy, reader instanceof VanillaMethodReader);
+            boolean isVanillaMethodReader = reader instanceof VanillaMethodReader;
 
             // Assert that an InvocationTargetRuntimeException is thrown when trying to read a method
             assertThrows(InvocationTargetRuntimeException.class, reader::readOne);
+            return isVanillaMethodReader;
         } finally {
             // Clear the system property to reset its original state
             System.clearProperty(DISABLE_READER_PROXY_CODEGEN);
@@ -343,19 +365,23 @@ public class MethodReaderDelegationTest extends WireTestCommon {
     }
 
     // Test to verify exception handling in user code with long parameters
-    @Test
-    public void testExceptionThrownFromUserCodeLong() {
-        testExceptionThrownFromUserCodeLong(false);
+    @MethodSource("data")
+    @ParameterizedTest(name = "useMethodId={0}")
+    public void testExceptionThrownFromUserCodeLong(boolean useMethodId) {
+        initMethodReaderDelegationTest(useMethodId);
+        assertFalse(isVanillaMethodReaderWhenUserExceptionThrownLong(false), "user exception (long): reader type");
     }
 
     // Test to verify exception handling in user code with long parameters when a proxy is used
-    @Test
-    public void testExceptionThrownFromUserCodeLongProxy() {
-        testExceptionThrownFromUserCodeLong(true);
+    @MethodSource("data")
+    @ParameterizedTest(name = "useMethodId={0}")
+    public void testExceptionThrownFromUserCodeLongProxy(boolean useMethodId) {
+        initMethodReaderDelegationTest(useMethodId);
+        assertTrue(isVanillaMethodReaderWhenUserExceptionThrownLong(true), "user exception (long, proxy): reader type");
     }
 
     // Helper method to test exception thrown from user code with long parameters
-    private void testExceptionThrownFromUserCodeLong(boolean proxy) {
+    private boolean isVanillaMethodReaderWhenUserExceptionThrownLong(boolean proxy) {
         // If proxy is enabled, set the system property to disable reader proxy code generation
         if (proxy)
             System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
@@ -379,11 +405,11 @@ public class MethodReaderDelegationTest extends WireTestCommon {
             // Set up the MethodReader to read methods from the wire
             final MethodReader reader = wire.methodReader(useMethodId ? (MyInterfaceLongMethodId) myInterface::myCall : myInterface);
 
-            // Check if the reader is of type VanillaMethodReader when proxy is enabled
-            assertEquals(proxy, reader instanceof VanillaMethodReader);
+            boolean isVanillaMethodReader = reader instanceof VanillaMethodReader;
 
             // Assert that an InvocationTargetRuntimeException is thrown when trying to read a method
             assertThrows(InvocationTargetRuntimeException.class, reader::readOne);
+            return isVanillaMethodReader;
         } finally {
             // Clear the system property to reset its original state
             System.clearProperty(DISABLE_READER_PROXY_CODEGEN);

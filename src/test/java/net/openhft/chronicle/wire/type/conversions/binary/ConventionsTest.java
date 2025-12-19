@@ -9,12 +9,12 @@ import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("unchecked")
 public class ConventionsTest extends WireTestCommon {
@@ -38,7 +38,7 @@ public class ConventionsTest extends WireTestCommon {
             }
 
             // Assert equality between the expected value and the result of the test method
-            Assert.assertEquals("type=" + type, extected, test(extected, type));
+            Assertions.assertEquals(extected, test(extected, type), "type=" + type);
         }
     }
 
@@ -62,7 +62,7 @@ public class ConventionsTest extends WireTestCommon {
             }
 
             // Assert equality between the expected value and the result of the test method
-            Assert.assertEquals("type=" + type, extected, test(extected, type));
+            Assertions.assertEquals(extected, test(extected, type), "type=" + type);
         }
     }
 
@@ -76,12 +76,12 @@ public class ConventionsTest extends WireTestCommon {
             // Use a small number as a string for the expected value
             @NotNull Object extected = "123"; // small number
             // Assert equality between the expected value and the result of the test method
-            Assert.assertEquals("type=" + type, extected, String.valueOf(test(extected, type)));
+            Assertions.assertEquals(extected, String.valueOf(test(extected, type)), "type=" + type);
         }
 
         // Special cases for floating-point numbers
-        Assert.assertEquals(123.0, test("123", Double.class), 0);
-        Assert.assertEquals(123.0, (double) test("123", Float.class), 0);
+        Assertions.assertEquals(123.0, test("123", Double.class), 0);
+        Assertions.assertEquals(123.0, (double) test("123", Float.class), 0);
 
     }
 
@@ -107,7 +107,7 @@ public class ConventionsTest extends WireTestCommon {
             @Nullable final Object actual = test(value, extected.getClass());
 
             // Assert that the converted value matches the expected value
-            Assert.assertEquals("type=" + type, extected, actual);
+            Assertions.assertEquals(extected, actual, "type=" + type);
         }
     }
 
@@ -118,7 +118,7 @@ public class ConventionsTest extends WireTestCommon {
         // Test conversions for maximum unsigned long value
         for (long shift : new long[]{8}) {
             long extected = 1L << shift;
-            Assert.assertEquals(extected, (long) test(extected, Long.class));
+            Assertions.assertEquals(extected, (long) test(extected, Long.class));
         }
     }
 

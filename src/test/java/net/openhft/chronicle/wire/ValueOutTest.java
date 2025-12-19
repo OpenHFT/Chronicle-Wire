@@ -3,32 +3,29 @@
  */
 package net.openhft.chronicle.wire;
 
-import junit.framework.TestCase;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@RunWith(Parameterized.class)
-public class ValueOutTest extends TestCase {
+public class ValueOutTest {
 
-    private final WireType wireType;
+    private WireType wireType;
 
     // Constructor to initialize the WireType for testing
-    public ValueOutTest(WireType wireType) {
+    public void initValueOutTest(WireType wireType) {
         this.wireType = wireType;
     }
 
     // Provide parameters to be injected into the test class constructor
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {WireType.TEXT},
@@ -37,55 +34,60 @@ public class ValueOutTest extends TestCase {
     }
 
     // Test the writing and reading of a byte array using the specified WireType
-    @Test
-    public void test() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void test(WireType wireType) {
+        initValueOutTest(wireType);
         // Apply the wire type and ensure padding is used if binary
         final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(wire.isBinary());
+        try {
+            // Define a byte array to be written and read during the test
+            @NotNull final byte[] expected = "this is my byte array".getBytes(ISO_8859_1);
+            wire.writeDocument(false, w ->
+                    w.write().object(expected)
 
-        // Define a byte array to be written and read during the test
-        @NotNull final byte[] expected = "this is my byte array".getBytes(ISO_8859_1);
-        wire.writeDocument(false, w ->
-                w.write().object(expected)
+            );
 
-        );
-
-        // Verify that the read byte array matches the written byte array
-        wire.readDocument(null, w -> {
-            @NotNull final byte[] actual = (byte[]) w.read().object();
-            Assert.assertArrayEquals(expected, actual);
-
-        });
-
-        // Release resources allocated for the byte buffer
-        wire.bytes().releaseLast();
+            // Verify that the read byte array matches the written byte array
+            final byte[][] actualHolder = {null};
+            wire.readDocument(null, w -> actualHolder[0] = (byte[]) w.read().object());
+            assertArrayEquals(expected, actualHolder[0], "valueOut: roundtrip wireType=" + wireType);
+        } finally {
+            // Release resources allocated for the byte buffer
+            wire.bytes().releaseLast();
+        }
     }
 
     // Test that object serialization and deserialization work as expected
     // when specifying the desired type explicitly
-    @Test
-    public void testRequestedType() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testRequestedType(WireType wireType) {
+        initValueOutTest(wireType);
         // Initialize the Wire object and enable padding for binary format
         final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(wire.isBinary());
+        try {
+            // Define and write a byte array to the Wire object
+            @NotNull final byte[] expected = "this is my byte array".getBytes(ISO_8859_1);
+            wire.writeDocument(false, w -> w.write().object(expected));
 
-        // Define and write a byte array to the Wire object
-        @NotNull final byte[] expected = "this is my byte array".getBytes(ISO_8859_1);
-        wire.writeDocument(false, w -> w.write().object(expected));
-
-        // Read the byte array back and ensure it matches the original
-        wire.readDocument(null, w -> {
-            @Nullable final byte[] actual = w.read().object(byte[].class);
-            Assert.assertArrayEquals(expected, actual);
-        });
-
-        // Free up resources related to the byte buffer
-        wire.bytes().releaseLast();
+            // Read the byte array back and ensure it matches the original
+            final byte[][] actualHolder = {null};
+            wire.readDocument(null, w -> actualHolder[0] = w.read().object(byte[].class));
+            assertArrayEquals(expected, actualHolder[0], "valueOut: requestedType wireType=" + wireType);
+        } finally {
+            // Free up resources related to the byte buffer
+            wire.bytes().releaseLast();
+        }
     }
 
     // Test the serialization and deserialization of all possible byte values
-    @Test
-    public void testAllBytes() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAllBytes(WireType wireType) {
+        initValueOutTest(wireType);
         // Apply the wire type, ensuring padding is applied if binary
         final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(wire.isBinary());
@@ -105,7 +107,7 @@ public class ValueOutTest extends TestCase {
             // Read back the byte and validate it against the original
             wire.readDocument(null, w -> {
                 @Nullable final byte[] actual = (byte[]) w.read().object();
-                Assert.assertArrayEquals(expected, actual);
+                assertArrayEquals(expected, actual);
             });
 
         }

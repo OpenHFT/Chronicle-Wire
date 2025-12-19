@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class WireAbcTestSupport {
     private WireAbcTestSupport() {
@@ -62,13 +62,13 @@ final class WireAbcTestSupport {
                 stringC + stringB + stringA}) {
             wire.reset();
             wire.bytes().append(input);
-            assertEquals(input, "!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
+            assertEquals("!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
                     "  A: hi,\n" +
                     "  B: hi,\n" +
                     "  C: hi\n" +
                     "}\n", wire.getValueIn()
                     .object(abc, TextWireTest.ABC.class)
-                    .toString());
+                    .toString(), input);
             assertEquals(expectedComments,
                     Arrays.stream(sb.toString().split("\n"))
                             .filter(s -> !s.isEmpty())

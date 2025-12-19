@@ -10,16 +10,15 @@ import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.threads.PauserMode;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test class to validate the behavior of the marshalling process within an EventGroup context.
  */
-@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
-public class MarshallingEventGroupTest extends WireTestCommon {
+class MarshallingEventGroupTest extends WireTestCommon {
 
     /**
      * Test method to evaluate the serialization of the EventGroup object.

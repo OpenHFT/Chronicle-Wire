@@ -8,11 +8,10 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.wire.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class CNFREOnMissingClassTest extends WireTestCommon {
 
@@ -20,14 +19,15 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
      * Validates that a ClassNotFoundRuntimeException is correctly thrown when attempting
      * to deserialize data with a class alias that is not registered in the system.
      */
-    @Test(expected = ClassNotFoundRuntimeException.class)
+    @Test
     public void throwClassNotFoundRuntimeExceptionOnMissingClassAlias() {
-        Wires.GENERATE_TUPLES = false;
-        Wire wire = new TextWire(Bytes.from("" +
-                "a: !Aaa { hi: bye }"));
-        Object object = wire.read("a").object();
-        System.out.println(object);
-        assertNotNull(object);
+        assertThrows(ClassNotFoundRuntimeException.class, () -> {
+            Wires.GENERATE_TUPLES = false;
+            Wire wire = new TextWire(Bytes.from("a: !Aaa { hi: bye }"));
+            Object object = wire.read("a").object();
+            System.out.println(object);
+            assertNotNull(object);
+        });
     }
 
     private static class TwoFields extends AbstractMarshallableCfg {
@@ -38,14 +38,16 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
     /**
      * Tests if a ClassNotFoundRuntimeException is thrown when a class for a field is missing.
      */
-    @Test(expected = ClassNotFoundRuntimeException.class)
+    @Test
     public void throwClassNotFoundRuntimeExceptionOnMissingClassForField() {
-        Wires.GENERATE_TUPLES = false;
-        ClassAliasPool.CLASS_ALIASES.addAlias(TwoFields.class);
-        String simpleObject = "!TwoFields { name: \"henry\", fieldOne: !ThisClassDoesntExist { value: 1234 } }";
-        String key = "class.not.found.for.missing.class.alias";
-        Jvm.startup().on(CNFREOnMissingClassTest.class, "Value of " + key + ": " + Jvm.getBoolean(key));
-        final TwoFields simple = Marshallable.fromString(simpleObject);
+        assertThrows(ClassNotFoundRuntimeException.class, () -> {
+            Wires.GENERATE_TUPLES = false;
+            ClassAliasPool.CLASS_ALIASES.addAlias(TwoFields.class);
+            String simpleObject = "!TwoFields { name: \"henry\", fieldOne: !ThisClassDoesntExist { value: 1234 } }";
+            String key = "class.not.found.for.missing.class.alias";
+            Jvm.startup().on(CNFREOnMissingClassTest.class, "Value of " + key + ": " + Jvm.getBoolean(key));
+            final TwoFields simple = Marshallable.fromString(simpleObject);
+        });
     }
 
     private static class UsesTwoFields extends AbstractMarshallableCfg {
@@ -57,14 +59,16 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
      * Failing to load a class for a field with a type of java.lang.Object causes the correct behaviour but in
      * an unexpected code path (the check for a classloader at TextWire#typeOrPrefixObject - line 1913
      */
-    @Test(expected = ClassNotFoundRuntimeException.class)
+    @Test
     public void throwClassNotFoundRuntimeExceptionOnMissingClassForField2() {
-        testFieldNotObject0(false, null);
+        assertThrows(ClassNotFoundRuntimeException.class, () ->
+                testFieldNotObject0(false, null));
     }
 
-    @Test(expected = ClassNotFoundRuntimeException.class)
+    @Test
     public void throwClassNotFoundRuntimeExceptionOnMissingClassForFieldNotATuple() {
-        testFieldNotObject0(true, null);
+        assertThrows(ClassNotFoundRuntimeException.class, () ->
+                testFieldNotObject0(true, null));
     }
 
     private void testFieldNotObject0(boolean generateTuples, String expected) {
@@ -87,9 +91,10 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
     /**
      * Tests if a ClassNotFoundRuntimeException is thrown for a missing class for an interface field.
      */
-    @Test(expected = ClassNotFoundRuntimeException.class)
+    @Test
     public void throwClassNotFoundRuntimeExceptionOnMissingClassForInterfaceField() {
-        testInterfaceFieldTest0(false, null);
+        assertThrows(ClassNotFoundRuntimeException.class, () ->
+                parseInterfaceField(false));
     }
 
     /**
@@ -100,21 +105,21 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
     public void useTupleOnMissingClassForInterfaceField() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        testInterfaceFieldTest0(true, "" +
-                "!UsesInterfaceField {\n" +
+        String expected = "!UsesInterfaceField {\n" +
                 "  name: henry,\n" +
                 "  engineListener: !ThisListenerClassDoesntExist {\n" +
                 "    value: 128\n" +
                 "  }\n" +
-                "}\n");
+                "}\n";
+        assertEquals(expected, parseInterfaceField(true), "tuple: missing class for interface field");
     }
 
-    private void testInterfaceFieldTest0(boolean generateTuples, String expected) {
+    private String parseInterfaceField(boolean generateTuples) {
         Wires.GENERATE_TUPLES = generateTuples;
 
         ClassAliasPool.CLASS_ALIASES.addAlias(UsesInterfaceField.class);
         String simpleObject = "!UsesInterfaceField { name: \"henry\", engineListener: !ThisListenerClassDoesntExist { value: 128 } }";
         final UsesInterfaceField simple = Marshallable.fromString(simpleObject);
-        assertEquals(expected, simple.toString());
+        return simple.toString();
     }
 }

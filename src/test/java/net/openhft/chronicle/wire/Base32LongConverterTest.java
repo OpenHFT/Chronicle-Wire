@@ -4,10 +4,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Base32LongConverterTest extends WireTestCommon {
 
@@ -34,19 +33,22 @@ public class Base32LongConverterTest extends WireTestCommon {
         assertTrue(true);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseLengthCheck() {
-        Base32LongConverter.INSTANCE.parse(getClass().getCanonicalName());
+        assertThrows(IllegalArgumentException.class, () ->
+                Base32LongConverter.INSTANCE.parse(getClass().getCanonicalName()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseSubstringLengthCheck() {
-        Base32LongConverter.INSTANCE.parse("ABCD", 3, 0);
+        assertThrows(IllegalArgumentException.class, () ->
+                Base32LongConverter.INSTANCE.parse("ABCD", 3, 0));
     }
 
     @Test
     public void allSafeCharsTextWire() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+        assertInstanceOf(TextWire.class, wire, "safe chars: wire type");
         LongConverterTestSupport.allSafeChars(wire, Base32LongConverter.INSTANCE, 32 * 32L);
     }
 
@@ -54,6 +56,7 @@ public class Base32LongConverterTest extends WireTestCommon {
     @Test
     public void allSafeCharsYamlWire() {
         Wire wire = new YamlWire();
+        assertInstanceOf(YamlWire.class, wire, "safe chars: wire type");
         LongConverterTestSupport.allSafeChars(wire, Base32LongConverter.INSTANCE, 32 * 32L);
     }
 }

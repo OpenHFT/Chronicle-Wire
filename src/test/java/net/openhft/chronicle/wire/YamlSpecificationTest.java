@@ -7,9 +7,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,9 +17,8 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static net.openhft.chronicle.wire.WireType.YAML;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(Parameterized.class)
 @SuppressWarnings({"deprecation", "removal"})
 public class YamlSpecificationTest extends WireTestCommon {
 
@@ -34,15 +32,14 @@ public class YamlSpecificationTest extends WireTestCommon {
     }
 
     // Input string used for tests
-    private final String input;
+    private String input;
 
     // Parameterized constructor
-    public YamlSpecificationTest(String input) {
+    public void initYamlSpecificationTest(String input) {
         this.input = input;
     }
 
     // Defining parameterized test cases
-    @Parameterized.Parameters(name = "case={0}")
     public static Collection<Object[]> tests() {
         return Arrays.asList(new Object[][]{
                 {"2_1_SequenceOfScalars"},
@@ -77,8 +74,10 @@ public class YamlSpecificationTest extends WireTestCommon {
     }
 
     // Test to decode YAML snippets based on various specifications
-    @Test
-    public void decodeAs() throws IOException {
+    @MethodSource("tests")
+    @ParameterizedTest(name = "case={0}")
+    public void decodeAs(String input) throws IOException {
+        initYamlSpecificationTest(input);
         String snippet = new String(getBytes(input + ".yaml"), StandardCharsets.UTF_8)
                 .replace("\r\n", "\n");
         String actual = parseWithYaml(snippet);
@@ -86,7 +85,7 @@ public class YamlSpecificationTest extends WireTestCommon {
         byte[] expectedBytes = getBytes(input + ".out.yaml");
         String expected;
         if (expectedBytes != null) {
-            assertEquals(actual, parseWithYaml(actual));
+            assertEquals(actual, parseWithYaml(actual), "parsed YAML should be idempotent when re-parsed");
 
             expected = new String(expectedBytes, StandardCharsets.UTF_8);
         } else {
@@ -94,10 +93,10 @@ public class YamlSpecificationTest extends WireTestCommon {
         }
 
         final String expectedStr = Bytes.wrapForRead(expected.getBytes(StandardCharsets.UTF_8)).toString();
-        assertEquals(input,
-                expectedStr
+        assertEquals(expectedStr
                         .replace("\r\n", "\n"),
-                actual);
+                actual,
+                "YAML output should match specification for test case: " + input);
     }
 
     // Helper method to parse input string using YamlWire

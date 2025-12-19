@@ -4,7 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class WireObjectStreamAdapterTest extends WireTestCommon {
 
@@ -38,40 +38,42 @@ public class WireObjectStreamAdapterTest extends WireTestCommon {
         wire.bytes().readPositionRemaining(0, wire.bytes().writePosition());
         WireObjectInput input = new WireObjectInput(wire);
 
-        assertTrue(input.readBoolean());
-        assertEquals(7, input.readByte());
-        assertEquals(1234, input.readShort());
-        assertEquals('A', input.readChar());
-        assertEquals(321, input.readInt());
-        assertEquals(9_876_543_210L, input.readLong());
-        assertEquals(1.25F, input.readFloat(), 0.0F);
-        assertEquals(3.5D, input.readDouble(), 0.0D);
-        assertEquals("hello", input.readUTF());
+        assertTrue(input.readBoolean(), "wire object stream should preserve boolean values");
+        assertEquals(7, input.readByte(), "wire object stream should preserve byte values");
+        assertEquals(1234, input.readShort(), "wire object stream should preserve short values");
+        assertEquals('A', input.readChar(), "wire object stream should preserve char values");
+        assertEquals(321, input.readInt(), "wire object stream should preserve int values");
+        assertEquals(9_876_543_210L, input.readLong(), "wire object stream should preserve long values");
+        assertEquals(1.25F, input.readFloat(), 0.0F, "wire object stream should preserve float values");
+        assertEquals(3.5D, input.readDouble(), 0.0D, "wire object stream should preserve double values");
+        assertEquals("hello", input.readUTF(), "wire object stream should preserve UTF string values");
 
         @SuppressWarnings("unchecked")
         List<String> list = (List<String>) input.readObject();
-        assertEquals(Arrays.asList("first", "second"), list);
+        assertEquals(Arrays.asList("first", "second"), list, "wire object stream should preserve list collection contents");
         @SuppressWarnings("unchecked")
         Map<String, Integer> map = (Map<String, Integer>) input.readObject();
-        assertEquals(Integer.valueOf(42), map.get("key"));
+        assertEquals(Integer.valueOf(42), map.get("key"), "wire object stream should preserve map collection contents");
 
         // Available() reports remaining bytes in the underlying wire, which may include framing.
-        assertTrue(input.available() >= 4);
+        assertTrue(input.available() >= 4, "wire object stream should report available bytes for remaining raw data");
 
         byte[] dest = new byte[5];
         int read = input.read(dest, 1, dest.length - 1);
-        assertEquals(dest.length - 1 - 1, read);
-        assertArrayEquals(new byte[]{9, 8, 7, 6, 0}, dest);
-        assertEquals(0, input.available());
-        assertEquals(-1, input.read());
+        assertEquals(dest.length - 1 - 1, read, "wire object stream should read correct number of raw bytes into buffer");
+        assertArrayEquals(new byte[]{9, 8, 7, 6, 0}, dest, "wire object stream should preserve raw byte array data with correct offset");
+        assertEquals(0, input.available(), "wire object stream should report zero available bytes after consuming all data");
+        assertEquals(-1, input.read(), "wire object stream should return -1 when no more data is available");
 
         buffer.releaseLast();
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void readFullyIsUnsupported() throws IOException {
-        Wire wire = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
-        WireObjectInput input = new WireObjectInput(wire);
-        input.readFully(new byte[1], 0, 1);
+        assertThrows(UnsupportedOperationException.class, () -> {
+            Wire wire = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
+            WireObjectInput input = new WireObjectInput(wire);
+            input.readFully(new byte[1], 0, 1);
+        });
     }
 }

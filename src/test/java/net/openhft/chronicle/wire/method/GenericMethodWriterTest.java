@@ -5,17 +5,14 @@ package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.Wire;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class for verifying the behavior of generic method writers in Chronicle Wire.
  */
-@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
-public class GenericMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
+class GenericMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     /**
      * Test the functionality of method writers with generic parameters.

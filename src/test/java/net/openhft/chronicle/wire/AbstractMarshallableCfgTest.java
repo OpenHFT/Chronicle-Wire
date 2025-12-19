@@ -5,13 +5,13 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class AbstractMarshallableCfgTest extends WireTestCommon{
     static class MyAMC extends AbstractMarshallableCfg {
@@ -40,8 +40,7 @@ public class AbstractMarshallableCfgTest extends WireTestCommon{
         MyAMC myAMC = new MyAMC();
 
         // Verify default string representation
-        assertEquals("" +
-                        "!net.openhft.chronicle.wire.AbstractMarshallableCfgTest$MyAMC {\n" +
+        assertEquals("!net.openhft.chronicle.wire.AbstractMarshallableCfgTest$MyAMC {\n" +
                         "}\n",
                 myAMC.toString());
 
@@ -51,8 +50,7 @@ public class AbstractMarshallableCfgTest extends WireTestCommon{
         myAMC.nestedSDM.bytes.append("Hi");
 
         // Verify modified string representation
-        assertEquals("" +
-                        "!net.openhft.chronicle.wire.AbstractMarshallableCfgTest$MyAMC {\n" +
+        assertEquals("!net.openhft.chronicle.wire.AbstractMarshallableCfgTest$MyAMC {\n" +
                         "  nestedAMC: {\n" +
                         "    number: 0,\n" +
                         "    flag: true\n" +

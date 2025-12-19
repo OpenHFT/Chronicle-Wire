@@ -6,10 +6,10 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class WireInternalTest extends WireTestCommon {
 
@@ -93,8 +93,7 @@ public class WireInternalTest extends WireTestCommon {
         String actual = Wires.fromSizePrefixedBlobs(bytes);
 
         // Validate the converted output against the expected string.
-        assertEquals("" +
-                "--- !!meta-data #binary\n" +
+        assertEquals("--- !!meta-data #binary\n" +
                 "csp: \"csp://hello-world\"\n" +
                 "tid: 123456789\n" +
                 "# position: 36, header: 0\n" +

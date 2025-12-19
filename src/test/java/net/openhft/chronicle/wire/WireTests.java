@@ -6,14 +6,14 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -22,33 +22,31 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Optional;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @SuppressWarnings("rawtypes")
-@RunWith(Parameterized.class)
 public class WireTests {
 
     // Member variables for parameterized tests
-    private final WireType wireType;
-    private final boolean usePadding;
+    private WireType wireType;
+    private boolean usePadding;
 
     // Rule to get the current test name
     @NotNull
-    @Rule
-    public TestName name = new TestName();
+    public String name;
 
     // Constructor to initialize test parameters
-    public WireTests(WireType wireType, boolean usePadding) {
+    public void initWireTests(WireType wireType, boolean usePadding) {
         this.wireType = wireType;
         this.usePadding = usePadding;
     }
 
     // Define the parameters for the test suite
     @NotNull
-    @Parameterized.Parameters(name = "{index}: {0} padding: {1}")
     public static Collection<Object[]> data() {
         Object[][] list = {
                 {WireType.BINARY, true},
@@ -61,8 +59,10 @@ public class WireTests {
     }
 
     // Test to verify that hex representations of negative long values are handled correctly
-    @Test
-    public void testHexLongNegativeTest() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{index}: {0} padding: {1}")
+    public void testHexLongNegativeTest(WireType wireType, boolean usePadding) {
+        initWireTests(wireType, usePadding);
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final long expectedLong1 = -1;
         final long expectedLong2 = Long.MIN_VALUE;
@@ -91,8 +91,10 @@ public class WireTests {
     }
 
     // Test to verify that non-existent type literals are handled leniently
-    @Test
-    public void testLenientTypeLiteral() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{index}: {0} padding: {1}")
+    public void testLenientTypeLiteral(WireType wireType, boolean usePadding) {
+        initWireTests(wireType, usePadding);
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             final Wire wire = createWire(b);
@@ -111,8 +113,10 @@ public class WireTests {
     }
 
     // Test to verify that Date objects are correctly written and read
-    @Test
-    public void testDate() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{index}: {0} padding: {1}")
+    public void testDate(WireType wireType, boolean usePadding) {
+        initWireTests(wireType, usePadding);
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final Wire wire = createWire(b);
 
@@ -138,8 +142,10 @@ public class WireTests {
     }
 
     // Test to verify that LocalDateTime objects are correctly written and read
-    @Test
-    public void testLocalDateTime() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{index}: {0} padding: {1}")
+    public void testLocalDateTime(WireType wireType, boolean usePadding) {
+        initWireTests(wireType, usePadding);
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             final Wire wire = createWire(b);
@@ -154,8 +160,10 @@ public class WireTests {
     }
 
     // Test to verify that ZonedDateTime objects are correctly written and read
-    @Test
-    public void testZonedDateTime() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{index}: {0} padding: {1}")
+    public void testZonedDateTime(WireType wireType, boolean usePadding) {
+        initWireTests(wireType, usePadding);
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final Wire wire = createWire(b);
         ZonedDateTime expected = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
@@ -168,8 +176,11 @@ public class WireTests {
     }
 
     // Test to verify skipping values while reading both numbers and text
-    @Test
-    public void testSkipValueWithNumbersAndStrings() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{index}: {0} padding: {1}")
+    public void testSkipValueWithNumbersAndStrings(WireType wireType, boolean usePadding) {
+
+        initWireTests(wireType, usePadding);
 
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final Wire wire = createWire(b);
@@ -191,8 +202,10 @@ public class WireTests {
     }
 
     // Test to verify that null values are correctly written and read
-    @Test
-    public void testWriteNull() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{index}: {0} padding: {1}")
+    public void testWriteNull(WireType wireType, boolean usePadding) {
+        initWireTests(wireType, usePadding);
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final Wire wire = createWire(b);
         wire.write().object(null);  // Write null values
@@ -202,37 +215,41 @@ public class WireTests {
 
         // Read the null values back and assert
         @Nullable Object o = wire.read().object(Object.class);
-        Assert.assertNull(o);
+        Assertions.assertNull(o);
         @Nullable String s = wire.read().object(String.class);
-        Assert.assertNull(s);
+        Assertions.assertNull(s);
         @Nullable RetentionPolicy rp = wire.read().object(RetentionPolicy.class);
-        Assert.assertNull(rp);
+        Assertions.assertNull(rp);
         @Nullable Circle c = wire.read().object(Circle.class);  // this fails without the check.
-        Assert.assertNull(c);
+        Assertions.assertNull(c);
 
         b.releaseLast();
     }
 
-    // Test to verify that a TestClass object with Class type is correctly marshalled and unmarshalled
-    @Test
-    public void testClassTypedMarshallableObject() {
+    // Test to verify that a ClassHolder object with Class type is correctly marshalled and unmarshalled
+    @MethodSource("data")
+    @ParameterizedTest(name = "{index}: {0} padding: {1}")
+    public void testClassTypedMarshallableObject(WireType wireType, boolean usePadding) {
+        initWireTests(wireType, usePadding);
         assumeFalse(wireType == WireType.JSON);
 
-        @NotNull TestClass testClass = new TestClass(Boolean.class);
+        @NotNull ClassHolder testClass = new ClassHolder(Boolean.class);
 
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final Wire wire = createWire(b);
         wire.write().typedMarshallable(testClass);
 
-        @Nullable TestClass o = wire.read().typedMarshallable();
+        @Nullable ClassHolder o = wire.read().typedMarshallable();
         assertEquals(Boolean.class, o.clazz());
 
         b.releaseLast();
     }
 
     // Test to verify that unknown fields are cleared between read contexts
-    @Test
-    public void unknownFieldsAreClearedBetweenReadContexts() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{index}: {0} padding: {1}")
+    public void unknownFieldsAreClearedBetweenReadContexts(WireType wireType, boolean usePadding) {
+        initWireTests(wireType, usePadding);
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final Wire wire = createWire(b);
 
@@ -254,8 +271,10 @@ public class WireTests {
     }
 
     // Test to verify peeking at YAML in the reading context, specific to BINARY wire type and padding
-    @Test
-    public void testReadingPeekYaml() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{index}: {0} padding: {1}")
+    public void testReadingPeekYaml(WireType wireType, boolean usePadding) {
+        initWireTests(wireType, usePadding);
         assumeTrue(usePadding);
         assumeTrue(wireType == WireType.BINARY);
 
@@ -319,18 +338,22 @@ public class WireTests {
         b.releaseLast();
     }
 
-    @Test
+    @MethodSource("data")
+    @ParameterizedTest(name = "{index}: {0} padding: {1}")
     // Test to ensure that isPresent() returns true when the value is actually present
-    public void isPresentReturnsTrueWhenValueIsPresent() {
+    public void isPresentReturnsTrueWhenValueIsPresent(WireType wireType, boolean usePadding) {
+        initWireTests(wireType, usePadding);
         Bytes<?> b = Bytes.allocateElasticOnHeap();  // Create an elastic byte buffer
         final Wire wire = createWire(b);         // Create a Wire object
         wire.write("value").int32(12345);        // Write an integer value to the wire with the key "value"
         assertTrue(wire.read("value").isPresent()); // Assert that reading the key "value" from the wire is present
     }
 
-    @Test
+    @MethodSource("data")
+    @ParameterizedTest(name = "{index}: {0} padding: {1}")
     // Test to ensure that isPresent() returns false when the value is not present
-    public void isPresentReturnsFalseWhenValueIsNotPresent() {
+    public void isPresentReturnsFalseWhenValueIsNotPresent(WireType wireType, boolean usePadding) {
+        initWireTests(wireType, usePadding);
         Bytes<?> b = Bytes.allocateElasticOnHeap();  // Create an elastic byte buffer
         final Wire wire = createWire(b);         // Create a Wire object
         wire.write("value").int32(12345);        // Write an integer value to the wire with the key "value"
@@ -345,11 +368,11 @@ public class WireTests {
     }
 
     // Inner class to represent a test object with a Class field
-    @SuppressWarnings("PMD.TestClassWithoutTestCases")
-    static class TestClass extends SelfDescribingMarshallable {
+
+    static class ClassHolder extends SelfDescribingMarshallable {
         final Class<?> o;
 
-        TestClass(Class<?> o) {
+        ClassHolder(Class<?> o) {
             this.o = o;
         }
 
@@ -360,5 +383,13 @@ public class WireTests {
 
     // Inner class to represent a Circle, implements Marshallable for serialization
     private static class Circle implements Marshallable {
+    }
+
+    @BeforeEach
+    public void setup(TestInfo testInfo) {
+        Optional<Method> testMethod = testInfo.getTestMethod();
+        if (testMethod.isPresent()) {
+            this.name = testMethod.get().getName();
+        }
     }
 }

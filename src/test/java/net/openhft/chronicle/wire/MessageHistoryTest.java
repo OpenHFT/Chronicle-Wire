@@ -9,14 +9,25 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.bytes.MethodReader.MESSAGE_HISTORY_METHOD_ID;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"deprecation", "removal"})
 public class MessageHistoryTest extends WireTestCommon {
+    private static final String EXPECTED_COPYABLE_YAML = "history: {\n" +
+            "  sources: [\n" +
+            "    1,\n" +
+            "    0x2\n" +
+            "  ],\n" +
+            "  timings: [\n" +
+            "    11111111,\n" +
+            "    22222222,\n" +
+            "    120962203520100\n" +
+            "  ]\n" +
+            "}\n";
 
     // Test to check if clearing and retrieving the MessageHistory works correctly.
     @Test
@@ -278,15 +289,15 @@ public class MessageHistoryTest extends WireTestCommon {
 
     @Test
     public void copyableSelfDescribing() {
-        doCopyableTest(false);
+        assertEquals(EXPECTED_COPYABLE_YAML, doCopyableTest(false), "copyable (self describing)");
     }
 
     @Test
     public void copyableBytes() {
-        doCopyableTest(true);
+        assertEquals(EXPECTED_COPYABLE_YAML, doCopyableTest(true), "copyable (bytes)");
     }
 
-    private static void doCopyableTest(boolean useBytesMarshallable) {
+    private static String doCopyableTest(boolean useBytesMarshallable) {
         SetTimeMessageHistory vmh = new SetTimeMessageHistory();
         vmh.addSource(1, 2);
         vmh.addTiming(11111111);
@@ -302,21 +313,12 @@ public class MessageHistoryTest extends WireTestCommon {
         Wire wire2 = new YamlWire();
         wire.copyTo(wire2);
 
-        assertEquals("history: {\n" +
-                "  sources: [\n" +
-                "    1,\n" +
-                "    0x2\n" +
-                "  ],\n" +
-                "  timings: [\n" +
-                "    11111111,\n" +
-                "    22222222,\n" +
-                "    120962203520100\n" +
-                "  ]\n" +
-                "}\n", wire2.toString());
+        String yaml = wire2.toString();
         VanillaMessageHistory vmh2 = new VanillaMessageHistory();
         vmh2.addSourceDetails(false);
         wire2.read().object(vmh2, VanillaMessageHistory.class);
-        assertEquals("VanillaMessageHistory { sources: [1=0x2], timings: [11111111,22222222,120962203520100], addSourceDetails=false }", vmh2.toString());
+        assertEquals("VanillaMessageHistory { sources: [1=0x2], timings: [11111111,22222222,120962203520100], addSourceDetails=false }", vmh2.toString(), "copyable: roundtrip");
+        return yaml;
     }
 
     @Test

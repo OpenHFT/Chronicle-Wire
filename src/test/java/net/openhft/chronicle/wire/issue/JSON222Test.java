@@ -12,10 +12,9 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
@@ -26,22 +25,21 @@ import java.util.Comparator;
 import java.util.List;
 
 import static java.nio.charset.StandardCharsets.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(Parameterized.class)
 public class JSON222Test extends WireTestCommon {
 
     @NotNull
-    private final File file;
+    private File file;
 
     // Constructor that accepts parameters for each test iteration
-    public JSON222Test(@NotNull String fileName, File file) {
+    public void initJSON222Test(@NotNull String fileName, File file) {
         this.file = file;
     }
 
     // Provide the test parameters from a collection of files found in a specific directory
     @NotNull
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
 
@@ -70,19 +68,23 @@ public class JSON222Test extends WireTestCommon {
     }
 
     // Test the JSON content using TextWire type
-    @Test
-    public void testJSONAsTextWire() throws IOException {
-        testJSON(WireType.TEXT);
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "{0}")
+    public void testJSONAsTextWire(@NotNull String fileName, File file) throws IOException {
+        initJSON222Test(fileName, file);
+        assertTrue(testJSON(WireType.TEXT), "json222: wireType=TEXT file=" + file.getName());
     }
 
     // Temporarily ignore this test; will be re-enabled once fixed
-    @Ignore(/* TODO FIX */)
-    @Test
-    public void testJSONAsYamlWire() throws IOException {
-        testJSON(WireType.YAML_ONLY);
+    @Disabled(/* TODO FIX */)
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "{0}")
+    public void testJSONAsYamlWire(@NotNull String fileName, File file) throws IOException {
+        initJSON222Test(fileName, file);
+        assertTrue(testJSON(WireType.YAML_ONLY), "json222: wireType=YAML_ONLY file=" + file.getName());
     }
 
-    private void testJSON(WireType wireType) throws IOException {
+    private boolean testJSON(WireType wireType) throws IOException {
         // Read the file content into a byte array
         int len = Maths.toUInt31(file.length());
         @NotNull byte[] bytes = new byte[len];
@@ -149,5 +151,6 @@ public class JSON222Test extends WireTestCommon {
             bytes2.releaseLast();
             bytes3.releaseLast();
         }
+        return true;
     }
 }

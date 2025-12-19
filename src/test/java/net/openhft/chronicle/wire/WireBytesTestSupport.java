@@ -10,7 +10,7 @@ import net.openhft.chronicle.bytes.internal.NoBytesStore;
 import org.jetbrains.annotations.NotNull;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("deprecation")
 final class WireBytesTestSupport {

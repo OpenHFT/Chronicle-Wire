@@ -6,9 +6,8 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,22 +16,20 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static net.openhft.chronicle.wire.WireType.TEXT;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(Parameterized.class)
 @SuppressWarnings({"deprecation", "removal"})
 public class YamlSpecificationTextWireTest extends WireTestCommon {
 
     // Holds the input data for each test case
-    private final String input;
+    private String input;
 
     // Parameterized constructor that initializes the input for each test case
-    public YamlSpecificationTextWireTest(String input) {
+    public void initYamlSpecificationTextWireTest(String input) {
         this.input = input;
     }
 
     // Provides the parameters for the parameterized test
-    @Parameterized.Parameters(name = "case={0}")
     public static Collection<Object[]> tests() {
         return Arrays.asList(new Object[][]{
                     // {"2_1_SequenceOfScalars"},  // Uncomment to include in the test
@@ -44,8 +41,10 @@ public class YamlSpecificationTextWireTest extends WireTestCommon {
     }
 
     // Test method to decode YAML as TextWire and validate it
-    @Test
-    public void decodeAs() throws IOException {
+    @MethodSource("tests")
+    @ParameterizedTest(name = "case={0}")
+    public void decodeAs(String input) throws IOException {
+        initYamlSpecificationTextWireTest(input);
         // Reads the YAML file and converts it to a string
         String snippet = new String(getBytes(input + ".yaml"), StandardCharsets.UTF_8);
 
@@ -64,7 +63,7 @@ public class YamlSpecificationTextWireTest extends WireTestCommon {
         }
 
         // Validate if the actual output matches the expected output
-        assertEquals(input, Bytes.wrapForRead(expected.getBytes(StandardCharsets.UTF_8)).toString().replace("\r\n", "\n"), actual);
+        assertEquals(Bytes.wrapForRead(expected.getBytes(StandardCharsets.UTF_8)).toString().replace("\r\n", "\n"), actual, input);
     }
 
     // Helper method to parse a given YAML string using TextWire

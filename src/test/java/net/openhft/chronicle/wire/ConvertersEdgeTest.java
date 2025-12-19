@@ -4,9 +4,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Round-trip tests for milli/micro/nano timestamp converters using append/parse.
@@ -34,7 +34,7 @@ public class ConvertersEdgeTest extends WireTestCommon {
         long nowUs = nowMs * 1000L + 321;
         long nowNs = nowMs * 1_000_000L + 654_321;
 
-        roundTrip(MilliTimestampLongConverter.INSTANCE, nowMs);
+        assertEquals(nowMs, roundTrip(MilliTimestampLongConverter.INSTANCE, nowMs), "milli roundtrip");
         roundTrip(MicroTimestampLongConverter.INSTANCE, nowUs);
         roundTrip(NanoTimestampLongConverter.INSTANCE, nowNs);
 
@@ -44,4 +44,3 @@ public class ConvertersEdgeTest extends WireTestCommon {
         roundTrip(NanoTimestampLongConverter.INSTANCE, 1L);
     }
 }
-

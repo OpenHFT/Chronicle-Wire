@@ -4,10 +4,10 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.wire.IdentifierLongConverter.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class IdentifierLongConverterTest extends net.openhft.chronicle.wire.WireTestCommon {
 
@@ -67,6 +67,7 @@ public class IdentifierLongConverterTest extends net.openhft.chronicle.wire.Wire
     @Test
     public void allSafeCharsTextWire() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+        assertInstanceOf(TextWire.class, wire, "safe chars: wire type");
         LongConverterTestSupport.allSafeChars(wire, IdentifierLongConverter.INSTANCE, 31);
     }
 
@@ -74,6 +75,7 @@ public class IdentifierLongConverterTest extends net.openhft.chronicle.wire.Wire
     @Test
     public void allSafeCharsYamlWire() {
         Wire wire = new YamlWire();
+        assertInstanceOf(YamlWire.class, wire, "safe chars: wire type");
         LongConverterTestSupport.allSafeChars(wire, IdentifierLongConverter.INSTANCE, 31);
     }
 }

@@ -3,31 +3,27 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * This test class is associated with an issue raised in the Chronicle-Wire repository.
  * Refer: https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
-@RunWith(Parameterized.class)
 public class JSONTypesWithMapsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Instance variable to determine if types are to be used in the JSON Wire representation.
-    private final boolean useTypes;
+    private boolean useTypes;
 
     // Provide two sets of parameters for the tests, based on whether types should be used or not.
-    @Parameterized.Parameters(name = "useTypes={0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
                 new Object[]{true},
@@ -36,7 +32,7 @@ public class JSONTypesWithMapsTest extends net.openhft.chronicle.wire.WireTestCo
     }
 
     // Constructor initializes the `useTypes` instance variable based on the test parameters.
-    public JSONTypesWithMapsTest(boolean useTypes) {
+    public void initJSONTypesWithMapsTest(boolean useTypes) {
         this.useTypes = useTypes;
     }
 
@@ -62,8 +58,11 @@ public class JSONTypesWithMapsTest extends net.openhft.chronicle.wire.WireTestCo
     }
 
     // Test method verifies the JSON Wire representation for a map containing an F1 instance.
-    @Test
-    public void test() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void test(boolean useTypes) {
+
+        initJSONTypesWithMapsTest(useTypes);
 
         // Create a new JSONWire instance and decide if it should use types based on `useTypes`.
         final JSONWire jsonWire = new JSONWire()
@@ -87,12 +86,12 @@ public class JSONTypesWithMapsTest extends net.openhft.chronicle.wire.WireTestCo
 
         // Verify the object isn't null and is an instance of a map.
         assertNotNull(object);
-        assertTrue(object instanceof Map);
+        assertInstanceOf(Map.class, object);
 
         // Convert the object to its string representation.
         final String actual = object.toString();
 
         // Assert to verify if the actual string matches the expected string.
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 }

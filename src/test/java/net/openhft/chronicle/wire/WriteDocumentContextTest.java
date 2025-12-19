@@ -4,11 +4,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class WriteDocumentContextTest extends WireTestCommon {
 
@@ -43,8 +43,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
     public void nestedPlainText() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         writeThreeKeys(wire);
-        assertEquals("" +
-                        "key: 0\n" +
+        assertEquals("key: 0\n" +
                         "key: 1\n" +
                         "key: 2\n" +
                         "...\n",
@@ -56,8 +55,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
     public void chainedPlainText() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         writeThreeChainedKeys(wire);
-        assertEquals("" +
-                        "key: 0\n" +
+        assertEquals("key: 0\n" +
                         "key: 1\n" +
                         "key: 2\n" +
                         "...\n",
@@ -71,8 +69,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
 
         writeThreeKeys(wire);
         assertEquals(21, wire.bytes().readInt());
-        assertEquals("" +
-                        "key: 0\n" +
+        assertEquals("key: 0\n" +
                         "key: 1\n" +
                         "key: 2\n",
                 wire.bytes().toString());
@@ -85,38 +82,35 @@ public class WriteDocumentContextTest extends WireTestCommon {
 
         writeThreeChainedKeys(wire);
         assertEquals(21, wire.bytes().readInt());
-        assertEquals("" +
-                        "key: 0\n" +
+        assertEquals("key: 0\n" +
                         "key: 1\n" +
                         "key: 2\n",
                 wire.bytes().toString());
     }
 
     // Test writing nested key-value pairs in YAML format (Currently Ignored)
-    @Ignore(/* TODO FIX */)
+    @Disabled(/* TODO FIX */)
     @Test
     public void nestedYaml() {
         Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
 
         writeThreeKeys(wire);
         assertEquals(21, wire.bytes().readInt());
-        assertEquals("" +
-                        "key: 0\n" +
+        assertEquals("key: 0\n" +
                         "key: 1\n" +
                         "key: 2\n",
                 wire.bytes().toString());
     }
 
     // Test writing chained key-value pairs in YAML format (Currently Ignored)
-    @Ignore(/* TODO FIX */)
+    @Disabled(/* TODO FIX */)
     @Test
     public void chainedYaml() {
         Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
 
         writeThreeChainedKeys(wire);
         assertEquals(21, wire.bytes().readInt());
-        assertEquals("" +
-                        "key: 0\n" +
+        assertEquals("key: 0\n" +
                         "key: 1\n" +
                         "key: 2\n",
                 wire.bytes().toString());
@@ -130,8 +124,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
 
         writeThreeKeys(wire);
         String s = Wires.fromSizePrefixedBlobs(wire);
-        assertEquals("" +
-                "--- !!data #binary\n" +
+        assertEquals("--- !!data #binary\n" +
                 "key: 0\n" +
                 "key: 1\n" +
                 "key: 2\n", s);
@@ -145,8 +138,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
 
         writeThreeChainedKeys(wire);
         String s = Wires.fromSizePrefixedBlobs(wire);
-        assertEquals("" +
-                "--- !!data #binary\n" +
+        assertEquals("--- !!data #binary\n" +
                 "key: 0\n" +
                 "key: 1\n" +
                 "key: 2\n", s);

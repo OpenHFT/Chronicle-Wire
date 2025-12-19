@@ -6,10 +6,10 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class YamlWireOutOfOrderReadMarshallableTest extends WireTestCommon {
 
@@ -37,9 +37,9 @@ public class YamlWireOutOfOrderReadMarshallableTest extends WireTestCommon {
                 assertTrue(dc.isPresent());
                 OutOfOrderRM dto = new OutOfOrderRM();
                 dc.wire().read("rm").marshallable(dto);
-                assertEquals("aye2", dto.a);
-                assertEquals("bee2", dto.b);
-                assertEquals("cee2", dto.c);
+                assertEquals("aye2", dto.a, "field 'a' should read correctly regardless of field order in YAML");
+                assertEquals("bee2", dto.b, "field 'b' should read correctly regardless of field order in YAML");
+                assertEquals("cee2", dto.c, "field 'c' should read correctly regardless of field order in YAML");
             }
         }
     }

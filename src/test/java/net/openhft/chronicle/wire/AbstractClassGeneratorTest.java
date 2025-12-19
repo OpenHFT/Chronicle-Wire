@@ -6,7 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.UpdateInterceptor;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.lang.reflect.Method;
@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // Generator for simple classes based on SimpleMetaData
 class SimpleClassGenerator extends AbstractClassGenerator<SimpleMetaData> {
@@ -81,13 +81,14 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
     public void simpleGenerator() throws Exception {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        doTest("Hello World");
-        doTest("Bye now");
-        doTest("The time is " + LocalDateTime.now());
+        assertEquals("Hello World", doTest("Hello World"), "simple generator: hello");
+        assertEquals("Bye now", doTest("Bye now"), "simple generator: bye");
+        String theTimeIs = "The time is " + LocalDateTime.now();
+        assertEquals(theTimeIs, doTest(theTimeIs), "simple generator: time");
     }
 
     // Helper method to perform the test with a given message
-    private void doTest(String message) throws Exception {
+    private String doTest(String message) throws Exception {
         SimpleClassGenerator scg = new SimpleClassGenerator();
         scg.metaData()
                 .packageName(Jvm.getPackageName(getClass()))
@@ -96,8 +97,7 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
         Class<Callable<String>> aClass = scg.acquireClass(getClass().getClassLoader());
         Callable<String> callable = aClass.getDeclaredConstructor().newInstance();
         // break point on the next line to be able to debug the generated class.
-        String call = callable.call();
-        assertEquals(message, call);
+        return callable.call();
     }
 
     // Test Cases

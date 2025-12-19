@@ -9,21 +9,21 @@ import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"deprecation", "removal"})
 public class TextDocumentTest extends WireTestCommon {
 
     // A helper function that performs the test on documents given a wireType.
-    private static void doTestDocument(WireType wireType) {
+    private static boolean doTestDocument(WireType wireType) {
         // Allocate an elastic byte buffer.
         @NotNull Bytes<?> bytes1 = Bytes.allocateElasticOnHeap();
         // Create a Wire object based on the provided wireType.
@@ -38,9 +38,9 @@ public class TextDocumentTest extends WireTestCommon {
         // Check that the written bytes contain the expected serialized atomic values.
         @NotNull Bytes<?> bytes = wire.bytes();
         String actual = Wires.fromSizePrefixedBlobs(bytes);
-        Assert.assertTrue(actual.contains(
+        Assertions.assertTrue(actual.contains(
                 "  writeByte: !!atomic {  locked: false, value: 00000000000000000512 }"));
-        Assert.assertTrue(actual.contains(
+        Assertions.assertTrue(actual.contains(
                 "  readByte: !!atomic {  locked: false, value: 00000000000000001024 }"));
 
         // Read the header from the wire and populate rheader.
@@ -53,6 +53,7 @@ public class TextDocumentTest extends WireTestCommon {
         // Close resources associated with the headers.
         wheader.closeAll();
         rheader.closeAll();
+        return true;
     }
 
     // Test the document writing and reading for TEXT wireType.
@@ -60,14 +61,14 @@ public class TextDocumentTest extends WireTestCommon {
     public void testDocument() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        doTestDocument(WireType.TEXT);
+        Assertions.assertTrue(doTestDocument(WireType.TEXT), "text document: wireType=TEXT");
     }
 
     // An ignored test for YAML_ONLY wireType. Needs to be fixed before running.
-    @Ignore(/* TODO FIX */)
+    @Disabled(/* TODO FIX */)
     @Test
     public void testDocumentYaml() {
-        doTestDocument(WireType.YAML_ONLY);
+        Assertions.assertTrue(doTestDocument(WireType.YAML_ONLY), "text document: wireType=YAML_ONLY");
     }
 
     // Enumeration of keys to use with the Wire objects.

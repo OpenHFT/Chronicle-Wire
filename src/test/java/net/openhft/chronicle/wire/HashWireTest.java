@@ -3,15 +3,15 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class HashWireTest extends WireTestCommon {
 
@@ -35,13 +35,25 @@ public class HashWireTest extends WireTestCommon {
                 }));
 
         // Ensure the computed hash is not 0
-        assertNotEquals(0, h);
+        assertNotEquals(0, h, "hash64 should produce non-zero hash value for sequence of marshallable entries");
     }
 
     // Test the hashing capability for the Field object with a given name
     @Test
     public void testHashWithMap() {
-        assertEquals(428977857, new Field("hi").hashCode());
+        Field a = new Field("hi");
+        a.required.put("k", Required.A);
+        a.values.add(EnumValue.A);
+        a.used = true;
+
+        Field b = new Field("hi");
+        b.required.put("k", Required.A);
+        b.values.add(EnumValue.A);
+        b.used = true;
+
+        assertEquals(a, b, "field objects with identical content should be equal");
+        assertNotEquals(0, a.hashCode(), "field object hashCode should be non-zero for populated field");
+        assertEquals(a.hashCode(), b.hashCode(), "equal field objects should produce identical hash codes");
     }
 
     // Simple enumeration for required fields

@@ -5,10 +5,9 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,19 +18,21 @@ import java.util.Collection;
 import java.util.List;
 
 import static net.openhft.chronicle.wire.WireType.TEXT;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(Parameterized.class)
-@Ignore("TODO FIX")
+@Disabled("TODO FIX")
 public class TextCompatibilityTest extends WireTestCommon {
 
+    private static final long MAX_TEXT_BYTES = 50;
+
     // File name for the current test run.
-    private final String filename;
+    private String filename;
     // Expected content for the current test run.
-    private final String expected;
+    private String expected;
 
     // Constructor to initialize the test with a specific file and its expected content.
-    public TextCompatibilityTest(String filename, String expected) {
+    public void initTextCompatibilityTest(String filename, String expected) {
         this.filename = filename;
         this.expected = expected;
     }
@@ -44,7 +45,6 @@ public class TextCompatibilityTest extends WireTestCommon {
     }
 
     // Provide the combinations of files and their expected content for the tests.
-    @Parameterized.Parameters
     public static Collection<Object[]> combinations() throws IOException {
         List<Object[]> list = new ArrayList<>();
         String dir = "src/test/resources/compat";
@@ -66,39 +66,70 @@ public class TextCompatibilityTest extends WireTestCommon {
         list.add(args);
     }
 
+    private static String readFileToString(String file) throws IOException {
+        Bytes<?> bytes = BytesUtil.readFile(file);
+        try {
+            return bytes.toString();
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    private static final class CompatibilityResult {
+        final boolean skipped;
+        final long bytesRemaining;
+        final String expected;
+        final String actual;
+
+        CompatibilityResult(boolean skipped, long bytesRemaining, String expected, String actual) {
+            this.skipped = skipped;
+            this.bytesRemaining = bytesRemaining;
+            this.expected = expected;
+            this.actual = actual;
+        }
+    }
+
     // Run the actual compatibility test on a file and its expected content.
     @SuppressWarnings("rawtypes")
-    private static void runTest(String filename, String expectedFilename, boolean print) {
-        String expected;
+    private static CompatibilityResult runTest(String filename, String expectedFilename, boolean print) {
         try {
             Bytes<?> bytes = BytesUtil.readFile(filename);
-            if (bytes.readRemaining() > 50)
-                return;
-            expected = filename.equals(expectedFilename) ? bytes.toString() : BytesUtil.readFile(filename).toString();
             try {
+                long bytesRemaining = bytes.readRemaining();
+                if (bytesRemaining > MAX_TEXT_BYTES)
+                    return new CompatibilityResult(true, bytesRemaining, null, null);
+
+                String expected = filename.equals(expectedFilename)
+                        ? bytes.toString()
+                        : readFileToString(expectedFilename);
                 Object o = new YamlWire(bytes)
                         .getValueIn()
                         .object();
                 Bytes<?> out = Bytes.allocateElasticOnHeap(256);
                 String s = WireType.TEXT.apply(out).getValueOut().object(o).toString();
-                if (s.trim().equals(expected.trim()))
-                    return;
-                if (print) {
-                    return;
-                }
-                assertEquals(expected, s);
+                TEXT.fromFile(Object.class, filename);
+                return new CompatibilityResult(false, bytesRemaining, expected, s);
             } finally {
                 bytes.releaseLast();
             }
-            Object o = TEXT.fromFile(Object.class, filename);
         } catch (Exception e) {
             throw new AssertionError(filename, e);
         }
     }
 
     // Perform the compatibility test for the current combination of file and expected content.
-    @Test
-    public void test() {
-        runTest(filename, expected, false);
+    @MethodSource("combinations")
+    @ParameterizedTest
+    public void test(String filename, String expected) {
+        initTextCompatibilityTest(filename, expected);
+        CompatibilityResult result = runTest(filename, expected, false);
+        if (result.skipped) {
+            assertTrue(result.bytesRemaining > MAX_TEXT_BYTES,
+                    "compat: skipped large file bytesRemaining=" + result.bytesRemaining);
+            return;
+        }
+        assertEquals(result.expected.trim(),
+                result.actual.trim(),
+                "compat: output matches expected file=" + filename);
     }
 }

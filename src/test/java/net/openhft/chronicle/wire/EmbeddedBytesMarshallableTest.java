@@ -11,18 +11,19 @@ import net.openhft.chronicle.bytes.internal.BytesFieldInfo;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // Test class focusing on the serialization and deserialization of Marshallables with embedded bytes.
 public class EmbeddedBytesMarshallableTest extends WireTestCommon {
 
     // Before each test, check the current architecture and skip if it's ARM or Azul Zing.
-    @Before
+    @BeforeEach
     public void checkArch() {
         assumeFalse(Jvm.isArm() || Jvm.isAzulZing());
     }
@@ -46,7 +47,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         e2.a.append("b0000000");
 
         // Ensure the deserialized and modified data is as expected.
-        Assert.assertEquals("b0000000", e2.a.toString());
+        Assertions.assertEquals("b0000000", e2.a.toString());
 
         // Release the bytes.
         bytes.releaseLast();
@@ -88,69 +89,81 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     }
 
     // Test deserialization with no data. Expected to throw a DecoratedBufferUnderflowException.
-    @Test(expected = DecoratedBufferUnderflowException.class)
+    @Test
     public void noData() {
-        Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
-        EBM ebm = new EBM();
-        ebm.readMarshallable(bytes);
+        assertThrows(DecoratedBufferUnderflowException.class, () -> {
+            Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
+            EBM ebm = new EBM();
+            ebm.readMarshallable(bytes);
+        });
     }
 
     // Test deserialization with invalid description (even bit count = 0).
     // Expected to throw an IllegalStateException.
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void invalidDescription() {
-        Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
-        bytes.readLimit(64); // even bit count i.e. 0
-        EBM ebm = new EBM();
-        ebm.readMarshallable(bytes);
+        assertThrows(IllegalStateException.class, () -> {
+            Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
+            bytes.readLimit(64); // even bit count i.e. 0
+            EBM ebm = new EBM();
+            ebm.readMarshallable(bytes);
+        });
     }
 
     // Test deserialization with another invalid description scenario where it tries to read more data than available.
     // Expected to throw an IllegalStateException.
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void invalidDescription2() {
-        Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
-        bytes.append("abcd"); // tries to read too much data.
-        bytes.readLimit(64);
-        EBM ebm = new EBM();
-        ebm.readMarshallable(bytes);
+        assertThrows(IllegalStateException.class, () -> {
+            Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
+            bytes.append("abcd"); // tries to read too much data.
+            bytes.readLimit(64);
+            EBM ebm = new EBM();
+            ebm.readMarshallable(bytes);
+        });
     }
 
     // Test deserialization with yet another invalid description, characterized by both an even bit count
     // and an attempt to read more data than available. Expected to throw an IllegalStateException.
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void invalidDescription3() {
-        Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
-        bytes.append("abce"); // even bit count &&  tries to read too much data.
-        bytes.readLimit(64);
-        EBM ebm = new EBM();
-        ebm.readMarshallable(bytes);
+        assertThrows(IllegalStateException.class, () -> {
+            Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
+            bytes.append("abce"); // even bit count &&  tries to read too much data.
+            bytes.readLimit(64);
+            EBM ebm = new EBM();
+            ebm.readMarshallable(bytes);
+        });
     }
 
     // Test deserialization with an even bit count description.
     // Expected to throw an IllegalStateException.
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void invalidDescription4() {
-        Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
-        bytes.append("3\0\0\0"); // even bit count
-        bytes.readLimit(64);
-        EBM ebm = new EBM();
-        ebm.readMarshallable(bytes);
+        assertThrows(IllegalStateException.class, () -> {
+            Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
+            bytes.append("3\0\0\0"); // even bit count
+            bytes.readLimit(64);
+            EBM ebm = new EBM();
+            ebm.readMarshallable(bytes);
+        });
     }
 
     // Test deserialization with field counts exceeding FIELD_COUNT_LIMIT (256).
     // Expected to throw an IllegalStateException.
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void excessiveFieldCounts() {
-        int desc = (200 << 24) | (200 << 16) | 1;
-        int length = 200 * 8 + 200 * 4 + 1;
-        Bytes<?> bytes = Bytes.allocateElasticOnHeap(length + 8);
-        bytes.writeInt(desc);
-        for (int i = 0; i < length; i++)
-            bytes.writeByte((byte) 0);
-        bytes.readLimit(bytes.writePosition());
-        EBM1 ebm1 = new EBM1();
-        ebm1.readMarshallable(bytes);
+        assertThrows(IllegalStateException.class, () -> {
+            int desc = (200 << 24) | (200 << 16) | 1;
+            int length = 200 * 8 + 200 * 4 + 1;
+            Bytes<?> bytes = Bytes.allocateElasticOnHeap(length + 8);
+            bytes.writeInt(desc);
+            for (int i = 0; i < length; i++)
+                bytes.writeByte((byte) 0);
+            bytes.readLimit(bytes.writePosition());
+            EBM1 ebm1 = new EBM1();
+            ebm1.readMarshallable(bytes);
+        });
     }
 
     // A class representing a Marshallable object with fields grouped into embedded Bytes.

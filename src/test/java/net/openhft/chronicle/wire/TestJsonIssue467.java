@@ -5,8 +5,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.OnHeapBytes;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
@@ -71,10 +71,10 @@ public class TestJsonIssue467 {
         }
 
         // check the number of '{' match the number of '}'
-        Assert.assertEquals("openBracket and closeBracket should match", openBracket, closeBracket);
+        Assertions.assertEquals(openBracket, closeBracket, "openBracket and closeBracket should match");
 
         // DON'T CHANGE THE EXPECTED JSON IT IS CORRECT ! - please use this website to validate the json - https://jsonformatter.org
-        Assert.assertEquals("{\"@ResponseItem467\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":{\"eventId\":\"periodicUpdate\",\"eventTime\":1652109920838805734,\"seqNumbers\":[ {\"sessionID\":{\"localCompID\":\"SERVER\",\"remoteCompID\":\"CLIENT\",\"localSubID\":null,\"remoteSubID\":null},\"rSeq\":1517,\"wSeq\":1519,\"isActive\":true,\"isConnected\":false} ]}}}", actual);
+        Assertions.assertEquals("{\"@ResponseItem467\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":{\"eventId\":\"periodicUpdate\",\"eventTime\":1652109920838805734,\"seqNumbers\":[ {\"sessionID\":{\"localCompID\":\"SERVER\",\"remoteCompID\":\"CLIENT\",\"localSubID\":null,\"remoteSubID\":null},\"rSeq\":1517,\"wSeq\":1519,\"isActive\":true,\"isConnected\":false} ]}}}", actual);
     }
 
     private static Wire jsonResponseItem() {
@@ -88,7 +88,7 @@ public class TestJsonIssue467 {
         final Wire jsonWire = jsonResponseItem();
         ResponseItem467 responseItem467 = jsonWire.getValueIn().object(ResponseItem467.class);
 
-        Assert.assertEquals("!ResponseItem467 {\n" +
+        Assertions.assertEquals("!ResponseItem467 {\n" +
                 "  index: \"4dc800000034\",\n" +
                 "  key: notificationMsg,\n" +
                 "  payload: Successfully debited your account by 0.0\n" +
@@ -100,7 +100,7 @@ public class TestJsonIssue467 {
         final Wire jsonWire = jsonResponseItem();
         ResponseItem467 responseItem4671 = new ResponseItem467();
         ResponseItem467 responseItem467 = jsonWire.getValueIn().object(responseItem4671, ResponseItem467.class);
-        Assert.assertEquals("!ResponseItem467 {\n" +
+        Assertions.assertEquals("!ResponseItem467 {\n" +
                 "  index: \"4dc800000034\",\n" +
                 "  key: notificationMsg,\n" +
                 "  payload: Successfully debited your account by 0.0\n" +

@@ -7,14 +7,13 @@ import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
-public class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTestCommon {
+class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Test to check the equality and hashcode of a VanillaMessageHistory object
     @Test

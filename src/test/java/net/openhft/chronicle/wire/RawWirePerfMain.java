@@ -10,14 +10,8 @@ import java.io.StreamCorruptedException;
 public class RawWirePerfMain extends WireTestCommon {
 
     public static void main(String[] args) {
-        // Create an instance of BinaryWirePerfTest with specific parameters.
-        // These parameters typically control the test conditions.
-        @NotNull BinaryWirePerfTest test = new BinaryWirePerfTest(-1, true, false, true);
-
-        // Run the performance test on wire operations.
-        test.wirePerf();
-
-        // Run the performance test specifically for integers on the wire.
-        test.wirePerfInts();
+        @NotNull BinaryWirePerfTest test = new BinaryWirePerfTest();
+        test.wirePerf(-1, true, false, true);
+        test.wirePerfInts(-1, true, false, true);
     }
 }

@@ -8,11 +8,11 @@ import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.wire.marshallable.TriviallyCopyableMarketData;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // Extend WireTestCommon to inherit common utility and setup methods for wire tests
 public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTestCommon {
@@ -43,8 +43,8 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
                 .build((MyMethod) str -> value[0] = str);
 
         // Assert that no message was read and the value remains null
-        Assert.assertFalse(reader.readOne());
-        Assert.assertNull(value[0]);
+        Assertions.assertFalse(reader.readOne());
+        Assertions.assertNull(value[0]);
     }
 
     // Test case to check the behavior of a predicate that always returns true
@@ -70,8 +70,8 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
         // Build the method reader and assert that the message was read correctly
         MethodReader reader = builder.build((MyMethod) str -> value[0] = str);
 
-        Assert.assertTrue(reader.readOne());
-        Assert.assertEquals("hi", value[0]);
+        Assertions.assertTrue(reader.readOne());
+        Assertions.assertEquals("hi", value[0]);
     }
 
     // Test case to log a binary message and validate its content
@@ -79,7 +79,7 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
     public void logMessage0() {
 
         // do not check Mac as it lays it memory out differently
-        Assume.assumeTrue(!OS.isMacOSX());
+        Assumptions.assumeTrue(!OS.isMacOSX());
 
         TriviallyCopyableMarketData data = new TriviallyCopyableMarketData();
         data.securityId(0x828282828282L);
@@ -89,8 +89,7 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
         wire.methodWriter(ITCO.class).marketData(data);
 
         // Assert that the binary representation of the message matches the expected output
-        assertEquals("" +
-                        "9e 00 00 00                                     # msg-length\n" +
+        assertEquals("9e 00 00 00                                     # msg-length\n" +
                         "b9 0a 6d 61 72 6b 65 74 44 61 74 61             # marketData: (event)\n" +
                         "80 90 82 82 82 82 82 82 00 00 00 00 00 00 00 00 # TriviallyCopyableMarketData\n" +
                         "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
@@ -108,8 +107,7 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
         try (DocumentContext dc = wire.readingDocument()) {
             final ValueIn marketData = dc.wire().read("marketData");
 
-            assertEquals("" +
-                            "read md - 00000010 80 90 82 82 82 82 82 82  00 00 00 00 00 00 00 00 ········ ········\n" +
+            assertEquals("read md - 00000010 80 90 82 82 82 82 82 82  00 00 00 00 00 00 00 00 ········ ········\n" +
                             "00000020 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                             "........\n" +
                             "000000a0 00 00                                            ··               ",

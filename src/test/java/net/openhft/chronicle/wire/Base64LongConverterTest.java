@@ -4,13 +4,12 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Base64LongConverterTest extends WireTestCommon {
 
@@ -37,14 +36,16 @@ public class Base64LongConverterTest extends WireTestCommon {
         assertTrue(true);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseLengthCheck() {
-        Base64LongConverter.INSTANCE.parse(getClass().getCanonicalName());
+        assertThrows(IllegalArgumentException.class, () ->
+                Base64LongConverter.INSTANCE.parse(getClass().getCanonicalName()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseSubstringLengthCheck() {
-        Base64LongConverter.INSTANCE.parse("abcd", 0, 5);
+        assertThrows(IllegalArgumentException.class, () ->
+                Base64LongConverter.INSTANCE.parse("abcd", 0, 5));
     }
 
     @Test
@@ -62,7 +63,7 @@ public class Base64LongConverterTest extends WireTestCommon {
             // Convert the long number to a Base64 encoded string
             String s = c.asString(l);
             // Assert conversion consistency by parsing it back and comparing with the original long number
-            Assert.assertEquals("i: " + i + ", s: " + s, l, c.parse(s));
+            Assertions.assertEquals(l, c.parse(s), "i: " + i + ", s: " + s);
         }
     }
 
@@ -71,6 +72,7 @@ public class Base64LongConverterTest extends WireTestCommon {
     public void allSafeCharsTextWire() {
         // Create a TextWire instance with elastic on heap bytes and configure it to use text documents
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
+        assertInstanceOf(TextWire.class, wire, "safe chars: wire type");
         // Execute the generic safe character check
         LongConverterTestSupport.allSafeChars(wire, Base64LongConverter.INSTANCE, 64 * 64L);
     }
@@ -80,6 +82,7 @@ public class Base64LongConverterTest extends WireTestCommon {
     public void allSafeCharsYamlWire() {
         // Create a YamlWire instance with elastic on heap bytes and configure it to use text documents
         Wire wire = new YamlWire();
+        assertInstanceOf(YamlWire.class, wire, "safe chars: wire type");
         // Execute the generic safe character check
         LongConverterTestSupport.allSafeChars(wire, Base64LongConverter.INSTANCE, 64 * 64L);
     }

@@ -7,7 +7,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.ReferenceCountedTracer;
 import net.openhft.chronicle.core.io.ReferenceOwner;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +15,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * Validates that Bytes reference counts remain stable when multiple {@link ReferenceOwner}s
@@ -28,8 +28,10 @@ public class BytesReferenceCountingTest extends WireTestCommon {
     @Test
     public void heapBytesMaintainReferenceCountsAcrossOwners() throws InterruptedException {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
+        assertEquals(1, bytes.refCount(), "newly allocated heap bytes should have initial reference count of 1");
         try {
             exerciseReferenceCountingAcrossThreads(bytes);
+            assertEquals(1, bytes.refCount(), "heap bytes reference count should return to 1 after all concurrent owners release their references");
         } finally {
             if (bytes.refCount() > 0) {
                 bytes.releaseLast();
@@ -40,10 +42,14 @@ public class BytesReferenceCountingTest extends WireTestCommon {
     @Test
     public void warnLoggedWhenOwnerLeakedAndForceReleased() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        assertEquals(1, bytes.refCount(), "newly allocated bytes should have initial reference count of 1 before any reservations");
         try {
             ReferenceOwner leaky = ReferenceOwner.temporary("leaky-owner");
             bytes.reserve(leaky);
+            long afterReserve = bytes.refCount();
+            assertTrue(afterReserve > 1, "reference count should be at least 2 after owner reserves the bytes");
             ((ReferenceCountedTracer) bytes).warnAndReleaseIfNotReleased();
+            assertTrue(bytes.refCount() < afterReserve, "force releasing leaked owner should decrease reference count below reserved level");
         } finally {
             if (bytes.refCount() > 0) {
                 bytes.releaseLast();
@@ -55,8 +61,10 @@ public class BytesReferenceCountingTest extends WireTestCommon {
     public void directBytesMaintainReferenceCountsAcrossOwners() throws InterruptedException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         Bytes<?> bytes = Bytes.allocateElasticDirect(64);
+        assertEquals(1, bytes.refCount(), "newly allocated direct bytes should have initial reference count of 1");
         try {
             exerciseReferenceCountingAcrossThreads(bytes);
+            assertEquals(1, bytes.refCount(), "direct bytes reference count should return to 1 after all concurrent owners release their references");
         } finally {
             if (bytes.refCount() > 0) {
                 bytes.releaseLast();
@@ -65,7 +73,7 @@ public class BytesReferenceCountingTest extends WireTestCommon {
     }
 
     private void exerciseReferenceCountingAcrossThreads(Bytes<?> bytes) throws InterruptedException {
-        assertEquals("fresh Bytes should start with refCount=1", 1, bytes.refCount());
+        assertEquals(1, bytes.refCount(), "bytes should have reference count of 1 before concurrent access test begins");
 
         int ownersCount = 4;
         int iterationsPerOwner = 64;
@@ -79,26 +87,30 @@ public class BytesReferenceCountingTest extends WireTestCommon {
             Thread thread = new Thread(() -> {
                 try {
                     if (!start.await(5, TimeUnit.SECONDS)) {
-                        failure.compareAndSet(null, new AssertionError("start latch timed out"));
+                        failure.compareAndSet(null, new AssertionError("worker thread failed to receive start signal within 5 second timeout - potential deadlock in concurrent reference counting test"));
                         return;
                     }
                     for (int iteration = 0; iteration < iterationsPerOwner; iteration++) {
                         bytes.reserve(owner);
                         long afterReserve = bytes.refCount();
                         if (afterReserve < 2) {
-                            failure.compareAndSet(null, new AssertionError("refCount did not increase on reserve"));
+                            failure.compareAndSet(null, new AssertionError(
+                                    "reference count must be at least 2 after reserve() call (1 for initial owner + 1 for reserved owner), but was " + afterReserve +
+                                            " after iteration " + iteration + " - indicates concurrent release bug or missing atomic increment"));
                             break;
                         }
                         bytes.release(owner);
                         long afterRelease = bytes.refCount();
                         if (afterRelease < 1) {
-                            failure.compareAndSet(null, new AssertionError("refCount underflow after release"));
+                            failure.compareAndSet(null, new AssertionError(
+                                    "reference count dropped to " + afterRelease + " after release() on iteration " + iteration +
+                                            " - indicates over-release bug causing premature deallocation of off-heap memory still in use"));
                             break;
                         }
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    failure.compareAndSet(null, new AssertionError("worker interrupted", e));
+                    failure.compareAndSet(null, new AssertionError("worker thread interrupted during reserve/release cycle - concurrent reference counting test integrity compromised", e));
                 } finally {
                     done.countDown();
                 }
@@ -108,7 +120,7 @@ public class BytesReferenceCountingTest extends WireTestCommon {
         }
 
         start.countDown();
-        assertTrue("workers did not finish in time", done.await(10, TimeUnit.SECONDS));
+        assertTrue(done.await(10, TimeUnit.SECONDS), "all worker threads should complete reserve/release cycles within timeout");
         for (Thread worker : workers) {
             worker.join(TimeUnit.SECONDS.toMillis(1));
         }
@@ -117,12 +129,12 @@ public class BytesReferenceCountingTest extends WireTestCommon {
             throw error;
         }
 
-        assertEquals("all temporary owners released", 1, bytes.refCount());
+        assertEquals(1, bytes.refCount(), "reference count should return to 1 after all concurrent owners complete their reserve/release cycles");
 
         ReferenceOwner finalOwner = ReferenceOwner.temporary("final-owner");
         bytes.reserve(finalOwner);
-        assertEquals("final owner should increment refCount", 2, bytes.refCount());
+        assertEquals(2, bytes.refCount(), "reference count should increase to 2 when final owner reserves bytes");
         bytes.release(finalOwner);
-        assertEquals("reference count returns to baseline", 1, bytes.refCount());
+        assertEquals(1, bytes.refCount(), "reference count should return to 1 after final owner releases bytes");
     }
 }

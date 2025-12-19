@@ -4,16 +4,15 @@
 package net.openhft.chronicle.wire.utils;
 
 import net.openhft.chronicle.wire.WireTestCommon;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class JavaSourceCodeFormatterTest extends WireTestCommon {
     // Test method for JavaSourceCodeFormatter's append functionality
     @Test
     public void testAppend() {
         // Creating an expected string of Java source code and asserting that the formatted code matches the expected string
-        Assert.assertEquals("" +
-                        "public Appendable append(final CharSequence csq) {\n" +
+        Assertions.assertEquals("public Appendable append(final CharSequence csq) {\n" +
                         "    return sb.append(replaceNewLine(csq, 0, csq.length() - 1));\n" +
                         "}\n",
                 new JavaSourceCodeFormatter()

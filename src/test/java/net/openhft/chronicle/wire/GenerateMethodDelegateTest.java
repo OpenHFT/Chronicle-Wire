@@ -7,8 +7,8 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -18,25 +18,28 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class GenerateMethodDelegateTest extends WireTestCommon {
 
-    @Before
+    @BeforeEach
     public void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     // Test the validity of class naming conventions
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidName() {
-        // Initialize a new GenerateMethodDelegate
-        GenerateMethodDelegate gmd = new GenerateMethodDelegate();
+        assertThrows(IllegalArgumentException.class, () -> {
+            // Initialize a new GenerateMethodDelegate
+            GenerateMethodDelegate gmd = new GenerateMethodDelegate();
 
-        // Set metadata for the generated class with an invalid name
-        gmd.metaData().packageName(Jvm.getPackageName(GenerateMethodDelegateTest.class))
-                .baseClassName("GMDT-");
+            // Set metadata for the generated class with an invalid name
+            gmd.metaData().packageName(Jvm.getPackageName(GenerateMethodDelegateTest.class))
+                    .baseClassName("GMDT-");
+        });
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

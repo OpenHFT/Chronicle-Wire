@@ -4,13 +4,13 @@
 package net.openhft.chronicle.wire.reuse;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import java.util.Random;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Utility class for creating and comparing WireProperty and WireCollection objects.
@@ -104,7 +104,7 @@ class WireUtils {
             if (b.getProperties().containsKey(c.getReference())) {
                 compareWireProperty(c, b.getProperties().get(c.getReference()));
             } else {
-                Assert.fail("Cannot match property child element WireProperty");
+                Assertions.fail("Cannot match property child element WireProperty");
             }
         });
 
@@ -112,7 +112,7 @@ class WireUtils {
             if (b.getCollections().containsKey(c.getReference())) {
                 compareWireCollection(c, b.getCollections().get(c.getReference()));
             } else {
-                Assert.fail("Cannot match collection child element WireCollection");
+                Assertions.fail("Cannot match collection child element WireCollection");
             }
         });
     }

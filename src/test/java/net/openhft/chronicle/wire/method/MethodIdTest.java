@@ -9,14 +9,13 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 // Test class extending WireTestCommon to test method identification in binary wire format
-@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
-public class MethodIdTest extends WireTestCommon {
+class MethodIdTest extends WireTestCommon {
 
     // Test method to verify serialization and deserialization of methods with various IDs
     @Test

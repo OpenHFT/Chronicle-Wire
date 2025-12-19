@@ -7,32 +7,28 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.Validatable;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(Parameterized.class)
-@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
-public class Marshallable2Test extends WireTestCommon {
+class Marshallable2Test extends WireTestCommon {
 
     // Instance variable for the WireType being tested in this instance of the test
-    private final WireType wireType;
+    private WireType wireType;
 
     // Constructor that initializes the WireType for this instance of the test
-    public Marshallable2Test(WireType wireType) {
+    public void initMarshallable2Test(WireType wireType) {
         this.wireType = wireType;
     }
 
     // Parameterized test setup: defining the different WireTypes that the tests will be run with
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
                 new Object[]{WireType.BINARY},
@@ -46,8 +42,10 @@ public class Marshallable2Test extends WireTestCommon {
     }
 
     // Test case to verify if the Wire's WriteDocumentContext behaves correctly in terms of being empty or not
-    @Test
-    public void writeDocumentIsEmpty() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "{0}")
+    public void writeDocumentIsEmpty(WireType wireType) {
+        initMarshallable2Test(wireType);
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(16);
         Wire wire = wireType.apply(bytes);
         try (DocumentContext dc = wire.writingDocument()) {
@@ -65,9 +63,11 @@ public class Marshallable2Test extends WireTestCommon {
     }
 
     // Test case to verify that a complex object with nested inner objects can be correctly serialized and deserialized
+    @MethodSource("wireTypes")
     @SuppressWarnings("rawtypes")
-    @Test
-    public void testObject() {
+    @ParameterizedTest(name = "{0}")
+    public void testObject(WireType wireType) {
+        initMarshallable2Test(wireType);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
@@ -83,8 +83,10 @@ public class Marshallable2Test extends WireTestCommon {
     }
 
     // Test case to verify if writing to the Wire is complete under various conditions
-    @Test
-    public void writingIsComplete() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "{0}")
+    public void writingIsComplete(WireType wireType) {
+        initMarshallable2Test(wireType);
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         Wire wire = wireType.apply(bytes);
         assertTrue(wire.writingIsComplete());

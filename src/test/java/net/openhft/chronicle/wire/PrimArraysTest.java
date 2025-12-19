@@ -6,28 +6,26 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // Use the Parameterized runner for JUnit to execute tests with different combinations of parameters
-@RunWith(Parameterized.class)
 public class PrimArraysTest extends WireTestCommon {
 
     // Class variables to hold the parameters
-    private final WireType wireType;
-    private final Object array;
-    private final String asText;
+    private WireType wireType;
+    private Object array;
+    private String asText;
 
     // Constructor that initializes the class variables
-    public PrimArraysTest(WireType wireType, Object array, String asText) {
+    public void initPrimArraysTest(WireType wireType, Object array, String asText) {
         this.wireType = wireType;
         this.array = array;
         this.asText = asText;
@@ -35,7 +33,6 @@ public class PrimArraysTest extends WireTestCommon {
 
     // Define the combinations of parameters with which the test method will be executed
     @NotNull
-    @Parameterized.Parameters(name = "wt={0}, asText={2}")
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
         for (WireType wt : new WireType[]{
@@ -82,8 +79,10 @@ public class PrimArraysTest extends WireTestCommon {
     }
 
     // The test method that will be executed for each combination of parameters
-    @Test
-    public void testPrimArray() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "wt={0}, asText={2}")
+    public void testPrimArray(WireType wireType, Object array, String asText) {
+        initPrimArraysTest(wireType, array, asText);
         Wire wire = createWire();  // Create a wire instance based on the wireType
         try {
             // Write the test array to the wire

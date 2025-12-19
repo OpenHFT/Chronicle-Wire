@@ -6,10 +6,10 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class WireMarshallerTest extends WireTestCommon {
 
@@ -33,7 +33,7 @@ public class WireMarshallerTest extends WireTestCommon {
         assert tf != null;
 
         // Assert that the string representation of the parsed object matches the original text.
-        assertEquals(text, tf.toString());
+        assertEquals(text, tf.toString(), "parsed object toString should match original YAML text representation");
 
         // Create a HexDumpBytes object for examining binary content in hexadecimal format.
         HexDumpBytes bytes = new HexDumpBytes();
@@ -48,11 +48,10 @@ public class WireMarshallerTest extends WireTestCommon {
         WMTwoFields tf2 = w.read().object(WMTwoFields.class);
 
         // Assert that the string representation of the deserialized object matches the original text.
-        assertEquals(text, tf2.toString());
+        assertEquals(text, tf2.toString(), "deserialized object toString should match original YAML text after binary round-trip");
 
         // Assert that the serialized binary content matches the expected hexadecimal format.
-        assertEquals("" +
-                "c0                                              # :\n" +
+        assertEquals("c0                                              # :\n" +
                 "82 14 00 00 00                                  # WMTwoFields\n" +
                 "   c2 69 64                                        # id:\n" +
                 "   a6 d2 02 96 49                                  # 1234567890\n" +

@@ -6,13 +6,13 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTestCommon {
 
@@ -20,8 +20,8 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
     @Test
     public void testConverMarshallableToTextName() {
 
-        // Initialize a TestMarshallable object and set its name
-        @NotNull TestMarshallable testMarshallable = new TestMarshallable();
+        // Initialize a MarshallableFixture object and set its name
+        @NotNull MarshallableFixture testMarshallable = new MarshallableFixture();
         testMarshallable.setName("hello world");
 
         // Create a ByteBuffer to hold the serialized data
@@ -31,7 +31,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
         @NotNull Wire wire = WireType.TEXT.apply(byteBufferBytes);
         wire.bytes().readPosition();
 
-        // Write the TestMarshallable object to the Wire
+        // Write the MarshallableFixture object to the Wire
         wire.writeDocument(false, d -> d.write(() -> "any-key").marshallable(testMarshallable));
 
         // Deserialize the Wire's bytes to a String
@@ -92,7 +92,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
             @NotNull SortedFilter sortedFilter = new SortedFilter();
 
             boolean add = sortedFilter.marshableFilters.add(expected);
-            Assert.assertTrue(add);
+            Assertions.assertTrue(add);
             wire.write().marshallable(sortedFilter);
         }
 

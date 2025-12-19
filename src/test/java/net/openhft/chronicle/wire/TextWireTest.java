@@ -16,10 +16,10 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
@@ -47,8 +47,8 @@ import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"rawtypes", "unchecked", "try", "serial", "deprecation"})
 public class TextWireTest extends AbstractWireTest {
@@ -57,7 +57,7 @@ public class TextWireTest extends AbstractWireTest {
     private static final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
     private Bytes<?> bytes;
 
-    @Before
+    @BeforeEach
     public void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
@@ -73,7 +73,7 @@ public class TextWireTest extends AbstractWireTest {
             @NotNull Wire wire = createWire();
             wire.bytes().append(text);
             @Nullable List<String> list = wire.read().object(List.class);
-            assertEquals(Arrays.asList("a", "b", "c"), list);
+            assertEquals(Arrays.asList("a", "b", "c"), list, "list should deserialize from text format with whitespace variations");
         }
     }
 
@@ -85,10 +85,10 @@ public class TextWireTest extends AbstractWireTest {
                     "  type:            !type               String\n" +
                     "}\n");
 
-            assertNotNull(o);
+            assertNotNull(o, "DTO should deserialize successfully with whitespace in type declaration");
 
         } catch (Exception e) {
-            Assert.fail();
+            Assertions.fail();
         }
     }
 
@@ -115,7 +115,7 @@ public class TextWireTest extends AbstractWireTest {
         final Wire wire = createWire();
         wire.writeComment("\thi: omg");
         wire.write("hi").text("there");
-        assertEquals("there", wire.read("hi").text());
+        assertEquals("there", wire.read("hi").text(), "text field should read correctly after comment is written");
     }
 
     // Test handling of type specification instead of an actual field in TextWire.
@@ -124,7 +124,7 @@ public class TextWireTest extends AbstractWireTest {
         Wire wire = TextWire.from("!!null \"\"");
         StringBuilder sb = new StringBuilder();
         wire.read(sb).object(Object.class);
-        assertEquals(0, sb.length());
+        assertEquals(0, sb.length(), "field name should be empty when reading null type");
     }
 
     // Test serialization with fields accompanied by comments in TextWire.
@@ -132,7 +132,7 @@ public class TextWireTest extends AbstractWireTest {
     public void testFieldWithComment() {
         FieldWithComment f = new FieldWithComment();
         f.field = "hello world";
-        Assert.assertEquals("!net.openhft.chronicle.wire.TextWireTest$FieldWithComment {\n" +
+        Assertions.assertEquals("!net.openhft.chronicle.wire.TextWireTest$FieldWithComment {\n" +
                 "  field: hello world, \t\t# a comment where the value=hello world\n" +
                 "}\n", Marshallable.$toString(f));
     }
@@ -142,7 +142,7 @@ public class TextWireTest extends AbstractWireTest {
     public void testFieldWithComment2() {
         FieldWithComment2 f = new FieldWithComment2();
         f.field = "hello world";
-        Assert.assertEquals("!net.openhft.chronicle.wire.TextWireTest$FieldWithComment2 {\n" +
+        Assertions.assertEquals("!net.openhft.chronicle.wire.TextWireTest$FieldWithComment2 {\n" +
                 "  field: hello world, \t\t# a comment where the value=hello world\n" +
                 "  field2: !!null \"\"\n" +
                 "}\n", Marshallable.$toString(f));
@@ -157,9 +157,9 @@ public class TextWireTest extends AbstractWireTest {
                 "  routes: [ \"INT1\" ] # terminating list\n" +
                 "}");
 
-        assertEquals("ROUND_ROBIN", o.get("policy"));
-        assertEquals(Collections.singletonList("INT1"), o.get("routes"));
-        assertEquals("@Symbol =~ \"[A-L].*\"", o.get("pattern"));
+        assertEquals("ROUND_ROBIN", o.get("policy"), "unquoted value should parse correctly after comment");
+        assertEquals(Collections.singletonList("INT1"), o.get("routes"), "list value should parse correctly with terminating comment");
+        assertEquals("@Symbol =~ \"[A-L].*\"", o.get("pattern"), "quoted value should parse correctly after comment");
     }
 
     // Test to ensure that unexpected fields in the serialized string are properly handled and deserialized.
@@ -180,7 +180,7 @@ public class TextWireTest extends AbstractWireTest {
                         "c=three\n" +
                         "e=also\n" +
                         "f=at the end",
-                asProperties(tf.others));
+                asProperties(tf.others), "unexpected fields should be captured in others map");
 
         // Repeat the above steps with different unexpected fields.
         TwoFields tf2 = Marshallable.fromString("!" + TwoFields.class.getName() + " {" +
@@ -193,7 +193,7 @@ public class TextWireTest extends AbstractWireTest {
         assertEquals("a=1\n" +
                         "c=three\n" +
                         "e=also",
-                asProperties(tf2.others));
+                asProperties(tf2.others), "unexpected fields should be captured when interleaved with known fields");
 
         // Check case sensitivity of field names
         TwoFields tf3 = Marshallable.fromString("!" + TwoFields.class.getName() + " {" +
@@ -206,7 +206,7 @@ public class TextWireTest extends AbstractWireTest {
         assertEquals("a=1\n" +
                         "c=three\n" +
                         "e=also",
-                asProperties(tf3.others));
+                asProperties(tf3.others), "field names should be matched case-insensitively");
     }
 
     // Utility method to convert a map to a string representation in properties format.
@@ -219,7 +219,7 @@ public class TextWireTest extends AbstractWireTest {
     public void licenseCheck() {
         // Verify that TEXT WireType doesn't require any license check.
         WireType.TEXT.licenceCheck();
-        assertTrue(WireType.TEXT.isAvailable());
+        assertTrue(WireType.TEXT.isAvailable(), "TEXT wire type should be available without license check");
     }
 
     // Test to ensure that objects with TreeMap fields are correctly serialized and deserialized.
@@ -245,7 +245,7 @@ public class TextWireTest extends AbstractWireTest {
                 "  }\n" +
                 "}");
         // Ensure the deserialized object is an instance of Map.
-        Assert.assertTrue(w instanceof Map);
+        assertInstanceOf(Map.class, w, "deserialized object should be a Map when reading nested map structure");
     }
 
     // Test to verify deserialization of integer values presented in hexadecimal format.
@@ -258,8 +258,8 @@ public class TextWireTest extends AbstractWireTest {
                     "data: 0x" + Integer.toHexString(i).toUpperCase() + ",\n" +
                             "data2: 0x" + Integer.toHexString(i).toLowerCase());
             // Verify that both deserialized values match the original integer.
-            assertEquals(i, w.read("data").int64());
-            assertEquals(i, w.read("data2").int64());
+            assertEquals(i, w.read("data").int64(), "uppercase hexadecimal value should parse correctly to int64");
+            assertEquals(i, w.read("data2").int64(), "lowercase hexadecimal value should parse correctly to int64");
         }
     }
 
@@ -288,7 +288,7 @@ public class TextWireTest extends AbstractWireTest {
         // System.out.println(textYaml);
         // Deserialize the TEXT into an object and verify its structure.
         @Nullable Object o = WireType.TEXT.fromString(textYaml);
-        Assert.assertEquals("{map={some={key=value}, some-other={key=value}}}", o.toString());
+        Assertions.assertEquals("{map={some={key=value}, some-other={key=value}}}", o.toString(), "binary wire should convert to text format preserving nested map structure");
 
         b.releaseLast();
     }
@@ -300,7 +300,7 @@ public class TextWireTest extends AbstractWireTest {
         wire.write();
         wire.write();
         wire.write();
-        assertEquals("\"\": \"\": \"\": ", wire.toString());
+        assertEquals("\"\": \"\": \"\": ", wire.toString(), "multiple write() calls should produce empty key-value pairs");
     }
 
     @NotNull
@@ -319,7 +319,11 @@ public class TextWireTest extends AbstractWireTest {
 
         // Write values to the wire
         WireReadTestSupport.writeStandardFields(wire);
-        WireReadTestSupport.exerciseRead(wire, 1);
+        wire.read();
+        wire.read();
+        wire.read();
+        assertEquals(1, wire.bytes().readRemaining(), "wire should have 1 byte remaining after reading 3 fields without keys");
+        wire.read();
     }
 
     // Test to validate reading using specific keys from the wire
@@ -331,7 +335,11 @@ public class TextWireTest extends AbstractWireTest {
         WireReadTestSupport.writeStandardFields(wire);
 
         // Read values using specific key. If the key is blank, it matches any key.
-        WireReadTestSupport.exerciseReadWithKey(wire, 0);
+        wire.read(BWKey.field1);
+        wire.read(BWKey.field1);
+        wire.read(BWKey.field1);
+        assertEquals(0, wire.bytes().readRemaining(), "wire should be fully consumed after reading 3 fields with matching keys");
+        wire.read();
     }
 
     // Test to validate reading values into a StringBuilder
@@ -347,7 +355,19 @@ public class TextWireTest extends AbstractWireTest {
 
         // Read values into StringBuilder. If the key is blank, it matches any key.
         @NotNull StringBuilder name = new StringBuilder();
-        WireReadTestSupport.exerciseReadWithNames(wire, name1, BWKey.field1.name(), name1, 1);
+        wire.read(name);
+        assertEquals(0, name.length(), "first field name should be empty when reading into StringBuilder");
+
+        name.setLength(0);
+        wire.read(name);
+        assertEquals(BWKey.field1.name(), name.toString(), "second field name should match BWKey.field1 when reading into StringBuilder");
+
+        name.setLength(0);
+        wire.read(name);
+        assertEquals(name1, name.toString(), "third field name should match long field name when reading into StringBuilder");
+
+        assertEquals(1, wire.bytes().readRemaining(), "wire should have 1 byte remaining after reading 3 field names into StringBuilder");
+        wire.read();
     }
 
     // Test to validate writing and reading 8-bit integers from the wire
@@ -363,7 +383,7 @@ public class TextWireTest extends AbstractWireTest {
 
         WireSmallIntTestSupport.readInt8Triplet(wire);
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, bytes.readRemaining(), "all int8 values should be consumed after reading");
         wire.read();
     }
 
@@ -380,7 +400,7 @@ public class TextWireTest extends AbstractWireTest {
 
         WireSmallIntTestSupport.readInt16Triplet(wire);
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, bytes.readRemaining(), "all int16 values should be consumed after reading");
         wire.read();
     }
 
@@ -397,7 +417,7 @@ public class TextWireTest extends AbstractWireTest {
 
         WireSmallIntTestSupport.readUint8Triplet(wire);
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, bytes.readRemaining(), "all uint8 values should be consumed after reading");
         wire.read();
     }
 
@@ -414,7 +434,7 @@ public class TextWireTest extends AbstractWireTest {
 
         WireSmallIntTestSupport.readUint16Triplet(wire);
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, bytes.readRemaining(), "all uint16 values should be consumed after reading");
         wire.read();
     }
 
@@ -431,7 +451,7 @@ public class TextWireTest extends AbstractWireTest {
 
         WireSmallIntTestSupport.readUint32Triplet(wire);
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, bytes.readRemaining(), "all uint32 values should be consumed after reading");
         wire.read();
     }
 
@@ -448,7 +468,7 @@ public class TextWireTest extends AbstractWireTest {
 
         WireSmallIntTestSupport.readInt32Triplet(wire);
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, bytes.readRemaining(), "all int32 values should be consumed after reading");
         wire.read();
     }
 
@@ -464,7 +484,7 @@ public class TextWireTest extends AbstractWireTest {
         expectWithSnakeYaml("{=1, field1=2, Test=3}", wire);
         assertEquals("\"\": 1\n" +
                 "field1: 2\n" +
-                "Test: 3\n", wire.toString());
+                "Test: 3\n", wire.toString(), "int64 values should serialize to text format with field names");
 
         // Read the 64-bit integers from the wire and validate their values
         WireNumericTestSupport.assertInt64sRead(wire, false);
@@ -481,7 +501,7 @@ public class TextWireTest extends AbstractWireTest {
         // Validate the wire's string format
         assertEquals("\"\": 1.0\n" +
                 "field1: 2.0\n" +
-                "Test: 3.0\n", wire.toString());
+                "Test: 3.0\n", wire.toString(), "float64 values should serialize with .0 suffix in text format");
 
         // Validate using SnakeYAML parser
         expectWithSnakeYaml("{=1.0, field1=2.0, Test=3.0}", wire);
@@ -503,12 +523,12 @@ public class TextWireTest extends AbstractWireTest {
                 "Bye}", wire);
         assertEquals("\"\": Hello\n" +
                 "field1: world\n" +
-                "Test: \"Long field name which is more than 32 characters, \\\\ \\nBye\"\n", wire.toString());
+                "Test: \"Long field name which is more than 32 characters, \\\\ \\nBye\"\n", wire.toString(), "text strings should escape special characters and quote long values");
 
         // Read the texts back and validate
         WireStringTestSupport.assertReadStrings(wire, name);
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, bytes.readRemaining(), "all text values should be consumed after reading");
         // Check it's safe to read too much.
         wire.read();
     }
@@ -530,14 +550,13 @@ public class TextWireTest extends AbstractWireTest {
         // expectWithSnakeYaml(wire, "{=1, field1=2, Test=3}");
         assertEquals("\"\": !MyType " +
                 "field1: !AlsoMyType " +
-                "Test: !" + name1 + " # \n", wire.toString());
+                "Test: !" + name1 + " # \n", wire.toString(), "type prefixes should serialize with ! marker before type name");
 
         // Read the types back and validate
-        Stream.of("MyType", "AlsoMyType", name1).forEach(e -> {
-            wire.read().typePrefix(e, Assert::assertEquals);
-        });
+        Stream.of("MyType", "AlsoMyType", name1).forEach(e ->
+                wire.read().typePrefix(e, Assertions::assertEquals));
 
-        assertEquals(0, bytes.readRemaining());
+        assertEquals(0, bytes.readRemaining(), "all type prefix values should be consumed after reading");
         // Check it's safe to read too much.
         wire.read();
     }
@@ -563,7 +582,7 @@ public class TextWireTest extends AbstractWireTest {
                 "    field1: 0.0\n" +
                 "  },\n" +
                 "  value: 12345\n" +
-                "}\n", a.toString());
+                "}\n", a.toString(), "empty type marker should create object with default field values");
     }
 
     // Test case for working with single quoted custom types
@@ -581,7 +600,7 @@ public class TextWireTest extends AbstractWireTest {
                 "  value: 12345\n" +
                 "}");
 
-        assertNotNull(a);  // Check that the resulting object is not null
+        assertNotNull(a, "object should deserialize successfully with empty type body");
     }
 
     // Test case for writing and reading boolean values
@@ -609,7 +628,7 @@ public class TextWireTest extends AbstractWireTest {
 
         WirePrimitiveTestSupport.writeTimes(wire, now);
 
-        assertEquals(WirePrimitiveTestSupport.expectedTimeString(now), bytes.toString());
+        assertEquals(WirePrimitiveTestSupport.expectedTimeString(now), bytes.toString(), "LocalTime should serialize in ISO-8601 format");
 
         WirePrimitiveTestSupport.assertTimes(wire, now);
     }
@@ -663,13 +682,38 @@ public class TextWireTest extends AbstractWireTest {
     // Test reading and writing of a string map with Wire.
     @Test
     public void testMapReadAndWriteStrings() {
-        WireMapTestSupport.writeAndReadStringMap(WireType.TEXT::apply);
+        @NotNull final Bytes<?> localBytes = allocateElasticOnHeap();
+        try {
+            @NotNull final Map<String, String> expected = new LinkedHashMap<>();
+            expected.put("hello", "world");
+            expected.put("hello1", "world1");
+            expected.put("hello2", "world2");
+
+            @NotNull final Wire wire = WireType.TEXT.apply(localBytes);
+
+            wire.writeDocument(false, o -> o.writeEventName(() -> "example").map(expected));
+
+            assertEquals("--- !!data\n" +
+                            "example: {\n" +
+                            "  hello: world,\n" +
+                            "  hello1: world1,\n" +
+                            "  hello2: world2\n" +
+                            "}\n",
+                    Wires.fromSizePrefixedBlobs(localBytes),
+                    "string map should serialize as YAML document with field names");
+
+            @NotNull final Map<String, String> actual = new LinkedHashMap<>();
+            wire.readDocument(null, c -> c.read(() -> "example").marshallableAsMap(String.class, String.class, actual));
+            assertEquals(expected, actual, "string map: roundtrip");
+        } finally {
+            localBytes.releaseLast();
+        }
     }
 
     // Test behavior when using fields of type Bytes.
     // Note: This test is ignored due to unreleased bytes.
     @Test
-    @Ignore("unreleased bytes")
+    @Disabled("unreleased bytes")
     public void testBytesField() {
         DtoWithBytesField dto = new DtoWithBytesField(), dto2 = null;
         byte[] binaryData = {1, 2, 3, 4};
@@ -680,7 +724,7 @@ public class TextWireTest extends AbstractWireTest {
             // Convert the DTO to string and back, and assert equality
             String cs = dto.toString();
             dto2 = Marshallable.fromString(cs);
-            assertEquals(cs, dto2.toString());
+            assertEquals(cs, dto2.toString(), "BytesField should roundtrip through string serialization");
         } finally {
             // Ensure resources are cleaned up
             dto.bytes.releaseLast();
@@ -704,9 +748,8 @@ public class TextWireTest extends AbstractWireTest {
         expected.put(3, 3);
 
         // Write the map to wire
-        wire.writeDocument(false, o -> {
-            o.write(() -> "example").map(expected);
-        });
+        wire.writeDocument(false, o ->
+                o.write(() -> "example").map(expected));
 
         // Assert that the wire content matches expected format
         assertEquals("--- !!data\n" +
@@ -714,13 +757,13 @@ public class TextWireTest extends AbstractWireTest {
                 "  ? !int 1: !int 11,\n" +
                 "  ? !int 2: !int 2,\n" +
                 "  ? !int 3: !int 3\n" +
-                "}\n", Wires.fromSizePrefixedBlobs(bytes));
+                "}\n", Wires.fromSizePrefixedBlobs(bytes), "integer map should serialize with !int type markers for keys and values");
 
         // Read the map from wire and assert it matches the expected map
         @NotNull final Map<Integer, Integer> actual = new HashMap<>();
         wire.readDocument(null, c -> {
             @Nullable Map m = c.read(() -> "example").marshallableAsMap(Integer.class, Integer.class, actual);
-            assertEquals(m, expected);
+            assertEquals(m, expected, "integer map should deserialize correctly from text format");
         });
     }
 
@@ -802,7 +845,7 @@ public class TextWireTest extends AbstractWireTest {
     // This test is for writing a Map<String, String> to the Wire and reading it back.
     // Currently, it's marked as ignored using the @Ignore annotation.
     @Test
-    @Ignore
+    @Disabled
     public void testStringMap() {
         // Create a wire instance
         @NotNull Wire wire = createWire();
@@ -813,7 +856,7 @@ public class TextWireTest extends AbstractWireTest {
 
         // Read the map from the wire and ensure it's empty
         @Nullable Map<String, String> map = wire.read().object(Map.class);
-        assertEquals(0, map.size());
+        assertEquals(0, map.size(), "empty map should deserialize with zero entries");
 
         // TODO we should not need to create a new wire.
         // wire = createWire();
@@ -882,7 +925,9 @@ public class TextWireTest extends AbstractWireTest {
     @Test
     public void writeNull() {
         @NotNull Wire wire = createWire();
-        WireNullTestSupport.writeNulls(wire, w -> w.write().object(null), Circle.class);
+        String text = WireNullTestSupport.writeNulls(wire, w -> w.write().object(null), Circle.class);
+        assertFalse(text.isEmpty(), "null object should produce non-empty output");
+        assertEquals(0, wire.bytes().readRemaining(), "null object bytes should be fully consumed after reading");
     }
 
     // Test to ensure all characters within the defined range are correctly written and read from a Wire
@@ -899,13 +944,13 @@ public class TextWireTest extends AbstractWireTest {
         @NotNull Wire wire = createWire();
         WireTestSupport.writeDemarshallable(wire);
 
-        assertEquals("40000052", Integer.toUnsignedString(wire.bytes().readInt(0), 16));
+        assertEquals("40000052", Integer.toUnsignedString(wire.bytes().readInt(0), 16), "document header should contain correct size prefix");
         assertEquals("!net.openhft.chronicle.wire.DemarshallableObject {\n" +
                 "  name: test,\n" +
                 "  value: 12345\n" +
-                "}\n", wire.toString().substring(4));
+                "}\n", wire.toString().substring(4), "demarshallable object should serialize with type and field names");
 
-        assertEquals(WireTestSupport.expectedDemarshallableBlob(), Wires.fromSizePrefixedBlobs(wire.bytes()));
+        assertEquals(WireTestSupport.expectedDemarshallableBlob(), Wires.fromSizePrefixedBlobs(wire.bytes()), "size-prefixed blob should match expected YAML format");
 
         WireTestSupport.assertDemarshallableRead(wire);
     }
@@ -923,6 +968,7 @@ public class TextWireTest extends AbstractWireTest {
     public void two() {
         testByteArrayValueWithRealBytesNegative();
         wire.reset();
+        assertEquals(0, wire.bytes().readRemaining(), "two: bytes empty after reset");
         uint16();
     }
 
@@ -961,37 +1007,42 @@ public class TextWireTest extends AbstractWireTest {
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key1 }: value1,\n" +
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key2 }: value2\n" +
                         "}\n",
-                Wires.fromSizePrefixedBlobs(wire.bytes()));
+                Wires.fromSizePrefixedBlobs(wire.bytes()), "map with marshallable keys should serialize with type markers and field names");
 
         // Read back the map from the Wire and verify its contents.
         wire.readDocument(null, w -> {
             MyMarshallable mm = w.readEvent(MyMarshallable.class);
-            assertEquals(parent.toString(), mm.toString());
-            assertEquals(parent, mm);
+            assertEquals(parent.toString(), mm.toString(), "marshallable key should deserialize with correct string representation");
+            assertEquals(parent, mm, "marshallable key should deserialize equal to original");
             @Nullable final Map map2 = w.getValueIn()
                     .object(Map.class);
-            assertEquals(map, map2);
+            assertEquals(map, map2, "map with marshallable keys should roundtrip correctly");
         });
     }
 
     // Test for attempting to serialize a non-serializable object (current thread).
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void writeUnserializable1() {
-        System.out.println(TEXT.asString(Thread.currentThread()));
+        assertThrows(IllegalArgumentException.class, () ->
+                System.out.println(TEXT.asString(Thread.currentThread())));
     }
 
     // Test for attempting to serialize a non-serializable object (socket instance).
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void writeUnserializable2() {
-        @NotNull Socket s = new Socket();
-        System.out.println(TEXT.asString(s));
+        assertThrows(IllegalArgumentException.class, () -> {
+            @NotNull Socket s = new Socket();
+            System.out.println(TEXT.asString(s));
+        });
     }
 
     // Test for attempting to serialize a non-serializable object (socket channel instance).
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void writeUnserializable3() throws IOException {
-        SocketChannel sc = SocketChannel.open();
-        System.out.println(TEXT.asString(sc));
+        assertThrows(IllegalArgumentException.class, () -> {
+            SocketChannel sc = SocketChannel.open();
+            System.out.println(TEXT.asString(sc));
+        });
     }
 
     // Test to ensure characters are correctly written to and read back from the Wire.
@@ -1025,7 +1076,7 @@ public class TextWireTest extends AbstractWireTest {
         // Validate the string representation of the modified BytesWrapper.
         assertEquals("!net.openhft.chronicle.wire.TextWireTest$BytesWrapper {\n" +
                 "  bytes: hello\n" +
-                "}\n", bw.toString());
+                "}\n", bw.toString(), "bytes field should update correctly when modified after deserialization");
 
         // Release the last acquired bytes to prevent memory leaks.
         bw.bytes.releaseLast();
@@ -1040,51 +1091,51 @@ public class TextWireTest extends AbstractWireTest {
         assertEquals("!D {\n" +
                 "  d: 1.0,\n" +
                 "  n: -1.0\n" +
-                "}\n", new DoubleWrapper(1.0).toString());
+                "}\n", new DoubleWrapper(1.0).toString(), "small double values should serialize with .0 suffix");
         assertEquals("!D {\n" +
                 "  d: 11.0,\n" +
                 "  n: -11.0\n" +
-                "}\n", new DoubleWrapper(11.0).toString());
+                "}\n", new DoubleWrapper(11.0).toString(), "two-digit double values should serialize with .0 suffix");
         assertEquals("!D {\n" +
                 "  d: 101.0,\n" +
                 "  n: -101.0\n" +
-                "}\n", new DoubleWrapper(101.0).toString());
+                "}\n", new DoubleWrapper(101.0).toString(), "three-digit double values should serialize with .0 suffix");
         assertEquals("!D {\n" +
                 "  d: 1E3,\n" +
                 "  n: -1E3\n" +
                 "}\n", new DoubleWrapper(1e3)
-                .toString());
+                .toString(), "1e3 should serialize in engineering notation");
 
         // Test deserialization: Convert the string representation back to DoubleWrapper and verify its content.
         DoubleWrapper dw = Marshallable.fromString(new DoubleWrapper(1e3).toString());
-        assertEquals(1e3, dw.d, 0); // Assert the deserialized value with a delta of 0.
+        assertEquals(1e3, dw.d, 0, "1e3 should deserialize correctly from engineering notation");
         assertEquals("!D {\n" +
                 "  d: 10E3,\n" +
                 "  n: -10E3\n" +
-                "}\n", new DoubleWrapper(10e3).toString());
+                "}\n", new DoubleWrapper(10e3).toString(), "10e3 should serialize in engineering notation");
         DoubleWrapper dw2 = Marshallable.fromString(new DoubleWrapper(10e3).toString());
-        assertEquals(10e3, dw2.d, 0);
+        assertEquals(10e3, dw2.d, 0, "10e3 should deserialize correctly from engineering notation");
 
         assertEquals("!D {\n" +
                 "  d: 100E3,\n" +
                 "  n: -100E3\n" +
-                "}\n", new DoubleWrapper(100e3).toString());
+                "}\n", new DoubleWrapper(100e3).toString(), "100e3 should serialize in engineering notation");
         DoubleWrapper dw3 = Marshallable.fromString(new DoubleWrapper(100e3).toString());
-        assertEquals(100e3, dw3.d, 0);
+        assertEquals(100e3, dw3.d, 0, "100e3 should deserialize correctly from engineering notation");
 
         assertEquals("!D {\n" +
                 "  d: 1E6,\n" +
                 "  n: -1E6\n" +
-                "}\n", new DoubleWrapper(1e6).toString());
+                "}\n", new DoubleWrapper(1e6).toString(), "1e6 should serialize in engineering notation");
         DoubleWrapper dw4 = Marshallable.fromString(new DoubleWrapper(1e6).toString());
-        assertEquals(1e6, dw4.d, 0);
+        assertEquals(1e6, dw4.d, 0, "1e6 should deserialize correctly from engineering notation");
 
         assertEquals("!D {\n" +
                 "  d: 10E6,\n" +
                 "  n: -10E6\n" +
-                "}\n", new DoubleWrapper(10e6).toString());
+                "}\n", new DoubleWrapper(10e6).toString(), "10e6 should serialize in engineering notation");
         DoubleWrapper dw5 = Marshallable.fromString(new DoubleWrapper(10e6).toString());
-        assertEquals(10e6, dw5.d, 0);
+        assertEquals(10e6, dw5.d, 0, "10e6 should deserialize correctly from engineering notation");
     }
 
     // Tests the consistency of serialization and deserialization of NestedList objects and various property combinations.
@@ -1112,7 +1163,7 @@ public class TextWireTest extends AbstractWireTest {
                 "}\n";
 
         // Check that the actual serialized string of the NestedList matches the expected format.
-        assertEquals(expected, nl.toString());
+        assertEquals(expected, nl.toString(), "nested list should serialize with proper field ordering and formatting");
 
         // Test various permutations of the NestedList's properties.
         OUTER:
@@ -1152,7 +1203,7 @@ public class TextWireTest extends AbstractWireTest {
             }
             cs.append("}\n");
             NestedList nl2 = Marshallable.fromString(cs.toString());
-            assertEquals(expected, nl2.toString());
+            assertEquals(expected, nl2.toString(), "nested list should deserialize correctly regardless of field order");
         }
     }
 
@@ -1164,13 +1215,13 @@ public class TextWireTest extends AbstractWireTest {
         wire.bytes().append("a: !type byte[], b: !type String[], c: hi");
 
         // Check that the deserialized type of "b" is String[].class.
-        assertEquals(String[].class, wire.read("b").typeLiteral());
+        assertEquals(String[].class, wire.read("b").typeLiteral(), "String[] type literal should parse correctly");
 
         // Check that the deserialized type of "a" is byte[].class.
-        assertEquals(byte[].class, wire.read("a").typeLiteral());
+        assertEquals(byte[].class, wire.read("a").typeLiteral(), "byte[] type literal should parse correctly");
 
         // Check that the deserialized text of "c" is "hi".
-        assertEquals("hi", wire.read("c").text());
+        assertEquals("hi", wire.read("c").text(), "text value should read correctly after type literals");
     }
 
     @Test
@@ -1180,9 +1231,9 @@ public class TextWireTest extends AbstractWireTest {
         wire.bytes().append("a: !type [B;, b: !type String[], c: hi");
 
         // Verify the data types and content retrieved from the wire
-        assertEquals(String[].class, wire.read("b").typeLiteral());
-        assertEquals(byte[].class, wire.read("a").typeLiteral());
-        assertEquals("hi", wire.read("c").text());
+        assertEquals(String[].class, wire.read("b").typeLiteral(), "String[] type literal should parse correctly with [B notation");
+        assertEquals(byte[].class, wire.read("a").typeLiteral(), "byte[] type literal should parse correctly as [B;");
+        assertEquals("hi", wire.read("c").text(), "text value should read correctly after JVM-style type notation");
     }
 
     @Test
@@ -1195,10 +1246,10 @@ public class TextWireTest extends AbstractWireTest {
             wire.bytes().append("a: [ !type ").append(clz.getName()).append("[] ], b: !type String[], c: hi");
 
             // Verify the data types and content retrieved from the wire for the current class type
-            assertEquals(String[].class, wire.read("b").typeLiteral());
+            assertEquals(String[].class, wire.read("b").typeLiteral(), "String[] type literal should parse correctly for primitive array types");
             Collection<Class> classes = wire.read("a").typedMarshallable();
-            assertArrayEquals(new Class[]{Array.newInstance(clz, 0).getClass()}, classes.toArray());
-            assertEquals("hi", wire.read("c").text());
+            assertArrayEquals(new Class[]{Array.newInstance(clz, 0).getClass()}, classes.toArray(), "primitive array type should parse correctly in collection");
+            assertEquals("hi", wire.read("c").text(), "text value should read correctly after primitive array type literals");
         }
     }
 
@@ -1212,8 +1263,8 @@ public class TextWireTest extends AbstractWireTest {
                 "}\n");
 
         // Verify that the wire contains instances of TWTSingleton
-        assertEquals(TWTSingleton.INSTANCE, wire.read("a").object());
-        assertEquals(TWTSingleton.INSTANCE, wire.read("b").object());
+        assertEquals(TWTSingleton.INSTANCE, wire.read("a").object(), "singleton should deserialize to same instance with compact body");
+        assertEquals(TWTSingleton.INSTANCE, wire.read("b").object(), "singleton should deserialize to same instance with multiline body");
 
     }
 
@@ -1237,13 +1288,13 @@ public class TextWireTest extends AbstractWireTest {
                 "    { name: one, timeUnits: [ DAYS ] },\n" +
                 "    { name: two, timeUnits: [ HOURS, DAYS ] }\n" +
                 "  ]\n" +
-                "}\n", wire.toString());
+                "}\n", wire.toString(), "nested list with EnumSet should serialize with enum names");
 
         // Retrieve and verify the NestedWithEnumSet object from the wire
         NestedWithEnumSet a = wire.read("hello")
                 .object(NestedWithEnumSet.class);
-        assertEquals(n.toString(), a.toString());
-        assertEquals(n, a);
+        assertEquals(n.toString(), a.toString(), "deserialized object should have same string representation as original");
+        assertEquals(n, a, "nested list with EnumSet should roundtrip correctly");
     }
 
     @Test
@@ -1261,7 +1312,7 @@ public class TextWireTest extends AbstractWireTest {
         MyDto o = Marshallable.fromString(cs);
 
         // Verify the deserialized object matches the original MyDto object
-        assertEquals(cs, o.toString());
+        assertEquals(cs, o.toString(), "MyDto with string list should roundtrip through serialization");
 
         assert o.strings.size() == 2;
     }
@@ -1275,10 +1326,10 @@ public class TextWireTest extends AbstractWireTest {
         assertEquals("!net.openhft.chronicle.wire.TextWireTest$TwoLongs {\n" +
                 "  hexadecimal: 1234567890abcdef,\n" +
                 "  hexa2: ffffffffffffffff\n" +
-                "}\n", twoLongs.toString());
+                "}\n", twoLongs.toString(), "long values with HexadecimalLongConverter should serialize as hex strings");
 
         // Ensure the string representation can be correctly deserialized back to the original object
-        assertEquals(twoLongs, Marshallable.fromString(twoLongs.toString()));
+        assertEquals(twoLongs, Marshallable.fromString(twoLongs.toString()), "hexadecimal long values should roundtrip correctly");
     }
 
     @Test
@@ -1293,7 +1344,7 @@ public class TextWireTest extends AbstractWireTest {
         final double d2 = textWire.getValueIn().float64();
 
         // Validate the double value remains consistent after the transfer
-        Assert.assertEquals(d, d2, 0);
+        Assertions.assertEquals(d, d2, 0, "double precision should be preserved through text wire serialization");
     }
 
     @Test
@@ -1302,7 +1353,13 @@ public class TextWireTest extends AbstractWireTest {
         MapHolder mh = new MapHolder();
         Map<RetentionPolicy, Double> map = Collections.singletonMap(RetentionPolicy.CLASS, 0.1);
         mh.map = new EnumMap<>(map);
-        doTestMapOfNamedKeys(mh);
+        assertEquals("!net.openhft.chronicle.wire.TextWireTest$MapHolder {\n" +
+                        "  map: {\n" +
+                        "    CLASS: 0.1\n" +
+                        "  }\n" +
+                        "}\n",
+                TEXT.asString(mh),
+                "EnumMap should serialize with enum constant names as keys");
     }
 
     @Test
@@ -1315,18 +1372,8 @@ public class TextWireTest extends AbstractWireTest {
         System.out.println("fwe = " + fwe);
 
         // Verify the deserialized FieldWithEnum object's properties
-        assertNull(fwe.allowedFoos);
-        assertEquals(OrderLevel.CHILD, fwe.orderLevel);
-    }
-
-    // Helper method to validate the map contents in a MapHolder object
-    private void doTestMapOfNamedKeys(MapHolder mh) {
-        assertEquals("!net.openhft.chronicle.wire.TextWireTest$MapHolder {\n" +
-                        "  map: {\n" +
-                        "    CLASS: 0.1\n" +
-                        "  }\n" +
-                        "}\n",
-                TEXT.asString(mh));
+        assertNull(fwe.allowedFoos, "null field should deserialize as null when explicitly marked");
+        assertEquals(OrderLevel.CHILD, fwe.orderLevel, "enum field should deserialize correctly after null field");
     }
 
     @Test
@@ -1336,13 +1383,13 @@ public class TextWireTest extends AbstractWireTest {
         Wire wire = createWire();
         wire.bytes().append(text);
         final Object list = wire.getValueIn().object();
-        assertEquals("[1,2,3]", "" + list);
+        assertEquals("[1,2,3]", "" + list, "compact list notation should parse correctly");
 
         // Repeat the process with a slightly different input
         String text2 = "[ 1, 2, 3 ]";
         wire.bytes().clear().append(text2);
         final Object list2 = wire.getValueIn().object();
-        assertEquals("[1, 2, 3]", "" + list2);
+        assertEquals("[1, 2, 3]", "" + list2, "spaced list notation should parse correctly");
     }
 
     @Test
@@ -1358,7 +1405,7 @@ public class TextWireTest extends AbstractWireTest {
         final Object list = wire.getValueIn().object();
 
         // Validate that the wire read the values correctly
-        assertEquals("[1,2,3, c]", "" + list);
+        assertEquals("[1,2,3, c]", "" + list, "mixed list with numbers and strings should parse correctly");
     }
 
     @Test
@@ -1374,7 +1421,7 @@ public class TextWireTest extends AbstractWireTest {
         DurationHolder dh2 = Marshallable.fromString(h);
 
         // Check if the deserialized object matches the original
-        assertEquals(dh, dh2);
+        assertEquals(dh, dh2, "Duration field should roundtrip correctly through serialization");
     }
 
     @Test
@@ -1388,7 +1435,7 @@ public class TextWireTest extends AbstractWireTest {
                 "dto: !net.openhft.chronicle.wire.BinaryWireTest$DTO {\n" +
                 "  text: text\n" +
                 "}\n" +
-                "\n", actual);
+                "\n", actual, "comments should be read and preserved in output");
     }
 
     @Test
@@ -1416,7 +1463,7 @@ public class TextWireTest extends AbstractWireTest {
                         "     # fin\n");
 
         // Assert that the object was deserialized correctly without being affected by the comments.
-        assertArrayEquals(new String[]{"bar", "quux"}, obj.strings);
+        assertArrayEquals(new String[]{"bar", "quux"}, obj.strings, "nested list with interleaved comments should parse correctly");
     }
 
     @Test
@@ -1434,7 +1481,7 @@ public class TextWireTest extends AbstractWireTest {
                         "     # fin\n");
 
         // Assert that the object was deserialised correctly without being affected by the comments.
-        assertEquals(obj, Arrays.asList("bar", "quux"));
+        assertEquals(obj, Arrays.asList("bar", "quux"), "list with interleaved comments should parse correctly");
     }
 
     // Enum to demonstrate serialization of enum types

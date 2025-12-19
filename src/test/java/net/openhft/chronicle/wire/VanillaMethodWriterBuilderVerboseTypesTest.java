@@ -8,19 +8,17 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@RunWith(Parameterized.class)
 public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Static initialization block to alias two classes
@@ -29,25 +27,24 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
     }
 
     // Flag to determine if verbose types should be used
-    private final boolean verboseTypes;
+    private boolean verboseTypes;
 
     // Expected string representation for the current test run
-    private final String expects;
+    private String expects;
 
     // Constructor initializes fields with parameterized values
-    public VanillaMethodWriterBuilderVerboseTypesTest(boolean verboseTypes, String expects) {
+    public void initVanillaMethodWriterBuilderVerboseTypesTest(boolean verboseTypes, String expects) {
         this.verboseTypes = verboseTypes;
         this.expects = expects;
     }
 
-    @Before
+    @BeforeEach
     public void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     // Provide different combinations of parameters for the test runs
     @NotNull
-    @Parameterized.Parameters(name = "verboseTypes={0}, expected={1}")
     public static Collection<Object[]> combinations() {
         return Arrays.asList(new Object[]{true, "print: !MyObject {\n" +
                 "  list: [\n" +
@@ -91,8 +88,10 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
     }
 
     // Test case to validate the output of the method writer based on the verbose types setting
-    @Test
-    public void test() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "verboseTypes={0}, expected={1}")
+    public void test(boolean verboseTypes, String expects) {
+        initVanillaMethodWriterBuilderVerboseTypesTest(verboseTypes, expects);
         // Allocate elastic bytes on heap and create a TextWire instance
         final Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap();
         TextWire textWire = new TextWire(bytes);
@@ -106,6 +105,6 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
         printer.print(new MyObject("hello world", 23));
 
         // Assert that the output matches the expected representation for the current run
-        Assert.assertEquals(expects, bytes.toString());
+        Assertions.assertEquals(expects, bytes.toString());
     }
 }

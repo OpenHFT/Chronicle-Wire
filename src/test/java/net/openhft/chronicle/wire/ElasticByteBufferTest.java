@@ -7,13 +7,13 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // Test class focusing on the functionality of elastic byte buffers with wire operations.
 public class ElasticByteBufferTest extends WireTestCommon {
@@ -48,7 +48,7 @@ public class ElasticByteBufferTest extends WireTestCommon {
 
         // Assert that the text was written correctly.
         @NotNull String s = stringBuilder.toString();
-        Assert.assertTrue(s.contains("some value of more than ten characters"));
+        Assertions.assertTrue(s.contains("some value of more than ten characters"));
 
         byteBufferBytes.releaseLast();
     }
@@ -70,14 +70,14 @@ public class ElasticByteBufferTest extends WireTestCommon {
                     context.wire().write("payload").text(largeValue);
                 }
 
-                Assert.assertTrue("buffer should grow when payload exceeds initial capacity",
-                        directBytes.realCapacity() >= initialCapacity);
+                Assertions.assertTrue(directBytes.realCapacity() >= initialCapacity,
+                        "buffer should grow when payload exceeds initial capacity");
 
                 directBytes.readPositionRemaining(0, directBytes.writePosition());
                 try (DocumentContext context = wire.readingDocument()) {
-                    Assert.assertTrue(context.isPresent());
-                    Assert.assertEquals("padding=" + padding, largeValue,
-                            context.wire().read("payload").text());
+                    Assertions.assertTrue(context.isPresent());
+                    Assertions.assertEquals(largeValue, context.wire().read("payload").text(),
+                            "padding=" + padding);
                 }
             } finally {
                 directBytes.releaseLast();

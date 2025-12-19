@@ -8,30 +8,30 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BrokenChainTest extends WireTestCommon {
     @Test
     public void brokenChainYaml() {
-        doBrokenChain(WireType.YAML_ONLY);
+        assertTrue(doBrokenChain(WireType.YAML_ONLY), "broken chain: wireType=YAML_ONLY");
     }
 
     @Test
     public void brokenChainText() {
-        doBrokenChain(WireType.TEXT);
+        assertTrue(doBrokenChain(WireType.TEXT), "broken chain: wireType=TEXT");
     }
 
     @Test
     public void brokenChainBinary() {
-        doBrokenChain(WireType.BINARY_LIGHT);
+        assertTrue(doBrokenChain(WireType.BINARY_LIGHT), "broken chain: wireType=BINARY_LIGHT");
     }
 
-    private void doBrokenChain(WireType wireType) {
+    private boolean doBrokenChain(WireType wireType) {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
         First writer = wire.methodWriter(First.class);
@@ -74,6 +74,7 @@ public class BrokenChainTest extends WireTestCommon {
         assertTrue(reader.readOne());
         assertFalse(reader.readOne());
         assertEquals("[pre: pre-C, msg: msg-C]", list.toString());
+        return true;
     }
 
     interface First {

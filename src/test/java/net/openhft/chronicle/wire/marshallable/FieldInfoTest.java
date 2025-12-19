@@ -8,37 +8,34 @@ import net.openhft.chronicle.wire.FieldInfo;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // Runner to enable parameterized tests for the FieldInfoTest class
-@RunWith(Parameterized.class)
 public class FieldInfoTest extends WireTestCommon {
 
     // Marshallable object for test scenarios
-    private final Marshallable m;
+    private Marshallable m;
 
     // Expected field information as string
-    private final String fieldInfos;
+    private String fieldInfos;
 
     // Constructor initializes the Marshallable object and expected field information
-    public FieldInfoTest(Marshallable m, String fieldInfos) {
+    public void initFieldInfoTest(Marshallable m, String fieldInfos) {
         this.fieldInfos = fieldInfos;
         this.m = m;
     }
 
     // Provide test data combinations for the parameterized test
     @NotNull
-    @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
 
         // Collection to store different test combinations
@@ -266,8 +263,10 @@ public class FieldInfoTest extends WireTestCommon {
     }
 
     // Test method to ensure the field information from the Marshallable object matches the expected value
-    @Test
-    public void fieldInfo() {
+    @MethodSource("combinations")
+    @ParameterizedTest
+    public void fieldInfo(Marshallable m, String fieldInfos) {
+        initFieldInfoTest(m, fieldInfos);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         @NotNull List<FieldInfo> infos = m.$fieldInfos();

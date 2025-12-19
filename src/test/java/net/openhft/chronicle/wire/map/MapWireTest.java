@@ -9,26 +9,25 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  * Test suite for validating Map serialization and deserialization using different wire types.
  * Inherits from WireTestCommon for common test setup and teardown functionalities.
  */
-@RunWith(Parameterized.class)
 public class MapWireTest extends WireTestCommon {
 
     // The wire type for serialization and deserialization (TEXT or BINARY)
-    private final WireType wireType;
+    private WireType wireType;
 
     // The map to be tested
     @SuppressWarnings("rawtypes")
-    private final Map m;
+    private Map m;
 
     /**
      * Constructs a new MapWireTest instance with the specified wire type and map.
@@ -37,7 +36,7 @@ public class MapWireTest extends WireTestCommon {
      * @param m The map to be tested.
      */
     @SuppressWarnings("rawtypes")
-    public MapWireTest(WireType wireType, Map m) {
+    public void initMapWireTest(WireType wireType, Map m) {
         this.wireType = wireType;
         this.m = m;
     }
@@ -48,7 +47,6 @@ public class MapWireTest extends WireTestCommon {
      * @return Collection of object arrays with wire types and maps.
      */
     @NotNull
-    @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
         @NotNull WireType[] wireTypes = {WireType.TEXT, WireType.BINARY};
@@ -74,9 +72,11 @@ public class MapWireTest extends WireTestCommon {
      * The test will serialize the map into wire format, then deserialize it back
      * and compare to the original map to ensure data integrity.
      */
+    @MethodSource("combinations")
     @SuppressWarnings({"rawtypes", "unchecked"})
-    @Test
-    public void writeMap() {
+    @ParameterizedTest
+    public void writeMap(WireType wireType, Map m) {
+        initMapWireTest(wireType, m);
         // Create an elastic buffer to hold serialized data
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 

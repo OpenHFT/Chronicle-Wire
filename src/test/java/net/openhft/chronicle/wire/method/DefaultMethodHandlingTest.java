@@ -9,11 +9,11 @@ import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Interface defining default behavior for an object that can perform operations
@@ -39,7 +39,7 @@ public class DefaultMethodHandlingTest extends WireTestCommon {
      *
      * @param wireType The WireType to use for the test.
      */
-    private static void doTest(WireType wireType) {
+    private static boolean doTest(WireType wireType) {
         // Allocate a new wire buffer and create a method writer for WithDefault.
         Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         WithDefault withDefault = wire.methodWriter(WithDefault.class);
@@ -68,6 +68,7 @@ public class DefaultMethodHandlingTest extends WireTestCommon {
         // Assert that the logged output matches the expected string.
         assertEquals("method1[one]\n" +
                 "method2[two]\n", sw.toString().replace("\r", ""));
+        return true;
     }
 
     /**
@@ -75,7 +76,7 @@ public class DefaultMethodHandlingTest extends WireTestCommon {
      */
     @Test
     public void withDefault() {
-        doTest(WireType.TEXT);
+        assertTrue(doTest(WireType.TEXT), "withDefault: wireType=TEXT");
     }
 
     /**
@@ -83,6 +84,6 @@ public class DefaultMethodHandlingTest extends WireTestCommon {
      */
     @Test
     public void withDefaultYaml() {
-        doTest(WireType.YAML_ONLY);
+        assertTrue(doTest(WireType.YAML_ONLY), "withDefault: wireType=YAML_ONLY");
     }
 }

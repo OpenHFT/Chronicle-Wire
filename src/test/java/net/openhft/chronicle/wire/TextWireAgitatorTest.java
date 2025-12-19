@@ -6,32 +6,36 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // This test suite is designed to test behaviors of the TextWire class
 // based on random character changes, a method called "agitator testing".
 public class TextWireAgitatorTest extends WireTestCommon {
 
-    @Test(expected = ClassNotFoundRuntimeException.class)
+    @Test
     public void lowerCaseClassThrows() {
-        Wires.GENERATE_TUPLES = false;
-        Object o = Marshallable.fromString("!" + TextWireTest.MyDto.class.getName().toLowerCase() + " { }");
-        fail("" + o);
+        assertThrows(ClassNotFoundRuntimeException.class, () -> {
+            Wires.GENERATE_TUPLES = false;
+            Object o = Marshallable.fromString("!" + TextWireTest.MyDto.class.getName().toLowerCase() + " { }");
+            fail("" + o);
+        });
     }
 
-    @Test(expected = IORuntimeException.class)
+    @Test
     public void colonInList() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assertThrows(IORuntimeException.class, () -> {
+            assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        TextWireTest.MyDto md = Marshallable.fromString("!net.openhft.chronicle.wire.TextWireTest$MyDto {\n" +
-                "  strings: [\n" +
-                "  :\n" +
-                "  ]\n" +
-                "}\n");
-        assertEquals("[hello]", md.toString());
+            TextWireTest.MyDto md = Marshallable.fromString("!net.openhft.chronicle.wire.TextWireTest$MyDto {\n" +
+                    "  strings: [\n" +
+                    "  :\n" +
+                    "  ]\n" +
+                    "}\n");
+            assertEquals("[hello]", md.toString());
+        });
     }
 
     // Test to validate if an unexpected string value (i.e., not a boolean) assigned to a boolean field

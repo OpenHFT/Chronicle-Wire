@@ -14,25 +14,35 @@ import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
 import net.openhft.chronicle.wire.domestic.stream.Streams;
 import net.openhft.chronicle.wire.domestic.streaming.reduction.MarketData;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.TestFactory;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SuppressWarnings({"deprecation", "removal"})
 final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
+    private final List<Wire> wiresToRelease = new ArrayList<>();
+
+    @AfterEach
+    void releaseWires() {
+        wiresToRelease.forEach(w -> w.bytes().releaseLast());
+        wiresToRelease.clear();
+    }
 
     @TestFactory
     Stream<DynamicTest> test() {
-        return Product.of(
+        final List<DynamicTest> tests = Product.of(
                         // All the wire types we'd like to test
                         wireTypes().map(this::wire),
                         // All the various sequences of possible stream operations
@@ -60,7 +70,10 @@ final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
                             .reduce(initialStream, (s, op) -> op.getPayload().apply(s), (a, b) -> a);
 
                     assertStreamEquals(expected, actual);
-                }));
+                }))
+                .collect(toList());
+        assertFalse(tests.isEmpty(), "streams: generated dynamic tests");
+        return tests.stream();
     }
 
     // Makes type declaration more concise
@@ -143,6 +156,7 @@ final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
     private Wire wire(WireType wireType) {
         final Bytes<?> bytes = Bytes.allocateDirect(1000);
         final Wire wire = wireType.apply(bytes);
+        wiresToRelease.add(wire);
         marketDataStream()
                 .forEach(md -> {
                     try (DocumentContext dc = wire.writingDocument()) {

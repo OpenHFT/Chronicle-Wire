@@ -5,10 +5,9 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
@@ -17,12 +16,11 @@ import java.time.LocalTime;
 import java.util.*;
 
 import static net.openhft.chronicle.wire.JsonUtil.assertBalancedBrackets;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
-@RunWith(Parameterized.class)
 @SuppressWarnings({"deprecation", "removal"})
 public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon {
 
@@ -30,18 +28,17 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     private static final String TEXT = "abc";
 
     // Flag to indicate if types should be used or not
-    private final boolean useTypes;
+    private boolean useTypes;
 
     // Instance of JSONWire which will be used in the tests
     private JSONWire wire;
 
     // Constructor to initialize the parameterized test instance with useTypes value
-    public JSONWireMiscTest(boolean useTypes) {
+    public void initJSONWireMiscTest(boolean useTypes) {
         this.useTypes = useTypes;
     }
 
     // Parameterized test data provider
-    @Parameterized.Parameters(name = "useTypes={0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
                 new Object[]{true},
@@ -50,14 +47,16 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     // Setup method to initialize JSONWire with or without types based on the test instance
-    @Before
+    @BeforeEach
     public void before() {
         wire = new JSONWire().useTypes(useTypes);
     }
 
     // Test to write a byte array to the wire and verify the written content
-    @Test
-    public void bytesByteArray() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void bytesByteArray(boolean useTypes) {
+        initJSONWireMiscTest(useTypes);
         final byte[] arr = TEXT.getBytes(StandardCharsets.UTF_8);
         wire.getValueOut().bytes(arr);
         final String actual = wire.toString();
@@ -66,8 +65,10 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     // Test to write a byte array with a given name to the wire and verify the written content
-    @Test
-    public void bytesStringByteArray() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void bytesStringByteArray(boolean useTypes) {
+        initJSONWireMiscTest(useTypes);
         final byte[] arr = TEXT.getBytes(StandardCharsets.UTF_8);
         wire.getValueOut().bytes("binary", arr);
         final String actual = wire.toString();
@@ -76,8 +77,10 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     // Test to write a Bytes object with a given name to the wire and verify the written content
-    @Test
-    public void bytesStringBytes() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void bytesStringBytes(boolean useTypes) {
+        initJSONWireMiscTest(useTypes);
         final Bytes<?> bytes = Bytes.from(TEXT);
         wire.getValueOut().bytes("binary", bytes);
         final String actual = wire.toString();
@@ -86,8 +89,10 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     // Test to write a sequence of strings to the wire and verify the written content
-    @Test
-    public void sequenceOfStrings() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void sequenceOfStrings(boolean useTypes) {
+        initJSONWireMiscTest(useTypes);
         final List<String> list = Arrays.asList("A", "B", "C");
         wire.getValueOut().sequence(list);
         final String actual = wire.toString();
@@ -96,8 +101,10 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     // Test to write an enum value to the wire and verify the written content
-    @Test
-    public void asEnum() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void asEnum(boolean useTypes) {
+        initJSONWireMiscTest(useTypes);
         wire.getValueOut().asEnum(A.SECOND);
         final String actual = wire.toString();
         System.out.println("actual = " + actual);
@@ -105,8 +112,10 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     // Test to write a sequence of enums to the wire and verify the written content
-    @Test
-    public void sequenceOfEnums() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void sequenceOfEnums(boolean useTypes) {
+        initJSONWireMiscTest(useTypes);
         final List<A> list = Arrays.asList(A.values());
         wire.getValueOut().sequence(list);
         final String actual = wire.toString();
@@ -115,8 +124,10 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     // Test to write a set of enums to the wire and verify the written content
-    @Test
-    public void sequenceOfSet() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void sequenceOfSet(boolean useTypes) {
+        initJSONWireMiscTest(useTypes);
         final Set<A> set = EnumSet.allOf(A.class);
         wire.getValueOut().sequence(set);
         final String actual = wire.toString();
@@ -125,8 +136,10 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     // Test to write a sorted set of enums to the wire and verify the written content
-    @Test
-    public void sequenceOfSortedSet() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void sequenceOfSortedSet(boolean useTypes) {
+        initJSONWireMiscTest(useTypes);
         final Set<A> set = EnumSet.allOf(A.class);
         wire.getValueOut().sequence(set);
         final String actual = wire.toString();
@@ -135,8 +148,10 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     // Test to write a LocalTime instance to the wire and verify the written content
-    @Test
-    public void localTime() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void localTime(boolean useTypes) {
+        initJSONWireMiscTest(useTypes);
         final LocalTime localTime = LocalTime.parse("17:01");
         wire.getValueOut().object(localTime);
         final String actual = wire.toString();
@@ -145,8 +160,10 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     // Test to write a sequence of custom class Foo instances to the wire and verify the written content
-    @Test
-    public void sequenceOfCustomClass() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void sequenceOfCustomClass(boolean useTypes) {
+        initJSONWireMiscTest(useTypes);
         final List<Foo> list = Arrays.asList(new Foo(0), new Foo(1), new Foo(2));
         wire.getValueOut().sequence(list);
         final String actual = wire.toString();
@@ -155,8 +172,10 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     // Test to write a custom class Bar instance to the wire and verify the written content
-    @Test
-    public void customClass() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void customClass(boolean useTypes) {
+        initJSONWireMiscTest(useTypes);
         wire.getValueOut().object(new Bar("Bazz"));
         final String actual = wire.toString();
         System.out.println("actual = " + actual);
@@ -164,8 +183,10 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     // Test to write a Duration instance to the wire and verify the written content
-    @Test
-    public void duration() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void duration(boolean useTypes) {
+        initJSONWireMiscTest(useTypes);
         final Duration duration = Duration.ofSeconds(63);
         wire.getValueOut().object(duration);
         final String actual = wire.toString();
@@ -174,8 +195,10 @@ public class JSONWireMiscTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     // Test to write a serializable class instance to the wire and verify the written content
-    @Test
-    public void serializable() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void serializable(boolean useTypes) {
+        initJSONWireMiscTest(useTypes);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final Ser s = new Ser();

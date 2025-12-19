@@ -5,16 +5,15 @@ package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireTypeConverter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WireTypeConverterWithTuplesTest extends WireTestCommon {
     @Test
     public void fromYamlToJsonAndBackToYaml() {
         WireTypeConverter wireTypeConverter = new WireTypeConverter();
-        String originalYaml = "" +
-                "!ChronicleServicesCfg {\n" +
+        String originalYaml = "!ChronicleServicesCfg {\n" +
                 "  queues: {\n" +
                 "    in: {\n" +
                 "      path: tmp/benchmark/in\n" +
@@ -63,8 +62,7 @@ public class WireTypeConverterWithTuplesTest extends WireTestCommon {
                 "}\n";
 
         CharSequence json = wireTypeConverter.yamlToJson(originalYaml);
-        String expected = "" +
-                "{\"@ChronicleServicesCfg\":{\"queues\":{\"in\":{\"path\":\"tmp/benchmark/in\"},\n" +
+        String expected = "{\"@ChronicleServicesCfg\":{\"queues\":{\"in\":{\"path\":\"tmp/benchmark/in\"},\n" +
                 "\"sender-one-out\":{\"path\":\"tmp/benchmark/sender-one-out\",\n" +
                 "\"builder\":{\"@SingleChronicleQueueBuilder\":{\"useSparseFiles\":true,\n" +
                 "\"rollCycle\":\"HUGE_DAILY\"}}},\n" +
@@ -86,8 +84,7 @@ public class WireTypeConverterWithTuplesTest extends WireTestCommon {
 
         CharSequence jsonToYaml = wireTypeConverter.jsonToYaml(json.toString());
 
-        assertEquals("" +
-                "!ChronicleServicesCfg {\n" +
+        assertEquals("!ChronicleServicesCfg {\n" +
                 "  queues: {\n" +
                 "    in: { path: tmp/benchmark/in },\n" +
                 "    sender-one-out: { path: tmp/benchmark/sender-one-out, builder: !SingleChronicleQueueBuilder { useSparseFiles: true, rollCycle: HUGE_DAILY } },\n" +

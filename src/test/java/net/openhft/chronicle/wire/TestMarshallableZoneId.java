@@ -3,8 +3,8 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.time.ZoneId;
 
@@ -39,7 +39,7 @@ public class TestMarshallableZoneId {
         final MySelfDescribingMarshallable actual = jsonWire.getValueIn().object(MySelfDescribingMarshallable.class);
 
         // Assert that the 'expected' and 'actual' objects are equal
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     // Define a static nested class named 'MyAbstractMarshallableCfg',
@@ -69,6 +69,6 @@ public class TestMarshallableZoneId {
         final MyAbstractMarshallableCfg actual = jsonWire.getValueIn().object(MyAbstractMarshallableCfg.class);
 
         // Assert that the 'expected' and 'actual' objects are equal
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 }

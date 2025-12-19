@@ -7,45 +7,43 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.BiConsumer;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // Test class for validating the Trivially Copyable features with Chronicle Wire
 public class TriviallyCopyableTest extends WireTestCommon {
 
     // Test utility to perform read and write operations on byte buffers
     // with AA instances, and then check if the original and the result are equal
-    private static void doTest(BiConsumer<Bytes<?>, AA> read, BiConsumer<Bytes<?>, AA> write) {
+    private static AA roundTrip(AA expected, BiConsumer<Bytes<?>, AA> read, BiConsumer<Bytes<?>, AA> write) {
         // Allocate direct memory for bytes
         Bytes<?> bytes = Bytes.allocateDirect(40);
+        try {
+            // Write the AA instance to bytes
+            write.accept(bytes, expected);
 
-        // Initialize an AA instance
-        AA aa = new AA((byte) 1, (byte) 2, true, false, 'Y', (short) 6, 7, 8, 9, 10);
+            // Create a new instance of AA for reading
+            AA actual = ObjectUtils.newInstance(AA.class);
 
-        // Write the AA instance to bytes
-        write.accept(bytes, aa);
-
-        // Create a new instance of AA for reading
-        AA a2 = ObjectUtils.newInstance(AA.class);
-
-        // Read bytes into the new AA instance
-        read.accept(bytes, a2);
-
-        // Validate the original and the read AA instances are identical
-        assertEquals(aa, a2);
-
-        // Release the bytes memory
-        bytes.releaseLast();
+            // Read bytes into the new AA instance
+            read.accept(bytes, actual);
+            return actual;
+        } finally {
+            // Release the bytes memory
+            bytes.releaseLast();
+        }
     }
 
     // Test case using the unsafe marshaller (only for non-Azul Zing JVMs)
     @Test
     public void unsafe2() {
         // Execute the test using AA's marshallers
-        doTest((b, a) -> a.readMarshallable(b), (b, a) -> a.writeMarshallable(b));
+        AA expected = new AA((byte) 1, (byte) 2, true, false, 'Y', (short) 6, 7, 8, 9, 10);
+        AA actual = roundTrip(expected, (b, a) -> a.readMarshallable(b), (b, a) -> a.writeMarshallable(b));
+        assertEquals(expected, actual, "unsafe2: roundtrip");
     }
 
     // Inner class representing a binary-serializable data structure

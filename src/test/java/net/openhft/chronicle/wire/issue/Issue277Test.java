@@ -8,12 +8,11 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * Test class to validate behaviors associated with class aliases in the context of Wire.
@@ -26,7 +25,7 @@ public class Issue277Test extends WireTestCommon {
      * Sets up the testing environment before executing the test methods.
      * It specifically adds class aliases to the ClassAliasPool.
      */
-    @Before
+    @BeforeEach
     public void setup() {
         // Add class aliases for Data1 and Data2 to the ClassAliasPool
         ClassAliasPool.CLASS_ALIASES.addAlias(Data1.class);
@@ -34,8 +33,7 @@ public class Issue277Test extends WireTestCommon {
     }
 
     // Sample data in string format to be used for deserialization tests
-    private static final String data = "" +
-            "!Data1 {\n" +
+    private static final String data = "!Data1 {\n" +
             "  name: Tom,\n" +
             "  age: 25,\n" +
             "  address: \"21 high street, Liverpool\"\n" +
@@ -64,13 +62,15 @@ public class Issue277Test extends WireTestCommon {
      * Aims to reproduce a ClassCastException by trying to parse a Data1 serialized data
      * as if it was a Data2 serialized data without providing the class alias.
      */
-    @Test(expected = ClassCastException.class)
+    @Test
     public void reproduce() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assertThrows(ClassCastException.class, () -> {
+            assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        // This operation should fail and throw a ClassCastException
-        Data2 o2 = WireType.TEXT.fromString(data);
-        fail("" + o2);
+            // This operation should fail and throw a ClassCastException
+            Data2 o2 = WireType.TEXT.fromString(data);
+            fail("" + o2);
+        });
     }
 
     /**

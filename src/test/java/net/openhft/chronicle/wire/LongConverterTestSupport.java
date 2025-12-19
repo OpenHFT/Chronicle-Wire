@@ -6,7 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.LongConverter;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class LongConverterTestSupport {
 
@@ -47,8 +47,8 @@ final class LongConverterTestSupport {
                 v.writeLong(converter, i2);
                 v.writeLong(converter, i2);
             });
-            assertEquals(wire.toString(),
-                    i, wire.read("a").readLong(converter));
+            assertEquals(i,
+                    wire.read("a").readLong(converter), wire.toString());
             wire.read("b").sequence(i, (i2, v) -> {
                 assertEquals((long) i2, v.readLong(converter));
                 assertEquals((long) i2, v.readLong(converter));

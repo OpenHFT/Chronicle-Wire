@@ -6,10 +6,10 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * This class is used to test the functionality related to reading individual messages and snapshots
@@ -22,7 +22,7 @@ public class ReadOneTest extends WireTestCommon {
     public void test() throws InterruptedException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        doTest(false);
+        assertEquals("two", doTest(false), "snapshot");
     }
 
     // Test for reading the wire using scanning
@@ -30,11 +30,11 @@ public class ReadOneTest extends WireTestCommon {
     public void testScanning() throws InterruptedException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        doTest(true);
+        assertEquals("two", doTest(true), "snapshot (scanning)");
     }
 
     // Core testing method that simulates writing to and reading from the Wire
-    private void doTest(boolean scanning) {
+    private String doTest(boolean scanning) {
         ignoreException("Unknown @MethodId='history' called on interface net.openhft.chronicle.wire.ReadOneTest$SnapshotListener");
         ignoreException("Unknown method-name='myDto' called on interface net.openhft.chronicle.wire.ReadOneTest$SnapshotListener");
         // Initialization phase
@@ -101,6 +101,7 @@ public class ReadOneTest extends WireTestCommon {
             assertTrue(reader.readOne());
         }
         assertFalse(reader.readOne());
+        return q[0].data;
     }
 
     // Utility method to simulate the history of messages

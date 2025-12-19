@@ -11,17 +11,14 @@ import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.*;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.lang.reflect.Proxy;
 
-import static junit.framework.TestCase.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class MethodWriterTest extends WireTestCommon {
     @Test
@@ -61,10 +58,10 @@ public class MethodWriterTest extends WireTestCommon {
         StringWriter sw = new StringWriter();
         MethodReader reader = wire.methodReader(Mocker.logging(VanillaMethodReaderTest.MRTListener.class, "subs ", sw));
         for (int i = 0; i < 4; i++) {
-            assertTrue(reader.readOne());
+            assertTrue(reader.readOne(), "method reader should read event call " + (i + 1) + " of 4");
         }
 
-        assertFalse(reader.readOne());
+        assertFalse(reader.readOne(), "method reader should have no more events after reading all 4");
         String expected = "subs top[!net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: one,\n" +
                 "  value: a\n" +
@@ -100,7 +97,7 @@ public class MethodWriterTest extends WireTestCommon {
         checkWriterType(writer);
         writer.callToDefaultMethod("hello world");
 
-        Assert.assertTrue(wire.toString().startsWith("callToDefaultMethod: hello world"));
+        assertTrue(wire.toString().startsWith("callToDefaultMethod: hello world"));
     }
 
     @SuppressWarnings("deprecation")
@@ -159,7 +156,7 @@ public class MethodWriterTest extends WireTestCommon {
         EasyMock.replay(mock);
         MethodReader reader = wire.methodReader(mock);
         for (int i = 0; i < 3; i++)
-            assertEquals(i < 2, reader.readOne());
+            assertEquals(i < 2, reader.readOne(), "method reader should read exactly 2 method calls");
         verify(mock);
     }
 
@@ -178,9 +175,9 @@ public class MethodWriterTest extends WireTestCommon {
 
         String expected = "hello world";
         instance.method(expected);
-        Assert.assertEquals(expected, value.toString());
+        assertEquals(expected, value.toString());
 
-        Assert.assertTrue(wire.toString().startsWith("method: hello world\n" +
+        assertTrue(wire.toString().startsWith("method: hello world\n" +
                 "...\n"));
     }
 
@@ -192,7 +189,7 @@ public class MethodWriterTest extends WireTestCommon {
         checkWriterType(instance);
         instance.method(" this should not be written because the return value above is false");
 
-        Assert.assertEquals("", wire.toString());
+        assertEquals("", wire.toString());
     }
 
     @Test
@@ -221,10 +218,10 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     public void testPrimitives() {
-        doTestPrimitives(false);
+        assertTrue(doTestPrimitives(false), "primitive arguments should survive method writer serialization round-trip");
     }
 
-    void doTestPrimitives(boolean byteShort) {
+    boolean doTestPrimitives(boolean byteShort) {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
         Args writer = wire.methodWriter(Args.class);
@@ -248,8 +245,9 @@ public class MethodWriterTest extends WireTestCommon {
         EasyMock.replay(mock);
         MethodReader reader = wire.methodReader(mock);
         for (int i = 0; i < 2; i++)
-            assertEquals(i < 1, reader.readOne());
+            assertEquals(i < 1, reader.readOne(), "method reader should read exactly 1 primitives call");
         verify(mock);
+        return true;
     }
 
     @Test
@@ -263,7 +261,7 @@ public class MethodWriterTest extends WireTestCommon {
         } catch (NullPointerException npe) {
             // ignore
         }
-        Assert.assertEquals("half message should not be written", "", wire.toString());
+        assertEquals("", wire.toString(), "half message should not be written");
     }
 
     @Test
@@ -274,7 +272,7 @@ public class MethodWriterTest extends WireTestCommon {
         checkWriterType(instance);
     }
 
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/274")
+    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/274")
     @Test
     public void testMultipleImplsReturnValues() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();

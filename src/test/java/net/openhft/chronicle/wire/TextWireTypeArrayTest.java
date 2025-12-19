@@ -4,9 +4,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // This test class is designed to validate the behavior of TextWire when dealing with arrays of types.
 public class TextWireTypeArrayTest extends WireTestCommon {
@@ -25,8 +25,7 @@ public class TextWireTypeArrayTest extends WireTestCommon {
         wire.getValueOut().typedMarshallable(hasClasses);
 
         // Define the expected string representation
-        final String expected = "" +
-                "!net.openhft.chronicle.wire.TextWireTypeArrayTest$HasClasses {\n" +
+        final String expected = "!net.openhft.chronicle.wire.TextWireTypeArrayTest$HasClasses {\n" +
                 "  classes: [ !type String, !type int, !type java.lang.Number ]\n" +
                 "}\n";
         assertEquals(expected, bytes.toString());

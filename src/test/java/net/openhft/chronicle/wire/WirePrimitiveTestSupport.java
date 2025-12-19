@@ -3,13 +3,10 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-
 import java.time.LocalTime;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("deprecation")
 final class WirePrimitiveTestSupport {
@@ -21,9 +18,9 @@ final class WirePrimitiveTestSupport {
                 .write().bool(true)
                 .write().bool(null);
 
-        wire.read().bool(false, Assert::assertEquals)
-                .read().bool(true, Assert::assertEquals)
-                .read().bool(null, Assert::assertEquals);
+        wire.read().bool(false, (expected, actual) -> assertEquals(expected, actual))
+                .read().bool(true, (expected, actual) -> assertEquals(expected, actual))
+                .read().bool(null, (expected, actual) -> assertEquals(expected, actual));
     }
 
     static void assertFloat32RoundTrip(Wire wire, Object testInstance) {
@@ -47,9 +44,9 @@ final class WirePrimitiveTestSupport {
     }
 
     static void assertTimes(Wire wire, LocalTime now) {
-        wire.read().time(now, Assert::assertEquals)
-                .read().time(LocalTime.MAX, Assert::assertEquals)
-                .read().time(LocalTime.MIN, Assert::assertEquals);
+        wire.read().time(now, (expected, actual) -> assertEquals(expected, actual))
+                .read().time(LocalTime.MAX, (expected, actual) -> assertEquals(expected, actual))
+                .read().time(LocalTime.MIN, (expected, actual) -> assertEquals(expected, actual));
     }
 
     static String expectedTimeString(LocalTime now) {

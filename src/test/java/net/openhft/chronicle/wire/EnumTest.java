@@ -8,20 +8,20 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * Tests for marshalling and unmarshalling of Enum using Wire.
  */
 public class EnumTest extends WireTestCommon {
-    @Before
+    @BeforeEach
     public void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
@@ -57,7 +57,7 @@ public class EnumTest extends WireTestCommon {
                 .object();
 
             // Ensure original and read enum are the same
-            Assert.assertSame(TestEnum.INSTANCE, enumObject);
+            Assertions.assertSame(TestEnum.INSTANCE, enumObject);
         } finally {
             // Release the byte buffer resources
             bytes.releaseLast();

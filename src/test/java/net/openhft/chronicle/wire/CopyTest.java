@@ -4,9 +4,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,27 +13,25 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-@RunWith(Parameterized.class)
 public class CopyTest extends WireTestCommon {
 
     // Initial source and destination wire types for the copy test
-    private final WireType from, to;
+    private WireType from, to;
 
     // Determines if the test uses the type information while copying
-    private final boolean withType;
+    private boolean withType;
 
     // Constructor to initialize wire types and whether the test runs with type information
-    public CopyTest(WireType from, WireType to, boolean withType) {
+    public void initCopyTest(WireType from, WireType to, boolean withType) {
         this.from = from;
         this.to = to;
         this.withType = withType;
     }
 
     // Define the combinations of wire types and settings for the test
-    @Parameterized.Parameters(name = "from: {0}, to: {1}, withType: {2}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
                 // new Object[] {WireType.TEXT, WireType.BINARY, true}, // not supported yet
@@ -62,9 +59,11 @@ public class CopyTest extends WireTestCommon {
         );
     }
 
+    @MethodSource("wireTypes")
     @SuppressWarnings("rawtypes")
-    @Test
-    public void testCopy() {
+    @ParameterizedTest(name = "from: {0}, to: {1}, withType: {2}")
+    public void testCopy(WireType from, WireType to, boolean withType) {
+        initCopyTest(from, to, withType);
         // Create source bytes and wire objects
         Bytes<?> bytesFrom = Bytes.allocateElasticOnHeap(64);
         Wire wireFrom = from.apply(bytesFrom);
@@ -88,8 +87,8 @@ public class CopyTest extends WireTestCommon {
         // Perform checks if the destination wire type is JSON
         if (to == WireType.JSON || to == WireType.JSON_ONLY) {
             final String text = wireTo.toString();
-            assertFalse(text, text.contains("? "));
-            assertFalse(text, text.contains("\n\""));
+            assertFalse(text.contains("? "), text);
+            assertFalse(text.contains("\n\""), text);
         }
 
         if (to == WireType.BINARY_LIGHT)

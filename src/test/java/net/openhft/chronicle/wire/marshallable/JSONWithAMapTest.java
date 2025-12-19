@@ -9,8 +9,8 @@ import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
@@ -24,7 +24,8 @@ public class JSONWithAMapTest extends net.openhft.chronicle.wire.WireTestCommon 
                 "  key: seqNumber,\n" +
                 "}";
 
-        doTest(expected, input);
+        String actual = toJson(input);
+        Assertions.assertEquals(expected, actual, "jsonWithAMap: test1");
     }
 
     @Test
@@ -37,7 +38,8 @@ public class JSONWithAMapTest extends net.openhft.chronicle.wire.WireTestCommon 
                 "}";
         final String expected = "{\"@ResponseItem\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":{}}}";
 
-        doTest(expected, input);
+        String actual = toJson(input);
+        Assertions.assertEquals(expected, actual, "jsonWithAMap: test2");
     }
 
     @Test
@@ -67,33 +69,37 @@ public class JSONWithAMapTest extends net.openhft.chronicle.wire.WireTestCommon 
                 "}";
         final String expected = "{\"@ResponseItem\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":{\"eventId\":\"periodicUpdate\",\"eventTime\":1652109920838805734,\"seqNumbers\":[ {\"sessionID\":{\"localCompID\":\"SERVER\",\"remoteCompID\":\"CLIENT\",\"localSubID\":null,\"remoteSubID\":null},\"rSeq\":1517,\"wSeq\":1519,\"isActive\":true,\"isConnected\":false} ]}}}";
 
-        doTest(expected, input);
+        String actual = toJson(input);
+        Assertions.assertEquals(expected, actual, "jsonWithAMap: test5");
     }
 
-    private void doTest(String expected, String input) {
+    private String toJson(String input) {
         CLASS_ALIASES.addAlias(ResponseItem.class);
         ResponseItem responseItem = Marshallable.fromString(ResponseItem.class, input);
 
         OnHeapBytes buffer = Bytes.allocateElasticOnHeap();
-        final Wire jsonWire = WireType.JSON_ONLY.apply(buffer);
-        jsonWire.getValueOut().object(responseItem);
+        try {
+            final Wire jsonWire = WireType.JSON_ONLY.apply(buffer);
+            jsonWire.getValueOut().object(responseItem);
 
-        String actual = buffer.toString();
+            String actual = buffer.toString();
 
-        int openBracket = 0;
-        int closeBracket = 0;
-        for (int i = 0; i < actual.length(); i++) {
-            if (actual.charAt(i) == '{')
-                openBracket++;
-            if (actual.charAt(i) == '}')
-                closeBracket++;
+            int openBracket = 0;
+            int closeBracket = 0;
+            for (int i = 0; i < actual.length(); i++) {
+                if (actual.charAt(i) == '{')
+                    openBracket++;
+                if (actual.charAt(i) == '}')
+                    closeBracket++;
+            }
+
+            // check the number of '{' match the number of '}'
+            Assertions.assertEquals(openBracket, closeBracket, "openBracket=" + openBracket + ",closeBracket=" + closeBracket);
+
+            return actual;
+        } finally {
+            buffer.releaseLast();
         }
-
-        // check the number of '{' match the number of '}'
-        Assert.assertEquals("openBracket=" + openBracket + ",closeBracket=" + closeBracket, openBracket, closeBracket);
-
-        // DON'T CHANGE THE EXPECTED JSON IT IS CORRECT ! - please use this website to validate the json - https://jsonformatter.org
-        Assert.assertEquals(expected, actual);
     }
 
     private static class ResponseItem extends SelfDescribingMarshallable {

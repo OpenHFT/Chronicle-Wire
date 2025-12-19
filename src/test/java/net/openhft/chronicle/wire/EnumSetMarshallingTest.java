@@ -6,16 +6,14 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.util.*;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * Tests for marshalling and unmarshalling of EnumSets using Wire.
@@ -57,9 +55,8 @@ public class EnumSetMarshallingTest extends WireTestCommon {
 
         @NotNull Wire tw = new BinaryWire(bytes);
         tw.usePadding(true);
-        tw.writeDocument(false, w -> {
-            w.write(() -> "key").marshallable(written);
-        });
+        tw.writeDocument(false, w ->
+                w.write(() -> "key").marshallable(written));
 
         // Validate serialized form and read data back into object
         assertEquals(EMPTY_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes));
@@ -85,9 +82,8 @@ public class EnumSetMarshallingTest extends WireTestCommon {
         @NotNull Wire tw = new BinaryWire(bytes);
         tw.usePadding(false);
 
-        tw.writeDocument(false, w -> {
-            w.write(() -> "key").marshallable(written);
-        });
+        tw.writeDocument(false, w ->
+                w.write(() -> "key").marshallable(written));
 
         // Validate serialized form and read data back into object
         assertEquals(FULL_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes));
@@ -114,9 +110,8 @@ public class EnumSetMarshallingTest extends WireTestCommon {
 
         @NotNull Wire tw = new BinaryWire(bytes);
         tw.usePadding(false);
-        tw.writeDocument(false, w -> {
-            w.write(() -> "key").marshallable(written);
-        });
+        tw.writeDocument(false, w ->
+                w.write(() -> "key").marshallable(written));
 
         // Validate serialized form and read data back into object
         assertEquals(FULL_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes));
@@ -141,15 +136,14 @@ public class EnumSetMarshallingTest extends WireTestCommon {
 
         @NotNull Wire tw = new BinaryWire(bytes);
         tw.usePadding(true);
-        tw.writeDocument(false, w -> {
-            w.write(() -> "key").marshallable(written);
-        });
+        tw.writeDocument(false, w ->
+                w.write(() -> "key").marshallable(written));
 
         // Read data back into object
         tw.readingDocument().wire().read("key").marshallable(read);
 
         // Ensure that the two EnumSets in the object graph are distinct
-        assertThat(read.f1.get(0).f, is(not(read.f2.get(0).f)));
+        assertNotSame(read.f1.get(0).f, read.f2.get(0).f);
         bytes.releaseLast();
     }
 

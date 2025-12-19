@@ -12,8 +12,8 @@ import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -21,9 +21,8 @@ import java.lang.reflect.Proxy;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class VanillaMethodReaderTest extends WireTestCommon {
 
@@ -69,13 +68,13 @@ public class VanillaMethodReaderTest extends WireTestCommon {
             checkReaderType(methodReader);
             {
                 boolean succeeded = methodReader.readOne();
-                assertEquals(5, this.instance.x);
-                assertTrue(succeeded); // only meta data
+                assertEquals(5, this.instance.x, "method parameter should be correctly deserialized from wire");
+                assertTrue(succeeded, "method reader should successfully read data method call");
             }
             {
                 boolean succeeded = methodReader.readOne();
-                assertEquals(5, this.instance.x);
-                assertTrue(succeeded); // only meta data
+                assertEquals(5, this.instance.x, "method parameter should be preserved across multiple reads");
+                assertTrue(succeeded, "method reader should successfully read metadata method call");
             }
         } finally {
             b.releaseLast();
@@ -96,10 +95,10 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         MethodReader reader = wire.methodReader(writer);
         checkReaderType(reader);
         for (int i = 0; i < 3; i++) {
-            assertTrue(reader.readOne());
+            assertTrue(reader.readOne(), "method reader should read method call " + (i + 1) + " from wire");
         }
-        assertFalse(reader.readOne());
-        assertEquals(expected.toString().trim().replace("\r", ""), wire2.toString().trim());
+        assertFalse(reader.readOne(), "method reader should return false when no more method calls exist in wire");
+        assertEquals(expected.toString().trim().replace("\r", ""), wire2.toString().trim(), "method calls read from wire should be re-written identically to expected output");
     }
 
     @SuppressWarnings("unused")
@@ -114,12 +113,12 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         MethodReader reader = wire.methodReader(mocker);
         checkReaderType(reader);
         for (int i = 0; i < 2; i++) {
-            assertTrue(reader.readOne());
+            assertTrue(reader.readOne(), "method reader should read method call " + (i + 1) + " containing collections from wire");
         }
-        assertFalse(reader.readOne());
-        assertEquals(2, queue.size());
+        assertFalse(reader.readOne(), "method reader should return false when all collection method calls have been read");
+        assertEquals(2, queue.size(), "exactly two method invocations should be queued");
         queue.take();
-        assertEquals("method3[[{field1=gidday, field2=1}, {field1=mate, field2=2}]]", queue.take());
+        assertEquals("method3[[{field1=gidday, field2=1}, {field1=mate, field2=2}]]", queue.take(), "collection parameters should be correctly marshalled through wire format");
     }
 
     @Test
@@ -139,9 +138,9 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         MethodReader reader = wire.methodReader(Mocker.logging(MRTListener.class, "subs ", sw));
         checkReaderType(reader);
         for (int i = 0; i < 7; i++) {
-            assertTrue(reader.readOne());
+            assertTrue(reader.readOne(), "method reader should read method call " + (i + 1) + " with subclass parameter from wire");
         }
-        assertFalse(reader.readOne());
+        assertFalse(reader.readOne(), "method reader should return false when all subclass method calls have been read");
         String expected = "subs timed[1234567890000000]\n" +
                 "subs top[!net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT1 {\n" +
                 "  field1: one,\n" +
@@ -176,7 +175,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 "}\n" +
                 "]\n";
         String actual = asString(sw);
-        assertEquals(expected, actual);
+        assertEquals(expected, actual, "method reader should correctly dispatch calls with polymorphic parameters to implementation");
     }
 
     @Test
@@ -211,7 +210,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 "  value: a,\n" +
                 "  field2: \"2\"\n" +
                 "}\n" +
-                "...\n", wire.toString());
+                "...\n", wire.toString(), "method writer should serialize polymorphic method calls with correct type information");
     }
 
     @Test
@@ -236,9 +235,9 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 .generateTuples(true);
         MethodReader reader = wire.methodReader(writer2);
         checkReaderType(reader);
-        assertTrue(reader.readOne());
-        assertFalse(reader.readOne());
-        assertEquals(text, wire2.toString());
+        assertTrue(reader.readOne(), "method reader should successfully read method call with nested unknown class");
+        assertFalse(reader.readOne(), "method reader should return false after reading all available method calls");
+        assertEquals(text, wire2.toString(), "nested unknown class should be preserved through wire round-trip with tuple generation");
     }
 
     @Test
@@ -267,47 +266,49 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                 .generateTuples(true);
         MethodReader reader = wire.methodReader(writer2);
         checkReaderType(reader);
-        assertTrue(reader.readOne());
-        assertTrue(reader.readOne());
-        assertFalse(reader.readOne());
-        assertEquals(text, wire2.toString());
+        assertTrue(reader.readOne(), "method reader should read first method call with unknown type without throwing");
+        assertTrue(reader.readOne(), "method reader should read second method call with known type without throwing");
+        assertFalse(reader.readOne(), "method reader should return false after reading all method calls with unknown types");
+        assertEquals(text, wire2.toString(), "unknown class types should be preserved through wire round-trip when tuple generation is enabled");
     }
 
-    @Test(expected = ClassNotFoundRuntimeException.class)
+    @Test
     public void testUnknownClassThrow() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assertThrows(ClassNotFoundRuntimeException.class, () -> {
+            assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
-                .useTextDocuments()
-                .generateTuples(false);
-        MRTListener writer2 = wire2.methodWriter(MRTListener.class);
+            Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
+                    .useTextDocuments()
+                    .generateTuples(false);
+            MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
-        String text = "top: !UnknownClass {\n" +
-                "  one: 1,\n" +
-                "  two: 2.2,\n" +
-                "  three: words\n" +
-                "}\n" +
-                "...\n" +
-                "top: {\n" +
-                "  one: 11,\n" +
-                "  two: 22.2,\n" +
-                "  three: many words\n" +
-                "}\n" +
-                "...\n";
-        Wire wire = TextWire.from(text)
-                .useTextDocuments()
-                .generateTuples(false);
-        MethodReader reader = wire.methodReader(writer2);
-        checkReaderType(reader);
-        assertTrue(reader.readOne());
-        assertTrue(reader.readOne());
-        assertFalse(reader.readOne());
-        assertEquals(text, wire2.toString());
+            String text = "top: !UnknownClass {\n" +
+                    "  one: 1,\n" +
+                    "  two: 2.2,\n" +
+                    "  three: words\n" +
+                    "}\n" +
+                    "...\n" +
+                    "top: {\n" +
+                    "  one: 11,\n" +
+                    "  two: 22.2,\n" +
+                    "  three: many words\n" +
+                    "}\n" +
+                    "...\n";
+            Wire wire = TextWire.from(text)
+                    .useTextDocuments()
+                    .generateTuples(false);
+            MethodReader reader = wire.methodReader(writer2);
+            checkReaderType(reader);
+            assertTrue(reader.readOne(), "method reader should attempt to read first method call with unknown type");
+            assertTrue(reader.readOne(), "method reader should attempt to read second method call");
+            assertFalse(reader.readOne(), "method reader should return false after attempting all reads");
+            assertEquals(text, wire2.toString(), "wire content should match expected format");
+        });
     }
 
     @Test
     public void testMessageHistoryCleared() {
-        Assume.assumeFalse(Boolean.getBoolean("history.as.bytes"));
+        Assumptions.assumeFalse(Boolean.getBoolean("history.as.bytes"));
         try {
             Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
             final long sourceIndex = 2L;
@@ -318,119 +319,125 @@ public class VanillaMethodReaderTest extends WireTestCommon {
             writer.timed(1234L);
 
             MethodReader reader = wire.methodReader(Mocker.intercepting(MRTListener.class, (s, objects) -> {
-                assertEquals("timed", s);
-                assertEquals(1, MessageHistory.get().sources());
-                assertEquals(sourceIndex, MessageHistory.get().sourceIndex(0));
+                assertEquals("timed", s, "intercepted method name should match the method being invoked");
+                assertEquals(1, MessageHistory.get().sources(), "message history should contain exactly one source during method dispatch");
+                assertEquals(sourceIndex, MessageHistory.get().sourceIndex(0), "message history should preserve the original source index");
             }, null));
             checkReaderType(reader);
-            assertTrue(reader.readOne());
-            assertFalse(reader.readOne());
-            assertEquals(0, MessageHistory.get().sources());
+            assertTrue(reader.readOne(), "method reader should successfully read method call with message history");
+            assertFalse(reader.readOne(), "method reader should return false after reading all method calls");
+            assertEquals(0, MessageHistory.get().sources(), "message history should be cleared after method reader completes processing");
         } finally {
             MessageHistory.clear();
         }
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testOverloaded() {
-        Jvm.recordExceptions();
-        try {
-            Wire wire2 = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(32));
-            Overloaded writer2 = wire2.methodWriter(Overloaded.class);
-            Wire wire = TextWire.from("method: [ ]\n");
-            wire.methodReader(writer2);
-        } finally {
-            Jvm.resetExceptionHandlers();
-        }
+        assertThrows(IllegalStateException.class, () -> {
+            Jvm.recordExceptions();
+            try {
+                Wire wire2 = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(32));
+                Overloaded writer2 = wire2.methodWriter(Overloaded.class);
+                Wire wire = TextWire.from("method: [ ]\n");
+                wire.methodReader(writer2);
+            } finally {
+                Jvm.resetExceptionHandlers();
+            }
+        });
     }
 
     @Test
     public void parseMetaData() {
-        doParseMetaData(false);
+        assertTrue(doParseMetaData(false), "parseMetaData: scanning=false");
     }
 
     @Test
     public void parseMetaDataScanning() {
-        doParseMetaData(true);
+        assertTrue(doParseMetaData(true), "parseMetaData: scanning=true");
     }
 
-    private void doParseMetaData(boolean scanning) {
+    private boolean doParseMetaData(boolean scanning) {
         Wire wire = WireType.BINARY_LIGHT.apply(new HexDumpBytes());
-        final RoutedSaying routedSaying = wire.methodWriter(RoutedSaying.class);
-        final RoutedSaying metaRoutedSaying = wire.methodWriterBuilder(true, RoutedSaying.class).build();
-        metaRoutedSaying.to("aye").say("hi AAA");
-        routedSaying.to("one").say("hi 111");
-        metaRoutedSaying.to("bee").say("hi BBB");
-        routedSaying.to("two").say("hi 222");
-        assertEquals("14 00 00 40                                     # msg-length\n" +
-                        "b9 02 74 6f                                     # to: (event)\n" +
-                        "e3 61 79 65                                     # aye\n" +
-                        "b9 03 73 61 79                                  # say: (event)\n" +
-                        "e6 68 69 20 41 41 41                            # hi AAA\n" +
-                        "14 00 00 00                                     # msg-length\n" +
-                        "b9 02 74 6f                                     # to: (event)\n" +
-                        "e3 6f 6e 65                                     # one\n" +
-                        "b9 03 73 61 79                                  # say: (event)\n" +
-                        "e6 68 69 20 31 31 31                            # hi 111\n" +
-                        "14 00 00 40                                     # msg-length\n" +
-                        "b9 02 74 6f                                     # to: (event)\n" +
-                        "e3 62 65 65                                     # bee\n" +
-                        "b9 03 73 61 79                                  # say: (event)\n" +
-                        "e6 68 69 20 42 42 42                            # hi BBB\n" +
-                        "14 00 00 00                                     # msg-length\n" +
-                        "b9 02 74 6f                                     # to: (event)\n" +
-                        "e3 74 77 6f                                     # two\n" +
-                        "b9 03 73 61 79                                  # say: (event)\n" +
-                        "e6 68 69 20 32 32 32                            # hi 222\n",
-                wire.bytes().toHexString());
-        StringWriter out = new StringWriter();
-        final MethodReader reader = wire.methodReaderBuilder()
-                .scanning(scanning)
-                .metaDataHandler(Mocker.logging(RoutedSaying.class, "meta: ", out))
-                .build(Mocker.logging(RoutedSaying.class, "data: ", out));
+        try {
+            final RoutedSaying routedSaying = wire.methodWriter(RoutedSaying.class);
+            final RoutedSaying metaRoutedSaying = wire.methodWriterBuilder(true, RoutedSaying.class).build();
+            metaRoutedSaying.to("aye").say("hi AAA");
+            routedSaying.to("one").say("hi 111");
+            metaRoutedSaying.to("bee").say("hi BBB");
+            routedSaying.to("two").say("hi 222");
+            assertEquals("14 00 00 40                                     # msg-length\n" +
+                            "b9 02 74 6f                                     # to: (event)\n" +
+                            "e3 61 79 65                                     # aye\n" +
+                            "b9 03 73 61 79                                  # say: (event)\n" +
+                            "e6 68 69 20 41 41 41                            # hi AAA\n" +
+                            "14 00 00 00                                     # msg-length\n" +
+                            "b9 02 74 6f                                     # to: (event)\n" +
+                            "e3 6f 6e 65                                     # one\n" +
+                            "b9 03 73 61 79                                  # say: (event)\n" +
+                            "e6 68 69 20 31 31 31                            # hi 111\n" +
+                            "14 00 00 40                                     # msg-length\n" +
+                            "b9 02 74 6f                                     # to: (event)\n" +
+                            "e3 62 65 65                                     # bee\n" +
+                            "b9 03 73 61 79                                  # say: (event)\n" +
+                            "e6 68 69 20 42 42 42                            # hi BBB\n" +
+                            "14 00 00 00                                     # msg-length\n" +
+                            "b9 02 74 6f                                     # to: (event)\n" +
+                            "e3 74 77 6f                                     # two\n" +
+                            "b9 03 73 61 79                                  # say: (event)\n" +
+                            "e6 68 69 20 32 32 32                            # hi 222\n",
+                    wire.bytes().toHexString(), "method writer should serialize metadata and data messages with correct binary format");
+            StringWriter out = new StringWriter();
+            final MethodReader reader = wire.methodReaderBuilder()
+                    .scanning(scanning)
+                    .metaDataHandler(Mocker.logging(RoutedSaying.class, "meta: ", out))
+                    .build(Mocker.logging(RoutedSaying.class, "data: ", out));
 
-        if (!scanning) {
-            assertTrue(reader.readOne());
+            if (!scanning) {
+                assertTrue(reader.readOne(), "method reader should read first metadata message when not in scanning mode");
+                assertEquals("meta: to[aye]\n" +
+                                "meta: say[hi AAA]\n",
+                        asString(out), "first metadata method calls should be dispatched to metadata handler");
+            }
+
+            assertTrue(reader.readOne(), "method reader should read first data message");
             assertEquals("meta: to[aye]\n" +
-                            "meta: say[hi AAA]\n",
-                    asString(out));
-        }
+                            "meta: say[hi AAA]\n" +
+                            "data: to[one]\n" +
+                            "data: say[hi 111]\n",
 
-        assertTrue(reader.readOne());
-        assertEquals("meta: to[aye]\n" +
-                        "meta: say[hi AAA]\n" +
-                        "data: to[one]\n" +
-                        "data: say[hi 111]\n",
+                    asString(out), "metadata and data method calls should be dispatched to appropriate handlers");
+            if (!scanning) {
+                assertTrue(reader.readOne(), "method reader should read second metadata message when not in scanning mode");
+                assertEquals("meta: to[aye]\n" +
+                                "meta: say[hi AAA]\n" +
+                                "data: to[one]\n" +
+                                "data: say[hi 111]\n" +
+                                "meta: to[bee]\n" +
+                                "meta: say[hi BBB]\n",
+                        asString(out), "second metadata method calls should be appended to output");
+            }
 
-                asString(out));
-        if (!scanning) {
-            assertTrue(reader.readOne());
+            assertTrue(reader.readOne(), "method reader should read second data message");
             assertEquals("meta: to[aye]\n" +
                             "meta: say[hi AAA]\n" +
                             "data: to[one]\n" +
                             "data: say[hi 111]\n" +
                             "meta: to[bee]\n" +
-                            "meta: say[hi BBB]\n",
-                    asString(out));
+                            "meta: say[hi BBB]\n" +
+                            "data: to[two]\n" +
+                            "data: say[hi 222]\n",
+                    asString(out), "all metadata and data method calls should be correctly ordered in output");
+
+            assertFalse(reader.readOne(), "method reader should return false when all messages have been read");
+            return true;
+        } finally {
+            wire.bytes().releaseLast();
         }
-
-        assertTrue(reader.readOne());
-        assertEquals("meta: to[aye]\n" +
-                        "meta: say[hi AAA]\n" +
-                        "data: to[one]\n" +
-                        "data: say[hi 111]\n" +
-                        "meta: to[bee]\n" +
-                        "meta: say[hi BBB]\n" +
-                        "data: to[two]\n" +
-                        "data: say[hi 222]\n",
-                asString(out));
-
-        assertFalse(reader.readOne());
-        wire.bytes().releaseLast();
     }
 
     private void checkReaderType(MethodReader reader) {
-        assertFalse(Proxy.isProxyClass(reader.getClass()));
+        assertFalse(Proxy.isProxyClass(reader.getClass()), "method reader should be a generated class, not a dynamic proxy");
     }
 
     interface IgnoredMetaData {

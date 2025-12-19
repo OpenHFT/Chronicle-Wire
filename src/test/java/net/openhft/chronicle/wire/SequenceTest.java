@@ -7,29 +7,26 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.nio.ByteBuffer;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@RunWith(Parameterized.class)
 public class SequenceTest extends WireTestCommon {
 
     // Instance variable to hold the WireType.
-    private final WireType wireType;
+    private WireType wireType;
 
     // Constructor to initialize the WireType.
-    public SequenceTest(WireType wireType) {
+    public void initSequenceTest(WireType wireType) {
         this.wireType = wireType;
     }
 
     // Parameterized test setup to use different WireTypes.
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> wireTypes() {
         Object[][] list = {
                 {WireType.BINARY},
@@ -40,8 +37,10 @@ public class SequenceTest extends WireTestCommon {
     }
 
     // Test method to check serialization and deserialization functionality.
-    @Test
-    public void test() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "{0}")
+    public void test(WireType wireType) {
+        initSequenceTest(wireType);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Create a new My object.
@@ -83,7 +82,7 @@ public class SequenceTest extends WireTestCommon {
                     "    two,\n" +
                     "    three\n" +
                     "  ]\n" +
-                    "}\n", m2.toString());
+                    "}\n", m2.toString(), "first deserialized object should contain elements [one, two, three]");
 
             // Deserialize the next set of serialized data and assert its content.
             m2.readMarshallable(w2);
@@ -94,7 +93,7 @@ public class SequenceTest extends WireTestCommon {
                     "    five,\n" +
                     "    six\n" +
                     "  ]\n" +
-                    "}\n", m2.toString());
+                    "}\n", m2.toString(), "second deserialized object should contain elements [four, five, six]");
 
             // Deserialize the final set of serialized data and assert its content.
             m2.readMarshallable(w2);
@@ -104,7 +103,7 @@ public class SequenceTest extends WireTestCommon {
                     "    seven,\n" +
                     "    eight\n" +
                     "  ]\n" +
-                    "}\n", m2.toString());
+                    "}\n", m2.toString(), "third deserialized object should contain elements [seven, eight]");
         }
 
         // Release the resources held by the ByteBuffer.
@@ -112,8 +111,10 @@ public class SequenceTest extends WireTestCommon {
     }
 
     // Test to read a Set as an object.
-    @Test
-    public void readSetAsObject() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "{0}")
+    public void readSetAsObject(WireType wireType) {
+        initSequenceTest(wireType);
         // Allocate an elastic buffer on heap.
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
@@ -136,13 +137,15 @@ public class SequenceTest extends WireTestCommon {
             Object o = dc.wire().read("list").object();
             if (wireType == WireType.JSON)
                 o = new LinkedHashSet<>((Collection<?>) o);
-            assertEquals(value, o);
+            assertEquals(value, o, "deserialized set should match original set with elements [a, b, c]");
         }
     }
 
     // Test to read a List as an object.
-    @Test
-    public void readListAsObject() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "{0}")
+    public void readListAsObject(WireType wireType) {
+        initSequenceTest(wireType);
         // Allocate an elastic buffer on heap.
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
@@ -163,13 +166,15 @@ public class SequenceTest extends WireTestCommon {
         // Read the list back from the wire.
         try (DocumentContext dc = w1.readingDocument()) {
             Object o = dc.wire().read("list").object();
-            assertEquals(value, o);
+            assertEquals(value, o, "deserialized list should match original list with elements [a, b, c]");
         }
     }
 
     // Test to read a Map as an object.
-    @Test
-    public void readMapAsObject() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "{0}")
+    public void readMapAsObject(WireType wireType) {
+        initSequenceTest(wireType);
         // Ensure that the wire type isn't RAW.
         assumeFalse(wireType == WireType.RAW);
 
@@ -195,7 +200,7 @@ public class SequenceTest extends WireTestCommon {
         // Read the map back from the wire.
         try (DocumentContext dc = w1.readingDocument()) {
             Object o = dc.wire().read("map").object();
-            assertEquals(value, o);
+            assertEquals(value, o, "deserialized map should match original map with entries {a=aya, b=bee}");
         }
     }
 

@@ -8,16 +8,17 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * @author Rob Austin
  */
 public class WireTextBugTest extends WireTestCommon {
 
-    @org.junit.Test
+    @Test
     // Test for handling text within the Wire framework
     public void testText() {
         assumeFalse(Jvm.maxDirectMemory() == 0);

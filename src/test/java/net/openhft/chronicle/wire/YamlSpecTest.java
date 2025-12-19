@@ -4,8 +4,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 
@@ -13,15 +13,16 @@ import java.io.InputStream;
 public class YamlSpecTest extends WireTestCommon {
     private static final String DIR = "/yaml/spec/";
 
-    private static void doTest(String file, String expected) {
+    private static boolean doTest(String file, String expected) {
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             InputStream is = YamlSpecTest.class.getResourceAsStream(DIR + file);
 
             Object o = Marshallable.fromString(is);
-            Assert.assertNotNull(o);
+            Assertions.assertNotNull(o);
             String actual = o.toString();
-            Assert.assertEquals(expected, actual);
+            Assertions.assertEquals(expected, actual);
+            return true;
 
         } finally {
             b.releaseLast();
@@ -35,9 +36,9 @@ public class YamlSpecTest extends WireTestCommon {
             InputStream is = YamlSpecTest.class.getResourceAsStream(DIR + "2_18Multi_lineFlowScalarsFixed.yaml");
 
             Object o = Marshallable.fromString(is);
-            Assert.assertNotNull(o);
+            Assertions.assertNotNull(o);
             String actual = o.toString();
-            Assert.assertEquals("{plain=\n" +
+            Assertions.assertEquals("{plain=\n" +
                     "  This unquoted scalar\n" +
                     "  spans many lines., quoted=So does this\n" +
                     "  quoted scalar.\n" +
@@ -50,6 +51,6 @@ public class YamlSpecTest extends WireTestCommon {
 
     @Test
     public void test2_21MiscellaneousFixed() {
-        doTest("2_21MiscellaneousFixed.yaml", "{null=, booleans=[true, false], string=012345}");
+        Assertions.assertTrue(doTest("2_21MiscellaneousFixed.yaml", "{null=, booleans=[true, false], string=012345}"), "yaml spec: 2_21MiscellaneousFixed");
     }
 }

@@ -9,22 +9,20 @@ import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * NestedClassTest is a parameterized test class extending WireTestCommon.
  * It tests the serialization and deserialization of OuterClass instances
  * with different Wire formats.
  */
-@RunWith(Parameterized.class)
 public class NestedClassTest extends WireTestCommon {
     // Static instances of OuterClass for testing.
     private static final OuterClass outerClass1 = new OuterClass();
@@ -55,17 +53,16 @@ public class NestedClassTest extends WireTestCommon {
 
     // Function to create Wire instances for each test run.
     @SuppressWarnings("rawtypes")
-    private final Function<Bytes<?>, Wire> wireType;
+    private Function<Bytes<?>, Wire> wireType;
 
     // Constructor to inject the Wire creation function.
     @SuppressWarnings("rawtypes")
-    public NestedClassTest(Function<Bytes<?>, Wire> wireType) {
+    public void initNestedClassTest(Function<Bytes<?>, Wire> wireType) {
         this.wireType = wireType;
     }
 
     // Method to provide different combinations of Wire instances for testing.
     @SuppressWarnings("rawtypes")
-    @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         return Arrays.asList(
                 new Object[]{(Function<Bytes<?>, Wire>) bytes -> new BinaryWire(bytes, false, true, false, 128, "binary")},
@@ -79,9 +76,11 @@ public class NestedClassTest extends WireTestCommon {
     }
 
     // Test method to verify multiple reads of OuterClass instances.
+    @MethodSource("combinations")
     @SuppressWarnings("rawtypes")
-    @Test
-    public void testMultipleReads() {
+    @ParameterizedTest
+    public void testMultipleReads(Function<Bytes<?>, Wire> wireType) {
+        initNestedClassTest(wireType);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         OuterClassWireTestSupport.assertTwoOuterClasses(wireType, OuterClass::new, outerClass1, outerClass2, false);

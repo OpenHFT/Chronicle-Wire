@@ -9,22 +9,20 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.YamlWire;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * Parameterized test class extending WireTestCommon to validate the consistency
  * between YamlWire and TextWire in processing YAML formatted text.
  */
-@RunWith(Parameterized.class)
 @SuppressWarnings({"deprecation", "removal"})
 public class YamlTextWireTest extends WireTestCommon {
 
@@ -33,7 +31,7 @@ public class YamlTextWireTest extends WireTestCommon {
         ClassAliasPool.CLASS_ALIASES.addAlias(Fields.class);
     }
 
-    private final String s;     // YAML formatted text to be tested
+    private String s;     // YAML formatted text to be tested
 
     /**
      * Constructor for parameterized test instances.
@@ -41,7 +39,7 @@ public class YamlTextWireTest extends WireTestCommon {
      * @param name Name of the test scenario.
      * @param text YAML formatted text to be used in the test.
      */
-    public YamlTextWireTest(String name, String text) {
+    public void initYamlTextWireTest(String name, String text) {
         // Name of the test scenario
         this.s = text;
     }
@@ -52,7 +50,6 @@ public class YamlTextWireTest extends WireTestCommon {
      *
      * @return Collection of Object arrays, each containing a scenario name and YAML text.
      */
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         // Stream of various YAML formatted texts to be tested
         return Stream.of(
@@ -101,8 +98,10 @@ public class YamlTextWireTest extends WireTestCommon {
      * Tests the order and structure of fields processed by YamlWire and TextWire to ensure they are consistent.
      * The test verifies that both wires produce the same object representation from the given YAML text.
      */
-    @Test
-    public void orderTest() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void orderTest(String name, String text) {
+        initYamlTextWireTest(name, text);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Parse the text using YamlWire and TextWire, and create Fields objects

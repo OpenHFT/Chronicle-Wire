@@ -8,9 +8,9 @@ import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test suite for the TwoArrays class.
@@ -36,8 +36,7 @@ public class TwoArraysTest extends WireTestCommon {
 
         // Serialize the TwoArrays object
         ta.writeMarshallable(wire);
-        assertEquals("" +
-                        "   c2 69 61                                        # ia:\n" +
+        assertEquals("   c2 69 61                                        # ia:\n" +
                         "   82 20 00 00 00                                  # BinaryIntArrayReference\n" +
                         "                                                # BinaryIntArrayReference\n" +
                         "   04 00 00 00 00 00 00 00                         # capacity\n" +
@@ -74,8 +73,7 @@ public class TwoArraysTest extends WireTestCommon {
         Bytes<?> bytes2 = new HexDumpBytes();
         Wire wire2 = new BinaryWire(bytes2);
         ta2.writeMarshallable(wire2);
-        assertEquals("" +
-                        "   c2 69 61                                        # ia:\n" +
+        assertEquals("   c2 69 61                                        # ia:\n" +
                         "   82 20 00 00 00                                  # BinaryIntArrayReference\n" +
                         "   04 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 # BinaryIntArrayReference\n" +
                         "   0b 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 # la:\n" +

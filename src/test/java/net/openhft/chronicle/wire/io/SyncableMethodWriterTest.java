@@ -13,15 +13,26 @@ import net.openhft.chronicle.core.io.Syncable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.YamlWire;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
+
+    private static final String EXPECTED = "say: hello\n" +
+            "...\n" +
+            "sync: \"\"\n" +
+            "# sync\n" +
+            "...\n" +
+            "say: world\n" +
+            "...\n" +
+            "sync: \"\"\n" +
+            "# sync\n" +
+            "...\n";
 
     // A custom interface combining message sending (say) and synchronization capabilities (sync)
     interface SayAndSync extends Syncable {
@@ -47,28 +58,22 @@ public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTes
     @Test
     public void sayAndSync() {
         final OnHeapBytes bytes = Bytes.allocateElasticOnHeap();
-        doTest(bytes);
+        try {
+            assertEquals(EXPECTED, doTest(bytes), "sayAndSync: output");
+        } finally {
+            bytes.releaseLast();
+        }
     }
 
     // Core logic for testing the say and sync operations, encapsulated for reuse
-    private void doTest(Bytes<?> bytes) {
+    private String doTest(Bytes<?> bytes) {
         Wire wire = new SyncableYamlWire(bytes);
         SayAndSync sas = wire.methodWriter(SayAndSync.class);
         sas.say("hello");
         sas.sync();
         sas.say("world");
         sas.sync();
-        assertEquals("" +
-                "say: hello\n" +
-                "...\n" +
-                "sync: \"\"\n" +
-                "# sync\n" +
-                "...\n" +
-                "say: world\n" +
-                "...\n" +
-                "sync: \"\"\n" +
-                "# sync\n" +
-                "...\n", wire.toString());
+        return wire.toString();
     }
 
     // Test the say and sync operations but this time with a MappedBytes instance which maps bytes to a file
@@ -78,7 +83,7 @@ public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTes
         final File file = IOTools.createTempFile("sayAndSyncMappedBytes");
         file.deleteOnExit();
         try (MappedBytes mb = MappedBytes.mappedBytes(file, OS.pageSize())) {
-            doTest(mb);
+            assertEquals(EXPECTED, doTest(mb), "sayAndSyncMappedBytes: output");
         }
     }
 }

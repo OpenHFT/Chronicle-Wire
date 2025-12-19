@@ -14,28 +14,25 @@ import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.nio.BufferUnderflowException;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@RunWith(Parameterized.class)
 public class BytesMarshallableTest extends WireTestCommon {
-    private final WireType wireType;
+    private WireType wireType;
 
     // Constructor that accepts a wireType as a parameter
-    public BytesMarshallableTest(WireType wireType) {
+    public void initBytesMarshallableTest(WireType wireType) {
         this.wireType = wireType;
     }
 
     // This method provides different WireType parameters to be used in the tests
-    @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         return Arrays.asList(
                 new Object[]{WireType.TEXT},
@@ -51,8 +48,10 @@ public class BytesMarshallableTest extends WireTestCommon {
 
     // Test method to verify the (de)serialization of primitive data transfer objects (DTOs)
     // with the wire, also validating against expected string representations
-    @Test
-    public void primitiveDto() {
+    @MethodSource("combinations")
+    @ParameterizedTest
+    public void primitiveDto(WireType wireType) {
+        initBytesMarshallableTest(wireType);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Creating a wire object using the previously defined method
@@ -99,8 +98,10 @@ public class BytesMarshallableTest extends WireTestCommon {
     }
 
     // Another test method similar to the above, but using different DTO types (PrimDto2 and ScalarDto2)
-    @Test
-    public void primitiveDto2() {
+    @MethodSource("combinations")
+    @ParameterizedTest
+    public void primitiveDto2(WireType wireType) {
+        initBytesMarshallableTest(wireType);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Creating a wire object using the previously defined method

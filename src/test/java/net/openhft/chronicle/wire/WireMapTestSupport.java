@@ -14,7 +14,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 final class WireMapTestSupport {
@@ -43,27 +43,32 @@ final class WireMapTestSupport {
                 fromString.toString());
     }
 
-    static void writeAndReadStringMap(Function<Bytes<?>, Wire> wireFactory) {
+    static boolean writeAndReadStringMap(Function<Bytes<?>, Wire> wireFactory) {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
-        @NotNull final Map<String, String> expected = new LinkedHashMap<>();
-        expected.put("hello", "world");
-        expected.put("hello1", "world1");
-        expected.put("hello2", "world2");
+        try {
+            @NotNull final Map<String, String> expected = new LinkedHashMap<>();
+            expected.put("hello", "world");
+            expected.put("hello1", "world1");
+            expected.put("hello2", "world2");
 
-        @NotNull final Wire wire = wireFactory.apply(bytes);
+            @NotNull final Wire wire = wireFactory.apply(bytes);
 
-        wire.writeDocument(false, o -> o.writeEventName(() -> "example").map(expected));
+            wire.writeDocument(false, o -> o.writeEventName(() -> "example").map(expected));
 
-        assertEquals("--- !!data\n" +
-                        "example: {\n" +
-                        "  hello: world,\n" +
-                        "  hello1: world1,\n" +
-                        "  hello2: world2\n" +
-                        "}\n",
-                Wires.fromSizePrefixedBlobs(bytes));
-        @NotNull final Map<String, String> actual = new LinkedHashMap<>();
-        wire.readDocument(null, c -> c.read(() -> "example").marshallableAsMap(String.class, String.class, actual));
-        assertEquals(expected, actual);
+            assertEquals("--- !!data\n" +
+                            "example: {\n" +
+                            "  hello: world,\n" +
+                            "  hello1: world1,\n" +
+                            "  hello2: world2\n" +
+                            "}\n",
+                    Wires.fromSizePrefixedBlobs(bytes));
+            @NotNull final Map<String, String> actual = new LinkedHashMap<>();
+            wire.readDocument(null, c -> c.read(() -> "example").marshallableAsMap(String.class, String.class, actual));
+            assertEquals(expected, actual);
+            return true;
+        } finally {
+            bytes.releaseLast();
+        }
     }
 
     static void assertMarshallableMap(Function<Bytes<?>, Wire> wireFactory) {

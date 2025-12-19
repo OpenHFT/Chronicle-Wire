@@ -9,8 +9,8 @@ import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -18,13 +18,13 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"java:S2699", "java:S125", "java:S1854", "java:S1481"})
 public class ReadmeChapter1Test extends WireTestCommon {
 
-    @Before
+    @BeforeEach
     public void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
@@ -114,6 +114,10 @@ prints in RawWire
 00000020 00 00 25 40                                      ··%@
 ```
 */
+        assertTrue(bytes.readRemaining() > 0, "text wire should serialize basic types (message, number, code, price) as documented in readme");
+        assertTrue(bytes2.readRemaining() > 0, "binary wire should serialize same data structure with field metadata preserved");
+        assertTrue(bytes3.readRemaining() > 0, "raw wire should serialize data with minimal metadata for size optimization");
+
         bytes.releaseLast();
         bytes2.releaseLast();
         bytes3.releaseLast();
@@ -138,6 +142,7 @@ prints in RawWire
         @NotNull Data data2 = new Data();
         data2.readMarshallable(wire);
         // System.out.println(data2);
+        assertEquals(data.toString(), data2.toString(), "marshallable data object should roundtrip through text wire without data loss");
 
 /*
 ```
@@ -162,6 +167,7 @@ To write in binary instead
         @NotNull Data data3 = new Data();
         data3.readMarshallable(wire2);
         // System.out.println(data3);
+        assertEquals(data.toString(), data3.toString(), "marshallable data object should roundtrip through binary wire maintaining all field values");
 /*
 ```
 prints
@@ -195,6 +201,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         @NotNull Data data2 = new Data();
         wire.read(() -> "mydata").marshallable(data2);
         // System.out.println(data2);
+        assertEquals(data.toString(), data2.toString(), "named marshallable field should serialize and deserialize with key-value structure");
 
 /*
 ```
@@ -256,6 +263,8 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 
         @Nullable Data data2 = wire.read(() -> "mydata").object(Data.class);
         // System.out.println(data2);
+        assertNotNull(data2, "wire should deserialize typed object with class alias successfully");
+        assertEquals(data.toString(), data2.toString(), "typed object serialization should preserve all fields and include type information");
 
 /*
 ```
@@ -322,7 +331,7 @@ The benefits of using this approach ares that
         // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
 
         @NotNull Data data2 = new Data();
-        assertTrue(wire.readDocument(null, data2));
+        assertTrue(wire.readDocument(null, data2), "document with size prefix should be readable as complete message with metadata header");
         // System.out.println(data2);
 
 /*
@@ -348,7 +357,7 @@ To write in binary instead
         // System.out.println(Wires.fromSizePrefixedBlobs(bytes2));
 
         @NotNull Data data3 = new Data();
-        assertTrue(wire2.readDocument(null, data3));
+        assertTrue(wire2.readDocument(null, data3), "binary document with size prefix and padding should support thread-safe concurrent access");
         // System.out.println(data3);
 /*
 ```
@@ -395,7 +404,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
                 .sequence(dataList, (l, v) -> {
                     while (v.hasNextSequenceItem())
                         l.add(v.object(Data.class));
-                })));
+                })), "document containing sequence of typed objects should deserialize into list preserving order");
         dataList.forEach(System.out::println);
 
 /*
@@ -446,7 +455,7 @@ To write in binary instead
                 .sequence(dataList2, (l, v) -> {
                     while (v.hasNextSequenceItem())
                         l.add(v.object(Data.class));
-                })));
+                })), "binary document with sequence should deserialize multiple objects maintaining type and order information");
         dataList2.forEach(System.out::println);
 /*
 ```
@@ -503,10 +512,8 @@ Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
         // System.out.println(bytes);
 
         @Nullable Object o = wire.getValueIn().object(Object.class);
-        if (o instanceof Data) {
-            @Nullable Data data2 = (Data) o;
-            // System.out.println(data2);
-        }
+        assertInstanceOf(Data.class, o, "value-only serialization should preserve type information for polymorphic deserialization");
+        assertEquals(data.toString(), o.toString(), "typed value without field name should deserialize to correct type with all fields intact");
 
 /*
 ```
@@ -530,10 +537,8 @@ To write in binary instead
         // System.out.println(bytes2.toHexString());
 
         @Nullable Object o2 = wire2.getValueIn().object(Object.class);
-        if (o2 instanceof Data) {
-            @NotNull Data data2 = (Data) o2;
-            // System.out.println(data2);
-        }
+        assertInstanceOf(Data.class, o2, "binary value serialization should include type metadata for correct deserialization");
+        assertEquals(data.toString(), o2.toString(), "binary typed value should roundtrip preserving all field data without field names");
 /*
 ```
 prints

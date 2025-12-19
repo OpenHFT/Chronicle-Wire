@@ -4,10 +4,10 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MarshallableCfgResetTest extends net.openhft.chronicle.wire.WireTestCommon {
 
@@ -57,10 +57,10 @@ public class MarshallableCfgResetTest extends net.openhft.chronicle.wire.WireTes
         Boat boat = w.getValueIn().object(using, Boat.class);
 
         // Assert that the engine is electric after reading from wire
-        Assert.assertTrue(boat.engine.isItElectric);
+        Assertions.assertTrue(boat.engine.isItElectric);
 
         // Set the engine as not electric in a new JSONWire and assert the change
         new JSONWire(Bytes.from("{\"engine\":{\"isItElectric\":false}}")).getValueIn().object(using, Boat.class);
-        Assert.assertFalse(boat.engine.isItElectric);
+        Assertions.assertFalse(boat.engine.isItElectric);
     }
 }

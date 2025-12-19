@@ -13,9 +13,9 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.jlbh.JLBH;
 import net.openhft.chronicle.jlbh.JLBHOptions;
 import net.openhft.chronicle.jlbh.JLBHTask;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,16 +26,15 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"deprecation", "removal"})
 public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Before each test case, obtain a thread dump
     @Override
-    @Before
+    @BeforeEach
     public void threadDump() {
         super.threadDump();
     }
@@ -44,8 +43,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     @Test
     public void fileAppend() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
-        final String expected = "" +
-                "mid: mid\n" +
+        final String expected = "mid: mid\n" +
                 "next: 1\n" +
                 "echo: echo-1\n" +
                 "...\n" +
@@ -53,30 +51,34 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
                 "next2: word\n" +
                 "echo: echo-2\n" +
                 "...\n";
-        file("?append=true", expected);
+        assertEquals(expected, file("?append=true"), "file append");
     }
 
     // Test writing data to a file without append mode
     @Test
     public void file() throws IOException {
-        final String expected = "" +
-                "mid2: mid2\n" +
+        final String expected = "mid2: mid2\n" +
                 "next2: word\n" +
                 "echo: echo-2\n" +
                 "...\n";
-        file("", expected);
+        assertEquals(expected, file(""), "file overwrite");
     }
 
     // Write expected messages to the file specified in the URL and verify its content
-    private void file(String query, String expected) throws IOException {
+    private String file(String query) throws IOException {
         final File file = new File(OS.getTarget(), "tmp-" + System.nanoTime());
         @SuppressWarnings("deprecation")
         final URL url = new URL("file://" + file.getAbsolutePath() + query);
         writeMessages(url);
         final Bytes<?> bytes = BytesUtil.readFile(file.getAbsolutePath());
-        assertEquals(expected, bytes.toString());
-        // can overwrite ok
-        writeMessages(url);
+        try {
+            String actual = bytes.toString();
+            // can overwrite ok
+            writeMessages(url);
+            return actual;
+        } finally {
+            bytes.releaseLast();
+        }
     }
 
     // Write messages to the specified URL
@@ -99,7 +101,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     }
 
     // Test writing messages to an HTTP endpoint and validate the response
-    @Ignore("long running test")
+    @Disabled("long running test")
     @Test
     public void http() throws IOException, InterruptedException {
         InetSocketAddress address = new InetSocketAddress(0);
@@ -125,7 +127,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     }
 
     // Another HTTP test that might be used in conjunction with queue-web-gateway. This is a work in progress.
-    @Ignore("test was added to work with queue-web-gateway, so work in progress")
+    @Disabled("test was added to work with queue-web-gateway, so work in progress")
     @Test
     public void http2() throws IOException, InterruptedException {
         InetSocketAddress address = new InetSocketAddress(0);
@@ -151,21 +153,22 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     }
 
     // Test to ensure only JSON Wire is supported and if BINARY_LIGHT is used, an IllegalArgumentException is thrown.
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void httpBinary() throws IOException {
-        InetSocketAddress address = new InetSocketAddress(0);
-        HttpServer server = HttpServer.create(address, 0);
-        int port = server.getAddress().getPort();
-        BlockingQueue<String> queue = new LinkedBlockingQueue<>();
-        server.createContext("/echo", new Handler(queue));
-        server.start();
-        try {
-            @SuppressWarnings("deprecation")
-            final URL url = new URL("http://localhost:" + port + "/echo");
-            writeMessages(url, WireType.BINARY_LIGHT);
-        } finally {
-            server.stop(1);
-        }
+        assertThrows(IllegalArgumentException.class, () -> {
+            InetSocketAddress address = new InetSocketAddress(0);
+            HttpServer server = HttpServer.create(address, 0);
+            int port = server.getAddress().getPort();
+            BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+            server.createContext("/echo", new Handler(queue));
+            server.start();
+            try {
+                @SuppressWarnings("deprecation") final URL url = new URL("http://localhost:" + port + "/echo");
+                writeMessages(url, WireType.BINARY_LIGHT);
+            } finally {
+                server.stop(1);
+            }
+        });
     }
 
     // Interface representing a timed event.

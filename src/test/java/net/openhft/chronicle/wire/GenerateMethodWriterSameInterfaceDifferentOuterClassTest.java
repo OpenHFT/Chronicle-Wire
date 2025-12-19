@@ -3,14 +3,14 @@
  */
 package net.openhft.chronicle.wire;
 
-import junit.framework.TestCase;
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.wire.WireType.BINARY;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // Test class to ensure proper method writing for interfaces with similar inner interfaces but different outer classes
-public class GenerateMethodWriterSameInterfaceDifferentOuterClassTest extends TestCase {
+public class GenerateMethodWriterSameInterfaceDifferentOuterClassTest {
 
     // Test the method writing capability for two different interfaces
     @Test
@@ -37,8 +37,7 @@ public class GenerateMethodWriterSameInterfaceDifferentOuterClassTest extends Te
                 .y("hello world");
 
         // Assert the expected output from the wire
-        assertEquals("" +
-                        "--- !!data #binary\n" +
+        assertEquals("--- !!data #binary\n" +
                         "x: hello world\n" +
                         "# position: 20, header: 1\n" +
                         "--- !!data #binary\n" +

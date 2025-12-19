@@ -5,9 +5,10 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Created by Rob Austin
@@ -65,20 +66,21 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
         assertEquals(expected, actual);
     }
 
-    @Test(expected = ClassNotFoundRuntimeException.class)
+    @Test
     public void testAssumeTheTypeMissingTypeThrows() {
-        Wires.GENERATE_TUPLES = false;
+        assertThrows(ClassNotFoundRuntimeException.class, () -> {
+            Wires.GENERATE_TUPLES = false;
 
-        final String cs = "!Xyz " +
-                "{\n" +
-                "  y: hello8\n" +
-                "}\n";
-        String s = Marshallable.fromString(Dto.class, cs).toString();
-        assertEquals("" +
-                "!net.openhft.chronicle.wire.InvalidYamWithCommonMistakesTest$Dto {\n" +
-                "  y: hello8,\n" +
-                "  x: !!null \"\"\n" +
-                "}\n", s);
+            final String cs = "!Xyz " +
+                    "{\n" +
+                    "  y: hello8\n" +
+                    "}\n";
+            String s = Marshallable.fromString(Dto.class, cs).toString();
+            assertEquals("!net.openhft.chronicle.wire.InvalidYamWithCommonMistakesTest$Dto {\n" +
+                    "  y: hello8,\n" +
+                    "  x: !!null \"\"\n" +
+                    "}\n", s);
+        });
     }
 
     // Test to parse a DTO with nested types
@@ -129,7 +131,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
         DtoB expected = new DtoB("hello8");
 
         // Parse DtoB object from a string representation containing explicit class path details
-        DtoB actual = Marshallable.<DtoB>fromString("!net.openhft.chronicle.wire.InvalidYamWithCommonMistakesTest$DtoB " +
+        DtoB actual = Marshallable.fromString("!net.openhft.chronicle.wire.InvalidYamWithCommonMistakesTest$DtoB " +
                 "{\n" +
                 "  y:hello8\n" +
                 "}\n");
@@ -146,7 +148,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
         DtoB expected = new DtoB("hello8");
 
         // Parse DtoB object from a string representation, type assumed from the given class
-        DtoB actual = Marshallable.<DtoB>fromString(DtoB.class, "{\n" +
+        DtoB actual = Marshallable.fromString(DtoB.class, "{\n" +
                 "  y:hello8\n" +
                 "}\n");
 
@@ -198,7 +200,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
         DtoB expected = new DtoB("hello8");
 
         // Parse DtoB object from a string representation using the alias
-        DtoB actual = Marshallable.<DtoB>fromString("!DtoB{\n" +
+        DtoB actual = Marshallable.fromString("!DtoB{\n" +
                 "  y:hello8\n" +
                 "}\n");
 

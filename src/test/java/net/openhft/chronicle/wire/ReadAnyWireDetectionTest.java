@@ -4,21 +4,21 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({"deprecation", "removal"})
 public class ReadAnyWireDetectionTest extends WireTestCommon {
 
     @Test
     public void detectsWireTypeAndReadsPayload() {
-        for (TestCase testCase : cases()) {
+        for (WireCase testCase : cases()) {
             Bytes<?> encoded = encode(testCase.type, wire -> {
                 try (DocumentContext dc = wire.writingDocument(false)) {
                     dc.wire().write("msg").text(testCase.payload);
@@ -36,10 +36,10 @@ public class ReadAnyWireDetectionTest extends WireTestCommon {
         }
     }
 
-    private Collection<TestCase> cases() {
+    private Collection<WireCase> cases() {
         return Arrays.asList(
-                new TestCase(WireType.TEXT, "lorem ipsum", WireType.TEXT),
-                new TestCase(WireType.BINARY, "binary-payload", WireType.BINARY)
+                new WireCase(WireType.TEXT, "lorem ipsum", WireType.TEXT),
+                new WireCase(WireType.BINARY, "binary-payload", WireType.BINARY)
         );
     }
 
@@ -53,13 +53,12 @@ public class ReadAnyWireDetectionTest extends WireTestCommon {
         return copy;
     }
 
-    @SuppressWarnings("PMD.TestClassWithoutTestCases")
-    private static final class TestCase {
+    private static final class WireCase {
         final WireType type;
         final String payload;
         final WireType expectedType;
 
-        private TestCase(WireType type, String payload, WireType expectedType) {
+        private WireCase(WireType type, String payload, WireType expectedType) {
             this.type = type;
             this.payload = payload;
             this.expectedType = expectedType;

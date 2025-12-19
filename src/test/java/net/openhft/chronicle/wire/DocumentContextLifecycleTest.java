@@ -4,9 +4,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Verifies lifecycle of writingDocument/readingDocument across Binary and Text wires.
@@ -76,7 +76,7 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
         }
 
         try (DocumentContext dc = w.readingDocument()) {
-            assertTrue("document should still be present after rollback", dc.isPresent());
+            assertTrue(dc.isPresent(), "document should still be present after rollback");
             assertEquals("value", dc.wire().read("item").text());
         }
 

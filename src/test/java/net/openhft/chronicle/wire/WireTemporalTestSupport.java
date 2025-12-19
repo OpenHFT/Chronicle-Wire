@@ -3,8 +3,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,9 +24,9 @@ final class WireTemporalTestSupport {
                 .write().zonedDateTime(max)
                 .write().zonedDateTime(min);
 
-        wire.read().zonedDateTime(now, Assert::assertEquals)
-                .read().zonedDateTime(max, Assert::assertEquals)
-                .read().zonedDateTime(min, Assert::assertEquals);
+        wire.read().zonedDateTime(now, Assertions::assertEquals)
+                .read().zonedDateTime(max, Assertions::assertEquals)
+                .read().zonedDateTime(min, Assertions::assertEquals);
     }
 
     static void assertLocalDates(Wire wire) {
@@ -36,9 +35,9 @@ final class WireTemporalTestSupport {
                 .write().date(LocalDate.MAX)
                 .write().date(LocalDate.MIN);
 
-        wire.read().date(now, Assert::assertEquals)
-                .read().date(LocalDate.MAX, Assert::assertEquals)
-                .read().date(LocalDate.MIN, Assert::assertEquals);
+        wire.read().date(now, Assertions::assertEquals)
+                .read().date(LocalDate.MAX, Assertions::assertEquals)
+                .read().date(LocalDate.MIN, Assertions::assertEquals);
     }
 
     static void assertUuids(Wire wire) {
@@ -48,8 +47,8 @@ final class WireTemporalTestSupport {
                 .write().uuid(new UUID(0, 0))
                 .write().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE));
 
-        wire.read().uuid(uuid, Assert::assertEquals)
-                .read().uuid(new UUID(0, 0), Assert::assertEquals)
-                .read().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), Assert::assertEquals);
+        wire.read().uuid(uuid, Assertions::assertEquals)
+                .read().uuid(new UUID(0, 0), Assertions::assertEquals)
+                .read().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), Assertions::assertEquals);
     }
 }

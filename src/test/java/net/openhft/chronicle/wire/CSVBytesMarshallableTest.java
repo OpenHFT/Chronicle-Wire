@@ -9,10 +9,10 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.wire.Wires.acquireStringBuilderScoped;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"deprecation", "removal"})
 public class CSVBytesMarshallableTest extends WireTestCommon {
@@ -45,35 +45,35 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
     // wire marshalling.
     @Test
     public void marshallableJSON() {
-        doTest(WireType.JSON, false);
+        assertEquals(2, doTest(WireType.JSON, false), "csv records (json)");
     }
 
     @Test
     public void marshallableTEXT() {
-        doTest(WireType.TEXT, false);
+        assertEquals(2, doTest(WireType.TEXT, false), "csv records (text)");
     }
 
     @Test
     public void marshallableYAML_ONLY() {
-        doTest(WireType.YAML_ONLY, false);
+        assertEquals(2, doTest(WireType.YAML_ONLY, false), "csv records (yaml)");
     }
 
     @Test
     public void marshallableBINARY() {
-        doTest(WireType.BINARY, true);
+        assertEquals(2, doTest(WireType.BINARY, true), "csv records (binary)");
     }
 
     @Test
     public void marshallableFIELDLESS() {
-        doTest(WireType.FIELDLESS_BINARY, true);
+        assertEquals(2, doTest(WireType.FIELDLESS_BINARY, true), "csv records (fieldless)");
     }
 
     @Test
     public void marshallableRAW() {
-        doTest(WireType.RAW, true);
+        assertEquals(2, doTest(WireType.RAW, true), "csv records (raw)");
     }
 
-    private void doTest(@NotNull WireType wt, boolean binary) {
+    private int doTest(@NotNull WireType wt, boolean binary) {
         // Reset read position for input data
         bytes.readPosition(0);
 
@@ -84,14 +84,17 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
         Wire out = wt.apply(bytes2);
 
         @NotNull FXPrice2 fxPrice = new FXPrice2();
+        int records = 0;
 
         // Read, marshall, and write data from one wire to another
         while (bytes.readRemaining() > 0) {
             fxPrice.readMarshallable(in);
             fxPrice.writeMarshallable(out);
+            records++;
         }
 
         bytes2.releaseLast();
+        return records;
     }
 }
 

@@ -6,8 +6,8 @@ package net.openhft.chronicle.wire.bytesmarshallable;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,13 +16,13 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PerfRegressionTest extends WireTestCommon {
 
     private final String cpuClass = Jvm.getCpuClass();  // Likely obtaining some CPU class information from a utility class 'Jvm'.
 
-    @Ignore("Long running")
+    @Disabled("Long running")
     @Test
     public void regressionTests() throws Exception {
         final URL location = PerfRegressionTest.class.getProtectionDomain().getCodeSource().getLocation();

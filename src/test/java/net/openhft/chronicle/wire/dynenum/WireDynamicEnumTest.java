@@ -10,13 +10,13 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumCache;
 import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // The WireDynamicEnumTest class extends WireTestCommon to inherit its common functionalities.
 // This class is intended to test dynamic enumeration functionalities in the context of wiring.
@@ -25,7 +25,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
 
     // This setup method is executed before each test.
     // It adds the required class aliases to the ClassAliasPool to facilitate serialization and deserialization.
-    @Before
+    @BeforeEach
     public void addClassAlias() {
         ClassAliasPool.CLASS_ALIASES.addAlias(HoldsWDENum.class);
         ClassAliasPool.CLASS_ALIASES.addAlias(UnwrapsWDENum.class);
@@ -37,7 +37,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
 
     // This method simulates the dynamic addition of an enumeration value.
     // It initializes various objects and performs operations to test the behavior of dynamic enums.
-    private static void doAddedEnum(WireType wireType) throws NoSuchFieldException {
+    private static boolean doAddedEnum(WireType wireType) throws NoSuchFieldException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Wire tw = wireType.apply(Bytes.allocateElasticOnHeap());
@@ -88,6 +88,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
                 "...\n" +
                 "push2: ACE\n" +
                 "...\n", tw.toString());
+        return true;
     }
 
     // This test validates the functionality of adding a dynamic enum using TEXT wire type.
@@ -111,13 +112,13 @@ public class WireDynamicEnumTest extends WireTestCommon {
 
     @Test
     public void addedEnum() throws NoSuchFieldException {
-        doAddedEnum(WireType.TEXT);
+        assertTrue(doAddedEnum(WireType.TEXT), "dynamic enum: wireType=TEXT");
     }
 
     // This test validates the functionality of adding a dynamic enum using YAML_ONLY wire type.
     @Test
     public void addedEnumYaml() throws NoSuchFieldException {
-        doAddedEnum(WireType.YAML_ONLY);
+        assertTrue(doAddedEnum(WireType.YAML_ONLY), "dynamic enum: wireType=YAML_ONLY");
     }
 
     // This test method validates the deserialization process of the dynamic enums and checks the correctness of the output.

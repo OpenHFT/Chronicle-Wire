@@ -7,9 +7,8 @@ import net.openhft.chronicle.wire.JSONWire;
 import net.openhft.chronicle.wire.JsonUtil;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -24,14 +23,12 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(Parameterized.class)
 public class Issue327Test extends WireTestCommon {
 
-    private final boolean useTypes;
+    private boolean useTypes;
 
-    @Parameterized.Parameters(name = "useTypes={0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
                 new Object[]{true},
@@ -39,71 +36,92 @@ public class Issue327Test extends WireTestCommon {
         );
     }
 
-    public Issue327Test(boolean useTypes) {
+    public void initIssue327Test(boolean useTypes) {
         this.useTypes = useTypes;
     }
 
-    @Test
-    public void localTime() {
-        test(() -> LocalTime.of(17, 01), "{\"@Time\":\"17:01\"}", "\"17:01\"");
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void localTime(boolean useTypes) {
+        initIssue327Test(useTypes);
+        String actual = toJson(() -> LocalTime.of(17, 01));
+        assertEquals(useTypes ? "{\"@Time\":\"17:01\"}" : "\"17:01\"", actual, "localTime (useTypes=" + useTypes + ")");
     }
 
-    @Test
-    public void localDateTime() {
-        test(() -> LocalDateTime.of(1969, 7, 20, 20, 17, 01), "{\"@DateTime\":\"1969-07-20T20:17:01\"}", "\"1969-07-20T20:17:01\"");
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void localDateTime(boolean useTypes) {
+        initIssue327Test(useTypes);
+        String actual = toJson(() -> LocalDateTime.of(1969, 7, 20, 20, 17, 01));
+        assertEquals(useTypes ? "{\"@DateTime\":\"1969-07-20T20:17:01\"}" : "\"1969-07-20T20:17:01\"", actual, "localDateTime (useTypes=" + useTypes + ")");
     }
 
-    @Test
-    public void zonedDateTime() {
-        test(() -> ZonedDateTime.of(LocalDateTime.of(1969, 7, 20, 20, 17, 01), ZoneId.of("UTC")), "{\"@ZonedDateTime\":\"1969-07-20T20:17:01Z[UTC]\"}", "\"1969-07-20T20:17:01Z[UTC]\"");
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void zonedDateTime(boolean useTypes) {
+        initIssue327Test(useTypes);
+        String actual = toJson(() -> ZonedDateTime.of(LocalDateTime.of(1969, 7, 20, 20, 17, 01), ZoneId.of("UTC")));
+        assertEquals(useTypes ? "{\"@ZonedDateTime\":\"1969-07-20T20:17:01Z[UTC]\"}" : "\"1969-07-20T20:17:01Z[UTC]\"", actual, "zonedDateTime (useTypes=" + useTypes + ")");
     }
 
-    @Test
-    public void uIID() {
-        test(() -> UUID.fromString("b2f78c98-b07d-42ab-86d5-4b0d48550761"), "{\"@UUID\":\"b2f78c98-b07d-42ab-86d5-4b0d48550761\"}", "\"b2f78c98-b07d-42ab-86d5-4b0d48550761\"");
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void uIID(boolean useTypes) {
+        initIssue327Test(useTypes);
+        String actual = toJson(() -> UUID.fromString("b2f78c98-b07d-42ab-86d5-4b0d48550761"));
+        assertEquals(useTypes ? "{\"@UUID\":\"b2f78c98-b07d-42ab-86d5-4b0d48550761\"}" : "\"b2f78c98-b07d-42ab-86d5-4b0d48550761\"", actual, "uuid (useTypes=" + useTypes + ")");
     }
 
-    @Test
-    public void date() {
-        test(() -> java.sql.Date.valueOf("1969-07-20"), "{\"@java.sql.Date\":\"1969-07-20T00:00:00.000 GMT\"}", "\"1969-07-20T00:00:00.000 GMT\"");
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void date(boolean useTypes) {
+        initIssue327Test(useTypes);
+        String actual = toJson(() -> java.sql.Date.valueOf("1969-07-20"));
+        assertEquals(useTypes ? "{\"@java.sql.Date\":\"1969-07-20T00:00:00.000 GMT\"}" : "\"1969-07-20T00:00:00.000 GMT\"", actual, "date (useTypes=" + useTypes + ")");
     }
 
-    @Test
-    public void byteArray() {
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void byteArray(boolean useTypes) {
+        initIssue327Test(useTypes);
         //test(() -> "Buzz".getBytes(StandardCharsets.UTF_8), "{\"@byte[]\":{\"@!binary\":\"QnV6eg==\"}}", "QnV6eg==");
         // not sure what the expected typed output should be
-        test(() -> "Buzz".getBytes(StandardCharsets.UTF_8), "{\"@byte[]\":{\"@!binary\":\"QnV6eg==\"}}", "\"QnV6eg==\"");
+        String actual = toJson(() -> "Buzz".getBytes(StandardCharsets.UTF_8));
+        assertEquals(useTypes ? "{\"@byte[]\":{\"@!binary\":\"QnV6eg==\"}}" : "\"QnV6eg==\"", actual, "byteArray (useTypes=" + useTypes + ")");
     }
 
-    @Test
-    public void intArray() {
-        test(() -> IntStream.range(0, 4).toArray(), "{\"@int[]\":[0,1,2,3 ]}", "[0,1,2,3 ]");
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void intArray(boolean useTypes) {
+        initIssue327Test(useTypes);
+        String actual = toJson(() -> IntStream.range(0, 4).toArray());
+        assertEquals(useTypes ? "{\"@int[]\":[0,1,2,3 ]}" : "[0,1,2,3 ]", actual, "intArray (useTypes=" + useTypes + ")");
     }
 
-    @Test
-    public void file() {
-        test(() -> new File("info.txt"), "{\"@java.io.File\":\"info.txt\"}", "\"info.txt\"");
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void file(boolean useTypes) {
+        initIssue327Test(useTypes);
+        String actual = toJson(() -> new File("info.txt"));
+        assertEquals(useTypes ? "{\"@java.io.File\":\"info.txt\"}" : "\"info.txt\"", actual, "file (useTypes=" + useTypes + ")");
     }
 
-    @Test
-    public void bigDecimal() {
-        test(() -> BigDecimal.TEN, "{\"@java.math.BigDecimal\":\"10\"}", "\"10\"");
+    @MethodSource("wireTypes")
+    @ParameterizedTest(name = "useTypes={0}")
+    public void bigDecimal(boolean useTypes) {
+        initIssue327Test(useTypes);
+        String actual = toJson(() -> BigDecimal.TEN);
+        assertEquals(useTypes ? "{\"@java.math.BigDecimal\":\"10\"}" : "\"10\"", actual, "bigDecimal (useTypes=" + useTypes + ")");
     }
 
-    private <T> void test(final Supplier<T> constructor,
-                          final String expectedTyped,
-                          final String expected) {
+    private <T> String toJson(final Supplier<T> constructor) {
         final Wire wire = new JSONWire().useTypes(useTypes);
         final T target = constructor.get();
 
         wire.getValueOut()
                 .object(target);
         final String actual = wire.toString();
-        System.out.println("actual = " + actual);
         JsonUtil.assertBalancedBrackets(actual);
-        if (useTypes)
-            assertEquals(expectedTyped, actual);
-        else
-            assertEquals(expected, actual);
+        return actual;
     }
 }

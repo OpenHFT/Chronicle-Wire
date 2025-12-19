@@ -3,11 +3,11 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // Unit test class extending from WireTestCommon to get basic setup for the Chronicle Wire tests.
 @SuppressWarnings({"deprecation", "removal"})
@@ -17,29 +17,29 @@ public class StringConsumerMarshallableOutTest extends net.openhft.chronicle.wir
     @Test
     public void saysYaml() {
         final WireType wireType = WireType.YAML_ONLY; // Specify the wire type as YAML.
-        final String expected = "" + // Expected serialized output.
+        final String expected = // Expected serialized output.
                 "say: One\n" +
                 "...\n" +
                 "say: Two\n" +
                 "...\n" +
                 "say: Three\n" +
                 "...\n";
-        doTest(wireType, expected); // Call the test method with YAML wire type and expected output.
+        assertEquals(expected, doTest(wireType), "yaml"); // Call the test method with YAML wire type and expected output.
     }
 
     // Test case to check if serialization to the JSON format works correctly.
     @Test
     public void saysJson() {
         final WireType wireType = WireType.JSON_ONLY; // Specify the wire type as JSON.
-        final String expected = "" + // Expected serialized output.
+        final String expected = // Expected serialized output.
                 "{\"say\":\"One\"}\n" +
                 "{\"say\":\"Two\"}\n" +
                 "{\"say\":\"Three\"}\n";
-        doTest(wireType, expected); // Call the test method with JSON wire type and expected output.
+        assertEquals(expected, doTest(wireType), "json"); // Call the test method with JSON wire type and expected output.
     }
 
     // Helper method to perform the serialization test.
-    private void doTest(WireType wireType, String expected) {
+    private String doTest(WireType wireType) {
         StringWriter sw = new StringWriter(); // StringWriter to hold the serialized data.
 
         // Create an instance of MarshallableOut which will write to the StringWriter.
@@ -56,7 +56,7 @@ public class StringConsumerMarshallableOutTest extends net.openhft.chronicle.wir
         says.say("Two");
         says.say("Three");
 
-        assertEquals(expected, sw.toString()); // Check if the serialized output matches the expected output.
+        return sw.toString(); // Check if the serialized output matches the expected output.
     }
 
     // Interface representing a method that can be serialized.

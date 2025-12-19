@@ -9,9 +9,9 @@ import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * The DotNetTest class tests the .NET serialization and deserialization
@@ -46,8 +46,7 @@ public class DotNetTest extends WireTestCommon {
         wire.copyTo(WireType.TEXT.apply(text));
 
         // Validate the converted textual representation against the expected output
-        assertEquals("" +
-                        "userId: andre\n" +
+        assertEquals("userId: andre\n" +
                         "domain: TEST-DOMAIN\n" +
                         "securityToken: SimplePassword\n" +
                         "clientId: \"4b425a18-ab49-4e97-9fe8-e760288144d9\"\n",

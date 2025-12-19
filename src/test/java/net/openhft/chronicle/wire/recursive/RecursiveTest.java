@@ -5,9 +5,9 @@ package net.openhft.chronicle.wire.recursive;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.WireMarshaller;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -16,19 +16,24 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * looking up fields of the class. At time of writing this occurs when checking if the component class
  * of a subfield is a leaf and is only a problem when the component class is the same as the parent class.
  */
-@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
-public class RecursiveTest {
+class RecursiveTest {
 
     @Test
     public void referToBaseClass() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
-        test(new ReferToBaseClass("hello"), new ReferToBaseClass(null));
+        ReferToBaseClass from = new ReferToBaseClass("hello");
+        ReferToBaseClass to = new ReferToBaseClass(null);
+        copyTo(from, to);
+        assertEquals(from.name(), to.name(), "recursive: copyTo referToBaseClass");
     }
 
     @Test
     public void referToSameClass() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
-        test(new ReferToSameClass("test"), new ReferToSameClass(null));
+        ReferToSameClass from = new ReferToSameClass("test");
+        ReferToSameClass to = new ReferToSameClass(null);
+        copyTo(from, to);
+        assertEquals(from.name(), to.name(), "recursive: copyTo referToSameClass");
     }
 
     @Test
@@ -43,8 +48,7 @@ public class RecursiveTest {
         assertNotNull(marshaller);
     }
 
-    private void test(Base from, Base to) {
+    private void copyTo(Base from, Base to) {
         from.copyTo(to);
-        assertEquals(from.name(), to.name());
     }
 }

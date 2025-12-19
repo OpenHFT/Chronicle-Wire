@@ -5,20 +5,18 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.*;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 // This class tests the internal interning behavior of the Wire component.
-@RunWith(Parameterized.class)
 public class WireInternalInternTest extends WireTestCommon {
 
     // Static initializer block to add aliases to the WireInternal component upon class loading.
@@ -27,16 +25,15 @@ public class WireInternalInternTest extends WireTestCommon {
     }
 
     // Field to store the test input value for each test iteration.
-    private final String typeValue;
+    private String typeValue;
 
     // Constructor to set the test input value.
-    public WireInternalInternTest(String typeValue) {
+    public void initWireInternalInternTest(String typeValue) {
         this.typeValue = typeValue;
     }
 
     // This method provides a collection of test data to be used in the parameterized test.
     @NotNull
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         return Stream.of(
                         // A list of date/time related objects for testing.
@@ -67,8 +64,10 @@ public class WireInternalInternTest extends WireTestCommon {
     }
 
     // This test ensures that the marshallable component behaves as expected.
-    @Test
-    public void marshallable() {
+    @MethodSource("combinations")
+    @ParameterizedTest(name = "{0}")
+    public void marshallable(String typeValue) {
+        initWireInternalInternTest(typeValue);
         // Creating a Marshallable object from the test input value.
         Object o = Marshallable.fromString(typeValue);
         // Creating another instance and ensuring that the same instance is returned.

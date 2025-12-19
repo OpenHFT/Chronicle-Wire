@@ -3,9 +3,9 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // Class to test JSON schema generation
 public class GenerateJsonSchemaMainTest extends WireTestCommon {
@@ -17,8 +17,7 @@ public class GenerateJsonSchemaMainTest extends WireTestCommon {
         final String main0 = GenerateJsonSchemaMain.main0(ITop.class.getName());
 
         // Compare the generated schema to the expected schema
-        assertEquals("" +
-                "{\n" +
+        assertEquals("{\n" +
                 "  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n" +
                 "  \"$id\": \"http://json-schema.org/draft-07/schema#\",\n" +
                 "  \"title\": \"Core schema meta-schema\",\n" +

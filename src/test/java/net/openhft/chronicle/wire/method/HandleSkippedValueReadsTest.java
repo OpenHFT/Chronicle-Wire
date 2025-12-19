@@ -11,29 +11,23 @@ import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(Parameterized.class)
-@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
-public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.WireTestCommon {
+class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
-    private final WireType wireType;
+    private WireType wireType;
 
-    public HandleSkippedValueReadsTest(WireType wireType) {
+    public void initHandleSkippedValueReadsTest(WireType wireType) {
         this.wireType = wireType;
     }
 
-    @Parameterized.Parameters(name = "wireType={0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(
                 new Object[]{WireType.BINARY_LIGHT},
@@ -46,17 +40,23 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
         return sw.toString().replace("\r", "");
     }
 
-    @Test
-    public void test() {
-        doTest(false);
+    @MethodSource("data")
+    @ParameterizedTest(name = "wireType={0}")
+    public void test(WireType wireType) {
+        initHandleSkippedValueReadsTest(wireType);
+        String output = doTest(false);
+        assertTrue(output.contains("M meta[one]"), "non-scanning mode should process meta[one] messages");
     }
 
-    @Test
-    public void testScanning() {
-        doTest(true);
+    @MethodSource("data")
+    @ParameterizedTest(name = "wireType={0}")
+    public void testScanning(WireType wireType) {
+        initHandleSkippedValueReadsTest(wireType);
+        String output = doTest(true);
+        assertTrue(output.contains("M meta[one]"), "scanning mode should process meta[one] messages");
     }
 
-    private void doTest(boolean scanning) {
+    private String doTest(boolean scanning) {
         Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         try (DocumentContext dc = wire.writingDocument(true)) {
             dc.wire()
@@ -160,19 +160,26 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
                         "D data[six]\n",
                 asString(sw));
         assertFalse(reader.readOne());
+        return asString(sw);
     }
 
-    @Test
-    public void index2index() {
-        doIndex2index(false);
+    @MethodSource("data")
+    @ParameterizedTest(name = "wireType={0}")
+    public void index2index(WireType wireType) {
+        initHandleSkippedValueReadsTest(wireType);
+        String output = doIndex2index(false);
+        assertTrue(output.contains("M meta[one]"), "non-scanning index2index should process meta[one] messages");
     }
 
-    @Test
-    public void index2indexScanning() {
-        doIndex2index(true);
+    @MethodSource("data")
+    @ParameterizedTest(name = "wireType={0}")
+    public void index2indexScanning(WireType wireType) {
+        initHandleSkippedValueReadsTest(wireType);
+        String output = doIndex2index(true);
+        assertTrue(output.contains("M meta[one]"), "scanning index2index should process meta[one] messages");
     }
 
-    private void doIndex2index(boolean scanning) {
+    private String doIndex2index(boolean scanning) {
         Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         try (DocumentContext dc = wire.writingDocument(true)) {
             dc.wire()
@@ -208,6 +215,7 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
                         "D data[six]\n",
                 asString(sw));
         assertFalse(reader.readOne());
+        return asString(sw);
     }
 
     interface MetaMethod {

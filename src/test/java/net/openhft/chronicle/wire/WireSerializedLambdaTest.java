@@ -11,8 +11,8 @@ import net.openhft.chronicle.core.util.SerializableFunction;
 import net.openhft.chronicle.core.util.SerializableUpdater;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,8 +20,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("unchecked")
 public class WireSerializedLambdaTest extends WireTestCommon {
@@ -33,7 +33,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
     }
 
     // Ensure that the test is not executed for Java versions 21 and above
-    @Before
+    @BeforeEach
     public void notSupportedInJava21() {
         assumeFalse(Jvm.majorVersion() >= 21);
     }
@@ -52,55 +52,58 @@ public class WireSerializedLambdaTest extends WireTestCommon {
     }
 
     // Helper function to test text-based wire formats
-    private static void doTestText(WireType wireType) {
+    private static boolean doTestText(WireType wireType) {
         @NotNull Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
-        SerializableFunction<String, String> fun = String::toUpperCase;
+        try {
+            SerializableFunction<String, String> fun = String::toUpperCase;
 
-        wire.write(() -> "one").object(fun)
-                .write(() -> "two").object(Fun.ADD_A)
-                .write(() -> "three").object(Update.INCR);
+            wire.write(() -> "one").object(fun)
+                    .write(() -> "two").object(Fun.ADD_A)
+                    .write(() -> "three").object(Update.INCR);
 
-        // System.out.println(wire.bytes().toString());
-        // Verify the serialized content of the wire object
-        assertEquals("one: !SerializedLambda {\n" +
-                "  cc: !type net.openhft.chronicle.wire.WireSerializedLambdaTest,\n" +
-                "  fic: net/openhft/chronicle/core/util/SerializableFunction,\n" +
-                "  fimn: apply,\n" +
-                "  fims: (Ljava/lang/Object;)Ljava/lang/Object;,\n" +
-                "  imk: 5,\n" +
-                "  ic: java/lang/String,\n" +
-                "  imn: toUpperCase,\n" +
-                "  ims: ()Ljava/lang/String;,\n" +
-                "  imt: (Ljava/lang/String;)Ljava/lang/String;,\n" +
-                "  ca: [ ]\n" +
-                "}\n" +
-                "two: !Fun ADD_A\n" +
-                "three: !Update INCR\n", wire.bytes().toString());
+            // System.out.println(wire.bytes().toString());
+            // Verify the serialized content of the wire object
+            assertEquals("one: !SerializedLambda {\n" +
+                    "  cc: !type net.openhft.chronicle.wire.WireSerializedLambdaTest,\n" +
+                    "  fic: net/openhft/chronicle/core/util/SerializableFunction,\n" +
+                    "  fimn: apply,\n" +
+                    "  fims: (Ljava/lang/Object;)Ljava/lang/Object;,\n" +
+                    "  imk: 5,\n" +
+                    "  ic: java/lang/String,\n" +
+                    "  imn: toUpperCase,\n" +
+                    "  ims: ()Ljava/lang/String;,\n" +
+                    "  imt: (Ljava/lang/String;)Ljava/lang/String;,\n" +
+                    "  ca: [ ]\n" +
+                    "}\n" +
+                    "two: !Fun ADD_A\n" +
+                    "three: !Update INCR\n", wire.bytes().toString());
 
-        @Nullable Function<String, String> function = wire.read(() -> "one").object(Function.class);
-        assertEquals("HELLO", function.apply("hello"));
+            @Nullable Function<String, String> function = wire.read(() -> "one").object(Function.class);
+            assertEquals("HELLO", function.apply("hello"));
 
-        @Nullable Function<String, String> function2 = wire.read(() -> "two").object(Function.class);
-        assertEquals("helloA", function2.apply("hello"));
+            @Nullable Function<String, String> function2 = wire.read(() -> "two").object(Function.class);
+            assertEquals("helloA", function2.apply("hello"));
 
-        @Nullable Consumer<AtomicLong> updater = wire.read(() -> "three").object(Consumer.class);
-        @NotNull AtomicLong aLong = new AtomicLong();
-        updater.accept(aLong);
-        assertEquals(1, aLong.get());
-
-        wire.bytes().releaseLast();
+            @Nullable Consumer<AtomicLong> updater = wire.read(() -> "three").object(Consumer.class);
+            @NotNull AtomicLong aLong = new AtomicLong();
+            updater.accept(aLong);
+            assertEquals(1, aLong.get());
+            return true;
+        } finally {
+            wire.bytes().releaseLast();
+        }
     }
 
     // Test the serialization and deserialization using TextWire
     @Test
     public void testTextWire() {
-        doTestText(WireType.TEXT);
+        assertTrue(doTestText(WireType.TEXT), "serialized lambda: wireType=TEXT");
     }
 
     // Test the serialization and deserialization using YamlWire
     @Test
     public void testYamlWire() {
-        doTestText(WireType.YAML_ONLY);
+        assertTrue(doTestText(WireType.YAML_ONLY), "serialized lambda: wireType=YAML_ONLY");
     }
 
     // Test the serialization and deserialization using BinaryWire
