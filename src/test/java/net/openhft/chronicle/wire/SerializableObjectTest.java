@@ -265,7 +265,7 @@ final class SerializableObjectTest extends WireTestCommon {
             } else {
                 return Objects.equals(source, source2);
             }
-        } catch (InstantiationException | NotSerializableException | IllegalAccessException t) {
+        } catch (InstantiationException | NotSerializableException | IllegalAccessException | NoSuchMethodException t) {
             return false;
         } catch (Throwable t) {
             System.out.println(aClass + ": " + t);
