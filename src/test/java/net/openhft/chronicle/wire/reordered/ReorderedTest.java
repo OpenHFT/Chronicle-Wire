@@ -135,6 +135,7 @@ public class ReorderedTest extends WireTestCommon {
             wire.write("b").int32(i * 11);
             wire.write("c").int32(i * 111);
 
+           // Reading back the fields in a different order and asserting
             assertEquals(i * 111, wire.read(() -> "c").int32());
             assertEquals(i, wire.read(() -> "a").int32());
             assertEquals(i * 11, wire.read(() -> "b").int32());

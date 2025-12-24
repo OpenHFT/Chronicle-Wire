@@ -76,7 +76,6 @@ public class JSONTypesWithMapsTest extends net.openhft.chronicle.wire.WireTestCo
                 .object(singletonMap("Lewis", f1));
 
         // (Commented out) Printing the bytes to the console for verification.
-        // System.out.println(jsonWire.bytes());
 
         // Expected string representation for the object read back from the wire.
         final String expected = "{Lewis=" + f1 + "}";

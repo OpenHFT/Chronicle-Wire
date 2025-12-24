@@ -91,7 +91,6 @@ public class MarshallableWireTest extends WireTestCommon {
         wire.getValueOut().object(m);
 
         // Uncomment to print wire contents for debug purposes
-        // System.out.println(wire);
 
         // Read back the object from the wire
         @Nullable Object m2 = wire.getValueIn().object();

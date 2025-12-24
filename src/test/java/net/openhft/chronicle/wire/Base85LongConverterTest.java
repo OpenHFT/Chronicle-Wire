@@ -38,7 +38,6 @@ public class Base85LongConverterTest extends WireTestCommon {
     public void parse() {
         // Obtain the singleton instance of Base85LongConverter
         LongConverter c = Base85LongConverter.INSTANCE;
-        // System.out.println(c.asString(-1L));
         // Iterate through predefined strings, validate parsing and string reconstruction
         for (String s : ",a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0".split(",")) {
             // Parse the string into a long value

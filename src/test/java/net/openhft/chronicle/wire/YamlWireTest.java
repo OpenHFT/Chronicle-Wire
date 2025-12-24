@@ -102,7 +102,6 @@ public class YamlWireTest extends AbstractWireTest {
         value.map.put("hello", "world");
         wire.write().object(value); // Write the object to the wire
 
-        // System.out.println(wire);
 
         // Deserialization tests here
         ObjectWithTreeMap value2 = new ObjectWithTreeMap();
@@ -221,7 +220,6 @@ public class YamlWireTest extends AbstractWireTest {
 
         // Convert the binary data to text and read it
         final String textYaml = Wires.fromSizePrefixedBlobs(wire);
-        // System.out.println(textYaml);
         @Nullable Object o = WireType.YAML.fromString(textYaml);
         // Assert the object's string representation is as expected
         Assertions.assertEquals("{map={some={key=value}, some-other={key=value}}}", o.toString(), "binary to text conversion should preserve nested map structure");

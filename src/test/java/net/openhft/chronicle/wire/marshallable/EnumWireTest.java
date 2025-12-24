@@ -80,7 +80,6 @@ public class EnumWireTest extends WireTestCommon {
     // Helper method that serializes an object using the current wire strategy and then deserializes it.
     private <T extends Marshallable> T roundTrip(@NotNull Supplier<T> supplier) {
         Wire wire = serialise(createWire, supplier.get());
-        // System.out.println(wire.bytes());
         try {
             T deserialized = supplier.get();
             deserialized.readMarshallable(wire);

@@ -85,7 +85,6 @@ public class MapWireTest extends WireTestCommon {
         // Serialize the map into the wire format
         wire.getValueOut().marshallable(m);
         // Uncomment the following line to print the wire content
-        // System.out.println(wire);
 
         // Deserialize the map from the wire format
         @Nullable Map m2 = wire.getValueIn().marshallableAsMap(Object.class, Object.class);

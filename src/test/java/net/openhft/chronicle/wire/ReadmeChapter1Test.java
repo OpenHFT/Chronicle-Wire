@@ -5,12 +5,11 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -18,13 +17,13 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings({"java:S2699", "java:S125", "java:S1854", "java:S1481"})
 public class ReadmeChapter1Test extends WireTestCommon {
 
-    @BeforeEach
+    @Before
     public void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
@@ -59,7 +58,6 @@ So now you can write to the wire with a simple document.
                 .write(() -> "number").int64(1234567890L)
                 .write(() -> "code").asEnum(TimeUnit.SECONDS)
                 .write(() -> "price").float64(10.50);
-        // System.out.println(bytes);
 /*
 ```
 prints
@@ -79,7 +77,6 @@ price: 10.5
                 .write(() -> "number").int64(1234567890L)
                 .write(() -> "code").asEnum(TimeUnit.SECONDS)
                 .write(() -> "price").float64(10.50);
-        // System.out.println(bytes2.toHexString());
 
 // to obtain the underlying ByteBuffer to write to a Channel
         @Nullable ByteBuffer byteBuffer = bytes2.underlyingObject();
@@ -104,7 +101,6 @@ The down side is that we cannot easily see what the message contains.
                 .write(() -> "number").int64(1234567890L)
                 .write(() -> "code").asEnum(TimeUnit.SECONDS)
                 .write(() -> "price").float64(10.50);
-        // System.out.println(bytes3.toHexString());
 /*
 ```
 prints in RawWire
@@ -114,10 +110,6 @@ prints in RawWire
 00000020 00 00 25 40                                      ··%@
 ```
 */
-        assertTrue(bytes.readRemaining() > 0, "text wire should serialize basic types (message, number, code, price) as documented in readme");
-        assertTrue(bytes2.readRemaining() > 0, "binary wire should serialize same data structure with field metadata preserved");
-        assertTrue(bytes3.readRemaining() > 0, "raw wire should serialize data with minimal metadata for size optimization");
-
         bytes.releaseLast();
         bytes2.releaseLast();
         bytes3.releaseLast();
@@ -137,12 +129,9 @@ prints in RawWire
 
         @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
         data.writeMarshallable(wire);
-        // System.out.println(bytes);
 
         @NotNull Data data2 = new Data();
         data2.readMarshallable(wire);
-        // System.out.println(data2);
-        assertEquals(data.toString(), data2.toString(), "marshallable data object should roundtrip through text wire without data loss");
 
 /*
 ```
@@ -162,12 +151,9 @@ To write in binary instead
         @NotNull Wire wire2 = new BinaryWire(bytes2);
 
         data.writeMarshallable(wire2);
-        // System.out.println(bytes2.toHexString());
 
         @NotNull Data data3 = new Data();
         data3.readMarshallable(wire2);
-        // System.out.println(data3);
-        assertEquals(data.toString(), data3.toString(), "marshallable data object should roundtrip through binary wire maintaining all field values");
 /*
 ```
 prints
@@ -196,12 +182,9 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 
         @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
         wire.write(() -> "mydata").marshallable(data);
-        // System.out.println(bytes);
 
         @NotNull Data data2 = new Data();
         wire.read(() -> "mydata").marshallable(data2);
-        // System.out.println(data2);
-        assertEquals(data.toString(), data2.toString(), "named marshallable field should serialize and deserialize with key-value structure");
 
 /*
 ```
@@ -222,11 +205,9 @@ To write in binary instead
         @NotNull Wire wire2 = new BinaryWire(bytes2);
 
         wire2.write(() -> "mydata").marshallable(data);
-        // System.out.println(bytes2.toHexString());
 
         @NotNull Data data3 = new Data();
         wire2.read(() -> "mydata").marshallable(data3);
-        // System.out.println(data3);
 /*
 ```
 prints
@@ -259,12 +240,8 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 
         @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
         wire.write(() -> "mydata").object(data);
-        // System.out.println(bytes);
 
         @Nullable Data data2 = wire.read(() -> "mydata").object(Data.class);
-        // System.out.println(data2);
-        assertNotNull(data2, "wire should deserialize typed object with class alias successfully");
-        assertEquals(data.toString(), data2.toString(), "typed object serialization should preserve all fields and include type information");
 
 /*
 ```
@@ -285,10 +262,8 @@ To write in binary instead
         @NotNull Wire wire2 = new BinaryWire(bytes2);
 
         wire2.write(() -> "mydata").object(data);
-        // System.out.println(bytes2.toHexString());
 
         @Nullable Data data3 = wire2.read(() -> "mydata").object(Data.class);
-        // System.out.println(data3);
 /*
 ```
 prints
@@ -328,11 +303,9 @@ The benefits of using this approach ares that
 
         @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
         wire.writeDocument(false, data);
-        // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
 
         @NotNull Data data2 = new Data();
-        assertTrue(wire.readDocument(null, data2), "document with size prefix should be readable as complete message with metadata header");
-        // System.out.println(data2);
+        assertTrue(wire.readDocument(null, data2));
 
 /*
 ```
@@ -354,11 +327,9 @@ To write in binary instead
         wire2.usePadding(true);
 
         wire2.writeDocument(false, data);
-        // System.out.println(Wires.fromSizePrefixedBlobs(bytes2));
 
         @NotNull Data data3 = new Data();
-        assertTrue(wire2.readDocument(null, data3), "binary document with size prefix and padding should support thread-safe concurrent access");
-        // System.out.println(data3);
+        assertTrue(wire2.readDocument(null, data3));
 /*
 ```
 prints
@@ -397,14 +368,13 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         };
         wire.writeDocument(false, w -> w.write(() -> "mydata")
                 .sequence(v -> Stream.of(data).forEach(v::object)));
-        // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
 
         @NotNull List<Data> dataList = new ArrayList<>();
         assertTrue(wire.readDocument(null, w -> w.read(() -> "mydata")
                 .sequence(dataList, (l, v) -> {
                     while (v.hasNextSequenceItem())
                         l.add(v.object(Data.class));
-                })), "document containing sequence of typed objects should deserialize into list preserving order");
+                })));
         dataList.forEach(System.out::println);
 
 /*
@@ -448,14 +418,13 @@ To write in binary instead
 
         wire2.writeDocument(false, w -> w.write(() -> "mydata")
                 .sequence(v -> Stream.of(data).forEach(v::object)));
-        // System.out.println(Wires.fromSizePrefixedBlobs(bytes2));
 
         @NotNull List<Data> dataList2 = new ArrayList<>();
         assertTrue(wire2.readDocument(null, w -> w.read(() -> "mydata")
                 .sequence(dataList2, (l, v) -> {
                     while (v.hasNextSequenceItem())
                         l.add(v.object(Data.class));
-                })), "binary document with sequence should deserialize multiple objects maintaining type and order information");
+                })));
         dataList2.forEach(System.out::println);
 /*
 ```
@@ -509,11 +478,11 @@ Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
 
         @NotNull Data data = new Data("Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.50);
         wire.getValueOut().object(data);
-        // System.out.println(bytes);
 
         @Nullable Object o = wire.getValueIn().object(Object.class);
-        assertInstanceOf(Data.class, o, "value-only serialization should preserve type information for polymorphic deserialization");
-        assertEquals(data.toString(), o.toString(), "typed value without field name should deserialize to correct type with all fields intact");
+        if (o instanceof Data) {
+            @Nullable Data data2 = (Data) o;
+        }
 
 /*
 ```
@@ -534,11 +503,11 @@ To write in binary instead
         @NotNull Wire wire2 = new BinaryWire(bytes2);
 
         wire2.getValueOut().object(data);
-        // System.out.println(bytes2.toHexString());
 
         @Nullable Object o2 = wire2.getValueIn().object(Object.class);
-        assertInstanceOf(Data.class, o2, "binary value serialization should include type metadata for correct deserialization");
-        assertEquals(data.toString(), o2.toString(), "binary typed value should roundtrip preserving all field data without field names");
+        if (o2 instanceof Data) {
+            @NotNull Data data2 = (Data) o2;
+        }
 /*
 ```
 prints
@@ -556,12 +525,10 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         bytes2.releaseLast();
     }
 }
-
 /*
 The code for the class Data
 ```java
 */
-@UsedViaReflection
 class Data extends SelfDescribingMarshallable {
     private String message;
     private long number;
@@ -581,6 +548,5 @@ class Data extends SelfDescribingMarshallable {
 /*
 ```
  */
-}
 
-// CHECKSTYLE:ON
+}

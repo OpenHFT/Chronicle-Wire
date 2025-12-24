@@ -58,7 +58,6 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
         wire.classLookup(wrap1);
 
         wire.writeDocument(false, w -> new MDTO2(1, 2, "3").writeMarshallable(w));
-        // System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
@@ -84,7 +83,6 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
         CLASS_ALIASES.addAlias(MDTO1.class, "MDTO");
 
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new MDTO1(1)));
-        // System.out.println(Wires.fromSizePrefixedBlobs(wire));
         ClassLookup wrap2 = CLASS_ALIASES.wrap();
         wrap2.addAlias(MDTO2.class, "MDTO");
         wire.classLookup(wrap2);
@@ -121,7 +119,6 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
 
         // Write a new instance of MDTO2 to the wire
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new MDTO2(1, 2, "3")));
-        // System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
         // Wrap the CLASS_ALIASES again and add an alias for MDTO2
         ClassLookup wrap1 = CLASS_ALIASES.wrap();

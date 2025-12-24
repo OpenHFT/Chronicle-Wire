@@ -38,11 +38,12 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
         String value = Wires.fromSizePrefixedBlobs(wire.bytes());
 
         // Ensure the serialised output matches the expected format
-        assertEquals("--- !!data\n" +
-                        "any-key: {\n" +
-                        "  name: hello world,\n" +
-                        "  count: 0\n" +
-                        "}\n",
+        assertEquals("" +
+                "--- !!data\n" +
+                "any-key: {\n" +
+                "  name: hello world,\n" +
+                "  count: 0\n" +
+                "}\n",
                 value);
 
         // Release the ByteBuffer's resources

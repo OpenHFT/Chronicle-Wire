@@ -50,7 +50,6 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
 
         // Writing a document with DTO1 data
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO1(1)));
-        // System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
         // Switching the alias to DTO2 class
         CLASS_ALIASES.addAlias(DTO2.class, "DTO");
@@ -86,7 +85,6 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
 
         // Writing a document with DTO2 data
         wire.writeDocument(false, w -> w.getValueOut().typedMarshallable(new DTO2(1, 2, 3)));
-        // System.out.println(Wires.fromSizePrefixedBlobs(wire));
 
         // Switching the alias to DTO1 class
         CLASS_ALIASES.addAlias(DTO1.class, "DTO");

@@ -77,7 +77,6 @@ public class MessageRoutingExample {
         routing.to("France").product(new Product("Cheese"));
         routing.to("America").product(new Product("Popcorn"));
 
-        //   System.out.println(wire);
         System.out.println(wire.bytes().toHexString());
 
         MethodReader methodReader = wire.methodReader((Routing) destinationMap::get);

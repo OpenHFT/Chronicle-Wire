@@ -80,11 +80,9 @@ public class BinaryWireWithMappedBytesTest extends WireTestCommon {
             // Force the old memory to be released and assert the reference count after
             bytes.compareAndSwapInt(1 << 20, 1, 1);
             assertEquals(expected + 3, ((Byteable) a).bytesStore().refCount());
-            // System.out.println(a + " " + b + " " + c);
 
             bytes.compareAndSwapInt(2 << 20, 1, 1);
             assertEquals(expected + 3, ((Byteable) a).bytesStore().refCount());
-            // System.out.println(a + " " + b + " " + c);
 
         }
 

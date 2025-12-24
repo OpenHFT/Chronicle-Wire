@@ -18,7 +18,6 @@ public class Base64LongConverterTest extends WireTestCommon {
     public void parse() {
         // Obtain the singleton instance of Base64LongConverter
         LongConverter c = Base64LongConverter.INSTANCE;
-        // System.out.println(c.asString(-1L));
         // Iterate through predefined strings, validate conversion from string to long and back to string
         for (String s : ",a,ab,abc,abcd,ab.de,123_56,1234567,12345678,123456789,z23456789,z234567890,O_________".split(",")) {
             long v = c.parse(s);

@@ -91,7 +91,6 @@ public class JSON222Test extends WireTestCommon {
         try (@NotNull InputStream in = Files.newInputStream(file.toPath())) {
             in.read(bytes);
         }
-        // System.out.println(file + " " + new String(bytes, "UTF-8"));
         // Convert byte array to Bytes object for further processing
         Bytes<?> b = Bytes.wrapForRead(bytes);
         @NotNull Wire wire = new JSONWire(b);
@@ -113,7 +112,6 @@ public class JSON222Test extends WireTestCommon {
                 out3.getValueOut()
                         .object(object);
 
-                // System.out.println("As YAML " + bytes3);
                 // Validate the read object with an external YAML parser
                 parseWithSnakeYaml(bytes3.toString());
                 @Nullable Object object3 = out3.getValueIn()

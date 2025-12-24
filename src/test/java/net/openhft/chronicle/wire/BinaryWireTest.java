@@ -1048,7 +1048,6 @@ public class BinaryWireTest extends WireTestCommon {
 
         WireBytesTestSupport.exerciseBytesRoundTrip(wire, WireBytesTestSupport.helloBytes(), WireBytesTestSupport.quoteBytes(), allBytes);
 
-        // System.out.println(bytes.toDebugString()); // Debugging line commented out
 
         // Read the byte arrays from the wire and assert they match the written values
         @SuppressWarnings("rawtypes")
@@ -1083,7 +1082,6 @@ public class BinaryWireTest extends WireTestCommon {
         wire.write(() -> "B").marshallable(mtB);
 
         // Uncomment the line below to print the wire bytes in debug format.
-        // System.out.println(wire.bytes().toDebugString(400));
 
         // Check the wire content against expected values.
         checkWire(wire,
@@ -1322,7 +1320,6 @@ public class BinaryWireTest extends WireTestCommon {
         // Writing an array of three strings to the wire
         @NotNull Object[] threeObjects = {"abc", "def", "ghi"};
         wire.write("b").object(threeObjects);
-        // System.out.println(wire.asText());
 
         // Reading the string array back from the wire and asserting its contents
         @Nullable Object[] object2 = wire.read()
@@ -1374,7 +1371,6 @@ public class BinaryWireTest extends WireTestCommon {
         // Reading events back from the wire and asserting their correctness
         try (DocumentContext dc = w.readingDocument()) {
 
-            // System.out.println(Wires.fromSizePrefixedBlobs(dc));
 
             StringBuilder sb = new StringBuilder();
 

@@ -53,7 +53,6 @@ public class ConventionsTest extends WireTestCommon {
             // Check if type is a subclass of Number
             if (Number.class.isAssignableFrom(type)) {
                 // Retrieve the MIN_VALUE field from the type class
-                // System.out.println("" + type + "");
                 final Field value = type.getField("MIN_VALUE");
                 extected = value.get(type);
             } else {

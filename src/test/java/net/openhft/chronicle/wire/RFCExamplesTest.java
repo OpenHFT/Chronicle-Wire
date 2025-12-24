@@ -36,7 +36,6 @@ public class RFCExamplesTest extends WireTestCommon {
         text.usePadding(true);
         writeMessageOne(text);
 
-        // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         // Validate the serialization result.
         assertEquals("--- !!meta-data\n" +
                         "csp: ///service-lookup\n" +
@@ -106,7 +105,6 @@ public class RFCExamplesTest extends WireTestCommon {
         clear(bytes);
         writeMessageTwo(wire);
 
-        // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         // Validate the binary format of the put operations.
         assertEquals("[pos: 0, rlim: 128, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@Ãcspî//server1/testÃcid¡⒈\\u008F\\u008F\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒈Åvalueåhello\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒉Åvalueåworld\\u008F\\u001C٠٠٠Ãput\\u0082⒗٠٠٠Ãkey¡⒊Åvalueãbye\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠٠",
                 bytes.toDebugString());
@@ -148,7 +146,6 @@ public class RFCExamplesTest extends WireTestCommon {
                                                 .write(() -> "valueType").typeLiteral("String"))));
 
         // Uncomment to print the serialized data.
-        // System.out.println(wire);
     }
 
     /**

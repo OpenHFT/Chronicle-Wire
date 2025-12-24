@@ -107,7 +107,6 @@ public class MarshallableTest extends WireTestCommon {
         dto2.three = "2018-11-02";
 
         String s = wireType.asString(dto2);
-        // System.out.println(s);
         DTO1 dto1 = wireType.fromString(DTO1.class, s);
         return wireType.asString(dto1);
     }

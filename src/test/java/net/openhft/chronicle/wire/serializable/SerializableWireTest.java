@@ -80,7 +80,6 @@ public class SerializableWireTest extends WireTestCommon {
 
             // Write the serializable object to wire
             wire.getValueOut().object(m);
-            // System.out.println(wire);
 
             // Read the object back from wire
             @Nullable Object m2 = wire.getValueIn().object();

@@ -284,8 +284,7 @@ public class BinaryWire2Test extends WireTestCommon {
             dc.wire().write().object(new Date(1234567890000L));
         }
         try (final DocumentContext dc = wire.readingDocument()) {
-            // System.out.println(Wires.fromSizePrefixedBlobs(dc));
-            Assertions.assertEquals(1234567890000L, dc.wire().read().object(Date.class).getTime(), "date timestamp should deserialize with correct millisecond value from binary wire");
+            Assert.assertEquals(1234567890000L, dc.wire().read().object(Date.class).getTime());
         }
     }
 
@@ -721,7 +720,6 @@ public class BinaryWire2Test extends WireTestCommon {
                 .marshallable(w -> w.write("key").text("1")
                         .write("value")
                         .object(expected)));
-        // System.out.println(wire);
 
         // Read back the stored byte array and validate its content
         AtomicReference<String> actualKey = new AtomicReference<>();
@@ -743,7 +741,6 @@ public class BinaryWire2Test extends WireTestCommon {
         @NotNull Wire wire = createWire();
         @NotNull Random rand = new Random();
         for (int i = 0; i < 70000; i += rand.nextInt(i + 1) + 1) {
-            // System.out.println(i);
             wire.clear();
             @NotNull final byte[] fromBytes = new byte[i];
             wire.writeDocument(false, w -> w.write("bytes").bytes(fromBytes));
@@ -1080,7 +1077,6 @@ public class BinaryWire2Test extends WireTestCommon {
             // Asserting that the read value is the same as the written value
             assertEquals(d, v, 0.0, "sequential decimal values 0.00 to 1.99 should round-trip correctly through binary wire");
             final long size = wire.bytes().readPosition();
-            // System.out.println(d + " size: " + size);
         }
     }
 

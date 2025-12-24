@@ -40,7 +40,6 @@ public class ShortTextLongConverterTest extends WireTestCommon {
     @Test
     public void parse() {
         LongConverter c = ShortTextLongConverter.INSTANCE;
-        // System.out.println(c.asString(-1L));
         for (String s : ",a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0".split(",")) {
             long v = c.parse(s);
             StringBuilder sb = new StringBuilder();

@@ -95,7 +95,6 @@ public class UnicodeStringTest extends WireTestCommon {
         wire.writeDocument(false, w -> w.write(() -> "msg").text(s));
 
         // Uncomment below to print the representation of the serialized data
-        // System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         // Read the string from the wire and validate it matches the original
         String[] actual = {null};

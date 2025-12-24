@@ -25,7 +25,6 @@ public class TextWireCompatibilityTest extends WireTestCommon {
         wire.getValueOut().object(new SubIncompatibleObject());
 
         // Uncomment the below line to debug and view the wire output
-        // System.out.println(wire.toString());
 
         // Read an object from the wire and ensure it's not null
         Assertions.assertNotNull(wire.getValueIn().object());

@@ -44,7 +44,6 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
         String cs = myDto2.toString();
 
         // Deserialize the string representation back to a MyDto2 object
-        // System.out.println(cs);
         MyDto2 o = Marshallable.fromString(cs);
 
         // Verify the size of the strings list in the deserialized object

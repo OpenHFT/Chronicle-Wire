@@ -102,7 +102,6 @@ public class TextWireTest extends AbstractWireTest {
 
         // Write different bytes sequences to the wire
         WireBytesTestSupport.exerciseBytesRoundTrip(wire, WireBytesTestSupport.helloBytes(), WireBytesTestSupport.quoteBytes(), allBytes);
-        // System.out.println(bytes.toString());
 
         // Read back the bytes sequences and validate their content
         @NotNull Bytes<?> allBytes2 = allocateElasticOnHeap();
@@ -285,7 +284,6 @@ public class TextWireTest extends AbstractWireTest {
 
         // Convert the binary blob into a string representation.
         final String textYaml = Wires.fromSizePrefixedBlobs(b);
-        // System.out.println(textYaml);
         // Deserialize the TEXT into an object and verify its structure.
         @Nullable Object o = WireType.TEXT.fromString(textYaml);
         Assertions.assertEquals("{map={some={key=value}, some-other={key=value}}}", o.toString(), "binary wire should convert to text format preserving nested map structure");
@@ -1242,7 +1240,6 @@ public class TextWireTest extends AbstractWireTest {
         for (Class<?> clz : new Class[]{byte.class, char.class, int.class, long.class, double.class, float.class, boolean.class}) {
             // Create a Wire instance and append data with the current class type to its bytes
             Wire wire = createWire();
-            // System.out.println("Class: " + clz);
             wire.bytes().append("a: [ !type ").append(clz.getName()).append("[] ], b: !type String[], c: hi");
 
             // Verify the data types and content retrieved from the wire for the current class type
