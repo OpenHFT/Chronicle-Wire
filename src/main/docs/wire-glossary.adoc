@@ -4,9 +4,6 @@
 :toclevels: 2
 :source-highlighter: rouge
 
-:sectnums:
-:lang: en-GB
-
 Purpose: To provide clear definitions for common terms and concepts used in Chronicle Wire and its related ecosystem.
 
 [glossary]

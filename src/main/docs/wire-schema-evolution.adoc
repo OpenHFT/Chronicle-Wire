@@ -2,10 +2,10 @@
 :toc:
 :lang: en-GB
 :source-highlighter: rouge
-
-Purpose: To provide an in-depth exploration of schema evolution capabilities and mechanisms within Chronicle Wire, including implementation details and advanced strategies.
 :sectnums:
 :lang: en-GB
+
+Purpose: To provide an in-depth exploration of schema evolution capabilities and mechanisms within Chronicle Wire, including implementation details and advanced strategies.
 
 == Introduction to Schema Evolution in Chronicle Wire
 
@@ -135,7 +135,7 @@ Secondary Mechanism :: When there is no default constructor.
 *Collections :: If a `List` or `Map` field is defined in the Java class but missing in the input stream, it will be initialised to `null`.
 It is the responsibility of the application logic (e.g., in a constructor or a custom `readMarshallable` method) to initialise it to an empty collection if that's the desired default behaviour.
 +
-[source,java]
+[source,java,opts=novalidate]
 ----
 // In readMarshallable or constructor:
 if (this.myList == null) {
@@ -276,7 +276,7 @@ Custom `readMarshallable` / `writeMarshallable` Implementations::
 * *Reading Old Versions:* Inside `readMarshallable(WireIn wire)` of a newer class version, you can inspect the incoming wire for tell-tale signs of an older version (e.g., presence/absence of certain fields, an explicit version field).
 Based on this, you can have conditional logic to read fields that existed in the old version and map/transform them to the new structure.
 +
-[source,java]
+[source,java,opts=novalidate]
 ----
 // In V2 class's readMarshallable
 if (wire.read("oldField").isPresent()) { // Check if old field exists

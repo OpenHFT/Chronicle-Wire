@@ -7,6 +7,7 @@ import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
+import net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor;
 import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
 import org.jetbrains.annotations.NotNull;
 
@@ -210,8 +211,8 @@ public final class StreamsUtil {
         /**
          * Constructs an AbstractPrimitiveSpliterator instance with the provided iterator, advancer, and forEachRemainer.
          *
-         * @param iterator The iterator to be used by this spliterator.
-         * @param advancer The advancer to dictate the advance mechanism of this iterator.
+         * @param iterator        The iterator to be used by this spliterator.
+         * @param advancer        The advancer to dictate the advance mechanism of this iterator.
          * @param forEachRemainer The bi-consumer to process remaining elements from the iterator.
          */
         protected AbstractPrimitiveSpliterator(@NotNull final I iterator,
@@ -296,7 +297,7 @@ public final class StreamsUtil {
         /**
          * Constructs an instance of the ExcerptIterator with the provided tailer and extractor.
          *
-         * @param tailer The data source from which documents will be read.
+         * @param tailer    The data source from which documents will be read.
          * @param extractor The extractor used to transform the raw document into an object of type T.
          */
         public ExcerptIterator(@NotNull final MarshallableIn tailer,
@@ -359,7 +360,7 @@ public final class StreamsUtil {
         /**
          * Constructs an instance of the ExcerptIteratorOfLong with the provided tailer and extractor.
          *
-         * @param tailer The data source from which documents will be read.
+         * @param tailer    The data source from which documents will be read.
          * @param extractor The extractor used to transform the raw document into a long value.
          */
         public ExcerptIteratorOfLong(@NotNull final MarshallableIn tailer,
@@ -422,11 +423,12 @@ public final class StreamsUtil {
         /**
          * Constructs an instance of the ExcerptIteratorOfDouble with the provided tailer and extractor.
          *
-         * @param tailer The data source from which documents will be read.
+         * @param tailer    The data source from which documents will be read.
          * @param extractor The extractor used to transform the raw document into a double value.
          */
-        public ExcerptIteratorOfDouble(@NotNull final MarshallableIn tailer,
-                                       @NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor) {
+        public ExcerptIteratorOfDouble(
+                @NotNull final MarshallableIn tailer,
+                @NotNull final ToDoubleDocumentExtractor extractor) {
             this.tailer = tailer;
             this.extractor = extractor;
         }

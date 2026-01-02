@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire.domestic.stream;
 
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
+import net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor;
 import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
 import net.openhft.chronicle.wire.internal.stream.StreamsUtil;
 import org.jetbrains.annotations.NotNull;
@@ -104,8 +105,9 @@ public final class Streams {
      */
     @NotNull
     @Deprecated(/* to be removed in 2027 */)
-    public static DoubleStream ofDouble(@NotNull final MarshallableIn documentProvider,
-                                        @NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor) {
+    public static DoubleStream ofDouble(
+            @NotNull final MarshallableIn documentProvider,
+            @NotNull final ToDoubleDocumentExtractor extractor) {
         requireNonNull(documentProvider);
         requireNonNull(extractor);
         return StreamSupport.doubleStream(spliteratorOfDouble(documentProvider, extractor), false);
@@ -131,8 +133,9 @@ public final class Streams {
      * @throws NullPointerException if any of the provided parameters are {@code null}
      */
     @NotNull
-    public static <T> Spliterator<T> spliterator(@NotNull final MarshallableIn documentProvider,
-                                                 @NotNull final DocumentExtractor<T> extractor) {
+    public static <T> Spliterator<T> spliterator(
+            @NotNull final MarshallableIn documentProvider,
+            @NotNull final DocumentExtractor<T> extractor) {
         requireNonNull(documentProvider);
         requireNonNull(extractor);
         return new StreamsUtil.VanillaSpliterator<>(iterator(documentProvider, extractor));
@@ -157,8 +160,9 @@ public final class Streams {
      * @throws NullPointerException if any of the provided parameters are {@code null}
      */
     @NotNull
-    public static Spliterator.OfLong spliteratorOfLong(@NotNull final MarshallableIn documentProvider,
-                                                       @NotNull final ToLongDocumentExtractor extractor) {
+    public static Spliterator.OfLong spliteratorOfLong(
+            @NotNull final MarshallableIn documentProvider,
+            @NotNull final ToLongDocumentExtractor extractor) {
         requireNonNull(documentProvider);
         requireNonNull(extractor);
         return new StreamsUtil.VanillaSpliteratorOfLong(iteratorOfLong(documentProvider, extractor));
@@ -183,8 +187,9 @@ public final class Streams {
      * @throws NullPointerException if any of the provided parameters are {@code null}
      */
     @NotNull
-    public static Spliterator.OfDouble spliteratorOfDouble(@NotNull final MarshallableIn documentProvider,
-                                                           @NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor) {
+    public static Spliterator.OfDouble spliteratorOfDouble(
+            @NotNull final MarshallableIn documentProvider,
+            @NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor) {
         requireNonNull(documentProvider);
         requireNonNull(extractor);
         return new StreamsUtil.VanillaSpliteratorOfDouble(iteratorOfDouble(documentProvider, extractor));
@@ -206,8 +211,9 @@ public final class Streams {
      * @throws NullPointerException if any of the provided parameters are {@code null}
      */
     @NotNull
-    public static <T> Iterator<T> iterator(@NotNull final MarshallableIn documentProvider,
-                                           @NotNull final DocumentExtractor<T> extractor) {
+    public static <T> Iterator<T> iterator(
+            @NotNull final MarshallableIn documentProvider,
+            @NotNull final DocumentExtractor<T> extractor) {
         requireNonNull(documentProvider);
         requireNonNull(extractor);
         return new StreamsUtil.ExcerptIterator<>(documentProvider, extractor);
@@ -228,8 +234,9 @@ public final class Streams {
      * @throws NullPointerException if any of the provided parameters are {@code null}
      */
     @NotNull
-    public static PrimitiveIterator.OfLong iteratorOfLong(@NotNull final MarshallableIn documentProvider,
-                                                          @NotNull final ToLongDocumentExtractor extractor) {
+    public static PrimitiveIterator.OfLong iteratorOfLong(
+            @NotNull final MarshallableIn documentProvider,
+            @NotNull final ToLongDocumentExtractor extractor) {
         requireNonNull(documentProvider);
         requireNonNull(extractor);
         return new StreamsUtil.ExcerptIteratorOfLong(documentProvider, extractor);
@@ -250,8 +257,9 @@ public final class Streams {
      * @throws NullPointerException if any of the provided parameters are {@code null}
      */
     @NotNull
-    public static PrimitiveIterator.OfDouble iteratorOfDouble(@NotNull final MarshallableIn documentProvider,
-                                                              @NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor) {
+    public static PrimitiveIterator.OfDouble iteratorOfDouble(
+            @NotNull final MarshallableIn documentProvider,
+            @NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor) {
         requireNonNull(documentProvider);
         requireNonNull(extractor);
 

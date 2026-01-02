@@ -2,9 +2,7 @@
 Per Minborg
 :sectnums:
 :toc: macro
-:icons: font
 :lang: en-GB
-:toclevels: 3
 :css-signature: demo
 :source-highlighter: rouge
 

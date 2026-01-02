@@ -223,6 +223,9 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
     public void flip(int bitIndex) {
         throwExceptionIfClosed();
 
+        if (bitIndex < 0)
+            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
+
         int wordIndex = toWordIndex(bitIndex);
         expandTo(wordIndex);
         caret(words[wordIndex], 1L << bitIndex);
@@ -345,6 +348,9 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
     public void clear(int bitIndex) {
         throwExceptionIfClosed();
 
+        if (bitIndex < 0)
+            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
+
         int wordIndex = toWordIndex(bitIndex);
         if (wordIndex >= getWordsInUse())
             return;
@@ -383,6 +389,9 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
     public boolean get(int bitIndex) {
         throwExceptionIfClosed();
 
+        if (bitIndex < 0)
+            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
+
         int wordIndex = toWordIndex(bitIndex);
         return (wordIndex < getWordsInUse())
                 && ((words[wordIndex].getValue() & (1L << bitIndex)) != 0);
@@ -398,6 +407,9 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
     @Override
     public int nextSetBit(int fromIndex) {
         throwExceptionIfClosed();
+
+        if (fromIndex < 0)
+            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
 
         int u = toWordIndex(fromIndex);
 

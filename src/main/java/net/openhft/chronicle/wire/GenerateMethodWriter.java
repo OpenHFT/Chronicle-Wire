@@ -643,21 +643,24 @@ public class GenerateMethodWriter {
             body.append("// updateInterceptor\n" + "if (! this." + UPDATE_INTERCEPTOR_FIELD + ".update(\"").append(dm.getName()).append("\", ").append(name).append(")) return").append(returnDefault(returnType)).append(";\n");
         }
 
-        body.append("MarshallableOut out = this.out.get();\n");
-        final boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
-        final boolean passthrough = returnType == DocumentContext.class;
+        body.append("MarshallableOut _out_ = this.out.get();\n");
+        boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
+        boolean passthrough = returnType == DocumentContext.class;
 
         // MarshallableOut setup logic
         body.append(passthrough ? "final " : "try (final ")
                 .append(WRITE_DOCUMENT_CONTEXT)
                 .append(" _dc_ = (")
-                .append(WRITE_DOCUMENT_CONTEXT).append(") out.acquireWritingDocument(")
+                .append(WRITE_DOCUMENT_CONTEXT).append(") _out_.acquireWritingDocument(")
                 .append(metaData)
-                .append(')')
-                .append(passthrough ? ";\n" : ") {\n")
-                .append("try {\n")
-                .append("_dc_.chainedElement(").append(!terminating && !passthrough).append(");\n")
-                .append("if (out.recordHistory()) MessageHistory.writeHistory(_dc_);\n");
+                .append(")");
+        if (passthrough)
+            body.append(";\n");
+        else
+            body.append(") {\n");
+        body.append("try {\n");
+        body.append("_dc_.chainedElement(" + (!terminating && !passthrough) + ");\n");
+        body.append("if (_out_.recordHistory()) MessageHistory.writeHistory(_dc_);\n");
 
         int startJ = 0;
 
@@ -693,7 +696,7 @@ public class GenerateMethodWriter {
 
         // Synchronize the method if it belongs to the Syncable class
         if (dm.getDeclaringClass() == Syncable.class) {
-            body.append(Syncable.class.getName()).append(".syncIfAvailable(out);\n");
+            body.append(Syncable.class.getName()).append(".syncIfAvailable(_out_);\n");
         }
 
         // Close the method body if it's not a passthrough method

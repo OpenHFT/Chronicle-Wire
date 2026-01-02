@@ -170,7 +170,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * a certain type for the field's value.
      *
      * @param <T>    field type
-     * @param name   The name of the field.
+     * @param name The name of the field.
      * @param tClass The expected class/type of the field's value.
      * @return The value of the specified field.
      * @throws NoSuchFieldException if the field does not exist

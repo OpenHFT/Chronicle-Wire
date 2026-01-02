@@ -39,7 +39,7 @@ class WireObjectOutput implements ObjectOutput {
     }
 
     /**
-     * Writes one unsigned byte via .
+     * Writes one unsigned byte via {@link ValueOut#uint8(long)}.
      */
     @Override
     public void write(int b) {
@@ -78,7 +78,7 @@ class WireObjectOutput implements ObjectOutput {
     }
 
     /**
-     * Writes a boolean via .
+     * Writes a boolean via {@link ValueOut#bool(boolean)}.
      */
     @Override
     public void writeBoolean(boolean v) {

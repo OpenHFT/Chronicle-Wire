@@ -26,7 +26,6 @@ import static net.openhft.chronicle.wire.WireParser.SKIP_READABLE_BYTES;
  */
 public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
-    // System property name to disable proxy generation.
     /**
      * System property that disables generated reader proxies.
      */

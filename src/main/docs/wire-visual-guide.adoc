@@ -15,10 +15,8 @@ It complements the text-based documentation by providing visual representations 
 
 === Layered Architecture
 
-ifdef::env-github[[source,mermaid]
-]
-ifndef::env-github[[mermaid]
-]
+ifdef::env-github[[source,mermaid]]
+ifndef::env-github[[mermaid]]
 
 ----
 graph TD
