@@ -225,10 +225,6 @@ public interface ValueOut {
 
     /**
      * Compatibility shim preserving the public nested MapMarshaller type from 2.27ea0.
-     * Delegates to the implementation in {@code net.openhft.chronicle.wire.internal.MapMarshaller}.
-     */
-    /**
-     * Compatibility shim preserving the public nested MapMarshaller type from 2.27ea0.
      *
      * @param <K> key type
      * @param <V> value type

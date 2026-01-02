@@ -7,7 +7,6 @@ import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
-import net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor;
 import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
 import org.jetbrains.annotations.NotNull;
 
@@ -428,7 +427,7 @@ public final class StreamsUtil {
          */
         public ExcerptIteratorOfDouble(
                 @NotNull final MarshallableIn tailer,
-                @NotNull final ToDoubleDocumentExtractor extractor) {
+                @NotNull final net.openhft.chronicle.wire.domestic.extractor.ToDoubleDocumentExtractor extractor) {
             this.tailer = tailer;
             this.extractor = extractor;
         }

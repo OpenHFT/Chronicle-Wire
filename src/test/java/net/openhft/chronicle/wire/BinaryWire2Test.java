@@ -284,7 +284,7 @@ public class BinaryWire2Test extends WireTestCommon {
             dc.wire().write().object(new Date(1234567890000L));
         }
         try (final DocumentContext dc = wire.readingDocument()) {
-            Assert.assertEquals(1234567890000L, dc.wire().read().object(Date.class).getTime());
+            Assertions.assertEquals(1234567890000L, dc.wire().read().object(Date.class).getTime());
         }
     }
 

@@ -14,7 +14,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTestCommon {
+public class UsingTestMarshallableFixture extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Test case to verify the conversion of a Marshallable object to its text representation
     @Test

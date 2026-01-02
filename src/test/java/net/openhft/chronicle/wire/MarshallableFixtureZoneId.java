@@ -10,7 +10,7 @@ import java.time.ZoneId;
 
 // Define a test class named 'TestMarshallableZoneId' that tests
 // serialization and deserialization of objects containing ZoneId fields
-public class TestMarshallableZoneId {
+public class MarshallableFixtureZoneId {
 
     // Define a static nested class named 'MySelfDescribingMarshallable',
     // which extends 'SelfDescribingMarshallable' and includes a 'ZoneId' field
