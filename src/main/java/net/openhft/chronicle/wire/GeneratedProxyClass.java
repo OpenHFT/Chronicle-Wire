@@ -45,16 +45,17 @@ public enum GeneratedProxyClass {
 
         // Builds the initial portion of the proxy class's Java code.
         StringBuilder sb = new StringBuilder(512);
-        sb.append(String.format("package %s;%n%n" +
-                "import net.openhft.chronicle.core.Jvm;%n" +
-                "import net.openhft.chronicle.wire.MethodWriterInvocationHandlerSupplier;%n" +
-                "import java.lang.reflect.InvocationHandler;%n" +
-                "import java.lang.reflect.Method;%n" +
-                "import java.util.stream.IntStream;%n" +
-                "import java.util.ArrayList;%n" +
-                "import java.util.List;%n", packageName));
-
-        sb.append("public class ")
+        StringBuilder header = new StringBuilder(320);
+        header.append("package ").append(packageName).append(";\n\n")
+                .append("import net.openhft.chronicle.core.Jvm;\n")
+                .append("import net.openhft.chronicle.wire.MethodWriterInvocationHandlerSupplier;\n")
+                .append("import java.lang.reflect.InvocationHandler;\n")
+                .append("import java.lang.reflect.Method;\n")
+                .append("import java.util.stream.IntStream;\n")
+                .append("import java.util.ArrayList;\n")
+                .append("import java.util.List;\n");
+        sb.append(header)
+                .append("public class ")
                 .append(className)
                 .append(" implements ");
 

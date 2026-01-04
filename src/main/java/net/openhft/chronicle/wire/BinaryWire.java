@@ -462,7 +462,6 @@ public class BinaryWire extends AbstractWire implements Wire {
      */
     private void copyOne(@NotNull WireOut wire, boolean first) throws InvalidMarshallableException {
         int peekCode = peekCode();
-        outerSwitch:
         switch (peekCode >> 4) {
             // For numeric codes, validate and copy accordingly.
             case BinaryWireHighCode.NUM0:
@@ -485,26 +484,26 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case PADDING:
                         // Handle padding and skip reading.
                         bytes.uncheckedReadSkipOne();
-                        break outerSwitch;
+                        return;
                     case PADDING32:
                         // Handle 32-bit padding and skip reading.
                         bytes.uncheckedReadSkipOne();
                         bytes.readSkip(bytes.readUnsignedInt());
-                        break outerSwitch;
+                        return;
 
                     // Handle byte lengths and read accordingly.
                     case BYTES_LENGTH8: {
                         bytes.uncheckedReadSkipOne();
                         int len = bytes.readUnsignedByte();
                         readWithLength(wire, len);
-                        break outerSwitch;
+                        return;
                     }
 
                     case BYTES_LENGTH16: {
                         bytes.uncheckedReadSkipOne();
                         int len = bytes.readUnsignedShort();
                         readWithLength(wire, len);
-                        break outerSwitch;
+                        return;
                     }
 
                     case BYTES_LENGTH32: {
@@ -512,7 +511,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         bytes.uncheckedReadSkipOne();
                         int len = bytes.readInt();
                         readWithLength(wire, len);
-                        break outerSwitch;
+                        return;
                     }
 
                     case I64_ARRAY:
@@ -541,23 +540,23 @@ public class BinaryWire extends AbstractWire implements Wire {
                                 o.swapLeaf(false);
                             });
 
-                        break outerSwitch;
+                        return;
 
                     case FIELD_ANCHOR: { // Process field anchors.
                         fieldAnchor(wire);
-                        break outerSwitch;
+                        return;
                     }
 
                     case ANCHOR:
                     case UPDATED_ALIAS: { // Process anchors and updated aliases.
                         anchor(wire);
-                        break outerSwitch;
+                        return;
                     }
 
                     case HISTORY_MESSAGE: {
                         bytes.uncheckedReadSkipOne();
                         copyHistoryMessage(bytes(), wire);
-                        break outerSwitch;
+                        return;
                     }
                     case U8_ARRAY:
                         unexpectedCode();
@@ -1798,7 +1797,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     public Wire writeComment(CharSequence s) {
         writeCode(COMMENT);
         bytes.writeUtf8(s);
-        return BinaryWire.this;
+        return this;
     }
 
     @NotNull

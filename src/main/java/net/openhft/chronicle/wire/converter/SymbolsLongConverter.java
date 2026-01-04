@@ -7,31 +7,19 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.StringUtils;
-import net.openhft.chronicle.wire.LongConverter;
-
-import java.util.Arrays;
 
 /**
- * A specialized implementation of the {@link LongConverter} interface for
+ * A specialized implementation of the {@link net.openhft.chronicle.wire.LongConverter} interface for
  * converting long values to and from strings using arbitrary bases, specifically
  * those not necessarily in powers of two.
  *
  * <p>This converter efficiently manages conversion using provided symbols,
  * allowing flexible and adaptable encoding and decoding processes.
  */
-public class SymbolsLongConverter implements LongConverter {
+public class SymbolsLongConverter extends AbstractSymbolsLongConverter {
 
     // Multiplicative factor for the conversion based on symbol length.
     private final int factor;
-
-    // Encoding array for fast look-up.
-    private final short[] encode;
-
-    // Decoding array.
-    private final char[] decode;
-
-    // Maximum allowed length for parsing.
-    private final int maxParseLength;
 
     /**
      * Initialises a converter with a custom symbol alphabet for base conversion.
@@ -39,68 +27,13 @@ public class SymbolsLongConverter implements LongConverter {
      * @param symbols A string containing unique symbols for conversion.
      */
     public SymbolsLongConverter(String symbols) {
-        final int length = symbols.length();
-        factor = length;
-        decode = symbols.toCharArray();
-        encode = new short[128]; // 128 is chosen for ASCII range.
-        Arrays.fill(encode, (short) -1);
-
-        for (int i = 0; i < decode.length; i++)
-            encode[decode[i]] = (short) i;
-
-        maxParseLength = LongConverter.maxParseLength(length);
+        super(symbols);
+        factor = symbols.length();
     }
 
     @Override
-    public int maxParseLength() {
-        return maxParseLength;
-    }
-
-    /**
-     * Parses a sequence of characters into a long value.
-     *
-     * @param textToParse the character sequence to parse
-     * @return the parsed long value.
-     * @throws IllegalArgumentException if the character sequence contains unexpected characters or
-     *      its length exceeds the maximum allowable length.
-     */
-    @Override
-    public long parse(CharSequence textToParse) {
-        lengthCheck(textToParse);
-
-        return parse0(textToParse, 0, textToParse.length());
-    }
-
-    /**
-     * Parses a part of a sequence of characters into a long value.
-     *
-     * @param textToParse the character sequence to parse
-     * @param beginIndex  the beginning index, inclusive
-     * @param endIndex    the ending index, exclusive
-     * @return the parsed long value.
-     * @throws IllegalArgumentException if the character sequence contains unexpected characters, or if any of the
-     *      indices are invalid or the sub-sequence length exceeds the maximum allowable length.
-     */
-    @Override
-    public long parse(CharSequence textToParse, int beginIndex, int endIndex) {
-        lengthCheck(textToParse, beginIndex, endIndex);
-
-        return parse0(textToParse, beginIndex, endIndex);
-    }
-
-    private long parse0(CharSequence text, int beginIndex, int endIndex) {
-        long v = 0;
-        for (int i = beginIndex; i < endIndex; i++) {
-            final char ch = text.charAt(i);
-
-            // Check for characters outside of the encoding range or not present in the encoding map.
-            if (ch >= encode.length || encode[ch] < 0)
-                throw new IllegalArgumentException("Unexpected character '" + ch + "' in \"" + text + "\"");
-
-            // Convert the character into its corresponding long value.
-            v = v * factor + encode[ch];
-        }
-        return v;
+    protected long accumulate(long value, int symbolIndex) {
+        return value * factor + symbolIndex;
     }
 
     /**

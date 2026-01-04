@@ -2255,6 +2255,8 @@ public class TextWire extends YamlWireOut<TextWire> {
             final long limit = bytes.readLimit();
             final long position = bytes.readPosition();
             boolean endsNormally = false;
+            IORuntimeException terminatorError = null;
+            T apply;
 
             try {
                 // ensure that you can read past the end of this marshable object
@@ -2262,9 +2264,8 @@ public class TextWire extends YamlWireOut<TextWire> {
                 bytes.readLimit(newLimit);
                 bytes.readSkip(1); // skip the {
                 consumePadding();
-                final T apply = marshallableReader.apply(TextWire.this);
+                apply = marshallableReader.apply(TextWire.this);
                 endsNormally = true;
-                return apply;
             } finally {
                 bytes.readLimit(limit);
 
@@ -2272,10 +2273,13 @@ public class TextWire extends YamlWireOut<TextWire> {
                 code = readCode();
                 popState();
                 if (code != '}' && endsNormally)
-                    throw new IORuntimeException("Unterminated { while reading marshallable "
+                    terminatorError = new IORuntimeException("Unterminated { while reading marshallable "
                             + "bytes=" + Bytes.toString(bytes)
                     );
             }
+            if (terminatorError != null)
+                throw terminatorError;
+            return apply;
         }
 
         @NotNull

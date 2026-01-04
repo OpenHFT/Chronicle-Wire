@@ -238,7 +238,7 @@ public class RawWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public Wire readComment(@NotNull StringBuilder sb) {
-        return RawWire.this;
+        return this;
     }
 
     @Override
@@ -338,7 +338,7 @@ public class RawWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public Wire writeComment(CharSequence s) {
-        return RawWire.this;
+        return this;
     }
 
     @NotNull

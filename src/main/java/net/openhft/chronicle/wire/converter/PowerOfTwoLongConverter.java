@@ -8,33 +8,21 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.util.StringUtils;
-import net.openhft.chronicle.wire.LongConverter;
-
-import java.util.Arrays;
 
 /**
- * A specialized implementation of the {@link LongConverter} interface
+ * A specialized implementation of the {@link net.openhft.chronicle.wire.LongConverter} interface
  * for converting long values to and from strings using power-of-two bases.
  *
  * <p>This converter leverages certain mathematical properties of power-of-two bases
  * to optimize the conversion process.
  */
-public class PowerOfTwoLongConverter implements LongConverter {
+public class PowerOfTwoLongConverter extends AbstractSymbolsLongConverter {
 
     // Bit-shift value based on the length of the symbol set.
     private final int shift;
 
     // Bit-mask for isolating bits.
     private final int mask;
-
-    // Encoding array for fast look-up.
-    private final short[] encode;
-
-    // Decoding array.
-    private final char[] decode;
-
-    // Maximum allowed length for parsing.
-    private final int maxParseLength;
 
     /**
      * Initialises a converter with a symbol alphabet for power-of-two encoding.
@@ -43,72 +31,17 @@ public class PowerOfTwoLongConverter implements LongConverter {
      *                should be a power of 2.
      */
     public PowerOfTwoLongConverter(String symbols) {
+        super(symbols);
         final int length = symbols.length();
         assert Maths.isPowerOf2(length); // Ensure length is a power of 2.
 
         shift = Maths.intLog2(length); // Compute log2 for the length.
         mask = (1 << shift) - 1; // Compute the mask.
-
-        decode = symbols.toCharArray();
-        encode = new short[128]; // 128 is chosen for ASCII range.
-        Arrays.fill(encode, (short) -1);
-
-        for (int i = 0; i < decode.length; i++)
-            encode[decode[i]] = (short) i;
-
-        maxParseLength = LongConverter.maxParseLength(length);
     }
 
     @Override
-    public int maxParseLength() {
-        return maxParseLength;
-    }
-
-    /**
-     * Parses a sequence of characters into a long value.
-     *
-     * @param textToParse the character sequence to parse
-     * @return the parsed long value.
-     * @throws IllegalArgumentException if the character sequence contains unexpected characters or its length
-     *      exceeds the maximum allowable length.
-     */
-    @Override
-    public long parse(CharSequence textToParse) {
-        lengthCheck(textToParse);
-
-        return parse0(textToParse, 0, textToParse.length());
-    }
-
-    /**
-     * Parses a part of a sequence of characters into a long value.
-     *
-     * @param textToParse the character sequence to parse
-     * @param beginIndex  the beginning index, inclusive
-     * @param endIndex    the ending index, exclusive
-     * @return the parsed long value.
-     * @throws IllegalArgumentException if the character sequence contains unexpected character, or if any of
-     *      the indices are invalid or the sub-sequence length exceeds the maximum allowable length.
-     */
-    @Override
-    public long parse(CharSequence textToParse, int beginIndex, int endIndex) {
-        lengthCheck(textToParse, beginIndex, endIndex);
-
-        return parse0(textToParse, beginIndex, endIndex);
-    }
-
-    private long parse0(CharSequence text, int beginIndex, int endIndex) {
-        long v = 0;
-        for (int i = beginIndex; i < endIndex; i++) {
-            final char ch = text.charAt(i);
-
-            // Check for characters outside of the encoding range or not present in the encoding map.
-            if (ch >= encode.length || encode[ch] < 0)
-                throw new IllegalArgumentException("Unexpected character '" + ch + "' in \"" + text + "\"");
-
-            // Convert the character into its corresponding long value.
-            v = (v << shift) + encode[ch];
-        }
-        return v;
+    protected long accumulate(long value, int symbolIndex) {
+        return (value << shift) + symbolIndex;
     }
 
     /**

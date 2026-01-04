@@ -327,7 +327,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
 
             // Handle duplicate parameter names.
             if (paramList.contains(pname))
-                pname = pname + paramList.size();
+                pname = new StringBuilder(pname).append(paramList.size()).toString();
             paramList.add(pname);
             params.append(pname);
             mainCode.append(nameForClass(pts[i])).append(' ').append(pname);

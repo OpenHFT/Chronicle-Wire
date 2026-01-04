@@ -535,8 +535,8 @@ public class WireMarshaller<T> {
 
                 } else {
                     // If not, copy default values
-                    for (; i < fields.length; i++) {
-                        FieldAccess field2 = fields[i];
+                    for (int j = i; j < fields.length; j++) {
+                        FieldAccess field2 = fields[j];
                         field2.setDefaultValue(defaultValue, t);
                     }
 
@@ -553,6 +553,7 @@ public class WireMarshaller<T> {
 
                         vin = in.read(sb);
                     } while (in.hasMore());
+                    return;
                 }
             }
         } catch (IllegalAccessException e) {
@@ -2218,11 +2219,11 @@ public class WireMarshaller<T> {
         }
     }
 
-    private static Collection copyCollection(Field field, Supplier<Collection> collectionSupplier, Object from, Object to) throws IllegalAccessException {
+    private static void copyCollection(Field field, Supplier<Collection> collectionSupplier, Object from, Object to) throws IllegalAccessException {
         Collection fromColl = (Collection) field.get(from);
         if (fromColl == null) {
             field.set(to, null);
-            return null;
+            return;
         }
         Collection coll = (Collection) field.get(to);
         if (coll == null) {
@@ -2232,7 +2233,6 @@ public class WireMarshaller<T> {
         coll.clear();
         if (!fromColl.isEmpty())
             coll.addAll(fromColl);
-        return coll;
     }
 
     private static Collection ensureCollection(Field field, Supplier<Collection> collectionSupplier, Object target) throws IllegalAccessException {

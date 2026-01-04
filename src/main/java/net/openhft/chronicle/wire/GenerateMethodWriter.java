@@ -645,22 +645,23 @@ public class GenerateMethodWriter {
 
         body.append("MarshallableOut _out_ = this.out.get();\n");
         boolean passthrough = returnType == DocumentContext.class;
+        boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
 
         // MarshallableOut setup logic
-        body.append(passthrough ? "final " : "try (final ")
+        StringBuilder writeDocument = new StringBuilder(128);
+        writeDocument.append(passthrough ? "final " : "try (final ")
                 .append(WRITE_DOCUMENT_CONTEXT)
                 .append(" _dc_ = (")
                 .append(WRITE_DOCUMENT_CONTEXT).append(") _out_.acquireWritingDocument(")
                 .append(metaData)
-                .append(")");
-        if (passthrough)
-            body.append(";\n");
-        else
-            body.append(") {\n");
-        body.append("try {\n");
-        boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
-        body.append("_dc_.chainedElement(" + (!terminating && !passthrough) + ");\n");
-        body.append("if (_out_.recordHistory()) MessageHistory.writeHistory(_dc_);\n");
+                .append(')')
+                .append(passthrough ? ";\n" : ") {\n")
+                .append("try {\n")
+                .append("_dc_.chainedElement(")
+                .append(!terminating && !passthrough)
+                .append(");\n");
+        body.append(writeDocument)
+                .append("if (_out_.recordHistory()) MessageHistory.writeHistory(_dc_);\n");
 
         int startJ = 0;
 

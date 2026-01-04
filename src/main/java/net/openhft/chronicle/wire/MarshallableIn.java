@@ -148,7 +148,7 @@ public interface MarshallableIn {
      * @return A {@code Map} constructed from the message, {@code null} if no message is available, or
      *         an empty map if the content does not represent a map.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "PMD.ReturnEmptyCollectionRatherThanNull"})
     @Nullable
     default <K, V> Map<K, V> readMap() throws InvalidMarshallableException {
         try (@NotNull DocumentContext dc = readingDocument()) {

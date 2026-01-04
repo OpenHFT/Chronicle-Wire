@@ -98,7 +98,7 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
             Class<?> handler = handlers.get(i);
             String fname = fieldCase(handler);
             if (fnameList.contains(fname))
-                fname = fname + fnameList.size();
+                fname = new StringBuilder(fname).append(fnameList.size()).toString();
             fnameList.add(fname);
             if (i == 0)
                 withLineNumber(mainCode);

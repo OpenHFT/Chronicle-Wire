@@ -1424,7 +1424,7 @@ public enum Wires {
 
             String compilerOptions = Jvm.getProperty("compiler.options");
 
-            if (compilerOptions == null || compilerOptions.trim().isEmpty()) {
+            if (compilerOptions == null || isBlank(compilerOptions)) {
                 CACHED_COMPILER = new CachedCompiler(sourceDir, classDir);
             } else {
                 CACHED_COMPILER = new CachedCompiler(sourceDir, classDir, asList(compilerOptions.split("\\s")));
@@ -1439,6 +1439,14 @@ public enum Wires {
             CACHED_COMPILER = null;
             throw t;
         }
+    }
+
+    private static boolean isBlank(@NotNull String value) {
+        for (int i = 0; i < value.length(); i++) {
+            if (!Character.isWhitespace(value.charAt(i)))
+                return false;
+        }
+        return true;
     }
 
     /**

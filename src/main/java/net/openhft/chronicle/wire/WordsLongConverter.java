@@ -95,7 +95,7 @@ public class WordsLongConverter implements LongConverter {
             Integer id = WORD_ID.get(s);
             if (id == null)
                 throw new IllegalArgumentException("Unknown word'" + s + "'");
-            value += id.longValue() << shift;
+            value += (long) id << shift;
             shift += 11;
         }
         return value;

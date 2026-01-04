@@ -372,6 +372,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      *
      * @return The current instance of YamlWire.
      */
+    // CPD-OFF
     @NotNull
     public YamlWire useBinaryDocuments() {
         readContext = new BinaryReadDocumentContext(this);
@@ -414,6 +415,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     protected TextValueIn createValueIn() {
         return new TextValueIn();
     }
+    // CPD-ON
 
     /**
      * Converts the current YamlWire instance into a string representation.
@@ -1208,6 +1210,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             return destinationBuilder;
         }
 
+        // CPD-OFF
         @NotNull
         @Override
         public WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, BooleanConsumer consumer) {
@@ -1231,6 +1234,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 toBytes.set(bytes2.addressForRead(bytes2.start()), capacity);
             });
         }
+        // CPD-ON
 
         @Override
         @NotNull
@@ -1757,13 +1761,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public Object typePrefixOrObject(Class<?> tClass) {
             consumePadding();
-            switch (yt.current()) {
-                case TAG: {
-                    return typePrefix();
-                }
-                default:
-                    return null;
-                /*
+            if (yt.current() == YamlToken.TAG)
+                return typePrefix();
+            return null;
+            /*
 
                 case MAPPING_START:
                     if (tClass == null || tClass == Object.class || tClass == Map.class) {
@@ -1780,7 +1781,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 case TEXT:
                     return text();
                 */
-            }
         }
 
         @Override
