@@ -61,7 +61,7 @@ public class JSON322Test extends WireTestCommon {
         Two parsedTwo = parsedThree.two;
         assertEquals("world", parsedTwo.text, "Nested type two base text should match");
         Four parsedFour = (Four) parsedTwo;
-        assertEquals("world", parsedFour.text, "Nested type four text should match");
+        assertEquals("world", parsedFour.text, "Nested type four (inherited) text should match");
         assertEquals(three, parsed, "Nested type parse result should equal original Three");
     }
 
@@ -129,11 +129,8 @@ public class JSON322Test extends WireTestCommon {
     }
 
     static class Four extends Two {
-        final String text;
-
         Four(String text) {
             super(text);
-            this.text = text;
         }
     }
 

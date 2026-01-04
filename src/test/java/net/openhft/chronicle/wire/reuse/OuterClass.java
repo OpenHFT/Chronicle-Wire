@@ -3,7 +3,6 @@
  */
 package net.openhft.chronicle.wire.reuse;
 
-import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 
 /**

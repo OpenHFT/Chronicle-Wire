@@ -18,17 +18,16 @@ public class ValueInBestEffortTest extends WireTestCommon {
     @DisplayName("Strict mode returns text for type mismatch")
     public void strictModeReturnsNullOnTypeMismatch() {
         TextWire wire = TextWire.from(YAML);
-        Object result = wire.read("value").object(null, String.class, false);
+        String result = wire.read("value").object(null, String.class, false);
         // In strict mode, mismatched types are not coerced into a target class;
         // current behaviour returns a textual representation of the mapping.
         assertInstanceOf(String.class, result, "Strict mode should return text when type mismatches");
-        String s = (String) result;
-        assertTrue(s.startsWith("{"),
-                "Strict mode text should start with '{' but was: " + s);
-        assertTrue(s.contains("foo: bar"),
-                "Strict mode text should include foo: bar but was: " + s);
-        assertTrue(s.endsWith("}"),
-                "Strict mode text should end with '}' but was: " + s);
+        assertTrue(result.startsWith("{"),
+                "Strict mode text should start with '{' but was: " + result);
+        assertTrue(result.contains("foo: bar"),
+                "Strict mode text should include foo: bar but was: " + result);
+        assertTrue(result.endsWith("}"),
+                "Strict mode text should end with '}' but was: " + result);
     }
 
     @Test

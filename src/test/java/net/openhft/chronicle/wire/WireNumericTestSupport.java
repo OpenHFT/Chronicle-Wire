@@ -6,7 +6,6 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.IntConsumer;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

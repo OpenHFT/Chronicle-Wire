@@ -12,10 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -291,7 +289,7 @@ public class TextWireCoverageTest extends WireTestCommon {
     public void testInt64WithConsumer() {
         TextWire wire = TextWire.from("val: 9223372036854775807");
         AtomicLong result = new AtomicLong();
-        wire.read("val").int64(result, (ref, val) -> ref.set(val));
+        wire.read("val").int64(result, AtomicLong::set);
         assertEquals(Long.MAX_VALUE, result.get(), "Long value should read as max long");
     }
 
@@ -301,7 +299,7 @@ public class TextWireCoverageTest extends WireTestCommon {
     public void testUint8Reading() {
         TextWire wire = TextWire.from("val: 255");
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").uint8(result, (ref, val) -> ref.set(val));
+        wire.read("val").uint8(result, AtomicInteger::set);
         assertEquals(255, result.get(), "Unsigned byte value should read as 255");
     }
 
@@ -311,7 +309,7 @@ public class TextWireCoverageTest extends WireTestCommon {
     public void testUint16Reading() {
         TextWire wire = TextWire.from("val: 65535");
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").uint16(result, (ref, val) -> ref.set(val));
+        wire.read("val").uint16(result, AtomicInteger::set);
         assertEquals(65535, result.get(), "Unsigned short value should read as 65535");
     }
 
@@ -321,7 +319,7 @@ public class TextWireCoverageTest extends WireTestCommon {
     public void testUint32Reading() {
         TextWire wire = TextWire.from("val: 4294967295");
         AtomicLong result = new AtomicLong();
-        wire.read("val").uint32(result, (ref, val) -> ref.set(val));
+        wire.read("val").uint32(result, AtomicLong::set);
         assertEquals(4294967295L, result.get(), "Unsigned int value should read as 4294967295");
     }
 
@@ -361,7 +359,7 @@ public class TextWireCoverageTest extends WireTestCommon {
     public void testObjectWithType() {
         TextWire wire = TextWire.from("value: !int 42");
         Object result = wire.read("value").object();
-        assertTrue(result instanceof Number, "Explicit type should read as number");
+        assertInstanceOf(Number.class, result, "Explicit type should read as number");
         assertEquals(42, ((Number) result).intValue(), "Typed value should be 42");
     }
 

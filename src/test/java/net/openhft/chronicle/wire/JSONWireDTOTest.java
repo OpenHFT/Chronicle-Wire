@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // Test class for testing JSON wire DTO functionalities.
@@ -74,7 +75,7 @@ public class JSONWireDTOTest extends WireTestCommon {
         JSNestedClass nested = dto2.nested.get(0);
         assertEquals("there", nested.str, "nested str should round-trip from json");
         assertEquals(1, nested.num, "nested num should round-trip from json");
-        assertEquals(false, dto2.b, "boolean should round-trip default value");
+        assertFalse(dto2.b, "boolean should round-trip default value");
         assertEquals((byte) 0, dto2.bb, "byte should round-trip default value");
         assertEquals((short) 0, dto2.s, "short should round-trip default value");
         assertEquals(0.0f, dto2.f, 0.0f, "float should round-trip default value");

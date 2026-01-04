@@ -98,9 +98,9 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
         AtomicInteger maxResult = new AtomicInteger();
         AtomicInteger midResult = new AtomicInteger();
         AtomicInteger zeroResult = new AtomicInteger();
-        wire.read("max").uint8(maxResult, (ref, val) -> ref.set(val));
-        wire.read("mid").uint8(midResult, (ref, val) -> ref.set(val));
-        wire.read("zero").uint8(zeroResult, (ref, val) -> ref.set(val));
+        wire.read("max").uint8(maxResult, AtomicInteger::set);
+        wire.read("mid").uint8(midResult, AtomicInteger::set);
+        wire.read("zero").uint8(zeroResult, AtomicInteger::set);
         assertEquals(255, maxResult.get(), "BinaryWire should read max unsigned byte value");
         assertEquals(128, midResult.get(), "BinaryWire should read mid unsigned byte value");
         assertEquals(0, zeroResult.get(), "BinaryWire should read zero unsigned byte value");
@@ -156,9 +156,9 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
         AtomicLong maxResult = new AtomicLong();
         AtomicLong midResult = new AtomicLong();
         AtomicLong zeroResult = new AtomicLong();
-        wire.read("max").uint32(maxResult, (ref, val) -> ref.set(val));
-        wire.read("mid").uint32(midResult, (ref, val) -> ref.set(val));
-        wire.read("zero").uint32(zeroResult, (ref, val) -> ref.set(val));
+        wire.read("max").uint32(maxResult, AtomicLong::set);
+        wire.read("mid").uint32(midResult, AtomicLong::set);
+        wire.read("zero").uint32(zeroResult, AtomicLong::set);
         assertEquals(4294967295L, maxResult.get(), "BinaryWire should read max unsigned int value");
         assertEquals(2147483648L, midResult.get(), "BinaryWire should read mid unsigned int value");
         assertEquals(0L, zeroResult.get(), "BinaryWire should read zero unsigned int value");
@@ -379,7 +379,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
         bytes.readPositionRemaining(0, bytes.writePosition());
 
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").int32(result, (ref, val) -> ref.set(val));
+        wire.read("val").int32(result, AtomicInteger::set);
         assertEquals(42, result.get(), "int32 consumer should receive 42 from key 'val'");
     }
 
@@ -394,7 +394,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
         bytes.readPositionRemaining(0, bytes.writePosition());
 
         AtomicLong result = new AtomicLong();
-        wire.read("val").int64(result, (ref, val) -> ref.set(val));
+        wire.read("val").int64(result, AtomicLong::set);
         assertEquals(Long.MAX_VALUE, result.get(), "int64 consumer should receive Long.MAX_VALUE from key 'val'");
     }
 
@@ -409,7 +409,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
         bytes.readPositionRemaining(0, bytes.writePosition());
 
         AtomicReference<Double> result = new AtomicReference<>();
-        wire.read("val").float64(result, (ref, val) -> ref.set(val));
+        wire.read("val").float64(result, AtomicReference::set);
         assertEquals(3.14159, result.get(), 0.0001, "float64 consumer should receive 3.14159 from key 'val'");
     }
 
@@ -447,20 +447,12 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
-        wire.write("outer").marshallable(w -> {
-            w.write("inner").marshallable(m -> {
-                m.write("value").int32(42);
-            });
-        });
+        wire.write("outer").marshallable(w -> w.write("inner").marshallable(m -> m.write("value").int32(42)));
 
         bytes.readPositionRemaining(0, bytes.writePosition());
 
         AtomicInteger value = new AtomicInteger();
-        wire.read("outer").marshallable(w -> {
-            w.read("inner").marshallable(m -> {
-                value.set(m.read("value").int32());
-            });
-        });
+        wire.read("outer").marshallable(w -> w.read("inner").marshallable(m -> value.set(m.read("value").int32())));
         assertEquals(42, value.get(), "BinaryWire should read nested marshallable value 42");
     }
 

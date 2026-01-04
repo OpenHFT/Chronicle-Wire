@@ -10,7 +10,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.EnumMap;
 import java.util.Map;
 

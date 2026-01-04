@@ -4,7 +4,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.MethodReader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -342,16 +341,12 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
-        wire.write("outer").marshallable(inner -> {
-            inner.write("innerVal").int32(42);
-        });
+        wire.write("outer").marshallable(inner -> inner.write("innerVal").int32(42));
 
         bytes.readPosition(0);
 
         AtomicInteger received = new AtomicInteger();
-        wire.read("outer").marshallable(inner -> {
-            received.set(inner.read("innerVal").int32());
-        });
+        wire.read("outer").marshallable(inner -> received.set(inner.read("innerVal").int32()));
 
         assertEquals(42, received.get(), "nested innerVal field should read 42");
     }
@@ -364,24 +359,20 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
-        wire.writeDocument(false, w -> {
-            w.write("list").sequence(seq -> {
-                seq.int32(1);
-                seq.int32(2);
-                seq.int32(3);
-            });
-        });
+        wire.writeDocument(false, w -> w.write("list").sequence(seq -> {
+            seq.int32(1);
+            seq.int32(2);
+            seq.int32(3);
+        }));
 
         bytes.readPosition(0);
 
         List<Integer> received = new ArrayList<>();
-        wire.readDocument(null, w -> {
-            w.read("list").sequence(received, (list, seq) -> {
-                while (seq.hasNextSequenceItem()) {
-                    list.add(seq.int32());
-                }
-            });
-        });
+        wire.readDocument(null, w -> w.read("list").sequence(received, (list, seq) -> {
+            while (seq.hasNextSequenceItem()) {
+                list.add(seq.int32());
+            }
+        }));
 
         assertEquals(3, received.size(), "Sequence should have 3 items");
         assertEquals(1, received.get(0), "First item should be 1");

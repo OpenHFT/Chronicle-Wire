@@ -76,6 +76,7 @@ final class SerializableObjectTest extends WireTestCommon {
             SimpleDateFormat.class,
             java.rmi.dgc.VMID.class,
             net.openhft.chronicle.wire.serializable.ScalarValues.class,
+            net.openhft.chronicle.wire.serializable.SerializableScalarValues.class,
             net.openhft.chronicle.wire.serializable.Nested.class
     ));
     // Predicate to check if a constructor is the default one.

@@ -13,8 +13,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.StreamCorruptedException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -696,7 +694,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
         bytes.writeLimit(2);
         BinaryWire wire = new BinaryWire(bytes);
 
-        assertThrows(Exception.class, () -> wire.readFirstHeader(),
+        assertThrows(Exception.class, wire::readFirstHeader,
                 "readFirstHeader should throw when capacity < 4");
     }
 
@@ -707,7 +705,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
         bytes.writeInt(0);  // Write a NOT_INITIALIZED (0) header
         BinaryWire wire = new BinaryWire(bytes);
 
-        assertThrows(StreamCorruptedException.class, () -> wire.readFirstHeader(),
+        assertThrows(StreamCorruptedException.class, wire::readFirstHeader,
                 "readFirstHeader should throw when header is NOT_INITIALIZED");
     }
 
@@ -1054,7 +1052,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
         Object result = wire.read("data").typedMarshallable();
         assertNotNull(result, "typedMarshallable should return TestData payload object");
-        assertTrue(result instanceof TestData, "typed marshallable result should be TestData instance");
+        assertInstanceOf(TestData.class, result, "typed marshallable result should be TestData instance");
         assertEquals("test", ((TestData) result).name, "TestData name should match written value");
         assertEquals(42, ((TestData) result).value, "TestData value should match written int value");
     }

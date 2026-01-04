@@ -332,7 +332,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
             bytes.readPosition(0);
 
             AtomicInteger result = new AtomicInteger();
-            wire.read("val").int32(result, (ref, val) -> ref.set(val));
+            wire.read("val").int32(result, AtomicInteger::set);
             assertEquals(12345, result.get(), "Int32 consumer should work in " + wireType);
         }
     }
@@ -348,7 +348,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
             bytes.readPosition(0);
 
             AtomicLong result = new AtomicLong();
-            wire.read("val").int64(result, (ref, val) -> ref.set(val));
+            wire.read("val").int64(result, AtomicLong::set);
             assertEquals(9876543210L, result.get(), "Int64 consumer should work in " + wireType);
         }
     }
@@ -364,7 +364,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
             bytes.readPosition(0);
 
             AtomicReference<Double> result = new AtomicReference<>();
-            wire.read("val").float64(result, (ref, val) -> ref.set(val));
+            wire.read("val").float64(result, AtomicReference::set);
             assertEquals(3.14159, result.get(), 0.00001, "Float64 consumer should work in " + wireType);
         }
     }
@@ -408,20 +408,12 @@ public class WireEdgeCasesTest extends WireTestCommon {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(512);
             Wire wire = wireType.apply(bytes);
 
-            wire.write("outer").marshallable(outer -> {
-                outer.write("inner").marshallable(inner -> {
-                    inner.write("value").int32(42);
-                });
-            });
+            wire.write("outer").marshallable(outer -> outer.write("inner").marshallable(inner -> inner.write("value").int32(42)));
 
             bytes.readPosition(0);
 
             AtomicInteger value = new AtomicInteger();
-            wire.read("outer").marshallable(outer -> {
-                outer.read("inner").marshallable(inner -> {
-                    value.set(inner.read("value").int32());
-                });
-            });
+            wire.read("outer").marshallable(outer -> outer.read("inner").marshallable(inner -> value.set(inner.read("value").int32())));
 
             assertEquals(42, value.get(), "Nested marshallable should work in " + wireType);
         }

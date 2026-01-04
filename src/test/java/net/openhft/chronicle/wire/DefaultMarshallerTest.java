@@ -11,8 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // This class provides tests for default marshaller functionalities.
@@ -122,8 +121,7 @@ public class DefaultMarshallerTest extends WireTestCommon {
                 "deserialised DMOuterClass should match original");
         assertEquals("words", oc2.getText(),
                 "deserialised text should match original");
-        assertEquals(true, oc2.isB(),
-                "deserialised boolean flag should match original");
+        assertTrue(oc2.isB(), "deserialised boolean flag should match original");
         assertEquals((byte) 1, oc2.getBb(),
                 "deserialised byte should match original");
         assertEquals((short) 6, oc2.getS(),

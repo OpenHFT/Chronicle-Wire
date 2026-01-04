@@ -52,13 +52,10 @@ public class PassThroughTest extends WireTestCommon {
         Bytes<?> bytes3 = new HexDumpBytes();
         Wire wire3 = new TextWire(bytes3).useTextDocuments();
 
-        final MethodReader reader2 = wire2.methodReader(new Destination() {
-            @Override
-            public DocumentContext to(String dest) {
-                final DocumentContext dc = wire3.writingDocument();
-                dc.wire().write("to").text(dest);
-                return dc;
-            }
+        final MethodReader reader2 = wire2.methodReader((Destination) dest -> {
+            final DocumentContext dc = wire3.writingDocument();
+            dc.wire().write("to").text(dest);
+            return dc;
         });
         for (int i = 2; i >= 0; i--)
             assertEquals(i > 0, reader2.readOne(),
@@ -119,13 +116,10 @@ public class PassThroughTest extends WireTestCommon {
         Bytes<?> bytes3 = new HexDumpBytes();
         Wire wire3 = new YamlWire(bytes3).useTextDocuments();
 
-        final MethodReader reader2 = wire2.methodReader(new Destination() {
-            @Override
-            public DocumentContext to(String dest) {
-                final DocumentContext dc = wire3.writingDocument();
-                dc.wire().write("to").text(dest);
-                return dc;
-            }
+        final MethodReader reader2 = wire2.methodReader((Destination) dest -> {
+            final DocumentContext dc = wire3.writingDocument();
+            dc.wire().write("to").text(dest);
+            return dc;
         });
         for (int i = 2; i >= 0; i--)
             assertEquals(i > 0, reader2.readOne(),
@@ -208,13 +202,10 @@ public class PassThroughTest extends WireTestCommon {
         Wire wire3 = WireType.BINARY_LIGHT.apply(bytes3);
         wire3.usePadding(false);
 
-        final MethodReader reader2 = wire2.methodReader(new Destination() {
-            @Override
-            public DocumentContext to(String dest) {
-                final DocumentContext dc = wire3.writingDocument();
-                dc.wire().write("to").text(dest);
-                return dc;
-            }
+        final MethodReader reader2 = wire2.methodReader((Destination) dest -> {
+            final DocumentContext dc = wire3.writingDocument();
+            dc.wire().write("to").text(dest);
+            return dc;
         });
         for (int i = 2; i >= 0; i--)
             assertEquals(i > 0, reader2.readOne(),

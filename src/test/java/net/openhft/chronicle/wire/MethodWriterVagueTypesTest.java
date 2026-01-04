@@ -99,8 +99,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         // Set up a MethodReader to read the String message and process it using the println method
         MethodReader reader = w.methodReaderBuilder()
                 .multipleNonMarshallableParamTypes(multipleNonMarshallableParamTypes)
-                .build((PrintObjectSingle) message ->
-                        singleQ.add(message));
+                .build((PrintObjectSingle) singleQ::add);
         // test with a series of objects
         testSingle(printer, reader, new MarshallableTestContainer());
         testSingle(printer, reader, "hello");

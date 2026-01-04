@@ -5,8 +5,6 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.StreamCorruptedException;
-
 public class RawWirePerfMain extends WireTestCommon {
 
     public static void main(String[] args) {

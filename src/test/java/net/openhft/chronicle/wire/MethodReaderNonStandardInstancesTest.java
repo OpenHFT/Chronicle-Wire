@@ -44,12 +44,7 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
         AtomicBoolean b = new AtomicBoolean();
 
         // Create a MethodReader that uses an anonymous class implementation
-        MethodReader reader = wire.methodReader(new MyInterface() {
-            @Override
-            public void call() {
-                b.set(true);
-            }
-        });
+        MethodReader reader = wire.methodReader((MyInterface) () -> b.set(true));
 
         // Assertions to ensure the reader is of the expected type and it reads and processes the message correctly
         assertFalse(reader instanceof VanillaMethodReader,
@@ -80,12 +75,7 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
         AtomicBoolean b = new AtomicBoolean();
 
         // Create a MethodReader that uses a BooleanConsumer implementation
-        MethodReader reader = wire.methodReader(new BooleanConsumer() {
-            @Override
-            public void accept(Boolean value) {
-                b.set(value);
-            }
-        });
+        MethodReader reader = wire.methodReader((BooleanConsumer) value -> b.set(value));
 
         // Assertions to ensure the reader is of the expected type and it reads and processes the message correctly
         assertFalse(reader instanceof VanillaMethodReader,

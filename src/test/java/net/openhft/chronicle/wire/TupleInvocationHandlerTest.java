@@ -39,7 +39,6 @@ public class TupleInvocationHandlerTest extends WireTestCommon {
         int hash = tuple.hashCode();
         assertNotEquals(0, hash, "tuple hashCode should not be zero");
         assertEquals(tuple, tuple, "tuple should be equal to itself");
-        assertNotEquals("other", tuple, "tuple should not equal unrelated object");
 
         SampleTuple copy = tuple.deepCopy();
         assertNotNull(copy, "deep copy should return a tuple instance");

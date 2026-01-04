@@ -259,7 +259,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     public void testBoolWithConsumer() {
         TextWire wire = TextWire.from("val: true");
         AtomicReference<Boolean> result = new AtomicReference<>();
-        wire.read("val").bool(result, (ref, val) -> ref.set(val));
+        wire.read("val").bool(result, AtomicReference::set);
         assertTrue(result.get(), "Boolean consumer should receive parsed true value");
     }
 
@@ -270,7 +270,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     public void testInt8WithConsumer() {
         TextWire wire = TextWire.from("val: 42");
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").int8(result, (ref, val) -> ref.set(val));
+        wire.read("val").int8(result, AtomicInteger::set);
         assertEquals(42, result.get(), "Int8 consumer should receive parsed value 42");
     }
 
@@ -279,7 +279,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     public void testInt16WithConsumer() {
         TextWire wire = TextWire.from("val: 12345");
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").int16(result, (ref, val) -> ref.set(val));
+        wire.read("val").int16(result, AtomicInteger::set);
         assertEquals(12345, result.get(), "Int16 consumer should receive parsed value 12345");
     }
 
@@ -288,7 +288,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     public void testInt32WithConsumer() {
         TextWire wire = TextWire.from("val: 1234567");
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").int32(result, (ref, val) -> ref.set(val));
+        wire.read("val").int32(result, AtomicInteger::set);
         assertEquals(1234567, result.get(), "Int32 consumer should receive parsed value 1234567");
     }
 
@@ -297,7 +297,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     public void testInt64WithConsumer() {
         TextWire wire = TextWire.from("val: 9876543210");
         AtomicLong result = new AtomicLong();
-        wire.read("val").int64(result, (ref, val) -> ref.set(val));
+        wire.read("val").int64(result, AtomicLong::set);
         assertEquals(9876543210L, result.get(), "Int64 consumer should receive parsed value 9876543210");
     }
 
@@ -306,7 +306,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     public void testUint8WithConsumer() {
         TextWire wire = TextWire.from("val: 255");
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").uint8(result, (ref, val) -> ref.set(val));
+        wire.read("val").uint8(result, AtomicInteger::set);
         assertEquals(255, result.get(), "Uint8 consumer should receive parsed value 255");
     }
 
@@ -315,7 +315,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     public void testUint16WithConsumer() {
         TextWire wire = TextWire.from("val: 65535");
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").uint16(result, (ref, val) -> ref.set(val));
+        wire.read("val").uint16(result, AtomicInteger::set);
         assertEquals(65535, result.get(), "Uint16 consumer should receive parsed value 65535");
     }
 
@@ -324,7 +324,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     public void testUint32WithConsumer() {
         TextWire wire = TextWire.from("val: 4294967295");
         AtomicLong result = new AtomicLong();
-        wire.read("val").uint32(result, (ref, val) -> ref.set(val));
+        wire.read("val").uint32(result, AtomicLong::set);
         assertEquals(4294967295L, result.get(), "Uint32 consumer should receive parsed value 4294967295");
     }
 
@@ -333,7 +333,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     public void testFloat32WithConsumer() {
         TextWire wire = TextWire.from("val: 3.14");
         AtomicReference<Float> result = new AtomicReference<>();
-        wire.read("val").float32(result, (ref, val) -> ref.set(val));
+        wire.read("val").float32(result, AtomicReference::set);
         assertEquals(3.14f, result.get(), 0.001f, "Float32 consumer should receive parsed value 3.14");
     }
 
@@ -342,7 +342,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     public void testFloat64WithConsumer() {
         TextWire wire = TextWire.from("val: 3.14159265359");
         AtomicReference<Double> result = new AtomicReference<>();
-        wire.read("val").float64(result, (ref, val) -> ref.set(val));
+        wire.read("val").float64(result, AtomicReference::set);
         assertEquals(3.14159265359, result.get(), 0.0000001, "Float64 consumer should receive parsed value 3.14159265359");
     }
 
@@ -362,7 +362,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
         UUID expected = UUID.randomUUID();
         TextWire wire = TextWire.from("id: " + expected);
         AtomicReference<UUID> result = new AtomicReference<>();
-        wire.read("id").uuid(result, (ref, val) -> ref.set(val));
+        wire.read("id").uuid(result, AtomicReference::set);
         assertEquals(expected, result.get(), "TextWire should round-trip UUID via consumer");
     }
 
@@ -434,11 +434,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     public void testNestedMarshallable() {
         TextWire wire = TextWire.from("outer: { inner: { value: 42 } }");
         AtomicInteger value = new AtomicInteger();
-        wire.read("outer").marshallable(outer -> {
-            outer.read("inner").marshallable(inner -> {
-                value.set(inner.read("value").int32());
-            });
-        });
+        wire.read("outer").marshallable(outer -> outer.read("inner").marshallable(inner -> value.set(inner.read("value").int32())));
         assertEquals(42, value.get(), "Nested marshallable value should read as 42");
     }
 
@@ -552,7 +548,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     public void testTypedInteger() {
         TextWire wire = TextWire.from("obj: !int 42");
         Object result = wire.read("obj").object();
-        assertTrue(result instanceof Number, "Typed int object should be a Number");
+        assertInstanceOf(Number.class, result, "Typed int object should be a Number");
         assertEquals(42, ((Number) result).intValue(), "Typed int value should equal 42");
     }
 

@@ -4,7 +4,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.PointerBytesStore;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

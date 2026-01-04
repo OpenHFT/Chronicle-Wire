@@ -229,12 +229,8 @@ public class WireYamlStructuralTest extends WireTestCommon {
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
 
-        wire.read("outer").marshallable(outer -> {
-            outer.read("inner").marshallable(inner -> {
-                assertEquals(42, inner.read("value").int32(),
-                        "Nested mapping should read inner value 42");
-            });
-        });
+        wire.read("outer").marshallable(outer -> outer.read("inner").marshallable(inner -> assertEquals(42, inner.read("value").int32(),
+                "Nested mapping should read inner value 42")));
     }
 
     // ========== Quoted String Edge Cases ==========

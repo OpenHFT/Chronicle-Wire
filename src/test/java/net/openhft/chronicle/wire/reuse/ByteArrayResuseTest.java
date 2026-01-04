@@ -51,7 +51,8 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for byte array reuse tests");
 
         RoundTripResult result = writeReadBytesArrayRoundTrip(true);
-        assertEquals("c4 64 61 74 61                                  # data:\n" +
+        assertEquals("" +
+                "c4 64 61 74 61                                  # data:\n" +
                 "80 22                                           # Data\n" +
                 "   c9 74 69 6d 65 73 74 61 6d 70                   # timestamp:\n" +
                 "   a6 d2 02 96 49                                  # 1234567890\n" +
@@ -128,7 +129,7 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
     static class Data extends SelfDescribingMarshallable {
         long timestamp;
         byte[] bytes;
-        boolean selfDescribing;
+        transient boolean selfDescribing;
 
         @Override
         public boolean usesSelfDescribingMessage() {

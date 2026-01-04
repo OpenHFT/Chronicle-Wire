@@ -41,18 +41,14 @@ class WireUtils {
         @NotNull WireCollection collection = new WireCollection("reference", "@", "name", 234234234, 23, UUID.randomUUID().toString());
 
         // Add randomly generated properties
-        IntStream.range(1, 10).forEach((i) -> {
-            collection.addProperty(randomWireProperty(i));
-        });
+        IntStream.range(1, 10).forEach((i) -> collection.addProperty(randomWireProperty(i)));
 
         // Add sub-collections with their properties
 
         IntStream.range(1, 4).forEach((i) -> {
             @NotNull WireCollection c = new WireCollection("reference" + i, "@:" + i, "name" + i, rand.nextLong(), rand.nextInt(), UUID.randomUUID().toString());
             collection.addCollection(c);
-            IntStream.range(1, 4).forEach((k) -> {
-                c.addProperty(new WireProperty("reference" + k, "@:" + i + "-" + k, "name" + k, UUID.randomUUID().toString().replace("-", ""), rand.nextLong(), rand.nextInt(), UUID.randomUUID().toString()));
-            });
+            IntStream.range(1, 4).forEach((k) -> c.addProperty(new WireProperty("reference" + k, "@:" + i + "-" + k, "name" + k, UUID.randomUUID().toString().replace("-", ""), rand.nextLong(), rand.nextInt(), UUID.randomUUID().toString())));
         });
 
         return collection;

@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,8 +26,8 @@ final class WireMapTestSupport {
         @NotNull final Map<Integer, Integer> actual = new HashMap<>();
         wire.readDocument(null, c -> {
             @Nullable Map m = c.read(() -> "example").marshallableAsMap(Integer.class, Integer.class, actual);
-            assertEquals(m,
-                    expected,
+            assertEquals(expected,
+                    m,
                     "Integer map should round trip from wire");
         });
     }

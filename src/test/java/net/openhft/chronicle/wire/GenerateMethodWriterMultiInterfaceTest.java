@@ -31,17 +31,7 @@ public class GenerateMethodWriterMultiInterfaceTest extends WireTestCommon {
         writer.one(1);
 
         List<String> seen = new ArrayList<>();
-        MethodReader reader = wire.methodReader(new First() {
-            @Override
-            public void one(int v) {
-                seen.add("one:" + v);
-            }
-        }, new Second() {
-            @Override
-            public void two(String s) {
-                seen.add("two:" + s);
-            }
-        });
+        MethodReader reader = wire.methodReader((First) v -> seen.add("one:" + v), (Second) s -> seen.add("two:" + s));
         while (reader.readOne()) {
             // drain
             continue;

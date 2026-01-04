@@ -112,13 +112,13 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
         bytes.readPositionRemaining(0, bytes.writePosition());
 
         AtomicInteger result = new AtomicInteger();
-        wire.read("max").uint8(result, (ref, val) -> ref.set(val));
+        wire.read("max").uint8(result, AtomicInteger::set);
         assertEquals(255, result.get(), "Max unsigned byte should read as 255");
 
-        wire.read("mid").uint8(result, (ref, val) -> ref.set(val));
+        wire.read("mid").uint8(result, AtomicInteger::set);
         assertEquals(128, result.get(), "Mid unsigned byte should read as 128");
 
-        wire.read("zero").uint8(result, (ref, val) -> ref.set(val));
+        wire.read("zero").uint8(result, AtomicInteger::set);
         assertEquals(0, result.get(), "Zero unsigned byte should read as 0");
     }
 
@@ -152,13 +152,13 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
         bytes.readPositionRemaining(0, bytes.writePosition());
 
         AtomicLong result = new AtomicLong();
-        wire.read("max").uint32(result, (ref, val) -> ref.set(val));
+        wire.read("max").uint32(result, AtomicLong::set);
         assertEquals(4294967295L, result.get(), "Max unsigned int should read");
 
-        wire.read("mid").uint32(result, (ref, val) -> ref.set(val));
+        wire.read("mid").uint32(result, AtomicLong::set);
         assertEquals(2147483648L, result.get(), "Mid unsigned int should read");
 
-        wire.read("zero").uint32(result, (ref, val) -> ref.set(val));
+        wire.read("zero").uint32(result, AtomicLong::set);
         assertEquals(0L, result.get(), "Zero unsigned int should read");
     }
 
@@ -225,7 +225,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
         bytes.readPositionRemaining(0, bytes.writePosition());
 
         AtomicReference<Float> result = new AtomicReference<>();
-        wire.read("val").float32(result, (ref, val) -> ref.set(val));
+        wire.read("val").float32(result, AtomicReference::set);
         assertEquals(3.14159f, result.get(), 0.00001f, "Float should read via consumer");
     }
 
@@ -436,24 +436,12 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
-        wire.write("level1").marshallable(l1 -> {
-            l1.write("level2").marshallable(l2 -> {
-                l2.write("level3").marshallable(l3 -> {
-                    l3.write("value").int32(42);
-                });
-            });
-        });
+        wire.write("level1").marshallable(l1 -> l1.write("level2").marshallable(l2 -> l2.write("level3").marshallable(l3 -> l3.write("value").int32(42))));
 
         bytes.readPositionRemaining(0, bytes.writePosition());
 
         AtomicInteger value = new AtomicInteger();
-        wire.read("level1").marshallable(l1 -> {
-            l1.read("level2").marshallable(l2 -> {
-                l2.read("level3").marshallable(l3 -> {
-                    value.set(l3.read("value").int32());
-                });
-            });
-        });
+        wire.read("level1").marshallable(l1 -> l1.read("level2").marshallable(l2 -> l2.read("level3").marshallable(l3 -> value.set(l3.read("value").int32()))));
         assertEquals(42, value.get(), "Deeply nested value should be read");
     }
 
@@ -492,7 +480,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
         bytes.readPositionRemaining(0, bytes.writePosition());
 
         AtomicReference<UUID> result = new AtomicReference<>();
-        wire.read("id").uuid(result, (ref, val) -> ref.set(val));
+        wire.read("id").uuid(result, AtomicReference::set);
         assertEquals(expected, result.get(), "UUID should round-trip via consumer");
     }
 
@@ -510,10 +498,10 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
         bytes.readPositionRemaining(0, bytes.writePosition());
 
         AtomicReference<Boolean> result = new AtomicReference<>();
-        wire.read("t").bool(result, (ref, val) -> ref.set(val));
+        wire.read("t").bool(result, AtomicReference::set);
         assertTrue(result.get(), "True should round-trip");
 
-        wire.read("f").bool(result, (ref, val) -> ref.set(val));
+        wire.read("f").bool(result, AtomicReference::set);
         assertFalse(result.get(), "False should round-trip");
     }
 
@@ -531,9 +519,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
             v.int32(1);
             v.int32(2);
         });
-        wire.write("map").marshallable(w -> {
-            w.write("a").int32(1);
-        });
+        wire.write("map").marshallable(w -> w.write("a").int32(1));
         wire.write("final").text("found");
 
         bytes.readPositionRemaining(0, bytes.writePosition());
@@ -561,7 +547,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
         Object result = wire.read("typed").typedMarshallable();
         assertNotNull(result, "Typed marshallable should be read");
-        assertTrue(result instanceof SimpleDTO, "Typed marshallable result should be SimpleDTO instance");
+        assertInstanceOf(SimpleDTO.class, result, "Typed marshallable result should be SimpleDTO instance");
         SimpleDTO dto = (SimpleDTO) result;
         assertEquals("test", dto.name, "DTO name should match input value, expected=test actual=" + dto.name);
         assertEquals(42, dto.value, "DTO value should match input value, expected=42 actual=" + dto.value);
@@ -670,7 +656,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
         bytes.readPositionRemaining(0, bytes.writePosition());
 
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").int8(result, (ref, val) -> ref.set(val));
+        wire.read("val").int8(result, AtomicInteger::set);
         assertEquals(42, result.get(), "Int8 should read via consumer");
     }
 
@@ -685,7 +671,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
         bytes.readPositionRemaining(0, bytes.writePosition());
 
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").int16(result, (ref, val) -> ref.set(val));
+        wire.read("val").int16(result, AtomicInteger::set);
         assertEquals(12345, result.get(), "Int16 should read via consumer");
     }
 
@@ -700,7 +686,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
         bytes.readPositionRemaining(0, bytes.writePosition());
 
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").int32(result, (ref, val) -> ref.set(val));
+        wire.read("val").int32(result, AtomicInteger::set);
         assertEquals(1234567, result.get(), "Int32 should read via consumer");
     }
 
@@ -715,7 +701,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
         bytes.readPositionRemaining(0, bytes.writePosition());
 
         AtomicLong result = new AtomicLong();
-        wire.read("val").int64(result, (ref, val) -> ref.set(val));
+        wire.read("val").int64(result, AtomicLong::set);
         assertEquals(9876543210L, result.get(), "Int64 should read via consumer");
     }
 

@@ -330,25 +330,23 @@ public class WireDepthLimitsTest extends WireTestCommon {
         BinaryWire wire = new BinaryWire(bytes);
 
         // Create a structure with both nesting and sequences
-        wire.write("root").marshallable(w1 -> {
-            w1.write("items").sequence(s1 -> {
-                for (int i = 0; i < 10; i++) {
-                    final int ii = i;
-                    s1.marshallable(w2 -> {
-                        w2.write("id").int32(ii);
-                        w2.write("children").sequence(s2 -> {
-                            for (int j = 0; j < 5; j++) {
-                                final int jj = j;
-                                s2.marshallable(w3 -> {
-                                    w3.write("childId").int32(ii * 100 + jj);
-                                    w3.write("name").text("child_" + ii + "_" + jj);
-                                });
-                            }
-                        });
+        wire.write("root").marshallable(w1 -> w1.write("items").sequence(s1 -> {
+            for (int i = 0; i < 10; i++) {
+                final int ii = i;
+                s1.marshallable(w2 -> {
+                    w2.write("id").int32(ii);
+                    w2.write("children").sequence(s2 -> {
+                        for (int j = 0; j < 5; j++) {
+                            final int jj = j;
+                            s2.marshallable(w3 -> {
+                                w3.write("childId").int32(ii * 100 + jj);
+                                w3.write("name").text("child_" + ii + "_" + jj);
+                            });
+                        }
                     });
-                }
-            });
-        });
+                });
+            }
+        }));
 
         bytes.readPosition(0);
 
@@ -393,9 +391,7 @@ public class WireDepthLimitsTest extends WireTestCommon {
         if (depth <= 0) {
             wire.write("value").text(leafValue);
         } else {
-            wire.write("level" + depth).marshallable(w -> {
-                writeNestedMarshallable(w, depth - 1, leafValue);
-            });
+            wire.write("level" + depth).marshallable(w -> writeNestedMarshallable(w, depth - 1, leafValue));
         }
     }
 
@@ -404,9 +400,7 @@ public class WireDepthLimitsTest extends WireTestCommon {
             return wire.read("value").text();
         } else {
             final String[] result = {null};
-            wire.read("level" + depth).marshallable(w -> {
-                result[0] = readNestedMarshallable(w, depth - 1);
-            });
+            wire.read("level" + depth).marshallable(w -> result[0] = readNestedMarshallable(w, depth - 1));
             return result[0];
         }
     }

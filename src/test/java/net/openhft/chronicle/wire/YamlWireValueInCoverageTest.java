@@ -106,7 +106,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
     public void testBoolWithConsumerNullValue() {
         YamlWire wire = YamlWire.from("c: ~");
         AtomicReference<Boolean> resultC = new AtomicReference<>();
-        wire.read("c").bool(resultC, (ref, val) -> ref.set(val));
+        wire.read("c").bool(resultC, AtomicReference::set);
         assertNull(resultC.get(), "Boolean flag should read as null for tilde");
     }
 
@@ -115,7 +115,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
     public void testBoolEmptyString() {
         YamlWire wire = YamlWire.from("empty: ''");
         AtomicReference<Boolean> result = new AtomicReference<>();
-        wire.read("empty").bool(result, (ref, val) -> ref.set(val));
+        wire.read("empty").bool(result, AtomicReference::set);
         assertNull(result.get(), "Empty string should result in null boolean");
     }
 
@@ -124,7 +124,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
     public void testInt8WithConsumer() {
         YamlWire wire = YamlWire.from("val: 42");
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").int8(result, (ref, val) -> ref.set(val));
+        wire.read("val").int8(result, AtomicInteger::set);
         assertEquals(42, result.get(), "Byte value should read as 42");
     }
 
@@ -133,7 +133,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
     public void testUint8WithConsumer() {
         YamlWire wire = YamlWire.from("val: 200");
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").uint8(result, (ref, val) -> ref.set(val));
+        wire.read("val").uint8(result, AtomicInteger::set);
         assertEquals(200, result.get(), "Unsigned byte value should read as 200");
     }
 
@@ -142,7 +142,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
     public void testInt16WithConsumer() {
         YamlWire wire = YamlWire.from("val: 12345");
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").int16(result, (ref, val) -> ref.set(val));
+        wire.read("val").int16(result, AtomicInteger::set);
         assertEquals(12345, result.get(), "Short value should read as 12345");
     }
 
@@ -151,7 +151,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
     public void testUint16WithConsumer() {
         YamlWire wire = YamlWire.from("val: 50000");
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").uint16(result, (ref, val) -> ref.set(val));
+        wire.read("val").uint16(result, AtomicInteger::set);
         assertEquals(50000, result.get(), "Unsigned short value should read as 50000");
     }
 
@@ -160,7 +160,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
     public void testInt32WithConsumer() {
         YamlWire wire = YamlWire.from("val: 1234567");
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").int32(result, (ref, val) -> ref.set(val));
+        wire.read("val").int32(result, AtomicInteger::set);
         assertEquals(1234567, result.get(), "Int value should read as 1234567");
     }
 
@@ -169,7 +169,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
     public void testUint32WithConsumer() {
         YamlWire wire = YamlWire.from("val: 3000000000");
         AtomicLong result = new AtomicLong();
-        wire.read("val").uint32(result, (ref, val) -> ref.set(val));
+        wire.read("val").uint32(result, AtomicLong::set);
         assertEquals(3000000000L, result.get(), "Unsigned int value should read as 3000000000");
     }
 
@@ -178,7 +178,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
     public void testInt64WithConsumer() {
         YamlWire wire = YamlWire.from("val: 9876543210");
         AtomicLong result = new AtomicLong();
-        wire.read("val").int64(result, (ref, val) -> ref.set(val));
+        wire.read("val").int64(result, AtomicLong::set);
         assertEquals(9876543210L, result.get(), "Long value should read as 9876543210");
     }
 
@@ -187,7 +187,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
     public void testFloat32WithConsumer() {
         YamlWire wire = YamlWire.from("val: 3.14");
         AtomicReference<Float> result = new AtomicReference<>();
-        wire.read("val").float32(result, (ref, val) -> ref.set(val));
+        wire.read("val").float32(result, AtomicReference::set);
         assertEquals(3.14f, result.get(), 0.001f, "Float value should read as 3.14");
     }
 
@@ -196,7 +196,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
     public void testFloat64WithConsumer() {
         YamlWire wire = YamlWire.from("val: 3.14159265359");
         AtomicReference<Double> result = new AtomicReference<>();
-        wire.read("val").float64(result, (ref, val) -> ref.set(val));
+        wire.read("val").float64(result, AtomicReference::set);
         assertEquals(3.14159265359, result.get(), 0.0000001, "Double value should read as 3.14159265359");
     }
 
@@ -224,7 +224,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
         UUID expected = UUID.randomUUID();
         YamlWire wire = YamlWire.from("id: " + expected);
         AtomicReference<UUID> result = new AtomicReference<>();
-        wire.read("id").uuid(result, (ref, val) -> ref.set(val));
+        wire.read("id").uuid(result, AtomicReference::set);
         assertEquals(expected, result.get(), "UUID value should round-trip via consumer");
     }
 
@@ -262,12 +262,10 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
     @DisplayName("Tests reading nested map value structures")
     public void testNestedMaps() {
         YamlWire wire = YamlWire.from("outer:\n  middle:\n    inner: value");
-        wire.read("outer").marshallable(w -> {
-            w.read("middle").marshallable(m -> {
-                String inner = m.read("inner").text();
-                assertEquals("value", inner, "Nested map should read inner value");
-            });
-        });
+        wire.read("outer").marshallable(w -> w.read("middle").marshallable(m -> {
+            String inner = m.read("inner").text();
+            assertEquals("value", inner, "Nested map should read inner value");
+        }));
     }
 
     @Test

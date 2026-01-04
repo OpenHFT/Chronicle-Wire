@@ -18,8 +18,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"java:S2699", "java:S125", "java:S1854", "java:S1481"})
@@ -46,7 +45,7 @@ public class ReadmeChapter1Test extends WireTestCommon {
         // or
         @NotNull WireType wireType = WireType.TEXT;
         Wire wireB = wireType.apply(bytes);
-        assertTrue(wireB != null, "Wire instance should be created for wireType example");
+        assertNotNull(wireB, "Wire instance should be created for wireType example");
         // or
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         @NotNull Wire wire2 = new BinaryWire(bytes2);
@@ -253,7 +252,7 @@ public class ReadmeChapter1Test extends WireTestCommon {
         wire.write(() -> "mydata").object(data);
 
         @Nullable Data data2 = wire.read(() -> "mydata").object(Data.class);
-        assertTrue(data2 != null, "Data should be read from text wire example");
+        assertNotNull(data2, "Data should be read from text wire example");
 
         /*
         ```
@@ -276,7 +275,7 @@ public class ReadmeChapter1Test extends WireTestCommon {
         wire2.write(() -> "mydata").object(data);
 
         @Nullable Data data3 = wire2.read(() -> "mydata").object(Data.class);
-        assertTrue(data3 != null, "Data should be read from binary wire example");
+        assertNotNull(data3, "Data should be read from binary wire example");
         /*
         ```
         prints
@@ -500,7 +499,7 @@ public class ReadmeChapter1Test extends WireTestCommon {
         wire.getValueOut().object(data);
 
         @Nullable Object o = wire.getValueIn().object(Object.class);
-        assertTrue(o instanceof Data, "ValueIn object should be Data for text wire example");
+        assertInstanceOf(Data.class, o, "ValueIn object should be Data for text wire example");
 
         /*
         ```
@@ -523,7 +522,7 @@ public class ReadmeChapter1Test extends WireTestCommon {
         wire2.getValueOut().object(data);
 
         @Nullable Object o2 = wire2.getValueIn().object(Object.class);
-        assertTrue(o2 instanceof Data, "ValueIn object should be Data for binary wire example");
+        assertInstanceOf(Data.class, o2, "ValueIn object should be Data for binary wire example");
         /*
         ```
         prints

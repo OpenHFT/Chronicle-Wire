@@ -593,8 +593,8 @@ public class TextWireTest extends AbstractWireTest {
     @Test
     @DisplayName("Text wire reads type with empty value")
     public void testTypeWithEmpty() {
-        // Expect an exception with a specific message when processing an object with missing content
-        expectException("Expected a {} but was blank for type class net.openhft.chronicle.wire.TextWireTest$NestedB");
+        // Expect warning about blank marshallable value for empty type body
+        expectException("was blank where '{}' is required");
 
         // Add type aliases for easier serialization/deserialization
         ClassAliasPool.CLASS_ALIASES.addAlias(NestedA.class, NestedB.class);
@@ -618,8 +618,8 @@ public class TextWireTest extends AbstractWireTest {
     @Test
     @DisplayName("Text wire parses single quoted string values")
     public void testSingleQuote() {
-        // Expect an exception with a specific message when processing an object with missing content
-        expectException("Expected a {} but was blank for type class net.openhft.chronicle.wire.TextWireTest$NestedB");
+        // Expect warning about blank marshallable value for empty type body
+        expectException("was blank where '{}' is required");
 
         // Add a type alias
         ClassAliasPool.CLASS_ALIASES.addAlias(NestedA.class);

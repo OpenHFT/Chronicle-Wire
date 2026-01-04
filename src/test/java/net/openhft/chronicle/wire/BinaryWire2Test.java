@@ -977,10 +977,8 @@ public class BinaryWire2Test extends WireTestCommon {
             wire.writeDocument(false, w -> w.write("data")
                     .typePrefix("!UpdateEvent")
                     .marshallable(
-                            v -> {
-                                v.write("mm").text("你好")  // Write Chinese characters
-                                        .write("value").float64(15.0);
-                            }));
+                            v -> v.write("mm").text("你好")  // Write Chinese characters
+                                    .write("value").float64(15.0)));
             // assertEquals("29 00 00 00 c4 64 61 74 61 b6 0c 21 55 70 64 61\n" +
             // "74 65 45 76 65 6e 74 82 11 00 00 00 c2 6d 6d e6\n" +
             // "e4 bd a0 e5 a5 bd c5 76 61 6c 75 65 0f\n", bytes.toHexString());
@@ -1001,13 +999,13 @@ public class BinaryWire2Test extends WireTestCommon {
         @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
 
         // Create a map with different types of values
-        @NotNull Map<String, Object> putMap = new HashMap<String, Object>();
+        @NotNull Map<String, Object> putMap = new HashMap<>();
         putMap.put("TestKey", "TestValue");
         putMap.put("TestKey2", 1.0);
 
         wire.writeAllAsMap(String.class, Object.class, putMap);  // Write the map to the wire
 
-        @NotNull Map<String, Object> newMap = new HashMap<String, Object>();
+        @NotNull Map<String, Object> newMap = new HashMap<>();
 
         wire.readAllAsMap(String.class, Object.class, newMap); // Read the map from the wire
 

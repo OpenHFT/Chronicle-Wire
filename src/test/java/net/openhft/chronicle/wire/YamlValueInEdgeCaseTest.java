@@ -229,7 +229,7 @@ public class YamlValueInEdgeCaseTest extends WireTestCommon {
     public void testInt8WithConsumer() {
         YamlWire wire = YamlWire.from("val: 42");
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").int8(result, (ref, val) -> ref.set(val));
+        wire.read("val").int8(result, AtomicInteger::set);
         assertEquals(42, result.get(), "Int8 consumer should receive parsed value 42");
     }
 
@@ -238,7 +238,7 @@ public class YamlValueInEdgeCaseTest extends WireTestCommon {
     public void testInt16WithConsumer() {
         YamlWire wire = YamlWire.from("val: 12345");
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").int16(result, (ref, val) -> ref.set(val));
+        wire.read("val").int16(result, AtomicInteger::set);
         assertEquals(12345, result.get(), "Int16 consumer should receive parsed value 12345");
     }
 
@@ -247,7 +247,7 @@ public class YamlValueInEdgeCaseTest extends WireTestCommon {
     public void testInt32WithConsumer() {
         YamlWire wire = YamlWire.from("val: 1234567");
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").int32(result, (ref, val) -> ref.set(val));
+        wire.read("val").int32(result, AtomicInteger::set);
         assertEquals(1234567, result.get(), "Int32 consumer should receive parsed value 1234567");
     }
 
@@ -256,7 +256,7 @@ public class YamlValueInEdgeCaseTest extends WireTestCommon {
     public void testInt64WithConsumer() {
         YamlWire wire = YamlWire.from("val: 9876543210");
         AtomicLong result = new AtomicLong();
-        wire.read("val").int64(result, (ref, val) -> ref.set(val));
+        wire.read("val").int64(result, AtomicLong::set);
         assertEquals(9876543210L, result.get(), "Int64 consumer should receive parsed value 9876543210");
     }
 
@@ -265,7 +265,7 @@ public class YamlValueInEdgeCaseTest extends WireTestCommon {
     public void testUint8WithConsumer() {
         YamlWire wire = YamlWire.from("val: 255");
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").uint8(result, (ref, val) -> ref.set(val));
+        wire.read("val").uint8(result, AtomicInteger::set);
         assertEquals(255, result.get(), "Uint8 consumer should receive parsed value 255");
     }
 
@@ -274,7 +274,7 @@ public class YamlValueInEdgeCaseTest extends WireTestCommon {
     public void testUint16WithConsumer() {
         YamlWire wire = YamlWire.from("val: 65535");
         AtomicInteger result = new AtomicInteger();
-        wire.read("val").uint16(result, (ref, val) -> ref.set(val));
+        wire.read("val").uint16(result, AtomicInteger::set);
         assertEquals(65535, result.get(), "Uint16 consumer should receive parsed value 65535");
     }
 
@@ -283,7 +283,7 @@ public class YamlValueInEdgeCaseTest extends WireTestCommon {
     public void testUint32WithConsumer() {
         YamlWire wire = YamlWire.from("val: 4294967295");
         AtomicLong result = new AtomicLong();
-        wire.read("val").uint32(result, (ref, val) -> ref.set(val));
+        wire.read("val").uint32(result, AtomicLong::set);
         assertEquals(4294967295L, result.get(), "Uint32 consumer should receive parsed value 4294967295");
     }
 
@@ -292,7 +292,7 @@ public class YamlValueInEdgeCaseTest extends WireTestCommon {
     public void testFloat32WithConsumer() {
         YamlWire wire = YamlWire.from("val: 3.14");
         AtomicReference<Float> result = new AtomicReference<>();
-        wire.read("val").float32(result, (ref, val) -> ref.set(val));
+        wire.read("val").float32(result, AtomicReference::set);
         assertEquals(3.14f, result.get(), 0.001f, "Float32 consumer should receive parsed value 3.14");
     }
 
@@ -301,7 +301,7 @@ public class YamlValueInEdgeCaseTest extends WireTestCommon {
     public void testFloat64WithConsumer() {
         YamlWire wire = YamlWire.from("val: 3.14159265359");
         AtomicReference<Double> result = new AtomicReference<>();
-        wire.read("val").float64(result, (ref, val) -> ref.set(val));
+        wire.read("val").float64(result, AtomicReference::set);
         assertEquals(3.14159265359, result.get(), 0.0000001, "Float64 consumer should receive parsed value 3.14159265359");
     }
 
@@ -365,7 +365,7 @@ public class YamlValueInEdgeCaseTest extends WireTestCommon {
         UUID expected = UUID.randomUUID();
         YamlWire wire = YamlWire.from("id: " + expected);
         AtomicReference<UUID> result = new AtomicReference<>();
-        wire.read("id").uuid(result, (ref, val) -> ref.set(val));
+        wire.read("id").uuid(result, AtomicReference::set);
         assertEquals(expected, result.get(), "YamlWire should round-trip UUID via consumer");
     }
 
@@ -386,7 +386,7 @@ public class YamlValueInEdgeCaseTest extends WireTestCommon {
     public void testBoolWithConsumer() {
         YamlWire wire = YamlWire.from("val: true");
         AtomicReference<Boolean> result = new AtomicReference<>();
-        wire.read("val").bool(result, (ref, val) -> ref.set(val));
+        wire.read("val").bool(result, AtomicReference::set);
         assertTrue(result.get(), "Boolean consumer should receive parsed true value");
     }
 
@@ -485,13 +485,7 @@ public class YamlValueInEdgeCaseTest extends WireTestCommon {
     public void testDeeplyNestedMapping() {
         YamlWire wire = YamlWire.from("l1:\n  l2:\n    l3:\n      value: 42");
         AtomicInteger value = new AtomicInteger();
-        wire.read("l1").marshallable(l1 -> {
-            l1.read("l2").marshallable(l2 -> {
-                l2.read("l3").marshallable(l3 -> {
-                    value.set(l3.read("value").int32());
-                });
-            });
-        });
+        wire.read("l1").marshallable(l1 -> l1.read("l2").marshallable(l2 -> l2.read("l3").marshallable(l3 -> value.set(l3.read("value").int32()))));
         assertEquals(42, value.get(), "Deeply nested mapping value should be 42");
     }
 
@@ -543,7 +537,7 @@ public class YamlValueInEdgeCaseTest extends WireTestCommon {
     public void testTypedInteger() {
         YamlWire wire = YamlWire.from("obj: !int 42");
         Object result = wire.read("obj").object();
-        assertTrue(result instanceof Number, "Typed int should be a Number");
+        assertInstanceOf(Number.class, result, "Typed int should be a Number");
         assertEquals(42, ((Number) result).intValue(), "Typed int value should be 42");
     }
 

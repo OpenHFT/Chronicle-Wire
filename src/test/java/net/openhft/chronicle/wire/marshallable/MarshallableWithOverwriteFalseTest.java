@@ -79,6 +79,6 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
      */
     static class MyDto2 extends SelfDescribingMarshallable {
         // Map to store MyDto instances with String keys
-        final Map<String, MyDto> myDto = new TreeMap<String, MyDto>();
+        final Map<String, MyDto> myDto = new TreeMap<>();
     }
 }

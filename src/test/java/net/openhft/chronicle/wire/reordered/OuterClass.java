@@ -3,7 +3,6 @@
  */
 package net.openhft.chronicle.wire.reordered;
 
-import net.openhft.chronicle.wire.*;
 import net.openhft.chronicle.wire.reuse.AbstractPooledOuterClass;
 
 /**
