@@ -21,15 +21,16 @@ final class WireCollectionTestSupport {
         wire.write().object(noObjects);
 
         @NotNull String[] object = wire.read().object(String[].class);
-        assertEquals(0, object.length);
+        assertEquals(0, object.length, "Empty string array should read with zero length");
 
         wire = wireSupplier.get();
         @NotNull String[] threeObjects = {"abc", "def", "ghi"};
         wire.write().object(threeObjects);
 
         @NotNull String[] object2 = wire.read().object(String[].class);
-        assertEquals(3, object2.length);
-        assertEquals("[abc, def, ghi]", Arrays.toString(object2));
+        assertEquals(3, object2.length, "String array should read back three elements");
+        assertEquals("[abc, def, ghi]", Arrays.toString(object2),
+                "String array order should remain abc def ghi");
     }
 
     static void assertStringListRoundTrip(Supplier<Wire> wireSupplier) {
@@ -38,15 +39,16 @@ final class WireCollectionTestSupport {
         wire.write().object(noObjects);
 
         @NotNull List<String> list = wire.read().object(List.class);
-        assertEquals(0, list.size());
+        assertEquals(0, list.size(), "Empty string list should read with zero size");
 
         wire = wireSupplier.get();
         @NotNull List<String> threeObjects = Arrays.asList("abc", "def", "ghi");
         wire.write().object(threeObjects);
 
         @NotNull List<String> list2 = wire.read().object(List.class);
-        assertEquals(3, list2.size());
-        assertEquals("[abc, def, ghi]", list2.toString());
+        assertEquals(3, list2.size(), "String list should read back three elements");
+        assertEquals("[abc, def, ghi]", list2.toString(),
+                "String list order should remain abc def ghi");
     }
 
     static void assertStringSetRoundTrip(Supplier<Wire> wireSupplier) {
@@ -55,14 +57,15 @@ final class WireCollectionTestSupport {
         wire.write().object(noObjects);
 
         @NotNull Set<String> list = wire.read().object(Set.class);
-        assertEquals(0, list.size());
+        assertEquals(0, list.size(), "Empty string set should read with zero size");
 
         wire = wireSupplier.get();
         @NotNull Set<String> threeObjects = new HashSet<>(Arrays.asList("abc", "def", "ghi"));
         wire.write().object(threeObjects);
 
         @NotNull Set<String> list2 = wire.read().object(Set.class);
-        assertEquals(3, list2.size());
-        assertEquals("[abc, def, ghi]", list2.toString());
+        assertEquals(3, list2.size(), "String set should read back three elements");
+        assertEquals("[abc, def, ghi]", list2.toString(),
+                "String set should contain abc def ghi");
     }
 }

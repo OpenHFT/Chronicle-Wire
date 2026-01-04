@@ -5,12 +5,17 @@ package net.openhft.chronicle.wire;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.DisplayName;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 public class TestLongConversion {
     private static final char SEPARATOR = '/';
     private LongConverter longConverter;
@@ -25,6 +30,7 @@ public class TestLongConversion {
         this.longConverter = longConverter;
     }
 
+    @DisplayName("Parses raw ints and appends values")
     @MethodSource("data")
     @ParameterizedTest
     public void parseRawIntsV1(LongConverter longConverter) {
@@ -43,9 +49,11 @@ public class TestLongConversion {
         builder.append(SEPARATOR);
         longConverter.append(builder, value3);
 
-        assertEquals("VAL2/VAL3/VAL4", builder.toString());
+        assertEquals("VAL2/VAL3/VAL4", builder.toString(),
+                "raw conversion should match for converter=" + longConverter);
     }
 
+    @DisplayName("Parses raw ints with offsets and appends values")
     @MethodSource("data")
     @ParameterizedTest
     public void parseRawIntsV2(LongConverter longConverter) {
@@ -69,6 +77,7 @@ public class TestLongConversion {
         longConverter.append(buffer, value3);
         builder.append(buffer);
 
-        assertEquals("VAL2/VAL3/VAL4", builder.toString());
+        assertEquals("VAL2/VAL3/VAL4", builder.toString(),
+                "offset conversion should match for converter=" + longConverter);
     }
 }

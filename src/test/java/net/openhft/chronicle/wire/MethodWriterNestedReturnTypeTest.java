@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
@@ -20,6 +21,7 @@ public class MethodWriterNestedReturnTypeTest extends WireTestCommon {
      * This test ensures that MethodWriter can handle methods with nested return types without resorting to proxy classes.
      */
     @Test
+    @DisplayName("Nested return types generate a concrete writer")
     public void testNestedReturnTypeIsSupportedInGeneratedWriter() {
         // Initialization of the wire
         BinaryWire binaryWire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
@@ -28,7 +30,8 @@ public class MethodWriterNestedReturnTypeTest extends WireTestCommon {
 
         // Check if the generated writer is not a proxy class
         // A proxy would indicate a fallback mechanism, suggesting the compilation of the generated writer failed.
-        assertFalse(Proxy.isProxyClass(writer.getClass()));
+        assertFalse(Proxy.isProxyClass(writer.getClass()),
+                "Nested return types should not force a proxy writer");
     }
 
     /**

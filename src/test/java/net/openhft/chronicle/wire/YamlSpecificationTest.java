@@ -7,9 +7,12 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -20,6 +23,9 @@ import static net.openhft.chronicle.wire.WireType.YAML;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"deprecation", "removal"})
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 public class YamlSpecificationTest extends WireTestCommon {
 
     // Register class aliases for String, Circle, Shape, Line, and Label
@@ -75,7 +81,8 @@ public class YamlSpecificationTest extends WireTestCommon {
 
     // Test to decode YAML snippets based on various specifications
     @MethodSource("tests")
-    @ParameterizedTest(name = "case={0}")
+    @ParameterizedTest(name = "YAML spec case {0} should round trip")
+    @DisplayName("YAML specification snippets round trip correctly")
     public void decodeAs(String input) throws IOException {
         initYamlSpecificationTest(input);
         String snippet = new String(getBytes(input + ".yaml"), StandardCharsets.UTF_8)
@@ -113,12 +120,18 @@ public class YamlSpecificationTest extends WireTestCommon {
     // Helper method to get bytes from a given file
     @Nullable
     private byte[] getBytes(String file) throws IOException {
-        InputStream is = getClass().getResourceAsStream("/yaml/spec/" + file);
-        if (is == null) return new byte[0];
-        int len = is.available();
-        @NotNull byte[] byteArr = new byte[len];
-        is.read(byteArr);
-        return byteArr;
+        try (InputStream is = getClass().getResourceAsStream("/yaml/spec/" + file)) {
+            if (is == null) {
+                return null;
+            }
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buffer = new byte[4096];
+            int read;
+            while ((read = is.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            return out.toByteArray();
+        }
     }
 }
 

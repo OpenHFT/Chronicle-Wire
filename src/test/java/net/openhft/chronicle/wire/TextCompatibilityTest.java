@@ -6,8 +6,10 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +23,10 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Disabled("TODO FIX")
+@Disabled("Disabled pending updated text compatibility fixtures review")
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 public class TextCompatibilityTest extends WireTestCommon {
 
     private static final long MAX_TEXT_BYTES = 50;
@@ -39,8 +44,9 @@ public class TextCompatibilityTest extends WireTestCommon {
 
     // Main method that demonstrates how to find YAML files in a directory and run the test on them.
     public static void main(String[] args) throws IOException {
-        String base = "/home/peter/git/snakeyaml/src/test/resources";
-        Files.find(Paths.get(base), 4, (p, a) -> p.toString().endsWith(".yaml"))
+        String userHome = System.getProperty("user.home");
+        Files.find(Paths.get(userHome, "git", "snakeyaml", "src", "test", "resources"), 4,
+                (p, a) -> p.toString().endsWith(".yaml"))
                 .forEach(p -> runTest(p.toString(), p.toString(), true));
     }
 
@@ -118,6 +124,7 @@ public class TextCompatibilityTest extends WireTestCommon {
     }
 
     // Perform the compatibility test for the current combination of file and expected content.
+    @DisplayName("Verifies text compatibility against YAML fixtures")
     @MethodSource("combinations")
     @ParameterizedTest
     public void test(String filename, String expected) {

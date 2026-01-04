@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.ZonedDateTime;
@@ -39,16 +40,18 @@ public class TextDocumentTest extends WireTestCommon {
         @NotNull Bytes<?> bytes = wire.bytes();
         String actual = Wires.fromSizePrefixedBlobs(bytes);
         Assertions.assertTrue(actual.contains(
-                "  writeByte: !!atomic {  locked: false, value: 00000000000000000512 }"));
+                "  writeByte: !!atomic {  locked: false, value: 00000000000000000512 }"),
+                actual + " should contain writeByte atomic value");
         Assertions.assertTrue(actual.contains(
-                "  readByte: !!atomic {  locked: false, value: 00000000000000001024 }"));
+                "  readByte: !!atomic {  locked: false, value: 00000000000000001024 }"),
+                actual + " should contain readByte atomic value");
 
         // Read the header from the wire and populate rheader.
         wire.readDocument(w -> w.read(() -> "header").marshallable(rheader), null);
 
         // Assert that both the written and read headers are the same.
-        assertEquals(wheader.uuid, rheader.uuid);
-        assertEquals(wheader.created, rheader.created);
+        assertEquals(wheader.uuid, rheader.uuid, "uuid should round-trip in document header");
+        assertEquals(wheader.created, rheader.created, "created timestamp should round-trip in document header");
 
         // Close resources associated with the headers.
         wheader.closeAll();
@@ -58,15 +61,17 @@ public class TextDocumentTest extends WireTestCommon {
 
     // Test the document writing and reading for TEXT wireType.
     @Test
+    @DisplayName("Reads and writes text document headers")
     public void testDocument() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip text document test");
 
         Assertions.assertTrue(doTestDocument(WireType.TEXT), "text document: wireType=TEXT");
     }
 
     // An ignored test for YAML_ONLY wireType. Needs to be fixed before running.
-    @Disabled(/* TODO FIX */)
     @Test
+    @Disabled("Disabled pending YAML document round-trip fix")
+    @DisplayName("Reads and writes YAML document headers")
     public void testDocumentYaml() {
         Assertions.assertTrue(doTestDocument(WireType.YAML_ONLY), "text document: wireType=YAML_ONLY");
     }

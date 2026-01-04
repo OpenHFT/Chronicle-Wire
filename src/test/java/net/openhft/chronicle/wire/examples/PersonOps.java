@@ -4,14 +4,14 @@
 package net.openhft.chronicle.wire.examples;
 
 /**
- * This interface defines operations related to a person.
+ * Defines example operations for handling {@link Person} instances in wire demos.
  */
 public interface PersonOps {
 
-   /**
-    * Add a new person.
-    *
-    * @param p The person to be added.
-    */
-   void addPerson(Person p);
+    /**
+     * Add a new {@link Person} entry to the example sink.
+     *
+     * @param p person instance to add
+     */
+    void addPerson(Person p);
 }

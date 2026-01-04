@@ -18,7 +18,8 @@ final class LongConverterTestSupport {
         try {
             final long value = converter.parse(text);
             converter.append(b, value);
-            assertEquals(text, b.toString());
+            assertEquals(text, b.toString(),
+                    "Append should reproduce the original text");
         } finally {
             b.releaseLast();
         }
@@ -29,7 +30,8 @@ final class LongConverterTestSupport {
         try {
             final long value = converter.parse(text);
             converter.append(b, value);
-            assertEquals(prefix + text, b.toString());
+            assertEquals(prefix + text, b.toString(),
+                    "Append should preserve the prefix and text");
         } finally {
             b.releaseLast();
         }
@@ -48,10 +50,13 @@ final class LongConverterTestSupport {
                 v.writeLong(converter, i2);
             });
             assertEquals(i,
-                    wire.read("a").readLong(converter), wire.toString());
+                    wire.read("a").readLong(converter),
+                    "Single value should round-trip for i=" + i);
             wire.read("b").sequence(i, (i2, v) -> {
-                assertEquals((long) i2, v.readLong(converter));
-                assertEquals((long) i2, v.readLong(converter));
+                assertEquals((long) i2, v.readLong(converter),
+                        "First sequence value should round-trip for i=" + i2);
+                assertEquals((long) i2, v.readLong(converter),
+                        "Second sequence value should round-trip for i=" + i2);
             });
         }
     }

@@ -7,6 +7,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -18,16 +19,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
- * Test class to validate behavior of marshallable objects with overwriting disabled.
+ * Exercises overwrite-false reads to ensure nested DTO list values persist after round-trip.
  */
 public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
 
-    /**
-     * Test method to evaluate the behavior of the marshallable logic.
-     */
     @Test
+    @DisplayName("Overwrite false should preserve nested strings list")
     public void test() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for overwrite false test");
 
         // Create instances of MyDto2 and MyDto
         MyDto2 myDto2 = new MyDto2();
@@ -43,11 +42,12 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
         // Convert MyDto2 instance to string representation
         String cs = myDto2.toString();
 
-        // Deserialize the string representation back to a MyDto2 object
+        // Deserialise the string representation back to a MyDto2 object
         MyDto2 o = Marshallable.fromString(cs);
 
-        // Verify the size of the strings list in the deserialized object
-        assertEquals(2, o.myDto.get("").strings.size());
+        // Verify the size of the strings list in the deserialised object
+        assertEquals(2, o.myDto.get("").strings.size(),
+                "Deserialised DTO should retain both string entries");
     }
 
     /**
@@ -60,7 +60,7 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
         /**
          * Reads the data from the provided WireIn object to populate this DTO.
          *
-         * @param wire WireIn instance containing serialized data
+         * @param wire WireIn instance containing serialised data
          * @throws IORuntimeException If an IO error occurs during reading
          */
         @Override

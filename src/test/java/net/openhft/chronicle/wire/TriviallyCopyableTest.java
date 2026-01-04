@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.BiConsumer;
@@ -39,11 +40,12 @@ public class TriviallyCopyableTest extends WireTestCommon {
 
     // Test case using the unsafe marshaller (only for non-Azul Zing JVMs)
     @Test
+    @DisplayName("Round-trips trivially copyable data via unsafe marshaller")
     public void unsafe2() {
         // Execute the test using AA's marshallers
         AA expected = new AA((byte) 1, (byte) 2, true, false, 'Y', (short) 6, 7, 8, 9, 10);
         AA actual = roundTrip(expected, (b, a) -> a.readMarshallable(b), (b, a) -> a.writeMarshallable(b));
-        assertEquals(expected, actual, "unsafe2: roundtrip");
+        assertEquals(expected, actual, "expected trivially copyable AA to round-trip via unsafe marshaller");
     }
 
     // Inner class representing a binary-serializable data structure

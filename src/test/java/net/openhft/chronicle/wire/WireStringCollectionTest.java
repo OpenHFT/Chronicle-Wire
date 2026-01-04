@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -20,10 +21,12 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 public class WireStringCollectionTest extends net.openhft.chronicle.wire.WireTestCommon {
     @BeforeEach
     public void hasDirect() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory is required for string collection wire test");
     }
 
     @Test
+    @DisplayName("String collection round trips via wire")
     public void readAndWrite() {
         // Add an alias for ContainsList class
         ClassAliasPool.CLASS_ALIASES.addAlias(ContainsList.class);
@@ -43,10 +46,14 @@ public class WireStringCollectionTest extends net.openhft.chronicle.wire.WireTes
         ContainsList defn = Marshallable.fromString(hbStr);
 
         // Validate the deserialized list and map contents
-        Assertions.assertEquals(2, defn.list.size());
-        Assertions.assertEquals(1, defn.map.size());
+        Assertions.assertEquals(2, defn.list.size(),
+                "Deserialised list should contain two entries");
+        Assertions.assertEquals(1, defn.map.size(),
+                "Deserialised map should contain one entry");
         // Validate the string representation of the deserialized object matches the original
-        Assertions.assertEquals(hbStr, defn.toString());
+        Assertions.assertEquals(hbStr,
+                defn.toString(),
+                "Serialised output should match original string");
     }
 
     // Definition for ContainsList class

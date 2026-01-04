@@ -5,9 +5,10 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,6 +17,9 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 public class ValueOutTest {
 
     private WireType wireType;
@@ -34,8 +38,9 @@ public class ValueOutTest {
     }
 
     // Test the writing and reading of a byte array using the specified WireType
-    @MethodSource("data")
     @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    @DisplayName("Round-trips byte array with generic object read")
     public void test(WireType wireType) {
         initValueOutTest(wireType);
         // Apply the wire type and ensure padding is used if binary
@@ -52,7 +57,8 @@ public class ValueOutTest {
             // Verify that the read byte array matches the written byte array
             final byte[][] actualHolder = {null};
             wire.readDocument(null, w -> actualHolder[0] = (byte[]) w.read().object());
-            assertArrayEquals(expected, actualHolder[0], "valueOut: roundtrip wireType=" + wireType);
+            assertArrayEquals(expected, actualHolder[0],
+                    "Byte array should round-trip via generic object read for wireType=" + wireType);
         } finally {
             // Release resources allocated for the byte buffer
             wire.bytes().releaseLast();
@@ -61,8 +67,9 @@ public class ValueOutTest {
 
     // Test that object serialization and deserialization work as expected
     // when specifying the desired type explicitly
-    @MethodSource("data")
     @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    @DisplayName("Round-trips byte array with requested type")
     public void testRequestedType(WireType wireType) {
         initValueOutTest(wireType);
         // Initialize the Wire object and enable padding for binary format
@@ -76,7 +83,8 @@ public class ValueOutTest {
             // Read the byte array back and ensure it matches the original
             final byte[][] actualHolder = {null};
             wire.readDocument(null, w -> actualHolder[0] = w.read().object(byte[].class));
-            assertArrayEquals(expected, actualHolder[0], "valueOut: requestedType wireType=" + wireType);
+            assertArrayEquals(expected, actualHolder[0],
+                    "Byte array should round-trip via requested type for wireType=" + wireType);
         } finally {
             // Free up resources related to the byte buffer
             wire.bytes().releaseLast();
@@ -84,8 +92,9 @@ public class ValueOutTest {
     }
 
     // Test the serialization and deserialization of all possible byte values
-    @MethodSource("data")
     @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    @DisplayName("Round-trips all byte values for each wire type")
     public void testAllBytes(WireType wireType) {
         initValueOutTest(wireType);
         // Apply the wire type, ensuring padding is applied if binary
@@ -93,22 +102,23 @@ public class ValueOutTest {
         wire.usePadding(wire.isBinary());
 
         // Loop through all possible byte values and test each one
-        for (int i = -128; i < 127; i++) {
+        for (int index = -128; index < 127; index++) {
             // Create and write a single-byte array to the Wire object
-            @NotNull final byte[] expected = {(byte) i};
+            @NotNull final byte[] expected = {(byte) index};
             wire.writeDocument(false, w ->
                     w.write().object(expected)
             );
 
             // Ensure the byte array is written and retrievable
             assertNotNull(
-                    Wires.fromSizePrefixedBlobs(wire.bytes()));
+                    Wires.fromSizePrefixedBlobs(wire.bytes()),
+                    "Size-prefixed blob should be written for wireType=" + wireType + ", index=" + index);
 
             // Read back the byte and validate it against the original
-            wire.readDocument(null, w -> {
-                @Nullable final byte[] actual = (byte[]) w.read().object();
-                assertArrayEquals(expected, actual);
-            });
+            final byte[][] actualHolder = {null};
+            wire.readDocument(null, w -> actualHolder[0] = (byte[]) w.read().object());
+            assertArrayEquals(expected, actualHolder[0],
+                    "Byte should round-trip after read for wireType=" + wireType + ", index=" + index);
 
         }
 

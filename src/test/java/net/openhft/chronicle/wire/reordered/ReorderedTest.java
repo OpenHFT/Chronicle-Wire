@@ -10,6 +10,7 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.reuse.OuterClassWireTestSupport;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * using different wire types in Chronicle Wire. This class uses parameterized tests to
  * execute the same set of tests with various wire formats.
  */
-public class ReorderedTest extends WireTestCommon {
+class ReorderedTest extends WireTestCommon {
     // Static instances of OuterClass for test setup
     private static final OuterClass outerClass1 = new OuterClass();
     private static final OuterClass outerClass2 = new OuterClass();
@@ -59,16 +60,6 @@ public class ReorderedTest extends WireTestCommon {
                 new NestedReadSubset().setTextNumber("two", 2.2));
     }
 
-    // Function to dynamically select the wire type for each test iteration
-    @SuppressWarnings("rawtypes")
-    private Function<Bytes<?>, Wire> wireType;
-
-    // Constructor accepting the wire type function
-    @SuppressWarnings("rawtypes")
-    public void initReorderedTest(Function<Bytes<?>, Wire> wireType) {
-        this.wireType = wireType;
-    }
-
     // Parameterized test configurations
     public static Collection<Object[]> combinations() {
         return Arrays.asList(new Object[][]{
@@ -88,11 +79,12 @@ public class ReorderedTest extends WireTestCommon {
     @MethodSource("combinations")
     @SuppressWarnings("rawtypes")
     @ParameterizedTest(name = "{0}")
-    public void testWithReorderedFields(Function<Bytes<?>, Wire> wireType) {
-        initReorderedTest(wireType);
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @DisplayName("Reordered field reads remain consistent across wire types")
+    void testWithReorderedFields(Function<Bytes<?>, Wire> wireType) {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for reordered field tests");
 
-        OuterClassWireTestSupport.assertTwoOuterClasses(wireType, OuterClass::new, outerClass1, outerClass2, true);
+        OuterClassWireTestSupport.assertTwoOuterClasses(wireType, OuterClass::new, outerClass1, outerClass2,
+                true /* helper asserts round-trip invariants */);
     }
 
     /**
@@ -101,8 +93,8 @@ public class ReorderedTest extends WireTestCommon {
      */
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
-    public void testWithSubsetFields(Function<Bytes<?>, Wire> wireType) {
-        initReorderedTest(wireType);
+    @DisplayName("Subset collections round-trip in wire output")
+    void testWithSubsetFields(Function<Bytes<?>, Wire> wireType) {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
 
@@ -112,8 +104,10 @@ public class ReorderedTest extends WireTestCommon {
         @NotNull StringBuilder sb = new StringBuilder();
 
         // Reading the collection back and comparing
-        assertEquals(nestedReadSubsets.toString().replace(',', '\n'), wire.readEventName(sb).collection(ArrayList::new, NestedReadSubset.class).toString().replace(',', '\n'));
-        assertEquals("test1", sb.toString());
+        assertEquals(nestedReadSubsets.toString().replace(',', '\n'),
+                wire.readEventName(sb).collection(ArrayList::new, NestedReadSubset.class).toString().replace(',', '\n'),
+                "Nested subsets should round-trip via collection read");
+        assertEquals("test1", sb.toString(), "Event name should be test1");
     }
 
     /**
@@ -124,8 +118,8 @@ public class ReorderedTest extends WireTestCommon {
     @MethodSource("combinations")
     @SuppressWarnings("rawtypes")
     @ParameterizedTest(name = "{0}")
-    public void testTopLevel(Function<Bytes<?>, Wire> wireType) {
-        initReorderedTest(wireType);
+    @DisplayName("Top-level fields read in reordered sequence")
+    void testTopLevel(Function<Bytes<?>, Wire> wireType) {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
         for (int i = 1; i < 5; i++) {
@@ -135,10 +129,10 @@ public class ReorderedTest extends WireTestCommon {
             wire.write("b").int32(i * 11);
             wire.write("c").int32(i * 111);
 
-           // Reading back the fields in a different order and asserting
-            assertEquals(i * 111, wire.read(() -> "c").int32());
-            assertEquals(i, wire.read(() -> "a").int32());
-            assertEquals(i * 11, wire.read(() -> "b").int32());
+            // Reading back the fields in a different order and asserting
+            assertEquals(i * 111, wire.read(() -> "c").int32(), "Field c should match at iteration " + i);
+            assertEquals(i, wire.read(() -> "a").int32(), "Field a should match at iteration " + i);
+            assertEquals(i * 11, wire.read(() -> "b").int32(), "Field b should match at iteration " + i);
         }
 
         bytes.releaseLast();

@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -24,6 +25,7 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
      * This test verifies that a Bytes message can be written and read using MethodWriter and MethodReader respectively.
      */
     @Test
+    @DisplayName("Bytes payload can be written and read")
     public void test() throws InterruptedException {
         // Initialization of the wire
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap());
@@ -32,15 +34,14 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
 
         // Set up a MethodReader to read the Bytes message and process it using the println method
         MethodReader reader = w.methodReader((Print) this::println);
-        reader.readOne();
+        Assertions.assertTrue(reader.readOne(), "Reader should process the Bytes message");
 
         // Fetch the read message from the blocking queue with a timeout
         Bytes result = q.poll(10, TimeUnit.SECONDS);
-        // Verify that the fetched message matches the expected content
-        Assertions.assertEquals("hello", result.toString());
-        if (result != null) {
-            result.releaseLast();
-        }
+        Assertions.assertNotNull(result, "Reader should supply a Bytes payload");
+        Assertions.assertEquals("hello", result.toString(),
+                "Payload should match the written Bytes content");
+        result.releaseLast();
         w.bytes().releaseLast();
     }
 
@@ -52,6 +53,7 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
     }
 
     @Test
+    @DisplayName("Reused Bytes remain stable across dispatches")
     public void reusedBytesRemainStableAcrossDispatches() throws InterruptedException {
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         Print printer = wire.methodWriter(Print.class);
@@ -70,10 +72,12 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
                 sink.add(bytes.readUtf8());
             });
 
-            Assertions.assertTrue(reader.readOne());
-            Assertions.assertEquals("alpha", sink.poll(5, TimeUnit.SECONDS));
-            Assertions.assertTrue(reader.readOne());
-            Assertions.assertEquals("beta", sink.poll(5, TimeUnit.SECONDS));
+            Assertions.assertTrue(reader.readOne(), "Reader should process the first message");
+            Assertions.assertEquals("alpha", sink.poll(5, TimeUnit.SECONDS),
+                    "First payload should be alpha");
+            Assertions.assertTrue(reader.readOne(), "Reader should process the second message");
+            Assertions.assertEquals("beta", sink.poll(5, TimeUnit.SECONDS),
+                    "Second payload should be beta");
         } finally {
             reusable.releaseLast();
             wire.bytes().releaseLast();
@@ -81,6 +85,7 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
     }
 
     @Test
+    @DisplayName("Producer mutation during callback does not corrupt payload")
     public void producerMutationDuringCallbackDoesNotCorruptPayload() throws InterruptedException {
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         Bytes<?> shared = Bytes.allocateElasticOnHeap();
@@ -98,8 +103,9 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
                 sink.add(bytes.readUtf8());
             });
 
-            Assertions.assertTrue(reader.readOne());
-            Assertions.assertEquals("original", sink.poll(5, TimeUnit.SECONDS));
+            Assertions.assertTrue(reader.readOne(), "Reader should process the shared Bytes message");
+            Assertions.assertEquals("original", sink.poll(5, TimeUnit.SECONDS),
+                    "Payload should remain original despite producer mutation");
         } finally {
             shared.releaseLast();
             wire.bytes().releaseLast();

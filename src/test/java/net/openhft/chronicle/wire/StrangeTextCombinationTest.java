@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -36,48 +37,56 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     // Tests that a string with a leading space is serialized and deserialized correctly.
     @MethodSource("data")
     @ParameterizedTest
+    @DisplayName("Round-trips string with leading space in wire format")
     public void testPrependedSpace(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String prependedSpace = " hello world";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(prependedSpace);
 
-        Assertions.assertEquals(prependedSpace, wire.read().text());
+        Assertions.assertEquals(prependedSpace, wire.read().text(),
+                "string should round-trip with leading space for wireType=" + wireType);
 
     }
 
     // Tests that a string with a trailing space is serialized and deserialized correctly.
     @MethodSource("data")
     @ParameterizedTest
+    @DisplayName("Round-trips string with trailing space in wire format")
     public void testPostpendedSpace(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String postpendedSpace = "hello world ";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(postpendedSpace);
 
-        Assertions.assertEquals(postpendedSpace, wire.read().text());
+        Assertions.assertEquals(postpendedSpace, wire.read().text(),
+                "string should round-trip with trailing space for wireType=" + wireType);
     }
 
     // Tests that a string with escape characters is serialized and deserialized correctly.
     @MethodSource("data")
     @ParameterizedTest
+    @DisplayName("Round-trips string with escaped quote sequence")
     public void testSlashQuoteTest(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = "\\\" ";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assertions.assertEquals(expected, wire.read().text());
+        Assertions.assertEquals(expected, wire.read().text(),
+                "string should round-trip with escaped quote for wireType=" + wireType);
     }
 
     // Tests that a string with specific YAML syntax is serialized and deserialized correctly.
     @MethodSource("data")
     @ParameterizedTest
+    @DisplayName("Round-trips string with yaml type syntax")
     public void testYaml(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = "!String{chars:hello world}";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assertions.assertEquals(expected, wire.read().text());
+        Assertions.assertEquals(expected, wire.read().text(),
+                "string should round-trip with yaml syntax for wireType=" + wireType);
     }
 
     // Test class to ensure various string values are correctly serialized and deserialized using
@@ -87,89 +96,105 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     // Tests that a string "!String" is serialized and deserialized correctly.
     @MethodSource("data")
     @ParameterizedTest
+    @DisplayName("Round-trips string literal with type prefix")
     public void testString(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = "!String";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assertions.assertEquals(expected, wire.read().text());
+        Assertions.assertEquals(expected, wire.read().text(),
+                "string should round-trip with type prefix for wireType=" + wireType);
     }
 
     // Tests that a string "!binary" is serialized and deserialized correctly.
     @MethodSource("data")
     @ParameterizedTest
+    @DisplayName("Round-trips string literal with binary tag")
     public void testBinary(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = "!binary";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assertions.assertEquals(expected, wire.read().text());
+        Assertions.assertEquals(expected, wire.read().text(),
+                "string should round-trip with binary tag for wireType=" + wireType);
     }
 
     // Tests that a string " !binary" with a leading space is serialized and deserialized correctly.
     @MethodSource("data")
     @ParameterizedTest
+    @DisplayName("Round-trips string literal with leading space")
     public void testBinaryWithSpace(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = " !binary";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assertions.assertEquals(expected, wire.read().text());
+        Assertions.assertEquals(expected, wire.read().text(),
+                "binary tag with leading space should round-trip for wireType=" + wireType);
     }
 
     // Tests that an empty string is serialized and deserialized correctly.
     @MethodSource("data")
     @ParameterizedTest
+    @DisplayName("Round-trips empty string value in wire format")
     public void testEmpty(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = "";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assertions.assertEquals(expected, wire.read().text());
+        Assertions.assertEquals(expected, wire.read().text(),
+                "empty string should round-trip for wireType=" + wireType);
     }
 
     // Tests that a null string value is serialized and deserialized correctly.
     @MethodSource("data")
     @ParameterizedTest
+    @DisplayName("Round-trips null string value in wire format")
     public void testNull(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
-        @Nullable final String expected = null;
+        @Nullable final String expected = nullText();
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assertions.assertEquals(expected, wire.read().text());
+        Assertions.assertEquals(expected, wire.read().text(),
+                "null string should round-trip for wireType=" + wireType);
     }
 
     // Tests that a string with a newline character is serialized and deserialized correctly.
     @MethodSource("data")
     @ParameterizedTest
+    @DisplayName("Round-trips newline string value in wire format")
     public void testNewLine(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = "\n";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assertions.assertEquals(expected, wire.read().text());
+        Assertions.assertEquals(expected, wire.read().text(),
+                "newline string should round-trip for wireType=" + wireType);
     }
 
     // Tests that a string with a Unicode null character is serialized and deserialized correctly.
     @MethodSource("data")
     @ParameterizedTest
+    @DisplayName("Round-trips null character string value in wire format")
     public void testUnicode(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = "\u0000";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assertions.assertEquals(expected, wire.read().text());
+        Assertions.assertEquals(expected, wire.read().text(),
+                "null character string should round-trip for wireType=" + wireType);
     }
 
     // Tests that an XML formatted string is serialized and deserialized correctly.
     @MethodSource("data")
     @ParameterizedTest
+    @DisplayName("Round-trips xml tag string value in wire format")
     public void testXML(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = "<name>rob austin</name>";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assertions.assertEquals(expected, wire.read().text());
+        Assertions.assertEquals(expected, wire.read().text(),
+                "xml tag string should round-trip for wireType=" + wireType);
     }
 
     // Helper method to create a new Wire instance using the given WireType.
@@ -178,5 +203,10 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     private Wire wireFactory() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         return wireType.apply(bytes);
+    }
+
+    @Nullable
+    private static String nullText() {
+        return System.getProperty("wire.null.text");
     }
 }

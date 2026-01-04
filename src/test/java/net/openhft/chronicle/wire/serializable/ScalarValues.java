@@ -9,6 +9,7 @@ import net.openhft.chronicle.core.io.Validatable;
 import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.wire.FieldInfo;
 import net.openhft.chronicle.wire.Wires;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.io.Serializable;
 
@@ -16,6 +17,7 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 
 @SuppressWarnings({"rawtypes","deprecation"})
 @UsedViaReflection
+@SuppressFBWarnings(value = "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS", justification = "Serializable variant keeps the name for compatibility with existing uses.")
 public class ScalarValues extends net.openhft.chronicle.wire.marshallable.ScalarValues implements Serializable, Validatable {
     private static final long serialVersionUID = 0L;
 

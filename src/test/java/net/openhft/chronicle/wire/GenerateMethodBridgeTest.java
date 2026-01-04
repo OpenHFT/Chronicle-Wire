@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.Mocker;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
@@ -37,8 +38,10 @@ interface GMBZ extends GMBA, GMBB {
 public class GenerateMethodBridgeTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Creates method bridge and routes calls")
     public void createBridge() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip method bridge generation test");
 
         // Instantiating an object to generate method bridges
         GenerateMethodBridge gmb = new GenerateMethodBridge();
@@ -119,6 +122,7 @@ public class GenerateMethodBridgeTest extends WireTestCommon {
                         "]\n" +
                         "gmbb.method3[method3]\n" +
                         "gmbz.method3[method3]\n",
-                sw.toString().replace("\r", ""));
+                sw.toString().replace("\r", ""),
+                "bridge should route method calls to all interfaces in order");
     }
 }

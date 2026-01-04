@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,9 +20,11 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 public class WireTextBugTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Binary wire round trip preserves bug text")
     // Test for handling text within the Wire framework
     public void testText() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory is required for wire text round trip");
 
         // Adding alias for the Bug class
         ClassAliasPool.CLASS_ALIASES.addAlias(Bug.class);
@@ -36,7 +39,9 @@ public class WireTextBugTest extends WireTestCommon {
         // Check the Bug object's string representation
         assertEquals("!Bug {\n" +
                 "  clOrdID: \"FIX.4.4:12345678_client1->FOO/MINI1-1234567891234-12\"\n" +
-                "}\n", b.toString());
+                "}\n",
+                b.toString(),
+                "Bug string should match expected YAML text");
 
         // Write the Bug object to the wire
         encodeWire.getValueOut().object(b);
@@ -55,7 +60,9 @@ public class WireTextBugTest extends WireTestCommon {
         // Check the deserialized Bug object's string representation
         assertEquals("!Bug {\n" +
                 "  clOrdID: \"FIX.4.4:12345678_client1->FOO/MINI1-1234567891234-12\"\n" +
-                "}\n", b2.toString());
+                "}\n",
+                b2.toString(),
+                "Decoded bug string should match expected YAML text");
 
         // Release resources
         encodeWire.bytes().releaseLast();

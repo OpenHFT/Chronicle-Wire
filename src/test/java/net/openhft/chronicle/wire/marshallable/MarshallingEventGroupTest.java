@@ -10,25 +10,24 @@ import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.threads.PauserMode;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Test class to validate the behavior of the marshalling process within an EventGroup context.
+ * Verifies EventGroup serialisation to text wire with configured pausers and thread metadata preserved.
  */
 class MarshallingEventGroupTest extends WireTestCommon {
 
-    /**
-     * Test method to evaluate the serialization of the EventGroup object.
-     */
     @Test
-    public void test() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @DisplayName("EventGroup should serialise to expected text wire")
+    void test() {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for EventGroup serialisation test");
 
         // Skip this test if JVM is running in debug mode, as it could lead to longer timeouts
-        assumeFalse(Jvm.isDebug());
+        assumeFalse(Jvm.isDebug(), "Debug mode disables EventGroup serialisation timing checks");
 
         // Using the EventGroupBuilder, create an instance of EventGroup and use try-with-resources to ensure it's closed
         try (final EventGroup eg =
@@ -44,7 +43,7 @@ class MarshallingEventGroupTest extends WireTestCommon {
             // Convert the EventGroup object to its TEXT representation
             final String actual = WireType.TEXT.asString(eg);
 
-            // An updated expected serialized string for the EventGroup object
+            // An updated expected serialised string for the EventGroup object
             String expected = "!net.openhft.chronicle.threads.EventGroup {\n" +
                     "  referenceId: 0,\n" +
                     "  lifecycle: !net.openhft.chronicle.threads.EventLoopLifecycle NEW,\n" +
@@ -135,8 +134,8 @@ class MarshallingEventGroupTest extends WireTestCommon {
                     "  replication: !!null \"\"\n" +
                     "}\n";
 
-            // Assert that the actual serialized string matches the updated expected string
-            assertEquals(expected, actual);
+            // Assert that the actual serialised string matches the updated expected string
+            assertEquals(expected, actual, "EventGroup should serialise to the expected text");
         }
     }
 }

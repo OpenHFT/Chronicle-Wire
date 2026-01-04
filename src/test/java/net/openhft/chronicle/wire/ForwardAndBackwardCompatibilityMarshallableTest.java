@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -21,12 +22,7 @@ import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 @SuppressWarnings("this-escape")
 public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCommon {
 
-    private WireType wireType;
     private final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
-
-    public void initForwardAndBackwardCompatibilityMarshallableTest(WireType wireType) {
-        this.wireType = wireType;
-    }
 
     // Define the wire types to be tested
     public static Collection<Object[]> data() {
@@ -49,8 +45,8 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
     // Test to check the compatibility of a marshallable StringBuilder
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Reads StringBuilder fields across wire versions")
     public void marshableStringBuilderTest(WireType wireType) {
-        initForwardAndBackwardCompatibilityMarshallableTest(wireType);
         final Wire wire = wireType.apply(bytes);
         wire.usePadding(wire.isBinary());
         ClassLookup wrap1 = CLASS_ALIASES.wrap();
@@ -61,7 +57,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
 
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
-                Assertions.fail();
+                Assertions.fail("document should be present for StringBuilder test, wireType=" + wireType);
             @NotNull MDTO2 dto2 = new MDTO2();
             dto2.readMarshallable(dc.wire());
             Assertions.assertEquals(1, dto2.one, "field 'one' should deserialize correctly with expected value");
@@ -73,8 +69,8 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
     // Test for checking backward compatibility of the Wire
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Reads older data with newer schema")
     public void backwardsCompatibility(WireType wireType) {
-        initForwardAndBackwardCompatibilityMarshallableTest(wireType);
         final Wire wire = wireType.apply(bytes);
         wire.usePadding(wire.isBinary());
         ClassLookup wrap1 = CLASS_ALIASES.wrap();
@@ -90,7 +86,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
             ((TextWire) wire).useBinaryDocuments();
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
-                Assertions.fail();
+                Assertions.fail("document should be present for backward compatibility, wireType=" + wireType);
             @NotNull MDTO2 dto2 = new MDTO2();
             dc.wire().getValueIn().marshallable(dto2);
             Assertions.assertEquals(1, dto2.one, "backward compatibility should preserve existing field 'one' when reading with newer schema");
@@ -101,13 +97,14 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
 
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Reads newer data with older schema")
     public void forwardCompatibility(WireType wireType) {
-        initForwardAndBackwardCompatibilityMarshallableTest(wireType);
         // Apply the given wireType to bytes to get a Wire instance
         final Wire wire = wireType.apply(bytes);
 
         // Check if the wire is an instance of YamlWire and skip the test if true
-        Assumptions.assumeFalse(wire instanceof YamlWire);
+        Assumptions.assumeFalse(wire instanceof YamlWire,
+                "YamlWire does not support forward compatibility test, wireType=" + wireType);
 
         // Check if the wire is binary and apply padding if true
         wire.usePadding(wire.isBinary());
@@ -133,7 +130,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
         try (DocumentContext dc = wire.readingDocument()) {
             // If there's no document present, fail the test
             if (!dc.isPresent())
-                Assertions.fail();
+                Assertions.fail("document should be present for forward compatibility, wireType=" + wireType);
 
             // Create a new instance of MDTO1 and read its value from the wire
             @NotNull MDTO1 dto1 = new MDTO1();

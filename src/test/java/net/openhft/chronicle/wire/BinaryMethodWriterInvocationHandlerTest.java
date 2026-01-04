@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
@@ -15,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class BinaryMethodWriterInvocationHandlerTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Closes target when proxy is closed")
     public void testOnClose() {
         Closeable closeable = createMock(Closeable.class);
 
@@ -38,7 +40,7 @@ public class BinaryMethodWriterInvocationHandlerTest extends WireTestCommon {
 
         Class<?>[] interfaces = {Closeable.class};
         try (@NotNull Closeable close = (Closeable) Proxy.newProxyInstance(Closeable.class.getClassLoader(), interfaces, handler)) {
-            assertNotNull(close);
+            assertNotNull(close, "Expected proxy closeable instance");
             // and close it
         }
 

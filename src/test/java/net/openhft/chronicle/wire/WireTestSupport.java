@@ -24,11 +24,19 @@ final class WireTestSupport {
                 .write().object(WireType.TEXT)
                 .write().object(WireType.RAW);
 
-        Assertions.assertEquals(expectedText, wire.toString());
+        Assertions.assertEquals(expectedText,
+                wire.toString(),
+                "Wire output should match expected round trip text");
 
-        Assertions.assertEquals(WireType.BINARY, wire.read().object(Object.class));
-        Assertions.assertEquals(WireType.TEXT, wire.read().object(Object.class));
-        Assertions.assertEquals(WireType.RAW, wire.read().object(Object.class));
+        Assertions.assertEquals(WireType.BINARY,
+                wire.read().object(Object.class),
+                "Wire should read back BINARY type token");
+        Assertions.assertEquals(WireType.TEXT,
+                wire.read().object(Object.class),
+                "Wire should read back TEXT type token");
+        Assertions.assertEquals(WireType.RAW,
+                wire.read().object(Object.class),
+                "Wire should read back RAW type token");
     }
 
     static void assertLzwCompressionAsText(Wire wire, Supplier<Bytes<?>> bytesSupplier) {
@@ -39,7 +47,9 @@ final class WireTestSupport {
 
         @NotNull Bytes<?> bytes = bytesSupplier.get();
         wire.read().bytes(bytes);
-        Assertions.assertEquals(str, bytes.toString());
+        Assertions.assertEquals(str,
+                bytes.toString(),
+                "LZW compression should round trip full text");
         bytes.releaseLast();
     }
 
@@ -67,7 +77,9 @@ final class WireTestSupport {
         for (int i = 0; i < 4; i++) {
             try (DocumentContext dc = wire.readingDocument()) {
                 final boolean metaData = i % 2 == 0;
-                Assertions.assertEquals(metaData, dc.isMetaData(), "i: " + i);
+                Assertions.assertEquals(metaData,
+                        dc.isMetaData(),
+                        "Metadata flag should match document index " + i);
             }
         }
     }
@@ -75,19 +87,22 @@ final class WireTestSupport {
     static void assertAllCharsRoundTrip(Wire wire) {
         @NotNull char[] chars = new char[256];
         for (int i = 0; i < 1024; i++) {
+            final int index = i;
             wire.clear();
             Arrays.fill(chars, (char) i);
             @NotNull String s = new String(chars);
             wire.writeDocument(false, w -> w.write(() -> "message").text(s));
 
-            wire.readDocument(null, w -> w.read(() -> "message").text(s, Assertions::assertEquals));
+            wire.readDocument(null, w -> w.read(() -> "message")
+                    .text(s, (expected, actual) -> Assertions.assertEquals(expected,
+                            actual,
+                            "Character block should round-trip at i=" + index)));
         }
     }
 
     static void writeDemarshallable(Wire wire) {
-        try (DocumentContext ignored = wire.writingDocument(true)) {
-            ignored.isData();
-            wire.getValueOut().typedMarshallable(new DemarshallableObject("test", 12345));
+        try (DocumentContext dc = wire.writingDocument(true)) {
+            dc.wire().getValueOut().typedMarshallable(new DemarshallableObject("test", 12345));
         }
     }
 
@@ -100,11 +115,14 @@ final class WireTestSupport {
     }
 
     static void assertDemarshallableRead(Wire wire) {
-        try (DocumentContext ignored = wire.readingDocument()) {
-            ignored.isData();
-            DemarshallableObject dobj = wire.getValueIn().typedMarshallable();
-            Assertions.assertEquals("test", dobj.name);
-            Assertions.assertEquals(12345, dobj.value);
+        try (DocumentContext dc = wire.readingDocument()) {
+            DemarshallableObject dobj = dc.wire().getValueIn().typedMarshallable();
+            Assertions.assertEquals("test",
+                    dobj.name,
+                    "Demarshalled name should match expected value");
+            Assertions.assertEquals(12345,
+                    dobj.value,
+                    "Demarshalled value should match expected number");
         }
     }
 
@@ -120,12 +138,21 @@ final class WireTestSupport {
         });
         Assertions.assertEquals("--- !!data\n" +
                         "put: { key: \"1\", value: !byte[] !!binary //79/Pv6+Q== }\n",
-                Wires.fromSizePrefixedBlobs(wire.bytes()));
+                Wires.fromSizePrefixedBlobs(wire.bytes()),
+                "Swap leaf should serialise expected binary blob");
 
         wire.readDocument(null, wir -> wire.read(() -> "put")
                 .marshallable(w -> w.read(() -> "key")
-                        .object(Object.class, "1", Assertions::assertEquals)
-                        .read(() -> "value").object(byte[].class, expected, Assertions::assertArrayEquals)));
+                        .object(Object.class,
+                                "1",
+                                (exp, act) -> Assertions.assertEquals(exp,
+                                        act,
+                                        "Swap leaf should preserve key value"))
+                        .read(() -> "value").object(byte[].class,
+                                expected,
+                                (exp, act) -> Assertions.assertArrayEquals(exp,
+                                        act,
+                                        "Swap leaf should preserve byte array value"))));
     }
 
     static void assertTypeWithoutSpace(Wire wire) {
@@ -143,7 +170,9 @@ final class WireTestSupport {
                 "  f: 0.0,\n" +
                 "  d: 0.0,\n" +
                 "  l: 0\n" +
-                "}\n", mt.toString());
+                "}\n",
+                mt.toString(),
+                "Type without space should parse default fields");
     }
 
     static void assertNanValues(Wire wire) {
@@ -155,12 +184,30 @@ final class WireTestSupport {
                         "A5: NaN\n" +
                         "B: 1.23\n");
 
-        Assertions.assertEquals(Double.NaN, wire.read("A").float64(), 0);
-        Assertions.assertEquals(Double.NaN, wire.read("A2").float64(), 0);
-        Assertions.assertEquals(Double.POSITIVE_INFINITY, wire.read("A3").float64(), 0);
-        Assertions.assertEquals(Double.NEGATIVE_INFINITY, wire.read("A4").float64(), 0);
-        Assertions.assertEquals(Double.NaN, wire.read("A5").float64(), 0);
-        Assertions.assertEquals(1.23, wire.read("B").float64(), 0);
+        Assertions.assertEquals(Double.NaN,
+                wire.read("A").float64(),
+                0,
+                "NaN parse should match field A value");
+        Assertions.assertEquals(Double.NaN,
+                wire.read("A2").float64(),
+                0,
+                "NaN parse should match field A2 entry");
+        Assertions.assertEquals(Double.POSITIVE_INFINITY,
+                wire.read("A3").float64(),
+                0,
+                "Infinity parse should match field A3 value");
+        Assertions.assertEquals(Double.NEGATIVE_INFINITY,
+                wire.read("A4").float64(),
+                0,
+                "Negative infinity parse should match field A4 value");
+        Assertions.assertEquals(Double.NaN,
+                wire.read("A5").float64(),
+                0,
+                "NaN parse should match field A5 value");
+        Assertions.assertEquals(1.23,
+                wire.read("B").float64(),
+                0,
+                "Numeric parse should match field B value");
     }
 
     static void assertExceptionRoundTrip(Wire wire, String testClassName) {
@@ -189,11 +236,14 @@ final class WireTestSupport {
                         "    { class: sun.reflect.NativeMethodAccessorImpl, method: invoke0, file: NativeMethodAccessorImpl.java, line: -2 }\n" +
                         "  ]\n" +
                         "}\n",
-                Wires.fromSizePrefixedBlobs(wire));
+                Wires.fromSizePrefixedBlobs(wire),
+                "Exception should serialise with expected stack trace");
 
         wire.readDocument(null, r -> {
             Throwable t = r.read(() -> "exception").throwable(true);
-            Assertions.assertInstanceOf(InvalidAlgorithmParameterException.class, t);
+            Assertions.assertInstanceOf(InvalidAlgorithmParameterException.class,
+                    t,
+                    "Decoded exception should be InvalidAlgorithmParameterException type");
         });
     }
 

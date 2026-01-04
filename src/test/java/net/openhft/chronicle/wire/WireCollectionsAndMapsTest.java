@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class WireCollectionsAndMapsTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Sequence read and write across wire types")
     public void sequenceReadWrite() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             final Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
@@ -42,7 +44,7 @@ public class WireCollectionsAndMapsTest extends WireTestCommon {
                 }
                 return c;
             });
-            assertEquals(0, len[0]);
+            assertEquals(0, len[0], "Empty sequence should report zero length for wire type " + wt);
 
             len[0] = w.read("one").sequenceWithLength(new int[1], (in, arr) -> {
                 int c = 0;
@@ -51,7 +53,7 @@ public class WireCollectionsAndMapsTest extends WireTestCommon {
                 }
                 return c;
             });
-            assertEquals(1, len[0]);
+            assertEquals(1, len[0], "Single item sequence should report length one for wire type " + wt);
 
             Object[] out = new Object[3];
             w.read("mix").sequence(out, (arr, in) -> {
@@ -59,11 +61,13 @@ public class WireCollectionsAndMapsTest extends WireTestCommon {
                 arr[1] = in.int64();
                 arr[2] = in.float64();
             });
-            assertArrayEquals(new Object[]{"a", 2L, 3.0}, out);
+            assertArrayEquals(new Object[]{"a", 2L, 3.0}, out,
+                    "Mixed sequence should round trip values for wire type " + wt);
         }
     }
 
     @Test
+    @DisplayName("Maps round trip via marshallable across wire types")
     public void mapsRoundTripViaMarshallable() {
         // Use ValueIn.marshallableAsMap across supported wire types.
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
@@ -76,8 +80,8 @@ public class WireCollectionsAndMapsTest extends WireTestCommon {
             w.write("m").map(in);
 
             Map<?, ?> out = w.read("m").marshallableAsMap(String.class, Object.class);
-            assertNotNull(out);
-            assertEquals(in, out);
+            assertNotNull(out, "Map should read back as non-null for wire type " + wt);
+            assertEquals(in, out, "Map contents should round trip for wire type " + wt);
         }
     }
 }

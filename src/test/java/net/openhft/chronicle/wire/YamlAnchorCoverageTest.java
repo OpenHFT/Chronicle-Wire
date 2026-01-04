@@ -3,6 +3,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -13,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class YamlAnchorCoverageTest extends WireTestCommon {
 
     @Test
+    @DisplayName("YAML anchors and aliases resolve shared map content")
     public void readsAnchorsAndAliases() {
         assertThrows(UnsupportedOperationException.class, () -> {
             String yaml = "common: &base { num: 7, text: 'hello' }\nfirst: *base\n";
@@ -20,10 +22,10 @@ public class YamlAnchorCoverageTest extends WireTestCommon {
 
             Map<String, Object> common = wire.read("common").marshallableAsMap(String.class, Object.class);
             Object first = wire.read("first").object(null, Object.class, true);
-            assertNotNull(first);
+            assertNotNull(first, "Alias read should return an object value");
             if (first instanceof Map) {
-                assertEquals(common, first);
+                assertEquals(common, first, "Alias map should match common anchor content");
             }
-        });
+        }, "Alias lookup should reject unsupported map operations");
     }
 }

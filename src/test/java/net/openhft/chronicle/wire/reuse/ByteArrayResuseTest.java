@@ -9,6 +9,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,11 +46,11 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
      * with the expected hexadecimal string.
      */
     @Test
+    @DisplayName("Reuses byte arrays in self-describing format")
     public void writeReadBytesArray() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for byte array reuse tests");
 
-        SELF_DESCRIBING = true;
-        RoundTripResult result = writeReadBytesArrayRoundTrip();
+        RoundTripResult result = writeReadBytesArrayRoundTrip(true);
         assertEquals("c4 64 61 74 61                                  # data:\n" +
                 "80 22                                           # Data\n" +
                 "   c9 74 69 6d 65 73 74 61 6d 70                   # timestamp:\n" +
@@ -73,11 +74,11 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
      * hexadecimal string.
      */
     @Test
+    @DisplayName("Reuses byte arrays in binary format")
     public void writeReadBytesArrayBinary() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for byte array reuse binary tests");
 
-        SELF_DESCRIBING = false;
-        RoundTripResult result = writeReadBytesArrayRoundTrip();
+        RoundTripResult result = writeReadBytesArrayRoundTrip(false);
         assertEquals("c4 64 61 74 61                                  # data:\n" +
                 "80 16                                           # Data\n" +
                 "   d2 02 96 49 00 00 00 00                         # timestamp\n" +
@@ -91,8 +92,9 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
         assertSame(result.firstBytes, result.secondBytes, "byte array reuse: array reused selfDescribing=false");
     }
 
-    private RoundTripResult writeReadBytesArrayRoundTrip() {
+    private RoundTripResult writeReadBytesArrayRoundTrip(boolean selfDescribing) {
         Data expected = new Data();
+        expected.selfDescribing = selfDescribing;
         expected.timestamp = 1234567890L;
         expected.bytes = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
 
@@ -102,6 +104,7 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
         wire.write("data").object(Data.class, expected);
 
         Data data2 = new Data();
+        data2.selfDescribing = selfDescribing;
         wire.read("data").object(data2, Data.class);
         Data firstRead = snapshot(data2);
         byte[] bytes2 = data2.bytes;
@@ -112,12 +115,11 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
 
     private static Data snapshot(Data source) {
         Data copy = new Data();
+        copy.selfDescribing = source.selfDescribing;
         copy.timestamp = source.timestamp;
         copy.bytes = source.bytes;
         return copy;
     }
-
-    private static boolean SELF_DESCRIBING;
 
     /**
      * Data class extends SelfDescribingMarshallable for testing byte array reuse.
@@ -126,10 +128,11 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
     static class Data extends SelfDescribingMarshallable {
         long timestamp;
         byte[] bytes;
+        boolean selfDescribing;
 
         @Override
         public boolean usesSelfDescribingMessage() {
-            return SELF_DESCRIBING;
+            return selfDescribing;
         }
 
         @Override

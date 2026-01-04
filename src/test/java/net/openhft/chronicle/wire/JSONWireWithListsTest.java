@@ -4,8 +4,10 @@
 package net.openhft.chronicle.wire;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,6 +17,9 @@ import java.util.List;
  * Test for JSON wire handling of lists.
  * Related issue: https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 public class JSONWireWithListsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Determines whether to use types during serialization
@@ -57,7 +62,8 @@ public class JSONWireWithListsTest extends net.openhft.chronicle.wire.WireTestCo
 
     // Test case for validating the serialization and deserialization of a list of drivers
     @MethodSource("wireTypes")
-    @ParameterizedTest(name = "useTypes={0}")
+    @ParameterizedTest(name = "useTypes={0} serialises json list values")
+    @DisplayName("Serialises list values with optional types in json")
     public void test(boolean useTypes) {
         initJSONWireWithListsTest(useTypes);
         // Instantiating a JSON wire with or without types based on test parameter
@@ -74,6 +80,7 @@ public class JSONWireWithListsTest extends net.openhft.chronicle.wire.WireTestCo
         final String actual = jsonWire.getValueIn().object().toString();
 
         // Asserting the deserialized value against the expected format
-        Assertions.assertEquals("[{surname=Hamilton, car=44}, {surname=Verstappen, car=33}]", actual);
+        Assertions.assertEquals("[{surname=Hamilton, car=44}, {surname=Verstappen, car=33}]", actual,
+                "json list output should match expected driver list");
     }
 }

@@ -4,17 +4,19 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Covers empty, single, and larger sequences to hit hasNextSequenceItem boundaries.
+ * Covers empty, single, and larger sequences to hit hasNextSequenceItem boundary edge scenarios.
  */
 @SuppressWarnings({"deprecation", "removal"})
 public class ValueInSequenceBoundariesTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Handles empty and single sequence boundaries")
     public void emptyAndSingle() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
@@ -31,7 +33,7 @@ public class ValueInSequenceBoundariesTest extends WireTestCommon {
                 }
                 return c;
             });
-            assertEquals(0, n0);
+            assertEquals(0, n0, "Expected empty sequence length for wireType=" + wt);
 
             final long[] one = new long[1];
             int n1 = w.read("s").sequenceWithLength(one, (in, arr) -> {
@@ -41,12 +43,13 @@ public class ValueInSequenceBoundariesTest extends WireTestCommon {
                 }
                 return c;
             });
-            assertEquals(1, n1);
-            assertEquals(1L, one[0]);
+            assertEquals(1, n1, "Expected single-item sequence length for wireType=" + wt);
+            assertEquals(1L, one[0], "Expected single item value for wireType=" + wt);
         }
     }
 
     @Test
+    @DisplayName("Handles multiple sequence items across boundary")
     public void manyItems() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(1024));
@@ -57,9 +60,9 @@ public class ValueInSequenceBoundariesTest extends WireTestCommon {
             });
             int[] arr = new int[65];
             int n = w.read("m").array(arr);
-            assertEquals(65, n);
+            assertEquals(65, n, "Expected 65 sequence items for wireType=" + wt);
             for (int i = 0; i < 65; i++) {
-                assertEquals(i, arr[i]);
+                assertEquals(i, arr[i], "Expected sequence value for wireType=" + wt + ", index=" + i);
             }
         }
     }

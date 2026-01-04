@@ -44,7 +44,7 @@ public class ClusterCommand extends SelfDescribingMarshallable {
     }
 
     /**
-     * Sets the cycle for this command.
+     * Sets the cycle value used to order or route this command.
      *
      * @param cycle The cycle to set.
      * @return The current ClusterCommand instance.
@@ -56,7 +56,7 @@ public class ClusterCommand extends SelfDescribingMarshallable {
     }
 
     /**
-     * Sets the Service for this command.
+     * Sets the Service for this command and updates the cached service id.
      *
      * @param service The Service instance to set.
      * @return The current ClusterCommand instance.

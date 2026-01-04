@@ -76,6 +76,38 @@ class DMOuterClass extends SelfDescribingMarshallable {
         this.s = s;
     }
 
+    String getText() {
+        return text;
+    }
+
+    boolean isB() {
+        return b;
+    }
+
+    byte getBb() {
+        return bb;
+    }
+
+    short getS() {
+        return s;
+    }
+
+    float getF() {
+        return f;
+    }
+
+    double getD() {
+        return d;
+    }
+
+    long getL() {
+        return l;
+    }
+
+    int getI() {
+        return i;
+    }
+
     /**
      * Override of the equals method to ensure correct equality check for instances
      * of DMOuterClass, adhering to the contract set by the base class and

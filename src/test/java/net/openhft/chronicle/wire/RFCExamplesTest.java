@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.wire.RFCExamplesTest.Fields.*;
@@ -26,8 +27,9 @@ public class RFCExamplesTest extends WireTestCommon {
     map.put(3, "bye");
      */
     @Test
+    @DisplayName("RFC put examples serialise consistently across wire types")
     public void testPuts() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for RFC example tests");
 
         // Allocate an elastic buffer on heap.
         @NotNull Bytes<?> bytes = Bytes.allocateElasticOnHeap();
@@ -50,7 +52,8 @@ public class RFCExamplesTest extends WireTestCommon {
                         "    valueType: !type String\n" +
                         "  }\n" +
                         "}\n",
-                Wires.fromSizePrefixedBlobs(bytes));
+                Wires.fromSizePrefixedBlobs(bytes),
+                "Text wire should match the RFC lookup example");
 
         // Create a binary representation of the wire.
         @NotNull Wire wire = new BinaryWire(bytes);
@@ -61,7 +64,8 @@ public class RFCExamplesTest extends WireTestCommon {
 
         // Validate the binary representation.
         assertEquals("[pos: 0, rlim: 132, wlim: 2147483632, cap: 2147483632 ] ǁ$٠٠@Ãcspñ///service-lookupÃtid§u\\u009F)å\"٠٠٠\\u008FX٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠٠٠٠٠٠",
-                bytes.toDebugString());
+                bytes.toDebugString(),
+                "Binary debug output should match the RFC lookup example");
 
         // Create a raw representation of the wire.
         @NotNull Wire raw = new RawWire(bytes);
@@ -71,7 +75,8 @@ public class RFCExamplesTest extends WireTestCommon {
 
         // Validate the raw representation.
         assertEquals("[pos: 0, rlim: 68, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@⒘///service-lookupu\\u009F)å\"٠٠٠٠٠ ٠٠٠\\u001C٠٠٠⒋test⒊Map⒖٠٠٠⒎Integer⒍String‡٠٠٠٠٠٠٠٠",
-                bytes.toDebugString());
+                bytes.toDebugString(),
+                "Raw debug output should match the RFC lookup example");
 
         clear(bytes);
         writeMessageTwo(text);
@@ -98,23 +103,27 @@ public class RFCExamplesTest extends WireTestCommon {
                         "  key: 3,\n" +
                         "  value: bye\n" +
                         "}\n",
-                Wires.fromSizePrefixedBlobs(bytes));
+                Wires.fromSizePrefixedBlobs(bytes),
+                "Text wire should match the RFC put examples");
         assertEquals("[pos: 0, rlim: 148, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@csp: //server1/test⒑cid: 1⒑ $٠٠٠put: {⒑  key: 1,⒑  value: hello⒑}⒑  $٠٠٠put: {⒑  key: 2,⒑  value: world⒑}⒑   ٠٠٠put: {⒑  key: 3,⒑  value: bye⒑}⒑‡٠٠٠٠٠٠٠٠٠٠٠٠٠",
-                bytes.toDebugString());
+                bytes.toDebugString(),
+                "Text debug output should match the RFC put examples");
 
         clear(bytes);
         writeMessageTwo(wire);
 
         // Validate the binary format of the put operations.
         assertEquals("[pos: 0, rlim: 128, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@Ãcspî//server1/testÃcid¡⒈\\u008F\\u008F\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒈Åvalueåhello\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒉Åvalueåworld\\u008F\\u001C٠٠٠Ãput\\u0082⒗٠٠٠Ãkey¡⒊Åvalueãbye\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠٠",
-                bytes.toDebugString());
+                bytes.toDebugString(),
+                "Binary debug output should match the RFC put examples");
 
         clear(bytes);
         writeMessageTwo(raw);
 
         // Validate the raw format of the put operations.
         assertEquals("[pos: 0, rlim: 96, wlim: 2147483632, cap: 2147483632 ] ǁ\\u0018٠٠@⒕//server1/test⒈٠٠٠٠٠٠٠٠⒛٠٠٠⒕٠٠٠⒈٠٠٠٠٠٠٠⒌hello٠٠⒛٠٠٠⒕٠٠٠⒉٠٠٠٠٠٠٠⒌world٠٠⒗٠٠٠⒓٠٠٠⒊٠٠٠٠٠٠٠⒊bye‡٠٠٠٠٠٠٠٠",
-                bytes.toDebugString());
+                bytes.toDebugString(),
+                "Raw debug output should match the RFC put examples");
     }
 
     // Clear the byte buffer.

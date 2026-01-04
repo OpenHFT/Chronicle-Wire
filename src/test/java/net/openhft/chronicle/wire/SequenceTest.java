@@ -7,8 +7,10 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -16,6 +18,9 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 public class SequenceTest extends WireTestCommon {
 
     // Instance variable to hold the WireType.
@@ -39,9 +44,10 @@ public class SequenceTest extends WireTestCommon {
     // Test method to check serialization and deserialization functionality.
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Reads repeated sequences for each wire type")
     public void test(WireType wireType) {
         initSequenceTest(wireType);
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for sequence round-trip tests");
 
         // Create a new My object.
         My m1 = new My();
@@ -113,6 +119,7 @@ public class SequenceTest extends WireTestCommon {
     // Test to read a Set as an object.
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Reads a set as an object for each wire type")
     public void readSetAsObject(WireType wireType) {
         initSequenceTest(wireType);
         // Allocate an elastic buffer on heap.
@@ -144,6 +151,7 @@ public class SequenceTest extends WireTestCommon {
     // Test to read a List as an object.
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Reads a list as an object for each wire type")
     public void readListAsObject(WireType wireType) {
         initSequenceTest(wireType);
         // Allocate an elastic buffer on heap.
@@ -173,10 +181,11 @@ public class SequenceTest extends WireTestCommon {
     // Test to read a Map as an object.
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Reads a map as an object for each wire type")
     public void readMapAsObject(WireType wireType) {
         initSequenceTest(wireType);
         // Ensure that the wire type isn't RAW.
-        assumeFalse(wireType == WireType.RAW);
+        assumeFalse(wireType == WireType.RAW, "RAW wire does not support object map reads");
 
         // Allocate an elastic buffer on heap.
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();

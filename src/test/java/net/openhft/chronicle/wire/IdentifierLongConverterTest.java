@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.wire.IdentifierLongConverter.*;
@@ -16,66 +17,83 @@ public class IdentifierLongConverterTest extends net.openhft.chronicle.wire.Wire
 
     // Test the parsing functionality for the minimum values
     @Test
+    @DisplayName("Parses empty and zero padded identifiers")
     public void parseMin() {
-        assertEquals(0, INSTANCE.parse(""));
-        assertEquals(0, INSTANCE.parse("000", 1, 2));
+        assertEquals(0, INSTANCE.parse(""),
+                "empty string should parse to zero");
+        assertEquals(0, INSTANCE.parse("000", 1, 2),
+                "subrange of zeros should parse to zero");
     }
 
     // Test parsing functionality for the maximum small positive value
     @Test
+    @DisplayName("Parses the maximum small positive identifier value")
     public void parseMaxSmallPositive() {
         assertEquals(MAX_SMALL_ID,
-                INSTANCE.parse(MAX_SMALL_POSITIVE_STR));
+                INSTANCE.parse(MAX_SMALL_POSITIVE_STR),
+                "max small identifier should parse to MAX_SMALL_ID");
     }
 
     // Test parsing functionality for one more than the max small positive value
     @Test
+    @DisplayName("Parses minimum date identifier as max small plus one")
     public void parseMaxSmallPositivePlus1() {
         assertEquals(MAX_SMALL_ID + 1,
-                INSTANCE.parse(MIN_DATE));
+                INSTANCE.parse(MIN_DATE),
+                "min date identifier should parse to MAX_SMALL_ID + 1");
     }
 
     // Test the string representation for zero
     @Test
+    @DisplayName("Formats zero as empty identifier string")
     public void asString0() {
         assertEquals("",
-                INSTANCE.asString(0));
+                INSTANCE.asString(0),
+                "zero should format to empty identifier string");
     }
 
     // Test the string representation for the max small value
     @Test
+    @DisplayName("Formats the maximum small identifier string")
     public void asStringMaxSmall() {
         assertEquals(MAX_SMALL_POSITIVE_STR,
-                INSTANCE.asString(MAX_SMALL_ID));
+                INSTANCE.asString(MAX_SMALL_ID),
+                "max small id should format to expected string");
     }
 
     // Test the string representation for one more than the max small value
     @Test
+    @DisplayName("Formats the minimum date identifier string")
     public void asStringMaxSmallPlus1() {
         assertEquals(MIN_DATE,
-                INSTANCE.asString(MAX_SMALL_ID + 1));
+                INSTANCE.asString(MAX_SMALL_ID + 1),
+                "max small id plus one should format to min date string");
     }
 
     // Test the string representation for the maximum DateTime value
     @Test
+    @DisplayName("Formats the maximum date identifier string")
     public void asStringMaxDateTime() {
         assertEquals(MAX_DATE,
-                INSTANCE.asString(Long.MAX_VALUE));
+                INSTANCE.asString(Long.MAX_VALUE),
+                "max date should format to expected identifier string");
     }
 
     // Test using the TextWire format with safe characters
     @Test
+    @DisplayName("Supports safe characters in text wire")
     public void allSafeCharsTextWire() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
-        assertInstanceOf(TextWire.class, wire, "safe chars: wire type");
+        assertInstanceOf(TextWire.class, wire, "Safe character test should use TextWire");
         LongConverterTestSupport.allSafeChars(wire, IdentifierLongConverter.INSTANCE, 31);
     }
 
     // Test using the YamlWire format with safe characters
     @Test
+    @DisplayName("Supports safe characters in yaml wire")
     public void allSafeCharsYamlWire() {
         Wire wire = new YamlWire();
-        assertInstanceOf(YamlWire.class, wire, "safe chars: wire type");
+        assertInstanceOf(YamlWire.class, wire, "Safe character test should use YamlWire");
         LongConverterTestSupport.allSafeChars(wire, IdentifierLongConverter.INSTANCE, 31);
     }
 }

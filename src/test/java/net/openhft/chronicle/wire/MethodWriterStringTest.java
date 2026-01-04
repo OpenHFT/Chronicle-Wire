@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -30,6 +31,7 @@ public class MethodWriterStringTest extends net.openhft.chronicle.wire.WireTestC
      * This test verifies that a String message can be written and read using MethodWriter and MethodReader respectively.
      */
     @Test
+    @DisplayName("MethodWriter and MethodReader round-trip strings")
     public void test() throws InterruptedException {
         // Initialization of the wire
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap());
@@ -43,7 +45,7 @@ public class MethodWriterStringTest extends net.openhft.chronicle.wire.WireTestC
         // Fetch the read message from the blocking queue with a timeout
         String result = q.poll(10, TimeUnit.SECONDS);
         // Verify that the fetched message matches the expected content
-        Assertions.assertEquals("hello", result);
+        Assertions.assertEquals("hello", result, "Reader should receive the written string");
     }
 
     /**

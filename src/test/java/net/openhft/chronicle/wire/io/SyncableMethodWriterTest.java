@@ -13,6 +13,7 @@ import net.openhft.chronicle.core.io.Syncable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.YamlWire;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -56,10 +57,11 @@ public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTes
 
     // Test the ability to use the custom method writer to write a message and then synchronize the wire
     @Test
+    @DisplayName("On-heap method writer syncs after say calls")
     public void sayAndSync() {
         final OnHeapBytes bytes = Bytes.allocateElasticOnHeap();
         try {
-            assertEquals(EXPECTED, doTest(bytes), "sayAndSync: output");
+            assertEquals(EXPECTED, doTest(bytes), "On-heap say/sync output should match expected format");
         } finally {
             bytes.releaseLast();
         }
@@ -78,12 +80,13 @@ public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTes
 
     // Test the say and sync operations but this time with a MappedBytes instance which maps bytes to a file
     @Test
+    @DisplayName("Mapped bytes writer syncs after say calls")
     public void sayAndSyncMappedBytes() throws FileNotFoundException {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for mapped bytes test");
         final File file = IOTools.createTempFile("sayAndSyncMappedBytes");
         file.deleteOnExit();
         try (MappedBytes mb = MappedBytes.mappedBytes(file, OS.pageSize())) {
-            assertEquals(EXPECTED, doTest(mb), "sayAndSyncMappedBytes: output");
+            assertEquals(EXPECTED, doTest(mb), "Mapped say/sync output should match expected format");
         }
     }
 }

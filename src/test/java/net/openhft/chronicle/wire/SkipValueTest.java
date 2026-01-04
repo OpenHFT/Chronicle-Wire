@@ -8,8 +8,10 @@ import net.openhft.chronicle.bytes.BytesMarshallable;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -31,6 +33,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * Tests the ability to skip certain values in wire formats based on the parameterized input.
  */
 @SuppressWarnings("rawtypes")
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     private String name; // Represents the name of the binary wire code.
@@ -117,7 +122,7 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
         // Update the test case array to set the wire code name.
         for (Object[] objects : list) {
             objects[0] = codeName.get(objects[1]);
-            assertNotNull(objects[0]);
+            assertNotNull(objects[0], "Wire code name should be resolved for code=" + objects[1]);
         }
 
         // Return the populated test cases as a list.
@@ -126,9 +131,11 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @MethodSource("data")
     @ParameterizedTest(name = "{index}: {0}")
+    @DisplayName("Skips binary value and reads next text entry")
     public void test(String name, int code, Consumer<ValueOut> valueOutConsumer) {
         initSkipValueTest(name, code, valueOutConsumer);
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip skip-value test for name=" + name + ", code=" + code);
 
         // Creates a new wire using the BINARY WireType.
         Wire wire = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
@@ -140,7 +147,8 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
         wire.getValueOut().text(name);
 
         // Checks the wire's byte content matches the expected 'code'.
-        assertEquals(code, wire.bytes().peekUnsignedByte());
+        assertEquals(code, wire.bytes().peekUnsignedByte(),
+                "wire code should match expected for name=" + name + ", code=" + code);
 
         // Reset the reading position of the wire's underlying bytes.
         wire.bytes().readPosition(0);
@@ -149,11 +157,15 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
         wire.getValueIn().skipValue();
 
         // Checks that the next value read from the wire is the expected 'name'.
-        assertEquals(name, wire.getValueIn().text());
+        assertEquals(name, wire.getValueIn().text(),
+                "wire should read name after skip for name=" + name + ", code=" + code);
     }
 
     // Dto8 is a data transfer object (DTO) that extends the SelfDescribingMarshallable,
     // which allows it to describe its own serialization/deserialization behavior.
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class Dto8 extends SelfDescribingMarshallable {
         // Stores the current system time in nanoseconds when an instance of Dto8 is created.
         long time = System.nanoTime();
@@ -167,6 +179,9 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
     }
 
     // Dto16 is another DTO, similar to Dto8, but with a 16-bit binary length specification.
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class Dto16 extends SelfDescribingMarshallable {
         // Stores the current system time in nanoseconds when an instance of Dto16 is created.
         long time = System.nanoTime();
@@ -179,6 +194,9 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
     }
 
     // Dto32 is yet another DTO, but with a 32-bit binary length specification.
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class Dto32 extends SelfDescribingMarshallable {
         // Stores the current system time in nanoseconds when an instance of Dto32 is created.
         long time = System.nanoTime();
@@ -192,6 +210,9 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // BM is a simple class that implements BytesMarshallable, allowing instances to be serialized to and
     // deserialized from Bytes directly.
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     private static class BM implements BytesMarshallable {
         // Stores the current system time in nanoseconds when an instance of BM is created.
         long time = System.nanoTime();

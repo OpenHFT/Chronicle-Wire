@@ -11,11 +11,12 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.*;
 import java.util.UUID;
+import java.util.Objects;
 
 @SuppressWarnings("rawtypes")
 public class ScalarValues extends SelfDescribingMarshallable {
-    public static net.openhft.chronicle.wire.serializable.ScalarValues fromSerializable(int i) {
-        return new net.openhft.chronicle.wire.serializable.ScalarValues(i);
+    public static net.openhft.chronicle.wire.serializable.SerializableScalarValues fromSerializable(int i) {
+        return new net.openhft.chronicle.wire.serializable.SerializableScalarValues(i);
     }
     private boolean flag;
     private byte b;
@@ -85,9 +86,14 @@ public class ScalarValues extends SelfDescribingMarshallable {
         file = new File("/tmp/" + i);
         dynamicEnum = TestEnum.THREE;
     }
+
+    int fieldFingerprint() {
+        return Objects.hash(flag, b, s, ch, i, f, l, d, flag2, b2, s2, ch2, i2, f2, l2, d2,
+                aClass, policy, text, date, time, dateTime, zonedDateTime, uuid, bi, bd, file, dynamicEnum);
+    }
 }
 /**
- * A simple dynamic enumeration used in ScalarValues.
+ * Defines enum values for ScalarValues serialisation coverage in marshallable tests.
  */
 enum TestEnum {
     ONE,   // Represents the first value

@@ -7,7 +7,9 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.Mocker;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.io.StringWriter;
 
@@ -24,8 +26,10 @@ public class LongConversionTest extends WireTestCommon {
 
     // Test case to verify the correct serialization and deserialization of the LongHolder object
     @Test
+    @DisplayName("Serialises and parses long conversion fields")
     public void dto() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip long conversion dto test");
 
         // Creating a new LongHolder instance and setting values for its fields
         LongHolder lh = new LongHolder();
@@ -38,17 +42,20 @@ public class LongConversionTest extends WireTestCommon {
                 "  unsigned: C222222222222,\n" +
                 "  hex: fedcba9876543210,\n" +
                 "  timestamp: 2016-12-08T08:00:31.345163\n" +
-                "}\n", lh.toString());
+                "}\n", lh.toString(),
+                "long holder should serialise with expected conversions");
 
         // Deserializing the LongHolder object from its string representation
         LongConversionTest.LongHolder lh2 = Marshallable.fromString(lh.toString());
 
         // Asserting the equality of the deserialized and original objects
-        assertEquals(lh2, lh);
+        assertEquals(lh2, lh,
+                "long holder should round-trip from text form");
     }
 
     // Test case to check the method using HexadecimalLongConverter
     @Test
+    @DisplayName("Writes and reads method with long conversion")
     public void method() {
 
         // Initializing a new Wire instance with an elastic heap-allocated buffer
@@ -57,10 +64,12 @@ public class LongConversionTest extends WireTestCommon {
 
         // Creating a method writer for the WriteWithLong interface
         LongConversionTest.WriteWithLong write = wire.methodWriter(LongConversionTest.WriteWithLong.class);
-        assertSame(write, write.to(0x12345));
+        assertSame(write, write.to(0x12345),
+                "non terminating method should return same writer");
 
         // Asserting the wire's string representation
-        assertEquals("to: 12345\n", wire.toString());
+        assertEquals("to: 12345\n", wire.toString(),
+                "wire output should use hex long conversion");
 
         // Setting up a StringWriter to capture logging output
         StringWriter sw = new StringWriter();
@@ -69,7 +78,8 @@ public class LongConversionTest extends WireTestCommon {
                 .readOne();
 
         // Asserting the captured output (Note: Mocker ignores the LongConverter)
-        assertEquals("to[74565]\n", sw.toString().replaceAll("\r", ""));
+        assertEquals("to[74565]\n", sw.toString().replaceAll("\r", ""),
+                "mocked output should show raw int value");
     }
 
     // Interface for method writers that use HexadecimalLongConverter
@@ -78,6 +88,9 @@ public class LongConversionTest extends WireTestCommon {
     }
 
     // Static class representing a holder for various types of Long values
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class LongHolder extends SelfDescribingMarshallable {
         @LongConversion(Base32LongConverter.class)
         long unsigned;  // Represents unsigned long value

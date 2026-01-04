@@ -19,10 +19,11 @@ final class WireNullTestSupport {
 
         String text = wire.toString();
 
-        assertNull(wire.read().object(Object.class));
-        assertNull(wire.read().object(String.class));
-        assertNull(wire.read().object(RetentionPolicy.class));
-        assertNull(wire.read().object(circleClass));
+        Class<?>[] classes = {Object.class, String.class, RetentionPolicy.class, circleClass};
+        for (Class<?> clazz : classes) {
+            assertNull(wire.read().object(clazz),
+                    "Null value should round trip for " + clazz.getSimpleName());
+        }
         return text;
     }
 }

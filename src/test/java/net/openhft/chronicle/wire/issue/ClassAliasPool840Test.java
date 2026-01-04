@@ -10,15 +10,17 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.ValueIn;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ClassAliasPool840Test {
     /**
-     * <a href="https://github.com/OpenHFT/Chronicle-Wire/issues/840">Chronicle-Wire#840</a>
+     * Regression coverage for custom alias lookup in issue 840.
      */
     @Test
+    @DisplayName("Custom ClassLookup resolves aliases for typedMarshallable")
     public void typeIsLoadedByClassLookup() {
         ClassLookup customClassLookup = new ClassLookup() {
             @Override
@@ -31,7 +33,7 @@ public class ClassAliasPool840Test {
                     case "type":
                         return Class.class;
                     default:
-                        throw new IllegalStateException();
+                        throw new IllegalStateException("Unsupported alias name: " + name);
                 }
             }
 
@@ -41,7 +43,7 @@ public class ClassAliasPool840Test {
                 if (clazz.equals(Type.class)) return "Type";
                 if (clazz.equals(Class.class)) return "type";
 
-                throw new IllegalStateException();
+                throw new IllegalStateException("Unsupported alias class: " + clazz);
             }
 
             @Override
@@ -68,9 +70,9 @@ public class ClassAliasPool840Test {
             Object o = in.typedMarshallable();
 
             if ("obj".contentEquals(name)) {
-                assertEquals(new Dto().value(1), o);
+                assertEquals(new Dto().value(1), o, "Dto alias should resolve to Dto instance");
             } else {
-                assertEquals(Type.class, o);
+                assertEquals(Type.class, o, "Type alias should resolve to Type class literal");
             }
         }
     }

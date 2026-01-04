@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -45,6 +46,7 @@ public class TextBinaryWireTest extends WireTestCommon {
     }
 
     // Test the WireType's valueOf() method.
+    @DisplayName("Identifies wire type from runtime wire instance lookup")
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
     public void testValueOf(WireType wireType) {
@@ -64,6 +66,7 @@ public class TextBinaryWireTest extends WireTestCommon {
     }
 
     // Test reading a document location from a Wire instance.
+    @DisplayName("Reads document at explicit position for each wire type")
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
     public void readingDocumentLocation(WireType wireType) {
@@ -83,12 +86,14 @@ public class TextBinaryWireTest extends WireTestCommon {
     }
 
     // Test reading comments from a Wire instance.
+    @DisplayName("Reads comments across supported wire types")
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
     public void testReadComment(WireType wireType) {
         initTextBinaryWireTest(wireType);
         // Only execute for specific wireTypes.
-        assumeTrue(wireType == WireType.TEXT || wireType == WireType.BINARY || wireType == WireType.YAML);
+        assumeTrue(wireType == WireType.TEXT || wireType == WireType.BINARY || wireType == WireType.YAML,
+                "only text, binary, and yaml wire types support comments");
 
         Wire wire = createWire();
         wire.writeComment("This is a comment");
@@ -100,12 +105,14 @@ public class TextBinaryWireTest extends WireTestCommon {
     }
 
     // Test reading fields as objects from a Wire instance.
+    @DisplayName("Reads enum events and values as objects")
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
     public void readFieldAsObject(WireType wireType) {
         initTextBinaryWireTest(wireType);
         // Exclude certain wireTypes.
-        assumeFalse(wireType == WireType.RAW || wireType == WireType.FIELDLESS_BINARY);
+        assumeFalse(wireType == WireType.RAW || wireType == WireType.FIELDLESS_BINARY,
+                "raw and fieldless binary do not support enum event fields, wireType=" + wireType);
 
         Wire wire = createWire();
         wire.write("CLASS").text("class")
@@ -121,12 +128,14 @@ public class TextBinaryWireTest extends WireTestCommon {
     }
 
     // Test reading fields as long values from a Wire instance.
+    @DisplayName("Reads numeric event keys and values")
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
     public void readFieldAsLong(WireType wireType) {
         initTextBinaryWireTest(wireType);
         // Exclude certain wireTypes.
-        assumeFalse(wireType == WireType.RAW || wireType == WireType.FIELDLESS_BINARY);
+        assumeFalse(wireType == WireType.RAW || wireType == WireType.FIELDLESS_BINARY,
+                "raw and fieldless binary do not support numeric event fields, wireType=" + wireType);
 
         Wire wire = createWire();
         // todo fix to ensure a field number is used.
@@ -146,12 +155,14 @@ public class TextBinaryWireTest extends WireTestCommon {
     }
 
     // Test conversion of different values to numeric values in a Wire instance.
+    @DisplayName("Converts boolean and numeric values to int32")
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
     public void testConvertToNum(WireType wireType) {
         initTextBinaryWireTest(wireType);
         // Exclude certain wireTypes.
-        assumeFalse(wireType == WireType.RAW || /* No support for bool conversions */ wireType == WireType.YAML);
+        assumeFalse(wireType == WireType.RAW || /* No support for bool conversions */ wireType == WireType.YAML,
+                "raw and yaml wire types do not support numeric conversions");
 
         Wire wire = createWire();
         wire.write("a").bool(false)

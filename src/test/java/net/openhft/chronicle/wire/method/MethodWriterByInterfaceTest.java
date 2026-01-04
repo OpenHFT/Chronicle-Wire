@@ -10,6 +10,7 @@ import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.wire.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
@@ -35,18 +36,21 @@ public class MethodWriterByInterfaceTest extends WireTestCommon {
 
     // Test method writing and reading via implementation with text wire type
     @Test
+    @DisplayName("Write/read via implementation on TEXT wire")
     public void writeReadViaImplementation() {
         checkWriteReadViaImplementation(WireType.TEXT, false);
     }
 
     // Test method writing and reading with text wire type and tuple generation enabled
     @Test
+    @DisplayName("Write/read via implementation on TEXT wire with tuples")
     public void writeReadViaImplementationGenerateTuples() {
         checkWriteReadViaImplementation(WireType.TEXT, true);
     }
 
     // Test method writing and reading via implementation with YAML wire type
     @Test
+    @DisplayName("Write/read via implementation on YAML_ONLY wire")
     public void writeReadViaImplementationYaml() {
         checkWriteReadViaImplementation(WireType.YAML_ONLY, false);
     }
@@ -63,14 +67,16 @@ public class MethodWriterByInterfaceTest extends WireTestCommon {
         mwbi0.method(new MWBImpl("name", 1234567890123456L));
 
         // Verify that the writer is not a proxy class
-        assertFalse(Proxy.isProxyClass(mwbi0.getClass()));
+        assertFalse(Proxy.isProxyClass(mwbi0.getClass()),
+                "Method writer should be generated rather than a proxy");
 
         // Assert the string representation of the wire
         assertEquals("method: {\n" +
                 "  name: name,\n" +
                 "  time: 2009-02-13T23:31:30.123456\n" +
                 "}\n" +
-                "...\n", tw.toString());
+                "...\n", tw.toString(),
+                "Wire output should include the method payload");
 
         // Setup a StringWriter to capture the method reader's output
         StringWriter sw = new StringWriter();
@@ -79,17 +85,19 @@ public class MethodWriterByInterfaceTest extends WireTestCommon {
         MethodReader reader = tw.methodReader(Mocker.logging(MWBI0.class, "", sw));
 
         // Verify that the reader is not a proxy class
-        assertFalse(Proxy.isProxyClass(reader.getClass()));
+        assertFalse(Proxy.isProxyClass(reader.getClass()),
+                "Method reader should be generated rather than a proxy");
 
         // Read data and assert that the reader successfully reads an entry
-        assertTrue(reader.readOne());
+        assertTrue(reader.readOne(), "Reader should process the method payload");
 
         // Assert the output captured by the StringWriter
         assertEquals("method[!net.openhft.chronicle.wire.method.MethodWriterByInterfaceTest$MWBImpl {\n" +
                 "  name: name,\n" +
                 "  time: 2009-02-13T23:31:30.123456\n" +
                 "}\n" +
-                "]\n", sw.toString().replace("\r", ""));
+                "]\n", sw.toString().replace("\r", ""),
+                "Logged output should include the method payload");
     }
 
     // Interface representing a data structure with name and time

@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.ReferenceCountedTracer;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 public class BytesReferenceCountingTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Maintains reference counts for heap bytes across owners")
     public void heapBytesMaintainReferenceCountsAcrossOwners() throws InterruptedException {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         assertEquals(1, bytes.refCount(), "newly allocated heap bytes should have initial reference count of 1");
@@ -40,6 +42,7 @@ public class BytesReferenceCountingTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Warns when owner leaks and force releases bytes")
     public void warnLoggedWhenOwnerLeakedAndForceReleased() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         assertEquals(1, bytes.refCount(), "newly allocated bytes should have initial reference count of 1 before any reservations");
@@ -47,9 +50,11 @@ public class BytesReferenceCountingTest extends WireTestCommon {
             ReferenceOwner leaky = ReferenceOwner.temporary("leaky-owner");
             bytes.reserve(leaky);
             long afterReserve = bytes.refCount();
-            assertTrue(afterReserve > 1, "reference count should be at least 2 after owner reserves the bytes");
+            assertTrue(afterReserve > 1, "Expected afterReserve > 1 but was " + afterReserve);
             ((ReferenceCountedTracer) bytes).warnAndReleaseIfNotReleased();
-            assertTrue(bytes.refCount() < afterReserve, "force releasing leaked owner should decrease reference count below reserved level");
+            long afterRelease = bytes.refCount();
+            assertTrue(afterRelease < afterReserve,
+                    "Expected refCount to drop below " + afterReserve + " but was " + afterRelease);
         } finally {
             if (bytes.refCount() > 0) {
                 bytes.releaseLast();
@@ -58,8 +63,9 @@ public class BytesReferenceCountingTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Maintains reference counts for direct bytes across owners")
     public void directBytesMaintainReferenceCountsAcrossOwners() throws InterruptedException {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip direct bytes test");
         Bytes<?> bytes = Bytes.allocateElasticDirect(64);
         assertEquals(1, bytes.refCount(), "newly allocated direct bytes should have initial reference count of 1");
         try {

@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class GenerateMethodWriter2CoverageTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Generates nested writers with method ids")
     public void generatesNestedWritersWithMethodIds() {
         String previous = System.getProperty("wire.generator.v2");
         System.setProperty("wire.generator.v2", "true");
@@ -48,7 +50,7 @@ public class GenerateMethodWriter2CoverageTest extends WireTestCommon {
             assertEquals(expected,
                     recorder.events, "Generated writer should emit method invocations in order");
             assertTrue(recorder.chainInvocations >= 2,
-                    "nested writer should be reused via thread-local state");
+                    "Nested writer reuse should give chainInvocations >= 2, actual=" + recorder.chainInvocations);
         } finally {
             if (previous != null)
                 System.setProperty("wire.generator.v2", previous);

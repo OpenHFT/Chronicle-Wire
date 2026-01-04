@@ -11,7 +11,7 @@ package net.openhft.chronicle.wire.method;
 public interface ChronicleEventHandler extends EventHandler<ChronicleEvent> {
 
     /**
-     * Handles the provided ChronicleEvent.
+     * Handles a ChronicleEvent and applies any downstream routing or validation.
      *
      * @param event The ChronicleEvent instance to be handled.
      */

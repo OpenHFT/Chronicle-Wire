@@ -9,6 +9,7 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -28,6 +29,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      * Tests method writing and reading using a simple interface implementation.
      */
     @Test
+    @DisplayName("Method reader handles simple interface calls")
     public void testInterface() {
         Simple simple = queue::add;
         checkWriteRead(simple);
@@ -37,6 +39,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      * Tests method writing and reading using a descendant of a simple interface.
      */
     @Test
+    @DisplayName("Method reader handles descendant interface calls")
     public void testInterfaceDescend() {
         SimpleDescendant simple = queue::add;
         checkWriteRead(simple);
@@ -46,6 +49,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      * Tests method writing and reading with a concrete class implementation of a descendant interface.
      */
     @Test
+    @DisplayName("Method reader handles descendant class implementations")
     public void testDescendantClass() {
         SimpleDescendant simple = new SimpleDescendantClass(queue);
         checkWriteRead(simple);
@@ -56,6 +60,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      * This test addresses a specific issue (referenced by a GitHub issue link).
      */
     @Test
+    @DisplayName("Method reader handles abstract descendant classes")
     public void testDescendantAbstractClass() {
         // this was the problem - https://github.com/OpenHFT/Chronicle-Wire/issues/154
         SimpleDescendant simple = new SimpleDescendantClass2(queue);
@@ -66,6 +71,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      * Tests method writing and reading with a class that extends another class and implements the same interface.
      */
     @Test
+    @DisplayName("Method reader handles classes extending same interface")
     public void testDescendantExtendsSameInterface() {
         SimpleDescendant simple = new SimpleDescendantClass3(queue);
         checkWriteRead(simple);
@@ -75,6 +81,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      * Tests method writing and reading with duck typing - implementing multiple interfaces with the same method.
      */
     @Test
+    @DisplayName("Method reader supports duck typing interfaces")
     public void testDuckTyping() {
         DuckTyping simple = new DuckTyping(queue);
         checkWriteRead(simple);
@@ -93,34 +100,22 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
         writer.hello(superMario);
         // writer =    "hello: Mario\n...\n"
 
-        assertTrue(reader.readOne());
-        assertEquals(1, queue.size());
-        assertEquals(superMario, queue.poll());
+        assertTrue(reader.readOne(), "Reader should process the hello call");
+        assertEquals(1, queue.size(), "Queue should contain one entry");
+        assertEquals(superMario, queue.poll(), "Queue should contain the hello payload");
     }
 
-    /**
-     * Simple interface with a single method.
-     */
     interface Simple {
         void hello(String name);
     }
 
-    /**
-     * Another interface with the same method as Simple.
-     */
     interface SimpleSameMethod {
         void hello(String name);
     }
 
-    /**
-     * Descendant interface that extends Simple.
-     */
     interface SimpleDescendant extends Simple {
     }
 
-    /**
-     * Class implementing SimpleDescendant.
-     */
     private static class SimpleDescendantClass implements SimpleDescendant {
         private final BlockingQueue<String> queue;
 
@@ -134,15 +129,9 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
         }
     }
 
-    /**
-     * Abstract class implementing SimpleDescendant.
-     */
     private abstract static class SimpleAbstractDescendantClass implements SimpleDescendant {
     }
 
-    /**
-     * Concrete class extending SimpleAbstractDescendantClass.
-     */
     private static class SimpleDescendantClass2 extends SimpleAbstractDescendantClass {
         private final BlockingQueue<String> queue;
 
@@ -156,18 +145,12 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
         }
     }
 
-    /**
-     * Class extending SimpleDescendantClass2 and implementing Simple.
-     */
     private static class SimpleDescendantClass3 extends SimpleDescendantClass2 implements Simple {
         SimpleDescendantClass3(BlockingQueue<String> queue) {
             super(queue);
         }
     }
 
-    /**
-     * Class implementing multiple interfaces with the same method (duck typing).
-     */
     private static class DuckTyping extends SimpleDescendantClass2 implements Simple, SimpleSameMethod {
         DuckTyping(BlockingQueue<String> queue) {
             super(queue);

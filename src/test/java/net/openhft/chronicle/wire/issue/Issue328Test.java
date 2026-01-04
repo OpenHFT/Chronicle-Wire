@@ -7,6 +7,7 @@ import net.openhft.chronicle.wire.JSONWire;
 import net.openhft.chronicle.wire.JsonUtil;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -22,13 +23,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * This test is designed to ensure the keys are correctly serialized as strings.
  * It extends WireTestCommon for utility behaviors related to Wire tests.
  */
-public class Issue328Test extends WireTestCommon {
+class Issue328Test extends WireTestCommon {
 
     /**
      * Tests the serialization of a map where the keys are integers and values are their string representations.
      */
     @Test
-    public void map() {
+    @DisplayName("JSONWire serialises integer keys as strings")
+    void map() {
         // Initializes a wire with JSON format and types set to true.
         final Wire wire = new JSONWire().useTypes(true);
         final int size = 3;
@@ -57,6 +59,6 @@ public class Issue328Test extends WireTestCommon {
         JsonUtil.assertBalancedBrackets(actual);
 
         // Checks that the actual serialized output matches the expected one.
-        assertEquals(expected, actual);
+        assertEquals(expected, actual, "JSON output should use string keys for integers");
     }
 }

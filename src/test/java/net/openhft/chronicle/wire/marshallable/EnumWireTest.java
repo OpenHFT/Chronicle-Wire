@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ReadResolvable;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -19,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
- * A suite of tests focused on checking the serialization/deserialization
- * behavior of different types of enums using various wire formats.
+ * A suite of tests focused on checking the serialisation/deserialisation
+ * behaviour of different types of enums using various wire formats.
  *
  * @author greg allen
  */
@@ -34,50 +35,56 @@ public class EnumWireTest extends WireTestCommon {
         this.createWire = createWire;
     }
 
-    // Parameterized test setup: Returns a list of wire creation strategies to be used for the test iterations.
+    // Parameterised test setup: Returns a list of wire creation strategies to be used for the test iterations.
     public static Iterable<Function<Bytes<?>, Wire>> wires() {
         return Arrays.asList(YamlWire::new, TextWire::new, BinaryWire::new, RawWire::new);
     }
 
-    // Helper method that serializes a given marshallable object (like Person) using the provided wire strategy.
+    // Helper method that serialises a given marshallable object (like Person) using the provided wire strategy.
     private static Wire serialise(@NotNull Function<Bytes<?>, Wire> createWire, @NotNull Marshallable person) {
         Wire wire = createWire.apply(Bytes.allocateElasticOnHeap());
         person.writeMarshallable(wire);
         return wire;
     }
 
-    // Test case that checks the correct deserialization of an enum that implements Marshallable.
+    // Test case that checks the correct deserialisation of an enum that implements Marshallable.
     @MethodSource("wires")
     @ParameterizedTest
+    @DisplayName("Enum implementing Marshallable should round-trip by value")
     public void testEnumImplementingMarshallable(Function<Bytes<?>, Wire> createWire) {
         initEnumWireTest(createWire);
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for Marshallable enum round-trip");
 
-        assertSame(Marsh.MARSH, roundTrip(Person1::new).field);
+        assertSame(Marsh.MARSH, roundTrip(Person1::new).field,
+                "Marshallable enum should remain Marsh.MARSH after round-trip");
     }
 
-    // Test case that checks the correct deserialization of an enum that does NOT implement Marshallable.
+    // Test case that checks the correct deserialisation of an enum that does NOT implement Marshallable.
     @MethodSource("wires")
     @ParameterizedTest
+    @DisplayName("Enum without Marshallable should round-trip by name")
     public void testEnumNotImplementingMarshallable(Function<Bytes<?>, Wire> createWire) {
         initEnumWireTest(createWire);
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for non-Marshallable enum round-trip");
 
-        assertSame(NoMarsh.NO_MARSH, roundTrip(Person2::new).field);
+        assertSame(NoMarsh.NO_MARSH, roundTrip(Person2::new).field,
+                "Non-Marshallable enum should remain NoMarsh.NO_MARSH after round-trip");
     }
 
-    // Test case that checks the correct deserialization of an object that's intended to behave like an enum,
+    // Test case that checks the correct deserialisation of an object that's intended to behave like an enum,
     // and implements both Marshallable and ReadResolvable.
     @MethodSource("wires")
     @ParameterizedTest
+    @DisplayName("Enum with ReadResolve should return singleton after round-trip")
     public void testEnumImplementingMarshallableAndReadResolve(Function<Bytes<?>, Wire> createWire) {
         initEnumWireTest(createWire);
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for ReadResolve enum round-trip");
 
-        assertSame(MarshAndResolve.MARSH_AND_RESOLVE, roundTrip(Person3::new).field);
+        assertSame(MarshAndResolve.MARSH_AND_RESOLVE, roundTrip(Person3::new).field,
+                "ReadResolve enum should return MARSH_AND_RESOLVE singleton");
     }
 
-    // Helper method that serializes an object using the current wire strategy and then deserializes it.
+    // Helper method that serialises an object using the current wire strategy and then deserialises it.
     private <T extends Marshallable> T roundTrip(@NotNull Supplier<T> supplier) {
         Wire wire = serialise(createWire, supplier.get());
         try {

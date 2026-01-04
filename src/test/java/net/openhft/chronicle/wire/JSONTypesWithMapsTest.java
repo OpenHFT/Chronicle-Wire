@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -20,9 +21,6 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class JSONTypesWithMapsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
-    // Instance variable to determine if types are to be used in the JSON Wire representation.
-    private boolean useTypes;
-
     // Provide two sets of parameters for the tests, based on whether types should be used or not.
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
@@ -31,10 +29,6 @@ public class JSONTypesWithMapsTest extends net.openhft.chronicle.wire.WireTestCo
         );
     }
 
-    // Constructor initializes the `useTypes` instance variable based on the test parameters.
-    public void initJSONTypesWithMapsTest(boolean useTypes) {
-        this.useTypes = useTypes;
-    }
 
     // Static class representing Formula 1 details.
     static class F1 {
@@ -59,11 +53,9 @@ public class JSONTypesWithMapsTest extends net.openhft.chronicle.wire.WireTestCo
 
     // Test method verifies the JSON Wire representation for a map containing an F1 instance.
     @MethodSource("wireTypes")
-    @ParameterizedTest(name = "useTypes={0}")
+    @ParameterizedTest(name = "useTypes={0} serialises json map values")
+    @DisplayName("Serialises map values with optional type hints")
     public void test(boolean useTypes) {
-
-        initJSONTypesWithMapsTest(useTypes);
-
         // Create a new JSONWire instance and decide if it should use types based on `useTypes`.
         final JSONWire jsonWire = new JSONWire()
                 .useTypes(useTypes);
@@ -84,13 +76,16 @@ public class JSONTypesWithMapsTest extends net.openhft.chronicle.wire.WireTestCo
         final Object object = jsonWire.getValueIn().object();
 
         // Verify the object isn't null and is an instance of a map.
-        assertNotNull(object);
-        assertInstanceOf(Map.class, object);
+        assertNotNull(object,
+                "json wire should return non-null map object");
+        assertInstanceOf(Map.class, object,
+                "json wire should return Map instance");
 
         // Convert the object to its string representation.
         final String actual = object.toString();
 
         // Assert to verify if the actual string matches the expected string.
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual,
+                "map string form should match expected output");
     }
 }

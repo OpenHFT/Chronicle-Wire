@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 public class ElasticBytesCapacityTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Grows heap bytes and preserves positions")
     public void heapBytesGrowAndRestorePositions() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         try {
@@ -28,8 +30,10 @@ public class ElasticBytesCapacityTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Grows direct bytes and preserves positions")
     public void directBytesGrowAndRestorePositions() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip direct bytes capacity test");
         Bytes<?> bytes = Bytes.allocateElasticDirect(32);
         try {
             assertElasticGrowthPreservesState(bytes);
@@ -72,8 +76,8 @@ public class ElasticBytesCapacityTest extends WireTestCommon {
         assertEquals(readLimit, bytes.readLimit(), "original read limit unaffected by snapshot");
 
         bytes.clear();
-        assertEquals(0L, bytes.readPosition());
-        assertEquals(0L, bytes.writePosition());
+        assertEquals(0L, bytes.readPosition(), "clear should reset read position");
+        assertEquals(0L, bytes.writePosition(), "clear should reset write position");
     }
 
     private void fill(Bytes<?> bytes, int length) {

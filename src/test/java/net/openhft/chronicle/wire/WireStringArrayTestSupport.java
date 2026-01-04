@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.Arrays;
 import java.util.function.Supplier;
@@ -19,15 +20,22 @@ final class WireStringArrayTestSupport {
         wire.bytes().append('!').append(TestStringArray.class.getName()).append(" { strings: [ a, b, c ] }");
 
         TestStringArray sa = wire.getValueIn().object(TestStringArray.class);
-        assertEquals("[a, b, c]", Arrays.toString(sa.strings));
+        assertEquals("[a, b, c]",
+                Arrays.toString(sa.strings),
+                "String array should read three list values");
 
         @NotNull Wire wire2 = wireSupplier.get();
         wire2.bytes().append('!').append(TestStringArray.class.getName()).append(" { strings: abc }");
 
         TestStringArray sa2 = wire2.getValueIn().object(TestStringArray.class);
-        assertEquals("[abc]", Arrays.toString(sa2.strings));
+        assertEquals("[abc]",
+                Arrays.toString(sa2.strings),
+                "String array should read single scalar value");
     }
 
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class TestStringArray implements Marshallable {
         String[] strings;
     }

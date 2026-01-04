@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 // This test suite is designed to verify compatibility behaviors of the TextWire class,
@@ -17,6 +18,7 @@ public class TextWireCompatibilityTest extends WireTestCommon {
     // Test to check the behavior when fields are added in the middle of a marshallable object.
     // The main purpose is to ensure that compatibility is maintained during such changes.
     @Test
+    @DisplayName("Maintains compatibility when fields are added in the middle")
     public void testAddFieldsInTheMiddle() {
         // Create a new TextWire instance with an elastic heap allocated buffer
         @NotNull Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(100));
@@ -27,7 +29,8 @@ public class TextWireCompatibilityTest extends WireTestCommon {
         // Uncomment the below line to debug and view the wire output
 
         // Read an object from the wire and ensure it's not null
-        Assertions.assertNotNull(wire.getValueIn().object());
+        Assertions.assertNotNull(wire.getValueIn().object(),
+                "read object should be present after adding fields");
     }
 
     // A superclass designed to be marshallable with basic incompatibility checks.
@@ -36,7 +39,8 @@ public class TextWireCompatibilityTest extends WireTestCommon {
         @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
             // Verify the value of the "a" field
-            Assertions.assertEquals(1, wire.read("a").int32());
+            Assertions.assertEquals(1, wire.read("a").int32(),
+                    "field a should remain compatible and equal 1");
 
             // Check if the "c" field is missing, and log an error if present
             @Nullable String missingValue = wire.read("c").text();
@@ -60,9 +64,12 @@ public class TextWireCompatibilityTest extends WireTestCommon {
             super.readMarshallable(wire);
 
             // Verify the value of the "b" field and the presence of "object" and "object2" fields
-            Assertions.assertEquals(TextWireCompatibilityTest.class, wire.read("b").typeLiteral());
-            Assertions.assertNotNull(wire.read(() -> "object").object());
-            Assertions.assertNotNull(wire.read(() -> "object2").object());
+            Assertions.assertEquals(TextWireCompatibilityTest.class, wire.read("b").typeLiteral(),
+                    "field b should preserve type literal");
+            Assertions.assertNotNull(wire.read(() -> "object").object(),
+                    "object field should be readable after compatibility change");
+            Assertions.assertNotNull(wire.read(() -> "object2").object(),
+                    "object2 field should be readable after compatibility change");
         }
 
         @Override

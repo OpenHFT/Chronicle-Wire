@@ -22,8 +22,11 @@ final class WireStringTestSupport {
     static void assertReadStrings(Wire wire, String name) {
         @NotNull StringBuilder sb = new StringBuilder();
         for (String expected : new String[]{"Hello", "world", name}) {
-            assertNotNull(wire.read().textTo(sb));
-            assertEquals(expected, sb.toString());
+            assertNotNull(wire.read().textTo(sb),
+                    "Wire should return text value for " + expected);
+            assertEquals(expected,
+                    sb.toString(),
+                    "Wire text should match expected value " + expected);
         }
     }
 }

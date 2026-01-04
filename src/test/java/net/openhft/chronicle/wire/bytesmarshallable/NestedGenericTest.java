@@ -9,6 +9,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Objects;
@@ -16,12 +17,13 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class NestedGenericTest extends WireTestCommon {
+class NestedGenericTest extends WireTestCommon {
 
     // Test to verify generic serialization and deserialization using Chronicle Wire with generic ValueHolder
     @Test
-    public void testGeneric() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @DisplayName("Serialises generic holder with BytesMarshallable correctly")
+    void testGeneric() {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip generic holder test");
 
         // Ignore specific warning about possible unmarshalling issues with the A class.
         ignoreException("BytesMarshallable found in field which is not matching exactly, the object may not unmarshall correctly if that type is not specified: " +
@@ -37,14 +39,17 @@ public class NestedGenericTest extends WireTestCommon {
         wire.getValueOut().object(object);
 
         // Assert conditions to verify write positions and object inequality after serialization/deserialization
-        assertFalse(wire.bytes().writePosition() > 150);
-        assertNotEquals(object, wire.getValueIn().object());
+        long writePosition = wire.bytes().writePosition();
+        assertFalse(writePosition > 150, "writePosition should be <= 150 but was " + writePosition);
+        assertNotEquals(object, wire.getValueIn().object(),
+                "Generic holder should not match without type hint");
     }
 
     // Test to verify serialization and deserialization using Chronicle Wire with a non-generic ValueHolderDef
     @Test
-    public void testDefined() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @DisplayName("Serialises defined holder with BytesMarshallable correctly")
+    void testDefined() {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip defined holder test");
 
         // Allocate elastic bytes on heap and create binary wire to handle serialization
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
@@ -56,8 +61,10 @@ public class NestedGenericTest extends WireTestCommon {
         wire.getValueOut().object(object);
 
         // Assert conditions to verify write positions and object equality after serialization/deserialization
-        assertTrue(wire.bytes().writePosition() < 150);
-        assertEquals(object, wire.getValueIn().object());
+        long writePosition = wire.bytes().writePosition();
+        assertTrue(writePosition < 150, "writePosition should be < 150 but was " + writePosition);
+        assertEquals(object, wire.getValueIn().object(),
+                "Defined holder should round-trip");
     }
 
     // Generic ValueHolder class to hold various types of values for testing

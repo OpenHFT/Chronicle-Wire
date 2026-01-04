@@ -5,8 +5,10 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.*;
 
@@ -14,6 +16,9 @@ import static java.util.Collections.addAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 public class NestedMapsTest extends WireTestCommon {
 
     // Instance variable to store the type of wire for this test
@@ -39,6 +44,7 @@ public class NestedMapsTest extends WireTestCommon {
     @MethodSource("wireTypes")
     @SuppressWarnings("incomplete-switch")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Round-trip nested maps across wire types")
     public void testMapped(WireType wireType) {
         initNestedMapsTest(wireType);
         // Initialize the Mapped object with words, numbers, and maps
@@ -92,7 +98,8 @@ public class NestedMapsTest extends WireTestCommon {
                         "    one: 1.0,\n" +
                         "    two point two: 2.2\n" +
                         "  }\n" +
-                        "}\n", Wires.fromSizePrefixedBlobs(wire));
+                        "}\n", Wires.fromSizePrefixedBlobs(wire),
+                        "TEXT wire should match expected nested map output");
                 break;
             case BINARY:
                 // Expected serialized format for BINARY wire type
@@ -126,7 +133,8 @@ public class NestedMapsTest extends WireTestCommon {
                         "    one: 1,\n" +
                         "    two point two: 2.2\n" +
                         "  }\n" +
-                        "}\n", Wires.fromSizePrefixedBlobs(wire));
+                        "}\n", Wires.fromSizePrefixedBlobs(wire),
+                        "BINARY wire should match expected nested map output");
                 break;
             case FIELDLESS_BINARY:
                 // Expected serialized format for FIELDLESS_BINARY wire type
@@ -160,7 +168,8 @@ public class NestedMapsTest extends WireTestCommon {
                         "    one: 1,\n" +
                         "    two point two: 2.2\n" +
                         "  }\n" +
-                        "]\n", Wires.fromSizePrefixedBlobs(wire));
+                        "]\n", Wires.fromSizePrefixedBlobs(wire),
+                        "FIELDLESS_BINARY wire should match expected nested map output");
                 break;
             default:
                 // Other wire types do not have deterministic string forms to assert.
@@ -170,10 +179,11 @@ public class NestedMapsTest extends WireTestCommon {
         // Deserialize the Mapped object from wire
         @NotNull Mapped m2 = new Mapped();
         assertTrue(wire.readDocument(null, w -> w.read(() -> "mapped")
-                .marshallable(m2)));
+                .marshallable(m2)),
+                "Wire should contain a mapped document");
 
         // Verify the serialized and deserialized objects match
-        assertEquals(m, m2);
+        assertEquals(m, m2, "Mapped object should round-trip for wireType=" + wireType);
 
         // Release the allocated bytes
         bytes.releaseLast();
@@ -183,6 +193,7 @@ public class NestedMapsTest extends WireTestCommon {
     @MethodSource("wireTypes")
     @SuppressWarnings("incomplete-switch")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Round-trip top-level mapped object across wires")
     public void testMappedTopLevel(WireType wireType) {
         initNestedMapsTest(wireType);
         // Initialize Mapped object with given data
@@ -231,13 +242,16 @@ public class NestedMapsTest extends WireTestCommon {
                         "map2: {\n" +
                         "  one: 1.0,\n" +
                         "  two point two: 2.2\n" +
-                        "}\n", wire.toString());
+                        "}\n", wire.toString(),
+                        "TEXT wire should match expected top-level map output");
                 break;
             case BINARY:
-                assertEquals("[pos: 0, rlim: 143, wlim: 2147483632, cap: 2147483632 ] ǁÅwords\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdogÇnumbers\\u0082⒕٠٠٠¡⒈¡⒉¡⒉¡⒊¡⒌¡⒏¡⒔Ämap1\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBBÄmap2\\u0082\\u0019٠٠٠¹⒊one¡⒈¹⒔two point two\\u0092Ü⒈‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+                assertEquals("[pos: 0, rlim: 143, wlim: 2147483632, cap: 2147483632 ] ǁÅwords\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdogÇnumbers\\u0082⒕٠٠٠¡⒈¡⒉¡⒉¡⒊¡⒌¡⒏¡⒔Ämap1\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBBÄmap2\\u0082\\u0019٠٠٠¹⒊one¡⒈¹⒔two point two\\u0092Ü⒈‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString(),
+                        "BINARY wire should match expected top-level map output");
                 break;
             case FIELDLESS_BINARY:
-                assertEquals("[pos: 0, rlim: 119, wlim: 2147483632, cap: 2147483632 ] ǁ\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdog\\u0082⒕٠٠٠¡⒈¡⒉¡⒉¡⒊¡⒌¡⒏¡⒔\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBB\\u0082\\u0019٠٠٠¹⒊one¡⒈¹⒔two point two\\u0092Ü⒈‡٠٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+                assertEquals("[pos: 0, rlim: 119, wlim: 2147483632, cap: 2147483632 ] ǁ\\u0082*٠٠٠áAåquickåbrownãfoxåjumpsäoverãtheälazyãdog\\u0082⒕٠٠٠¡⒈¡⒉¡⒉¡⒊¡⒌¡⒏¡⒔\\u0082⒙٠٠٠¹⒊ayeãAAA¹⒊beeãBBB\\u0082\\u0019٠٠٠¹⒊one¡⒈¹⒔two point two\\u0092Ü⒈‡٠٠٠٠٠٠٠٠٠", wire.bytes().toDebugString(),
+                        "FIELDLESS_BINARY wire should match expected top-level map output");
                 break;
             default:
                 // Other wire types do not have deterministic string forms to assert.
@@ -247,7 +261,7 @@ public class NestedMapsTest extends WireTestCommon {
         // Deserialize the object and assert if it matches the original
         @NotNull Mapped m2 = new Mapped();
         m2.readMarshallable(wire);
-        assertEquals(m, m2);
+        assertEquals(m, m2, "Top-level mapped object should round-trip for wireType=" + wireType);
 
         // Release the byte buffer
         bytes.releaseLast();
@@ -256,6 +270,7 @@ public class NestedMapsTest extends WireTestCommon {
     // This test method ensures maps can be read and written correctly
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Read and write maps using marshallable types")
     public void testMapReadAndWrite(WireType wireType) {
         initNestedMapsTest(wireType);
         // Create a byte buffer and initialize the wire
@@ -279,9 +294,10 @@ public class NestedMapsTest extends WireTestCommon {
 
         // Verify if the written and read maps match
         if (wireType == WireType.JSON)
-            assertEquals(expected.toString(), actual.toString());
+            assertEquals(expected.toString(), actual.toString(),
+                    "JSON wire should preserve map entries order-independent");
         else
-            assertEquals(expected, actual);
+            assertEquals(expected, actual, "Map should round-trip for wireType=" + wireType);
     }
 
     // Define the Mapped class for testing purposes

@@ -70,4 +70,12 @@ public class ChronicleEvent extends BytesInBinaryMarshallable implements Event {
     public long transactTimeNS() {
         return transactTimeNS;
     }
+
+    public void text3(String text3) {
+        this.text3 = text3;
+    }
+
+    public String text3() {
+        return text3;
+    }
 }

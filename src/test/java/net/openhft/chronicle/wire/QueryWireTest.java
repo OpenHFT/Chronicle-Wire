@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class QueryWireTest extends WireTestCommon {
 
     // Test case to verify both write and read operations of the QueryWire
     @Test
+    @DisplayName("Reads and writes basic query fields")
     public void readWriteQuery() {
 
         // Create a wire and write various data types to it
@@ -72,6 +74,7 @@ public class QueryWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Writes and reads query fragments with raw bytes")
     public void writesAndReadsQueryFragments() {
         Bytes<?> bytes = allocateElasticOnHeap();
         QueryWire writer = new QueryWire(bytes);
@@ -83,10 +86,10 @@ public class QueryWireTest extends WireTestCommon {
         writer.write("payload").bytes(new byte[]{1, 2, 3});
 
         String query = bytes.toString();
-        assertTrue(query.contains("flag=true"), "query wire should serialize boolean field as 'flag=true'");
-        assertTrue(query.contains("count=42"), "query wire should serialize integer field as 'count=42'");
-        assertTrue(query.contains("raw=tail"), "query wire should serialize raw bytes as literal text in query string");
-        assertTrue(query.contains("payload="), "query wire should include base64-encoded payload field in query string");
+        assertTrue(query.contains("flag=true"), "query string should contain flag=true, actual: " + query);
+        assertTrue(query.contains("count=42"), "query string should contain count=42, actual: " + query);
+        assertTrue(query.contains("raw=tail"), "query string should contain raw=tail, actual: " + query);
+        assertTrue(query.contains("payload="), "query string should contain payload=, actual: " + query);
 
         bytes.readPositionRemaining(0, bytes.writePosition());
         QueryWire reader = new QueryWire(bytes);
@@ -104,6 +107,7 @@ public class QueryWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Percent-encoded characters remain literal in output")
     public void percentEncodedCharactersRemainLiteral() {
         @NotNull QueryWire wire = createWire();
         String literal = "value%2Bplus+space";
@@ -120,6 +124,7 @@ public class QueryWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Handles zero bytes and dangling keys")
     public void handlesZeroBytesAndDanglingKeys() {
         Bytes<?> storage = allocateElasticOnHeap();
         QueryWire wire = new QueryWire(storage);
@@ -150,6 +155,7 @@ public class QueryWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Query output feeds text wire after formatting")
     public void queryWireOutputCanFeedTextWireAfterFormatting() {
         @NotNull QueryWire wire = createWire();
         wire.write("name").text("alpha beta");

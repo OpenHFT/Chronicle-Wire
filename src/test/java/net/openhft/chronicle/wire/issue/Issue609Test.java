@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -16,18 +17,20 @@ import static net.openhft.chronicle.core.util.StringUtils.isEqual;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Test class extending `WireTestCommon` to verify the deserialization of `ChronicleServicesCfg` from YAML.
+ * Regression coverage for issue 609: verifies ChronicleServicesCfg deserialisation
+ * from YAML services configuration sources.
  */
 @SuppressWarnings({"deprecation", "removal"})
 public class Issue609Test extends WireTestCommon {
 
     /**
-     * Tests the deserialization of services from a YAML file and ensures that the deserialized object
+     * Tests the deserialisation of services from a YAML file and ensures that the deserialised object
      * matches the expected configuration.
      *
-     * @throws IOException if there's an error reading the file.
+     * @throws IOException if there is an error reading the file
      */
     @Test
+    @DisplayName("YAML services config should deserialise correctly")
     public void testServices() throws IOException {
         // Deserialises the ChronicleServicesCfg from a YAML file
         final ChronicleServicesCfg obj = WireType.YAML.fromString(ChronicleServicesCfg.class, BytesUtil.readFile("yaml/services.yaml"));
@@ -45,10 +48,11 @@ public class Issue609Test extends WireTestCommon {
         scfg.inputs.add(new InputCfg().input("fix-search-out"));
 
         // Asserts that the deserialized object matches the expected configuration
-        assertEquals(expected, obj);
+        assertEquals(expected, obj, "Deserialised services config should match expected");
     }
 
     @Test
+    @DisplayName("Services config round-trips across wire types")
     public void toYamlAndBackIssue824() {
         ChronicleServicesCfg expected = new ChronicleServicesCfg();
 
@@ -61,9 +65,11 @@ public class Issue609Test extends WireTestCommon {
 
         System.out.println(yaml);
 
-        assertEquals(expected, WireType.TEXT.fromString(yaml));
+        assertEquals(expected, WireType.TEXT.fromString(yaml),
+                "TEXT wire should parse YAML output correctly");
 
-        assertEquals(expected, WireType.YAML_ONLY.fromString(yaml));
+        assertEquals(expected, WireType.YAML_ONLY.fromString(yaml),
+                "YAML_ONLY wire should parse YAML output correctly");
 
         String withString = "!net.openhft.chronicle.wire.issue.Issue609Test$ChronicleServicesCfg {\n" +
                 "  services: {\n" +
@@ -71,12 +77,16 @@ public class Issue609Test extends WireTestCommon {
                 "  }\n" +
                 "}";
 
-        assertEquals(expected, WireType.YAML_ONLY.fromString(withString));
-        assertEquals(expected, WireType.TEXT.fromString(withString));
+        assertEquals(expected, WireType.YAML_ONLY.fromString(withString),
+                "YAML_ONLY wire should parse explicit class name YAML");
+        assertEquals(expected, WireType.TEXT.fromString(withString),
+                "TEXT wire should parse explicit class name YAML");
 
         String withString2 = withString.replace("'", "");
-        assertEquals(expected, WireType.YAML_ONLY.fromString(withString2));
-        assertEquals(expected, WireType.TEXT.fromString(withString2));
+        assertEquals(expected, WireType.YAML_ONLY.fromString(withString2),
+                "YAML_ONLY wire should parse YAML without quotes");
+        assertEquals(expected, WireType.TEXT.fromString(withString2),
+                "TEXT wire should parse YAML without quotes");
     }
 
     static class ChronicleServicesCfg extends AbstractMarshallableCfg {

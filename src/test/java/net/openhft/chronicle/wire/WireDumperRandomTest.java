@@ -6,9 +6,10 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.OnHeapBytes;
 import net.openhft.chronicle.core.Jvm;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Random;
+import java.util.SplittableRandom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
@@ -18,6 +19,7 @@ public class WireDumperRandomTest {
     private static final int LEN = 64;
 
     @Test
+    @DisplayName("Wire dumper handles random binary payloads")
     public void dumpBinary() {
         // Initialize a count variable.
         int count = 0;
@@ -29,10 +31,9 @@ public class WireDumperRandomTest {
         String starts = "--- !!data #binary\n" +
                 "00000000             ";
 
+        SplittableRandom random = new SplittableRandom(0L);
         // Loop for 20000 iterations, generating different binary data.
         for (int i = 0; i < 20000; i++) {
-            // Generate random values based on iteration count.
-            Random random = new Random(i);
 
             // Clear bytes, write length information and random integer value.
             bytes.clear()
@@ -53,8 +54,8 @@ public class WireDumperRandomTest {
             }
         }
 
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for this test");
         // Assert that count should be 3. It seems like we expect 3 strings not to start with the defined string.
-        assertEquals(3, count);
+        assertEquals(3, count, "Unexpected header count should remain stable");
     }
 }

@@ -4,9 +4,10 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.wire.converter.Words;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Random;
+import java.util.SplittableRandom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -14,6 +15,7 @@ public class WordsLongConverterTest extends WireTestCommon {
 
     // Test how WordsLongConverter integrates with YAML Wire
     @Test
+    @DisplayName("Words converter serialises values into YAML")
     public void inYaml() {
         // Initialize YAML wire
         Wire wire = Wire.newYamlWireOnHeap();
@@ -32,11 +34,14 @@ public class WordsLongConverterTest extends WireTestCommon {
                 "words: many.looks.now\n" +
                 "...\n" +
                 "words: square.army.plan.player.wash.disk\n" +
-                "...\n", wire.toString());
+                "...\n",
+                wire.toString(),
+                "YAML output should list each words entry");
     }
 
     // Test the conversion of longs to strings
     @Test
+    @DisplayName("Words converter formats long values consistently")
     public void asString() {
         // Initialize WordsLongConverter
         LongConverter bic = new WordsLongConverter();
@@ -64,11 +69,13 @@ public class WordsLongConverterTest extends WireTestCommon {
                         "9904578032905937: unit.grass.hints.day.moon\n" +
                         "168377826559400929: adjust.ancient.weekly.fifth.layout.all\n" +
                         "2862423051509815793: knock.blocks.pose.expert.walk.sky\n",
-                sb.toString());
+                sb.toString(),
+                "Words conversion output should match expected list");
     }
 
     // Test the parsing capabilities of WordsLongConverter
     @Test
+    @DisplayName("Words converter parses strings into long values")
     public void parse() {
         // Initialize WordsLongConverter
         LongConverter bic = new WordsLongConverter();
@@ -86,23 +93,29 @@ public class WordsLongConverterTest extends WireTestCommon {
                 "songs.unlock.dare.enough.shed.child\n" +
                 "smile.excerpt.alpha.centre.grill.alpha\n" +
                 "it.launch.duck.stable.brother.calm").split("\n")) {
-            assertEquals(s, bic.asString(bic.parse(s)));
+            assertEquals(s,
+                    bic.asString(bic.parse(s)),
+                    "Words conversion should round trip for: " + s);
         }
         for (long l : new long[]{Long.MIN_VALUE, Integer.MIN_VALUE,
                 System.currentTimeMillis(), System.nanoTime(), System.currentTimeMillis() * 1000,
                 -1, 0, 1,
                 Integer.MAX_VALUE, Long.MAX_VALUE}) {
             String text = bic.asString(l);
-            assertEquals(l, bic.parse(text));
+            assertEquals(l,
+                    bic.parse(text),
+                    "Parsed long should match original for: " + l);
         }
-        Random random = new Random(1);
+        SplittableRandom random = new SplittableRandom(1L);
         for (int i = 0; i < 1000; i++) {
             long l = random.nextLong();
             String text = bic.asString(l);
             if (text.equals("eagle.eagle.bedroom.again.dealer.bids"))
                 System.out.println(text);
             long parse = bic.parse("glue." + text + ".apply", 5, 5 + text.length());
-            assertEquals(l, parse);
+            assertEquals(l,
+                    parse,
+                    "Parsed long should match random value at index " + i + ": " + l);
 
         }
     }

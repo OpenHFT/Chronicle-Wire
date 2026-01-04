@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -32,8 +33,9 @@ public class UnknownEnumTest extends WireTestCommon {
 
     // Test to check how the Wire handles an unknown dynamic Enum
     @Test
+    @DisplayName("Handles unknown dynamic enum values as text")
     public void testUnknownDynamicEnum() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip unknown enum test");
 
         Wire wire = createWire();
         wire.write("value").text("Maybe");
@@ -46,23 +48,26 @@ public class UnknownEnumTest extends WireTestCommon {
 
         // Verifying that the written Enum value is correctly read as text
         String maybe = wire2.read("value").text();
-        assertEquals("Maybe", maybe);
+        assertEquals("Maybe", maybe, "dynamic enum value should round-trip as text");
     }
 
     // Test to check how the Wire handles an unknown static Enum
     @Test
+    @DisplayName("Throws when reading unknown static enum value")
     public void testUnknownStaticEnum() {
         Wire wire = createWire();
         wire.write("value").text("Maybe");
 
         // Expecting a failure while trying to read an unknown Enum value as a known static Enum type (StrictYesNo)
-        assertThrows(IllegalArgumentException.class, () -> wire.read("value").asEnum(StrictYesNo.class));
+        assertThrows(IllegalArgumentException.class, () -> wire.read("value").asEnum(StrictYesNo.class),
+                "unknown static enum should throw on read");
     }
 
     /*
     Documents the behaviour of BinaryWire when an enum type is unknown
      */
     @Test
+    @DisplayName("Binary wire throws when enum type is unknown")
     public void shouldConvertEnumValueToStringWhenTypeIsNotKnownInBinaryWireThrows() {
         assertThrows(ClassNotFoundRuntimeException.class, () -> {
             final Bytes<ByteBuffer> bytes = Bytes.wrapForRead(ByteBuffer.wrap(SERIALISED_MAP_DATA));
@@ -71,23 +76,25 @@ public class UnknownEnumTest extends WireTestCommon {
 
             // Reading the serialized map data and ensuring the unknown Enum value is read as a String
             final Map<String, Object> enumField = wire.read("event").marshallableAsMap(String.class, Object.class);
-            assertEquals("FIRST", enumField.get("key"));
-        });
+            assertEquals("FIRST", enumField.get("key"), "unknown enum key should be read as string");
+        }, "binary wire should throw when enum type is unknown");
     }
 
     // This test ensures that TextWire produces a friendly error message for unknown Enum types
     @Test
+    @DisplayName("Text wire emits friendly error for unknown enum type")
     public void shouldGenerateFriendlyErrorMessageWhenTypeIsNotKnownInTextWire() {
         try {
             final Wire textWire = TextWire.from("enumField: !UnknownEnum QUX")
                                             .generateTuples(true);
             textWire.getValueIn().wireIn().read("enumField").object();
 
-            fail(); // This point should not be reached
+            fail("expected exception for unknown enum type"); // This point should not be reached
         } catch (Exception e) {
             // Ensuring the error message is in the expected format
             String message = e.getMessage().replaceAll(" [a-z0-9.]+.Proxy\\d+", " ProxyXX");
-            assertEquals("Trying to read marshallable class ProxyXX at [pos: 23, rlim: 27, wlim: 27, cap: 27 ]  QUX expected to find a {", message);
+            assertEquals("Trying to read marshallable class ProxyXX at [pos: 23, rlim: 27, wlim: 27, cap: 27 ]  QUX expected to find a {", message,
+                    "text wire should report friendly message for unknown enum type");
         }
     }
 

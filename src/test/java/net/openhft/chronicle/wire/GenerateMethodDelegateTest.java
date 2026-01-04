@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
@@ -26,11 +27,13 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
 
     @BeforeEach
     public void hasDirect() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip method delegate generation tests");
     }
 
     // Test the validity of class naming conventions
     @Test
+    @DisplayName("Rejects invalid generated class name values")
     public void testInvalidName() {
         assertThrows(IllegalArgumentException.class, () -> {
             // Initialize a new GenerateMethodDelegate
@@ -39,11 +42,12 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
             // Set metadata for the generated class with an invalid name
             gmd.metaData().packageName(Jvm.getPackageName(GenerateMethodDelegateTest.class))
                     .baseClassName("GMDT-");
-        });
+        }, "invalid base class name should be rejected");
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    @DisplayName("Acquires delegate class and routes calls")
     public void testAcquireClass() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         // Initialize a new GenerateMethodDelegate
         GenerateMethodDelegate gmd = new GenerateMethodDelegate();
@@ -75,11 +79,13 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         assertEquals("run[]\n" +
                 "accept[consumer]\n" +
                 "get[]\n" +
-                "accept[bi, consumer]\n", sw.toString().replace("\r", ""));
+                "accept[bi, consumer]\n", sw.toString().replace("\r", ""),
+                "delegate should route calls to all interfaces in order");
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    @DisplayName("Generates chained delegates with extra calls")
     public void chainedDelegate() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         // Create a custom GenerateMethodDelegate with overridden methods for chaining
         GenerateMethodDelegate gmd = new GenerateMethodDelegate() {
@@ -118,7 +124,8 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
         assertEquals("chained1[one]\n" +
                 "say[hello]\n" +
                 "chained1[one]\n" +
-                "say[bye]\n", sw.toString().replace("\r", ""));
+                "say[bye]\n", sw.toString().replace("\r", ""),
+                "chained delegate should emit expected call sequence");
 
     }
 

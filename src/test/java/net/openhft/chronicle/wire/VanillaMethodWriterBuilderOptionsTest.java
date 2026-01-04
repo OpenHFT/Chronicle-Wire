@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class VanillaMethodWriterBuilderOptionsTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Honours update interceptor and thread-safe toggle")
     public void honoursUpdateInterceptorAndThreadSafeToggle() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
@@ -35,8 +37,8 @@ public class VanillaMethodWriterBuilderOptionsTest extends WireTestCommon {
             // drain
             continue;
         }
-        assertEquals(1, seen.size());
-        assertEquals("keep", seen.get(0));
+        assertEquals(1, seen.size(), "Reader should keep only the forwarded event");
+        assertEquals("keep", seen.get(0), "Reader should forward only the keep event");
     }
 
     interface Events {

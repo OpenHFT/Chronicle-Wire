@@ -8,7 +8,9 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -26,13 +28,13 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     // Will hold the last argument received in a method call.
     private volatile Object lastArgumentRef;
 
-    private static void assertRecycledEquality(Object a, Object b) {
+    private static void assertRecycledEquality(Object a, Object b, String context) {
         if (a instanceof int[] && b instanceof int[])
-            assertArrayEquals((int[]) a, (int[]) b);
+            assertArrayEquals((int[]) a, (int[]) b, context + " should match wire values for int[]");
         else if (a instanceof Object[] && b instanceof Object[])
-            assertArrayEquals((Object[]) a, (Object[]) b);
+            assertArrayEquals((Object[]) a, (Object[]) b, context + " should match wire values for Object[]");
         else
-            assertEquals(a, b);
+            assertEquals(a, b, context + " should match wire values");
     }
 
     // This method sets up the test environment before each test case.
@@ -107,53 +109,60 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     }
 
     // Utility method to verify that an argument is not recycled between method calls.
-    private <T> void verifyNotRecycled(T firstArg, T secondArg, Consumer<T> call) {
+    private <T> void verifyNotRecycled(T firstArg, T secondArg, Consumer<T> call, String callLabel) {
+        String firstContext = "first call for " + callLabel;
         call.accept(firstArg);
-        assertTrue(reader.readOne(), "first method call should be successfully read from wire");
+        assertTrue(reader.readOne(), firstContext + " should be read from wire");
         final Object firstRef = lastArgumentRef;
-        assertRecycledEquality(firstArg, lastArgumentRef);
+        assertRecycledEquality(firstArg, lastArgumentRef, firstContext);
 
+        String secondContext = "second call for " + callLabel;
         call.accept(secondArg);
-        assertTrue(reader.readOne(), "second method call should be successfully read from wire");
-        assertRecycledEquality(secondArg, lastArgumentRef);
+        assertTrue(reader.readOne(), secondContext + " should be read from wire");
+        assertRecycledEquality(secondArg, lastArgumentRef, secondContext);
 
-        assertNotSame(firstRef, lastArgumentRef, "argument objects should not be recycled between calls");
+        assertNotSame(firstRef, lastArgumentRef, callLabel + " should not reuse argument instances between calls");
     }
 
     // Utility method to verify that an argument is recycled between method calls.
-    private <T> void verifyRecycled(T firstArg, T secondArg, Consumer<T> call) {
+    private <T> void verifyRecycled(T firstArg, T secondArg, Consumer<T> call, String callLabel) {
+        String firstContext = "first call for " + callLabel;
         call.accept(firstArg);
-        assertTrue(reader.readOne(), "first method call should be successfully read from wire");
+        assertTrue(reader.readOne(), firstContext + " should be read from wire");
         final Object firstRef = lastArgumentRef;
-        assertEquals(firstArg, lastArgumentRef, "deserialized argument should match first input value");
+        assertEquals(firstArg, lastArgumentRef, firstContext + " should preserve argument values");
 
+        String secondContext = "second call for " + callLabel;
         call.accept(secondArg);
-        assertTrue(reader.readOne(), "second method call should be successfully read from wire");
-        assertEquals(secondArg, lastArgumentRef, "deserialized argument should match second input value");
+        assertTrue(reader.readOne(), secondContext + " should be read from wire");
+        assertEquals(secondArg, lastArgumentRef, secondContext + " should preserve argument values");
 
-        assertSame(firstRef, lastArgumentRef, "argument object should be recycled between calls for memory efficiency");
+        assertSame(firstRef, lastArgumentRef, callLabel + " should reuse argument instances between calls");
     }
 
     @Test
+    @DisplayName("int[] arguments are not recycled between calls")
     public void testIntArrayNotRecycled() {
         // Two different int arrays to pass to the method.
         int[] first = {1, 2, 3};
         int[] second = {5, 6, 7, 8};
 
-        verifyNotRecycled(first, second, writer::intArrayCall);
+        verifyNotRecycled(first, second, writer::intArrayCall, "int[] arguments");
     }
 
     // Test to ensure that an Object array argument is not recycled between calls.
     @Test
+    @DisplayName("Object[] arguments are not recycled between calls")
     public void testObjectArrayNotRecycled() {
         String[] first = {"a", "b", "c"};
         String[] second = {"d", ""};
 
-        verifyNotRecycled(first, second, writer::objectArrayCall);
+        verifyNotRecycled(first, second, writer::objectArrayCall, "Object[] arguments");
     }
 
     // Test to verify that a MyMarshallable object argument gets recycled between calls.
     @Test
+    @DisplayName("Marshallable arguments are recycled between calls")
     public void testMarshallableRecycled() {
         final MyMarshallable first = new MyMarshallable();
         first.l = 5L;
@@ -161,11 +170,12 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
         final MyMarshallable second = new MyMarshallable();
         second.l = 7L;
 
-        verifyRecycled(first, second, writer::marshallableCall);
+        verifyRecycled(first, second, writer::marshallableCall, "Marshallable arguments");
     }
 
     // Test to confirm that a MyBytesMarshallable object argument gets recycled between calls.
     @Test
+    @DisplayName("BytesMarshallable arguments are recycled between calls")
     public void testBytesMarshallableRecycled() {
         final MyBytesMarshallable first = new MyBytesMarshallable();
         first.d = 8.5;
@@ -173,11 +183,12 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
         final MyBytesMarshallable second = new MyBytesMarshallable();
         second.d = 32.25;
 
-        verifyRecycled(first, second, writer::bytesMarshallableCall);
+        verifyRecycled(first, second, writer::bytesMarshallableCall, "BytesMarshallable arguments");
     }
 
     // Test to ascertain that a RegularDTO object argument gets recycled between calls.
     @Test
+    @DisplayName("DTO arguments are recycled between calls")
     public void testDtoRecycled() {
         RegularDTO first = new RegularDTO();
         first.i = 6;
@@ -187,10 +198,11 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
         second.i = -3;
         second.s = "s";
 
-        verifyRecycled(first, second, writer::dtoCall);
+        verifyRecycled(first, second, writer::dtoCall, "DTO arguments");
     }
 
     @Test
+    @DisplayName("Config DTO resets missing fields when recycled")
     public void testConfigDtoRecycled() {
         ConfigDTO first = new ConfigDTO();
         first.s = "f";
@@ -200,7 +212,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
         second.s = "s";
         // don't set b
 
-        verifyRecycled(first, second, writer::configDtoCall);
+        verifyRecycled(first, second, writer::configDtoCall, "Config DTO arguments");
 
         ConfigDTO dto = (ConfigDTO) lastArgumentRef;
         Assertions.assertFalse(dto.b, "boolean field should reset to default false value when not set in second call");
@@ -208,6 +220,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
     // Test to ascertain that a DTO object's list field gets recycled between calls.
     @Test
+    @DisplayName("Wrapped list DTO is recycled between calls")
     public void testWrappedListRecycled() {
         ListContainingDto first = new ListContainingDto();
         first.list = new ArrayList<>(Arrays.asList(6, "f"));
@@ -215,11 +228,12 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
         ListContainingDto second = new ListContainingDto();
         second.list = new ArrayList<>(Arrays.asList(-3, "s"));
 
-        verifyRecycled(first, second, writer::wrappedListCall);
+        verifyRecycled(first, second, writer::wrappedListCall, "wrapped list DTO");
     }
 
     // Test to ascertain that a DTO object's list field gets recycled between calls.
     @Test
+    @DisplayName("Wrapped object DTO is recycled between calls")
     public void testWrappedListAsObjectRecycled() {
         final ObjectContainingDto first = new ObjectContainingDto();
         first.list = new ArrayList<>(Arrays.asList(6, "f"));
@@ -227,11 +241,12 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
         final ObjectContainingDto second = new ObjectContainingDto();
         second.list = new ArrayList<>(Arrays.asList(-3, "s"));
 
-        verifyRecycled(first, second, writer::wrappedObjectCall);
+        verifyRecycled(first, second, writer::wrappedObjectCall, "wrapped object DTO");
     }
 
     // Test to ascertain that a DTO object's list field gets recycled between calls.
     @Test
+    @DisplayName("Wrapped object DTO recycles list elements between calls")
     public void testWrappedListAsObjectRecycledDTO() {
         ObjectContainingDto first = new ObjectContainingDto();
         first.list = new ArrayList<>(Arrays.asList(new MyDto(1, 2), new MyDto(3, 4), new MyDto(5, 6)));
@@ -249,7 +264,8 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
                 "    !net.openhft.chronicle.wire.MethodReaderArgumentsRecycleTest$MyDto { a: 3, b: 4 },\n" +
                 "    !net.openhft.chronicle.wire.MethodReaderArgumentsRecycleTest$MyDto { a: 5, b: 6 }\n" +
                 "  ]\n" +
-                "}\n", lastArgumentRef.toString());
+                "}\n", lastArgumentRef.toString(),
+                "First wrapped DTO should serialise with all list elements");
         final List<?> list1 = (List<?>) ((ObjectContainingDto) lastArgumentRef).list;
         assertEquals(first.list, list1, "deserialized list should match first input list values");
         final MyDto dto0 = (MyDto) list1.get(0);
@@ -263,7 +279,8 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
                 "    !net.openhft.chronicle.wire.MethodReaderArgumentsRecycleTest$MyDto { a: 7, b: 8 },\n" +
                 "    !net.openhft.chronicle.wire.MethodReaderArgumentsRecycleTest$MyDto { a: 9, b: 0 }\n" +
                 "  ]\n" +
-                "}\n", lastArgumentRef.toString());
+                "}\n", lastArgumentRef.toString(),
+                "Second wrapped DTO should serialise with updated list elements");
         final List<?> list2 = (List<?>) ((ObjectContainingDto) lastArgumentRef).list;
         assertEquals(second.list, list2, "deserialized list should match second input list values");
         assertSame(dto0, list1.get(0), "first DTO in list should be recycled from previous call");
@@ -275,6 +292,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
     // Test to ensure that a List argument gets recycled between calls.
     @Test
+    @DisplayName("List arguments are recycled between calls")
     public void testListRecycled() {
         List<String> first = new ArrayList<>();
         first.add("a");
@@ -285,11 +303,12 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
         second.add("d");
         second.add("e");
 
-        verifyRecycled(first, second, writer::listCall);
+        verifyRecycled(first, second, writer::listCall, "list arguments");
     }
 
     // Test to confirm that a Map argument gets recycled between calls.
     @Test
+    @DisplayName("Map arguments are recycled between calls")
     public void testMapRecycled() {
         Map<String, String> first = new HashMap<>();
         first.put("a", "A");
@@ -300,11 +319,12 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
         second.put("d", "D");
         second.put("e", "E");
 
-        verifyRecycled(first, second, writer::mapCall);
+        verifyRecycled(first, second, writer::mapCall, "map arguments");
     }
 
     // Test to confirm that a Set argument gets recycled between calls.
     @Test
+    @DisplayName("Set arguments are recycled between calls")
     public void testSetRecycled() {
         Set<String> first = new HashSet<>();
         first.add("a");
@@ -315,7 +335,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
         second.add("d");
         second.add("e");
 
-        verifyRecycled(first, second, writer::setCall);
+        verifyRecycled(first, second, writer::setCall, "set arguments");
     }
 
     // Interface definition for various types of method calls.
@@ -344,27 +364,42 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     }
 
     // Definition of a custom Marshallable object with a long field.
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class MyMarshallable extends SelfDescribingMarshallable {
         long l;
     }
 
     // Definition of a custom BytesMarshallable object with a double field.
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class MyBytesMarshallable extends BytesInBinaryMarshallable {
         double d;
     }
 
     // Definition of a regular Data Transfer Object (DTO) with string and integer fields.
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class RegularDTO extends SelfDescribingMarshallable {
         String s;
         int i;
     }
 
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class ConfigDTO extends AbstractMarshallableCfg {
         String s;
         boolean b;
     }
 
     // Definition of a DTO with a list-containing field.
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class ListContainingDto extends SelfDescribingMarshallable {
         List<Object> list;
     }
@@ -375,6 +410,9 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     }
 
     @UsedViaReflection
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class MyDto extends SelfDescribingMarshallable {
         private final int a;
         private final int b;

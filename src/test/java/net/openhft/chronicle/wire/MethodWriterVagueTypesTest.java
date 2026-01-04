@@ -6,12 +6,14 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
@@ -65,7 +67,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
 
     static class NonMarshallableTestContainer implements Container {
 
-        final String randomInt = String.valueOf(new Random().nextInt());
+        final String randomInt = String.valueOf(ThreadLocalRandom.current().nextInt());
 
         @Override
         public String toString() {
@@ -87,6 +89,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
 
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Single argument messages round-trip with vague types")
     public void testSingle(Boolean multipleNonMarshallableParamTypes) throws Exception {
         initMethodWriterVagueTypesTest(multipleNonMarshallableParamTypes);
         // Initialization of the wire
@@ -104,11 +107,12 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         testSingle(printer, reader, new NonMarshallableTestContainer());
         testSingle(printer, reader, new MarshallableTestContainer());
         testSingle(printer, reader, new NonMarshallableTestContainer());
-        Assertions.assertTrue(singleQ.isEmpty(), "single: queue empty");
+        Assertions.assertTrue(singleQ.isEmpty(), "Single queue should be empty after reads");
     }
 
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Double argument messages round-trip with vague types")
     public void testDouble(Boolean multipleNonMarshallableParamTypes) throws Exception {
         initMethodWriterVagueTypesTest(multipleNonMarshallableParamTypes);
         // Initialization of the wire
@@ -130,11 +134,12 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         testDouble(printer::msg, reader, 5, new MarshallableTestContainer());
         testDouble(printer::msg, reader, 6, new MarshallableTestContainer());
         testDouble(printer::msg, reader, 3L, new MarshallableTestContainer());
-        Assertions.assertTrue(doubleQ.isEmpty(), "double: queue empty");
+        Assertions.assertTrue(doubleQ.isEmpty(), "Double queue should be empty after reads");
     }
 
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Final container messages round-trip with vague types")
     public void testDoubleFinal(Boolean multipleNonMarshallableParamTypes) throws Exception {
         initMethodWriterVagueTypesTest(multipleNonMarshallableParamTypes);
         // Initialization of the wire
@@ -151,11 +156,12 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         // test with a series of objects
         testDouble(printer::msg, reader, new FinalMarshallableContainer(), new FinalNonMarshallableContainer());
         testDouble(printer::msg, reader, new FinalMarshallableContainer(), new FinalNonMarshallableContainer());
-        Assertions.assertTrue(doubleQ.isEmpty(), "double final: queue empty");
+        Assertions.assertTrue(doubleQ.isEmpty(), "Double queue should be empty after final test");
     }
 
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Primitive key messages round-trip with vague types")
     public void testPrimitive(Boolean multipleNonMarshallableParamTypes) throws Exception {
         initMethodWriterVagueTypesTest(multipleNonMarshallableParamTypes);
         // Initialization of the wire
@@ -174,7 +180,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         testDoubleWithPrimitive(printer, reader, 2L, new NonMarshallableTestContainer());
         testDoubleWithPrimitive(printer, reader, Long.MAX_VALUE, new MarshallableTestContainer());
         testDoubleWithPrimitive(printer, reader, 2L, new NonMarshallableTestContainer());
-        Assertions.assertTrue(doubleQ.isEmpty(), "primitive: queue empty");
+        Assertions.assertTrue(doubleQ.isEmpty(), "Primitive queue should be empty after reads");
     }
 
     private void testSingle(PrintObjectSingle printer, MethodReader reader, Object obj) throws Exception {
@@ -198,7 +204,8 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
             }
         }
         if (Boolean.FALSE.equals(multipleNonMarshallableParamTypes) && marshallableToNonMarshallable) {
-            Assertions.assertThrows(RuntimeException.class, () -> assertWrite(reader, queue, objs));
+            Assertions.assertThrows(RuntimeException.class, () -> assertWrite(reader, queue, objs),
+                    "Restricted types should reject marshallable to non-marshallable changes");
         } else {
             assertWrite(reader, queue, objs);
         }
@@ -220,15 +227,18 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
                 classMismatchString = "Invalid class type! " + objClass.getSimpleName() + " != " + result.getClass().getSimpleName();
                 continue;
             }
-            Assertions.assertEquals(obj, result);
+            Assertions.assertEquals(obj, result,
+                    "Result should match the written object for " + objClass.getSimpleName() + " at i=" + i);
             prevObjClasses[i] = objClass;
             Object usedObj = usedObjects.get(i).get(objClass);
             if (usedObj != null) {
                 if (objClass != String.class && !Number.class.isAssignableFrom(objClass) && (!Boolean.FALSE.equals(multipleNonMarshallableParamTypes) ||
                         Marshallable.class.isAssignableFrom(objClass) || Modifier.isFinal(objClass.getModifiers()))) {
-                    Assertions.assertSame(usedObj, result);
+                    Assertions.assertSame(usedObj, result,
+                            "Reusable object should be reused for " + objClass.getSimpleName() + " at i=" + i);
                 } else {
-                    Assertions.assertNotSame(usedObj, result);
+                    Assertions.assertNotSame(usedObj, result,
+                            "Object should not be reused for " + objClass.getSimpleName() + " at i=" + i);
                 }
             }
             usedObjects.get(i).put(objClass, result);

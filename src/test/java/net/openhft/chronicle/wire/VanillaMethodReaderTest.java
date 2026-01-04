@@ -10,6 +10,7 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.wire.marshallable.TriviallyCopyableMarketData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,6 +25,7 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
 
     // Test case to check the behavior of a predicate that always returns false
     @Test
+    @DisplayName("Predicate false prevents any method dispatch")
     public void testPredicateFalse() {
 
         // Allocate elastic bytes on heap and create a TextWire instance
@@ -43,12 +45,13 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
                 .build((MyMethod) str -> value[0] = str);
 
         // Assert that no message was read and the value remains null
-        Assertions.assertFalse(reader.readOne());
-        Assertions.assertNull(value[0]);
+        Assertions.assertFalse(reader.readOne(), "Predicate false should suppress all reads");
+        Assertions.assertNull(value[0], "No message should be delivered when predicate fails");
     }
 
     // Test case to check the behavior of a predicate that always returns true
     @Test
+    @DisplayName("Predicate true allows single method dispatch")
     public void testPredicateTrue() {
 
         // Allocate elastic bytes on heap and create a TextWire instance
@@ -70,16 +73,18 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
         // Build the method reader and assert that the message was read correctly
         MethodReader reader = builder.build((MyMethod) str -> value[0] = str);
 
-        Assertions.assertTrue(reader.readOne());
-        Assertions.assertEquals("hi", value[0]);
+        Assertions.assertTrue(reader.readOne(), "Predicate true should allow one read");
+        Assertions.assertEquals("hi", value[0], "Reader should deliver the hi payload");
     }
 
     // Test case to log a binary message and validate its content
     @Test
+    @DisplayName("Binary log message matches expected hex dump")
     public void logMessage0() {
 
         // do not check Mac as it lays it memory out differently
-        Assumptions.assumeTrue(!OS.isMacOSX());
+        Assumptions.assumeTrue(!OS.isMacOSX(),
+                "macOS layout differs for hex dump expectations");
 
         TriviallyCopyableMarketData data = new TriviallyCopyableMarketData();
         data.securityId(0x828282828282L);
@@ -101,7 +106,8 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
                         "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
                         "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
                         "00 00\n",
-                wire.bytes().toHexString());
+                wire.bytes().toHexString(),
+                "Binary wire hex dump should match expected output");
 
         // Read the written message and validate its content
         try (DocumentContext dc = wire.readingDocument()) {
@@ -111,7 +117,8 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
                             "00000020 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                             "........\n" +
                             "000000a0 00 00                                            ··               ",
-                    VanillaMethodReader.logMessage0("md", marketData));
+                    VanillaMethodReader.logMessage0("md", marketData),
+                    "Log message should include expected market data dump");
         }
     }
 

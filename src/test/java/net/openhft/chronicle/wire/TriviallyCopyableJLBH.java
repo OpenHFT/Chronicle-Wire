@@ -42,8 +42,7 @@ public class TriviallyCopyableJLBH implements JLBHTask {
         } else if (ioType.equals("trivial")) {
             type = HouseType.TRIVIALLY_COPYABLE;
         } else {
-            System.out.println("-Dio.type must be \"binary\" or \"trivial\"");
-            System.exit(-1);
+            throw new IllegalArgumentException("-Dio.type must be \"binary\" or \"trivial\"");
         }
 
         cpu = Integer.parseInt(System.getProperty("cpu", "2"));
@@ -54,7 +53,6 @@ public class TriviallyCopyableJLBH implements JLBHTask {
 
     public static void main(String[] args) {
         new TriviallyCopyableJLBH().test();
-        System.exit(0);
     }
 
     private BaseHouse newHouse(HouseType type) {

@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -16,10 +17,12 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"deprecation", "removal"})
 public class JSONWireTypesTest extends WireTestCommon {
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
+    @DisplayName("Serialises nested sets with json only wire")
     public void nestedSets() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip nested sets json test");
 
         DtoWithNestedSets dto = new DtoWithNestedSets()
             .setOfSets(
@@ -33,10 +36,12 @@ public class JSONWireTypesTest extends WireTestCommon {
                         "{\"@!set\":[ {\"@net.openhft.chronicle.wire.JSONWireTypesTest$Dto\":{\"field\":\"234\"}} ]}," +
                         "{\"@!set\":[ {\"@net.openhft.chronicle.wire.JSONWireTypesTest$Dto\":{\"field\":\"123\"}} ]}" +
                         " ]}}",
-            dtoAsJson
+            dtoAsJson,
+            "json only output should contain nested set representations"
         );
 
-        assertEquals(dto, JSON_ONLY.fromString(dtoAsJson));
+        assertEquals(dto, JSON_ONLY.fromString(dtoAsJson),
+                "dto should round-trip through json only string");
     }
 
     @SuppressWarnings("rawtypes")

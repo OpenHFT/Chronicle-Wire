@@ -7,7 +7,9 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,7 @@ public class UsingTestMarshallableFixture extends net.openhft.chronicle.wire.Wir
 
     // Test case to verify the conversion of a Marshallable object to its text representation
     @Test
+    @DisplayName("Serialises marshallable fixture to text wire")
     public void testConverMarshallableToTextName() {
 
         // Initialize a MarshallableFixture object and set its name
@@ -44,7 +47,8 @@ public class UsingTestMarshallableFixture extends net.openhft.chronicle.wire.Wir
                 "  name: hello world,\n" +
                 "  count: 0\n" +
                 "}\n",
-                value);
+                value,
+                "MarshallableFixture text wire output should match");
 
         // Release the ByteBuffer's resources
         byteBufferBytes.releaseLast();
@@ -53,6 +57,7 @@ public class UsingTestMarshallableFixture extends net.openhft.chronicle.wire.Wir
     // Test case to check the marshalling functionality using numbers as keys in binary wire
     // This test addresses the WIRE-37 issue
     @Test
+    @DisplayName("Reads typed marshallable using numeric key")
     public void testMarshall() {
 
         // Create a ByteBuffer to hold the serialized data
@@ -74,7 +79,7 @@ public class UsingTestMarshallableFixture extends net.openhft.chronicle.wire.Wir
         @Nullable final MyMarshallable result = read.typedMarshallable();
 
         // Ensure the read value matches the written one
-        assertEquals("text", result.text.toString());
+        assertEquals("text", result.text.toString(), "Text should round-trip from binary wire");
 
         // Release the ByteBuffer's resources
         bytes.releaseLast();
@@ -82,6 +87,7 @@ public class UsingTestMarshallableFixture extends net.openhft.chronicle.wire.Wir
 
     // Test case to check the write and read functionality for a Marshallable object
     @Test
+    @DisplayName("Round-trips sorted filter with nested marshallables")
     public void test() {
 
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
@@ -93,7 +99,7 @@ public class UsingTestMarshallableFixture extends net.openhft.chronicle.wire.Wir
             @NotNull SortedFilter sortedFilter = new SortedFilter();
 
             boolean add = sortedFilter.marshableFilters.add(expected);
-            Assertions.assertTrue(add);
+            Assertions.assertTrue(add, "Filter should be added to list");
             wire.write().marshallable(sortedFilter);
         }
 
@@ -101,8 +107,10 @@ public class UsingTestMarshallableFixture extends net.openhft.chronicle.wire.Wir
         {
             @NotNull SortedFilter sortedFilter = new SortedFilter();
             wire.read().marshallable(sortedFilter);
-            assertEquals(1, sortedFilter.marshableFilters.size());
-            assertEquals(expected, sortedFilter.marshableFilters.get(0));
+            assertEquals(1, sortedFilter.marshableFilters.size(),
+                    "One marshable filter should be present after read");
+            assertEquals(expected, sortedFilter.marshableFilters.get(0),
+                    "Marshable filter should round-trip");
         }
         bytes.releaseLast();
     }
@@ -140,6 +148,9 @@ public class UsingTestMarshallableFixture extends net.openhft.chronicle.wire.Wir
     }
 
     // Class representing a filter condition for data, defined by a column name and a filter expression.
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class MarshableFilter extends SelfDescribingMarshallable {
         // Name of the column to which the filter applies.
         @NotNull
@@ -157,6 +168,9 @@ public class UsingTestMarshallableFixture extends net.openhft.chronicle.wire.Wir
     }
 
     // Class representing an order-by condition for data, defined by a column name and sort direction.
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class MarshableOrderBy extends SelfDescribingMarshallable {
         // Name of the column used for ordering data.
         @NotNull
@@ -173,6 +187,9 @@ public class UsingTestMarshallableFixture extends net.openhft.chronicle.wire.Wir
     }
 
     // Class representing a filter with sorting details for processing data.
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD", "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class SortedFilter extends SelfDescribingMarshallable {
         // Index from which the filtering should start.
         public long fromIndex;

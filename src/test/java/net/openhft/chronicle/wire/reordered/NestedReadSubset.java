@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class NestedReadSubset implements Marshallable {
     private String text;
-    private String text2;
+    private String text2 = "";
     private double number;
     private double number2;
     private double number4;

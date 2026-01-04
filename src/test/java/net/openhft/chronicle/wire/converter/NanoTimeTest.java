@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire.converter;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,6 +23,7 @@ public class NanoTimeTest extends net.openhft.chronicle.wire.WireTestCommon {
      * The test uses a YAML-based wire to serialize data.
      */
     @Test
+    @DisplayName("Serialises NanoTime fields into yaml wire")
     public void yaml() {
         // Initialize a YAML wire on the heap.
         Wire wire = Wire.newYamlWireOnHeap();
@@ -42,7 +44,8 @@ public class NanoTimeTest extends net.openhft.chronicle.wire.WireTestCommon {
                 "event: {\n" +
                 "  start: 2022-06-17T12:35:56\n" +
                 "}\n" +
-                "...\n", wire.toString());
+                "...\n", wire.toString(),
+                "yaml output should match expected NanoTime rendering");
     }
 
     /**

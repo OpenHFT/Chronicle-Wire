@@ -13,6 +13,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,11 +26,12 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     // Before each test, check the current architecture and skip if it's ARM or Azul Zing.
     @BeforeEach
     public void checkArch() {
-        assumeFalse(Jvm.isArm() || Jvm.isAzulZing());
+        assumeFalse(Jvm.isArm() || Jvm.isAzulZing(), "ARM or Azul Zing detected; skip embedded bytes tests");
     }
 
     // Test clearing and appending new data to the embedded bytes.
     @Test
+    @DisplayName("Clears and updates embedded bytes content")
     public void testClear() {
         // Register the alias for the class.
         ClassAliasPool.CLASS_ALIASES.addAlias(EBM.class);
@@ -47,7 +49,8 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         e2.a.append("b0000000");
 
         // Ensure the deserialized and modified data is as expected.
-        Assertions.assertEquals("b0000000", e2.a.toString());
+        Assertions.assertEquals("b0000000", e2.a.toString(),
+                "Expected embedded bytes to reflect updated content");
 
         // Release the bytes.
         bytes.releaseLast();
@@ -55,8 +58,9 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
 
     // Test serialization and deserialization with certain expected output.
     @Test
+    @DisplayName("Serialises embedded bytes into hex dump")
     public void ebm() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip embedded bytes marshalling test");
 
         // Register the alias for the class.
         ClassAliasPool.CLASS_ALIASES.addAlias(EBM.class);
@@ -73,7 +77,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
                 "  b: a1234567890123456789abc,\n" +
                 "  c: a1234567890\n" +
                 "}\n";
-        assertEquals(expected, e1.toString());
+        assertEquals(expected, e1.toString(), "Expected EBM toString before marshalling");
         Bytes<?> bytes = new HexDumpBytes();
         e1.writeMarshallable(bytes);
         assertEquals("00 80 04 08 00 80 04 08 1e 61 31 32 33 34 35 36\n" +
@@ -81,38 +85,115 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
                 "33 34 35 36 37 38 39 00 17 61 31 32 33 34 35 36\n" +
                 "37 38 39 30 31 32 33 34 35 36 37 38 39 61 62 63\n" +
                 "c4 5f 74 4c 00 00 00 00 0b 61 31 32 33 34 35 36\n" +
-                "37 38 39 30\n", bytes.toHexString());
+                "37 38 39 30\n", bytes.toHexString(),
+                "Expected hex dump output for embedded bytes");
         EBM e2 = new EBM();
         e2.readMarshallable(bytes);
-        assertEquals(expected, e2.toString());
+        assertEquals(expected, e2.toString(), "Expected EBM toString after unmarshalling");
+        assertEquals(e1.number, e2.number, "Expected number to round-trip for embedded bytes");
+        bytes.releaseLast();
+    }
+
+    @Test
+    @DisplayName("Trivially copyable fields round-trip for embedded bytes")
+    public void triviallyCopyableFieldsRoundTrip() {
+        EBM1 ebm1 = new EBM1();
+        ebm1.l0 = 11L;
+        ebm1.i0 = 12;
+        ebm1.s0 = 13;
+        ebm1.b0 = 14;
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        ebm1.writeMarshallable(bytes);
+        EBM1 ebm1Copy = new EBM1();
+        ebm1Copy.readMarshallable(bytes);
+        assertEquals(11L, ebm1Copy.l0, "EBM1 first long value should round-trip");
+        assertEquals(12, ebm1Copy.i0, "EBM1 i0 should round-trip");
+        assertEquals(13, ebm1Copy.s0, "EBM1 s0 should round-trip");
+        assertEquals(14, ebm1Copy.b0, "EBM1 b0 should round-trip");
+
+        bytes.clear();
+        EBM2 ebm2 = new EBM2();
+        ebm2.l0 = 21L;
+        ebm2.l1 = 22L;
+        ebm2.i0 = 23;
+        ebm2.i1 = 24;
+        ebm2.s0 = 25;
+        ebm2.s1 = 26;
+        ebm2.b0 = 27;
+        ebm2.b1 = 28;
+        ebm2.writeMarshallable(bytes);
+        EBM2 ebm2Copy = new EBM2();
+        ebm2Copy.readMarshallable(bytes);
+        assertEquals(21L, ebm2Copy.l0, "EBM2 first long value should round-trip");
+        assertEquals(22L, ebm2Copy.l1, "EBM2 second long value should round-trip");
+        assertEquals(23, ebm2Copy.i0, "EBM2 i0 should round-trip");
+        assertEquals(24, ebm2Copy.i1, "EBM2 i1 should round-trip");
+        assertEquals(25, ebm2Copy.s0, "EBM2 s0 should round-trip");
+        assertEquals(26, ebm2Copy.s1, "EBM2 s1 should round-trip");
+        assertEquals(27, ebm2Copy.b0, "EBM2 b0 should round-trip");
+        assertEquals(28, ebm2Copy.b1, "EBM2 b1 should round-trip");
+
+        bytes.clear();
+        EBM3 ebm3 = new EBM3();
+        ebm3.l0 = 31L;
+        ebm3.l1 = 32L;
+        ebm3.l2 = 33L;
+        ebm3.i0 = 34;
+        ebm3.i1 = 35;
+        ebm3.i2 = 36;
+        ebm3.s0 = 37;
+        ebm3.s1 = 38;
+        ebm3.s2 = 39;
+        ebm3.b0 = 40;
+        ebm3.b1 = 41;
+        ebm3.b2 = 42;
+        ebm3.writeMarshallable(bytes);
+        EBM3 ebm3Copy = new EBM3();
+        ebm3Copy.readMarshallable(bytes);
+        assertEquals(31L, ebm3Copy.l0, "EBM3 first long value should round-trip");
+        assertEquals(32L, ebm3Copy.l1, "EBM3 second long value should round-trip");
+        assertEquals(33L, ebm3Copy.l2, "EBM3 third long value should round-trip");
+        assertEquals(34, ebm3Copy.i0, "EBM3 i0 should round-trip");
+        assertEquals(35, ebm3Copy.i1, "EBM3 i1 should round-trip");
+        assertEquals(36, ebm3Copy.i2, "EBM3 i2 should round-trip");
+        assertEquals(37, ebm3Copy.s0, "EBM3 s0 should round-trip");
+        assertEquals(38, ebm3Copy.s1, "EBM3 s1 should round-trip");
+        assertEquals(39, ebm3Copy.s2, "EBM3 s2 should round-trip");
+        assertEquals(40, ebm3Copy.b0, "EBM3 b0 should round-trip");
+        assertEquals(41, ebm3Copy.b1, "EBM3 b1 should round-trip");
+        assertEquals(42, ebm3Copy.b2, "EBM3 b2 should round-trip");
+
         bytes.releaseLast();
     }
 
     // Test deserialization with no data. Expected to throw a DecoratedBufferUnderflowException.
     @Test
+    @DisplayName("Empty input buffer should be rejected with underflow exception")
     public void noData() {
         assertThrows(DecoratedBufferUnderflowException.class, () -> {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
             EBM ebm = new EBM();
             ebm.readMarshallable(bytes);
-        });
+        }, "Expected buffer underflow for empty input");
     }
 
     // Test deserialization with invalid description (even bit count = 0).
     // Expected to throw an IllegalStateException.
     @Test
+    @DisplayName("Rejects invalid description with zero field count")
     public void invalidDescription() {
         assertThrows(IllegalStateException.class, () -> {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
             bytes.readLimit(64); // even bit count i.e. 0
             EBM ebm = new EBM();
             ebm.readMarshallable(bytes);
-        });
+        }, "Expected invalid description with zero field count");
     }
 
     // Test deserialization with another invalid description scenario where it tries to read more data than available.
     // Expected to throw an IllegalStateException.
     @Test
+    @DisplayName("Rejects invalid description with insufficient data")
     public void invalidDescription2() {
         assertThrows(IllegalStateException.class, () -> {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
@@ -120,12 +201,13 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
             bytes.readLimit(64);
             EBM ebm = new EBM();
             ebm.readMarshallable(bytes);
-        });
+        }, "Expected invalid description with insufficient data");
     }
 
     // Test deserialization with yet another invalid description, characterized by both an even bit count
     // and an attempt to read more data than available. Expected to throw an IllegalStateException.
     @Test
+    @DisplayName("Rejects invalid description with even bit count")
     public void invalidDescription3() {
         assertThrows(IllegalStateException.class, () -> {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
@@ -133,12 +215,13 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
             bytes.readLimit(64);
             EBM ebm = new EBM();
             ebm.readMarshallable(bytes);
-        });
+        }, "Expected invalid description with even bit count and insufficient data");
     }
 
     // Test deserialization with an even bit count description.
     // Expected to throw an IllegalStateException.
     @Test
+    @DisplayName("Rejects description with even bit count marker")
     public void invalidDescription4() {
         assertThrows(IllegalStateException.class, () -> {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
@@ -146,12 +229,13 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
             bytes.readLimit(64);
             EBM ebm = new EBM();
             ebm.readMarshallable(bytes);
-        });
+        }, "Expected invalid description for even bit count marker");
     }
 
     // Test deserialization with field counts exceeding FIELD_COUNT_LIMIT (256).
     // Expected to throw an IllegalStateException.
     @Test
+    @DisplayName("Rejects excessive field counts in description")
     public void excessiveFieldCounts() {
         assertThrows(IllegalStateException.class, () -> {
             int desc = (200 << 24) | (200 << 16) | 1;
@@ -163,7 +247,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
             bytes.readLimit(bytes.writePosition());
             EBM1 ebm1 = new EBM1();
             ebm1.readMarshallable(bytes);
-        });
+        }, "Expected excessive field counts to be rejected");
     }
 
     // A class representing a Marshallable object with fields grouped into embedded Bytes.

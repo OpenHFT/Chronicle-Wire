@@ -7,11 +7,15 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireOut;
 import net.openhft.chronicle.wire.Wires;
 import org.jetbrains.annotations.NotNull;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Represents a rung in a ladder with certain properties such as price, quantity, and delta.
  * Extends the SelfDescribingMarshallable to provide self-describing marshalling capabilities.
  */
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 class Rung extends SelfDescribingMarshallable {
 
     // Represents the price of the rung
@@ -50,5 +54,21 @@ class Rung extends SelfDescribingMarshallable {
     public void writeMarshallable(@NotNull WireOut wire) {
         // Use Wires utility to write the object's data to the wire
         Wires.writeMarshallable(this, wire, false);
+    }
+
+    double getPrice() {
+        return price;
+    }
+
+    double getQty() {
+        return qty;
+    }
+
+    boolean isDelta() {
+        return delta;
+    }
+
+    String getNotSet() {
+        return notSet;
     }
 }

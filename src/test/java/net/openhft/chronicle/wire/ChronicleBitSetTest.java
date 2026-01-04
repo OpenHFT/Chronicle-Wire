@@ -10,6 +10,7 @@ import net.openhft.chronicle.core.io.IOTools;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -71,6 +72,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     }
 
     // Test nextSetBit() method of ChronicleBitSet
+    @DisplayName("Finds next set bit from zero index")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testNextSetBit0(Class<?> clazz) {
@@ -113,11 +115,6 @@ public class ChronicleBitSetTest extends WireTestCommon {
     // Assert a failure with a given diagnostic message
     public void fail(String diagnostic) {
         Assertions.fail(diagnostic);
-    }
-
-    // Check if the given condition is true
-    private void check(boolean condition) {
-        Assertions.assertTrue(condition);
     }
 
     // Check if the given condition is true with a diagnostic message
@@ -168,17 +165,17 @@ public class ChronicleBitSetTest extends WireTestCommon {
     private void checkSanity(ChronicleBitSet... sets) {
         for (ChronicleBitSet s : sets) {
             int len = s.length();
-            int cardinality1 = s.cardinality();
             int cardinality2 = 0;
             // Counting set bits
             for (int i = s.nextSetBit(0); i >= 0; i = s.nextSetBit(i + 1)) {
-                check(s.get(i));
+                check(s.get(i), "expected bit set at index " + i);
                 cardinality2++;
             }
             // Various validity checks
             check(s.nextSetBit(len) == -1, "last set bit");
             check(s.nextClearBit(len) == len, "last set bit");
             check(s.isEmpty() == (len == 0), "emptiness");
+            int cardinality1 = s.cardinality();
             check(cardinality1 == cardinality2, "cardinalities");
             check(len <= s.size(), "length <= size");
             check(len >= 0, "length >= 0");
@@ -186,6 +183,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         }
     }
 
+    @DisplayName("Finds next set bit for random sets")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testNextSetBit(Class<?> clazz) {
@@ -195,7 +193,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         // Repeat the test 100 times
         for (int i = 0; i < 100; i++) {
             int numberOfSetBits = generator.nextInt(100) + 1;
-            ChronicleBitSet testSet = createBitSet(numberOfSetBits * 30);
+            ChronicleBitSet testSet = createBitSet((long) numberOfSetBits * 30L);
             int[] history = new int[numberOfSetBits];
 
             // Set some random bits and remember them
@@ -221,6 +219,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         assertEquals(0, failCount, "all randomly set bits should be retrieved correctly by nextSetBit");
     }
 
+    @DisplayName("Finds next clear bit for random sets")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testNextClearBit(Class<?> clazz) {
@@ -274,6 +273,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         assertEquals(0, failCount, "all randomly cleared bits should be retrieved correctly by nextClearBit");
     }
 
+    @DisplayName("Sets, gets, clears, and flips bits")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testSetGetClearFlip(Class<?> clazz) {
@@ -375,6 +375,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         assertEquals(0, failCount, "set, get, clear, and flip operations should maintain bit state correctly");
     }
 
+    @DisplayName("Computes andNot set difference across random sets")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testAndNot(Class<?> clazz) {
@@ -411,6 +412,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         assertEquals(0, failCount, "andNot operation should compute correct set difference for all bit positions");
     }
 
+    @DisplayName("Computes logical AND across random sets")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testAnd(Class<?> clazz) {
@@ -420,7 +422,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         for (int i = 0; i < 100; i++) {
             ChronicleBitSet b1 = createBitSet(256);
             if (b1 instanceof LongValueBitSet)
-                assertEquals(4, b1.getWordsInUse());
+                assertEquals(4, b1.getWordsInUse(), "Expected four words in use for LongValueBitSet at iteration " + i);
 
             ChronicleBitSet b2 = createBitSet(256);
 
@@ -452,17 +454,18 @@ public class ChronicleBitSetTest extends WireTestCommon {
         assertEquals(0, failCount, "and operation should compute correct logical AND for all bit positions");
     }
 
+    @DisplayName("Clears last word when AND removes bits")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testAnd2(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         // Test the AND operation that clears the last word of the bitset
         ChronicleBitSet b4 = makeSet(2, 127);
-        assertEquals("{2, 127}", b4.toString());
+        assertEquals("{2, 127}", b4.toString(), "initial set should list bits 2 and 127");
         final ChronicleBitSet b4a = makeSet(2, 64);
-        assertEquals("{2, 64}", b4a.toString());
+        assertEquals("{2, 64}", b4a.toString(), "initial set should list bits 2 and 64");
         b4.and(b4a);
-        assertEquals("{2}", b4.toString());
+        assertEquals("{2}", b4.toString(), "and should leave only the shared bit");
         checkSanity(b4);
         int failCount = 0;
         final ChronicleBitSet bs2 = makeSet(2);
@@ -473,6 +476,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         assertEquals(0, failCount, "and operation should correctly clear last word when intersecting sets");
     }
 
+    @DisplayName("Computes logical OR across random sets")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testOr(Class<?> clazz) {
@@ -526,6 +530,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         assertEquals(0, failCount, "or operation should compute correct logical OR for all bit positions");
     }
 
+    @DisplayName("Computes logical XOR across random sets")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testXor(Class<?> clazz) {
@@ -575,6 +580,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         assertEquals(0, failCount, "xor operation should compute correct logical XOR for all bit positions");
     }
 
+    @DisplayName("Compares equality across bitsets with same bits")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testEquals(Class<?> clazz) {
@@ -603,6 +609,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         assertEquals(0, failCount, "bitsets with same set bits should be equal regardless of storage size");
     }
 
+    @DisplayName("Reports length based on highest set bit")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testLength(Class<?> clazz) {
@@ -631,11 +638,11 @@ public class ChronicleBitSetTest extends WireTestCommon {
             for (int x = 0; x < 100; x++) {
                 // Flip a random range twice
                 int rangeStart = generator.nextInt(100);
-                int rangeEnd = rangeStart + generator.nextInt(100);
                 b1.flip(rangeStart);
                 b1.flip(rangeStart);
                 if (!b1.isEmpty())
                     failCount++;
+                int rangeEnd = rangeStart + generator.nextInt(100);
                 b1.flip(rangeStart, rangeEnd);
                 b1.flip(rangeStart, rangeEnd);
                 if (!b1.isEmpty())
@@ -647,20 +654,23 @@ public class ChronicleBitSetTest extends WireTestCommon {
         // Test length after or
         for (int i = 0; i < 100; i++) {
             ChronicleBitSet b1 = createBitSet(256);
-            ChronicleBitSet b2 = createBitSet(256);
             int bit1 = generator.nextInt(100);
             int bit2 = generator.nextInt(100);
             if (bit2 >= bit1)
                 bit2++;
-            int highestSetBit = Math.max(bit1, bit2);
             b1.set(bit1);
-            assertEquals("{" + bit1 + "}", b1.toString());
+            assertEquals("{" + bit1 + "}", b1.toString(),
+                    "toString should match single set bit for bit1=" + bit1 + ", iteration=" + i);
+            ChronicleBitSet b2 = createBitSet(256);
             b2.set(bit2);
-            assertEquals("{" + bit2 + "}", b2.toString());
+            assertEquals("{" + bit2 + "}", b2.toString(),
+                    "toString should match single set bit for bit2=" + bit2 + ", iteration=" + i);
             b1.or(b2);
             final String expected = "{" + Math.min(bit1, bit2) + ", " + Math.max(bit1, bit2) + "}";
-            assertEquals(expected, b1.toString());
+            assertEquals(expected, b1.toString(),
+                    "toString should include both set bits after or at iteration " + i);
             final int length = b1.length();
+            int highestSetBit = Math.max(bit1, bit2);
             if (length != highestSetBit + 1)
                 failCount++;
             checkSanity(b1, b2);
@@ -669,6 +679,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         assertEquals(0, failCount, "length should correctly reflect highest set bit position across set, flip, and or operations");
     }
 
+    @DisplayName("Clears bit ranges and matches per-bit clear")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testClear(Class<?> clazz) {
@@ -687,6 +698,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         assertEquals(0, failCount, "clear range operation should produce same result as clearing individual bits");
     }
 
+    @DisplayName("Sets bit ranges and matches per-bit set")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testSet(Class<?> clazz) {
@@ -723,6 +735,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         assertEquals(0, failCount, "set range operation should produce same result as setting individual bits");
     }
 
+    @DisplayName("Flips bit ranges and matches per-bit flip")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testFlip(Class<?> clazz) {
@@ -814,6 +827,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         void apply(ChronicleBitSet bitSet, int start, int end);
     }
 
+    @DisplayName("Detects intersection between bitsets with shared bits")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testIntersects(Class<?> clazz) {
@@ -858,6 +872,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         assertEquals(0, failCount, "intersects should correctly detect presence or absence of common set bits");
     }
 
+    @DisplayName("Counts number of set bits accurately")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testCardinality(Class<?> clazz) {
@@ -887,6 +902,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         assertEquals(0, failCount, "cardinality should correctly count number of set bits");
     }
 
+    @DisplayName("Reports empty state after set and clear operations on bitsets")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testEmpty(Class<?> clazz) {
@@ -916,6 +932,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         assertEquals(0, failCount, "isEmpty should correctly reflect bitset state after set and clear operations");
     }
 
+    @DisplayName("Reports empty state after random operations")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testEmpty2(Class<?> clazz) {
@@ -1021,26 +1038,31 @@ public class ChronicleBitSetTest extends WireTestCommon {
 */
     }
 
+    @DisplayName("Formats toString output for set bits in increasing order")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testToString(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         // Check the string representation of an empty ChronicleBitSet
-        check(createBitSet().toString().equals("{}"));
+        check(createBitSet().toString().equals("{}"), "toString should return empty braces for empty set");
 
         // Check the string representation of a ChronicleBitSet with specific set bits
-        check(makeSet(2, 3, 42, 43, 234).toString().equals("{2, 3, 42, 43, 234}"));
+        check(makeSet(2, 3, 42, 43, 234).toString().equals("{2, 3, 42, 43, 234}"),
+                "toString should list set bits in order");
 
         // Check the string representation of large bit indices if enough memory is available
         // and if the instance is of LongArrayValueBitSet class
         if (Runtime.getRuntime().maxMemory() >= (512 << 20) && clazz == LongArrayValueBitSet.class) {
             // only run it if we have enough memory
             check(makeSet(Integer.MAX_VALUE - 1).toString()
-                    .equals("{" + (Integer.MAX_VALUE - 1) + "}"));
+                    .equals("{" + (Integer.MAX_VALUE - 1) + "}"),
+                    "toString should include Integer.MAX_VALUE - 1 bit");
             check(makeSet(Integer.MAX_VALUE).toString()
-                    .equals("{" + Integer.MAX_VALUE + "}"));
+                    .equals("{" + Integer.MAX_VALUE + "}"),
+                    "toString should include Integer.MAX_VALUE bit");
             check(makeSet(0, 1, Integer.MAX_VALUE - 1, Integer.MAX_VALUE).toString()
-                    .equals("{0, 1, " + (Integer.MAX_VALUE - 1) + ", " + Integer.MAX_VALUE + "}"));
+                    .equals("{0, 1, " + (Integer.MAX_VALUE - 1) + ", " + Integer.MAX_VALUE + "}"),
+                    "toString should include low and high bit positions");
         }
     }
 
@@ -1055,23 +1077,24 @@ public class ChronicleBitSetTest extends WireTestCommon {
             }
 
             ChronicleBitSet b3 = cloneBitSet(b1, possibleSetBit);
-            ChronicleBitSet b4 = cloneBitSet(b2, possibleSetBit);
-            ChronicleBitSet b5 = cloneBitSet(b1, possibleSetBit);
-            ChronicleBitSet b6 = cloneBitSet(b2, possibleSetBit);
 
             for (int x = 0; x < possibleSetBit; x++)
                 b2.flip(x);
             b1.and(b2);
             for (int x = 0; x < possibleSetBit; x++)
                 b3.flip(x);
+            ChronicleBitSet b4 = cloneBitSet(b2, possibleSetBit);
             b3.and(b4);
             b1.or(b3);
+            ChronicleBitSet b5 = cloneBitSet(b1, possibleSetBit);
+            ChronicleBitSet b6 = cloneBitSet(b2, possibleSetBit);
             b5.xor(b6);
-            assertEquals(b1, b5);
+            assertEquals(b1, b5, "xor identity should match combined result at iteration " + i);
             checkSanity(b1, b2, b3, b4, b5, b6);
         }
     }
 
+    @DisplayName("Honours De Morgan and XOR identities")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void testLogicalIdentities(Class<?> clazz) {
@@ -1180,7 +1203,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         try {
             return (ChronicleBitSet) clazz.getConstructor(long.class, Wire.class).newInstance(size, w);
         } catch (Throwable t) {
-            throw new AssertionError(t);
+            throw new AssertionError("Failed to construct ChronicleBitSet via reflection", t);
         }
     }
 }

@@ -7,8 +7,10 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +19,9 @@ import java.util.List;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 public class UnicodeStringTest extends WireTestCommon {
 
     // Suppressing unchecked warnings as Bytes class may handle various types
@@ -79,6 +84,7 @@ public class UnicodeStringTest extends WireTestCommon {
     }
 
     // Test case to validate serialization and deserialization of long strings
+    @DisplayName("Round-trips long unicode strings across code points")
     @MethodSource("combinations")
     @ParameterizedTest
     public void testLongString(char ch) {
@@ -99,6 +105,6 @@ public class UnicodeStringTest extends WireTestCommon {
         // Read the string from the wire and validate it matches the original
         String[] actual = {null};
         wire.readDocument(null, w -> actual[0] = w.read(() -> "msg").text());
-        Assertions.assertEquals(s, actual[0], "long string: roundtrip ch=0x" + Integer.toHexString(ch));
+        Assertions.assertEquals(s, actual[0], "long string should round-trip for ch=0x" + Integer.toHexString(ch));
     }
 }

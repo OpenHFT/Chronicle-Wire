@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
@@ -22,13 +23,15 @@ public class GenericMethodsTest extends WireTestCommon {
 
     // Test for chained method calls with TextWire
     @Test
+    @DisplayName("Writes chained generic method calls to text wire")
     public void chainedText() {
 
         // Create a new TextWire instance with elastic byte allocation
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap(128))
                 .useTextDocuments();
         MyInterface<?> top = wire.methodWriter(MyInterface.class);
-        assertFalse(Proxy.isProxyClass(top.getClass()));
+        assertFalse(Proxy.isProxyClass(top.getClass()),
+                "method writer should not be a proxy class");
 
         // Chain multiple method calls and terminate
         top.hello("hello world").hello("hello world 2").terminator();
@@ -37,6 +40,7 @@ public class GenericMethodsTest extends WireTestCommon {
         assertEquals("hello: hello world\n" +
                 "hello: hello world 2\n" +
                 "terminator: \"\"\n" +
-                "...\n", wire.toString());
+                "...\n", wire.toString(),
+                "text wire should contain chained method calls in order");
     }
 }

@@ -12,6 +12,7 @@ import net.openhft.chronicle.wire.*;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
@@ -22,6 +23,7 @@ import static org.easymock.EasyMock.*;
 
 public class MethodWriterTest extends WireTestCommon {
     @Test
+    @DisplayName("Method writer serialises subclass events correctly")
     public void testSubclasses() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
 
@@ -85,10 +87,11 @@ public class MethodWriterTest extends WireTestCommon {
                 "}\n" +
                 "]\n";
         String actual = sw.toString().replace("\r", "");
-        assertEquals(expected, actual);
+        assertEquals(expected, actual, "Logged output should match expected subclass events");
     }
 
     @Test
+    @DisplayName("Default method calls are written to wire")
     public void testDefault() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
@@ -97,11 +100,13 @@ public class MethodWriterTest extends WireTestCommon {
         checkWriterType(writer);
         writer.callToDefaultMethod("hello world");
 
-        assertTrue(wire.toString().startsWith("callToDefaultMethod: hello world"));
+        assertTrue(wire.toString().startsWith("callToDefaultMethod: hello world"),
+                "Wire output should start with default method call");
     }
 
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
+    @DisplayName("Method writer can write to multiple outputs")
     public void multiOut() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
@@ -117,27 +122,31 @@ public class MethodWriterTest extends WireTestCommon {
                 "  one,\n" +
                 "  one\n" +
                 "]\n" +
-                "...\n", wire.toString());
+                "...\n", wire.toString(),
+                "Text wire should contain the first event only");
         assertEquals("14 00 00 00                                     # msg-length\n" +
                         "b9 05 65 76 65 6e 74                            # event: (event)\n" +
                         "82 08 00 00 00                                  # sequence\n" +
                         "e3 74 77 6f                                     # two\n" +
                         "e3 74 77 6f                                     # two\n",
-                wire2.bytes().toHexString());
+                wire2.bytes().toHexString(),
+                "Binary output should contain the second event");
         wire2.bytes().releaseLast();
     }
 
     @Test
+    @DisplayName("Static Closeable methods are ignored by writer")
     public void ignoreStatic() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
 
         Closeable writer = wire.methodWriter(Closeable.class);
         checkWriterType(writer);
         Closeable.closeQuietly(writer);
-        assertEquals("", wire.toString());
+        assertEquals("", wire.toString(), "Static Closeable methods should not emit output");
     }
 
     @Test
+    @DisplayName("No-args methods serialise as empty strings")
     public void testNoArgs() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
@@ -149,18 +158,20 @@ public class MethodWriterTest extends WireTestCommon {
         assertEquals("methodOne: \"\"\n" +
                 "...\n" +
                 "methodTwo: \"\"\n" +
-                "...\n", wire.toString());
+                "...\n", wire.toString(),
+                "No-args methods should serialize as empty strings");
         NoArgs mock = createMock(NoArgs.class);
         mock.methodOne();
         mock.methodTwo();
         EasyMock.replay(mock);
         MethodReader reader = wire.methodReader(mock);
         for (int i = 0; i < 3; i++)
-            assertEquals(i < 2, reader.readOne(), "method reader should read exactly 2 method calls");
+            assertEquals(i < 2, reader.readOne(), "method reader should read exactly 2 method calls at index " + i);
         verify(mock);
     }
 
     @Test
+    @DisplayName("Update interceptor captures method argument text")
     public void testUpdateListener() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
@@ -175,13 +186,15 @@ public class MethodWriterTest extends WireTestCommon {
 
         String expected = "hello world";
         instance.method(expected);
-        assertEquals(expected, value.toString());
+        assertEquals(expected, value.toString(),
+                "Update interceptor should capture the argument text");
 
         assertTrue(wire.toString().startsWith("method: hello world\n" +
-                "...\n"));
+                "...\n"), "Wire output should start with update-intercepted call");
     }
 
     @Test
+    @DisplayName("Update interceptor suppresses writes when returning false")
     public void testUpdateListenerCheckUpdateInterceptorReturnValue() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
@@ -189,10 +202,12 @@ public class MethodWriterTest extends WireTestCommon {
         checkWriterType(instance);
         instance.method(" this should not be written because the return value above is false");
 
-        assertEquals("", wire.toString());
+        assertEquals("", wire.toString(),
+                "Update interceptor should suppress writes when returning false");
     }
 
     @Test
+    @DisplayName("Micro timestamp arguments serialise with expected format")
     public void testMicroTS() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
@@ -202,21 +217,24 @@ public class MethodWriterTest extends WireTestCommon {
         long now = 1532251709775811L;
         MicroTS microTS = new MicroTS();
         microTS.timeUS = now;
+        assertEquals(now, microTS.timeUS, "MicroTS timeUS should match assigned value");
         writer.microTS(microTS);
         assertEquals("microTS: {\n" +
                 "  timeUS: 2018-07-22T09:28:29.775811\n" +
                 "}\n" +
-                "...\n", wire.toString());
+                "...\n", wire.toString(),
+                "MicroTimestamp should serialize in expected format");
         HasMicroTS mock = createMock(HasMicroTS.class);
         MethodReader reader = wire.methodReader(mock);
         mock.microTS(microTS);
         replay(mock);
         for (int i = 0; i < 2; i++)
-            assertEquals(i < 1, reader.readOne());
+            assertEquals(i < 1, reader.readOne(), "MethodReader should read a single microTS call at index " + i);
         verify(mock);
     }
 
     @Test
+    @DisplayName("Primitive arguments round-trip via method writer")
     public void testPrimitives() {
         assertTrue(doTestPrimitives(false), "primitive arguments should survive method writer serialization round-trip");
     }
@@ -239,18 +257,20 @@ public class MethodWriterTest extends WireTestCommon {
                 "  \"8\",\n" +
                 "  \"9\"\n" +
                 "]\n" +
-                "...\n", wire.toString());
+                "...\n", wire.toString(),
+                "Primitive arguments should serialize in order");
         Args mock = createMock(Args.class);
         mock.primitives(true, (byte) 1, (short) 2, 3, 4, '5', 6, 7, "8", "9");
         EasyMock.replay(mock);
         MethodReader reader = wire.methodReader(mock);
         for (int i = 0; i < 2; i++)
-            assertEquals(i < 1, reader.readOne(), "method reader should read exactly 1 primitives call");
+            assertEquals(i < 1, reader.readOne(), "method reader should read exactly 1 primitives call at index " + i);
         verify(mock);
         return true;
     }
 
     @Test
+    @DisplayName("Marshalling exceptions roll back partial writes")
     public void testExceptionInMarshallingRollsBack() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
@@ -265,6 +285,7 @@ public class MethodWriterTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Multiple interface inheritance resolves ignore method")
     public void testMultipleImplsInheritBoth() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
@@ -272,8 +293,9 @@ public class MethodWriterTest extends WireTestCommon {
         checkWriterType(instance);
     }
 
-    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/274")
     @Test
+    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/274")
+    @DisplayName("Multiple interface return values are unsupported")
     public void testMultipleImplsReturnValues() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
@@ -282,6 +304,7 @@ public class MethodWriterTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Return value workaround uses inherited interfaces")
     public void testMultipleImplsReturnValuesWorkAround() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
@@ -290,7 +313,8 @@ public class MethodWriterTest extends WireTestCommon {
     }
 
     void checkWriterType(Object writer) {
-        assertFalse(Proxy.isProxyClass(writer.getClass()));
+        assertFalse(Proxy.isProxyClass(writer.getClass()),
+                "Writer should be generated rather than a proxy");
     }
 
     @FunctionalInterface

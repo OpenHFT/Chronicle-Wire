@@ -7,6 +7,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.Closeable;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -21,10 +22,12 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 public class WireResetTest extends WireTestCommon {
     @BeforeEach
     public void hasDirect() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory is required for reset tests");
     }
 
     @Test
+    @DisplayName("Reset keeps event open after reset")
     //https://github.com/OpenHFT/Chronicle-Wire/issues/225
     public void test() {
         Event event = new Event();
@@ -35,6 +38,7 @@ public class WireResetTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Reset keeps AbstractCloseable event open after reset")
     //https://github.com/OpenHFT/Chronicle-Wire/issues/225
     public void testEventAbstractCloseable() {
         try (EventAbstractCloseable event = new EventAbstractCloseable()) {
@@ -46,6 +50,7 @@ public class WireResetTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Deep reset clears nested fields safely")
     //https://github.com/OpenHFT/Chronicle-Wire/issues/732
     public void testDeepReset() {
         Event event1 = new Event();
@@ -92,9 +97,10 @@ public class WireResetTest extends WireTestCommon {
     }
 
     /**
-     * Reproduction of <a href="https://github.com/OpenHFT/Chronicle-Wire/issues/745">this issue</a>
+     * Reproduction of issue 745 with LocalDate fields.
      */
     @Test
+    @DisplayName("Deep reset clears LocalDate fields safely")
     public void canDeepResetOnDtosContainingLocalDates() {
         Event e = new Event();
         e.someDate = LocalDate.now();

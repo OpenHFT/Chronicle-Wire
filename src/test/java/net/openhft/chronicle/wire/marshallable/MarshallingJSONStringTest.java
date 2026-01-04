@@ -9,6 +9,7 @@ import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,6 +29,7 @@ public class MarshallingJSONStringTest implements Marshallable {
     }
 
     @Test
+    @DisplayName("JSON content should remain without type prefix")
     public void testNoPrefixAddedToJson() {
 
         String configJson = "!net.openhft.chronicle.wire.marshallable.MarshallingJSONStringTest {\n" +
@@ -46,6 +48,6 @@ public class MarshallingJSONStringTest implements Marshallable {
                 "  }";
 
         MarshallingJSONStringTest read = Marshallable.fromString(configJson);
-        assertEquals(expectedJson, read.configAsJSON);
+        assertEquals(expectedJson, read.configAsJSON, "JSON content should be preserved without a type prefix");
     }
 }

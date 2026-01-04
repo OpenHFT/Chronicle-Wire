@@ -8,6 +8,7 @@ import net.openhft.chronicle.bytes.Invocation;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -34,10 +35,11 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      * the generated method reader.
      */
     @Test
+    @DisplayName("Generated reader supports MethodReaderInterceptorReturns interceptors correctly")
     public void testInterceptorSupportedInGeneratedCode() {
         CountDownLatch readerCreateLatch = new CountDownLatch(1);
         doTestInterceptorSupportedInGeneratedCode(readerCreateLatch, false);
-        assertEquals(0, readerCreateLatch.getCount(), "reader create latch released");
+        assertEquals(0, readerCreateLatch.getCount(), "single reader creation should release the latch");
     }
 
     /**
@@ -45,6 +47,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      * are created at the same time.
      */
     @Test
+    @DisplayName("Intercepting reader creation is safe under concurrency")
     public void testInterceptingReaderConcurrentCreation() throws ExecutionException, InterruptedException, TimeoutException {
         int concurrencyLevel = 5;
 
@@ -66,7 +69,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
             for (Future<?> future : futureList) {
                 future.get(10, TimeUnit.SECONDS);
             }
-            assertEquals(0, readerCreateLatch.getCount(), "reader create latch released");
+            assertEquals(0, readerCreateLatch.getCount(), "concurrent reader creation should release every latch");
         } finally {
             executor.shutdownNow();
         }
@@ -76,8 +79,6 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
     private void doTestInterceptorSupportedInGeneratedCode(CountDownLatch readerCreateLatch, boolean addDummyInstance) {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
-
-        InterceptedInterface writer = wire.methodWriter(InterceptedInterface.class);
 
         final StringBuilder interceptedMethodNames = new StringBuilder();
 
@@ -118,31 +119,33 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
                     .build(impl);
         }
 
-        assertFalse(reader instanceof VanillaMethodReader);
-
+        assertFalse(reader instanceof VanillaMethodReader,
+                "Intercepting reader should use generated code");
+        InterceptedInterface writer = wire.methodWriter(InterceptedInterface.class);
         writer.noArgs();
         writer.oneArg(2);
         writer.twoArgs("dd", 3).end();
 
         // Reading from the wire and asserting that all reads are successful
-        assertTrue(reader.readOne());
-        assertTrue(reader.readOne());
-        assertTrue(reader.readOne());
+        assertTrue(reader.readOne(), "Generated interceptor reader should process noArgs call");
+        assertTrue(reader.readOne(), "Generated interceptor reader should process oneArg call");
+        assertTrue(reader.readOne(), "Generated interceptor reader should process twoArgs call");
 
         // If the interceptor encounters any error, the test fails
         if (interceptorError.get() != null)
             fail("Failed to execute interceptor code: " + interceptorError.get().toString());
 
         // Asserting that the intercepted methods are as expected
-        assertEquals("noArgs[]*oneArg[2]*twoArgs[dd, 3]*end[]*", interceptedMethodNames.toString());
+        assertEquals("noArgs[]*oneArg[2]*twoArgs[dd, 3]*end[]*", interceptedMethodNames.toString(),
+                "Intercepted methods should match call order");
     }
 
     /**
-     * Covers {@link GeneratingMethodReaderInterceptorReturns}, which allows intervening in method reader's logic
-     * without resorting to reflective calls.
+     * Covers {@link GeneratingMethodReaderInterceptorReturns} by verifying aggregation without reflection.
      */
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
+    @DisplayName("Generating interceptor aggregates call information safely")
     public void testGeneratingAggregatingInfoInterceptor() {
         // Create a wire with a buffer of size 128 and padding enabled
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
@@ -163,7 +166,8 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
                 .build(impl);
 
         // Assert that the reader is not of type VanillaMethodReader
-        assertFalse(reader instanceof VanillaMethodReader);
+        assertFalse(reader instanceof VanillaMethodReader,
+                "Aggregating interceptor should use the generated reader");
 
         // Write sample data to the writer
         writer.noArgs();
@@ -171,20 +175,21 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
         writer.twoArgs("dd", 3).end();
 
         // Read the data written above
-        assertTrue(reader.readOne());
-        assertTrue(reader.readOne());
-        assertTrue(reader.readOne());
+        assertTrue(reader.readOne(), "Aggregating interceptor reader should process noArgs call");
+        assertTrue(reader.readOne(), "Aggregating interceptor reader should process oneArg call");
+        assertTrue(reader.readOne(), "Aggregating interceptor reader should process twoArgs call");
 
         // Verify the aggregated information from the interceptor
-        assertEquals("someCall*twoArgs[dd, 3]*someCall*", impl.info());
+        assertEquals("someCall*twoArgs[dd, 3]*someCall*", impl.info(),
+                "Aggregated info should include skipped and processed calls");
     }
 
     /**
-     * Covers {@link GeneratingMethodReaderInterceptorReturns}, which allows intervening in method reader's logic
-     * without resorting to reflective calls.
+     * Covers {@link GeneratingMethodReaderInterceptorReturns} by verifying null filtering without reflection.
      */
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
+    @DisplayName("Generating interceptor skips null arguments in wire")
     public void testGeneratingSkippingInterceptor() {
         // Create a wire with a buffer of size 128 and padding enabled
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
@@ -205,19 +210,21 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
                 .build(impl);
 
         // Assert that the reader is not of type VanillaMethodReader
-        assertFalse(reader instanceof VanillaMethodReader);
+        assertFalse(reader instanceof VanillaMethodReader,
+                "Skipping interceptor should use the generated reader");
 
         // Write sample data to the writer, including one with a null argument
         writer.twoArgs("dd", 3).end();
         writer.twoArgs(null, 4).end();
 
         // Read the data written above
-        assertTrue(reader.readOne());
-        assertTrue(reader.readOne());
+        assertTrue(reader.readOne(), "Reader should process first twoArgs call");
+        assertTrue(reader.readOne(), "Reader should process second twoArgs call");
 
         // Assert that the call with a null argument was skipped
         // as per the logic of SkippingInterceptor
-        assertEquals("twoArgs[dd, 3]*", impl.info());
+        assertEquals("twoArgs[dd, 3]*", impl.info(),
+                "Skipping interceptor should omit null argument call");
     }
 
     // Interfaces defining the behavior for the test

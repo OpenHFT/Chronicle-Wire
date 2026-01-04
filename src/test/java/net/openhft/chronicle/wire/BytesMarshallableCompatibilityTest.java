@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -16,6 +17,7 @@ public final class BytesMarshallableCompatibilityTest extends WireTestCommon {
 
     // Test the serialization and deserialization of the Container object using BytesMarshallable
     @Test
+    @DisplayName("Serialises BytesMarshallable into raw bytes correctly")
     public void shouldSerialiseToBytes() {
 
         // Instantiate and initialize a Container object
@@ -27,7 +29,7 @@ public final class BytesMarshallableCompatibilityTest extends WireTestCommon {
         // Create an elastic heap byte buffer to serialize the Container object into
         final Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
 
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip bytes marshallable test");
         // Serialize the Container object into the bytes buffer
         container.writeMarshallable(bytes);
 
@@ -36,9 +38,9 @@ public final class BytesMarshallableCompatibilityTest extends WireTestCommon {
         copy.readMarshallable(bytes);
 
         // Validate that the original and copied containers have identical properties
-        assertEquals(container.number, copy.number);
-        assertEquals(container.label, copy.label);
-        assertEquals(container.truth, copy.truth);
+        assertEquals(container.number, copy.number, "Expected number to round-trip");
+        assertEquals(container.label, copy.label, "Expected label to round-trip");
+        assertEquals(container.truth, copy.truth, "Expected truth flag to round-trip");
     }
 
     // Private static class representing a container, extending the capabilities provided by BytesInBinaryMarshallable

@@ -37,7 +37,7 @@ final class WireAbcTestSupport {
                         "  D: bye\n" +
                         "}\n", wire.getValueIn()
                         .object(abcd, TextWireTest.ABCD.class)
-                        .toString());
+                        .toString(), "ABCD round trip should preserve field values at pass " + i);
             }
         } finally {
             abcd.releaseAll();
@@ -68,12 +68,12 @@ final class WireAbcTestSupport {
                     "  C: hi\n" +
                     "}\n", wire.getValueIn()
                     .object(abc, TextWireTest.ABC.class)
-                    .toString(), input);
+                    .toString(), "ABC round trip should match input order: " + input);
             assertEquals(expectedComments,
                     Arrays.stream(sb.toString().split("\n"))
                             .filter(s -> !s.isEmpty())
                             .sorted(Collections.reverseOrder())
-                            .collect(toList()));
+                            .collect(toList()), "Comment capture should match expected comment list for input " + input);
             sb.setLength(0);
         }
     }

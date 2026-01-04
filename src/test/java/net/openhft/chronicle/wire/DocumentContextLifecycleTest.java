@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DocumentContextLifecycleTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Reads and exhausts documents in binary wire")
     public void binaryReadWriteAndExhaust() {
         Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap(256));
         // write two docs
@@ -25,21 +27,24 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
         }
         // read both
         try (DocumentContext dc = w.readingDocument()) {
-            assertTrue(dc.isPresent());
-            assertEquals(1, dc.wire().read("a").int32());
+            assertTrue(dc.isPresent(), "first binary document should be present");
+            assertEquals(1, dc.wire().read("a").int32(),
+                    "first binary document should contain a=1");
         }
         try (DocumentContext dc = w.readingDocument()) {
-            assertTrue(dc.isPresent());
-            assertEquals("two", dc.wire().read("b").text());
+            assertTrue(dc.isPresent(), "second binary document should be present");
+            assertEquals("two", dc.wire().read("b").text(),
+                    "second binary document should contain b=two");
         }
         // exhausted
         try (DocumentContext dc = w.readingDocument()) {
-            assertFalse(dc.isPresent());
+            assertFalse(dc.isPresent(), "binary document reader should be exhausted");
         }
-        assertTrue(w.writingIsComplete());
+        assertTrue(w.writingIsComplete(), "binary writing should be complete after reads");
     }
 
     @Test
+    @DisplayName("Reads and exhausts documents in text wire")
     public void textUseTextDocumentsLifecycle() {
         Wire w = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
         try (DocumentContext dc = w.writingDocument()) {
@@ -50,20 +55,23 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
         }
         // read two then assert exhausted
         try (DocumentContext dc = w.readingDocument()) {
-            assertTrue(dc.isPresent());
-            assertEquals(11L, dc.wire().read("x").int64());
+            assertTrue(dc.isPresent(), "first text document should be present");
+            assertEquals(11L, dc.wire().read("x").int64(),
+                    "first text document should contain x=11");
         }
         try (DocumentContext dc = w.readingDocument()) {
-            assertTrue(dc.isPresent());
-            assertEquals("yy", dc.wire().read("y").text());
+            assertTrue(dc.isPresent(), "second text document should be present");
+            assertEquals("yy", dc.wire().read("y").text(),
+                    "second text document should contain y=yy");
         }
         try (DocumentContext dc = w.readingDocument()) {
-            assertFalse(dc.isPresent());
+            assertFalse(dc.isPresent(), "text document reader should be exhausted");
         }
-        assertTrue(w.writingIsComplete());
+        assertTrue(w.writingIsComplete(), "text writing should be complete after reads");
     }
 
     @Test
+    @DisplayName("Rollback should keep document available for reread")
     public void rollbackKeepsDocumentAvailableForNextRead() {
         Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap(256));
         try (DocumentContext dc = w.writingDocument()) {
@@ -71,17 +79,18 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
         }
 
         try (DocumentContext dc = w.readingDocument()) {
-            assertTrue(dc.isPresent());
+            assertTrue(dc.isPresent(), "document should be present before rollback");
             dc.rollbackOnClose();
         }
 
         try (DocumentContext dc = w.readingDocument()) {
             assertTrue(dc.isPresent(), "document should still be present after rollback");
-            assertEquals("value", dc.wire().read("item").text());
+            assertEquals("value", dc.wire().read("item").text(),
+                    "rolled back document should be readable again");
         }
 
         try (DocumentContext dc = w.readingDocument()) {
-            assertFalse(dc.isPresent());
+            assertFalse(dc.isPresent(), "document reader should be exhausted after replay");
         }
         w.bytes().releaseLast();
     }

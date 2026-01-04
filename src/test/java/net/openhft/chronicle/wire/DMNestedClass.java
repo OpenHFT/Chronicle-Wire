@@ -30,4 +30,12 @@ class DMNestedClass extends SelfDescribingMarshallable {
         this.str = str;  // Assign the provided string to the instance variable 'str'.
         this.num = num;  // Assign the provided integer to the instance variable 'num'.
     }
+
+    String getStr() {
+        return str;
+    }
+
+    int getNum() {
+        return num;
+    }
 }

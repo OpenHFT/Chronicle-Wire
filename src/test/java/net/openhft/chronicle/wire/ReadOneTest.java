@@ -6,7 +6,9 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
@@ -19,18 +21,20 @@ public class ReadOneTest extends WireTestCommon {
 
     // Basic test for reading without scanning the wire
     @Test
+    @DisplayName("ReadOne returns snapshot without scanning enabled")
     public void test() throws InterruptedException {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for readOne snapshot test");
 
-        assertEquals("two", doTest(false), "snapshot");
+        assertEquals("two", doTest(false), "Snapshot should return the latest value without scanning");
     }
 
     // Test for reading the wire using scanning
     @Test
+    @DisplayName("ReadOne returns snapshot with scanning enabled")
     public void testScanning() throws InterruptedException {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for readOne scanning test");
 
-        assertEquals("two", doTest(true), "snapshot (scanning)");
+        assertEquals("two", doTest(true), "Snapshot should return the latest value with scanning enabled");
     }
 
     // Core testing method that simulates writing to and reading from the Wire
@@ -77,30 +81,30 @@ public class ReadOneTest extends WireTestCommon {
 
         if (!scanning) {
             // 1
-            assertTrue(reader.readOne());
+            assertTrue(reader.readOne(), "Step 1 should read a non-snapshot event");
         }
         // 2
-        assertTrue(reader.readOne());
-        assertNotNull(q[0]);
-        assertEquals("one", q[0].data);
+        assertTrue(reader.readOne(), "Step 2 should read the first snapshot");
+        assertNotNull(q[0], "Snapshot should be populated at step 2");
+        assertEquals("one", q[0].data, "Snapshot payload should be one");
         q[0] = null;
 
         if (!scanning) {
             // 3
-            assertTrue(reader.readOne());
+            assertTrue(reader.readOne(), "Step 3 should read a non-snapshot event");
             // 4
-            assertTrue(reader.readOne());
+            assertTrue(reader.readOne(), "Step 4 should read a non-snapshot event");
         }
         // 5
-        assertTrue(reader.readOne());
-        assertNotNull(q[0]);
-        assertEquals("two", q[0].data);
+        assertTrue(reader.readOne(), "Step 5 should read the second snapshot");
+        assertNotNull(q[0], "Snapshot should be populated at step 5");
+        assertEquals("two", q[0].data, "Snapshot payload should be two");
 
         if (!scanning) {
             // 6
-            assertTrue(reader.readOne());
+            assertTrue(reader.readOne(), "Step 6 should read a non-snapshot event");
         }
-        assertFalse(reader.readOne());
+        assertFalse(reader.readOne(), "Reader should have no more events");
         return q[0].data;
     }
 
@@ -124,6 +128,9 @@ public class ReadOneTest extends WireTestCommon {
     }
 
     // Definition for MyDto class, used for testing reading data from the Wire
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class MyDto extends SelfDescribingMarshallable {
         String data;
     }

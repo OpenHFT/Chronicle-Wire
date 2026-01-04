@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class WiresUtilityTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Binary dump includes written text fields")
     public void dumpsBinaryDocuments() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
@@ -20,10 +22,12 @@ public class WiresUtilityTest extends WireTestCommon {
 
         bytes.readPositionRemaining(0, bytes.writePosition());
         String dump = Wires.fromSizePrefixedBlobs(bytes);
-        assertTrue(dump.contains("msg: hello"));
+        assertTrue(dump.contains("msg: hello"),
+                dump + " should contain msg: hello");
     }
 
     @Test
+    @DisplayName("Binary dump includes written integer fields")
     public void dumpsViaWireIn() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
@@ -33,7 +37,8 @@ public class WiresUtilityTest extends WireTestCommon {
 
         bytes.readPositionRemaining(0, bytes.writePosition());
         String dump = Wires.fromSizePrefixedBlobs(wire.bytes());
-        assertTrue(dump.contains("value: 7"));
+        assertTrue(dump.contains("value: 7"),
+                dump + " should contain value: 7");
     }
 
     // Skipped in this environment due to formatting variance across versions
@@ -50,7 +55,8 @@ public class WiresUtilityTest extends WireTestCommon {
 
         bytes.readPositionRemaining(0, bytes.writePosition());
         String dump = Wires.fromSizePrefixedBlobs(bytes, 0, true);
-        assertTrue(dump.contains("k1: v1"));
+        assertTrue(dump.contains("k1: v1"),
+                dump + " should contain k1: v1");
         // assertion on k2 omitted
     }
 }

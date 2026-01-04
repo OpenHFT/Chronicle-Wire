@@ -34,7 +34,8 @@ public class MarshallableObj implements Marshallable {
     @Override
     public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
         builder.setLength(0);
-        assertNotNull(wire.getValueIn().textTo(builder));
+        assertNotNull(wire.getValueIn().textTo(builder),
+                "Wire input should provide text for builder");
     }
 
     // Writes the current string value from the builder to the wire

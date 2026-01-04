@@ -5,13 +5,15 @@ package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireTypeConverter;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class WireTypeConverterWithTuplesTest extends WireTestCommon {
+class WireTypeConverterWithTuplesTest extends WireTestCommon {
     @Test
-    public void fromYamlToJsonAndBackToYaml() {
+    @DisplayName("YAML to JSON round-trip should preserve tuples")
+    void fromYamlToJsonAndBackToYaml() {
         WireTypeConverter wireTypeConverter = new WireTypeConverter();
         String originalYaml = "!ChronicleServicesCfg {\n" +
                 "  queues: {\n" +
@@ -80,7 +82,8 @@ public class WireTypeConverterWithTuplesTest extends WireTestCommon {
                 "\"pretouchMS\":100,\n" +
                 "\"serviceConfig\":{\"param\":{\"@CustomClass1\":{\"param2\":\"value\"}}}}}}}";
         assertEquals(expected,
-                json.toString().replace(",", ",\n"));
+                json.toString().replace(",", ",\n"),
+                "YAML to JSON conversion should match expected output");
 
         CharSequence jsonToYaml = wireTypeConverter.jsonToYaml(json.toString());
 
@@ -95,6 +98,7 @@ public class WireTypeConverterWithTuplesTest extends WireTestCommon {
                 "  services: {\n" +
                 "    sender-one: { inputs: [ in ], output: sender-one-out, startFromStrategy: $property.name, affinityCpu: any, pretouchMS: 100, serviceConfig: { param: !CustomClass1 { param2: value } } }\n" +
                 "  }\n" +
-                "}\n", jsonToYaml.toString());
+                "}\n", jsonToYaml.toString(),
+                "JSON to YAML conversion should match expected output");
     }
 }

@@ -25,11 +25,15 @@ final class WireBytesTestSupport {
     }
 
     static void assertBytesRoundTrip(Wire wire, byte[] allBytes, Bytes<?> target) {
-        wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
-                .read().bytes(b -> assertEquals("Hello", b.toString()))
-                .read().bytes(b -> assertEquals("quotable, text", b.toString()))
+        wire.read().bytes(b -> assertEquals(0, b.readRemaining(),
+                        "Empty bytes field should have zero remaining"))
+                .read().bytes(b -> assertEquals("Hello", b.toString(),
+                        "Hello bytes should decode to Hello string"))
+                .read().bytes(b -> assertEquals("quotable, text", b.toString(),
+                        "Quoted text bytes should decode to string"))
                 .read().bytes(target);
-        assertEquals(Bytes.wrapForRead(allBytes), target);
+        assertEquals(Bytes.wrapForRead(allBytes), target,
+                "Target bytes should match original payload");
     }
 
     static BytesStore<?, ?> helloBytes() {

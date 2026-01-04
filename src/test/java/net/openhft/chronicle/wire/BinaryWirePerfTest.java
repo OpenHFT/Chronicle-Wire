@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -13,9 +14,8 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Disabled("Long running test")
+@Disabled("Long running performance test for wire serialisation")
 public class BinaryWirePerfTest extends WireTestCommon {
 
     // Define test parameters
@@ -62,6 +62,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
     // Performance test for Wire serialization and deserialization
     @MethodSource("combinations")
     @ParameterizedTest
+    @DisplayName("Measures wire performance for marshallable types")
     public void wirePerf(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         initBinaryWirePerfTest(testId, fixed, numericField, fieldLess);
         @NotNull Wire wire = createBytes();
@@ -80,7 +81,6 @@ public class BinaryWirePerfTest extends WireTestCommon {
             b.text.append("Hello World");
             wirePerf0(wire, b, new MyTypes(), t);
         }
-        assertTrue(true);
     }
 
     private void wirePerf0(@NotNull Wire wire, @NotNull MyTypes a, @NotNull MyTypes b, int t) {
@@ -100,6 +100,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
     // Performance test for serializing and deserializing integers with Wire
     @MethodSource("combinations")
     @ParameterizedTest
+    @DisplayName("Measures wire performance for integer fields")
     public void wirePerfInts(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         initBinaryWirePerfTest(testId, fixed, numericField, fieldLess);
         @NotNull Wire wire = createBytes();
@@ -107,7 +108,6 @@ public class BinaryWirePerfTest extends WireTestCommon {
         for (int t = 0; t < 3; t++) {
             wirePerf0(wire, a, new MyType2(), t);
         }
-        assertTrue(true);
     }
 
     // Common method to test serialization and deserialization for type MyType2
@@ -121,6 +121,10 @@ public class BinaryWirePerfTest extends WireTestCommon {
             a.writeMarshallable(wire);
 
             b.readMarshallable(wire);
+        }
+        int lastX = b.x;
+        if (lastX != 0) {
+            throw new AssertionError("Expected x to remain 0, got " + lastX);
         }
         long rate = (System.nanoTime() - start) / runs;
         System.out.printf("(ints) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().readPosition());
@@ -150,7 +154,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
                     .write(Fields.U).int32(u)
                     .write(Fields.V).int32(v)
                     .write(Fields.W).int32(w)
-                    .write(Fields.X).int32(v);
+                    .write(Fields.X).int32(x);
         }
 
         // Read this object's fields from the provided Wire

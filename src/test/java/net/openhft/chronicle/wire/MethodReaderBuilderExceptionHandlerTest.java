@@ -10,6 +10,7 @@ import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import net.openhft.chronicle.core.util.IgnoresEverything;
 import net.openhft.chronicle.core.util.Mocker;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
@@ -41,6 +42,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
 
     // Test where nothing is expected to happen, using non-scanning method
     @Test
+    @DisplayName("Non-scanning reader ignores unknown methods safely")
     public void testNothing() {
         assertEquals("# true\n" +
                         "# true\n" +
@@ -48,18 +50,20 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "# true\n" +
                         "# true\n" +
                         "# true\n", doTest(ExceptionHandler.ignoresEverything(), IgnoresEverything.class, false),
-                "nothing (scanning=false)");
+                "Non-scanning reader should report every entry as read");
     }
 
     // Test where nothing is expected to happen, using scanning method
     @Test
+    @DisplayName("Scanning reader stops at unknown methods")
     public void testNothingScanning() {
         assertEquals("# false\n", doTest(ExceptionHandler.ignoresEverything(), IgnoresEverything.class, true),
-                "nothing (scanning=true)");
+                "Scanning reader should stop at the first unmatched entry");
     }
 
     // Test focusing on the 'a' type message, using non-scanning method
     @Test
+    @DisplayName("Non-scanning captures a and skips others")
     public void testA() {
         assertEquals("a[a1]\n" +
                         "# true\n" +
@@ -69,22 +73,24 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "# true\n" +
                         "# true\n" +
                         "# true\n", doTest(ExceptionHandler.ignoresEverything(), IA.class, false),
-                "a (scanning=false)");
+                "Non-scanning reader should capture a entries and skip others");
     }
 
     // Test focusing on the 'a' type message, using scanning method
     @Test
+    @DisplayName("Scanning captures a and flags non-matches")
     public void testAScanning() {
         assertEquals("a[a1]\n" +
                         "# true\n" +
                         "a[a2]\n" +
                         "# true\n" +
                         "# false\n", doTest(ExceptionHandler.ignoresEverything(), IA.class, true),
-                "a (scanning=true)");
+                "Scanning reader should return false after the first non-match");
     }
 
     // Test focusing on both 'b' and 'c' type messages using non-scanning method
     @Test
+    @DisplayName("Non-scanning captures b and c while skipping a")
     public void testBC() {
         assertEquals("# true\n" +
                         "b[b1]\n" +
@@ -96,11 +102,12 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "# true\n" +
                         "c[c2]\n" +
                         "# true\n", doTest(ExceptionHandler.ignoresEverything(), IBC.class, false),
-                "bc (scanning=false)");
+                "Non-scanning reader should capture b and c entries only");
     }
 
     // Test focusing on both 'b' and 'c' type messages using scanning method
     @Test
+    @DisplayName("Scanning captures b and c only")
     public void testBCScanning() {
         assertEquals("b[b1]\n" +
                         "# true\n" +
@@ -110,11 +117,12 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "# true\n" +
                         "c[c2]\n" +
                         "# true\n", doTest(ExceptionHandler.ignoresEverything(), IBC.class, true),
-                "bc (scanning=true)");
+                "Scanning reader should capture b and c entries in order");
     }
 
     // Test focusing on 'b' and 'c' type messages using non-scanning method, while expecting a warning for the 'a' type message
     @Test
+    @DisplayName("Non-scanning warns on a and captures b/c")
     public void testBCWarn() {
         expectException("Unknown method-name='a'");
         assertEquals("# true\n" +
@@ -127,11 +135,12 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "# true\n" +
                         "c[c2]\n" +
                         "# true\n", doTest(Jvm.warn(), IBC.class, false),
-                "bc warn (scanning=false)");
+                "Non-scanning reader should warn on a and continue with b/c");
     }
 
     // Test focusing on 'b' and 'c' type messages using scanning method, while expecting a warning for the 'a' type message
     @Test
+    @DisplayName("Scanning warns on a and captures b/c")
     public void testBCWarnScanning() {
         expectException("Unknown method-name='a'");
         assertEquals("b[b1]\n" +
@@ -142,7 +151,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
                         "# true\n" +
                         "c[c2]\n" +
                         "# true\n", doTest(Jvm.warn(), IBC.class, true),
-                "bc warn (scanning=true)");
+                "Scanning reader should warn on a and continue with b/c");
     }
 
     // A helper method for performing tests:

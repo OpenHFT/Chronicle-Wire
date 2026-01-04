@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire.domestic.streaming;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.domestic.stream.Streams;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -21,32 +22,36 @@ import static org.junit.jupiter.api.Assertions.*;
 class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @Test
+    @DisplayName("Streams.of reads a single text message")
     void streamTextMessage() {
         MarshallableIn tailer = createThenValueOuts(a -> a.writeString("Hello"));
 
         Stream<String> stream = Streams.of(tailer, (w, index) -> w.getValueIn().text());
-        assertFalse(stream.isParallel());
+        assertFalse(stream.isParallel(), "Stream should be sequential");
         List<String> actualContent = stream.collect(toList());
-        assertEquals(Collections.singletonList("Hello"), actualContent);
+        assertEquals(Collections.singletonList("Hello"), actualContent,
+                "Stream should expose the written message");
     }
 
     @Test
+    @DisplayName("Iterator should report an empty stream state")
     void iteratorEmpty() {
         Wire tailer = CreateUtil.create();
 
         Iterator<String> iterator = Streams.iterator(tailer, (wire, index) -> "A");
-        assertFalse(iterator.hasNext());
-        assertFalse(iterator.hasNext());
+        assertFalse(iterator.hasNext(), "Iterator should report empty stream on first check");
+        assertFalse(iterator.hasNext(), "Iterator should remain empty on second check");
     }
 
     @Test
+    @DisplayName("Iterator reads a single text message")
     void iteratorTextMessage() {
         MarshallableIn tailer = createThenValueOuts(a -> a.writeString("Hello"));
         Iterator<String> iterator = Streams.iterator(tailer, (wire, index) -> wire.getValueIn().text());
-        assertTrue(iterator.hasNext());
+        assertTrue(iterator.hasNext(), "Iterator should expose the first value");
         // Make sure another call does not change the state
-        assertTrue(iterator.hasNext());
-        assertEquals("Hello", iterator.next());
-        assertFalse(iterator.hasNext());
+        assertTrue(iterator.hasNext(), "Repeated hasNext should be stable");
+        assertEquals("Hello", iterator.next(), "Iterator should return the written message");
+        assertFalse(iterator.hasNext(), "Iterator should be exhausted");
     }
 }

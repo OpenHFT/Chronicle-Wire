@@ -6,9 +6,12 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -19,6 +22,9 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"deprecation", "removal"})
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 public class YamlSpecificationTextWireTest extends WireTestCommon {
 
     // Holds the input data for each test case
@@ -42,7 +48,8 @@ public class YamlSpecificationTextWireTest extends WireTestCommon {
 
     // Test method to decode YAML as TextWire and validate it
     @MethodSource("tests")
-    @ParameterizedTest(name = "case={0}")
+    @ParameterizedTest(name = "YAML text spec case {0} should round trip")
+    @DisplayName("YAML specification text wire round trip")
     public void decodeAs(String input) throws IOException {
         initYamlSpecificationTextWireTest(input);
         // Reads the YAML file and converts it to a string
@@ -55,7 +62,8 @@ public class YamlSpecificationTextWireTest extends WireTestCommon {
         byte[] expectedBytes = getBytes(input + ".out.yaml");
         String expected;
         if (expectedBytes != null) {
-            assertEquals(actual, parseWithText(actual));
+            assertEquals(actual, parseWithText(actual),
+                    "Text wire should be idempotent for case: " + input);
 
             expected = new String(expectedBytes, StandardCharsets.UTF_8);
         } else {
@@ -63,7 +71,9 @@ public class YamlSpecificationTextWireTest extends WireTestCommon {
         }
 
         // Validate if the actual output matches the expected output
-        assertEquals(Bytes.wrapForRead(expected.getBytes(StandardCharsets.UTF_8)).toString().replace("\r\n", "\n"), actual, input);
+        assertEquals(Bytes.wrapForRead(expected.getBytes(StandardCharsets.UTF_8)).toString().replace("\r\n", "\n"),
+                actual,
+                "Text wire output should match specification case: " + input);
     }
 
     // Helper method to parse a given YAML string using TextWire
@@ -87,14 +97,17 @@ public class YamlSpecificationTextWireTest extends WireTestCommon {
     // Helper method to read the bytes of a file
     @Nullable
     private byte[] getBytes(String file) throws IOException {
-        // Locate the file resource
-        InputStream is = getClass().getResourceAsStream("/yaml/spec/" + file);
-        if (is == null) return new byte[0];
-
-        // Read the bytes into a byte array
-        int len = is.available();
-        @NotNull byte[] byteArr = new byte[len];
-        is.read(byteArr);
-        return byteArr;
+        try (InputStream is = getClass().getResourceAsStream("/yaml/spec/" + file)) {
+            if (is == null) {
+                return null;
+            }
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buffer = new byte[4096];
+            int read;
+            while ((read = is.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            return out.toByteArray();
+        }
     }
 }

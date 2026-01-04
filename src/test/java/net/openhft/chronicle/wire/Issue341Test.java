@@ -8,6 +8,7 @@ import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -19,14 +20,6 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class Issue341Test extends WireTestCommon {
-
-    // Instance variable to store the current WireType that the test is running for.
-    private WireType wireType;
-
-    // Constructor that initializes the WireType for this test run.
-    public void initIssue341Test(WireType wireType) {
-        this.wireType = wireType;
-    }
 
     // This method specifies the different WireTypes the tests will run for.
     public static Collection<Object[]> data() {
@@ -42,8 +35,8 @@ public class Issue341Test extends WireTestCommon {
     // Test for serializing and deserializing an instance of MyClass using different WireTypes.
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Serialises Instant field across wire types")
     public void instant(WireType wireType) {
-        initIssue341Test(wireType);
         final MyClass source = new MyClass();
         source.instant = Instant.ofEpochMilli(1_000_000_000_000L);
 
@@ -60,17 +53,21 @@ public class Issue341Test extends WireTestCommon {
         final MyClass target = wire.getValueIn().object(source.getClass());
 
         // Verify that the deserialized object matches the original source object.
-        Assertions.assertEquals(source, target);
+        Assertions.assertEquals(source, target,
+                "Instant field should round-trip for wireType=" + wireType);
+        Assertions.assertEquals(source.instant, target.instant,
+                "Instant value should round-trip for wireType=" + wireType);
 
     }
 
     // Test for serializing and deserializing an instance of MyComparableSerializable using different WireTypes.
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Serialises comparable serialisable across wire types")
     public void testComparableSerializable(WireType wireType) {
-        initIssue341Test(wireType);
         // for backward compatibility, this doesn't support types
-        assumeFalse(wireType == WireType.JSON);
+        assumeFalse(wireType == WireType.JSON,
+                "json wire does not support types for Issue341, wireType=" + wireType);
         final MyComparableSerializable source = new MyComparableSerializable("hello");
 
         // Create bytes from HexDumpBytes for serialization.
@@ -86,7 +83,8 @@ public class Issue341Test extends WireTestCommon {
         final MyComparableSerializable target = wire.getValueIn().object(source.getClass());
 
         // Verify that the deserialized object's value matches the original source object's value.
-        Assertions.assertEquals(source.value, target.value);
+        Assertions.assertEquals(source.value, target.value,
+                "comparable serialisable value should round-trip for wireType=" + wireType);
     }
 
     // Class that represents a test object with an Instant property.
@@ -114,6 +112,21 @@ public class Issue341Test extends WireTestCommon {
         @Override
         public int compareTo(@NotNull MyComparableSerializable o) {
             return value.compareTo(o.value);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (!(o instanceof MyComparableSerializable))
+                return false;
+            MyComparableSerializable that = (MyComparableSerializable) o;
+            return value.equals(that.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return value.hashCode();
         }
     }
 }

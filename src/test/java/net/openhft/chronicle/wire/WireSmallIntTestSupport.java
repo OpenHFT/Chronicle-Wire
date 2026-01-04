@@ -85,20 +85,28 @@ final class WireSmallIntTestSupport {
     }
 
     static void expectTextLayout(Wire wire, String expectedSnake, String expectedText) {
-        assertEquals(expectedText, wire.toString());
+        assertEquals(expectedText,
+                wire.toString(),
+                "Text layout should match expected output");
     }
 
     static void expectBinaryDebug(Bytes<?> bytes, String expectedDebug) {
-        assertEquals(expectedDebug, bytes.toDebugString());
+        assertEquals(expectedDebug,
+                bytes.toDebugString(),
+                "Binary debug should match expected output");
     }
 
     private static <T> void readThree(Wire wire, Runnable reader, T holder) {
         for (int expected = 1; expected <= 3; expected++) {
             reader.run();
             if (holder instanceof AtomicInteger) {
-                assertEquals(expected, ((AtomicInteger) holder).get());
+                assertEquals(expected,
+                        ((AtomicInteger) holder).get(),
+                        "Int value should match expected step " + expected);
             } else if (holder instanceof AtomicLong) {
-                assertEquals(expected, ((AtomicLong) holder).get());
+                assertEquals(expected,
+                        ((AtomicLong) holder).get(),
+                        "Long value should match expected step " + expected);
             }
         }
     }

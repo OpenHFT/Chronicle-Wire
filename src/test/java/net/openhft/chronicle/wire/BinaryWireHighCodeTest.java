@@ -3,6 +3,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -16,9 +17,11 @@ public class BinaryWireHighCodeTest extends WireTestCommon {
 
     // Test if the BinaryWireHighCode values are unique and no duplicates exist
     @Test
+    @DisplayName("Ensures BinaryWireHighCode values are unique across all fields")
     public void testUnique() throws IllegalAccessException {
         // Ensure there are no pre-defined values
-        assertEquals(0, BinaryWireHighCode.values().length);
+        assertEquals(0, BinaryWireHighCode.values().length,
+                "Expected no enum values in BinaryWireHighCode");
 
         // Create a set to store the values
         Set<Integer> values = new HashSet<>();
@@ -29,7 +32,8 @@ public class BinaryWireHighCodeTest extends WireTestCommon {
             int value = (Integer) field.get(null);
 
             // Add the value to the set and ensure it's unique (not already present)
-            assertTrue(values.add(value));
+            assertTrue(values.add(value),
+                    "Expected unique BinaryWireHighCode value for field=" + field.getName() + ", value=" + value);
         }
     }
 }

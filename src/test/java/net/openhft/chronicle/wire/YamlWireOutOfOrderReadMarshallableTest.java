@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class YamlWireOutOfOrderReadMarshallableTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Flow mapping preserves manual read order")
     public void flowMappingKeepsManualReadMarshallableInOrder() {
         assertOutOfOrderManualReadMarshallable(
                 flowYaml("c", "b", "a"),
@@ -22,6 +24,7 @@ public class YamlWireOutOfOrderReadMarshallableTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Indented mapping preserves manual read order")
     public void indentedMappingKeepsManualReadMarshallableInOrder() {
         assertOutOfOrderManualReadMarshallable(
                 indentedYaml("c", "b", "a"),
@@ -34,12 +37,12 @@ public class YamlWireOutOfOrderReadMarshallableTest extends WireTestCommon {
             YamlWire wire = new YamlWire(Bytes.from(yaml)).useTextDocuments();
 
             try (DocumentContext dc = wire.readingDocument()) {
-                assertTrue(dc.isPresent());
+                assertTrue(dc.isPresent(), "Document should be present for YAML: " + yaml);
                 OutOfOrderRM dto = new OutOfOrderRM();
                 dc.wire().read("rm").marshallable(dto);
-                assertEquals("aye2", dto.a, "field 'a' should read correctly regardless of field order in YAML");
-                assertEquals("bee2", dto.b, "field 'b' should read correctly regardless of field order in YAML");
-                assertEquals("cee2", dto.c, "field 'c' should read correctly regardless of field order in YAML");
+                assertEquals("aye2", dto.a, "Field 'a' should read correctly for YAML: " + yaml);
+                assertEquals("bee2", dto.b, "Field 'b' should read correctly for YAML: " + yaml);
+                assertEquals("cee2", dto.c, "Field 'c' should read correctly for YAML: " + yaml);
             }
         }
     }

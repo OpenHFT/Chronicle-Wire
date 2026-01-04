@@ -58,7 +58,8 @@ class TimestampLongConverterTest extends WireTestCommon {
     @MethodSource("converters")
     void shouldParseUtcTimestampWithZ(String name, Function<String, LongConverter> factory, TimeUnit unit, long expectedTs, String utcTsString, String melbourneTsString) {
         LongConverter converter = factory.apply("UTC");
-        assertEquals(expectedTs, converter.parse(utcTsString + "Z"));
+        assertEquals(expectedTs, converter.parse(utcTsString + "Z"),
+                "UTC Z suffix should parse for converter " + name);
     }
 
     @DisplayName("Should assume local timezone for timestamps without an offset")
@@ -67,7 +68,8 @@ class TimestampLongConverterTest extends WireTestCommon {
     void shouldAssumeLocalZoneForDateWithNoTimezone(String name, Function<String, LongConverter> factory, TimeUnit unit, long expectedTs, String utcTsString, String melbourneTsString) {
         LongConverter melbourneConverter = factory.apply("Australia/Melbourne");
         // Parsing a string with an explicit offset should be the same as parsing a local time string without one
-        assertEquals(melbourneConverter.parse(melbourneTsString), melbourneConverter.parse("2023-02-15T16:31:49.856123456"));
+        assertEquals(melbourneConverter.parse(melbourneTsString), melbourneConverter.parse("2023-02-15T16:31:49.856123456"),
+                "local zone parsing should match explicit offset for " + name);
     }
 
     @DisplayName("Should correctly format a timestamp to a non-UTC timezone")
@@ -75,7 +77,8 @@ class TimestampLongConverterTest extends WireTestCommon {
     @MethodSource("converters")
     void shouldFormatTimestampToLocalZone(String name, Function<String, LongConverter> factory, TimeUnit unit, long ts, String utcTsString, String melbourneTsString) {
         LongConverter converter = factory.apply("Australia/Melbourne");
-        assertEquals(melbourneTsString, converter.asString(ts));
+        assertEquals(melbourneTsString, converter.asString(ts),
+                "local zone formatting should match Melbourne for " + name);
     }
 
     @DisplayName("Should correctly format a timestamp to UTC (without 'Z' suffix)")
@@ -83,7 +86,8 @@ class TimestampLongConverterTest extends WireTestCommon {
     @MethodSource("converters")
     void shouldFormatTimestampToUtc(String name, Function<String, LongConverter> factory, TimeUnit unit, long ts, String utcTsString, String melbourneTsString) {
         LongConverter converter = factory.apply("UTC");
-        assertEquals(utcTsString, converter.asString(ts));
+        assertEquals(utcTsString, converter.asString(ts),
+                "UTC formatting should match expected string for " + name);
     }
 
     @DisplayName("Should perform a round trip from String -> long -> String")
@@ -92,7 +96,8 @@ class TimestampLongConverterTest extends WireTestCommon {
     void shouldRoundTripFromString(String name, Function<String, LongConverter> factory, TimeUnit unit, long ts, String utcTsString, String melbourneTsString) {
         LongConverter converter = factory.apply("Australia/Melbourne");
         long parsed = converter.parse(melbourneTsString);
-        assertEquals(melbourneTsString, converter.asString(parsed));
+        assertEquals(melbourneTsString, converter.asString(parsed),
+                "string round-trip should preserve formatted value for " + name);
     }
 
     @DisplayName("Should perform a round trip from long -> String -> long")
@@ -101,7 +106,8 @@ class TimestampLongConverterTest extends WireTestCommon {
     void shouldRoundTripFromLong(String name, Function<String, LongConverter> factory, TimeUnit unit, long ts, String utcTsString, String melbourneTsString) {
         LongConverter converter = factory.apply("UTC");
         String asString = converter.asString(ts);
-        assertEquals(ts, converter.parse(asString));
+        assertEquals(ts, converter.parse(asString),
+                "long round-trip should preserve value for " + name);
     }
 
     @DisplayName("Should parse date with slash separator")
@@ -110,16 +116,19 @@ class TimestampLongConverterTest extends WireTestCommon {
     void shouldParseDateWithSlashSeparator(String name, Function<String, LongConverter> factory, TimeUnit unit, long ts, String utcTsString, String melbourneTsString) {
         LongConverter converter = factory.apply("UTC");
         String slashDate = utcTsString.replaceFirst("-", "/").replaceFirst("-", "/");
-        assertEquals(ts, converter.parse(slashDate));
+        assertEquals(ts, converter.parse(slashDate),
+                "slash date should parse to expected value for " + name);
     }
 
-    @DisplayName("Should return 0 for null or empty input")
+    @DisplayName("Returns zero when parsing null or empty timestamp input string")
     @ParameterizedTest(name = "{0}")
     @MethodSource("converters")
     void shouldReturnZeroForNullOrEmptyInput(String name, Function<String, LongConverter> factory, TimeUnit unit, long ts, String utcTsString, String melbourneTsString) {
         LongConverter converter = factory.apply("UTC");
-        assertEquals(0, converter.parse(null));
-        assertEquals(0, converter.parse(""));
+        assertEquals(0, converter.parse(null),
+                "null input should parse to zero for " + name);
+        assertEquals(0, converter.parse(""),
+                "empty input should parse to zero for " + name);
     }
 
     @DisplayName("Should format 0 and negative values as plain numbers")
@@ -127,8 +136,10 @@ class TimestampLongConverterTest extends WireTestCommon {
     @MethodSource("converters")
     void shouldFormatZeroAndNegativeAsNumber(String name, Function<String, LongConverter> factory, TimeUnit unit, long ts, String utcTsString, String melbourneTsString) {
         LongConverter converter = factory.apply("UTC");
-        assertEquals("0", converter.asString(0));
-        assertEquals("-123", converter.asString(-123));
+        assertEquals("0", converter.asString(0),
+                "zero value should format as 0 for " + name);
+        assertEquals("-123", converter.asString(-123),
+                "negative values should format as numbers for " + name);
     }
 
     @DisplayName("Should throw exception for malformed date strings")
@@ -136,7 +147,9 @@ class TimestampLongConverterTest extends WireTestCommon {
     @MethodSource("converters")
     void shouldThrowExceptionForMalformedDate(String name, Function<String, LongConverter> factory, TimeUnit unit, long ts, String utcTsString, String melbourneTsString) {
         LongConverter converter = factory.apply("UTC");
-        assertThrows(DateTimeParseException.class, () -> converter.parse("not-a-valid-date"));
-        assertThrows(DateTimeParseException.class, () -> converter.parse("2023-13-40T00:00:00.000")); // Invalid month/day
+        assertThrows(DateTimeParseException.class, () -> converter.parse("not-a-valid-date"),
+                "malformed date should throw for " + name);
+        assertThrows(DateTimeParseException.class, () -> converter.parse("2023-13-40T00:00:00.000"),
+                "invalid month or day should throw for " + name); // Invalid month/day
     }
 }

@@ -17,19 +17,18 @@ final class WireCommentTestSupport {
 
     static String exerciseReadComments(@NotNull Wire wire) {
         StringBuilder sb = new StringBuilder();
-        try (DocumentContext ignored = wire.writingDocument()) {
-            ignored.isData(); // touch resource to avoid unused warning
-            wire.writeComment("one");
-            wire.writeEventId("dto", 1);
-            wire.writeComment("two");
-            wire.getValueOut().object(new BinaryWireTest.DTO("text"));
-            wire.writeComment("three");
-            wire.commentListener(cs ->
+        try (DocumentContext dc = wire.writingDocument()) {
+            dc.wire().writeComment("one");
+            dc.wire().writeEventId("dto", 1);
+            dc.wire().writeComment("two");
+            dc.wire().getValueOut().object(new BinaryWireTest.DTO("text"));
+            dc.wire().writeComment("three");
+            dc.wire().commentListener(cs ->
                     sb.append(cs).append('\n'));
         }
         MethodReader reader = wire.methodReader((BinaryWireTest.IDTO) dto -> sb.append("dto: ").append(dto).append('\n'));
-        assertTrue(reader.readOne());
-        assertFalse(reader.readOne());
+        assertTrue(reader.readOne(), "First read should consume the queued dto");
+        assertFalse(reader.readOne(), "Second read should find no remaining messages");
         return sb.toString();
     }
 }

@@ -4,8 +4,10 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,6 +16,9 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 public class WireDumperTest extends WireTestCommon {
 
     // Instance variables for the test setup and expected outputs
@@ -51,6 +56,7 @@ public class WireDumperTest extends WireTestCommon {
     // Test case for verifying serialization of content to a wire
     @MethodSource("parameters")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Serialises full document content for each wire type")
     public void shouldSerialiseContent(final String name, final WireType wireType) {
         initWireDumperTest(name, wireType);
         // Writing values to the wire
@@ -59,7 +65,8 @@ public class WireDumperTest extends WireTestCommon {
         wire.writeDocument(3.14D, ValueOut::float64);
 
         final String actual = isText(wire.bytes()) ? wire.toString() : WireDumper.of(wire).asString();
-        assertEquals(expectedContentByType.get(wireType), actual);  // Asserting expected vs actual content
+        assertEquals(expectedContentByType.get(wireType), actual,
+                "Dumped output should match expected content for " + wireType);
     }
 
     // Helper method to check if the given bytes represent text
@@ -76,6 +83,7 @@ public class WireDumperTest extends WireTestCommon {
     // Test case for verifying serialization of partial content to a wire
     @MethodSource("parameters")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Serialises partial document content for each wire type")
     public void shouldSerialisePartialContent(final String name, final WireType wireType) {
         initWireDumperTest(name, wireType);
         // Writing partial content to the wire
@@ -84,7 +92,8 @@ public class WireDumperTest extends WireTestCommon {
         context.wire().getValueOut().text("meow");
 
         final String actual = isText(wire.bytes()) ? wire.toString() : WireDumper.of(wire).asString();
-        assertEquals(expectedPartialContent.get(wireType), actual);  // Asserting expected vs actual partial content
+        assertEquals(expectedPartialContent.get(wireType), actual,
+                "Partial dump should match expected output for " + wireType);
     }
 
     // Overridden method to perform clean up after each test case

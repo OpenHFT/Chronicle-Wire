@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire.recursive;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.WireMarshaller;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
@@ -19,33 +20,37 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class RecursiveTest {
 
     @Test
-    public void referToBaseClass() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @DisplayName("copyTo handles base-class recursion safely")
+    void referToBaseClass() {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for base-class recursion test");
         ReferToBaseClass from = new ReferToBaseClass("hello");
         ReferToBaseClass to = new ReferToBaseClass(null);
         copyTo(from, to);
-        assertEquals(from.name(), to.name(), "recursive: copyTo referToBaseClass");
+        assertEquals(from.name(), to.name(), "copyTo should copy name for base-class recursion");
     }
 
     @Test
-    public void referToSameClass() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @DisplayName("copyTo handles same-class recursion safely")
+    void referToSameClass() {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for same-class recursion test");
         ReferToSameClass from = new ReferToSameClass("test");
         ReferToSameClass to = new ReferToSameClass(null);
         copyTo(from, to);
-        assertEquals(from.name(), to.name(), "recursive: copyTo referToSameClass");
+        assertEquals(from.name(), to.name(), "copyTo should copy name for same-class recursion");
     }
 
     @Test
-    public void marshallerReferToSameClass() {
+    @DisplayName("Marshaller resolves same-class recursion safely")
+    void marshallerReferToSameClass() {
         WireMarshaller<?> marshaller= WireMarshaller.WIRE_MARSHALLER_CL.get(ReferToSameClass.class);
-        assertNotNull(marshaller);
+        assertNotNull(marshaller, "Marshaller should be created for same-class recursion");
     }
 
     @Test
-    public void marshallerReferToBaseClass() {
+    @DisplayName("Marshaller resolves base-class recursion safely")
+    void marshallerReferToBaseClass() {
         WireMarshaller<?> marshaller = WireMarshaller.WIRE_MARSHALLER_CL.get(ReferToBaseClass.class);
-        assertNotNull(marshaller);
+        assertNotNull(marshaller, "Marshaller should be created for base-class recursion");
     }
 
     private void copyTo(Base from, Base to) {

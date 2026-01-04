@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -14,12 +15,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Small end‑to‑end flow using MethodWriter and VanillaMethodReader to
+ * Small end-to-end flow using MethodWriter and VanillaMethodReader to
  * exercise method dispatch and basic argument serialisation.
  */
 public class MethodWriterReaderSimpleIntegrationTest extends WireTestCommon {
 
     @Test
+    @DisplayName("MethodWriter and MethodReader round-trip calls successfully")
     public void roundTrip() {
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap(256));
 
@@ -51,10 +53,10 @@ public class MethodWriterReaderSimpleIntegrationTest extends WireTestCommon {
             continue;
         }
 
-        assertEquals(3, seen.size());
-        assertTrue(seen.get(0).startsWith("one:"));
-        assertTrue(seen.get(1).startsWith("two:"));
-        assertTrue(seen.get(2).startsWith("three:"));
+        assertEquals(3, seen.size(), "Reader should dispatch three calls");
+        assertTrue(seen.get(0).startsWith("one:"), "First call should start with the one: marker");
+        assertTrue(seen.get(1).startsWith("two:"), "Second call should start with the two: marker");
+        assertTrue(seen.get(2).startsWith("three:"), "Third call should start with the three: marker");
     }
 
     interface Echo {

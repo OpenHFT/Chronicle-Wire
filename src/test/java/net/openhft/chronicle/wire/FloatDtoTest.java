@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,6 +14,7 @@ public class FloatDtoTest extends WireTestCommon {
 
     // Test method to serialize and deserialize a 'Value' object using a wire
     @Test
+    @DisplayName("Serialises and reads float dto values")
     public void test() {
         // Creating a 'Value' instance with specific values
         @NotNull final Value value = new Value(99, 2000f);
@@ -29,7 +31,12 @@ public class FloatDtoTest extends WireTestCommon {
         w.read().marshallable(object1);
 
         // Asserting that the original 'value' and the deserialized 'object1' are equal
-        assertEquals(value, object1);
+        assertEquals(value, object1,
+                "marshalled and unmarshalled value should match");
+        assertEquals(99, object1.uiid,
+                "uiid should round-trip for float dto");
+        assertEquals(2000f, object1.myFloat, 0.0f,
+                "myFloat should round-trip for float dto");
         bytes.releaseLast();
     }
 

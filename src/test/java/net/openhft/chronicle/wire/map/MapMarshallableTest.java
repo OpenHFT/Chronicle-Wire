@@ -9,6 +9,7 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.Wires;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -22,10 +23,10 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * Test suite for validating the marshalling capabilities of maps.
  * Inherits from WireTestCommon for common test setup and teardown functionalities.
  */
-public class MapMarshallableTest extends WireTestCommon {
+class MapMarshallableTest extends WireTestCommon {
     @BeforeEach
-    public void hasDirect() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for map marshalling test");
     }
 
     /**
@@ -36,7 +37,8 @@ public class MapMarshallableTest extends WireTestCommon {
      * - Copying values between maps with different implementations.
      */
     @Test
-    public void test() {
+    @DisplayName("Copies map values into DTO and back")
+    void test() {
         // Initialize a LinkedHashMap and populate it with sample data
         @NotNull final Map<String, Object> map = new LinkedHashMap<>();
         map.put("one", 10);
@@ -49,19 +51,21 @@ public class MapMarshallableTest extends WireTestCommon {
         @NotNull MyDto result = Wires.copyTo(map, usingInstance);
 
         // Validate the values copied to the MyDto instance
-        assertEquals(10, result.one);
-        assertEquals(20, result.two);
-        assertEquals(30, result.three);
+        assertEquals(10, result.one, "DTO field one should match map value");
+        assertEquals(20, result.two, "DTO field two should match map value");
+        assertEquals(30, result.three, "DTO field three should match map value");
 
         // Copy values from the MyDto instance back to a new LinkedHashMap
         @NotNull Map<String, Object> map2 = Wires.copyTo(result, new LinkedHashMap<>());
         // Validate the copied values
-        assertEquals("{one=10, two=20, three=30}", map2.toString());
+        assertEquals("{one=10, two=20, three=30}", map2.toString(),
+                "LinkedHashMap copy should preserve insertion order");
 
         // Copy values from the original map to a TreeMap (sorted map)
         @NotNull Map<String, Object> map3 = Wires.copyTo(map, new TreeMap<>());
         // Validate the copied values (the order may change due to the TreeMap sorting)
-        assertEquals("{one=10, three=30, two=20}", map3.toString());
+        assertEquals("{one=10, three=30, two=20}", map3.toString(),
+                "TreeMap copy should reflect sorted order");
     }
 
     /**
@@ -73,5 +77,11 @@ public class MapMarshallableTest extends WireTestCommon {
         int one;
         int two;
         int three;
+
+        MyDto() {
+            one = -1;
+            two = -1;
+            three = -1;
+        }
     }
 }

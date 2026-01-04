@@ -7,10 +7,8 @@ import net.openhft.chronicle.wire.JSONWire;
 import net.openhft.chronicle.wire.Wire;
 
 /**
- * Demonstrates the use of the Wire library's method writer and reader functionality,
- * specifically with the `JSONWire` implementation. The example uses an interface `Printer`
- * to serialize and then deserialize a method call, allowing for efficient and readable
- * serialization of method invocations.
+ * Demonstrates the Wire method writer and reader using {@link JSONWire}.
+ * The example serialises and deserialises a method call for readable output.
  */
 public class WireExamples4 {
 
@@ -19,17 +17,17 @@ public class WireExamples4 {
      */
     interface Printer {
         /**
-         * Print the provided message.
+         * Print the provided message text to the bound output.
          *
-         * @param message Message to be printed.
+         * @param message message to print
          */
         void print(String message);
     }
 
     /**
-     * Entry point for the demonstration.
+     * Entry point for the JSONWire method writer demonstration.
      *
-     * @param args Command-line arguments.
+     * @param args command-line arguments
      */
     public static void main(String[] args) {
         // Initialize a new JSON Wire instance

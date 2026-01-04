@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,8 +15,9 @@ import static org.junit.jupiter.api.Assertions.*;
  * This pattern arises when using Web Gateway.
  */
 public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTestCommon {
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
+    @DisplayName("Definitive interface chain reads in order")
     public void testDefinitive() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
@@ -30,7 +32,7 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
         MethodReader methodReader = wire.methodReader(new DefinitiveIface() {
             @Override
             public void ride(String what) {
-                assertEquals("train", what);
+                assertEquals("train", what, "ride should receive the expected transport");
             }
 
             @Override
@@ -38,26 +40,27 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
                 return result -> {
                     switch (target) {
                         case "Germany":
-                            assertEquals("Buchloe", result);
+                            assertEquals("Buchloe", result, "Destination result should match for Germany");
                             break;
                         case "Belgium":
-                            assertEquals("Liege", result);
+                            assertEquals("Liege", result, "Destination result should match for Belgium");
                             break;
                         default:
-                            fail();
+                            fail("Definitive destination target should be Germany or Belgium, got " + target);
                     }
                 };
             }
         });
 
-        assertTrue(methodReader.readOne(), "definitive: event[0]");
-        assertTrue(methodReader.readOne(), "definitive: event[1]");
-        assertTrue(methodReader.readOne(), "definitive: event[2]");
-        assertFalse(methodReader.readOne(), "definitive: no more events");
+        assertTrue(methodReader.readOne(), "definitive reader should read event 0");
+        assertTrue(methodReader.readOne(), "definitive reader should read event 1");
+        assertTrue(methodReader.readOne(), "definitive reader should read event 2");
+        assertFalse(methodReader.readOne(), "definitive reader should report no more events");
     }
 
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
+    @DisplayName("Indefinite interface chain reads in order")
     public void testIndefinite() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
@@ -72,7 +75,7 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
         MethodReader methodReader = wire.methodReader(new IndefiniteIface() {
             @Override
             public void fly(String what) {
-                assertEquals("plane", what);
+                assertEquals("plane", what, "indefinite fly should receive expected transport value");
             }
 
             @Override
@@ -80,26 +83,27 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
                 return result -> {
                     switch (target) {
                         case "UK":
-                            assertEquals("London", result);
+                            assertEquals("London", result, "Destination result should match for UK");
                             break;
                         case "USA":
-                            assertEquals("Miami", result);
+                            assertEquals("Miami", result, "Destination result should match for USA");
                             break;
                         default:
-                            fail();
+                            fail("Indefinite destination target should be UK or USA, got " + target);
                     }
                 };
             }
         });
 
-        assertTrue(methodReader.readOne(), "indefinite: event[0]");
-        assertTrue(methodReader.readOne(), "indefinite: event[1]");
-        assertTrue(methodReader.readOne(), "indefinite: event[2]");
-        assertFalse(methodReader.readOne(), "indefinite: no more events");
+        assertTrue(methodReader.readOne(), "indefinite reader should read event 0");
+        assertTrue(methodReader.readOne(), "indefinite reader should read event 1");
+        assertTrue(methodReader.readOne(), "indefinite reader should read event 2");
+        assertFalse(methodReader.readOne(), "indefinite reader should report no more events");
     }
 
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
+    @DisplayName("Nested interface chain reads in order")
     public void testNested() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
@@ -115,12 +119,12 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
         MethodReader methodReader = wire.methodReader(new NestedInterface() {
             @Override
             public void move(String where) {
-                assertEquals("T2", where);
+                assertEquals("T2", where, "move should receive the expected location");
             }
 
             @Override
             public void fly(String what) {
-                assertEquals("plane", what);
+                assertEquals("plane", what, "nested fly should receive expected transport value");
             }
 
             @Override
@@ -128,27 +132,27 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
                 return result -> {
                     switch (target) {
                         case "Chile":
-                            assertEquals("Santiago", result);
+                            assertEquals("Santiago", result, "Destination result should match for Chile");
                             break;
                         case "Peru":
-                            assertEquals("Lima", result);
+                            assertEquals("Lima", result, "Destination result should match for Peru");
                             break;
                         default:
-                            fail();
+                            fail("Nested destination target should be Chile or Peru, got " + target);
                     }
                 };
             }
         });
 
-        assertTrue(methodReader.readOne(), "nested: event[0]");
-        assertTrue(methodReader.readOne(), "nested: event[1]");
-        assertTrue(methodReader.readOne(), "nested: event[2]");
-        assertTrue(methodReader.readOne(), "nested: event[3]");
-        assertFalse(methodReader.readOne(), "nested: no more events");
+        assertTrue(methodReader.readOne(), "nested reader should read event 0");
+        assertTrue(methodReader.readOne(), "nested reader should read event 1");
+        assertTrue(methodReader.readOne(), "nested reader should read event 2");
+        assertTrue(methodReader.readOne(), "nested reader should read event 3");
+        assertFalse(methodReader.readOne(), "nested reader should report no more events");
     }
 
     /**
-     * Interface resembling QWG's Transport.
+     * Interface resembling QWG's transport for chained calls.
      */
     interface Transport<T> {
         T destination(String target);

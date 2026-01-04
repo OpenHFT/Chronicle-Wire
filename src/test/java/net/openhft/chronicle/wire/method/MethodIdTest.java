@@ -9,6 +9,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,6 +20,7 @@ class MethodIdTest extends WireTestCommon {
 
     // Test method to verify serialization and deserialization of methods with various IDs
     @Test
+    @DisplayName("MethodId encodes binary and YAML outputs")
     public void methodIdInBinary() {
         // Create a new BinaryWire instance with specified configurations
         Wire wire = new BinaryWire(new HexDumpBytes(), true, true, false, 128, "");
@@ -64,7 +66,8 @@ class MethodIdTest extends WireTestCommon {
                         "10 00 00 00                                     # msg-length\n" +
                         "ba ff ff ff ff 87 00                            # methodIntMin (-2147483648)\n" +
                         "a7 00 00 00 80 ff ff ff ff                      # -2147483648\n",
-                wire.bytes().toHexString());
+                wire.bytes().toHexString(),
+                "Binary output should encode MethodId values and arguments");
 
         // Create a new YAML based Wire for reading
         Wire wire2 = Wire.newYamlWireOnHeap();
@@ -91,8 +94,9 @@ class MethodIdTest extends WireTestCommon {
                         "...\n" +
                         "methodIntMin: -2147483648\n" +
                         "...\n",
-                wire2.toString());
-        assertFalse(reader.readOne());
+                wire2.toString(),
+                "YAML output should include all MethodId events");
+        assertFalse(reader.readOne(), "Reader should have no more events");
     }
 
     // Interface defining various methods with specific method IDs using annotations

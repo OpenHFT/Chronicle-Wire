@@ -213,7 +213,7 @@ public final class MarketData extends SelfDescribingMarshallable implements Vali
      */
     @Override
     public void validate() throws InvalidMarshallableException {
-        ValidatableUtil.requireTrue(symbol > 0, "symbol must be set");
+        ValidatableUtil.requireTrue(symbol > 0, "MarketData symbol must be a positive value");
         ValidatableUtil.requireTrue(last >= 0, "last must be non-negative");
         ValidatableUtil.requireTrue(high > 0, "high must be positive");
         ValidatableUtil.requireTrue(low > 0, "low must be positive");

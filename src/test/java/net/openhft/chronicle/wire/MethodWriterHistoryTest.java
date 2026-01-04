@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.ValueIn;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.bytes.MethodReader.MESSAGE_HISTORY_METHOD_ID;
@@ -30,6 +31,7 @@ public class MethodWriterHistoryTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("History event is prepended when recording is enabled")
     public void historyEventIsPrependedWhenRecordingEnabled() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         Wire wire = new RecordingTextWire(bytes);
@@ -46,17 +48,20 @@ public class MethodWriterHistoryTest extends WireTestCommon {
 
             bytes.readPositionRemaining(0, bytes.writePosition());
             try (DocumentContext dc = wire.readingDocument()) {
-                assertTrue(dc.isPresent());
+                assertTrue(dc.isPresent(), "History document should be present");
                 long historyEventId = dc.wire().readEventNumber();
-                assertEquals(MESSAGE_HISTORY_METHOD_ID, historyEventId);
+                assertEquals(MESSAGE_HISTORY_METHOD_ID, historyEventId,
+                        "History event id should match MESSAGE_HISTORY_METHOD_ID");
                 VanillaMessageHistory captured = dc.wire().getValueIn().object(VanillaMessageHistory.class);
-                assertEquals(suppliedHistory.sources(), captured.sources());
-                assertEquals(suppliedHistory.sourceId(0), captured.sourceId(0));
+                assertEquals(suppliedHistory.sources(), captured.sources(),
+                        "Captured history should have the same source count");
+                assertEquals(suppliedHistory.sourceId(0), captured.sourceId(0),
+                        "Captured history should retain the source id");
 
                 StringBuilder callName = new StringBuilder();
                 ValueIn callValue = dc.wire().readEventName(callName);
-                assertEquals("event", callName.toString());
-                assertEquals("payload", callValue.text());
+                assertEquals("event", callName.toString(), "Event name should follow history");
+                assertEquals("payload", callValue.text(), "Event payload should follow history");
             }
         } finally {
             MessageHistory.clear();

@@ -7,24 +7,27 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.net.URL;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class PerfRegressionTest extends WireTestCommon {
+class PerfRegressionTest extends WireTestCommon {
 
     private final String cpuClass = Jvm.getCpuClass();  // Likely obtaining some CPU class information from a utility class 'Jvm'.
 
-    @Disabled("Long running")
     @Test
-    public void regressionTests() throws Exception {
+    @DisplayName("Runs performance regression benchmarks across byte marshallable cases")
+    @Disabled("Long running performance regression test suite")
+    void regressionTests() throws Exception {
         final URL location = PerfRegressionTest.class.getProtectionDomain().getCodeSource().getLocation();
         File file = new File(location.getFile());
 
@@ -117,7 +120,8 @@ public class PerfRegressionTest extends WireTestCommon {
 
     // Retrieve and return the execution result from the output stream of a given process
     private long getResult(Class<?> aClass, long result, Process process) throws IOException, InterruptedException {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
             // Iterate through each line of the process output
             for (String line; (line = br.readLine()) != null; ) {
                 // If a line starts with "result:", extract and update the result value

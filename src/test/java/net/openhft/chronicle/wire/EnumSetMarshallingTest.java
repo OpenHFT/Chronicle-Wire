@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
- * Tests for marshalling and unmarshalling of EnumSets using Wire.
+ * Verifies EnumSet marshalling and unmarshalling across BinaryWire with expected text forms.
  */
 public class EnumSetMarshallingTest extends WireTestCommon {
 
@@ -42,11 +43,13 @@ public class EnumSetMarshallingTest extends WireTestCommon {
                     "}\n";
 
     /**
-     * Test marshalling an empty set of thread states.
+     * Covers marshalling an empty set of thread states via BinaryWire.
      */
     @Test
+    @DisplayName("BinaryWire should serialise and read empty EnumSet values")
     public void shouldMarshallEmptySet() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip empty EnumSet marshalling");
 
         // Initialization of resources and test data
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -59,20 +62,24 @@ public class EnumSetMarshallingTest extends WireTestCommon {
                 w.write(() -> "key").marshallable(written));
 
         // Validate serialized form and read data back into object
-        assertEquals(EMPTY_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes));
+        assertEquals(EMPTY_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes),
+                "empty EnumSet should serialise to expected binary text form");
         tw.readingDocument().wire().read("key").marshallable(read);
 
         // Ensure original and read data match
-        assertEquals(written.f, read.f);
+        assertEquals(written.f, read.f,
+                "empty EnumSet should round-trip through binary wire");
         bytes.releaseLast();
     }
 
     /**
-     * Test marshalling a full set of thread states.
+     * Covers marshalling a full set of thread states via BinaryWire.
      */
     @Test
+    @DisplayName("BinaryWire should serialise and read full EnumSet")
     public void shouldMarshallFullSet() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip full EnumSet marshalling");
 
         // Initialization of resources and test data
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -86,20 +93,24 @@ public class EnumSetMarshallingTest extends WireTestCommon {
                 w.write(() -> "key").marshallable(written));
 
         // Validate serialized form and read data back into object
-        assertEquals(FULL_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes));
+        assertEquals(FULL_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes),
+                "full EnumSet should serialise to expected binary text form with padding disabled");
         tw.readingDocument().wire().read("key").marshallable(read);
 
         // Ensure original and read data match
-        assertEquals(written.f, read.f);
+        assertEquals(written.f, read.f,
+                "full EnumSet should round-trip through binary wire");
         bytes.releaseLast();
     }
 
     /**
-     * Test unmarshalling into a container that initially has a null value for the EnumSet.
+     * Covers unmarshalling when the EnumSet target is null.
      */
     @Test
+    @DisplayName("BinaryWire should allocate EnumSet when target is null")
     public void shouldUnmarshallToContainerWithNullValue() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip null EnumSet unmarshalling");
 
         // Initialization of resources and test data
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -114,20 +125,24 @@ public class EnumSetMarshallingTest extends WireTestCommon {
                 w.write(() -> "key").marshallable(written));
 
         // Validate serialized form and read data back into object
-        assertEquals(FULL_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes));
+        assertEquals(FULL_SET_SERIALISED_FORM, Wires.fromSizePrefixedBlobs(bytes),
+                "full EnumSet should serialise to expected binary text form for null target");
         tw.readingDocument().wire().read("key").marshallable(read);
 
         // Ensure original and read data match
-        assertEquals(written.f, read.f);
+        assertEquals(written.f, read.f,
+                "EnumSet should be allocated and match when target is null");
         bytes.releaseLast();
     }
 
     /**
-     * Test handling multiple instances of EnumSets within an object graph.
+     * Covers multiple EnumSet instances within an object graph.
      */
     @Test
+    @DisplayName("BinaryWire should keep EnumSet instances distinct")
     public void shouldAllowMultipleInstancesInObjectGraph() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip multi instance EnumSet test");
 
         // Initialization of resources and test data
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -143,7 +158,8 @@ public class EnumSetMarshallingTest extends WireTestCommon {
         tw.readingDocument().wire().read("key").marshallable(read);
 
         // Ensure that the two EnumSets in the object graph are distinct
-        assertNotSame(read.f1.get(0).f, read.f2.get(0).f);
+        assertNotSame(read.f1.get(0).f, read.f2.get(0).f,
+                "EnumSet instances in object graph should not alias");
         bytes.releaseLast();
     }
 

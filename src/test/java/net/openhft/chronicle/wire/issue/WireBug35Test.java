@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire.issue;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.*;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
@@ -18,17 +19,19 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * @author ryanlea
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class WireBug35Test extends WireTestCommon {
+class WireBug35Test extends WireTestCommon {
 
     @Test
-    public void objectsInSequence() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @DisplayName("Text wire should write objects in sequence")
+    void objectsInSequence() {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for sequence tests");
 
         assertObjectsInSequence(WireType.TEXT.apply(Bytes.elasticByteBuffer()));
     }
 
     @Test
-    public void objectsInSequenceBinaryWire() {
+    @DisplayName("Binary wire should write objects in sequence")
+    void objectsInSequenceBinaryWire() {
         final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         assertObjectsInSequence(WireType.BINARY.apply(bytes));
     }
@@ -42,7 +45,8 @@ public class WireBug35Test extends WireTestCommon {
         final String text = Wires.asText(wire, Bytes.allocateElasticOnHeap()).toString();
         Object load = new Yaml().load(text);
 
-        assertEquals("{seq=[{key=value}, {key=value}]}", load.toString());
+        assertEquals("{seq=[{key=value}, {key=value}]}", load.toString(),
+                "Sequence should render expected YAML text");
 
         wire.bytes().releaseLast();
     }

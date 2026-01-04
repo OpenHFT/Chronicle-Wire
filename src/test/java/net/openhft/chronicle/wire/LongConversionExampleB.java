@@ -3,6 +3,7 @@
  */
 package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class LongConversionExampleB {
 
@@ -12,6 +13,9 @@ public class LongConversionExampleB {
     }
 
     // Static inner class representing a House with an owner using a specific long conversion
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class House extends SelfDescribingMarshallable {
         @LongConversion(Base64LongConverter.class)
         long owner;

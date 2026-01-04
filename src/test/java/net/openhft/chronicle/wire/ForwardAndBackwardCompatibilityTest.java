@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -18,14 +19,6 @@ import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
 // Using the Parameterized runner for JUnit tests to enable parameter-driven tests
 public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
-
-    // Holds the WireType for this test instance
-    private WireType wireType;
-
-    // Constructor that sets the WireType
-    public void initForwardAndBackwardCompatibilityTest(WireType wireType) {
-        this.wireType = wireType;
-    }
 
     // Provides the set of WireTypes to be used as parameters for the tests
     public static Collection<Object[]> data() {
@@ -38,8 +31,8 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     // Test for checking backward compatibility of DTO classes
     @MethodSource("data")
     @ParameterizedTest
+    @DisplayName("Reads DTO1 data with DTO2 schema")
     public void backwardsCompatibility(WireType wireType) {
-        initForwardAndBackwardCompatibilityTest(wireType);
         // Expecting an exception due to class replacement
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2");
 
@@ -73,8 +66,8 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     // Test for checking forward compatibility of DTO classes
     @MethodSource("data")
     @ParameterizedTest
+    @DisplayName("Reads DTO2 data with DTO1 schema")
     public void forwardCompatibility(WireType wireType) {
-        initForwardAndBackwardCompatibilityTest(wireType);
         // Expecting an exception due to class replacement
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1");
 
@@ -106,10 +99,8 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     // Test to ensure that new data added to a document doesn't affect old reads
     @MethodSource("data")
     @ParameterizedTest
+    @DisplayName("Reads older document content after new data appended")
     public void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads(WireType wireType) {
-
-        initForwardAndBackwardCompatibilityTest(wireType);
-
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             // Creating a Wire instance
@@ -178,8 +169,6 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         int one;
         // Another field to hold an integer value
         int two;
-        // Unused field to hold an Object
-        Object o;
 
         // Constructor used via reflection for deserialization
         @UsedViaReflection

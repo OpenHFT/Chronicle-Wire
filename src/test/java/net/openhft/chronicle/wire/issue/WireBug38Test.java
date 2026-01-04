@@ -9,6 +9,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -28,8 +29,9 @@ public class WireBug38Test extends WireTestCommon {
      * deserialization results of nested structures.
      */
     @Test
+    @DisplayName("TEXT wire preserves nested object structure")
     public void testNestedObj() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for nested object test");
 
         // Define the TEXT WireType and a test string
         @NotNull final WireType wireType = WireType.TEXT;
@@ -52,7 +54,7 @@ public class WireBug38Test extends WireTestCommon {
         // Deserialize the string back into obj2 and ensure it matches obj1
         obj2.readMarshallable(wireType.apply(Bytes.from(output)));
 
-        assertEquals(obj1, obj2);
+        assertEquals(obj1, obj2, "Deserialised nested object should match original");
 
         // Release the resources associated with the byte buffer
         bytes.releaseLast();

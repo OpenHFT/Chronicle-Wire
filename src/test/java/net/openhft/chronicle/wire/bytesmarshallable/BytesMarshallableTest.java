@@ -14,6 +14,7 @@ import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -50,9 +51,10 @@ public class BytesMarshallableTest extends WireTestCommon {
     // with the wire, also validating against expected string representations
     @MethodSource("combinations")
     @ParameterizedTest
+    @DisplayName("Serialises and reads primitive DTOs correctly")
     public void primitiveDto(WireType wireType) {
         initBytesMarshallableTest(wireType);
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip primitive DTO test");
 
         // Creating a wire object using the previously defined method
         Wire wire = createWire();
@@ -75,10 +77,11 @@ public class BytesMarshallableTest extends WireTestCommon {
                 expected = "[pos: 0, rlim: 69, wlim: 2147483632, cap: 2147483632 ] ǁÄprim\\u0082\\u001D٠٠٠Y⒈⒈⒈٠⒈٠٠٠⒈٠٠٠٠٠٠٠٠٠\\u0080?٠٠٠٠٠٠ð?Æscalar\\u0082⒙٠٠٠⒍Hello1⒌bye 1⒋hi 1‡٠٠٠٠٠٠٠٠٠٠٠";
                 break;
             default:
-                throw new IllegalStateException("Unsupported wire type " + wireType);
+                throw new IllegalStateException("Unsupported wire type for primitiveDto: " + wireType);
         }
         // Asserting that the expected string equals the debug string output of the wire bytes
-        assertEquals(expected, wire.bytes().toDebugString());
+        assertEquals(expected, wire.bytes().toDebugString(),
+                "Expected primitive DTO debug output for wireType=" + wireType);
 
         // Creating two new DTOs and populating them by reading from the wire
         // Then, asserting that they equal the original written DTOs
@@ -90,19 +93,20 @@ public class BytesMarshallableTest extends WireTestCommon {
             wire.bytes().readPosition(0);
 
             wire.read("prim").marshallable(dto2);
-            assertEquals(dto1, dto2);
+            assertEquals(dto1, dto2, "Expected PrimDto round-trip on pass " + i);
 
             wire.read("scalar").marshallable(sdto2);
-            assertEquals(sdto1, sdto2);
+            assertEquals(sdto1, sdto2, "Expected ScalarDto round-trip on pass " + i);
         }
     }
 
     // Another test method similar to the above, but using different DTO types (PrimDto2 and ScalarDto2)
     @MethodSource("combinations")
     @ParameterizedTest
+    @DisplayName("Serialises and reads custom primitive DTOs correctly")
     public void primitiveDto2(WireType wireType) {
         initBytesMarshallableTest(wireType);
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip primitive DTO2 test");
 
         // Creating a wire object using the previously defined method
         Wire wire = createWire();
@@ -126,10 +130,11 @@ public class BytesMarshallableTest extends WireTestCommon {
                 break;
 
             default:
-                throw new IllegalStateException("Unsupported wire type " + wireType);
+                throw new IllegalStateException("Unsupported wire type for primitiveDto2: " + wireType);
         }
         // Asserting that the expected string equals the debug string output of the wire bytes
-        assertEquals(expected, wire.bytes().toDebugString());
+        assertEquals(expected, wire.bytes().toDebugString(),
+                "Expected primitive DTO2 debug output for wireType=" + wireType);
 
         // Creating two new DTOs, reading values from the wire, and asserting they equal originals
         PrimDto2 dto2 = new PrimDto2();
@@ -139,10 +144,10 @@ public class BytesMarshallableTest extends WireTestCommon {
             wire.bytes().readPosition(0);
 
             wire.read("prim").marshallable(dto2);
-            assertEquals(dto1, dto2);
+            assertEquals(dto1, dto2, "Expected PrimDto2 round-trip on pass " + i);
 
             wire.read("scalar").marshallable(sdto2);
-            assertEquals(sdto1, sdto2);
+            assertEquals(sdto1, sdto2, "Expected ScalarDto2 round-trip on pass " + i);
         }
 
         ClassAliasPool.CLASS_ALIASES.addAlias(PrimDto2.class);
@@ -157,13 +162,15 @@ public class BytesMarshallableTest extends WireTestCommon {
                 "  s64: 1,\n" +
                 "  f32: 1.0,\n" +
                 "  f64: 1.0\n" +
-                "}\n", dto2.toString());
+                "}\n", dto2.toString(),
+                "Expected PrimDto2 toString output");
 
         assertEquals("!ScalarDto2 {\n" +
                 "  text: Hello1,\n" +
                 "  buffer: bye 1,\n" +
                 "  bytes: hi 1\n" +
-                "}\n", sdto2.toString());
+                "}\n", sdto2.toString(),
+                "Expected ScalarDto2 toString output");
     }
 
     // Class encapsulating various primitive data types and providing initialization logic.
@@ -283,7 +290,7 @@ public class BytesMarshallableTest extends WireTestCommon {
                 try {
                     out.write(bytes, offset, readRemaining);
                 } catch (BufferUnderflowException | IllegalArgumentException e) {
-                    throw new AssertionError(e);
+                    throw new AssertionError("Failed to write scalar bytes payload", e);
                 }
             }
         }

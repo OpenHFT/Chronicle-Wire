@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire.converter;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,6 +21,7 @@ public class Base64Test extends net.openhft.chronicle.wire.WireTestCommon {
      * Test the Base64 encoding for various field types and validate against expected outputs.
      */
     @Test
+    @DisplayName("Encodes multiple field types using Base64 in yaml")
     public void onAnField() {
         // Create a new YAML wire with memory allocated on the heap
         Wire wire = Wire.newYamlWireOnHeap();
@@ -54,7 +56,8 @@ public class Base64Test extends net.openhft.chronicle.wire.WireTestCommon {
                 "...\n";
 
         // Validate the wire's output against the expected output
-        assertEquals(expected, wire.toString());
+        assertEquals(expected, wire.toString(),
+                "base64 writer should emit expected yaml payload for all fields");
 
         // Create another YAML wire for reading the encoded data
         Wire wire2 = Wire.newYamlWireOnHeap();
@@ -62,10 +65,12 @@ public class Base64Test extends net.openhft.chronicle.wire.WireTestCommon {
 
         // Read and validate the data from the wire
         for (int i = 0; i <= 5; i++)
-            assertEquals(i < 5, reader.readOne());
+            assertEquals(i < 5, reader.readOne(),
+                    "method reader should return expected read state at iteration " + i);
 
         // Ensure the read wire's content matches the expected output
-        assertEquals(expected, wire2.toString());
+        assertEquals(expected, wire2.toString(),
+                "base64 reader should reproduce expected yaml payload");
     }
 
     /**

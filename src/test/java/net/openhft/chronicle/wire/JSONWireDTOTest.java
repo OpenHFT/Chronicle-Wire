@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -20,8 +21,10 @@ public class JSONWireDTOTest extends WireTestCommon {
 
     // Test to verify serialization and deserialization of DTO using JSONWire.
     @Test
+    @DisplayName("Serialises dto to json and back")
     public void dto() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip json dto test");
 
         expectException("Found this$0, in class");
 
@@ -42,7 +45,8 @@ public class JSONWireDTOTest extends WireTestCommon {
 
         // Check the serialized output.
         assertEquals("{\"text\":\"hi\",\"nested\":[ {\"str\":\"there\",\"num\":1} ],\"b\":false,\"bb\":0,\"s\":0,\"f\":0.0,\"d\":3.1415,\"l\":0,\"i\":0}",
-                bytes.toString());
+                bytes.toString(),
+                "json output should match expected dto payload");
 
         // Create another DTO instance for deserialization.
         JSOuterClass dto2 = new JSOuterClass();
@@ -63,7 +67,20 @@ public class JSONWireDTOTest extends WireTestCommon {
                 "  d: 3.1415,\n" +
                 "  l: 0,\n" +
                 "  i: 0\n" +
-                "}\n", dto2.toString());
+                "}\n", dto2.toString(),
+                "deserialised dto should match expected text form");
+        assertEquals("hi", dto2.text, "text should round-trip from json");
+        assertEquals(1, dto2.nested.size(), "nested list should contain one entry");
+        JSNestedClass nested = dto2.nested.get(0);
+        assertEquals("there", nested.str, "nested str should round-trip from json");
+        assertEquals(1, nested.num, "nested num should round-trip from json");
+        assertEquals(false, dto2.b, "boolean should round-trip default value");
+        assertEquals((byte) 0, dto2.bb, "byte should round-trip default value");
+        assertEquals((short) 0, dto2.s, "short should round-trip default value");
+        assertEquals(0.0f, dto2.f, 0.0f, "float should round-trip default value");
+        assertEquals(3.1415, dto2.d, 0.0, "double should round-trip from json");
+        assertEquals(0L, dto2.l, "long should round-trip default value");
+        assertEquals(0, dto2.i, "int should round-trip default value");
 
         // Release the allocated bytes.
         bytes.releaseLast();

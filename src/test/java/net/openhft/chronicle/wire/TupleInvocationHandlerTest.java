@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -18,33 +19,35 @@ public class TupleInvocationHandlerTest extends WireTestCommon {
 
     @AfterEach
     public void restoreTuplesFlag() {
-        Wires.GENERATE_TUPLES = originalGenerateTuples;
+        Wires.setGenerateTuples(originalGenerateTuples);
     }
 
     @Test
+    @DisplayName("Supports tuple field API and deep copy behaviour")
     public void tupleSupportsFieldApiAndDeepCopy() throws InvalidMarshallableException, NoSuchFieldException {
-        Wires.GENERATE_TUPLES = true;
+        Wires.setGenerateTuples(true);
         SampleTuple tuple = Wires.tupleFor(SampleTuple.class, "sampleType");
-        assertNotNull(tuple);
+        assertNotNull(tuple, "tuple instance should be created for sampleType conversion");
 
         tuple.setField("alpha", "one");
         tuple.setField("beta", 2L);
-        assertEquals("one", tuple.getField("alpha", String.class));
-        assertEquals(Long.valueOf(2L), tuple.getField("beta", Long.class));
-        assertEquals("sampleType", tuple.className());
-        assertTrue(tuple.usesSelfDescribingMessage());
+        assertEquals("one", tuple.getField("alpha", String.class), "alpha field should read back as string");
+        assertEquals(Long.valueOf(2L), tuple.getField("beta", Long.class), "beta field should read back as long");
+        assertEquals("sampleType", tuple.className(), "className should match tuple type");
+        assertTrue(tuple.usesSelfDescribingMessage(), "tuple should use self-describing messages");
 
         int hash = tuple.hashCode();
-        assertNotEquals(0, hash);
-        assertEquals(tuple, tuple);
-        assertNotEquals("other", tuple);
+        assertNotEquals(0, hash, "tuple hashCode should not be zero");
+        assertEquals(tuple, tuple, "tuple should be equal to itself");
+        assertNotEquals("other", tuple, "tuple should not equal unrelated object");
 
         SampleTuple copy = tuple.deepCopy();
-        assertNotNull(copy);
-        assertEquals(tuple.getField("alpha", String.class), copy.getField("alpha", String.class));
+        assertNotNull(copy, "deep copy should return a tuple instance");
+        assertEquals(tuple.getField("alpha", String.class), copy.getField("alpha", String.class),
+                "deep copy should preserve alpha field");
 
         List<FieldInfo> infos = tuple.$fieldInfos();
-        assertEquals(2, infos.size());
+        assertEquals(2, infos.size(), "tuple should report two field infos");
 
         Bytes<?> buffer = Bytes.allocateElasticOnHeap();
         Wire textWire = WireType.TEXT.apply(buffer);
@@ -53,7 +56,8 @@ public class TupleInvocationHandlerTest extends WireTestCommon {
         buffer.readPositionRemaining(0, buffer.writePosition());
         SampleTuple readBack = Wires.tupleFor(SampleTuple.class, "sampleType");
         readBack.readMarshallable(textWire);
-        assertEquals("one", readBack.getField("alpha", String.class));
+        assertEquals("one", readBack.getField("alpha", String.class),
+                "readBack alpha field should match written value");
         buffer.releaseLast();
     }
 

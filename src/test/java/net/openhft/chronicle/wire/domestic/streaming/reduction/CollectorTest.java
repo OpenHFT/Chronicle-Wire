@@ -9,6 +9,7 @@ import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -21,22 +22,23 @@ import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class CollectorTest extends WireTestCommon {
+class CollectorTest extends WireTestCommon {
 
     private static final String Q_NAME = CollectorTest.class.getSimpleName();
 
     @BeforeEach
-    public void clearBefore() {
+    void clearBefore() {
         IOTools.deleteDirWithFiles(Q_NAME);
     }
 
     @AfterEach
-    public void clearAfter() {
+    void clearAfter() {
         IOTools.deleteDirWithFiles(Q_NAME);
     }
 
     @Test
-    public void lastSeenManual() {
+    @DisplayName("Manual collector should keep the last MarketData entry")
+    void lastSeenManual() {
 
         Collector<MarketData, AtomicReference<MarketData>, MarketData> lastSeen = Collector.of(
                 AtomicReference::new,
@@ -54,11 +56,12 @@ public class CollectorTest extends WireTestCommon {
 
         MarketData expected = StreamingReductionTestSupport.createMarketData();
         MarketData actual = listener.reduction();
-        assertEquals(expected, actual);
+        assertEquals(expected, actual, "Manual collector should keep last MarketData");
     }
 
     @Test
-    public void lastSeen() {
+    @DisplayName("Concurrent reducing collector keeps last MarketData")
+    void lastSeen() {
         Reduction<Optional<MarketData>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class).withMethod(StreamingReductionTestSupport.ServiceOut.class, StreamingReductionTestSupport.ServiceOut::marketData).build())
                 .collecting(reducingConcurrent(replacingMerger()));
@@ -67,11 +70,12 @@ public class CollectorTest extends WireTestCommon {
 
         MarketData expected = StreamingReductionTestSupport.createMarketData();
         MarketData actual = listener.reduction().orElseThrow(NoSuchElementException::new);
-        assertEquals(expected, actual);
+        assertEquals(expected, actual, "Concurrent reduction should keep last MarketData");
     }
 
     @Test
-    public void map() {
+    @DisplayName("Map reduction returns unmodifiable map of symbols")
+    void map() {
 
         Reduction<Map<String, MarketData>> listener = StreamingReductionTestSupport.mapReduction();
 
@@ -81,12 +85,15 @@ public class CollectorTest extends WireTestCommon {
         Map<String, MarketData> expected = new HashMap<>();
         expected.put(expectedSymbol.symbol(), expectedSymbol);
 
-        assertEquals(expected, listener.reduction());
-        assertEquals("java.util.Collections$UnmodifiableMap", listener.reduction().getClass().getName());
+        assertEquals(expected, listener.reduction(),
+                "Reduction should map symbols to last MarketData");
+        assertEquals("java.util.Collections$UnmodifiableMap", listener.reduction().getClass().getName(),
+                "Reduction should return an unmodifiable map");
     }
 
     @Test
-    public void composite() {
+    @DisplayName("Composite collector groups last values per symbol")
+    void composite() {
 
         final Reduction<Map<String, List<Double>>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class).withMethod(StreamingReductionTestSupport.ServiceOut.class, StreamingReductionTestSupport.ServiceOut::marketData).build())
@@ -98,6 +105,7 @@ public class CollectorTest extends WireTestCommon {
         Map<String, List<Double>> expected = new HashMap<>();
         expected.put(expectedSymbol.symbol(), Arrays.asList(0D, expectedSymbol.last()));
 
-        assertEquals(expected, listener.reduction());
+        assertEquals(expected, listener.reduction(),
+                "Composite collector should group last values per symbol");
     }
 }

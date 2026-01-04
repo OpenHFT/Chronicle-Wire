@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -25,8 +26,10 @@ public class ElasticByteBufferTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Writes text into elastic byte buffer wire")
     public void testElasticByteBufferWithWire() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip elastic byte buffer wire test");
 
         // Initialize an elastic byte buffer with initial size of 10.
         Bytes<ByteBuffer> byteBufferBytes = Bytes.elasticByteBuffer(10);
@@ -48,14 +51,17 @@ public class ElasticByteBufferTest extends WireTestCommon {
 
         // Assert that the text was written correctly.
         @NotNull String s = stringBuilder.toString();
-        Assertions.assertTrue(s.contains("some value of more than ten characters"));
+        Assertions.assertTrue(s.contains("some value of more than ten characters"),
+                "buffer output should contain expected payload text, actual=" + s);
 
         byteBufferBytes.releaseLast();
     }
 
     @Test
+    @DisplayName("Resizes direct elastic buffer when capacity exceeded")
     public void directElasticBufferResizesWhenCapacityIsExceeded() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip direct elastic buffer resize test");
 
         for (boolean padding : new boolean[]{true, false}) {
             Bytes<?> directBytes = Bytes.allocateElasticDirect(32);
@@ -71,13 +77,14 @@ public class ElasticByteBufferTest extends WireTestCommon {
                 }
 
                 Assertions.assertTrue(directBytes.realCapacity() >= initialCapacity,
-                        "buffer should grow when payload exceeds initial capacity");
+                        "buffer should grow when payload exceeds initial capacity, padding=" + padding);
 
                 directBytes.readPositionRemaining(0, directBytes.writePosition());
                 try (DocumentContext context = wire.readingDocument()) {
-                    Assertions.assertTrue(context.isPresent());
+                    Assertions.assertTrue(context.isPresent(),
+                            "document should be present after writing payload, padding=" + padding);
                     Assertions.assertEquals(largeValue, context.wire().read("payload").text(),
-                            "padding=" + padding);
+                            "payload text should round-trip for padding=" + padding);
                 }
             } finally {
                 directBytes.releaseLast();

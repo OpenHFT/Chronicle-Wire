@@ -10,8 +10,10 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +21,9 @@ import java.util.Collection;
 
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Static initialization block to alias two classes
@@ -40,7 +45,7 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
 
     @BeforeEach
     public void hasDirect() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for this test");
     }
 
     // Provide different combinations of parameters for the test runs
@@ -90,6 +95,7 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
     // Test case to validate the output of the method writer based on the verbose types setting
     @MethodSource("combinations")
     @ParameterizedTest(name = "verboseTypes={0}, expected={1}")
+    @DisplayName("Writes verbose type markers when enabled")
     public void test(boolean verboseTypes, String expects) {
         initVanillaMethodWriterBuilderVerboseTypesTest(verboseTypes, expects);
         // Allocate elastic bytes on heap and create a TextWire instance
@@ -105,6 +111,6 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
         printer.print(new MyObject("hello world", 23));
 
         // Assert that the output matches the expected representation for the current run
-        Assertions.assertEquals(expects, bytes.toString());
+        Assertions.assertEquals(expects, bytes.toString(), "Wire output should match verbose types setting");
     }
 }

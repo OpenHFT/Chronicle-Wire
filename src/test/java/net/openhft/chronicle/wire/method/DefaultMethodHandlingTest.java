@@ -9,6 +9,7 @@ import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
@@ -52,7 +53,8 @@ public class DefaultMethodHandlingTest extends WireTestCommon {
         assertEquals("method1: one\n" +
                 "...\n" +
                 "method2: two\n" +
-                "...\n", wire.toString());
+                "...\n", wire.toString(),
+                "Wire output should include method1 and method2 in order");
 
         // Create a StringWriter to capture logging output.
         StringWriter sw = new StringWriter();
@@ -61,13 +63,14 @@ public class DefaultMethodHandlingTest extends WireTestCommon {
         MethodReader reader = wire.methodReader(Mocker.logging(WithDefault.class, "", sw));
 
         // Read the method calls and assert the expected outcomes.
-        assertTrue(reader.readOne()); // Expecting true when reading method1.
-        assertTrue(reader.readOne()); // Expecting true when reading method2.
-        assertFalse(reader.readOne()); // Expecting false when no more methods to read.
+        assertTrue(reader.readOne(), "Reader should process method1");
+        assertTrue(reader.readOne(), "Reader should process method2");
+        assertFalse(reader.readOne(), "Reader should have no more methods");
 
         // Assert that the logged output matches the expected string.
         assertEquals("method1[one]\n" +
-                "method2[two]\n", sw.toString().replace("\r", ""));
+                "method2[two]\n", sw.toString().replace("\r", ""),
+                "Logged output should capture method1 and method2 calls");
         return true;
     }
 
@@ -75,15 +78,17 @@ public class DefaultMethodHandlingTest extends WireTestCommon {
      * Tests the method writers and readers using TEXT wire format.
      */
     @Test
+    @DisplayName("Default method handling on TEXT wire")
     public void withDefault() {
-        assertTrue(doTest(WireType.TEXT), "withDefault: wireType=TEXT");
+        assertTrue(doTest(WireType.TEXT), "Default method handling should succeed on TEXT wire");
     }
 
     /**
      * Tests the method writers and readers using YAML_ONLY wire format.
      */
     @Test
+    @DisplayName("Default method handling on YAML_ONLY wire")
     public void withDefaultYaml() {
-        assertTrue(doTest(WireType.YAML_ONLY), "withDefault: wireType=YAML_ONLY");
+        assertTrue(doTest(WireType.YAML_ONLY), "Default method handling should succeed on YAML_ONLY wire");
     }
 }

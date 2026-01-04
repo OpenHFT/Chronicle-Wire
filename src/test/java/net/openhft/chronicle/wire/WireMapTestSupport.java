@@ -27,20 +27,24 @@ final class WireMapTestSupport {
         @NotNull final Map<Integer, Integer> actual = new HashMap<>();
         wire.readDocument(null, c -> {
             @Nullable Map m = c.read(() -> "example").marshallableAsMap(Integer.class, Integer.class, actual);
-            assertEquals(m, expected);
+            assertEquals(m,
+                    expected,
+                    "Integer map should round trip from wire");
         });
     }
 
     static void assertMapInMap(String yaml) {
         Map<String, Object> fromString = Marshallable.fromString(yaml);
         assertEquals("{WithMap={innerMap={AUDUSD=AUDUSD1, USDPLN=USDPLN1}}}",
-                fromString.toString());
+                fromString.toString(),
+                "Map within map should match expected string");
     }
 
     static void assertMapWithQuestionMarks(String yaml) {
         Map<String, Object> fromString = Marshallable.fromString(yaml);
         assertEquals("{WithMap={innerMap={AUDUSD=AUDUSD1, USDPLN=USDPLN1}}}",
-                fromString.toString());
+                fromString.toString(),
+                "Map with question marks should match expected string");
     }
 
     static boolean writeAndReadStringMap(Function<Bytes<?>, Wire> wireFactory) {
@@ -61,10 +65,13 @@ final class WireMapTestSupport {
                             "  hello1: world1,\n" +
                             "  hello2: world2\n" +
                             "}\n",
-                    Wires.fromSizePrefixedBlobs(bytes));
+                    Wires.fromSizePrefixedBlobs(bytes),
+                    "String map serialisation should match expected text");
             @NotNull final Map<String, String> actual = new LinkedHashMap<>();
             wire.readDocument(null, c -> c.read(() -> "example").marshallableAsMap(String.class, String.class, actual));
-            assertEquals(expected, actual);
+            assertEquals(expected,
+                    actual,
+                    "String map should round trip to expected values");
             return true;
         } finally {
             bytes.releaseLast();
@@ -87,7 +94,8 @@ final class WireMapTestSupport {
                         "  ? { MyField: aKey }: { MyField: aValue },\n" +
                         "  ? { MyField: aKey2 }: { MyField: aValue2 }\n" +
                         "}\n",
-                Wires.fromSizePrefixedBlobs(bytes));
+                Wires.fromSizePrefixedBlobs(bytes),
+                "Marshallable map serialisation should match expected text");
 
         @NotNull final Map<MyMarshallable, MyMarshallable> actual = new LinkedHashMap<>();
 
@@ -97,7 +105,9 @@ final class WireMapTestSupport {
                         MyMarshallable.class,
                         actual));
 
-        assertEquals(expected, actual);
+        assertEquals(expected,
+                actual,
+                "Marshallable map should round trip to expected values");
 
         wire.bytes().releaseLast();
     }
@@ -110,15 +120,21 @@ final class WireMapTestSupport {
 
         ObjectWithTreeMap value2 = new ObjectWithTreeMap();
         wire.read().object(value2, ObjectWithTreeMap.class);
-        assertEquals("{hello=world}", value2.map.toString());
+        assertEquals("{hello=world}",
+                value2.map.toString(),
+                "Tree map should round trip for typed object");
 
         wire.bytes().readPosition(0);
         ObjectWithTreeMap value3 = new ObjectWithTreeMap();
         wire.read().object(value3, Object.class);
-        assertEquals("{hello=world}", value3.map.toString());
+        assertEquals("{hello=world}",
+                value3.map.toString(),
+                "Tree map should round trip for Object.class read");
 
         wire.bytes().readPosition(0);
         ObjectWithTreeMap value4 = wire.read().object(ObjectWithTreeMap.class);
-        assertEquals("{hello=world}", value4.map.toString());
+        assertEquals("{hello=world}",
+                value4.map.toString(),
+                "Tree map should round trip for direct read");
     }
 }

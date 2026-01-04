@@ -4,12 +4,13 @@
 package net.openhft.chronicle.wire.converter;
 
 import net.openhft.chronicle.wire.*;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Tests for validating the behavior of field converters with long data types.
+ * Tests for validating the behaviour of field converters with long data type values.
  */
 public class LongConvertorFieldsTest {
 
@@ -55,6 +56,7 @@ public class LongConvertorFieldsTest {
      * Test for verifying the Base16 encoding functionality.
      */
     @Test
+    @DisplayName("Serialises Base16 fields using expected hex widths")
     public void base16() {
         // Validate Base16 encoding with a range of positive values
         assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base16DTO {\n" +
@@ -117,6 +119,7 @@ public class LongConvertorFieldsTest {
      * Test for verifying the Base64 encoding functionality.
      */
     @Test
+    @DisplayName("Serialises Base64 fields using expected symbol widths")
     public void base64() {
         // Validate Base64 encoding with a range of positive values
         assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base64DTO {\n" +
@@ -179,6 +182,7 @@ public class LongConvertorFieldsTest {
      * Test for verifying the Base85 encoding functionality.
      */
     @Test
+    @DisplayName("Serialises Base85 fields with variable length text")
     public void base85() {
         // Validate Base85 encoding with a range of positive values
         assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base85DTO {\n" +
@@ -200,6 +204,7 @@ public class LongConvertorFieldsTest {
     }
 
     @Test
+    @DisplayName("Round-trips Base85 special character values")
     public void detectSpecialCharBase85() {
         final String CHARS = "0123456789" +
                 ":;<=>?@" +
@@ -210,7 +215,8 @@ public class LongConvertorFieldsTest {
         for (int i = 0; i < 85; i++) {
             char ch = CHARS.charAt(i);
             Base85DTO dto = new Base85DTO((byte) i, (char) i, (short) c.parse("0" + ch), (int) c.parse(ch + "a"), c.parse(ch + " "));
-            assertEquals(dto, Marshallable.fromString(dto.toString()), "base85 converter should preserve all 85 character combinations in roundtrip serialization");
+            assertEquals(dto, Marshallable.fromString(dto.toString()),
+                    "base85 converter should preserve all 85 character combinations in roundtrip serialisation at index " + i + ", char=" + ch);
         }
     }
 
@@ -241,6 +247,7 @@ public class LongConvertorFieldsTest {
     }
 
     @Test
+    @DisplayName("Serialises ShortText fields with expected formatting")
     public void shortText() {
         assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$ShortTextDTO {\n" +
                 "  b: 1,\n" +
@@ -260,6 +267,7 @@ public class LongConvertorFieldsTest {
     }
 
     @Test
+    @DisplayName("Round-trips ShortText special character values")
     public void detectSpecialChar() {
         final String CHARS = " " +
                 "123456789" +
@@ -271,7 +279,8 @@ public class LongConvertorFieldsTest {
         for (int i = 0; i < 85; i++) {
             char ch = CHARS.charAt(i);
             ShortTextDTO dto = new ShortTextDTO((byte) i, (char) i, (short) c.parse("0" + ch), (int) c.parse(ch + "a"), c.parse(ch + " "));
-            assertEquals(dto, Marshallable.fromString(dto.toString()), "shorttext converter should preserve all 85 character combinations in roundtrip serialization");
+            assertEquals(dto, Marshallable.fromString(dto.toString()),
+                    "shorttext converter should preserve all 85 character combinations in roundtrip serialisation at index " + i + ", char=" + ch);
         }
     }
 
@@ -314,6 +323,7 @@ public class LongConvertorFieldsTest {
      * Test method for verifying the Words encoding functionality.
      */
     @Test
+    @DisplayName("Serialises Words fields into readable tokens")
     public void words() {
         // Validate Words encoding with a range of positive values.
         // The expected results are arbitrary word mappings for demonstration.

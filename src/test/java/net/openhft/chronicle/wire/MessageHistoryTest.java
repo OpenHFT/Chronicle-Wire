@@ -9,6 +9,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.bytes.MethodReader.MESSAGE_HISTORY_METHOD_ID;
@@ -31,26 +32,28 @@ public class MessageHistoryTest extends WireTestCommon {
 
     // Test to check if clearing and retrieving the MessageHistory works correctly.
     @Test
+    @DisplayName("MessageHistory get and clear should create a fresh instance")
     public void checkHistoryGetClear() {
         // Retrieve the current message history.
         MessageHistory mg = MessageHistory.get();
-        assertNotNull(mg);
+        assertNotNull(mg, "MessageHistory.get should return a history instance");
 
         // Reset the message history.
         MessageHistory.clear();
 
         // Retrieve a new instance of message history.
         MessageHistory mg2 = MessageHistory.get();
-        assertNotNull(mg2);
+        assertNotNull(mg2, "MessageHistory.get should return a new instance after clear");
 
         // Ensure that the two message histories are not the same instance.
-        assertNotSame(mg, mg2);
+        assertNotSame(mg, mg2, "MessageHistory.clear should replace the history instance");
     }
 
     // Test the deep copy functionality of the VanillaMessageHistory.
     @Test
+    @DisplayName("VanillaMessageHistory deep copy preserves sources and timings")
     public void checkDeepCopy() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for deep copy history test");
 
         // Initialize a new history and add sources and timings.
         VanillaMessageHistory history = new VanillaMessageHistory();
@@ -58,11 +61,12 @@ public class MessageHistoryTest extends WireTestCommon {
         VanillaMessageHistory history2 = history.deepCopy();
 
         // Check if the original and copied histories are equal.
-        assertEquals(history, history2);
+        assertEquals(history, history2, "deepCopy should preserve sources and timings");
     }
 
     // Test to check if an exception is thrown when history exceeds maximum size.
     @Test
+    @DisplayName("MessageHistory should enforce maximum size limit")
     public void checkHistoryMaxSizeException() {
         VanillaMessageHistory container1 = new VanillaMessageHistory();
         container1.useBytesMarshallable(!OS.isMacOSX());
@@ -78,16 +82,19 @@ public class MessageHistoryTest extends WireTestCommon {
         }
 
         // this is the limit, one more timing should fail
-        assertEquals(256, container1.timings());
+        assertEquals(256, container1.timings(), "timings should reach maximum history length");
         // Attempt to copy again and expect an exception.
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> Wires.copyTo(container1, container2));
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> Wires.copyTo(container1, container2),
+                "copyTo beyond max size should throw");
         if (thrown instanceof ArithmeticException) {
-            assertTrue(thrown.getMessage().contains("257 out of range"));
+            assertTrue(thrown.getMessage().contains("257 out of range"),
+                    "exception message should include out of range count");
         }
     }
 
     // Test the serialization of bytes in the VanillaMessageHistory.
     @Test
+    @DisplayName("MessageHistory should serialise and deserialise byte streams")
     public void checkSerialiseBytes() {
 
         // Initialize a new history and add sources and timings.
@@ -105,7 +112,8 @@ public class MessageHistoryTest extends WireTestCommon {
         assertEquals("VanillaMessageHistory { " +
                 "sources: [1=0xff,2=0xfff], " +
                 "timings: [1000000000000000000,1000000000000010000,120962203520100,120962203520100], " +
-                "addSourceDetails=true }", history2.toString());
+                "addSourceDetails=true }", history2.toString(),
+                "Deserialised history should match expected string without source context");
 
         // Adjust the read position and add source details.
         bw.bytes().readPosition(0);
@@ -130,11 +138,13 @@ public class MessageHistoryTest extends WireTestCommon {
         assertEquals("VanillaMessageHistory { " +
                 "sources: [1=0xff,2=0xfff,3=0xffff], " +
                 "timings: [1000000000000000000,1000000000000010000,120962203520100,120962203520100], " +
-                "addSourceDetails=true }", history2.toString());
+                "addSourceDetails=true }", history2.toString(),
+                "Deserialised history should include source context");
     }
 
     // Test the toString() representation of the VanillaMessageHistory.
     @Test
+    @DisplayName("MessageHistory toString renders expected hex and text")
     public void checkToString() {
         {
             VanillaMessageHistory history = new SetTimeMessageHistory();
@@ -143,8 +153,8 @@ public class MessageHistoryTest extends WireTestCommon {
             history.addSourceDetails(true);
             history.historyWallClock(true);
             initExampleMessageHistory(history);
-            assertEquals(2, history.sources());
-            assertEquals(2, history.timings());
+            assertEquals(2, history.sources(), "history should contain two sources");
+            assertEquals(2, history.timings(), "history should contain two timings");
 
             // Serialize the message history into hex dump bytes.
             BinaryWire bw = new BinaryWire(new HexDumpBytes());
@@ -164,15 +174,16 @@ public class MessageHistoryTest extends WireTestCommon {
                             "                                                # timing in nanos\n" +
                             "a7 10 27 64 a7 b3 b6 e0 0d                      # 1000000000000010000\n" +
                             "a7 64 0c 2c b5 03 6e 00 00                      # 120962203520100\n",
-                    bw.bytes().toHexString());
+                    bw.bytes().toHexString(),
+                    "Hex dump should match expected history encoding");
 
             // Release the bytes from the wire.
             bw.bytes().releaseLast();
 
             assertEquals("VanillaMessageHistory { sources: [1=0xff,2=0xfff], timings: [ 2001-09-09T01:46:40, 2001-09-09T01:46:40.00001 ], addSourceDetails=true }",
-                    history.toString());
-            assertEquals(2, history.sources());
-            assertEquals(2, history.timings());
+                    history.toString(), "toString should include sources and timings in wall clock mode");
+            assertEquals(2, history.sources(), "history should still contain two sources");
+            assertEquals(2, history.timings(), "history should still contain two timings");
 
             BinaryWire bw2 = new BinaryWire(new HexDumpBytes());
             history.useBytesMarshallable(true);
@@ -183,7 +194,8 @@ public class MessageHistoryTest extends WireTestCommon {
                             "00 ff 0f 00 00 00 00 00 00 03 00 00 64 a7 b3 b6 # timings\n" +
                             "e0 0d 10 27 64 a7 b3 b6 e0 0d 64 0c 2c b5 03 6e\n" +
                             "00 00\n",
-                    bw2.bytes().toHexString());
+                    bw2.bytes().toHexString(),
+                    "Hex dump should match bytes-marshallable encoding");
             bw2.bytes().releaseLast();
 
             // check direct and on heap memory serialize the same.
@@ -193,22 +205,25 @@ public class MessageHistoryTest extends WireTestCommon {
             history.writeMarshallable(wire2);
             String hexString1 = wire1.bytes().toHexString();
             String hexString2 = wire2.bytes().toHexString();
-            assertEquals(hexString1, hexString2);
+            assertEquals(hexString1, hexString2, "Direct and heap serialisation should match");
             VanillaMessageHistory mh1 = new SetTimeMessageHistory();
             mh1.historyWallClock(true);
             mh1.addSourceDetails(false);
             mh1.readMarshallable(wire1);
-            assertTrue(mh1.toString().startsWith("VanillaMessageHistory { sources: [1=0xff,2=0xfff], timings: [ 2001-09-09T01:46:40, 2001-09-09T01:46:40.00001,"));
+            assertTrue(mh1.toString().startsWith("VanillaMessageHistory { sources: [1=0xff,2=0xfff], timings: [ 2001-09-09T01:46:40, 2001-09-09T01:46:40.00001,"),
+                    "Heap history should include expected sources and timings prefix");
             VanillaMessageHistory mh2 = new SetTimeMessageHistory();
             mh2.historyWallClock(true);
             mh2.addSourceDetails(false);
             mh2.readMarshallable(wire2);
-            assertTrue(mh2.toString().startsWith("VanillaMessageHistory { sources: [1=0xff,2=0xfff], timings: [ 2001-09-09T01:46:40, 2001-09-09T01:46:40.00001,"));
+            assertTrue(mh2.toString().startsWith("VanillaMessageHistory { sources: [1=0xff,2=0xfff], timings: [ 2001-09-09T01:46:40, 2001-09-09T01:46:40.00001,"),
+                    "Direct history should include expected sources and timings prefix");
         }
     }
 
     // Tests the readMarshallable functionality using different configurations.
     @Test
+    @DisplayName("MessageHistory readMarshallable matches expected wire output")
     public void testReadMarshallable() {
         {
             SetTimeMessageHistory vmh = new SetTimeMessageHistory();
@@ -245,7 +260,8 @@ public class MessageHistoryTest extends WireTestCommon {
                             "01 01 00 00 00 02 00 00 00 00 00 00 00          # sources\n" +
                             "03 57 04 00 00 00 00 00 00 ae 08 00 00 00 00 00 # timings\n" +
                             "00 64 0c 2c b5 03 6e 00 00\n",
-                    bytes.toHexString());
+                    bytes.toHexString(),
+                    "Hex dump should include both event name and method id forms");
 
             // Add additional timing to the original history.
             vmh.addTiming(120962203520100L);
@@ -256,7 +272,8 @@ public class MessageHistoryTest extends WireTestCommon {
             // Deserialize the bytes back to a message history and assert its content.
             wire.read().object(vmh2, VanillaMessageHistory.class);
             vmh2.addSourceDetails(true);
-            assertEquals(vmh.toString(), vmh2.toString());
+            assertEquals(vmh.toString(), vmh2.toString(),
+                    "Deserialised history should match original (first read)");
 
             VanillaMessageHistory vmh3 = new VanillaMessageHistory();
             vmh3.historyWallClock(true);
@@ -264,11 +281,13 @@ public class MessageHistoryTest extends WireTestCommon {
             // Deserialize the bytes again to another message history and assert its content.
             wire.read().object(vmh3, VanillaMessageHistory.class);
             vmh3.addSourceDetails(true);
-            assertEquals(vmh.toString(), vmh3.toString());
+            assertEquals(vmh.toString(), vmh3.toString(),
+                    "Deserialised history should match original (second read)");
         }
     }
 
     @Test
+    @DisplayName("MessageHistory should write self describing wire header")
     public void testWriteHistorySelfDescribing() {
         {
             final SetTimeMessageHistory history = new SetTimeMessageHistory();
@@ -283,18 +302,23 @@ public class MessageHistoryTest extends WireTestCommon {
             }
 
             assertEquals("00000000 57 00 00 00 b9 07 68 69  73 74 6f 72 79 81 4b 00 W·····hi story·K·",
-                    bytes.toHexString().split("\n")[0]);
+                    bytes.toHexString().split("\n")[0],
+                    "Self describing history should match expected header bytes");
         }
     }
 
     @Test
+    @DisplayName("Copyable history should use self describing YAML")
     public void copyableSelfDescribing() {
-        assertEquals(EXPECTED_COPYABLE_YAML, doCopyableTest(false), "copyable (self describing)");
+        assertEquals(EXPECTED_COPYABLE_YAML, doCopyableTest(false),
+                "Copyable history should round-trip with self describing YAML");
     }
 
     @Test
+    @DisplayName("Copyable history should use bytes marshalling")
     public void copyableBytes() {
-        assertEquals(EXPECTED_COPYABLE_YAML, doCopyableTest(true), "copyable (bytes)");
+        assertEquals(EXPECTED_COPYABLE_YAML, doCopyableTest(true),
+                "Copyable history should round-trip with bytes marshalling");
     }
 
     private static String doCopyableTest(boolean useBytesMarshallable) {
@@ -314,14 +338,20 @@ public class MessageHistoryTest extends WireTestCommon {
         wire.copyTo(wire2);
 
         String yaml = wire2.toString();
-        VanillaMessageHistory vmh2 = new VanillaMessageHistory();
-        vmh2.addSourceDetails(false);
-        wire2.read().object(vmh2, VanillaMessageHistory.class);
-        assertEquals("VanillaMessageHistory { sources: [1=0x2], timings: [11111111,22222222,120962203520100], addSourceDetails=false }", vmh2.toString(), "copyable: roundtrip");
+        verifyYamlRoundTrip(wire2);
         return yaml;
     }
 
+    private static void verifyYamlRoundTrip(Wire wire) {
+        VanillaMessageHistory vmh2 = new VanillaMessageHistory();
+        vmh2.addSourceDetails(false);
+        wire.read().object(vmh2, VanillaMessageHistory.class);
+        assertEquals("VanillaMessageHistory { sources: [1=0x2], timings: [11111111,22222222,120962203520100], addSourceDetails=false }",
+                vmh2.toString(), "Copyable history should round-trip from YAML");
+    }
+
     @Test
+    @DisplayName("MessageHistory should write bytes-marshallable header")
     public void testWriteHistoryAsBytes() {
         try {
             final SetTimeMessageHistory history = new SetTimeMessageHistory();
@@ -336,7 +366,8 @@ public class MessageHistoryTest extends WireTestCommon {
             }
 
             assertEquals("00000000 39 00 00 00 ba 80 00 81  33 00 86 02 01 00 00 00 9······· 3·······",
-                    bytes.toHexString().split("\n")[0]);
+                    bytes.toHexString().split("\n")[0],
+                    "Bytes-marshallable history should match expected header bytes");
 
             final SetTimeMessageHistory history2 = new SetTimeMessageHistory();
             initExampleMessageHistory(history2);
@@ -348,7 +379,8 @@ public class MessageHistoryTest extends WireTestCommon {
             }
 
             assertEquals("00000000 39 00 00 00 ba 80 00 81  33 00 86 02 01 00 00 00 9······· 3·······",
-                    bytes.toHexString().split("\n")[0]);
+                    bytes.toHexString().split("\n")[0],
+                    "Repeat bytes-marshallable history should match expected header bytes");
 
         } finally {
             MessageHistory.clear();

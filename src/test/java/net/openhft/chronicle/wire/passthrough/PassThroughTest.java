@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.*;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -41,10 +42,11 @@ public class PassThroughTest extends WireTestCommon {
 
         // Read and assert each document in the wire
         for (int i = 2; i >= 0; i--)
-            assertEquals(i > 0, reader.readOne());
+            assertEquals(i > 0, reader.readOne(),
+                    "Text reader should consume each document at i=" + i);
 
         // Assert the output of wire2 matches the input
-        assertEquals(input, wire2.toString());
+        assertEquals(input, wire2.toString(), "Text wire output should match the input");
 
         // Setup another wire for reading the output of wire2 and assert the result
         Bytes<?> bytes3 = new HexDumpBytes();
@@ -59,8 +61,9 @@ public class PassThroughTest extends WireTestCommon {
             }
         });
         for (int i = 2; i >= 0; i--)
-            assertEquals(i > 0, reader2.readOne());
-        assertEquals(input, wire3.toString());
+            assertEquals(i > 0, reader2.readOne(),
+                    "Text second reader should consume each document at i=" + i);
+        assertEquals(input, wire3.toString(), "Text wire pass-through should preserve the input");
     }
 
     /**
@@ -68,6 +71,7 @@ public class PassThroughTest extends WireTestCommon {
      * matches the expected format.
      */
     @Test
+    @DisplayName("Method writer produces expected text document")
     public void methodWriterText() {
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         final Destination destination = wire2.methodWriter(Destination.class);
@@ -79,7 +83,8 @@ public class PassThroughTest extends WireTestCommon {
         assertEquals("to: dest\n" +
                         "send: message\n" +
                         "...\n",
-                wire2.toString());
+                wire2.toString(),
+                "Method writer should produce the expected text document");
     }
 
     /**
@@ -104,10 +109,11 @@ public class PassThroughTest extends WireTestCommon {
 
         // Read and assert each document in the wire
         for (int i = 2; i >= 0; i--)
-            assertEquals(i > 0, reader.readOne());
+            assertEquals(i > 0, reader.readOne(),
+                    "Yaml reader should consume each document at i=" + i);
 
         // Assert the output of wire2 matches the input
-        assertEquals(input, wire2.toString());
+        assertEquals(input, wire2.toString(), "Yaml wire output should match the input");
 
         // Setup another wire for reading the output of wire2 and assert the result
         Bytes<?> bytes3 = new HexDumpBytes();
@@ -122,8 +128,9 @@ public class PassThroughTest extends WireTestCommon {
             }
         });
         for (int i = 2; i >= 0; i--)
-            assertEquals(i > 0, reader2.readOne());
-        assertEquals(input, wire3.toString());
+            assertEquals(i > 0, reader2.readOne(),
+                    "Yaml second reader should consume each document at i=" + i);
+        assertEquals(input, wire3.toString(), "Yaml wire pass-through should preserve the input");
     }
 
     /**
@@ -131,6 +138,7 @@ public class PassThroughTest extends WireTestCommon {
      * matches the expected YAML format.
      */
     @Test
+    @DisplayName("Method writer produces expected YAML document")
     public void methodWriterYaml() {
         // Create a YAML wire for writing
         Wire wire2 = Wire.newYamlWireOnHeap();
@@ -145,7 +153,8 @@ public class PassThroughTest extends WireTestCommon {
         assertEquals("to: dest\n" +
                         "send: message\n" +
                         "...\n",
-                wire2.toString());
+                wire2.toString(),
+                "Method writer should produce the expected YAML document");
     }
 
     /**
@@ -173,7 +182,8 @@ public class PassThroughTest extends WireTestCommon {
         // Read from the YAML wire and write to the binary wire
         final MethodReader reader = wire.methodReader(destinationSpecific);
         for (int i = 2; i >= 0; i--)
-            assertEquals(i > 0, reader.readOne());
+            assertEquals(i > 0, reader.readOne(),
+                    "Binary reader should consume each document at i=" + i);
 
         // Assert the binary output
         assertEquals("18 00 00 00                                     # msg-length\n" +
@@ -190,7 +200,8 @@ public class PassThroughTest extends WireTestCommon {
                         "a7 01 00 00 00 00 00 00 00                      # 1\n" +
                         "b9 03 74 77 6f                                  # two: (event)\n" +
                         "a7 02 00 00 00 00 00 00 00                      # 2\n",
-                wire2.bytes().toHexString());
+                wire2.bytes().toHexString(),
+                "Binary pass-through should match the expected hex output");
 
         // Setup another binary wire for reading the output of wire2 and assert the result
         Bytes<?> bytes3 = new HexDumpBytes();
@@ -206,7 +217,8 @@ public class PassThroughTest extends WireTestCommon {
             }
         });
         for (int i = 2; i >= 0; i--)
-            assertEquals(i > 0, reader2.readOne());
+            assertEquals(i > 0, reader2.readOne(),
+                    "Binary second reader should consume each document at i=" + i);
         assertEquals("17 00 00 00                                     # msg-length\n" +
                         "c2 74 6f                                        # to:\n" +
                         "e5 64 65 73 74 31                               # dest1\n" +
@@ -217,16 +229,18 @@ public class PassThroughTest extends WireTestCommon {
                         "b9 05 73 65 6e 64 73 82 1c 00 00 00 b9 03 6f 6e # passed-through\n" +
                         "65 a7 01 00 00 00 00 00 00 00 b9 03 74 77 6f a7\n" +
                         "02 00 00 00 00 00 00 00\n",
-                wire3.bytes().toHexString().replaceAll("Lambda.*", "Lambda"));
+                wire3.bytes().toHexString().replaceAll("Lambda.*", "Lambda"),
+                "Binary pass-through should match the expected hex output after round-trip");
 
         // Setup a text wire for reading the output of wire3 and compare it to the original input
         Wire wire4 = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
         final DestinationSpecific destinationSpecific4 = wire4.methodWriter(DestinationSpecific.class);
         final MethodReader reader3 = wire3.methodReader(destinationSpecific4);
         for (int i = 2; i >= 0; i--)
-            assertEquals(i > 0, reader3.readOne());
+            assertEquals(i > 0, reader3.readOne(),
+                    "Binary third reader should consume each document at i=" + i);
 
-        assertEquals(input, wire4.toString());
+        assertEquals(input, wire4.toString(), "Binary pass-through should return to the original text input");
 
         // Release resources
         bytes3.releaseLast();
@@ -238,6 +252,7 @@ public class PassThroughTest extends WireTestCommon {
      * matches the expected binary format.
      */
     @Test
+    @DisplayName("Method writer produces expected binary document")
     public void methodWriterBinary() {
         // Create a binary wire for writing
         Wire wire2 = WireType.BINARY_LIGHT.apply(new HexDumpBytes());
@@ -254,7 +269,8 @@ public class PassThroughTest extends WireTestCommon {
                         "e4 64 65 73 74                                  # dest\n" +
                         "c4 73 65 6e 64                                  # send:\n" +
                         "e7 6d 65 73 73 61 67 65                         # message\n",
-                wire2.bytes().toHexString());
+                wire2.bytes().toHexString(),
+                "Method writer should produce the expected binary output");
     }
 
     /**
@@ -275,7 +291,7 @@ public class PassThroughTest extends WireTestCommon {
      */
     interface Sending {
         /**
-         * Sends a simple text message.
+         * Sends a text message that should be preserved by pass-through wires.
          *
          * @param msg The message to be sent.
          */

@@ -9,6 +9,7 @@ import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.YamlWire;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -16,17 +17,19 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Test class to validate the behavior and serialization of Wire objects with arrays.
+ * Regression coverage for issue 272: validates serialisation of Wire arrays and maps
+ * across YAML and binary formats.
  */
 @SuppressWarnings({"deprecation", "removal"})
 public class Issue272Test {
 
     /**
-     * Test case to handle the serialization and deserialization of int arrays
+     * Test case to handle the serialisation and deserialisation of int arrays
      * using Wire. This test also verifies the conversion between YamlWire
      * and BinaryWire and their respective outputs.
      */
     @Test
+    @DisplayName("Wire should serialise arrays across wire types")
     public void arrays() {
         Bytes<?> buffer = Bytes.allocateElasticOnHeap();
 
@@ -72,7 +75,8 @@ public class Issue272Test {
                         "a1 67                                           # 103\n" +
                         "a1 68                                           # 104\n" +
                         "a1 69                                           # 105\n",
-                bytes.toHexString());
+                bytes.toHexString(),
+                "Binary wire hex output should match expected array encoding");
 
         // Create a fresh YamlWire, copy data from the BinaryWire, and verify the result
         Wire copyWire = new YamlWire(Bytes.allocateElasticOnHeap());
@@ -93,16 +97,18 @@ public class Issue272Test {
                         "  104,\n" +
                         "  105\n" +
                         "]\n",
-                copyWire.toString());
+                copyWire.toString(),
+                "YAML output should match expected array values");
         doTest(copyWire);
     }
 
     /**
-     * Test case to handle the serialization and deserialization of map structures
+     * Test case to handle the serialisation and deserialisation of map structures
      * using Wire. This test verifies the conversion between YamlWire
      * and BinaryWire and their respective outputs for map structures.
      */
     @Test
+    @DisplayName("Wire should serialise map structures across wire types")
     public void map() {
         // Create an input string with Yaml format to be parsed
         String input = "to: dest1\n" +
@@ -138,7 +144,8 @@ public class Issue272Test {
                         "a1 01                                           # 1\n" +
                         "c3 74 77 6f                                     # two:\n" +
                         "a1 02                                           # 2\n",
-                bytes.toHexString());
+                bytes.toHexString(),
+                "Binary wire hex output should match expected map encoding");
 
         // Convert the BinaryWire back into a YamlWire and verify its string representation
         Wire wire2 = new YamlWire();
@@ -154,7 +161,8 @@ public class Issue272Test {
                         "  }\n" +
                         "}\n" +
                         "...\n",
-                wire2.toString());
+                wire2.toString(),
+                "YAML output should match expected map structure");
     }
 
     /**
@@ -177,7 +185,7 @@ public class Issue272Test {
 
     /**
      * Validates the contents of a Wire that has two arrays "one" and "two".
-     * This method checks if the Wire correctly read the serialized arrays.
+     * This method checks if the Wire correctly read the serialised arrays.
      *
      * @param copyWire The Wire object to be tested.
      */
@@ -187,10 +195,12 @@ public class Issue272Test {
 
         // Read the "one" array and validate its contents
         int amtRead = copyWire.read("one").array(readBuffer);
-        assertEquals("5, [1, 2, 3, 4, 5]", amtRead + ", " + Arrays.toString(readBuffer));
+        assertEquals("5, [1, 2, 3, 4, 5]", amtRead + ", " + Arrays.toString(readBuffer),
+                "Array 'one' should read five elements");
 
         // Read the "two" array and validate its contents
         int amtRead2 = copyWire.read("two").array(readBuffer);
-        assertEquals("5, [101, 102, 103, 104, 105]", amtRead2 + ", " + Arrays.toString(readBuffer));
+        assertEquals("5, [101, 102, 103, 104, 105]", amtRead2 + ", " + Arrays.toString(readBuffer),
+                "Array 'two' should read five elements");
     }
 }

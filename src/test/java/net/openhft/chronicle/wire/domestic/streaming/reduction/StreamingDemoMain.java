@@ -120,6 +120,19 @@ public class StreamingDemoMain {
         // This provides a concurrent automatically updated view of the queue-backed map.
         Map<String, MarketData> queueBackedMap = queueBackedMapping.reduction();
 
+        if (Boolean.getBoolean("chronicle.wire.streaming.demo")) {
+            System.out.println("demo count=" + count
+                    + ", maxIndex=" + maxIndex
+                    + ", listingSize=" + listing.reduction().size()
+                    + ", symbolsStartingWithS=" + symbolsStartingWithS.reduction().size()
+                    + ", latestAAPL=" + String.valueOf(latestAppleMarketData)
+                    + ", liveQueueBackedMapSize=" + liveQueueBackedMap.size()
+                    + ", latestProtectedSize=" + latestProtected.reduction().size()
+                    + ", statsSize=" + stats.reduction().size()
+                    + ", averageAAPL=" + averageApplePrice
+                    + ", queueBackedMapSize=" + queueBackedMap.size());
+        }
+
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 
         try (AutoTailers.CloseableRunnable runnable = AutoTailers.createRunnable(
@@ -127,10 +140,10 @@ public class StreamingDemoMain {
                 queueBackedMapping,
                 PauserMode.balanced
         )) {
-            executorService.submit(runnable);
+            executorService.execute(runnable);
             Thread.sleep(TimeUnit.SECONDS.toMillis(10));
         } catch (InterruptedException ie) {
-            // do nothing
+            Thread.currentThread().interrupt();
         }
         net.openhft.chronicle.threads.Threads.shutdown(executorService);
 

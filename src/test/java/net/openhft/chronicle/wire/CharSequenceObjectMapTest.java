@@ -3,6 +3,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,6 +12,7 @@ public class CharSequenceObjectMapTest extends WireTestCommon {
 
     // Test the put operation of the CharSequenceObjectMap
     @Test
+    @DisplayName("Stores and retrieves string keys in map")
     public void put() {
         // Initialize a new CharSequenceObjectMap with a capacity of 10
         CharSequenceObjectMap<String> map = new CharSequenceObjectMap<>(10);
@@ -22,7 +24,7 @@ public class CharSequenceObjectMapTest extends WireTestCommon {
 
         // Verify that the added key-value pairs can be successfully retrieved from the map
         for (int i = 10; i < 20; i++) {
-            assertEquals("" + i, map.get("" + i));
+            assertEquals("" + i, map.get("" + i), "Expected map value for key=" + i);
         }
     }
 }

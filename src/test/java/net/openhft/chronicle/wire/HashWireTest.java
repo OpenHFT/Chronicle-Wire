@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,11 +13,13 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HashWireTest extends WireTestCommon {
 
     // Test the hashing capability for a sequence of marshallable entries
     @Test
+    @DisplayName("Computes hash for marshallable entry sequence")
     public void testHash64() {
 
         // Calculate a 64-bit hash value for the given wire data structure
@@ -40,6 +43,7 @@ public class HashWireTest extends WireTestCommon {
 
     // Test the hashing capability for the Field object with a given name
     @Test
+    @DisplayName("Computes hash for field with map and list content")
     public void testHashWithMap() {
         Field a = new Field("hi");
         a.required.put("k", Required.A);
@@ -52,6 +56,8 @@ public class HashWireTest extends WireTestCommon {
         b.used = true;
 
         assertEquals(a, b, "field objects with identical content should be equal");
+        assertEquals("hi", a.name, "field name should match expected value");
+        assertTrue(a.used, "field used flag should be true");
         assertNotEquals(0, a.hashCode(), "field object hashCode should be non-zero for populated field");
         assertEquals(a.hashCode(), b.hashCode(), "equal field objects should produce identical hash codes");
     }

@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Test class to validate handling of newline characters in string values
  * when working with wires, extending common wire tests.
  */
-public class WireBug37Test extends WireTestCommon {
+class WireBug37Test extends WireTestCommon {
 
     /**
      * Validates that newline characters within a string value are correctly serialized
@@ -25,7 +26,8 @@ public class WireBug37Test extends WireTestCommon {
      * and deserialization.
      */
     @Test
-    public void testNewlineInString() {
+    @DisplayName("TEXT wire preserves newline characters in strings")
+    void testNewlineInString() {
         // Define the TEXT WireType and a test string containing a newline
         @NotNull final WireType wireType = WireType.TEXT;
         @NotNull final String exampleString = "hello\nworld";
@@ -40,7 +42,7 @@ public class WireBug37Test extends WireTestCommon {
         obj2.append(exampleString);
 
         // Ensure that the two objects are equal after the append
-        assertEquals(obj1, obj2);
+        assertEquals(obj1, obj2, "Objects should match after appending newline string");
 
         // Serialize obj2 into bytes using the TEXT WireType
         final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
@@ -52,7 +54,7 @@ public class WireBug37Test extends WireTestCommon {
         // Deserialize the string back into obj3 and ensure it matches obj2
         obj3.readMarshallable(wireType.apply(Bytes.from(output)));
 
-        assertEquals(obj2, obj3);
+        assertEquals(obj2, obj3, "Deserialised object should match original");
 
         // Release the resources associated with the byte buffer
         bytes.releaseLast();

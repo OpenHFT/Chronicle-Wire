@@ -4,7 +4,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
@@ -14,8 +16,9 @@ public class TextWithArraysTest extends WireTestCommon {
 
     // Test the behavior of TextWire with arrays of different types.
     @Test
+    @DisplayName("Serialises arrays of primitives and objects in text wire")
     public void testWithArrays() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip text array test");
 
         // Check the string representation of an uninitialized WithArrays object
         assertEquals("!net.openhft.chronicle.wire.TextWithArraysTest$WithArrays {\n" +
@@ -28,7 +31,8 @@ public class TextWithArraysTest extends WireTestCommon {
                 "  floats: !!null \"\",\n" +
                 "  doubles: !!null \"\",\n" +
                 "  words: !!null \"\"\n" +
-                "}\n", new WithArrays().toString());
+                "}\n", new WithArrays().toString(),
+                "empty arrays should serialise as nulls in text wire");
 
         // Initialize the arrays with sample values
         WithArrays wa = new WithArrays();
@@ -53,11 +57,15 @@ public class TextWithArraysTest extends WireTestCommon {
                 "  floats: [ -1.0, 0.0, 1.0 ],\n" +
                 "  doubles: [ -1.0, 0.0, 1.0 ],\n" +
                 "  words: [ Hello, World, Bye, for, now ]\n" +
-                "}\n", wa.toString());
+                "}\n", wa.toString(),
+                "populated arrays should serialise with expected values");
 
     }
 
     // Inner class that holds arrays of different data types for testing.
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class WithArrays extends SelfDescribingMarshallable {
         boolean[] booleans;
         byte[] bytes;

@@ -9,36 +9,36 @@ import net.openhft.chronicle.wire.*;
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
 /**
- * Demonstrates the process of serializing and deserializing `TextObject` using the BinaryWire library.
+ * Demonstrates serialising and deserialising a {@link TextObject} using BinaryWire for example diagnostic output.
  */
 public class WireExamples2 {
 
     /**
-     * Entry point for the demonstration.
+     * Entry point for the wire serialisation demonstration.
      *
-     * @param args Command-line arguments.
+     * @param args command-line arguments
      */
     public static void main(String... args) {
-        // Add an alias for `TextObject` for ease of serialization
+        // Add an alias for TextObject for ease of serialisation
         CLASS_ALIASES.addAlias(TextObject.class);
 
         // Initialize a new Binary Wire instance
         final Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
 
-        // Serialize a `TextObject` instance to the wire
+        // Serialise a TextObject instance to the wire
         wire.getValueOut().object(new TextObject("SAMPLETEXT"));
 
-        // Print the hexadecimal representation of the serialized data
+        // Print the hexadecimal representation of the serialised data
         System.out.println("encoded to=" + wire.bytes().toHexString());
 
-        // Deserialize the `TextObject` from the wire and print its value
+        // Deserialise the TextObject from the wire and print its value
         System.out.println("deserialized=" + wire.getValueIn().object());
 
     }
 
     /**
-     * Represents a text object that internally uses a Base64 encoding.
-     * Extends the `SelfDescribingMarshallable` to utilize its serialization features.
+     * Represents a text object that internally uses Base64 encoding.
+     * Extends {@link SelfDescribingMarshallable} to use its serialisation features.
      */
     static class TextObject extends SelfDescribingMarshallable {
         // Temporary buffer for conversion purposes
@@ -49,18 +49,18 @@ public class WireExamples2 {
         private final long text;
 
         /**
-         * Constructor to initialize the `TextObject` with the given text.
+         * Initialise the {@link TextObject} with the given text value.
          *
-         * @param text Text to initialize the object with.
+         * @param text text value to encode
          */
         TextObject(CharSequence text) {
             this.text = Base64LongConverter.INSTANCE.parse(text);
         }
 
         /**
-         * Retrieves the original text from the Base64 encoded representation.
+         * Return the original text from the Base64-encoded representation.
          *
-         * @return Original text as CharSequence.
+         * @return original text as a character sequence
          */
         public CharSequence text() {
             Base64LongConverter.INSTANCE.append(temp, text);

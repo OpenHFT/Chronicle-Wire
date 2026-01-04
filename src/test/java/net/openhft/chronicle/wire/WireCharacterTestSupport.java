@@ -16,7 +16,7 @@ final class WireCharacterTestSupport {
             }
             wire.write().object(ch);
             char ch2 = wire.read().object(char.class);
-            assertEquals(ch, ch2);
+            assertEquals(ch, ch2, "Character round trip should preserve value " + (int) ch);
         }
     }
 }

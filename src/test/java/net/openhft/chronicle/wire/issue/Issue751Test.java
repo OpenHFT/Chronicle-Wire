@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire.issue;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,6 +33,21 @@ public class Issue751Test extends WireTestCommon {
         public int compareTo(@NotNull Issue751Test.Two o) {
             return text.hashCode() - o.text.hashCode();
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (!(o instanceof Two))
+                return false;
+            Two that = (Two) o;
+            return text.equals(that.text);
+        }
+
+        @Override
+        public int hashCode() {
+            return text.hashCode();
+        }
     }
 
     static class Three extends SelfDescribingMarshallable {
@@ -45,8 +61,9 @@ public class Issue751Test extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Comparable fields should serialise to YAML")
     public void comparableField() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for comparable field test");
 
         Wire wire = new YamlWire();
         wire.write("first").object(new Three(
@@ -60,6 +77,12 @@ public class Issue751Test extends WireTestCommon {
                 "  two: {\n" +
                 "    text: !int 42\n" +
                 "  }\n" +
-                "}\n", first.toString());
+                "}\n", first.toString(),
+                "Comparable fields should render expected YAML output");
+        Three parsed = (Three) first;
+        assertEquals("hello", parsed.one.text,
+                "One.text should round-trip for comparable field test");
+        assertEquals(42, parsed.two.text,
+                "Two.text should round-trip for comparable field test");
     }
 }

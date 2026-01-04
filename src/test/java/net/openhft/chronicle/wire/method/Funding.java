@@ -26,49 +26,23 @@ public class Funding extends SelfDescribingMarshallable {
         return this;
     }
 
-    /**
-     * Gets the funding rate.
-     *
-     * @return The funding rate.
-     */
     public double fr() {
         return fr;
     }
 
-    /**
-     * Gets the symbol.
-     *
-     * @return The symbol identifier.
-     */
     public long s() {
         return symbol;
     }
 
-    /**
-     * Sets the symbol.
-     *
-     * @param symbol The symbol identifier to set.
-     * @return This Funding instance for method chaining.
-     */
     public Funding s(final long symbol) {
         this.symbol = symbol;
         return this;
     }
 
-    /**
-     * Gets the minutes until funding.
-     *
-     * @return The minutes until funding.
-     */
     public long mins() {
         return mins;
     }
 
-    /**
-     * Sets the minutes until funding.
-     *
-     * @param minsUntilFunding The number of minutes until funding.
-     */
     public void mins(long minsUntilFunding) {
         this.mins = minsUntilFunding;
     }

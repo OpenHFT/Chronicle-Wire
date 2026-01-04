@@ -10,6 +10,7 @@ import net.openhft.chronicle.wire.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.ZoneId;
@@ -37,26 +38,28 @@ public class NullFieldMarshallingTest extends WireTestCommon {
         if (Jvm.hasException(exceptions)) {
             Jvm.dumpException(exceptions);
             Jvm.resetExceptionHandlers();
-            Assertions.fail();
+            Assertions.fail("Unexpected exceptions recorded during test");
         }
     }
 
     @Test
+    @DisplayName("Null abstract field remains null for text marshalling")
     public void testAbstractNullFieldUnmarshalledCorrectlyText() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for text marshalling test");
 
         VO object = new VO();
 
         String val = Marshallable.$toString(object);
 
         VO object2 = Marshallable.fromString(val);
-        assertNotNull(object2);
-        assertNull(object2.zoneId);
+        assertNotNull(object2, "Text round-trip should return a non-null VO instance");
+        assertNull(object2.zoneId, "Text round-trip should keep ZoneId field null");
     }
 
     @Test
+    @DisplayName("Null abstract field remains null for binary marshalling")
     public void testAbstractNullFieldUnmarshalledCorrectlyBinary() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for binary marshalling test");
 
         VO object = new VO();
 
@@ -64,12 +67,16 @@ public class NullFieldMarshallingTest extends WireTestCommon {
         wire.write().typedMarshallable(object);
 
         VO object2 = wire.read().typedMarshallable();
-        assertNotNull(object2);
-        assertNull(object2.zoneId);
+        assertNotNull(object2, "Binary round-trip should return a non-null VO instance");
+        assertNull(object2.zoneId, "Binary round-trip should keep ZoneId field null");
         wire.bytes().releaseLast();
     }
 
     static class VO extends SelfDescribingMarshallable {
         ZoneId zoneId;
+
+        VO() {
+            zoneId = null;
+        }
     }
 }

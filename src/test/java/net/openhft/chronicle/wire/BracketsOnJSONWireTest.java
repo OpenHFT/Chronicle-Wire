@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -24,8 +25,9 @@ public class BracketsOnJSONWireTest extends net.openhft.chronicle.wire.WireTestC
 
     // Test the JSON_ONLY wire type with a method writer and reader using the Printer interface
     @Test
+    @DisplayName("JSON_ONLY writes without brackets and reads back")
     public void test() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for JSON_ONLY wire test");
 
         // Create an elastic byte buffer to hold the wire data
         final Bytes<ByteBuffer> t = Bytes.elasticByteBuffer();
@@ -38,7 +40,8 @@ public class BracketsOnJSONWireTest extends net.openhft.chronicle.wire.WireTestC
                 .print("hello");
 
         // Assert that the wire representation matches the expected JSON format
-        assertEquals("{\"print\":\"hello\"}", wire.toString());
+        assertEquals("{\"print\":\"hello\"}", wire.toString(),
+                "JSON_ONLY should write single field without surrounding braces");
 
         // Use a method reader to read the message from the wire and set the 'actual' variable
         wire.methodReader((Printer) msg -> actual = msg).readOne();
@@ -47,6 +50,6 @@ public class BracketsOnJSONWireTest extends net.openhft.chronicle.wire.WireTestC
         t.releaseLast();
 
         // Assert that the read message matches the original message written to the wire
-        assertEquals("hello", actual);
+        assertEquals("hello", actual, "method reader should receive the printed message");
     }
 }

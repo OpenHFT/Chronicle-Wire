@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -20,26 +21,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
- * Tests for handling escaped characters in various Wire formats.
+ * Tests handling of escaped characters across various Wire output formats.
  */
 public class EscapeCharsTest extends WireTestCommon {
-    private Future<?> future;
 
     // Override the threadDump from WireTestCommon to use the parent implementation
     @Override
     @BeforeEach
     public void threadDump() {
         super.threadDump();
-    }
-
-    /**
-     * Constructor for parameterized test.
-     *
-     * @param chs   Characters to test
-     * @param future Represents the result of an asynchronous computation
-     */
-    public void initEscapeCharsTest(@NotNull String chs, Future<?> future) {
-        this.future = future;
     }
 
     /**
@@ -96,11 +86,15 @@ public class EscapeCharsTest extends WireTestCommon {
 
         // Read from wire and validate
         @Nullable String s = wire.read(sb).text();
-        assertEquals(str, sb.toString(), "key " + str);
-        assertEquals(str, s, "value " + str);
+        assertEquals(str, sb.toString(),
+                "first key should match input string " + str);
+        assertEquals(str, s,
+                "first value should match input string " + str);
         @Nullable String ss = wire.read(sb).text();
-        assertEquals(str2, sb.toString(), "key " + str2);
-        assertEquals(str2, ss, "value " + str2);
+        assertEquals(str2, sb.toString(),
+                "second key should match input string " + str2);
+        assertEquals(str2, ss,
+                "second value should match input string " + str2);
     }
 
     /**
@@ -108,8 +102,9 @@ public class EscapeCharsTest extends WireTestCommon {
      */
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Handles escaped characters across wire types")
     public void testEscaped(@NotNull String chs, Future<?> future) throws ExecutionException, InterruptedException {
-        initEscapeCharsTest(chs, future);
-        assertNull(future.get());
+        assertNull(future.get(),
+                "escape character task should complete without exception for " + chs);
     }
 }

@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -22,8 +23,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 public class MonetaTest extends net.openhft.chronicle.wire.WireTestCommon {
     // Test method for serialization and deserialization of a SortedSet with custom Comparable objects
     @Test
+    @DisplayName("SortedSet of currency wrappers round-trips")
     public void monetary() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for serialisation test");
 
         // Create a sorted set of NonScalarComparable objects
         SortedSet<NonScalarComparable> set = new TreeSet<>();
@@ -43,8 +45,7 @@ public class MonetaTest extends net.openhft.chronicle.wire.WireTestCommon {
                 .object(SortedSet.class);
 
         // Assert that the original set and the set read from the wire are equal
-
-        assertEquals(set, set2);
+        assertEquals(set, set2, "SortedSet of currencies should round-trip");
     }
 
     // Inner class representing a non-scalar comparable object
@@ -62,6 +63,21 @@ public class MonetaTest extends net.openhft.chronicle.wire.WireTestCommon {
         @Override
         public int compareTo(@NotNull MonetaTest.NonScalarComparable o) {
             return currency.getDisplayName().compareTo(o.currency.getDisplayName());
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (!(obj instanceof NonScalarComparable))
+                return false;
+            NonScalarComparable other = (NonScalarComparable) obj;
+            return currency.equals(other.currency);
+        }
+
+        @Override
+        public int hashCode() {
+            return currency.hashCode();
         }
     }
 }

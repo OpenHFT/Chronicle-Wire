@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -15,8 +16,10 @@ public class WireInternalTest extends WireTestCommon {
 
     // Test the serialization and deserialization of a Throwable object using Wire's object method.
     @Test
+    @DisplayName("Wire serialises Throwable using object method")
     public void testThrowableAsObject() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory is required for throwable object test");
 
         // Create an elastic byte buffer for testing.
         final Bytes<?> bytes = Bytes.elasticByteBuffer();
@@ -36,7 +39,9 @@ public class WireInternalTest extends WireTestCommon {
             // Compare the stack traces of the original and deserialized exceptions.
             StackTraceElement[] expectedST = exc.getStackTrace();
             StackTraceElement[] actualST = actual.getStackTrace();
-            assertEquals(expectedST.length, actualST.length);
+            assertEquals(expectedST.length,
+                    actualST.length,
+                    "Stack trace length should match for throwable method");
         } finally {
             // Release the resources used by the byte buffer.
             bytes.releaseLast();
@@ -45,8 +50,10 @@ public class WireInternalTest extends WireTestCommon {
 
     // Test the serialization and deserialization of a Throwable using Wire's dedicated throwable method.
     @Test
+    @DisplayName("Wire serialises Throwable using throwable method")
     public void testThrowable() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory is required for throwable text test");
 
         // Similar setup to the previous test but uses TEXT wire type and the dedicated throwable methods.
         final Bytes<?> bytes = Bytes.elasticByteBuffer();
@@ -60,7 +67,9 @@ public class WireInternalTest extends WireTestCommon {
             final Throwable actual = wire.read("exc").throwable(false);
             StackTraceElement[] expectedST = exc.getStackTrace();
             StackTraceElement[] actualST = actual.getStackTrace();
-            assertEquals(expectedST.length, actualST.length);
+            assertEquals(expectedST.length,
+                    actualST.length,
+                    "Stack trace length should match after round trip");
         } finally {
             bytes.releaseLast();
         }
@@ -68,6 +77,7 @@ public class WireInternalTest extends WireTestCommon {
 
     // Test the conversion of a size-prefixed binary message to text using Wire.
     @Test
+    @DisplayName("Binary blobs convert to expected text output")
     public void testFromSizePrefixedBinaryToText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         @NotNull Wire wire = new BinaryWire(bytes);
@@ -112,7 +122,9 @@ public class WireInternalTest extends WireTestCommon {
                 "]\n" +
                 "# position: 116, header: 2\n" +
                 "--- !!data #binary\n" +
-                "userid: peter\n", actual);
+                "userid: peter\n",
+                actual,
+                "Binary blobs should convert to expected text output");
 
         // Release the resources used by the byte buffer.
         bytes.releaseLast();

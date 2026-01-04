@@ -9,6 +9,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.wire.Wires.acquireStringBuilderScoped;
@@ -25,6 +26,7 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
 
     // Test for low level bytes marshalling using FXPrice
     @Test
+    @DisplayName("Serialises CSV bytes into raw bytes output")
     public void bytesMarshallable() {
         Bytes<?> bytes2 = Bytes.allocateElasticOnHeap();
         @NotNull FXPrice fxPrice = new FXPrice();
@@ -38,39 +40,47 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
         // Verify the resulting data
         assertEquals("1.09029,1.090305,EURUSD,2,EBS\n" +
                 "1.50935,1.50936,GBPUSD,5,RTRS\n" +
-                "1.0906,1.09065,EURCHF,3,EBS\n", bytes2.toString());
+                "1.0906,1.09065,EURCHF,3,EBS\n", bytes2.toString(),
+                "Expected CSV bytes to round-trip without level field");
         bytes2.releaseLast();
     }
 
     // wire marshalling.
     @Test
+    @DisplayName("Marshals CSV records through JSON wire")
     public void marshallableJSON() {
-        assertEquals(2, doTest(WireType.JSON, false), "csv records (json)");
+        assertEquals(2, doTest(WireType.JSON, false), "Expected CSV record count for JSON wire");
     }
 
     @Test
+    @DisplayName("Marshals CSV records through text wire")
     public void marshallableTEXT() {
-        assertEquals(2, doTest(WireType.TEXT, false), "csv records (text)");
+        assertEquals(2, doTest(WireType.TEXT, false), "Expected CSV record count for text wire");
     }
 
     @Test
+    @DisplayName("Marshals CSV records through YAML wire")
     public void marshallableYAML_ONLY() {
-        assertEquals(2, doTest(WireType.YAML_ONLY, false), "csv records (yaml)");
+        assertEquals(2, doTest(WireType.YAML_ONLY, false), "Expected CSV record count for YAML wire");
     }
 
     @Test
+    @DisplayName("Marshals CSV records through binary wire")
     public void marshallableBINARY() {
-        assertEquals(2, doTest(WireType.BINARY, true), "csv records (binary)");
+        assertEquals(2, doTest(WireType.BINARY, true), "Expected CSV record count for binary wire");
     }
 
     @Test
+    @DisplayName("Marshals CSV records through fieldless wire")
     public void marshallableFIELDLESS() {
-        assertEquals(2, doTest(WireType.FIELDLESS_BINARY, true), "csv records (fieldless)");
+        assertEquals(2, doTest(WireType.FIELDLESS_BINARY, true),
+                "Expected CSV record count for fieldless binary wire");
     }
 
     @Test
+    @DisplayName("Marshals CSV records through raw wire")
     public void marshallableRAW() {
-        assertEquals(2, doTest(WireType.RAW, true), "csv records (raw)");
+        assertEquals(2, doTest(WireType.RAW, true), "Expected CSV record count for raw wire");
     }
 
     private int doTest(@NotNull WireType wt, boolean binary) {
@@ -123,9 +133,8 @@ class FXPrice implements BytesMarshallable {
         offerprice = bytes.parseDouble();
         pair = parseEnum(bytes, CcyPair.INTERNER);
         size = Maths.toInt32(bytes.parseLong());
-        byte level = Maths.toInt8(bytes.parseLong());
+        Maths.toInt8(bytes.parseLong());
         exchangeName = bytes.parseUtf8(StopCharTesters.COMMA_STOP);
-        double midPrice = (bidprice + offerprice) / 2;
     }
 
     /**

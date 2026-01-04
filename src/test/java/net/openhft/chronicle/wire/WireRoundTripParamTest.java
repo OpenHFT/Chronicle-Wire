@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,6 +23,7 @@ public class WireRoundTripParamTest extends WireTestCommon {
     };
 
     @Test
+    @DisplayName("Primitive scalars round trip across wire types")
     public void primitivesRoundTrip() {
         for (WireType wt : TYPES) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
@@ -36,18 +38,36 @@ public class WireRoundTripParamTest extends WireTestCommon {
             w.write("txt").text("hello");
 
             // read back
-            assertEquals((byte) -1, w.read("i8").int8());
-            assertEquals(32767, w.read("i16").int16());
-            assertEquals(123456789, w.read("i32").int32());
-            assertEquals(Long.MIN_VALUE + 1, w.read("i64").int64());
-            assertEquals(3.25f, w.read("fp").float32(), 0.0f);
-            assertEquals(Math.PI, w.read("dp").float64(), 0.0);
-            assertTrue(w.read("b").bool());
-            assertEquals("hello", w.read("txt").text());
+            assertEquals((byte) -1,
+                    w.read("i8").int8(),
+                    "i8 should round trip for " + wt);
+            assertEquals(32767,
+                    w.read("i16").int16(),
+                    "i16 should round trip for " + wt);
+            assertEquals(123456789,
+                    w.read("i32").int32(),
+                    "i32 should round trip for " + wt);
+            assertEquals(Long.MIN_VALUE + 1,
+                    w.read("i64").int64(),
+                    "i64 should round trip for " + wt);
+            assertEquals(3.25f,
+                    w.read("fp").float32(),
+                    0.0f,
+                    "Float32 should round trip for " + wt);
+            assertEquals(Math.PI,
+                    w.read("dp").float64(),
+                    0.0,
+                    "Float64 should round trip for " + wt);
+            assertTrue(w.read("b").bool(),
+                    "Boolean should round trip for " + wt);
+            assertEquals("hello",
+                    w.read("txt").text(),
+                    "Text should round trip for " + wt);
         }
     }
 
     @Test
+    @DisplayName("Sequences round trip across wire types")
     public void sequenceRoundTrip() {
         for (WireType wt : TYPES) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
@@ -65,7 +85,9 @@ public class WireRoundTripParamTest extends WireTestCommon {
                 arr[2] = in.int64();
             });
 
-            assertArrayEquals(new Object[]{1, "two", 3L}, out);
+            assertArrayEquals(new Object[]{1, "two", 3L},
+                    out,
+                    "Sequence should round trip for " + wt);
         }
     }
 }

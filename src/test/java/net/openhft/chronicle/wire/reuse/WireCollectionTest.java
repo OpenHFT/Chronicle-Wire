@@ -12,6 +12,7 @@ import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -22,34 +23,19 @@ import java.util.function.Function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Test class for WireCollection, using various wire types.
+ * Validates WireCollection marshalling round-trip across all supported wire types and formats.
  */
-@Disabled("TODO FIX")
-public class WireCollectionTest extends WireTestCommon {
+@Disabled("Disabled until WireCollection round-trip works for all wire types")
+class WireCollectionTest extends WireTestCommon {
 
     // Registering WireProperty class with the ClassAliasPool for serialization/deserialization
     static {
         ClassAliasPool.CLASS_ALIASES.addAlias(WireProperty.class);
     }
 
-    private Function<Bytes<?>, Wire> wireType;
     private WireCollection collection;// = new WireModel();
 
-    /**
-     * Constructor for WireCollectionTest.
-     *
-     * @param wireType A function that defines the type of Wire to be tested.
-     */
-    public void initWireCollectionTest(Function<Bytes<?>, Wire> wireType) {
-        this.wireType = wireType;
-    }
-
-    /**
-     * Parameterized test data generator.
-     *
-     * @return A collection of wire type configurations to be tested.
-     */
-    public static Collection<Object[]> combinations() {
+    static Collection<Object[]> combinations() {
         return Arrays.asList(
                 // Test with various wire types
                 new Object[]{WireType.TEXT},
@@ -66,17 +52,14 @@ public class WireCollectionTest extends WireTestCommon {
      * Sets up the test environment before each test.
      */
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         collection = WireUtils.randomWireCollection();
     }
 
-    /**
-     * Tests multiple reads of WireCollection using various wire types.
-     */
-    @MethodSource("combinations")
     @ParameterizedTest
-    public void testMultipleReads(Function<Bytes<?>, Wire> wireType) {
-        initWireCollectionTest(wireType);
+    @MethodSource("combinations")
+    @DisplayName("WireCollection round-trip across wire types")
+    void testMultipleReads(Function<Bytes<?>, Wire> wireType) {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
 
@@ -88,7 +71,8 @@ public class WireCollectionTest extends WireTestCommon {
         wire.readDocument(results, null);
 
         // Asserting the collections are equal after the write-read process
-        assertEquals(collection.toString(), results.toString());
+        assertEquals(collection.toString(), results.toString(),
+                "WireCollection should round-trip via write and read");
         WireUtils.compareWireCollection(collection, results);
     }
 }

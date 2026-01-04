@@ -8,34 +8,32 @@ import net.openhft.chronicle.wire.converter.NanoTime;
 import net.openhft.chronicle.wire.converter.ShortText;
 
 /**
- * Represents a person with specific attributes. This class inherits from
- * the SelfDescribingMarshallable which provides serialization functionality.
+ * Represents a person with example attributes.
+ * Uses {@link SelfDescribingMarshallable} for wire-friendly serialisation.
  */
 public class Person extends SelfDescribingMarshallable {
 
-    // Represents the name of the person.
     private String name;
 
-    // Represents the timestamp in nanoseconds.
     @NanoTime
     private long timestampNS;
     @ShortText
     private long userName;
 
     /**
-     * Retrieve the name of the person.
+     * Return the person name used in example payloads.
      *
-     * @return The name of the person.
+     * @return the person name as stored
      */
     public String name() {
         return name;
     }
 
     /**
-     * Set the name of the person.
+     * Update the person name used in example payloads.
      *
-     * @param name The name to set.
-     * @return This person instance, allowing for method chaining.
+     * @param name person name to store
+     * @return this person instance for method chaining
      */
     public Person name(String name) {
         this.name = name;
@@ -43,19 +41,19 @@ public class Person extends SelfDescribingMarshallable {
     }
 
     /**
-     * Retrieve the timestamp in nanoseconds.
+     * Return the timestamp in nanoseconds stored via {@link NanoTime}.
      *
-     * @return The timestamp in nanoseconds.
+     * @return timestamp in nanoseconds
      */
     public long timestampNS() {
         return timestampNS;
     }
 
     /**
-     * Set the timestamp in nanoseconds.
+     * Set the timestamp in nanoseconds for {@link NanoTime} encoding.
      *
-     * @param timestampNS The timestamp to set.
-     * @return This person instance, allowing for method chaining.
+     * @param timestampNS timestamp in nanoseconds
+     * @return this person instance for method chaining
      */
     public Person timestampNS(long timestampNS) {
         this.timestampNS = timestampNS;
@@ -63,19 +61,19 @@ public class Person extends SelfDescribingMarshallable {
     }
 
     /**
-     * Retrieve the username of the person.
+     * Return the short-text user name token stored for this person.
      *
-     * @return The username of the person.
+     * @return short-text user name token
      */
     public long userName() {
         return userName;
     }
 
     /**
-     * Set the username of the person.
+     * Set the short-text user name token for {@link ShortText} encoding.
      *
-     * @param userName The username to set.
-     * @return This person instance, allowing for method chaining.
+     * @param userName short-text user name token to store
+     * @return this person instance for method chaining
      */
     public Person userName(long userName) {
         this.userName = userName;

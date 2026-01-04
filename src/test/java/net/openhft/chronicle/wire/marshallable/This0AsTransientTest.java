@@ -8,6 +8,7 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,37 +24,49 @@ public class This0AsTransientTest extends WireTestCommon {
      * Test serialization of MyClass1, which does not explicitly have a 'this$0' field.
      */
     @Test
+    @DisplayName("MyClass1 serialises without outer reference field")
     public void test1() {
+        MyClass1 instance = new MyClass1(128);
+        assertEquals(128L, instance.value, "MyClass1 value should match constructor input for toString");
         assertEquals("!net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass1 {\n" +
                         "  value: 128\n" +
                         "}\n",
-                new MyClass1(128).toString());
+                instance.toString(),
+                "MyClass1 should serialise without the outer reference field");
     }
 
     /**
      * Test serialization of MyClass1 with YAML, capturing expected exception due to presence of 'this$0'.
      */
     @Test
+    @DisplayName("MyClass1 YAML write ignores this$0 field")
     public void test1b() {
         expectException("Found this$0, in class ");
         Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
-        wire.writeMessage("test", new MyClass1(1111));
+        MyClass1 instance = new MyClass1(1111);
+        assertEquals(1111L, instance.value, "MyClass1 value should match constructor input for YAML write");
+        wire.writeMessage("test", instance);
         assertEquals("test: !net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass1 {\n" +
                         "  value: 1111\n" +
                         "}\n" +
                         "...\n",
-                wire.bytes().toString());
+                wire.bytes().toString(),
+                "MyClass1 YAML should include the value and omit the outer reference");
     }
 
     /**
      * Test serialization of MyClass2, which does not explicitly have a 'this$0' field.
      */
     @Test
+    @DisplayName("MyClass2 serialises without outer reference field")
     public void test2() {
+        MyClass2 instance = new MyClass2(128);
+        assertEquals(128L, instance.value, "MyClass2 value should match constructor input for toString");
         assertEquals("!net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass2 {\n" +
                         "  value: 128\n" +
                         "}\n",
-                new MyClass2(128).toString());
+                instance.toString(),
+                "MyClass2 should serialise without the outer reference field");
     }
 
     /**
@@ -61,16 +74,20 @@ public class This0AsTransientTest extends WireTestCommon {
      * MyClass2 has an additional 'this$0' field to demonstrate the presence of this hidden field in inner classes.
      */
     @Test
+    @DisplayName("MyClass2 YAML write ignores this$0 fields")
     public void test2b() {
         expectException("Found this$0, in class ");
         expectException("Found this$0$, in class ");
         Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
-        wire.writeMessage("test", new MyClass2(2222));
+        MyClass2 instance = new MyClass2(2222);
+        assertEquals(2222L, instance.value, "MyClass2 value should match constructor input for YAML write");
+        wire.writeMessage("test", instance);
         assertEquals("test: !net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass2 {\n" +
                         "  value: 2222\n" +
                         "}\n" +
                         "...\n",
-                wire.bytes().toString());
+                wire.bytes().toString(),
+                "MyClass2 YAML should include the value and omit the outer reference");
     }
 
     /**
@@ -89,6 +106,7 @@ public class This0AsTransientTest extends WireTestCommon {
      * This class has an explicit 'this$0' field to mimic the behavior of hidden fields in inner classes.
      */
     class MyClass2 extends SelfDescribingMarshallable {
+        @SuppressWarnings("checkstyle:MemberName")
         String this$0;
         long value;
 

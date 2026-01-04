@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire.marshallable;
 
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Consumer;
@@ -15,13 +16,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Test class for the WithDefaults functionality.
  * Extends the WireTestCommon to leverage utilities related to wire tests.
  */
-public class WithDefaultsTest extends WireTestCommon {
+class WithDefaultsTest extends WireTestCommon {
 
     /**
      * Tests the writeMarshallable functionality of WithDefaults under various scenarios.
      */
     @Test
-    public void writeMarshallable() {
+    @DisplayName("WithDefaults round-trips across mutation scenarios")
+    void writeMarshallable() {
         for (Scenario scenario : new Scenario[]{
                 new Scenario("default", w -> {
                 }),
@@ -31,8 +33,22 @@ public class WithDefaultsTest extends WireTestCommon {
                 new Scenario("num", w -> w.num = 5),
         }) {
             RoundTripResult result = roundTrip(scenario.mutation);
-            assertEquals(result.serialised, result.roundTripped.toString(), "withDefaults: serialised (" + scenario.name + ")");
-            assertEquals(result.original, result.roundTripped, "withDefaults: object (" + scenario.name + ")");
+            assertEquals(result.serialised, result.roundTripped.toString(),
+                    "Serialised output should match round-tripped form for " + scenario.name);
+            assertEquals(result.original, result.roundTripped,
+                    "Round-tripped object should equal original for " + scenario.name);
+            assertEquals(result.original.text, result.roundTripped.text,
+                    "text should round-trip for " + scenario.name);
+            assertEquals(result.original.flag, result.roundTripped.flag,
+                    "flag should round-trip for " + scenario.name);
+            assertEquals(result.original.num, result.roundTripped.num,
+                    "num should round-trip for " + scenario.name);
+            assertEquals(result.original.num2, result.roundTripped.num2,
+                    "num2 should round-trip for " + scenario.name);
+            assertEquals(result.original.qty, result.roundTripped.qty, 0.0,
+                    "qty should round-trip for " + scenario.name);
+            assertEquals(result.original.bytes.toString(), result.roundTripped.bytes.toString(),
+                    "bytes should round-trip for " + scenario.name);
         }
     }
 

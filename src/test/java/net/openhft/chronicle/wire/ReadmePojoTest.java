@@ -6,7 +6,9 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.io.IOException;
 import java.util.*;
@@ -22,6 +24,7 @@ public class ReadmePojoTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Marshallable list round-trips from string and file")
     public void testFromString() throws IOException {
         // Initialize a MyPojos instance with two MyPojo entries
         @NotNull MyPojos mps = new MyPojos("test-list");
@@ -30,7 +33,7 @@ public class ReadmePojoTest extends WireTestCommon {
 
         // Convert MyPojos instance to string and back, then validate equality
         @Nullable MyPojos mps2 = Marshallable.fromString(mps.toString());
-        assertEquals(mps, mps2);
+        assertEquals(mps, mps2, "Marshallable should round-trip via toString");
 
         // Convert a predefined string into MyPojos object and validate equality
         @NotNull String text = "!MyPojos {\n" +
@@ -41,14 +44,15 @@ public class ReadmePojoTest extends WireTestCommon {
                 "  ]\n" +
                 "}\n";
         @Nullable MyPojos mps3 = Marshallable.fromString(text);
-        assertEquals(mps, mps3);
+        assertEquals(mps, mps3, "Parsed text should match the expected data");
 
         // Read the MyPojos object from a file and validate its content
         @NotNull MyPojos mps4 = Marshallable.fromFile("my-pojos.yaml");
-        assertEquals(mps, mps4);
+        assertEquals(mps, mps4, "File read should match the expected data");
     }
 
     @Test
+    @DisplayName("Text wire map dump matches expected format")
     public void testMapDump() {
         // Creating a LinkedHashMap with various key-value pairs
         @NotNull Map<String, Object> map = new LinkedHashMap<>();
@@ -80,13 +84,16 @@ public class ReadmePojoTest extends WireTestCommon {
                 "  a: 1,\n" +
                 "  b: Hello World,\n" +
                 "  c: bye\n" +
-                "}\n", text);
+                "}\n", text, "Text wire dump should match the expected output");
 
         // Convert the string back into a map and validate equality
         @Nullable Map<String, Object> map2 = TEXT.asMap(text);
-        assertEquals(map, map2);
+        assertEquals(map, map2, "Map parsed from text should match the original");
     }
 
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class MyPojo extends SelfDescribingMarshallable {
         final String text; // Textual data
         final int num;     // Numerical value

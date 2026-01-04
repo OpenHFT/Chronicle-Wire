@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class WireParserTest extends WireTestCommon {
 
     @Test
+    @DisplayName("SkipReadable consumes all remaining readable bytes")
     public void noOpReadOne() {
         // Create an elastic byte buffer with an initial capacity of 128 bytes.
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
@@ -22,6 +24,8 @@ public class WireParserTest extends WireTestCommon {
         WireParser.skipReadable(-1, wire);
 
         // Assert that there are no more bytes left to read from the wire.
-        assertEquals(0, wire.bytes().readRemaining());
+        assertEquals(0,
+                wire.bytes().readRemaining(),
+                "SkipReadable should consume all readable bytes");
     }
 }

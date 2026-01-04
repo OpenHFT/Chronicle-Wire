@@ -6,13 +6,15 @@ package net.openhft.chronicle.wire.marshallable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.Marshallable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TriviallyCopyableMarketDataTest extends net.openhft.chronicle.wire.WireTestCommon {
+class TriviallyCopyableMarketDataTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
-    public void test() {
+    @DisplayName("Trivially copyable market data round-trips")
+    void test() {
         ClassAliasPool.CLASS_ALIASES.addAlias(TriviallyCopyableMarketData.class, "MarketData");
         final String str = "!MarketData {\n" +
                 "  securityId: EUR/GBP,\n" +
@@ -42,8 +44,10 @@ public class TriviallyCopyableMarketDataTest extends net.openhft.chronicle.wire.
         TriviallyCopyableMarketData data2 = new TriviallyCopyableMarketData();
         data2.readMarshallable(bytes);
 
-        assertEquals(str, data.toString());
-        assertEquals(str, data2.toString());
-        assertEquals(data, data2);
+        assertEquals(str, data.toString(), "Source object should render to the expected text");
+        assertEquals(str, data2.toString(), "Round-tripped object should render to the expected text");
+        assertEquals(data, data2, "Round-tripped object should match the source");
+        assertEquals(data.fieldChecksum(), data2.fieldChecksum(),
+                "Round-tripped object should preserve all field values");
     }
 }

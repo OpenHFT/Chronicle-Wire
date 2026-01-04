@@ -6,8 +6,10 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -17,6 +19,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // Use the Parameterized runner for JUnit to execute tests with different combinations of parameters
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 public class PrimArraysTest extends WireTestCommon {
 
     // Class variables to hold the parameters
@@ -81,6 +86,7 @@ public class PrimArraysTest extends WireTestCommon {
     // The test method that will be executed for each combination of parameters
     @MethodSource("combinations")
     @ParameterizedTest(name = "wt={0}, asText={2}")
+    @DisplayName("Primitive arrays round-trip across wire types")
     public void testPrimArray(WireType wireType, Object array, String asText) {
         initPrimArraysTest(wireType, array, asText);
         Wire wire = createWire();  // Create a wire instance based on the wireType
@@ -89,15 +95,17 @@ public class PrimArraysTest extends WireTestCommon {
             wire.write("test")
                     .object(array);
             // Assert that the textual representation matches when using WireType.TEXT
-            if (wireType == WireType.TEXT)
-                assertEquals(asText.trim(), wire.toString().trim());
+            if (wireType == WireType.TEXT) {
+                assertEquals(asText.trim(), wire.toString().trim(),
+                        "Text wire output should match the expected representation");
+            }
 
             // Read the array from the wire and assert it matches the original
             @Nullable Object array2 = wire.read().object();
-            assertEquals(array.getClass(), array2.getClass());
-            assertEquals(Array.getLength(array), Array.getLength(array));
+            assertEquals(array.getClass(), array2.getClass(), "Array type should round-trip");
+            assertEquals(Array.getLength(array), Array.getLength(array2), "Array length should round-trip");
             for (int i = 0, len = Array.getLength(array); i < len; i++)
-                assertEquals(Array.get(array, i), Array.get(array2, i));
+                assertEquals(Array.get(array, i), Array.get(array2, i), "Array element should round-trip at index " + i);
         } finally {
             wire.bytes().releaseLast();  // Clean up resources
         }

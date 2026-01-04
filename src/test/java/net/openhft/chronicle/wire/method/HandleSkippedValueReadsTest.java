@@ -11,6 +11,7 @@ import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -41,19 +42,23 @@ class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.WireTestCom
     }
 
     @MethodSource("data")
-    @ParameterizedTest(name = "wireType={0}")
+    @DisplayName("Handle skipped value reads in metadata and data")
+    @ParameterizedTest(name = "wire type {0} handles skipped values without scanning")
     public void test(WireType wireType) {
         initHandleSkippedValueReadsTest(wireType);
         String output = doTest(false);
-        assertTrue(output.contains("M meta[one]"), "non-scanning mode should process meta[one] messages");
+        assertTrue(output.contains("M meta[one]"),
+                output + " should contain M meta[one] in non-scanning mode");
     }
 
     @MethodSource("data")
-    @ParameterizedTest(name = "wireType={0}")
+    @DisplayName("Handle skipped value reads with scanning enabled")
+    @ParameterizedTest(name = "wire type {0} handles skipped values with scanning")
     public void testScanning(WireType wireType) {
         initHandleSkippedValueReadsTest(wireType);
         String output = doTest(true);
-        assertTrue(output.contains("M meta[one]"), "scanning mode should process meta[one] messages");
+        assertTrue(output.contains("M meta[one]"),
+                output + " should contain M meta[one] in scanning mode");
     }
 
     private String doTest(boolean scanning) {
@@ -100,46 +105,46 @@ class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.WireTestCom
                 .build(Mocker.logging(DataMethod.class, "D ", sw));
 
         if (scanning) {
-            assertTrue(reader.readOne());
+            assertTrue(reader.readOne(), "scanning should read first metadata document");
             assertEquals("M meta[one]\n" +
                             "M meta[oneB]\n" +
                             "M meta[two]\n" +
                             "M meta[three]\n" +
                             "D data[four]\n" +
                             "D data[fourB]\n",
-                    asString(sw));
+                    asString(sw), "scanning should accumulate expected metadata and data messages");
 
         } else {
             // one
-            assertTrue(reader.readOne());
+            assertTrue(reader.readOne(), "non-scanning should read first metadata document");
             assertEquals("M meta[one]\n" +
                             "M meta[oneB]\n",
-                    asString(sw));
+                    asString(sw), "non-scanning should log first metadata messages");
             // two
-            assertTrue(reader.readOne());
+            assertTrue(reader.readOne(), "non-scanning should read second metadata document");
             assertEquals("M meta[one]\n" +
                             "M meta[oneB]\n" +
                             "M meta[two]\n",
-                    asString(sw));
+                    asString(sw), "non-scanning should include meta[two] after second read");
             // three
-            assertTrue(reader.readOne());
+            assertTrue(reader.readOne(), "non-scanning should read third metadata document");
             assertEquals("M meta[one]\n" +
                             "M meta[oneB]\n" +
                             "M meta[two]\n" +
                             "M meta[three]\n",
-                    asString(sw));
+                    asString(sw), "non-scanning should include meta[three] after third read");
             // four
-            assertTrue(reader.readOne());
+            assertTrue(reader.readOne(), "non-scanning should read first data document");
             assertEquals("M meta[one]\n" +
                             "M meta[oneB]\n" +
                             "M meta[two]\n" +
                             "M meta[three]\n" +
                             "D data[four]\n" +
                             "D data[fourB]\n",
-                    asString(sw));
+                    asString(sw), "non-scanning should include first data messages after fourth read");
         }
         // five
-        assertTrue(reader.readOne());
+        assertTrue(reader.readOne(), "reader should read second data document");
         assertEquals("M meta[one]\n" +
                         "M meta[oneB]\n" +
                         "M meta[two]\n" +
@@ -147,9 +152,9 @@ class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.WireTestCom
                         "D data[four]\n" +
                         "D data[fourB]\n" +
                         "D data[five]\n",
-                asString(sw));
+                asString(sw), "log should include data[five] after next read");
         // six
-        assertTrue(reader.readOne());
+        assertTrue(reader.readOne(), "reader should read final data document");
         assertEquals("M meta[one]\n" +
                         "M meta[oneB]\n" +
                         "M meta[two]\n" +
@@ -158,25 +163,29 @@ class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.WireTestCom
                         "D data[fourB]\n" +
                         "D data[five]\n" +
                         "D data[six]\n",
-                asString(sw));
-        assertFalse(reader.readOne());
+                asString(sw), "log should include data[six] after final read");
+        assertFalse(reader.readOne(), "no more documents should remain after reading six");
         return asString(sw);
     }
 
     @MethodSource("data")
-    @ParameterizedTest(name = "wireType={0}")
+    @DisplayName("Handle skipped value reads for index2index metadata")
+    @ParameterizedTest(name = "wire type {0} handles index2index without scanning")
     public void index2index(WireType wireType) {
         initHandleSkippedValueReadsTest(wireType);
         String output = doIndex2index(false);
-        assertTrue(output.contains("M meta[one]"), "non-scanning index2index should process meta[one] messages");
+        assertTrue(output.contains("M meta[one]"),
+                output + " should contain M meta[one] in non-scanning index2index");
     }
 
     @MethodSource("data")
-    @ParameterizedTest(name = "wireType={0}")
+    @DisplayName("Handle skipped value reads for index2index with scanning")
+    @ParameterizedTest(name = "wire type {0} handles index2index with scanning")
     public void index2indexScanning(WireType wireType) {
         initHandleSkippedValueReadsTest(wireType);
         String output = doIndex2index(true);
-        assertTrue(output.contains("M meta[one]"), "scanning index2index should process meta[one] messages");
+        assertTrue(output.contains("M meta[one]"),
+                output + " should contain M meta[one] in scanning index2index");
     }
 
     private String doIndex2index(boolean scanning) {
@@ -200,21 +209,23 @@ class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.WireTestCom
                 .metaDataHandler(Mocker.logging(MetaMethod.class, "M ", sw))
                 .build(Mocker.logging(DataMethod.class, "D ", sw));
 
-        assertTrue(reader.readOne());
+        assertTrue(reader.readOne(), "index2index should read first metadata document");
 
         if (!scanning) {
             // one
-            assertEquals("M meta[one]\n", asString(sw));
-            assertTrue(reader.readOne());
+            assertEquals("M meta[one]\n", asString(sw),
+                    "non-scanning should log meta[one] after first read");
+            assertTrue(reader.readOne(), "index2index should read index2index document");
             // i2i
-            assertEquals("M meta[one]\n", asString(sw));
-            assertTrue(reader.readOne());
+            assertEquals("M meta[one]\n", asString(sw),
+                    "index2index should not add output for skipped index2index entry");
+            assertTrue(reader.readOne(), "index2index should read data document");
         }
         // data six
         assertEquals("M meta[one]\n" +
                         "D data[six]\n",
-                asString(sw));
-        assertFalse(reader.readOne());
+                asString(sw), "final log should include data[six] after read");
+        assertFalse(reader.readOne(), "no more documents should remain after data[six]");
         return asString(sw);
     }
 

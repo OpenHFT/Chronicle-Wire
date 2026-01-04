@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,8 +21,9 @@ public class BytesUsageTest extends WireTestCommon {
      * Test the operations and manipulations on Bytes.
      * It showcases creating Bytes from a string and then appending it to other Bytes instances.
      */
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
+    @DisplayName("BytesWrapper should reuse buffers without garbage")
     public void testBytes() {
         // Initialize a BytesStore instance from a string
         BytesStore<?, ?> value = Bytes.from("helloWorld");
@@ -30,14 +32,16 @@ public class BytesUsageTest extends WireTestCommon {
         {
             BytesWrapper bw = new BytesWrapper();
             bw.clOrdId(Bytes.from("A" + value));
-            assertEquals(Bytes.from("AhelloWorld"), bw.clOrdId());
+            assertEquals(Bytes.from("AhelloWorld"), bw.clOrdId(),
+                    "BytesWrapper should store the prefixed value");
         }
 
         // Garbage-free replacement of Bytes in BytesWrapper
         // This demonstrates how to avoid garbage creation by reusing objects
         BytesWrapper bw = new BytesWrapper();  // this instance should be recycled to avoid garbage
         bw.clOrdId().clear().append('A').append(value); // Direct manipulation of the Bytes
-        assertEquals(Bytes.from("AhelloWorld"), bw.clOrdId());
+        assertEquals(Bytes.from("AhelloWorld"), bw.clOrdId(),
+                "BytesWrapper should reuse the buffer and preserve the value");
 
         // Release any resources held by the Bytes instance
         value.releaseLast();

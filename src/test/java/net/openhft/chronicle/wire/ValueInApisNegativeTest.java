@@ -4,18 +4,20 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Drives less common ValueIn APIs and empty sequence paths.
+ * Exercises less common ValueIn APIs, including empty sequences and binary bytesMatch behaviour.
  */
 @SuppressWarnings({"deprecation", "removal"})
 public class ValueInApisNegativeTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Handles empty sequences and bytesMatch for binary wire")
     public void emptySequenceAndBytesMatch() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
@@ -31,7 +33,7 @@ public class ValueInApisNegativeTest extends WireTestCommon {
                 }
                 return c;
             });
-            assertEquals(0, len);
+            assertEquals(0, len, "Expected empty sequence length for wireType=" + wt);
 
             // bytesMatch on binary only (text/yaml base64 specifics are covered elsewhere)
             if (wt == WireType.BINARY) {
@@ -39,7 +41,7 @@ public class ValueInApisNegativeTest extends WireTestCommon {
                 w.write("b").bytes(content);
                 final boolean[] res = {false};
                 w.read("b").bytesMatch(Bytes.wrapForRead(content), b -> res[0] = b);
-                assertTrue(res[0]);
+                assertTrue(res[0], "Expected bytesMatch to succeed for wireType=" + wt);
             }
         }
     }

@@ -13,6 +13,7 @@ import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.yaml.snakeyaml.Yaml;
@@ -29,14 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JSON222Test extends WireTestCommon {
-
-    @NotNull
-    private File file;
-
-    // Constructor that accepts parameters for each test iteration
-    public void initJSON222Test(@NotNull String fileName, File file) {
-        this.file = file;
-    }
 
     // Provide the test parameters from a collection of files found in a specific directory
     @NotNull
@@ -70,21 +63,23 @@ public class JSON222Test extends WireTestCommon {
     // Test the JSON content using TextWire type
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("JSON files should parse with TextWire")
     public void testJSONAsTextWire(@NotNull String fileName, File file) throws IOException {
-        initJSON222Test(fileName, file);
-        assertTrue(testJSON(WireType.TEXT), "json222: wireType=TEXT file=" + file.getName());
+        assertTrue(testJSON(WireType.TEXT, file),
+                "JSON file should parse with TEXT wire for " + file.getName());
     }
 
     // Temporarily ignore this test; will be re-enabled once fixed
-    @Disabled(/* TODO FIX */)
+    @Disabled("TODO FIX: YAML_ONLY parsing for JSON files")
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("JSON files should parse with YAML wire")
     public void testJSONAsYamlWire(@NotNull String fileName, File file) throws IOException {
-        initJSON222Test(fileName, file);
-        assertTrue(testJSON(WireType.YAML_ONLY), "json222: wireType=YAML_ONLY file=" + file.getName());
+        assertTrue(testJSON(WireType.YAML_ONLY, file),
+                "JSON file should parse with YAML_ONLY wire for " + file.getName());
     }
 
-    private boolean testJSON(WireType wireType) throws IOException {
+    private boolean testJSON(WireType wireType, File file) throws IOException {
         // Read the file content into a byte array
         int len = Maths.toUInt31(file.length());
         @NotNull byte[] bytes = new byte[len];
@@ -116,7 +111,8 @@ public class JSON222Test extends WireTestCommon {
                 parseWithSnakeYaml(bytes3.toString());
                 @Nullable Object object3 = out3.getValueIn()
                         .object();
-                assertEquals(object, object3);
+                assertEquals(object, object3,
+                        "Round-trip object should match for file=" + file.getName());
 
                 list.add(object);
                 out.getValueOut().object(object);
@@ -137,13 +133,14 @@ public class JSON222Test extends WireTestCommon {
                 if (expected.contains("\r\n"))
                     expected = expected.replaceAll("\r\n", "\n");
                 String actual = bytes2.toString();
-                assertEquals(expected, actual);
+                assertEquals(expected, actual,
+                        "Expected YAML output should match for file=" + file.getName());
             }
             // if (fail)
             // throw new AssertionError("Expected to fail, was " + list);
         } catch (Exception e) {
             if (!fail)
-                throw new AssertionError(e);
+                throw new AssertionError("JSON round-trip should not fail for file=" + file.getName(), e);
         } finally {
             // Release resources to avoid memory leaks
             bytes2.releaseLast();

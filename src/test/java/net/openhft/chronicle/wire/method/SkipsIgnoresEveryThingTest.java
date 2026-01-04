@@ -8,6 +8,7 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.util.IgnoresEverything;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
- * Test class extending WireTestCommon to verify selective reading behavior in Chronicle Wire.
+ * Verifies selective reading by routing MethodReader calls based on destination ids.
  */
 public class SkipsIgnoresEveryThingTest extends net.openhft.chronicle.wire.WireTestCommon {
 
@@ -27,6 +28,7 @@ public class SkipsIgnoresEveryThingTest extends net.openhft.chronicle.wire.WireT
      * based on the given condition.
      */
     @Test
+    @DisplayName("Selective reader skips even destinations with DontSayBad")
     public void selective() {
         // Setup a wire with predefined text representing a sequence of messages
         String text = "to: 1\n" +
@@ -60,8 +62,10 @@ public class SkipsIgnoresEveryThingTest extends net.openhft.chronicle.wire.WireT
 
         // Read messages and assert their processing
         for (int i = 4; i >= 0; i--)
-            assertEquals(i > 0, reader.readOne());
-        assertEquals("[hi, fine]", words.toString()); // Assert only valid words are collected
+            assertEquals(i > 0, reader.readOne(),
+                    "readOne should return true until wire is exhausted at i=" + i);
+        assertEquals("[hi, fine]", words.toString(),
+                "Only non-bad words from odd ids should be collected");
     }
 
     /**
@@ -86,7 +90,7 @@ public class SkipsIgnoresEveryThingTest extends net.openhft.chronicle.wire.WireT
         @Override
         public void say(String text) {
             // Assert that the text is not "bad"
-            assertNotEquals("bad", text);
+            assertNotEquals("bad", text, "DontSayBad should ignore bad content");
         }
     }
 }

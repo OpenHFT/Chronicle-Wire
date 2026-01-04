@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,6 +17,7 @@ public class ThrowableTest extends WireTestCommon {
 
     // Tests the writing and reading capabilities of a Throwable object with TEXT and BINARY_LIGHT WireTypes.
     @Test
+    @DisplayName("Writes and reads Throwable across wire types")
     public void writeReadThrowable() {
         // Loop through TEXT and BINARY_LIGHT WireTypes for testing
         for (WireType wireType : new WireType[]{WireType.TEXT, WireType.BINARY_LIGHT}) {
@@ -28,12 +30,15 @@ public class ThrowableTest extends WireTestCommon {
                 dc.wire().getValueOut()
                         .object(message);
             }
-            assumeFalse(Jvm.maxDirectMemory() == 0);
+            assumeFalse(Jvm.maxDirectMemory() == 0,
+                    "Direct memory disabled; skip throwable test for wireType=" + wireType);
             // Read the written Throwable and validate its content
             try (DocumentContext dc = wire.readingDocument()) {
                 Throwable t = (Throwable) dc.wire().getValueIn().object();
-                assertEquals("message", t.getMessage());
-                assertTrue(t.getStackTrace()[0].toString().startsWith("net.openhft.chronicle.wire.ThrowableTest.writeReadThrowable(ThrowableTest.java"));
+                assertEquals("message", t.getMessage(),
+                        "throwable message should round-trip for wireType=" + wireType);
+                assertTrue(t.getStackTrace()[0].toString().startsWith("net.openhft.chronicle.wire.ThrowableTest.writeReadThrowable(ThrowableTest.java"),
+                        "stack trace should include test method for wireType=" + wireType);
             }
 
             // Release the byte resources

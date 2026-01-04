@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.wire.WireType.BINARY;
@@ -14,6 +15,7 @@ public class GenerateMethodWriterSameInterfaceDifferentOuterClassTest {
 
     // Test the method writing capability for two different interfaces
     @Test
+    @DisplayName("Writes methods for nested interfaces from different outers")
     public void test() {
 
         // Create a new Wire object with elastic byte buffer and BINARY settings
@@ -42,7 +44,8 @@ public class GenerateMethodWriterSameInterfaceDifferentOuterClassTest {
                         "# position: 20, header: 1\n" +
                         "--- !!data #binary\n" +
                         "y: hello world\n",
-                Wires.fromSizePrefixedBlobs(wire));
+                Wires.fromSizePrefixedBlobs(wire),
+                "wire output should include both outer interface events");
 
     }
 }

@@ -15,6 +15,7 @@ import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
 import net.openhft.chronicle.wire.domestic.stream.Streams;
 import net.openhft.chronicle.wire.domestic.streaming.reduction.MarketData;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.TestFactory;
@@ -41,6 +42,7 @@ final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
     }
 
     @TestFactory
+    @DisplayName("Streams should match reference operations across wire types")
     Stream<DynamicTest> test() {
         final List<DynamicTest> tests = Product.of(
                         // All the wire types we'd like to test
@@ -172,6 +174,6 @@ final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
                 // Make a copy as the stream might reuse objects
                 .map(MarketData::new)
                 .collect(toList());
-        assertEquals(expectedList, actualList);
+        assertEquals(expectedList, actualList, "Stream contents should match expected market data");
     }
 }

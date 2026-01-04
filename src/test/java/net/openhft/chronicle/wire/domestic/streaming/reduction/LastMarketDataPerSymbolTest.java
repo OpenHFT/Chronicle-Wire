@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire.domestic.streaming.reduction;
 
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -17,7 +18,7 @@ import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("deprecation")
-public class LastMarketDataPerSymbolTest extends WireTestCommon {
+class LastMarketDataPerSymbolTest extends WireTestCommon {
 
     private static final List<MarketData> MARKET_DATA_SET = Arrays.asList(
             new MarketData("MSFT", 100, 110, 90),
@@ -26,7 +27,8 @@ public class LastMarketDataPerSymbolTest extends WireTestCommon {
     );
 
     @Test
-    public void lastMarketDataPerSymbol() {
+    @DisplayName("Reduces last market data per symbol")
+    void lastMarketDataPerSymbol() {
 
         final Reduction<Map<String, MarketData>> listener = Reduction.of(
                         builder(MarketData.class).build())
@@ -37,11 +39,13 @@ public class LastMarketDataPerSymbolTest extends WireTestCommon {
         final Map<String, MarketData> expected = MARKET_DATA_SET.stream()
                 .collect(toMap(MarketData::symbol, Function.identity(), (a, b) -> b));
 
-        assertEquals(expected, listener.reduction());
+        assertEquals(expected, listener.reduction(),
+                "Reduction should keep the last MarketData per symbol");
     }
 
     @Test
-    public void symbolSet() {
+    @DisplayName("Reduces symbol set from market data")
+    void symbolSet() {
 
         Reduction<Set<String>> listener = Reduction.of(
                         builder(MarketData.class).build().map(MarketData::symbol))
@@ -53,7 +57,8 @@ public class LastMarketDataPerSymbolTest extends WireTestCommon {
                 .map(MarketData::symbol)
                 .collect(toSet());
 
-        assertEquals(expected, listener.reduction());
+        assertEquals(expected, listener.reduction(),
+                "Reduction should collect all unique symbols");
     }
 
 }

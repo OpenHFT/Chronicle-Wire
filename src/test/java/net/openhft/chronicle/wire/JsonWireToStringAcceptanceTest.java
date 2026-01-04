@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -22,31 +23,37 @@ class JsonWireToStringAcceptanceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"£", "€", "¥", "\u20B9", "ó", "óaóó", "", "ÊÆÄ"})
+    @DisplayName("Renders unicode characters in json asString")
     void json_verifyAsString(String input) {
         Map<String, String> map = new HashMap<>();
         map.put("x", input);
         for (WireType wireType : WIRE_TYPES) {
-            Assertions.assertEquals("{\"x\":\"" + input + "\"}", wireType.asString(map));
+            Assertions.assertEquals("{\"x\":\"" + input + "\"}", wireType.asString(map),
+                    "asString should preserve unicode value for wireType=" + wireType);
         }
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"£", "€", "¥", "\u20B9", "ó", "óaóó"})
+    @DisplayName("Renders unicode characters in json object toString")
     void json_verifyObjectToString(String input) {
         Map<String, String> map = new HashMap<>();
         map.put("x", input);
         WireOut object = new JSONWire().getValueOut().object(map);
-        Assertions.assertEquals("{\"x\":\"" + input + "\"}", object.toString());
+        Assertions.assertEquals("{\"x\":\"" + input + "\"}", object.toString(),
+                "object toString should preserve unicode value");
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"£", "€", "¥", "\u20B9", "ó", "óaóó"})
+    @DisplayName("Renders unicode characters in json asText")
     void json_verifyAsText(String input) {
         Map<String, String> map = new HashMap<>();
         map.put("x", input);
         JSONWire jsonWire = new JSONWire();
         jsonWire.getValueOut().object(map);
-        Assertions.assertEquals("{\"x\":\"" + input + "\"}", JSONWire.asText(jsonWire));
+        Assertions.assertEquals("{\"x\":\"" + input + "\"}", JSONWire.asText(jsonWire),
+                "asText should preserve unicode value");
     }
 
 }

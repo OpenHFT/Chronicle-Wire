@@ -24,4 +24,8 @@ class Group extends SelfDescribingMarshallable {
     public Group(Field field) {
         this.field = field;
     }
+
+    Field getField() {
+        return field;
+    }
 }

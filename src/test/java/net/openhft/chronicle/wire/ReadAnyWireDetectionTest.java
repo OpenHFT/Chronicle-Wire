@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ReadAnyWireDetectionTest extends WireTestCommon {
 
     @Test
+    @DisplayName("ReadAnyWire detects wire type and reads payload")
     public void detectsWireTypeAndReadsPayload() {
         for (WireCase testCase : cases()) {
             Bytes<?> encoded = encode(testCase.type, wire -> {
@@ -27,11 +29,13 @@ public class ReadAnyWireDetectionTest extends WireTestCommon {
             ReadAnyWire readAnyWire = new ReadAnyWire(encoded);
             WireType detected;
             try (DocumentContext dc = readAnyWire.readingDocument()) {
-                assertTrue(dc.isPresent());
-                assertEquals(testCase.payload, dc.wire().read("msg").text());
+                assertTrue(dc.isPresent(), "Document should be present for " + testCase.type);
+                assertEquals(testCase.payload, dc.wire().read("msg").text(),
+                        "Payload should match for " + testCase.type);
                 detected = readAnyWire.underlyingType().get();
             }
-            assertEquals(testCase.expectedType, detected);
+            assertEquals(testCase.expectedType, detected,
+                    "Detected type should match expected for " + testCase.type);
             encoded.releaseLast();
         }
     }

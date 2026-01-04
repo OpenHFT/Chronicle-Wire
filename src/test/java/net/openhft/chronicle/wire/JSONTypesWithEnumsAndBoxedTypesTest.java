@@ -7,6 +7,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -21,9 +22,6 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  */
 public class JSONTypesWithEnumsAndBoxedTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
 
-    // Instance variable to determine if types are to be used in the JSON Wire representation.
-    private boolean useTypes;
-
     // Providing two sets of parameters for the tests, based on whether types should be used or not.
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
@@ -32,10 +30,6 @@ public class JSONTypesWithEnumsAndBoxedTypesTest extends net.openhft.chronicle.w
         );
     }
 
-    // Constructor to initialize the `useTypes` instance variable.
-    public void initJSONTypesWithEnumsAndBoxedTypesTest(boolean useTypes) {
-        this.useTypes = useTypes;
-    }
 
     // Enum representing various locations in a Formula 1 race.
     enum Location {
@@ -62,10 +56,11 @@ public class JSONTypesWithEnumsAndBoxedTypesTest extends net.openhft.chronicle.w
 
     // Test method to verify the JSON Wire representation.
     @MethodSource("wireTypes")
-    @ParameterizedTest(name = "useTypes={0}")
+    @ParameterizedTest(name = "useTypes={0} writes json boxed enum values")
+    @DisplayName("Writes boxed enums to json with optional types")
     public void test(boolean useTypes) {
-        initJSONTypesWithEnumsAndBoxedTypesTest(useTypes);
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip json enums test");
 
         // Add an alias for the F1 class for a more concise YAML representation.
         ClassAliasPool.CLASS_ALIASES.addAlias(F1.class);
@@ -85,6 +80,7 @@ public class JSONTypesWithEnumsAndBoxedTypesTest extends net.openhft.chronicle.w
         final String actual = jsonWire.getValueIn().object().toString();
 
         // Assert to verify if the string representation contains the word "TRACK".
-        Assertions.assertTrue(actual.contains("TRACK"));
+        Assertions.assertTrue(actual.contains("TRACK"),
+                actual + " should include enum value TRACK");
     }
 }

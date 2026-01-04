@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -14,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ValueOutMapTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Writes and reads map entries with values")
     public void writesAndReadsMaps() {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("name", "alice");
@@ -25,7 +27,7 @@ public class ValueOutMapTest extends WireTestCommon {
 
         bytes.readPositionRemaining(0, bytes.writePosition());
         Map<String, Object> read = wire.read("map").marshallableAsMap(String.class, Object.class);
-        assertEquals(map, read);
+        assertEquals(map, read, "Expected map round-trip to preserve entries");
     }
 }
 

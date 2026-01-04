@@ -8,10 +8,12 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Represents a nested structure containing various data types.
- * This class can be serialized/deserialized as it extends SelfDescribingMarshallable.
+ * This class can be serialised/deserialised as it extends SelfDescribingMarshallable.
  */
 @SuppressWarnings("serial")
 class Nested extends SelfDescribingMarshallable {
@@ -31,14 +33,11 @@ class Nested extends SelfDescribingMarshallable {
     // An array of strings
     private String[] array;
 
-    /**
-     * Default constructor.
-     */
     public Nested() {
     }
 
     /**
-     * Parameterized constructor to initialize the object with specified values.
+     * Parameterised constructor to initialise the object with specified values.
      *
      * @param values   Scalar values
      * @param strings  A list of strings
@@ -52,5 +51,9 @@ class Nested extends SelfDescribingMarshallable {
         this.ints = ints;
         this.map = map;
         this.array = array;
+    }
+
+    int fieldFingerprint() {
+        return Objects.hash(values, strings, ints, map, Arrays.hashCode(array));
     }
 }

@@ -5,12 +5,13 @@ package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.Wire;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for verifying the behavior of generic method writers in Chronicle Wire.
+ * Exercises generic method writer dispatch through YAML wire and MethodReader.
  */
 class GenericMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
 
@@ -18,6 +19,7 @@ class GenericMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon 
      * Test the functionality of method writers with generic parameters.
      */
     @Test
+    @DisplayName("Generic method writers round-trip via MethodReader")
     public void genericParameter() {
         // Create a new YAML wire in memory
         Wire wire = Wire.newYamlWireOnHeap();
@@ -28,6 +30,7 @@ class GenericMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon 
         // Create an instance of ChronicleEvent and set its sending time
         final ChronicleEvent event = new ChronicleEvent();
         event.sendingTimeNS((long) 1e9); // Set sending time to 1 billion nanoseconds (1 second)
+        assertNull(event.text3(), "text3 should default to null before serialisation");
         writer.event(event); // Write the event to the wire
         event.sendingTimeNS((long) 2e9); // Set sending time to 2 billion nanoseconds (2 second)
         writer.onEvent(event); // Write the event to the wire
@@ -45,7 +48,8 @@ class GenericMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon 
                 "  text1: \"\",\n" +
                 "  text3: !!null \"\"\n" +
                 "}\n" +
-                "...\n", wire.toString());
+                "...\n", wire.toString(),
+                "Wire output should reflect both events in order");
 
         // Repeat the process with a new wire to verify the reader functionality
         Wire wire2 = Wire.newYamlWireOnHeap();
@@ -53,9 +57,9 @@ class GenericMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon 
 
         // Read from the first wire and write to the second wire
         final MethodReader reader = wire.methodReader(writer2);
-        assertTrue(reader.readOne()); // Expect to read the first event
-        assertTrue(reader.readOne()); // Expect to read the second event
-        assertFalse(reader.readOne()); // No more events to read
+        assertTrue(reader.readOne(), "Reader should process the first event");
+        assertTrue(reader.readOne(), "Reader should process the second event");
+        assertFalse(reader.readOne(), "Reader should have no more events");
 
         // Assert the second wire's content matches the first wire's
         assertEquals("event: {\n" +
@@ -71,6 +75,7 @@ class GenericMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon 
                 "  text1: \"\",\n" +
                 "  text3: !!null \"\"\n" +
                 "}\n" +
-                "...\n", wire2.toString());
+                "...\n", wire2.toString(),
+                "Wire output should round-trip through MethodReader");
     }
 }

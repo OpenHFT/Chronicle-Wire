@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.util.BooleanConsumer;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -26,8 +27,9 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
      * Test case to verify that an anonymous class can be passed to MethodReader.
      * It sets up a writer, writes a message, then uses a MethodReader to read and process the message using an anonymous class implementation.
      */
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
+    @DisplayName("Anonymous class can be used with MethodReader")
     public void testAnonymousClassCanBePassedToMethodReader() {
         // Initialization of the wire with padding
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
@@ -50,18 +52,20 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
         });
 
         // Assertions to ensure the reader is of the expected type and it reads and processes the message correctly
-        assertFalse(reader instanceof VanillaMethodReader);
+        assertFalse(reader instanceof VanillaMethodReader,
+                "MethodReader should use generated code for anonymous class");
 
-        assertTrue(reader.readOne());
-        assertTrue(b.get());
+        assertTrue(reader.readOne(), "Anonymous class reader should process the single written call");
+        assertTrue(b.get(), "Anonymous class should receive the call");
     }
 
     /**
      * Test case to verify that a core class can be passed to MethodReader.
      * Similar to the above test but uses a BooleanConsumer core class.
      */
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
+    @DisplayName("Core class can be used with MethodReader")
     public void testCoreClassCanBePassedToMethodReader() throws Exception {
         // Initialization of the wire with padding
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
@@ -84,18 +88,20 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
         });
 
         // Assertions to ensure the reader is of the expected type and it reads and processes the message correctly
-        assertFalse(reader instanceof VanillaMethodReader);
+        assertFalse(reader instanceof VanillaMethodReader,
+                "MethodReader should use generated code for core classes");
 
-        assertTrue(reader.readOne());
-        assertTrue(b.get());
+        assertTrue(reader.readOne(), "Core class reader should process the single written call");
+        assertTrue(b.get(), "BooleanConsumer should receive the call");
     }
 
     /**
      * Test case to verify that a lambda expression can be passed to MethodReader.
      * It demonstrates how a lambda can be used to implement the reading functionality.
      */
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
+    @DisplayName("Lambda can be used with MethodReader")
     public void testLambdaCanBePassedToMethodReader() {
         // Initialization of the wire with padding
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
@@ -113,10 +119,11 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
         MethodReader reader = wire.methodReader((MyInterface) () -> b.set(true));
 
         // Assertions to ensure the reader is of the expected type and it reads and processes the message correctly
-        assertFalse(reader instanceof VanillaMethodReader);
+        assertFalse(reader instanceof VanillaMethodReader,
+                "MethodReader should use generated code for lambda");
 
-        assertTrue(reader.readOne());
-        assertTrue(b.get());
+        assertTrue(reader.readOne(), "Lambda reader should process the single written call");
+        assertTrue(b.get(), "Lambda should receive the call");
     }
 
     /**

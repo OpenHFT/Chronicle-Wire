@@ -6,27 +6,26 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-import java.lang.reflect.Method;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // This class tests the functionalities related to the projection of wire data.
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 public class ProjectTest extends WireTestCommon {
 
-    // Rule to retrieve the name of the currently-running test
-    @NotNull
-    public String name;
-
     // Test case to verify the projection functionality between two data transfer objects.
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
+    @DisplayName("Projects values between compatible DTO objects")
     public void testProject() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for projection tests");
 
         // Initialize the first DTO with sample data
         @NotNull Dto1 dto1 = new Dto1();
@@ -38,16 +37,17 @@ public class ProjectTest extends WireTestCommon {
         Dto2 dto2 = Wires.project(Dto2.class, dto1);
 
         // Assert that the data has been correctly projected
-        Assertions.assertEquals(dto2.someValue, dto1.someValue);
-        Assertions.assertEquals(dto2.anotherField, dto1.anotherField);
-        Assertions.assertEquals(dto2.m, dto1.m);
+        Assertions.assertEquals(dto2.someValue, dto1.someValue, "Projected someValue should match the source");
+        Assertions.assertEquals(dto2.anotherField, dto1.anotherField, "Projected anotherField should match the source");
+        Assertions.assertEquals(dto2.m, dto1.m, "Projected map should match the source");
 
     }
 
     // Test case to verify the projection functionality with nested marshallable objects.
     @Test
+    @DisplayName("Projects nested marshallable objects without loss")
     public void testProjectWithNestedMarshallable() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for nested projection tests");
 
         // Initialize the simple object with a nested inner object and sample data
         @NotNull final Simple simple = new Simple();
@@ -59,7 +59,7 @@ public class ProjectTest extends WireTestCommon {
 
         // Project the data from the simple object to an outer object
         final Outer project = Wires.project(Outer.class, simple);
-        Assertions.assertEquals("some data", project.inner().name());
+        Assertions.assertEquals("some data", project.inner().name(), "Projected inner name should match the source");
     }
 
     // Data Transfer Object 1 - holds sample data for projection tests
@@ -74,6 +74,9 @@ public class ProjectTest extends WireTestCommon {
 
     // Data Transfer Object 2 - target object for the projection tests
     @SuppressWarnings("rawtypes")
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     static class Dto2 extends SelfDescribingMarshallable {
         long someValue;
         String anotherField;
@@ -124,11 +127,4 @@ public class ProjectTest extends WireTestCommon {
         }
     }
 
-    @BeforeEach
-    public void setup(TestInfo testInfo) {
-        Optional<Method> testMethod = testInfo.getTestMethod();
-        if (testMethod.isPresent()) {
-            this.name = testMethod.get().getName();
-        }
-    }
 }

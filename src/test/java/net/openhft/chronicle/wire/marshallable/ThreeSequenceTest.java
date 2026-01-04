@@ -6,22 +6,26 @@ package net.openhft.chronicle.wire.marshallable;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
- * Unit test for the ThreeSequence class.
+ * Verifies YAML round-trip for ThreeSequence across three price/qty lists.
  */
-public class ThreeSequenceTest extends WireTestCommon {
+class ThreeSequenceTest extends WireTestCommon {
 
     /**
      * Tests the serialization and deserialization process for the ThreeSequence class.
      */
     @Test
-    public void testThree() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @DisplayName("ThreeSequence YAML round-trips with all lists")
+    void testThree() {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for ThreeSequence test");
 
         // Deserialize the YAML string into a ThreeSequence object
         ThreeSequence ts = Marshallable.fromString("!" + ThreeSequence.class.getName() + " {\n" +
@@ -55,9 +59,21 @@ public class ThreeSequenceTest extends WireTestCommon {
                 "    { price: 3.2, qty: 1.0 }\n" +
                 "  ],\n" +
                 "  text: hello\n" +
-                "}\n", ts.toString());
+                "}\n", ts.toString(), "Rendered text should match the expected format");
+
+        assertEquals("hello", ts.getText(), "Text should parse from YAML");
+        assertEquals(2, ts.getA().size(), "List a should contain two entries");
+        assertEquals(2, ts.getB().size(), "List b should contain two entries");
+        assertEquals(2, ts.getC().size(), "List c should contain two entries");
+
+        Rung rung = ts.getA().get(0);
+        assertEquals(1.1, rung.getPrice(), 0.0, "First rung price should match YAML input");
+        assertEquals(2.0, rung.getQty(), 0.0, "First rung qty should match YAML input");
+        assertFalse(rung.isDelta(), "First rung delta should default to false");
+        assertNull(rung.getNotSet(), "First rung notSet should default to null");
 
         // Round-trip test: serialize and then deserialize to verify the entire process
-        assertEquals(ts, Marshallable.fromString(ts.toString()));
+        assertEquals(ts, Marshallable.fromString(ts.toString()),
+                "Marshallable should round-trip via toString");
     }
 }

@@ -8,6 +8,7 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
 import net.openhft.chronicle.wire.domestic.reduction.Reductions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.LongSupplier;
@@ -16,10 +17,11 @@ import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.createThe
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("deprecation")
-public class LastIndexSeenTailerTest extends WireTestCommon {
+class LastIndexSeenTailerTest extends WireTestCommon {
 
     @Test
-    public void lastIndexSeenTailer() {
+    @DisplayName("Last index seen tailer reports final index")
+    void lastIndexSeenTailer() {
 
         // Add stuff that simulated existing values in the queue
         MarshallableIn tailer = createThenValueOuts(
@@ -35,6 +37,7 @@ public class LastIndexSeenTailerTest extends WireTestCommon {
         listener.accept(tailer);
 
         // Assert that the retrieved index is greater than the sum of the lengths of the simulated strings (3 + 3 + 5)
-        assertTrue(listener.reduction().getAsLong() > 3 + 3 + 5);
+        assertTrue(listener.reduction().getAsLong() > 3 + 3 + 5,
+                "Reduction should report an index beyond the final payload size");
     }
 }

@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -57,24 +58,33 @@ public class WireInternalInternTest extends WireTestCommon {
         // Interning the value using WireInternal.
         Object value2 = WireInternal.intern(type, value);
         // Checking that the interned value matches the expected output.
-        assertEquals(value, value2.toString());
+        assertEquals(value,
+                value2.toString(),
+                "Interned value should match original text");
         // Interning again and checking that the same instance is returned.
         Object value3 = WireInternal.intern(type, value);
-        assertSame(value2, value3);
+        assertSame(value2,
+                value3,
+                "Interned value should return same instance");
     }
 
     // This test ensures that the marshallable component behaves as expected.
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Marshallable returns interned instances for values")
     public void marshallable(String typeValue) {
         initWireInternalInternTest(typeValue);
         // Creating a Marshallable object from the test input value.
         Object o = Marshallable.fromString(typeValue);
         // Creating another instance and ensuring that the same instance is returned.
         Object o2 = Marshallable.fromString(typeValue);
-        assertSame(o, o2);
+        assertSame(o,
+                o2,
+                "Marshallable should return same interned instance");
         // Serializing the object to a string and verifying it matches the expected output.
         String s = WireType.TEXT.asString(o);
-        assertEquals(typeValue.trim(), s.trim().replaceAll("\"", ""));
+        assertEquals(typeValue.trim(),
+                s.trim().replaceAll("\"", ""),
+                "Text wire output should match interned value");
     }
 }

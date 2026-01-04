@@ -11,6 +11,7 @@ import net.openhft.chronicle.core.pool.EnumCache;
 import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
@@ -38,7 +39,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
     // This method simulates the dynamic addition of an enumeration value.
     // It initializes various objects and performs operations to test the behavior of dynamic enums.
     private static boolean doAddedEnum(WireType wireType) throws NoSuchFieldException {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Dynamic enum write test requires direct memory");
 
         Wire tw = wireType.apply(Bytes.allocateElasticOnHeap());
         UsesWDENums nums = tw.methodWriter(UsesWDENums.class);
@@ -87,44 +88,51 @@ public class WireDynamicEnumTest extends WireTestCommon {
                 "}\n" +
                 "...\n" +
                 "push2: ACE\n" +
-                "...\n", tw.toString());
+                "...\n", tw.toString(),
+                "Dynamic enum output should match expected text for " + wireType);
         return true;
     }
 
     // This test validates the functionality of adding a dynamic enum using TEXT wire type.
     @Test
+    @DisplayName("Dynamic enum reset should preserve explicit nulls")
     public void dontResetDynamicEnum() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Dynamic enum reset test requires direct memory");
 
         HoldsWDENum x = new HoldsWDENum(null, null);
         assertEquals("!HoldsWDENum {\n" +
                 "  a: !!null \"\",\n" +
                 "  b: !!null \"\"\n" +
-                "}\n", x.toString());
+                "}\n", x.toString(),
+                "Reset should preserve null fields for empty instance");
 
         HoldsWDENum a = new HoldsWDENum(WDENums.ONE, WDENums.TWO);
         Wires.reset(a);
         assertEquals("!HoldsWDENum {\n" +
                 "  a: !!null \"\",\n" +
                 "  b: !!null \"\"\n" +
-                "}\n", a.toString());
+                "}\n", a.toString(),
+                "Reset should clear enum fields to null");
     }
 
     @Test
+    @DisplayName("Dynamic enum additions should work for TEXT wire")
     public void addedEnum() throws NoSuchFieldException {
-        assertTrue(doAddedEnum(WireType.TEXT), "dynamic enum: wireType=TEXT");
+        assertTrue(doAddedEnum(WireType.TEXT), "Dynamic enum additions should succeed for TEXT wire");
     }
 
     // This test validates the functionality of adding a dynamic enum using YAML_ONLY wire type.
     @Test
+    @DisplayName("Dynamic enum additions should work for YAML_ONLY wire")
     public void addedEnumYaml() throws NoSuchFieldException {
-        assertTrue(doAddedEnum(WireType.YAML_ONLY), "dynamic enum: wireType=YAML_ONLY");
+        assertTrue(doAddedEnum(WireType.YAML_ONLY), "Dynamic enum additions should succeed for YAML_ONLY wire");
     }
 
     // This test method validates the deserialization process of the dynamic enums and checks the correctness of the output.
     @Test
+    @DisplayName("Dynamic enum reader should deserialise text sequence")
     public void deserialize() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Dynamic enum deserialise test requires direct memory");
 
         // Define the text input string representing the serialized form of the dynamic enums and their operations.
         String text = "push: ONE\n" +
@@ -168,10 +176,10 @@ public class WireDynamicEnumTest extends WireTestCommon {
         // Read and deserialize each entry in the input text.
         // Expect to read 6 entries based on the input structure.
         for (int i = 0; i < 6; i++)
-            assertTrue(reader.readOne());
+            assertTrue(reader.readOne(), "Reader should process entry " + i + " in deserialize");
 
         // After reading all entries, no more entries should be available.
-        assertFalse(reader.readOne());
+        assertFalse(reader.readOne(), "Reader should have no more entries after standard deserialisation");
 
         // Assert that the output captured in the StringWriter matches the expected deserialized format.
         assertEquals("push[ONE]\n" +
@@ -202,7 +210,8 @@ public class WireDynamicEnumTest extends WireTestCommon {
                 "  nice: Ace,\n" +
                 "  value: 101\n" +
                 "}\n" +
-                "]\n", sw.toString().replace("\r", ""));
+                "]\n", sw.toString().replace("\r", ""),
+                "Logged output should match deserialised enum sequence");
     }
 
     /**
@@ -210,8 +219,9 @@ public class WireDynamicEnumTest extends WireTestCommon {
      * Instead of using a mocker to log method calls, a real implementation of the UsesWDENums interface is provided.
      */
     @Test
+    @DisplayName("Dynamic enum reader should deserialise with custom handlers")
     public void deserialize2() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for dynamic enum test");
 
         // Define the input text string, which represents serialized data.
         String text = "push: ONE\n" +
@@ -295,10 +305,10 @@ public class WireDynamicEnumTest extends WireTestCommon {
         // Read and deserialize each entry in the input text.
         // Expect to read 8 entries based on the input structure.
         for (int i = 0; i < 8; i++)
-            assertTrue(reader.readOne());
+            assertTrue(reader.readOne(), "Reader should process entry " + i + " in custom deserialisation");
 
         // After reading all entries, no more entries should be available.
-        assertFalse(reader.readOne());
+        assertFalse(reader.readOne(), "Reader should have no more entries after custom deserialisation");
 
         // Assert that the output captured in the StringWriter matches the expected deserialized format.
         assertEquals("ONE ~ One ~ 1\n" +
@@ -317,17 +327,21 @@ public class WireDynamicEnumTest extends WireTestCommon {
                 "\n" +
                 "ONE = One = 1\n" +
                 "TWO = Two = 2\n" +
-                "KING = King = 112\n", sw.toString());
+                "KING = King = 112\n", sw.toString(),
+                "Logged output should match updated enum values");
     }
 
     // Test the deep copy functionality of WDENums
     @Test
+    @DisplayName("Dynamic enum deepCopy should preserve identity")
     public void testDeepCopy() {
         // Assert that the deep copy of WDENums.ONE is equal to WDENums.ONE
-        assertEquals(WDENums.ONE, WDENums.ONE.deepCopy());
+        assertEquals(WDENums.ONE, WDENums.ONE.deepCopy(),
+                "Deep copy should preserve enum identity for ONE");
 
         // Assert that the deep copy of WDENums.TWO is the same instance as WDENums.TWO
-        assertSame(WDENums.TWO, WDENums.TWO.deepCopy());
+        assertSame(WDENums.TWO, WDENums.TWO.deepCopy(),
+                "Deep copy should return the same instance for TWO");
     }
 
     // Enum representing WDENums with associated values and display names

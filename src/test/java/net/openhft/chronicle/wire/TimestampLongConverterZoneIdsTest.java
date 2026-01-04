@@ -4,8 +4,10 @@
 package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -23,6 +25,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // Running the test class in a parameterized manner.
 @SuppressWarnings({"deprecation", "removal"})
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
 
     private Future<?> future;
@@ -48,18 +53,20 @@ public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
 
     // This static method tests a given zoneId with the specified converter type.
     private static void testManyZones(String zoneId, ConverterType converterType) {
-        assumeFalse(zoneId.equals("GMT0"));
+        assumeFalse(zoneId.equals("GMT0"), "GMT0 zone id is excluded from this test");
         AbstractTimestampLongConverter mtlc = converterType.createConverter(zoneId);
         final String str = mtlc.asString(converterType.sampleTimeInUTC);
-        assertEquals(converterType.sampleTimeInUTC, mtlc.parse(str), zoneId);
+        assertEquals(converterType.sampleTimeInUTC, mtlc.parse(str),
+                "parsed time should match sample time for zoneId=" + zoneId + ", converterType=" + converterType);
     }
 
     // This test method checks the result of the future from the asynchronous operation.
+    @DisplayName("Converts sample timestamps across zone ids")
     @MethodSource("combinations")
     @ParameterizedTest(name = "zoneId={0}, converterType={1}")
     public void testManyZones(String zoneId, ConverterType converterType, Future<?> future) throws ExecutionException, InterruptedException {
         initTimestampLongConverterZoneIdsTest(zoneId, converterType, future);
-        assertNull(future.get());
+        assertNull(future.get(), "zone conversion future should return null for zoneId=" + zoneId);
     }
 
     // Enum representing the different converter types: Milli, Micro, and Nano.

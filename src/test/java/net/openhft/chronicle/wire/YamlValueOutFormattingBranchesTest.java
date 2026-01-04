@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -19,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class YamlValueOutFormattingBranchesTest extends WireTestCommon {
 
     @Test
+    @DisplayName("YAML value output round trips complex values")
     public void writeAndReadComplexYaml() {
         Wire w = WireType.YAML.apply(Bytes.allocateElasticOnHeap(512));
 
@@ -39,20 +41,25 @@ public class YamlValueOutFormattingBranchesTest extends WireTestCommon {
 
         // Parse back and assert values
         YamlWire r = YamlWire.from(yaml);
-        assertEquals("needs: quoting [brackets]", r.read("quoted").text());
-        assertEquals("line1\nline2", r.read("multiline").text());
-        assertEquals("", r.read("empty").text());
+        assertEquals("needs: quoting [brackets]", r.read("quoted").text(),
+                "Quoted value should round trip with brackets intact");
+        assertEquals("line1\nline2", r.read("multiline").text(),
+                "Multiline value should round trip with line breaks");
+        assertEquals("", r.read("empty").text(),
+                "Empty string should round trip as empty value");
         final Object[] seq = new Object[2];
         r.read("seq").sequence(seq, (arr, in) -> {
             arr[0] = in.text();
             arr[1] = in.text();
         });
-        assertArrayEquals(new Object[]{"x", "y"}, seq);
+        assertArrayEquals(new Object[]{"x", "y"}, seq,
+                "Sequence values should round trip in order");
         Map<?, ?> out = r.read("map").marshallableAsMap(String.class, Object.class);
-        assertEquals(m, out);
+        assertEquals(m, out, "Map values should round trip through YAML");
     }
 
     @Test
+    @DisplayName("YAML output writes quoted and multiline values")
     public void writesQuotedAndMultilineValues() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         YamlWire wire = new YamlWire(bytes);
@@ -62,13 +69,17 @@ public class YamlValueOutFormattingBranchesTest extends WireTestCommon {
         wire.write("flag").bool(true);
 
         String yaml = bytes.toString();
-        assertTrue(yaml.contains("quoted: \"needs: quoting\""));
+        assertTrue(yaml.contains("quoted: \"needs: quoting\""),
+                "YAML output should contain quoted value, got: " + yaml);
 
         // Read the whole document as a map (avoids relying on ValueIn#marshallable for root documents)
         Map<String, Object> values = YamlWire.from(yaml)
                 .readAllAsMap(String.class, Object.class, new java.util.LinkedHashMap<>());
-        assertEquals("needs: quoting", values.get("quoted"));
-        assertEquals("first\nsecond", values.get("multiline"));
-        assertEquals(true, values.get("flag"));
+        assertEquals("needs: quoting", values.get("quoted"),
+                "Quoted field should parse back to original value");
+        assertEquals("first\nsecond", values.get("multiline"),
+                "Multiline field should parse back with line breaks");
+        assertEquals(true, values.get("flag"),
+                "Boolean field should parse back to true");
     }
 }

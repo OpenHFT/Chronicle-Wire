@@ -18,9 +18,15 @@ final class WirePrimitiveTestSupport {
                 .write().bool(true)
                 .write().bool(null);
 
-        wire.read().bool(false, (expected, actual) -> assertEquals(expected, actual))
-                .read().bool(true, (expected, actual) -> assertEquals(expected, actual))
-                .read().bool(null, (expected, actual) -> assertEquals(expected, actual));
+        wire.read().bool(false, (expected, actual) -> assertEquals(expected,
+                        actual,
+                        "Boolean false value should round trip"))
+                .read().bool(true, (expected, actual) -> assertEquals(expected,
+                        actual,
+                        "Boolean true value should round trip"))
+                .read().bool(null, (expected, actual) -> assertEquals(expected,
+                        actual,
+                        "Boolean null value should round trip"));
     }
 
     static void assertFloat32RoundTrip(Wire wire, Object testInstance) {
@@ -30,11 +36,24 @@ final class WirePrimitiveTestSupport {
                 .write().float32(Float.NEGATIVE_INFINITY)
                 .write().float32(123456.0f);
 
-        wire.read().float32(testInstance, (o, t) -> assertEquals(0.0F, t, 0.0F))
-                .read().float32(testInstance, (o, t) -> assertTrue(Float.isNaN(t)))
-                .read().float32(testInstance, (o, t) -> assertEquals(Float.POSITIVE_INFINITY, t, 0.0F))
-                .read().float32(testInstance, (o, t) -> assertEquals(Float.NEGATIVE_INFINITY, t, 0.0F))
-                .read().float32(testInstance, (o, t) -> assertEquals(123456.0f, t, 0.0F));
+        wire.read().float32(testInstance, (o, t) -> assertEquals(0.0F,
+                        t,
+                        0.0F,
+                        "Float32 should round trip for zero"))
+                .read().float32(testInstance, (o, t) -> assertTrue(Float.isNaN(t),
+                        "Float32 should round trip NaN"))
+                .read().float32(testInstance, (o, t) -> assertEquals(Float.POSITIVE_INFINITY,
+                        t,
+                        0.0F,
+                        "Float32 should round trip positive infinity"))
+                .read().float32(testInstance, (o, t) -> assertEquals(Float.NEGATIVE_INFINITY,
+                        t,
+                        0.0F,
+                        "Float32 should round trip negative infinity"))
+                .read().float32(testInstance, (o, t) -> assertEquals(123456.0f,
+                        t,
+                        0.0F,
+                        "Float32 should round trip 123456 value"));
     }
 
     static void writeTimes(Wire wire, LocalTime now) {
@@ -44,9 +63,15 @@ final class WirePrimitiveTestSupport {
     }
 
     static void assertTimes(Wire wire, LocalTime now) {
-        wire.read().time(now, (expected, actual) -> assertEquals(expected, actual))
-                .read().time(LocalTime.MAX, (expected, actual) -> assertEquals(expected, actual))
-                .read().time(LocalTime.MIN, (expected, actual) -> assertEquals(expected, actual));
+        wire.read().time(now, (expected, actual) -> assertEquals(expected,
+                        actual,
+                        "LocalTime now value should round trip"))
+                .read().time(LocalTime.MAX, (expected, actual) -> assertEquals(expected,
+                        actual,
+                        "LocalTime MAX value should round trip"))
+                .read().time(LocalTime.MIN, (expected, actual) -> assertEquals(expected,
+                        actual,
+                        "LocalTime MIN value should round trip"));
     }
 
     static String expectedTimeString(LocalTime now) {

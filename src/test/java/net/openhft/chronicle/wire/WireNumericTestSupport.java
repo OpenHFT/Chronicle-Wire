@@ -25,9 +25,13 @@ final class WireNumericTestSupport {
         @NotNull AtomicLong i = new AtomicLong();
         LongStream.rangeClosed(1, 3).forEach(e -> {
             wire.read().int64(i, AtomicLong::set);
-            assertEquals(e, i.get());
+            assertEquals(e,
+                    i.get(),
+                    "Int64 value should match expected step " + e);
         });
-        assertEquals(0, wire.bytes().readRemaining());
+        assertEquals(0,
+                wire.bytes().readRemaining(),
+                "Int64 read should leave no remaining bytes");
         wire.read();
     }
 
@@ -38,10 +42,21 @@ final class WireNumericTestSupport {
     }
 
     static void assertFloat64sRead(Wire wire) {
-        assertEquals(1, wire.read().float64(), 0.0);
-        assertEquals(2, wire.read(BWKey.field1).float64(), 0.0);
-        assertEquals(3, wire.read().float64(), 0.0);
-        assertEquals(0, wire.bytes().readRemaining());
+        assertEquals(1,
+                wire.read().float64(),
+                0.0,
+                "First float64 value should equal 1");
+        assertEquals(2,
+                wire.read(BWKey.field1).float64(),
+                0.0,
+                "Second float64 value should equal 2");
+        assertEquals(3,
+                wire.read().float64(),
+                0.0,
+                "Third float64 value should equal 3");
+        assertEquals(0,
+                wire.bytes().readRemaining(),
+                "Float64 read should leave no remaining bytes");
         wire.read();
     }
 }

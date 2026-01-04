@@ -9,6 +9,7 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -20,26 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Test suite for validating Map serialization and deserialization using different wire types.
  * Inherits from WireTestCommon for common test setup and teardown functionalities.
  */
-public class MapWireTest extends WireTestCommon {
-
-    // The wire type for serialization and deserialization (TEXT or BINARY)
-    private WireType wireType;
-
-    // The map to be tested
-    @SuppressWarnings("rawtypes")
-    private Map m;
-
-    /**
-     * Constructs a new MapWireTest instance with the specified wire type and map.
-     *
-     * @param wireType The wire type for serialization and deserialization.
-     * @param m The map to be tested.
-     */
-    @SuppressWarnings("rawtypes")
-    public void initMapWireTest(WireType wireType, Map m) {
-        this.wireType = wireType;
-        this.m = m;
-    }
+class MapWireTest extends WireTestCommon {
 
     /**
      * Provides a collection of test parameters including wire types and maps with various content.
@@ -74,9 +56,9 @@ public class MapWireTest extends WireTestCommon {
      */
     @MethodSource("combinations")
     @SuppressWarnings({"rawtypes", "unchecked"})
+    @DisplayName("Map round-trips across wire types")
     @ParameterizedTest
-    public void writeMap(WireType wireType, Map m) {
-        initMapWireTest(wireType, m);
+    void writeMap(WireType wireType, Map m) {
         // Create an elastic buffer to hold serialized data
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
@@ -90,7 +72,7 @@ public class MapWireTest extends WireTestCommon {
         @Nullable Map m2 = wire.getValueIn().marshallableAsMap(Object.class, Object.class);
 
         // Ensure that the deserialized map matches the original map
-        assertEquals(m, m2);
+        assertEquals(m, m2, "Map should round-trip for wireType=" + wireType);
 
         // Release the bytes buffer
         bytes.releaseLast();

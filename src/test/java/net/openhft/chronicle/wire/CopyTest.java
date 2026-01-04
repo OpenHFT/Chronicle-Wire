@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -13,23 +14,11 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class CopyTest extends WireTestCommon {
-
-    // Initial source and destination wire types for the copy test
-    private WireType from, to;
-
-    // Determines if the test uses the type information while copying
-    private boolean withType;
-
-    // Constructor to initialize wire types and whether the test runs with type information
-    public void initCopyTest(WireType from, WireType to, boolean withType) {
-        this.from = from;
-        this.to = to;
-        this.withType = withType;
-    }
 
     // Define the combinations of wire types and settings for the test
     public static Collection<Object[]> wireTypes() {
@@ -62,8 +51,8 @@ public class CopyTest extends WireTestCommon {
     @MethodSource("wireTypes")
     @SuppressWarnings("rawtypes")
     @ParameterizedTest(name = "from: {0}, to: {1}, withType: {2}")
+    @DisplayName("Copies wire data across formats with optional type metadata")
     public void testCopy(WireType from, WireType to, boolean withType) {
-        initCopyTest(from, to, withType);
         // Create source bytes and wire objects
         Bytes<?> bytesFrom = Bytes.allocateElasticOnHeap(64);
         Wire wireFrom = from.apply(bytesFrom);
@@ -87,18 +76,30 @@ public class CopyTest extends WireTestCommon {
         // Perform checks if the destination wire type is JSON
         if (to == WireType.JSON || to == WireType.JSON_ONLY) {
             final String text = wireTo.toString();
-            assertFalse(text.contains("? "), text);
-            assertFalse(text.contains("\n\""), text);
+            assertFalse(text.contains("? "),
+                    "JSON output should not include type tags, from=" + from + ", to=" + to + ", withType=" + withType + ", text=" + text);
+            assertFalse(text.contains("\n\""),
+                    "JSON output should not include raw newline quotes, from=" + from + ", to=" + to + ", withType=" + withType + ", text=" + text);
         }
 
         if (to == WireType.BINARY_LIGHT)
             wireTo.readingDocument();
         // Validate the data in the destination wire
         final String event = wireTo.readEvent(String.class);
-        assertEquals("test", event);
+        assertEquals("test", event,
+                "Copied event name should be preserved, from=" + from + ", to=" + to + ", withType=" + withType);
         AClass b = wireTo.getValueIn().object(AClass.class);
 
-        assertEquals(a, b);
+        assertEquals(a, b,
+                "Copied object should match original, from=" + from + ", to=" + to + ", withType=" + withType);
+        assertEquals(a.map, b.map,
+                "Copied map should match original, from=" + from + ", to=" + to + ", withType=" + withType);
+        assertArrayEquals(a.array, b.array,
+                "Copied array should match original, from=" + from + ", to=" + to + ", withType=" + withType);
+        assertEquals(a.intValue, b.intValue,
+                "Copied intValue should match original, from=" + from + ", to=" + to + ", withType=" + withType);
+        assertEquals(a.value, b.value, 0.0,
+                "Copied value should match original, from=" + from + ", to=" + to + ", withType=" + withType);
 
         // If testing with type information, re-run copy with typedMarshallable
         if (withType) {
@@ -115,7 +116,8 @@ public class CopyTest extends WireTestCommon {
                 wireTo.readingDocument();
             Object b2 = wireTo.read("msg").object();
 
-            assertEquals(a, b2);
+            assertEquals(a, b2,
+                    "Typed marshallable copy should match original, from=" + from + ", to=" + to + ", withType=" + withType);
         }
     }
 

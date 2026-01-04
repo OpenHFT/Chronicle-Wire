@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -32,6 +33,7 @@ class UpdateInterceptorReturnTypeTest extends WireTestCommon {
     // Test to verify behavior with an interceptor on a method that has no return type
     @MethodSource("data")
     @ParameterizedTest(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
+    @DisplayName("Interceptor writes data for void return type")
     public void testUpdateInterceptorNoReturnType(boolean disableProxyCodegen) {
         withDisableProxyCodegen(disableProxyCodegen, () -> {
             final Wire wire = createWire();
@@ -42,13 +44,15 @@ class UpdateInterceptorReturnTypeTest extends WireTestCommon {
                     .x("hello world");
             assertEquals("--- !!data #binary\n" +
                             "x: hello world\n",
-                    Wires.fromSizePrefixedBlobs(wire));
+                    Wires.fromSizePrefixedBlobs(wire),
+                    "Expected wire output for void return type, disableProxyCodegen=" + disableProxyCodegen);
         });
     }
 
     // Test to verify behavior with an interceptor on a method that has an integer return type
     @MethodSource("data")
     @ParameterizedTest(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
+    @DisplayName("Interceptor returns default int and writes data")
     public void testUpdateInterceptorWithIntReturnType(boolean disableProxyCodegen) {
         withDisableProxyCodegen(disableProxyCodegen, () -> {
             final Wire wire = createWire();
@@ -57,16 +61,18 @@ class UpdateInterceptorReturnTypeTest extends WireTestCommon {
                     .updateInterceptor((methodName, t) -> true)
                     .build()
                     .x("hello world");
-            assertEquals(0, value);
+            assertEquals(0, value, "Expected default int return for disableProxyCodegen=" + disableProxyCodegen);
             assertEquals("--- !!data #binary\n" +
                             "x: hello world\n",
-                    Wires.fromSizePrefixedBlobs(wire));
+                    Wires.fromSizePrefixedBlobs(wire),
+                    "Expected wire output for int return type, disableProxyCodegen=" + disableProxyCodegen);
         });
     }
 
     // Test to verify behavior with an interceptor on a method that has an object return type
     @MethodSource("data")
     @ParameterizedTest(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
+    @DisplayName("Interceptor returns writer for object return type")
     public void testUpdateInterceptorWithObjectReturnType(boolean disableProxyCodegen) {
         withDisableProxyCodegen(disableProxyCodegen, () -> {
             final Wire wire = createWire();
@@ -75,28 +81,32 @@ class UpdateInterceptorReturnTypeTest extends WireTestCommon {
                     .updateInterceptor((methodName, t) -> true)
                     .build();
             Object value = mw.x("hello world");
-            assertSame(mw, value);
-            assertEquals(disableProxyCodegen, Proxy.isProxyClass(mw.getClass()));
-            assumeFalse(disableProxyCodegen);
+            assertSame(mw, value, "Expected object return to be the writer instance");
+            assertEquals(disableProxyCodegen, Proxy.isProxyClass(mw.getClass()),
+                    "Expected proxy status to match disableProxyCodegen=" + disableProxyCodegen);
+            assumeFalse(disableProxyCodegen, "Proxy codegen disabled; skip not-ready-data assertion");
 
             // Here, data is written but is on hold until the end of the message is written.
             // WireDumper no longer scans data that is written but not ready
             assertEquals("--- !!not-ready-data\n" +
                             "...\n" +
                             "# 15 bytes remaining\n",
-                    Wires.fromSizePrefixedBlobs(wire));
+                    Wires.fromSizePrefixedBlobs(wire),
+                    "Expected not-ready-data marker before second call");
 
             mw.y("good byte");
             assertEquals("--- !!data #binary\n" +
                             "x: hello world\n" +
                             "y: good byte\n",
-                    Wires.fromSizePrefixedBlobs(wire));
+                    Wires.fromSizePrefixedBlobs(wire),
+                    "Expected wire output after second call with x and y fields");
         });
     }
 
     // Test to verify the behavior of an interceptor on a method from the LadderByQtyListener interface
     @MethodSource("data")
     @ParameterizedTest(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
+    @DisplayName("Interceptor writes ladderByQty updates for listener")
     public void testUpdateInterceptorWithLadderByQtyListener(boolean disableProxyCodegen) {
         withDisableProxyCodegen(disableProxyCodegen, () -> {
             final Wire wire = createWire();
@@ -107,7 +117,8 @@ class UpdateInterceptorReturnTypeTest extends WireTestCommon {
                     .ladderByQty("a ladder");
             assertEquals("--- !!data #binary\n" +
                             "ladderByQty: a ladder\n",
-                    Wires.fromSizePrefixedBlobs(wire));
+                    Wires.fromSizePrefixedBlobs(wire),
+                    "Expected wire output for ladderByQty, disableProxyCodegen=" + disableProxyCodegen);
         });
     }
 

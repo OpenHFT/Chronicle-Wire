@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.DataOutput;
@@ -19,6 +20,7 @@ public class IgnoreHighOrderBitsTest extends WireTestCommon {
      * see https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/DataOutput.html#write(int)
      */
     @Test
+    @DisplayName("Writes only low order byte for int write")
     public void testWriteByte() throws IOException {
         // Create a new HexDumpBytes object to represent byte sequences in a human-readable format
         @SuppressWarnings("rawtypes") final Bytes<?> bytes = new HexDumpBytes();
@@ -38,7 +40,8 @@ public class IgnoreHighOrderBitsTest extends WireTestCommon {
 
             // Assert that the byte representation matches the expected output
             assertEquals("a1 00                                           # 0\n",
-                    bytes.toHexString());
+                    bytes.toHexString(),
+                    "wire should write low order byte only for value 256");
         } finally {
             bytes.releaseLast();
         }

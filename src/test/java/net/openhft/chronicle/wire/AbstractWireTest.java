@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
@@ -30,6 +31,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
     // Test case for working with ZonedDateTime values
     @Test
+    @DisplayName("Serialises and reads ZonedDateTime values correctly")
     public void testZonedDateTime() {
         @NotNull Wire wire = createWire();
 
@@ -85,6 +87,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
     // Test to ensure a SortedSet is correctly written to and read from the Wire.
     @Test
+    @DisplayName("Serialises and reads SortedSet values correctly")
     public void testSortedSet() {
         // Initialize a new Wire instance.
         final Wire wire = createWire();
@@ -116,6 +119,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
     // Test to ensure a SortedMap is correctly written to and read from the Wire.
     @Test
+    @DisplayName("Serialises and reads SortedMap values correctly")
     public void testSortedMap() {
         // Initialize a new Wire instance.
         final Wire wire = createWire();
@@ -147,6 +151,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
     // Test to validate the behavior of writing and reading simple boolean values
     @Test
+    @DisplayName("Writes and reads simple boolean fields")
     public void testSimpleBool() {
         @NotNull Wire wire = createWire();
 
@@ -170,6 +175,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
     // Test to validate the behavior when writing strings that cannot be converted to boolean
     @Test
+    @DisplayName("Reads non-boolean text values as false")
     public void testFailingBool() {
         @NotNull Wire wire = createWire();
 
@@ -180,7 +186,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
         // Verify the written strings
         assertEquals("A: \"\"\n" +
                         "B: other\n", wire.toString(),
-                "wire should serialize non-boolean text values as strings");
+                "wire should serialise non-boolean text values as strings");
 
         // Check the wire content using the SnakeYaml parser
         @NotNull String expected = "{A=, B=other}";
@@ -193,6 +199,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
     // Test to validate the reading of non-boolean strings as Boolean objects
     @Test
+    @DisplayName("Reads non-boolean text as Boolean object result")
     public void testFailingBoolean() {
         @NotNull Wire wire = createWire();
 
@@ -203,7 +210,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
         // Verify the written strings
         assertEquals("A: \"\"\n" +
                         "B: other\n", wire.toString(),
-                "wire should serialize non-boolean text values as strings");
+                "wire should serialise non-boolean text values as strings for Boolean reads");
 
         // Check the wire content using the SnakeYaml parser
         @NotNull String expected = "{A=, B=other}";
@@ -217,6 +224,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
     // Test to validate the behavior when writing text with a leading space
     @Test
+    @DisplayName("Preserves leading whitespace in text values")
     public void testLeadingSpace() {
         @NotNull Wire wire = createWire();
 
@@ -249,6 +257,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
     // Test writing arrays of objects to a Wire and reading them back.
     @Test
+    @DisplayName("Round-trips empty and simple arrays correctly")
     public void testArrays() {
         // Create a wire instance
         @NotNull Wire wire = createWire();
@@ -261,6 +270,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
     // Test writing arrays with varying lengths and types of elements to a Wire and reading them back.
     @Test
+    @DisplayName("Round-trips object arrays of varying size")
     public void testArrays2() {
         // Create a wire instance
         @NotNull Wire wire = createWire();
@@ -273,15 +283,16 @@ public abstract class AbstractWireTest extends WireTestCommon {
         wire.write("three").object(Object[].class, a3);
 
         Object o1 = wire.read().object(Object[].class);
-        assertArrayEquals(a1, (Object[]) o1, "array[0]: empty");
+        assertArrayEquals(a1, (Object[]) o1, "Expected empty array at index 0");
         Object o2 = wire.read().object(Object[].class);
-        assertArrayEquals(a2, (Object[]) o2, "array[1]: one");
+        assertArrayEquals(a2, (Object[]) o2, "Expected single-item array at index 1");
         Object o3 = wire.read().object(Object[].class);
-        assertArrayEquals(a3, (Object[]) o3, "array[2]: three");
+        assertArrayEquals(a3, (Object[]) o3, "Expected three-item array at index 2");
     }
 
     // Test GZIP compression of text strings written to a Wire.
     @Test
+    @DisplayName("Decompresses gzip text written to wire")
     @SuppressWarnings("deprecation")
     public void testGZIPCompressionAsText() {
         // Create a wire instance and a string to compress
@@ -302,6 +313,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
     // Test to validate the behavior of writing and reading a long value
     @Test
+    @DisplayName("Writes and reads int64 values correctly")
     public void testInt64() {
         @NotNull Wire wire = createWire();
 
@@ -319,6 +331,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
     // Test to validate the behavior of writing and reading a short value
     @Test
+    @DisplayName("Writes and reads int16 values correctly")
     public void testInt16() {
         @NotNull Wire wire = createWire();
 
@@ -336,6 +349,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
     // Test to ensure that reading a value too large for a short throws an exception
     @Test
+    @DisplayName("Rejects int16 overflow during read safely")
     public void testInt16TooLarge() {
         assertThrows(IllegalStateException.class, () -> {
             @NotNull Wire wire = createWire();
@@ -345,11 +359,12 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
             // Attempt to read the value as a short, which should throw an exception
             wire.read(() -> "VALUE").int16();
-        });
+        }, "Expected int16 read to reject overflow");
     }
 
     // Test to validate the behavior of writing and reading an integer value
     @Test
+    @DisplayName("Writes and reads int32 values correctly")
     public void testInt32() {
         @NotNull Wire wire = createWire();
 
@@ -370,6 +385,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
     // Test to ensure that reading a value too large for an integer throws an exception
     @Test
+    @DisplayName("Rejects int32 overflow during read safely")
     public void testInt32TooLarge() {
         assertThrows(IllegalStateException.class, () -> {
             @NotNull Wire wire = createWire();
@@ -379,11 +395,12 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
             // Attempt to read the value as a short, which should throw an exception
             wire.read(() -> "VALUE").int16();
-        });
+        }, "Expected int32 read to reject overflow");
     }
 
     // Test to validate writing using keys from the BWKey enum
     @Test
+    @DisplayName("Writes enum keys without values correctly")
     public void testWrite1() {
         @NotNull Wire wire = createWire();
 
@@ -399,6 +416,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
     // Test to validate writing with different string lengths
     @Test
+    @DisplayName("Writes field names with long strings")
     public void testWrite2() {
         @NotNull Wire wire = createWire();
 
@@ -414,6 +432,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
     // Test to validate reading from the wire
     @Test
+    @DisplayName("Consumes bytes when reading fields from wire")
     public void testRead() {
         @NotNull Wire wire = createWire();
 
@@ -423,15 +442,16 @@ public abstract class AbstractWireTest extends WireTestCommon {
         wire.write(() -> "Test");
 
         long remainingBefore = wire.bytes().readRemaining();
-        wire.read();
-        wire.read();
-        wire.read();
+        for (int i = 0; i < 3; i++) {
+            wire.read();
+        }
         assertTrue(wire.bytes().readRemaining() < remainingBefore,
                 "wire read operations should consume bytes from the underlying buffer");
     }
 
     // Test the write behavior of custom Marshallable objects with Wire.
     @Test
+    @DisplayName("Serialises and reads Marshallable objects correctly")
     public void testWriteMarshallable() {
         // Create wire instance
         final Wire wire = createWire();
@@ -481,6 +501,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test the write behavior of custom Marshallable objects with Wire,
     // and verify the length of written fields.
     @Test
+    @DisplayName("Reports field length for marshallable writes")
     public void testWriteMarshallableAndFieldLength() {
         // Create wire instance
         final Wire wire = createWire();
@@ -505,7 +526,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
         expectWithSnakeYaml("{A={B_FLAG=true, S_NUM=12345, D_NUM=123.456, L_NUM=0, I_NUM=-12345789, TEXT=}}", wire);
 
         @NotNull ValueIn read = wire.read(() -> "A");
-        assertTrue(fieldLen > 0, "wire should report positive field length for written Marshallable");
+        assertTrue(fieldLen > 0, "Expected positive field length but was " + fieldLen);
         long readLength = read.readLength();
         assertTrue(Math.abs(fieldLen - readLength) <= 1,
                 "wire field length should match read length within one byte fieldLen=" + fieldLen + ", readLength=" + readLength);

@@ -22,6 +22,8 @@ public class EgMain {
         String str = e.toString();
         Event e2 = Marshallable.fromString(str);
         System.out.println(e2);
+        long roundTripTime = e2.time;
+        System.out.println("Round-trip time: " + roundTripTime);
 
         // Measure the time taken for retrieving current time repeatedly.
         for (int t = 0; t < 3; t++) {

@@ -96,122 +96,59 @@ public class WireCollection extends WireModel {
         }
     }
 
-    /**
-     * Gets the reference of this collection.
-     *
-     * @return The reference string, may be null.
-     */
     @Nullable
     public String getReference() {
         return reference;
     }
 
-    /**
-     * Sets the reference of this collection.
-     *
-     * @param reference The new reference string.
-     */
     public void setReference(@Nullable String reference) {
         this.reference = reference;
     }
 
-    /**
-     * Gets the path of this collection.
-     *
-     * @return The path string, may be null.
-     */
     @Nullable
     public String getPath() {
         return path;
     }
 
-    /**
-     * Sets the path of this collection.
-     *
-     * @param path The new path string.
-     */
     public void setPath(@Nullable String path) {
         this.path = path;
     }
 
-    /**
-     * Gets the name of this collection.
-     *
-     * @return The name string, may be null.
-     */
     @Nullable
     public String getName() {
         return name;
     }
 
-    /**
-     * Sets the name of this collection.
-     *
-     * @param name The new name string.
-     */
     public void setName(@Nullable String name) {
         this.name = name;
     }
 
-    /**
-     * Clears all properties from this collection.
-     */
     public void clearProperties() {
         properties.clear();
     }
 
-    /**
-     * Gets the properties map of this collection.
-     *
-     * @return A map of properties, may be null.
-     */
     @Nullable
     public Map<String, WireProperty> getProperties() {
         return properties;
     }
 
-    /**
-     * Sets the properties map of this collection.
-     *
-     * @param properties The new properties map.
-     */
     public void setProperties(@Nullable Map<String, WireProperty> properties) {
         this.properties = properties;
     }
 
-    /**
-     * Adds a property to this collection.
-     *
-     * @param property The property to add.
-     */
     public void addProperty(@NotNull WireProperty property) {
         this.properties.put(property.getReference(), property);
     }
 
-    /**
-     * Gets the collections map of this collection.
-     *
-     * @return A map of sub-collections, may be null.
-     */
     @Nullable
     public Map<String, WireCollection> getCollections() {
         return collections;
     }
 
-    /**
-     * Sets the collections map of this collection.
-     *
-     * @param collections The new collections map.
-     */
     public void setCollections(@Nullable Map<String, WireCollection> collections) {
         this.collections = collections;
     }
 
-    /**
-     * Adds a sub-collection to this collection.
-     *
-     * @param collection The sub-collection to add.
-     */
     public void addCollection(@NotNull WireCollection collection) {
         this.collections.put(collection.getReference(), collection);
     }

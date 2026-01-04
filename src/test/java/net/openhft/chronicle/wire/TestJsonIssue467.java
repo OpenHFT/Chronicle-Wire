@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.OnHeapBytes;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
@@ -20,11 +21,13 @@ public class TestJsonIssue467 {
     }
 
     @Test
+    @DisplayName("Serialises response item to expected json payload")
     public void test() {
         assertResponseItemJson();
     }
 
     @Test
+    @DisplayName("Serialises response item to expected json payload again")
     public void test2() {
         assertResponseItemJson();
     }
@@ -71,10 +74,12 @@ public class TestJsonIssue467 {
         }
 
         // check the number of '{' match the number of '}'
-        Assertions.assertEquals(openBracket, closeBracket, "openBracket and closeBracket should match");
+        Assertions.assertEquals(openBracket, closeBracket,
+                "open and close braces should balance, open=" + openBracket + ", close=" + closeBracket);
 
         // DON'T CHANGE THE EXPECTED JSON IT IS CORRECT ! - please use this website to validate the json - https://jsonformatter.org
-        Assertions.assertEquals("{\"@ResponseItem467\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":{\"eventId\":\"periodicUpdate\",\"eventTime\":1652109920838805734,\"seqNumbers\":[ {\"sessionID\":{\"localCompID\":\"SERVER\",\"remoteCompID\":\"CLIENT\",\"localSubID\":null,\"remoteSubID\":null},\"rSeq\":1517,\"wSeq\":1519,\"isActive\":true,\"isConnected\":false} ]}}}", actual);
+        Assertions.assertEquals("{\"@ResponseItem467\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":{\"eventId\":\"periodicUpdate\",\"eventTime\":1652109920838805734,\"seqNumbers\":[ {\"sessionID\":{\"localCompID\":\"SERVER\",\"remoteCompID\":\"CLIENT\",\"localSubID\":null,\"remoteSubID\":null},\"rSeq\":1517,\"wSeq\":1519,\"isActive\":true,\"isConnected\":false} ]}}}", actual,
+                "json output should match expected ResponseItem467 payload");
     }
 
     private static Wire jsonResponseItem() {
@@ -84,6 +89,7 @@ public class TestJsonIssue467 {
     }
 
     @Test
+    @DisplayName("Reads json wire object into response item")
     public void testWireObject() {
         final Wire jsonWire = jsonResponseItem();
         ResponseItem467 responseItem467 = jsonWire.getValueIn().object(ResponseItem467.class);
@@ -92,10 +98,12 @@ public class TestJsonIssue467 {
                 "  index: \"4dc800000034\",\n" +
                 "  key: notificationMsg,\n" +
                 "  payload: Successfully debited your account by 0.0\n" +
-                "}\n", responseItem467.toString());
+                "}\n", responseItem467.toString(),
+                "wire object should render expected response item text");
     }
 
     @Test
+    @DisplayName("Reads json wire object into provided response instance")
     public void testWireReusingObject() {
         final Wire jsonWire = jsonResponseItem();
         ResponseItem467 responseItem4671 = new ResponseItem467();
@@ -104,6 +112,7 @@ public class TestJsonIssue467 {
                 "  index: \"4dc800000034\",\n" +
                 "  key: notificationMsg,\n" +
                 "  payload: Successfully debited your account by 0.0\n" +
-                "}\n", responseItem467.toString());
+                "}\n", responseItem467.toString(),
+                "reused response item should render expected text output");
     }
 }

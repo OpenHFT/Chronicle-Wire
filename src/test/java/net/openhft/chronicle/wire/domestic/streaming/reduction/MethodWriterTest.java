@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire.domestic.streaming.reduction;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -17,10 +18,11 @@ import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class MethodWriterTest extends WireTestCommon {
+class MethodWriterTest extends WireTestCommon {
 
     @Test
-    public void lastSeen() {
+    @DisplayName("Reduction captures last market data via method writer")
+    void lastSeen() {
 
         final Reduction<AtomicReference<MarketData>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class)
@@ -33,11 +35,12 @@ public class MethodWriterTest extends WireTestCommon {
 
         MarketData expected = StreamingReductionTestSupport.createMarketData();
         MarketData actual = listener.reduction().get();
-        assertEquals(expected, actual);
+        assertEquals(expected, actual, "Reduction should capture the last MarketData");
     }
 
     @Test
-    public void map() {
+    @DisplayName("Reduction map collects market data by symbol")
+    void map() {
 
         final Reduction<Map<String, MarketData>> listener = StreamingReductionTestSupport.mapReduction();
 
@@ -46,6 +49,7 @@ public class MethodWriterTest extends WireTestCommon {
         Map<String, MarketData> expected = new HashMap<>();
         expected.put(expectedSymbol.symbol(), expectedSymbol);
 
-        assertEquals(expected, listener.reduction());
+        assertEquals(expected, listener.reduction(),
+                "Reduction should map the last MarketData per symbol");
     }
 }

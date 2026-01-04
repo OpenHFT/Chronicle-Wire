@@ -9,6 +9,7 @@ import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.Mocker;
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -21,18 +22,6 @@ import static org.easymock.EasyMock.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ClassAliasPoolTest extends WireTestCommon {
-
-    // Define the type of wire (e.g., TEXT, YAML, BINARY) being tested
-    private WireType wireType;
-
-    // Define a consumer that performs checks on the wire's content
-    private Consumer<Wire> wireChecker;
-
-    // Constructor to initialize wire type and checker
-    public void initClassAliasPoolTest(WireType wireType, Consumer<Wire> wireChecker) {
-        this.wireType = wireType;
-        this.wireChecker = wireChecker;
-    }
 
     // Helper method to match char sequences in a mock setup
     private static CharSequence charSequence(String text) {
@@ -59,13 +48,15 @@ public class ClassAliasPoolTest extends WireTestCommon {
                                         "  value: 0\n" +
                                         "}\n" +
                                         "...\n",
-                                w.toString())},
+                                w.toString(),
+                                "text wire output should include CAPTData handle event")},
                 {WireType.YAML_ONLY,
                         (Consumer<WireIn>) w -> assertEquals("handle: !CAPTData {\n" +
                                         "  value: 0\n" +
                                         "}\n" +
                                         "...\n",
-                                w.toString())},
+                                w.toString(),
+                                "yaml wire output should include CAPTData handle event")},
                 {WireType.BINARY,
                         (Consumer<WireIn>) w -> assertEquals("1f 00 00 00                                     # msg-length\n" +
                                         "b9 06 68 61 6e 64 6c 65                         # handle: (event)\n" +
@@ -73,7 +64,8 @@ public class ClassAliasPoolTest extends WireTestCommon {
                                         "82 08 00 00 00                                  # CAPTData\n" +
                                         "   c5 76 61 6c 75 65                               # value:\n" +
                                         "   a1 00                                           # 0\n",
-                                w.bytes().toHexString())},
+                                w.bytes().toHexString(),
+                                "binary wire hex output should match CAPTData handle event")},
         });
     }
 
@@ -81,8 +73,8 @@ public class ClassAliasPoolTest extends WireTestCommon {
     @MethodSource("data")
     @SuppressWarnings({"rawtypes", "unchecked"})
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Uses class lookup aliases while reading and writing")
     public void testUsesClassLookup(WireType wireType, Consumer<Wire> wireChecker) {
-        initClassAliasPoolTest(wireType, wireChecker);
         // Create a mock for the ClassLookup interface
         final ClassLookup mock = createMock(ClassLookup.class);
 
@@ -101,7 +93,9 @@ public class ClassAliasPoolTest extends WireTestCommon {
 
         // Create a method writer for the TestedMethods interface and write a handle event
         final TestedMethods writer = wire.methodWriter(TestedMethods.class);
-        writer.handle(new CAPTData());
+        CAPTData data = new CAPTData();
+        assertEquals(0L, data.value, "Expected CAPTData default value to be zero");
+        writer.handle(data);
 
         // Validate the content of the wire using the wire checker
         wireChecker.accept(wire);
@@ -113,16 +107,20 @@ public class ClassAliasPoolTest extends WireTestCommon {
         final MethodReader reader = wire.methodReader(
                 Mocker.logging(TestedMethods.class, "", out));
         String name = reader.getClass().getName();
-        assertFalse(name.contains("$Proxy"), name);
+        assertFalse(name.contains("$Proxy"),
+                "method reader should not be a proxy class for wireType=" + wireType + ", className=" + name);
 
         // Read events from the wire and validate their output
-        assertTrue(reader.readOne()); // Expect one event to be read
-        assertFalse(reader.readOne()); // No more events expected
+        assertTrue(reader.readOne(),
+                "method reader should read one event for wireType=" + wireType);
+        assertFalse(reader.readOne(),
+                "method reader should have no extra events for wireType=" + wireType);
         assertEquals("handle[!net.openhft.chronicle.wire.ClassAliasPoolTest$CAPTData {\n" +
                         "  value: 0\n" +
                         "}\n" +
                         "]\n",
-                out.toString().replace("\r", ""));
+                out.toString().replace("\r", ""),
+                "method reader output should include CAPTData handle for wireType=" + wireType);
 
         // Verify that the mock was used as expected
         verify(mock);

@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -13,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class AbstractMarshallableCfgTest extends WireTestCommon{
+public class AbstractMarshallableCfgTest extends WireTestCommon {
     static class MyAMC extends AbstractMarshallableCfg {
         final NestedAMC nestedAMC = new NestedAMC();  // Configuration nested inside MyAMC
         final NestedSDM nestedSDM = new NestedSDM();  // Self-describing data nested inside MyAMC
@@ -34,15 +35,17 @@ public class AbstractMarshallableCfgTest extends WireTestCommon{
     // Test Cases
     // Test the string representation of the MyAMC configuration
     @Test
+    @DisplayName("Renders configuration to string with defaults")
     public void asString() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip toString configuration test");
 
         MyAMC myAMC = new MyAMC();
 
         // Verify default string representation
         assertEquals("!net.openhft.chronicle.wire.AbstractMarshallableCfgTest$MyAMC {\n" +
                         "}\n",
-                myAMC.toString());
+                myAMC.toString(),
+                "Expected default toString output for MyAMC");
 
         // Modify values for nested configurations
         myAMC.nestedAMC.number = 0;
@@ -60,13 +63,15 @@ public class AbstractMarshallableCfgTest extends WireTestCommon{
                         "    amt: 1.0\n" +
                         "  }\n" +
                         "}\n",
-                myAMC.toString());
+                myAMC.toString(),
+                "Expected updated toString output for MyAMC");
     }
 
     // Test the deep copy functionality
     @Test
+    @DisplayName("Deep copy clones nested configuration values")
     public void deepCopy() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip deep copy configuration test");
 
         MyAMC myAMC = new MyAMC();
 
@@ -74,8 +79,17 @@ public class AbstractMarshallableCfgTest extends WireTestCommon{
         MyAMC myAMC2 = myAMC.deepCopy();
 
         // Ensure deep copied nested configurations are not the same references
-        assertNotSame(myAMC.nestedAMC, myAMC2.nestedAMC);
-        assertNotSame(myAMC.nestedSDM, myAMC2.nestedSDM);
-        assertNotSame(myAMC.nestedSDM.bytes, myAMC2.nestedSDM.bytes);
+        assertNotSame(myAMC.nestedAMC, myAMC2.nestedAMC,
+                "Expected nestedAMC to be a deep copy");
+        assertNotSame(myAMC.nestedSDM, myAMC2.nestedSDM,
+                "Expected nestedSDM to be a deep copy");
+        assertNotSame(myAMC.nestedSDM.bytes, myAMC2.nestedSDM.bytes,
+                "Expected nestedSDM bytes to be a deep copy");
+        assertEquals(myAMC.nestedAMC.number, myAMC2.nestedAMC.number,
+                "Expected nestedAMC.number to match after deep copy");
+        assertEquals(myAMC.nestedAMC.flag, myAMC2.nestedAMC.flag,
+                "Expected nestedAMC.flag to match after deep copy");
+        assertEquals(myAMC.nestedSDM.amt, myAMC2.nestedSDM.amt, 0.0,
+                "Expected nestedSDM.amt to match after deep copy");
     }
 }

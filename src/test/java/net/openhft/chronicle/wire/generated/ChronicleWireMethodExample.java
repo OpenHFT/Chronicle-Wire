@@ -36,12 +36,12 @@ interface MyService {
 class MyServiceImpl implements MyService {
     @Override
     public void foo(int arg1, String arg2) {
-        System.out.printf("MyServiceImpl.foo(%d, %s)\n", arg1, arg2);
+        System.out.printf("MyServiceImpl.foo(%d, %s)%n", arg1, arg2);
     }
 
     @Override
     public int bar(String arg1, long arg2) {
-        System.out.printf("MyServiceImpl.bar(%s, %d)\n", arg1, arg2);
+        System.out.printf("MyServiceImpl.bar(%s, %d)%n", arg1, arg2);
         return arg1.length() + (int) arg2;
     }
 }

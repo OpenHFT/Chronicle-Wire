@@ -8,6 +8,7 @@ import net.openhft.chronicle.wire.FieldInfo;
 import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -20,19 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // Runner to enable parameterized tests for the FieldInfoTest class
-public class FieldInfoTest extends WireTestCommon {
-
-    // Marshallable object for test scenarios
-    private Marshallable m;
-
-    // Expected field information as string
-    private String fieldInfos;
-
-    // Constructor initializes the Marshallable object and expected field information
-    public void initFieldInfoTest(Marshallable m, String fieldInfos) {
-        this.fieldInfos = fieldInfos;
-        this.m = m;
-    }
+class FieldInfoTest extends WireTestCommon {
 
     // Provide test data combinations for the parameterized test
     @NotNull
@@ -265,11 +254,11 @@ public class FieldInfoTest extends WireTestCommon {
     // Test method to ensure the field information from the Marshallable object matches the expected value
     @MethodSource("combinations")
     @ParameterizedTest
-    public void fieldInfo(Marshallable m, String fieldInfos) {
-        initFieldInfoTest(m, fieldInfos);
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @DisplayName("Marshallable field info should match expected layout")
+    void fieldInfo(Marshallable m, String fieldInfos) {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for FieldInfo test");
 
         @NotNull List<FieldInfo> infos = m.$fieldInfos();
-        assertEquals(fieldInfos, infos.toString());
+        assertEquals(fieldInfos, infos.toString(), "Field info should match the expected layout");
     }
 }

@@ -33,14 +33,16 @@ public final class OuterClassWireTestSupport {
         T target = supplier.get();
 
         wire.readEventName(sb).marshallable(target);
-        assertEquals("test1", sb.toString());
+        assertEquals("test1", sb.toString(), "First event name should be test1");
         assertEquals(normaliseNewlines ? first.toString().replace(',', '\n') : first.toString(),
-                normaliseNewlines ? target.toString().replace(',', '\n') : target.toString());
+                normaliseNewlines ? target.toString().replace(',', '\n') : target.toString(),
+                "First outer class should round-trip via marshalling");
 
         wire.readEventName(sb).marshallable(target);
-        assertEquals("test2", sb.toString());
+        assertEquals("test2", sb.toString(), "Second event name should be test2");
         assertEquals(normaliseNewlines ? second.toString().replace(',', '\n') : second.toString(),
-                normaliseNewlines ? target.toString().replace(',', '\n') : target.toString());
+                normaliseNewlines ? target.toString().replace(',', '\n') : target.toString(),
+                "Second outer class should round-trip via marshalling");
 
         bytes.releaseLast();
     }

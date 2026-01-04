@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.WireType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -22,60 +23,75 @@ class MethodWriterClassNameGeneratorTest extends net.openhft.chronicle.wire.Wire
 
     // Test the basic class name generation for a simple interface using YAML WireType
     @Test
-    public void testGetClassName() {
+    @DisplayName("Class name should include YAML suffix")
+    void testGetClassName() {
         assertEquals("MethodWriterClassNameGeneratorTestJustAnInterfaceYamlMethodWriter",
-                generatedClassName(null, false, false, WireType.YAML, JustAnInterface.class));
+                generatedClassName(null, false, false, WireType.YAML, JustAnInterface.class),
+                "Generated class name should match expected YAML pattern");
     }
 
     // Test the class name generation when metadata is included using JSON WireType
     @Test
-    public void testGetClassNameIncludesMetadata() {
+    @DisplayName("Class name should include metadata marker")
+    void testGetClassNameIncludesMetadata() {
         assertEquals("MethodWriterClassNameGeneratorTestJustAnInterfaceMetadataAwareJsonMethodWriter",
-                generatedClassName(null, true, false, WireType.JSON, JustAnInterface.class));
+                generatedClassName(null, true, false, WireType.JSON, JustAnInterface.class),
+                "Generated class name should include metadata for JSON");
     }
 
     // Test the class name generation when intercepting is included using BINARY_LIGHT WireType
     @Test
-    public void testGetClassNameIncludesIntercepting() {
+    @DisplayName("Class name should include intercepting marker")
+    void testGetClassNameIncludesIntercepting() {
         assertEquals("MethodWriterClassNameGeneratorTestJustAnInterfaceInterceptingBinarylightMethodWriter",
-                generatedClassName(null, false, true, WireType.BINARY_LIGHT, JustAnInterface.class));
+                generatedClassName(null, false, true, WireType.BINARY_LIGHT, JustAnInterface.class),
+                "Generated class name should include intercepting for BINARY_LIGHT");
     }
 
     // Test the class name generation for a specific generic event using BINARY WireType
     @Test
-    public void testGetClassNameIncludesGenericEvent() {
+    @DisplayName("Class name should include generic event")
+    void testGetClassNameIncludesGenericEvent() {
         assertEquals("MethodWriterClassNameGeneratorTestJustAnInterfaceFooBarBinaryMethodWriter",
-                generatedClassName("FooBar", false, false, WireType.BINARY, JustAnInterface.class));
+                generatedClassName("FooBar", false, false, WireType.BINARY, JustAnInterface.class),
+                "Generated class name should include generic event name");
     }
 
     // Test the class name generation when all modifiers are included using RAW WireType
     @Test
-    public void testGetClassNameIncludesAllModifiers() {
+    @DisplayName("Class name should include all modifier markers")
+    void testGetClassNameIncludesAllModifiers() {
         assertEquals("MethodWriterClassNameGeneratorTestJustAnInterfaceFooBarMetadataAwareInterceptingRawMethodWriter",
-                generatedClassName("FooBar", true, true, WireType.RAW, JustAnInterface.class));
+                generatedClassName("FooBar", true, true, WireType.RAW, JustAnInterface.class),
+                "Generated class name should include metadata and intercepting");
     }
 
     // Test the class name generation when maximum filename length is exceeded
     @Test
-    public void testGetClassNameTruncatesInterfaceNamesWhenMaxFilenameLengthIsExceeded() {
+    @DisplayName("Class name should truncate long interfaces")
+    void testGetClassNameTruncatesInterfaceNamesWhenMaxFilenameLengthIsExceeded() {
         assertEquals("MethodWriterClassNameGeneratorTestNewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1MethodWriterClassNameGeneratorTestNewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGi5JWELPHK3VKNITextMethodWriter",
                 generatedClassName(null, false, false, WireType.TEXT,
                         NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1.class,
-                        NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener2.class));
+                        NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener2.class),
+                "Generated class name should truncate long interface names");
     }
 
     // Test the class name generation with all modifiers and truncation
     @Test
-    public void testGetClassNameIncludesAllModifiersTruncated() {
+    @DisplayName("Class name should include modifiers when truncated")
+    void testGetClassNameIncludesAllModifiersTruncated() {
         assertEquals("MethodWriterClassNameGeneratorTestNewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1MethodWriterClassNameGeneratorTestNewOrderSingleListenerOmsHCTPGPS5OJWMSQFooBarMetadataAwareInterceptingFieldlessbinaryMethodWriter",
                 generatedClassName("FooBar", true, true, WireType.FIELDLESS_BINARY,
                         NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1.class,
-                        NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener2.class));
+                        NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener2.class),
+                "Generated class name should include modifiers after truncation");
     }
 
     // Test that class names generated with truncation differ when only the truncated portion is different
     @Test
-    public void testTruncatedClassNamesDifferWhenOnlyTruncatedPortionDiffers() {
+    @DisplayName("Truncated class names should differ correctly")
+    void testTruncatedClassNamesDifferWhenOnlyTruncatedPortionDiffers() {
         String cn1 = generatedClassName(null, false, false, WireType.TEXT,
                 NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1.class,
                 NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener2.class);
@@ -83,7 +99,7 @@ class MethodWriterClassNameGeneratorTest extends net.openhft.chronicle.wire.Wire
                 NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1.class,
                 NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGiDiffersInTheTruncatedPortion.class);
         Jvm.startup().on(MethodWriterClassNameGeneratorTest.class, "Must differ:\n" + cn1 + "\n" + cn2);
-        assertNotEquals(cn1, cn2);
+        assertNotEquals(cn1, cn2, "Truncated class names should differ when suffix differs");
     }
 
     // Helper method to generate the class name based on provided parameters and interfaces

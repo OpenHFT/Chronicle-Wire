@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.io.StringWriter;
 
@@ -15,6 +16,7 @@ public class StringConsumerMarshallableOutTest extends net.openhft.chronicle.wir
 
     // Test case to check if serialization to the YAML format works correctly.
     @Test
+    @DisplayName("Serialises method calls into yaml lines")
     public void saysYaml() {
         final WireType wireType = WireType.YAML_ONLY; // Specify the wire type as YAML.
         final String expected = // Expected serialized output.
@@ -24,18 +26,21 @@ public class StringConsumerMarshallableOutTest extends net.openhft.chronicle.wir
                 "...\n" +
                 "say: Three\n" +
                 "...\n";
-        assertEquals(expected, doTest(wireType), "yaml"); // Call the test method with YAML wire type and expected output.
+        assertEquals(expected, doTest(wireType),
+                "yaml output should match expected lines for YAML_ONLY wire type");
     }
 
     // Test case to check if serialization to the JSON format works correctly.
     @Test
+    @DisplayName("Serialises method calls into json lines")
     public void saysJson() {
         final WireType wireType = WireType.JSON_ONLY; // Specify the wire type as JSON.
         final String expected = // Expected serialized output.
                 "{\"say\":\"One\"}\n" +
                 "{\"say\":\"Two\"}\n" +
                 "{\"say\":\"Three\"}\n";
-        assertEquals(expected, doTest(wireType), "json"); // Call the test method with JSON wire type and expected output.
+        assertEquals(expected, doTest(wireType),
+                "json output should match expected lines for JSON_ONLY wire type");
     }
 
     // Helper method to perform the serialization test.

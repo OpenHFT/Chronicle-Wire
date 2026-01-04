@@ -9,6 +9,7 @@ import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -20,8 +21,10 @@ public class InnerMapTest extends WireTestCommon {
 
     // A test case to verify the marshaling and demarshaling of the `MyMarshable` class
     @Test
+    @DisplayName("Round-trips nested maps and marshallables")
     public void testMyInnnerMap() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip inner map test");
 
         // Create a new instance of MyMarshable and set its properties
         @NotNull MyMarshable myMarshable = new MyMarshable("rob");
@@ -39,7 +42,8 @@ public class InnerMapTest extends WireTestCommon {
                 "  nested: !net.openhft.chronicle.wire.InnerMapTest$MyNested {\n" +
                 "    value: text\n" +
                 "  }\n" +
-                "}\n", asString);
+                "}\n", asString,
+                "marshallable should render expected nested map format");
 
         // Allocate elastic byte buffer to hold serialized data
         @SuppressWarnings("rawtypes")
@@ -57,7 +61,15 @@ public class InnerMapTest extends WireTestCommon {
         // Read the MyMarshable instance from the wire and assert its string representation
         try (DocumentContext dc = w.readingDocument()) {
             @Nullable MyMarshable tm = dc.wire().read(() -> "marshable").typedMarshallable();
-            Assertions.assertEquals(asString, tm.toString());
+            Assertions.assertEquals(asString, tm.toString(),
+                    "marshallable should round-trip through binary wire");
+            Assertions.assertEquals("rob", tm.name,
+                    "name should round-trip through binary wire");
+            Assertions.assertEquals(123.4, tm.commission.get("hello"), 0.0,
+                    "commission value should round-trip through binary wire");
+            MyNested nested = (MyNested) tm.nested;
+            Assertions.assertEquals("text", nested.value,
+                    "nested value should round-trip through binary wire");
         }
 
         // Release the byte buffer resources

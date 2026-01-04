@@ -21,7 +21,7 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 public class PerfRegressionHolder {
     // A volatile integer barrier utilized possibly for ensuring visibility between threads
-    private static volatile int barrier;
+    private int barrier;
     // Initializing byte buffers: one direct (off-heap) and one on heap
     private final Bytes<?> direct = Bytes.allocateElasticDirect();
     private final Bytes<?> onHeap = Bytes.allocateElasticOnHeap();
@@ -83,7 +83,7 @@ public class PerfRegressionHolder {
                 System.out.println("result: " + times[(times.length - 1) / 2] + " us");
             }
         } catch (IOException ioe) {
-            throw new AssertionError(ioe);
+            throw new AssertionError("I/O failure during benchmark setup", ioe);
         }
     }
 
@@ -240,7 +240,7 @@ public class PerfRegressionHolder {
                 try {
                     bytes.write(a, offset, readRemaining);
                 } catch (BufferUnderflowException | IllegalArgumentException e1) {
-                    throw new AssertionError(e1);
+                    throw new AssertionError("Benchmark run failed", e1);
                 }
             }
         }

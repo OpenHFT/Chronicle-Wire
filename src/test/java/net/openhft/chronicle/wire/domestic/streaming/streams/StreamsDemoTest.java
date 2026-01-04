@@ -14,6 +14,7 @@ import net.openhft.chronicle.wire.domestic.stream.Streams;
 import net.openhft.chronicle.wire.domestic.streaming.reduction.MarketData;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -36,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @Test
+    @DisplayName("Stream market data to string output")
     void streamTypeMarketDataSimple() {
         ClassAliasPool.CLASS_ALIASES.addAlias(MarketData.class);
         MarshallableIn wire = createThenValueOuts(
@@ -71,10 +73,11 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
                 "  last: 101.0,\n" +
                 "  high: 110.0,\n" +
                 "  low: 90.0\n" +
-                "}\n", s);
+                "}\n", s, "Stream output should match expected market data text");
     }
 
     @Test
+    @DisplayName("Stream market data with invalid entry")
     void streamTypeMarketDataSimpleWIthInvalid() {
         ClassAliasPool.CLASS_ALIASES.addAlias(MarketData.class);
         MarketData invalid = new MarketData("invalid", 0, 0, 0);
@@ -85,17 +88,18 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
                         "  high: 0.0,\n" +
                         "  low: 0.0\n" +
                         "}\n",
-                invalid.toString());
+                invalid.toString(), "Invalid market data should render expected text");
 
         Assertions.assertThrows(InvalidMarshallableException.class, () -> createThenValueOuts(
                 vo -> vo.object(new MarketData("MSFT", 100, 110, 90)),
                 vo -> vo.object(new MarketData("AAPL", 200, 220, 180)),
                 vo -> vo.object(new MarketData("MSFT", 101, 110, 90)),
                 vo -> vo.object(invalid)
-        ));
+        ), "Invalid market data should fail during write");
     }
 
     @Test
+    @DisplayName("Stream extracts latest document index value")
     void latestIndex() {
         MarshallableIn in = createThenValueOuts(
                 vo -> vo.writeLong(1),
@@ -107,10 +111,11 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
                 .max()
                 .orElse(-1);
 
-        assertEquals(14, last);
+        assertEquals(14, last, "Latest index should match last document id");
     }
 
     @Test
+    @DisplayName("Stream raw long values into summary")
     void streamRaw() {
         MarshallableIn in = createThenValueOuts(
                 vo -> vo.writeLong(1),
@@ -126,6 +131,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
     }
 
     @Test
+    @DisplayName("Stream groups market data by symbol")
     void streamTypeMarketData() {
 
         MarshallableIn in = createThenValueOuts(
@@ -144,11 +150,12 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
                 )
                 .collect(groupingBy(MarketData::symbol));
 
-        assertEquals(expected, groups);
+        assertEquals(expected, groups, "Grouped market data should match expected map");
 
     }
 
     @Test
+    @DisplayName("Stream iterator sums market data last values")
     void testIterator() {
 
         MarshallableIn in = createThenValueOuts(
@@ -161,10 +168,11 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         Iterator<MarketData> iterator = Streams.iterator(in, builder(MarketData.class).build());
         iterator.forEachRemaining(md -> adder.add(md.last()));
 
-        assertEquals(401.0, adder.doubleValue(), 1e-10);
+        assertEquals(401.0, adder.doubleValue(), 1e-10, "Iterator sum should match expected total");
     }
 
     @Test
+    @DisplayName("Stream groups share data by symbol")
     void streamType2() {
         MarshallableIn in = createThenValueOuts(
                 vo -> vo.object(new Shares("ABCD", 100_000_000)),
@@ -178,10 +186,11 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         Map<String, List<Shares>> expected = new HashMap<>();
         expected.put("ABCD", Arrays.asList(new Shares("ABCD", 100_000_000), new Shares("ABCD", 300_000_000)));
         expected.put("EFGH", Collections.singletonList(new Shares("EFGH", 200_000_000)));
-        assertEquals(expected, groups);
+        assertEquals(expected, groups, "Grouped share data should match expected map");
     }
 
     @Test
+    @DisplayName("Stream method writer filters typed events")
     void streamMessageWriter() {
         News firstNews = new News("MSFT", "Microsoft releases Linux Windows", "In a stunning presentation today, ...");
         News secondNews = new News("APPL", "Apple releases Iphone 23", "Today, Apple released ...");
@@ -204,7 +213,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         List<News> expected = Stream.of(firstNews, secondNews)
                 .sorted(Comparator.comparing(News::symbol))
                 .collect(toList());
-        assertEquals(expected, newsList);
+        assertEquals(expected, newsList, "News stream should match expected list");
 
         final LongSummaryStatistics stat = Streams.of(
                         resetted(in),
@@ -229,7 +238,8 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
     }
 
     @Test
-    @Disabled("Parallel is not supported yet")
+    @DisplayName("Parallel long stream sums expected values")
+    @Disabled("Parallel stream processing is not supported yet")
     void longStreamParallel() {
         final int no = 100_000;
 
@@ -252,14 +262,15 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
                 .sum();
 
         long expected = (long) no * no / 2L;
-        assertEquals(expected, sum);
+        assertEquals(expected, sum, "Parallel sum should match expected value");
 
         System.out.println("threads = " + threads);
 
     }
 
-    @Disabled("Does not work properly since net.openhft.chronicle.bytes.NativeBytes is not thread-safe")
     @Test
+    @Disabled("Does not work properly since net.openhft.chronicle.bytes.NativeBytes is not thread-safe")
+    @DisplayName("Parallel object stream sums expected values")
     void streamParallel() {
         final int no = 100_000;
 
@@ -283,15 +294,16 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
                 .sum();
 
         long expected = (long) (no - 1) * no / 2L;
-        assertEquals(expected, sum);
+        assertEquals(expected, sum, "Parallel sum should match expected shares");
 
         if (Runtime.getRuntime().availableProcessors() > 2) {
-            assertTrue(threads.size() > 1);
+            assertTrue(threads.size() > 1, "Parallel stream should use more than one thread");
         }
     }
 
     @Test
-    @Disabled("Performance test")
+    @DisplayName("Stream performance comparison with manual loop")
+    @Disabled("Performance comparison test is disabled by default")
     void performance() {
         final int no = 100_000;
 
@@ -341,7 +353,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
 
             final long streamDurationMs = System.currentTimeMillis() - streamBegin;
 
-            assertEquals(streamSum, sum);
+            assertEquals(streamSum, sum, "Stream sum should equal manual iteration sum at iteration " + i);
             System.out.println("streamDurationMs = " + streamDurationMs);
             System.out.println("iterationDurationMs = " + iterationDurationMs);
 
@@ -356,6 +368,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
     }
 
     @Test
+    @DisplayName("Stream closes tailer after grouping results")
     void streamCloseTailer() {
         MarshallableIn in = createThenValueOuts(
                 vo -> vo.object(new MarketData("MSFT", 100, 110, 90)),
@@ -369,10 +382,11 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
                 .collect(groupingBy(MarketData::symbol));
 
         // A bit sloppy...
-        assertEquals(2, groups.size());
+        assertEquals(2, groups.size(), "Grouped result should contain two symbols");
     }
 
     @Test
+    @DisplayName("Stream reuse returns correct max value")
     void streamObjectReuse() {
         MarshallableIn in = createThenValueOuts(
                 vo -> vo.object(new MarketData("MSFT", 100, 110, 90)),
@@ -389,10 +403,11 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
 
         OptionalDouble expected = OptionalDouble.of(200);
 
-        assertEquals(expected, max);
+        assertEquals(expected, max, "Reuse stream max should be 200");
     }
 
     @Test
+    @DisplayName("Stream illegal reuse duplicates last entry")
     void streamIllegalObjectReuse() {
         MarshallableIn in = createThenValueOuts(
                 vo -> vo.object(new MarketData("MSFT", 100, 110, 90)),
@@ -414,7 +429,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
                 )
                 .collect(toList());
 
-        assertEquals(expected, list);
+        assertEquals(expected, list, "Reused objects should all match last entry");
     }
 
     public interface Messages {
@@ -506,7 +521,8 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
                 LongSummaryStatistics::getMax,
                 LongSummaryStatistics::getSum,
                 LongSummaryStatistics::getAverage
-        ).allMatch(op -> op.apply(a).equals(op.apply(b))));
+        ).allMatch(op -> op.apply(a).equals(op.apply(b))),
+                "Summary statistics should match count min max sum average");
     }
 
     private MarshallableIn resetted(MarshallableIn in) {

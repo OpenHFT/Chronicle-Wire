@@ -6,8 +6,10 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -21,6 +23,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"deprecation", "removal"})
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 public class WireToOutputStreamTest extends WireTestCommon {
 
     private WireType currentWireType;
@@ -49,6 +54,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
 
     @MethodSource("data")
     @ParameterizedTest(name = "{index}: {0}")
+    @DisplayName("Wire output stream round trips timestamps")
     // Test to ensure the Timestamp object can be serialized and deserialized correctly
     public void testTimestamp(WireType currentWireType) {
         initWireToOutputStreamTest(currentWireType);
@@ -58,11 +64,14 @@ public class WireToOutputStreamTest extends WireTestCommon {
 
         Timestamp ts2 = wire.read()
                 .object(Timestamp.class);
-        assertEquals(ts.toString(), ts2.toString());
+        assertEquals(ts.toString(),
+                ts2.toString(),
+                "Timestamp should serialise and deserialise via wire type " + currentWireType);
     }
 
     @MethodSource("data")
     @ParameterizedTest(name = "{index}: {0}")
+    @DisplayName("Wire output stream round trips without sockets")
     // Test serialization and deserialization without a socket
     public void testNoSocket(WireType currentWireType) {
         initWireToOutputStreamTest(currentWireType);
@@ -70,11 +79,14 @@ public class WireToOutputStreamTest extends WireTestCommon {
         final AnObject ao = writeAnObject(wire);
 
         Object ao2 = readAnObject(wire);
-        assertEquals(ao.toString(), ao2.toString());
+        assertEquals(ao.toString(),
+                ao2.toString(),
+                "Object should serialise and deserialise without sockets for wire type " + currentWireType);
     }
 
     @MethodSource("data")
     @ParameterizedTest(name = "{index}: {0}")
+    @DisplayName("Wire output stream round trips with sockets")
     // Test serialization and deserialization using a socket
     public void testVisSocket(WireType currentWireType) throws IOException {
         initWireToOutputStreamTest(currentWireType);
@@ -90,7 +102,9 @@ public class WireToOutputStreamTest extends WireTestCommon {
             final InputStreamToWire istw = new InputStreamToWire(currentWireType, s2.getInputStream());
             final Wire wire2 = istw.readOne();
             final Object ao2 = readAnObject(wire2);
-            assertEquals(ao.toString(), ao2.toString());
+            assertEquals(ao.toString(),
+                    ao2.toString(),
+                    "Object should serialise and deserialise via socket stream for wire type " + currentWireType);
         }
     }
 

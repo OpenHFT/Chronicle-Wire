@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -12,6 +13,7 @@ public class GenerateJsonSchemaMainTest extends WireTestCommon {
 
     // Test method to verify schema generation for a given class
     @Test
+    @DisplayName("Generates expected json schema for ITop")
     public void generateSchemaFor() throws ClassNotFoundException {
         // Generate the schema for the ITop class
         final String main0 = GenerateJsonSchemaMain.main0(ITop.class.getName());
@@ -92,6 +94,7 @@ public class GenerateJsonSchemaMainTest extends WireTestCommon {
                 "      \"type\": \"string\"\n" +
                 "    },\n" +
                 "  }\n" +
-                "}\n", main0);
+                "}\n", main0,
+                "generated schema should match expected output for ITop");
     }
 }

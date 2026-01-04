@@ -8,33 +8,31 @@ import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Test suite for the TwoArrays class.
+ * Exercises BinaryWire HexDumpBytes output when TwoArrays round-trips array capacity, used counts, and element values.
  */
 public class TwoArraysTest extends WireTestCommon {
-
-    /**
-     * Tests serialization and deserialization of TwoArrays using the Chronicle Wire library.
-     */
     @Test
+    @DisplayName("TwoArrays serialises and deserialises via BinaryWire")
     public void testTwoArrays() {
         // Ignore exceptions with specific error message
         ignoreException("BytesMarshallable found in field which is not matching exactly");
 
-        // Create a new HexDumpBytes which will be used to serialize the TwoArrays object
+        // Create a new HexDumpBytes which will be used to serialise the TwoArrays object
         Bytes<?> bytes = new HexDumpBytes();
 
-        // Create a BinaryWire instance for serialization and deserialization
+        // Create a BinaryWire instance for serialisation and deserialisation
         Wire wire = new BinaryWire(bytes);
 
         // Create an instance of TwoArrays
         TwoArrays ta = new TwoArrays(4, 8);
 
-        // Serialize the TwoArrays object
+        // Serialise the TwoArrays object
         ta.writeMarshallable(wire);
         assertEquals("   c2 69 61                                        # ia:\n" +
                         "   82 20 00 00 00                                  # BinaryIntArrayReference\n" +
@@ -51,25 +49,26 @@ public class TwoArraysTest extends WireTestCommon {
                         "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
                         "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
                         "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n",
-                bytes.toHexString());
+                bytes.toHexString(),
+                "Initial serialised form should match the expected hex output");
 
         TwoArrays ta2 = new TwoArrays(0, 0);
 
-        // Deserialize the TwoArrays object
+        // Deserialise the TwoArrays object
         ta2.readMarshallable(wire);
 
-        // Assertions to validate deserialization results
-        assertEquals(4, ta2.ia.getCapacity());
-        assertEquals(8, ta2.la.getCapacity());
+        // Assertions to validate deserialisation results
+        assertEquals(4, ta2.ia.getCapacity(), "Int array capacity should match the initial value");
+        assertEquals(8, ta2.la.getCapacity(), "Long array capacity should match the initial value");
 
-        // Modify the values in the deserialized TwoArrays instance
+        // Modify the values in the deserialised TwoArrays instance
         ta2.ia.setMaxUsed(1);
         ta2.ia.setValueAt(0, 11);
         ta2.la.setMaxUsed(2);
         ta2.la.setValueAt(0, 111);
         ta2.la.setValueAt(1, 222);
 
-        // Serialize the modified TwoArrays object
+        // Serialise the modified TwoArrays object
         Bytes<?> bytes2 = new HexDumpBytes();
         Wire wire2 = new BinaryWire(bytes2);
         ta2.writeMarshallable(wire2);
@@ -83,22 +82,23 @@ public class TwoArraysTest extends WireTestCommon {
                         "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
                         "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
                         "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n",
-                bytes2.toHexString());
+                bytes2.toHexString(),
+                "Modified serialised form should match the expected hex output");
 
         bytes.readPosition(0);
 
-        // Deserialize the modified TwoArrays object
+        // Deserialise the modified TwoArrays object
         TwoArrays ta3 = new TwoArrays(0, 0);
         ta3.readMarshallable(wire);
 
-        // Assertions to validate deserialization results of the modified TwoArrays instance
-        assertEquals(4, ta3.ia.getCapacity());
-        assertEquals(1, ta3.ia.getUsed());
-        assertEquals(11, ta3.ia.getValueAt(0));
-        assertEquals(8, ta3.la.getCapacity());
-        assertEquals(2, ta3.la.getUsed());
-        assertEquals(111, ta3.la.getValueAt(0));
-        assertEquals(222, ta3.la.getValueAt(1));
+        // Assertions to validate deserialisation results of the modified TwoArrays instance
+        assertEquals(4, ta3.ia.getCapacity(), "Int array capacity should round-trip");
+        assertEquals(1, ta3.ia.getUsed(), "Int array used count should round-trip");
+        assertEquals(11, ta3.ia.getValueAt(0), "Int array value at index 0 should round-trip");
+        assertEquals(8, ta3.la.getCapacity(), "Long array capacity should round-trip");
+        assertEquals(2, ta3.la.getUsed(), "Long array used count should round-trip");
+        assertEquals(111, ta3.la.getValueAt(0), "Long array value at index 0 should round-trip");
+        assertEquals(222, ta3.la.getValueAt(1), "Long array value at index 1 should round-trip");
 
         // Close resources and release memory
         ta.close();

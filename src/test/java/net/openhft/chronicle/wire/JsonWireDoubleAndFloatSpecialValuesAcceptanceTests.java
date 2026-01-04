@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -32,26 +33,29 @@ class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
 
     @ParameterizedTest
     @MethodSource("doubleTestInputs")
+    @DisplayName("Serialises special double values as quoted strings")
     void serialiseDoubleSpecialValues(DoubleTestInput doubleTestInput) {
         assertEquals(
                 String.format("\"%s\"", doubleTestInput.expectedStringRepresentation),
                 toJson(doubleTestInput.inputValue),
-                "Expected correct representation for special value and for it to be quoted as a string literal"
+                "Special double value should be quoted as JSON string literal"
         );
     }
 
     @ParameterizedTest
     @MethodSource("floatTestInputs")
+    @DisplayName("Serialises special float values as quoted strings")
     void serialiseFloatSpecialValues(FloatTestInput floatTestInput) {
         assertEquals(
                 String.format("\"%s\"", floatTestInput.expectedStringRepresentation),
                 toJson(floatTestInput.inputValue),
-                "Expected correct representation for special value and for it to be quoted as a string literal"
+                "Special float value should be quoted as JSON string literal"
         );
     }
 
     @ParameterizedTest
     @MethodSource("doubleTestInputs")
+    @DisplayName("Round-trips special double values through json")
     void doubleRoundTrip(DoubleTestInput doubleTestInput) {
         // Serialise an object to JSON and ensure its represented correctly
         JSONWire inputWire = new JSONWire();
@@ -60,18 +64,21 @@ class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
         assertEquals(
                 String.format("{\"value\":\"%s\"}", doubleTestInput.expectedStringRepresentation),
                 text,
-                "Expected JSON representation where special values are quoted string literals"
+                "JSON text should quote special double value as string literal"
         );
 
         // Deserialize back to an object, ensure that the special value is retained
         JSONWire outputWire = JSONWire.from(text);
         DoubleDto object = outputWire.getValueIn().object(DoubleDto.class);
-        Assertions.assertNotNull(object);
-        Assertions.assertTrue(doubleTestInput.expectOutputDoubleToMatchThisPredicate.test(object.value));
+        Assertions.assertNotNull(object,
+                "deserialised DoubleDto should not be null");
+        Assertions.assertTrue(doubleTestInput.expectOutputDoubleToMatchThisPredicate.test(object.value),
+                "double value should match predicate after round-trip");
     }
 
     @ParameterizedTest
     @MethodSource("floatTestInputs")
+    @DisplayName("Round-trips special float values through json")
     void floatRoundTrip(FloatTestInput floatTestInput) {
         // Serialise an object to JSON and ensure its represented correctly
         JSONWire inputWire = new JSONWire();
@@ -80,14 +87,16 @@ class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
         assertEquals(
                 String.format("{\"value\":\"%s\"}", floatTestInput.expectedStringRepresentation),
                 text,
-                "Expected JSON representation where special values are quoted string literals"
+                "JSON text should quote special float value as string literal"
         );
 
         // Deserialize back to an object, ensure that the special value is retained
         JSONWire outputWire = JSONWire.from(text);
         FloatDto object = outputWire.getValueIn().object(FloatDto.class);
-        Assertions.assertNotNull(object);
-        Assertions.assertTrue(floatTestInput.expectOutputFloatToMatchThisPredicate.test(object.value));
+        Assertions.assertNotNull(object,
+                "deserialised FloatDto should not be null");
+        Assertions.assertTrue(floatTestInput.expectOutputFloatToMatchThisPredicate.test(object.value),
+                "float value should match predicate after round-trip");
     }
 
     private static Stream<DoubleTestInput> doubleTestInputs() {

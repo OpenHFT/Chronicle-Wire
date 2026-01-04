@@ -65,13 +65,30 @@ public class TriviallyCopyableMarketData extends BytesInBinaryMarshallable {
         bytes.unsafeWriteObject(this, START, LENGTH);
     }
 
-    /**
-     * Setter for the security ID.
-     *
-     * @param securityId Unique identifier for the security.
-     */
     public void securityId(long securityId) {
         this.securityId = securityId;
+    }
+
+    long fieldChecksum() {
+        long result = securityId;
+        result = result * 31 + time;
+        result = result * 31 + Double.doubleToLongBits(bid0);
+        result = result * 31 + Double.doubleToLongBits(bid1);
+        result = result * 31 + Double.doubleToLongBits(bid2);
+        result = result * 31 + Double.doubleToLongBits(bid3);
+        result = result * 31 + Double.doubleToLongBits(bidQty0);
+        result = result * 31 + Double.doubleToLongBits(bidQty1);
+        result = result * 31 + Double.doubleToLongBits(bidQty2);
+        result = result * 31 + Double.doubleToLongBits(bidQty3);
+        result = result * 31 + Double.doubleToLongBits(ask0);
+        result = result * 31 + Double.doubleToLongBits(ask1);
+        result = result * 31 + Double.doubleToLongBits(ask2);
+        result = result * 31 + Double.doubleToLongBits(ask3);
+        result = result * 31 + Double.doubleToLongBits(askQty0);
+        result = result * 31 + Double.doubleToLongBits(askQty1);
+        result = result * 31 + Double.doubleToLongBits(askQty2);
+        result = result * 31 + Double.doubleToLongBits(askQty3);
+        return result;
     }
 
     /**

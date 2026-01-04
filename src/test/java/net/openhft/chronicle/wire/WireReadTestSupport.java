@@ -21,7 +21,9 @@ final class WireReadTestSupport {
         wire.read();
         wire.read();
         wire.read();
-        assertEquals(expectedRemaining, wire.bytes().readRemaining());
+        assertEquals(expectedRemaining,
+                wire.bytes().readRemaining(),
+                "Read remaining should match expected count");
         wire.read();
     }
 
@@ -29,24 +31,34 @@ final class WireReadTestSupport {
         wire.read(BWKey.field1);
         wire.read(BWKey.field1);
         wire.read(BWKey.field1);
-        assertEquals(expectedRemaining, wire.bytes().readRemaining());
+        assertEquals(expectedRemaining,
+                wire.bytes().readRemaining(),
+                "Key read remaining should match expected count");
         wire.read();
     }
 
     static void exerciseReadWithNames(Wire wire, String name1, String expectedSecond, String expectedThird, long expectedRemaining) {
         @NotNull StringBuilder name = new StringBuilder();
         wire.read(name);
-        assertEquals(0, name.length());
+        assertEquals(0,
+                name.length(),
+                "First read should leave name empty");
 
         name.setLength(0);
         wire.read(name);
-        assertEquals(expectedSecond, name.toString());
+        assertEquals(expectedSecond,
+                name.toString(),
+                "Second read should set name to " + expectedSecond);
 
         name.setLength(0);
         wire.read(name);
-        assertEquals(expectedThird, name.toString());
+        assertEquals(expectedThird,
+                name.toString(),
+                "Third read should set name to " + expectedThird);
 
-        assertEquals(expectedRemaining, wire.bytes().readRemaining());
+        assertEquals(expectedRemaining,
+                wire.bytes().readRemaining(),
+                "Name read remaining should match expected count");
         wire.read();
     }
 }

@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.List;
 public class JSONEmptySequencesTest extends net.openhft.chronicle.wire.WireTestCommon {
     // Test for verifying the handling of empty and non-empty JSON sequences.
     @Test
+    @DisplayName("Parses empty and populated sequences in JSON wire")
     public void emptySequence() {
         // Add an alias for the Foo class to simplify the YAML representation.
         ClassAliasPool.CLASS_ALIASES.addAlias(Foo.class);
@@ -46,7 +48,8 @@ public class JSONEmptySequencesTest extends net.openhft.chronicle.wire.WireTestC
                 "    abc,\n" +
                 "    xyz\n" +
                 "  ]\n" +
-                "}\n", f.toString());
+                "}\n", f.toString(),
+                "json sequence parsing should preserve empty and populated lists");
     }
 
     // A private static class Foo with four fields, where two of them are lists.

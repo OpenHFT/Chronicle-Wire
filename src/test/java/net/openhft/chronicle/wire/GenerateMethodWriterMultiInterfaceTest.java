@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class GenerateMethodWriterMultiInterfaceTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Builds writer supporting multiple interfaces safely")
     public void builderSupportsAdditionalInterfaces() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
@@ -44,9 +46,12 @@ public class GenerateMethodWriterMultiInterfaceTest extends WireTestCommon {
             // drain
             continue;
         }
-        assertEquals(2, seen.size());
-        assertTrue(seen.get(0).startsWith("two:"));
-        assertTrue(seen.get(1).startsWith("one:"));
+        assertEquals(2, seen.size(),
+                "method reader should capture two events");
+        assertTrue(seen.get(0).startsWith("two:"),
+                "first event should come from Second.two call");
+        assertTrue(seen.get(1).startsWith("one:"),
+                "second event should come from First.one call");
     }
 
     interface First {

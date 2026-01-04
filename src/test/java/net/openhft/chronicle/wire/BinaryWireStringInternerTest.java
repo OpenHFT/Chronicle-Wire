@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.threads.NamedThreadFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * This class tests the efficiency and correctness of the `BinaryWire` when interning strings.
+ * This class tests the efficiency, correctness, and stability of BinaryWire string interning across concurrent readers.
  */
 public final class BinaryWireStringInternerTest extends WireTestCommon {
 
@@ -39,12 +40,6 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
     private final String[] internedStrings = new String[DATA_SET_SIZE];
     private final Bytes<?> heapBytes = Bytes.allocateElasticOnHeap(4096);
     private final BinaryWire wire = BinaryWire.binaryOnly(heapBytes);
-
-    // Helper method to create a meaningful message for assertions
-    private static String message(final int index, final String inputData) {
-        return String.format("At index %d for string %s",
-                index, inputData);
-    }
 
     // Generates a random string of given length
     private static String makeString(final int length, final Random random) {
@@ -80,6 +75,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
 
     // Test to ensure the interning of existing strings works correctly
     @Test
+    @DisplayName("Interns existing strings across concurrent readers")
     public void shouldInternExistingStringsAlright() throws Exception {
         // List to capture exceptions during the execution of concurrent tasks
         final List<RuntimeException> capturedExceptions = new CopyOnWriteArrayList<>();
@@ -91,7 +87,8 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
 
         // Submit multiple tasks to the executor
         for (int i = 0; i < (Jvm.isArm() || Jvm.isCodeCoverage() ? 12 : 200); i++) {
-            executorService.submit(new BinaryTextReaderWriter(capturedExceptions::add, () -> BinaryWire.binaryOnly(Bytes.allocateElasticOnHeap(4096))));
+            executorService.execute(new BinaryTextReaderWriter(capturedExceptions::add,
+                    () -> BinaryWire.binaryOnly(Bytes.allocateElasticOnHeap(4096))));
         }
 
         // Randomly pick strings from testData, serialize and compare with previously interned strings
@@ -101,13 +98,17 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
             wire.getFixedBinaryValueOut(true).text(testData[dataPointIndex]);
 
             final String inputData = wire.read().text();
-            assertEquals(internedStrings[dataPointIndex], inputData, message(i, inputData));
+            assertEquals(internedStrings[dataPointIndex], inputData,
+                    "interned string should match input at iteration " + i
+                            + ", data index=" + dataPointIndex + ", value=" + inputData);
         }
 
         // Shutdown the executor and ensure all tasks are complete
         executorService.shutdown();
-        assertTrue(executorService.awaitTermination(60, TimeUnit.SECONDS), "jobs did not complete in time");
-        assertTrue(capturedExceptions.isEmpty());
+        assertTrue(executorService.awaitTermination(60, TimeUnit.SECONDS),
+                "Interning tasks did not complete in time");
+        assertTrue(capturedExceptions.isEmpty(),
+                "interning tasks should not raise exceptions, saw " + capturedExceptions.size());
     }
 
     /**
@@ -115,6 +116,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
      * there should be no concurrency issues.
      */
     @Test
+    @DisplayName("Uses per-thread BinaryWire without concurrency faults")
     public void multipleThreadsUsingBinaryWiresShouldNotCauseProblems() throws Exception {
         // List to capture exceptions during the execution of concurrent tasks
         final List<RuntimeException> capturedExceptions = new CopyOnWriteArrayList<>();
@@ -124,21 +126,24 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
 
         // Submit multiple tasks to the executor. The number of tasks depends on the environment (ARM or Code Coverage).
         for (int i = 0; i < (Jvm.isArm() || Jvm.isCodeCoverage() ? 4 : 200); i++) {
-            executorService.submit(new BinaryTextReaderWriter(capturedExceptions::add, () -> BinaryWire.binaryOnly(Bytes.allocateElasticOnHeap(4096))));
+            executorService.execute(new BinaryTextReaderWriter(capturedExceptions::add,
+                    () -> BinaryWire.binaryOnly(Bytes.allocateElasticOnHeap(4096))));
         }
 
         // Shutdown the executor and ensure all tasks are complete
         executorService.shutdown();
         assertTrue(executorService.awaitTermination(60, TimeUnit.SECONDS),
-                "jobs did not complete in time");
-        assertTrue(capturedExceptions.isEmpty());
+                "Per-thread wire tasks did not complete in time");
+        assertTrue(capturedExceptions.isEmpty(),
+                "per-thread wire tasks should not raise exceptions, saw " + capturedExceptions.size());
     }
 
     /**
      * Test to demonstrate potential errors that can arise when threads share the same BinaryWire instance.
      */
-    @Disabled("used to demonstrate errors that can occur when buffers are shared between threads")
     @Test
+    @Disabled("used to demonstrate errors that can occur when buffers are shared between threads")
+    @DisplayName("Shared BinaryWire across threads can trigger failures")
     public void multipleThreadsSharingBinaryWireShouldCauseProblems() throws Exception {
         // List to capture exceptions during the execution of concurrent tasks
         final List<RuntimeException> capturedExceptions = new CopyOnWriteArrayList<>();
@@ -153,16 +158,18 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
 
         // Submit tasks to the executor, all sharing the same BinaryWire instance
         for (int i = 0; i < 1_000; i++) {
-            executorService.submit(new BinaryTextReaderWriter(capturedExceptions::add, () -> sharedMutableWire));
+            executorService.execute(new BinaryTextReaderWriter(capturedExceptions::add, () -> sharedMutableWire));
         }
 
         // Shutdown the executor and ensure all tasks are complete
         executorService.shutdown();
-        assertTrue(executorService.awaitTermination(30L, TimeUnit.SECONDS), "jobs did not complete in time");
+        assertTrue(executorService.awaitTermination(30L, TimeUnit.SECONDS),
+                "Shared wire tasks did not complete in time");
 
         // Print exceptions of type BufferUnderflowException
         capturedExceptions.stream().filter(e -> e instanceof BufferUnderflowException).forEach(RuntimeException::printStackTrace);
-        assertTrue(capturedExceptions.isEmpty());
+        assertTrue(capturedExceptions.isEmpty(),
+                "shared wire tasks should not raise exceptions, saw " + capturedExceptions.size());
     }
 
     // Runnable class to read/write from/to BinaryWire

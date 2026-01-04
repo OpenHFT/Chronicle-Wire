@@ -38,10 +38,18 @@ final class WireByteArrayDocSupport {
                 "four: !byte[] !!binary AQIDBA==\n";
 
         String expected = usePadding ? expectedPadded : expectedNoPad;
-        assertEquals(expected, Wires.fromSizePrefixedBlobs(wire.bytes(), 0));
+        String paddingLabel = usePadding ? "with padding" : "without padding";
+        assertEquals(expected, Wires.fromSizePrefixedBlobs(wire.bytes(), 0),
+                "Wire should render byte array documents " + paddingLabel);
 
-        wire.readDocument(null, w -> assertArrayEquals(new byte[0], (byte[]) w.read(() -> "nothing").object()));
-        wire.readDocument(null, w -> assertArrayEquals(one, (byte[]) w.read(() -> "one").object()));
-        wire.readDocument(null, w -> assertArrayEquals(four, (byte[]) w.read(() -> "four").object()));
+        wire.readDocument(null, w -> assertArrayEquals(new byte[0],
+                (byte[]) w.read(() -> "nothing").object(),
+                "Empty byte array should round trip from nothing entry"));
+        wire.readDocument(null, w -> assertArrayEquals(one,
+                (byte[]) w.read(() -> "one").object(),
+                "Single byte array should round trip from one entry"));
+        wire.readDocument(null, w -> assertArrayEquals(four,
+                (byte[]) w.read(() -> "four").object(),
+                "Four byte array should round trip from four entry"));
     }
 }

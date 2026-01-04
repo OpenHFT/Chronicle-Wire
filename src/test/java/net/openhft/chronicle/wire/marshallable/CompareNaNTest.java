@@ -7,9 +7,11 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
@@ -23,11 +25,14 @@ public class CompareNaNTest extends WireTestCommon {
      * Ensures that two DTOs with NaN primitive values are considered equal.
      */
     @Test
+    @DisplayName("NaN primitives should compare equal in DTO")
     public void testPrim() {
         @NotNull PrimDTO a = new PrimDTO(Double.NaN, Float.NaN);
         @NotNull PrimDTO b = new PrimDTO(Double.NaN, Float.NaN);
-        assertEquals(a.toString(), b.toString());
-        assertEquals(a, b);
+        assertTrue(Double.isNaN(a.d), "PrimDTO.d should be NaN for double input");
+        assertTrue(Float.isNaN(a.f), "PrimDTO.f should be NaN for float input");
+        assertEquals(a.toString(), b.toString(), "Rendered text should match for NaN primitives");
+        assertEquals(a, b, "DTOs with NaN primitives should compare equal");
     }
 
     /**
@@ -35,13 +40,16 @@ public class CompareNaNTest extends WireTestCommon {
      * Ensures that two DTOs with NaN wrapped values are considered equal.
      */
     @Test
+    @DisplayName("NaN wrapper values should compare equal in DTO")
     public void testWrapDTO() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for NaN wrapper DTO test");
 
         @NotNull WrapDTO a = new WrapDTO(Double.NaN, Float.NaN);
         @NotNull WrapDTO b = new WrapDTO(Double.NaN, Float.NaN);
-        assertEquals(a.toString(), b.toString());
-        assertEquals(a, b);
+        assertTrue(Double.isNaN(a.d), "WrapDTO.d should be NaN for Double input");
+        assertTrue(Float.isNaN(a.f), "WrapDTO.f should be NaN for Float input");
+        assertEquals(a.toString(), b.toString(), "Rendered text should match for NaN wrappers");
+        assertEquals(a, b, "DTOs with NaN wrappers should compare equal");
     }
 
     /**
@@ -49,13 +57,16 @@ public class CompareNaNTest extends WireTestCommon {
      * Ensures that two DTOs with NaN object values are considered equal.
      */
     @Test
+    @DisplayName("NaN object values should compare equal in DTO")
     public void testObjectWrapDTO() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for NaN object DTO test");
 
         @NotNull ObjectWrapDTO a = new ObjectWrapDTO(Double.NaN, Float.NaN);
         @NotNull ObjectWrapDTO b = new ObjectWrapDTO(Double.NaN, Float.NaN);
-        assertEquals(a.toString(), b.toString());
-        assertEquals(a, b);
+        assertTrue(Double.isNaN((Double) a.d), "ObjectWrapDTO.d should be NaN for Double input");
+        assertTrue(Float.isNaN((Float) a.f), "ObjectWrapDTO.f should be NaN for Float input");
+        assertEquals(a.toString(), b.toString(), "Rendered text should match for NaN objects");
+        assertEquals(a, b, "DTOs with NaN objects should compare equal");
     }
 
     /**

@@ -8,6 +8,7 @@ import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -17,6 +18,7 @@ public class MethodWriterMarshallableTest extends WireTestCommon {
 
     // Test method expecting an IllegalArgumentException when using an invalid interface with method writer
     @Test
+    @DisplayName("Invalid interface is rejected by method writer")
     public void invalidInterface() {
         assertThrows(IllegalArgumentException.class, () -> {
             // Create a new wire instance with the TEXT wire type
@@ -24,7 +26,7 @@ public class MethodWriterMarshallableTest extends WireTestCommon {
 
             // Attempt to create a method writer for a bad interface, expecting an exception
             wire.methodWriter(MyBadInterface.class);
-        });
+        }, "Method writer should reject interfaces extending Marshallable");
     }
 
     // Interface declared invalid for method writer usage due to it extending Marshallable

@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -18,18 +19,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
- * Tests for marshalling and unmarshalling of Enum using Wire.
+ * Tests marshalling and unmarshalling of enum values using Wire formats.
  */
 public class EnumTest extends WireTestCommon {
     @BeforeEach
     public void hasDirect() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip enum wire tests");
     }
 
     /**
-     * Tests serialization and deserialization of the TestEnum enumeration.
+     * Tests serialisation and deserialisation of the TestEnum enumeration.
      */
     @Test
+    @DisplayName("Serialises enum instance and reads it back")
     public void testEnum() {
         // Expecting an exception regarding enum handling
         expectException("Treating class net.openhft.chronicle.wire.EnumTest$TestEnum as enum not WriteMarshallable");
@@ -45,7 +48,8 @@ public class EnumTest extends WireTestCommon {
                 .object(TestEnum.INSTANCE);
 
             // Validate the serialized form of the TestEnum
-            assertEquals("test: !net.openhft.chronicle.wire.EnumTest$TestEnum INSTANCE\n", wire.toString());
+            assertEquals("test: !net.openhft.chronicle.wire.EnumTest$TestEnum INSTANCE\n", wire.toString(),
+                    "enum should serialise to expected text wire format");
 
             // Create another Text wire with serialized TestEnum
             @NotNull TextWire wire2 = TextWire.from(
@@ -57,7 +61,8 @@ public class EnumTest extends WireTestCommon {
                 .object();
 
             // Ensure original and read enum are the same
-            Assertions.assertSame(TestEnum.INSTANCE, enumObject);
+            Assertions.assertSame(TestEnum.INSTANCE, enumObject,
+                    "enum instance should be preserved on read");
         } finally {
             // Release the byte buffer resources
             bytes.releaseLast();

@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -15,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class BinaryWireReadWithLengthTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Copies map fragment to text wire")
     public void copiesMapFragmentToText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire writer = new BinaryWire(bytes);
@@ -32,10 +34,12 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
         source.bytes().readPosition(bodyPos);
         source.readWithLength(target, len);
 
-        assertTrue(target.bytes().toString().contains("key: 1"));
+        String text = target.bytes().toString();
+        assertTrue(text.contains("key: 1"), "Expected map fragment to include key: 1, got: " + text);
     }
 
     @Test
+    @DisplayName("Copies sequence fragment to text wire")
     public void copiesSequenceFragmentToText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire writer = new BinaryWire(bytes);
@@ -57,11 +61,12 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
         source.readWithLength(target, len);
 
         String dump = target.bytes().toString();
-        assertTrue(dump.contains("first"));
-        assertTrue(dump.contains("2"));
+        assertTrue(dump.contains("first"), "Expected sequence text to include first, got: " + dump);
+        assertTrue(dump.contains("2"), "Expected sequence text to include 2, got: " + dump);
     }
 
     @Test
+    @DisplayName("Copies entire wire into text output")
     public void copyEntireWireToText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire writer = new BinaryWire(bytes);
@@ -73,11 +78,12 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
         new BinaryWire(bytes).copyTo(textWire);
         String output = textWire.bytes().toString();
 
-        assertTrue(output.contains("say: hello"));
-        assertTrue(output.contains("number: 42"));
+        assertTrue(output.contains("say: hello"), "Expected output to include say: hello, got: " + output);
+        assertTrue(output.contains("number: 42"), "Expected output to include number: 42, got: " + output);
     }
 
     @Test
+    @DisplayName("Copies messages one by one into text wire")
     public void copyMessagesIndividually() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire writer = new BinaryWire(bytes);
@@ -90,6 +96,6 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
 
         source.copyOne(textWire);
         String first = textWire.bytes().toString();
-        assertFalse(first.isEmpty());
+        assertFalse(first.isEmpty(), "Expected copyOne to write first message into text wire, got empty output");
     }
 }

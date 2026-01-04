@@ -15,6 +15,7 @@ import net.openhft.chronicle.jlbh.JLBHOptions;
 import net.openhft.chronicle.jlbh.JLBHTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -41,8 +42,10 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
 
     // Test appending data to a file
     @Test
+    @DisplayName("Appends output to file when append requested")
     public void fileAppend() throws IOException {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip file append test");
         final String expected = "mid: mid\n" +
                 "next: 1\n" +
                 "echo: echo-1\n" +
@@ -51,17 +54,20 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
                 "next2: word\n" +
                 "echo: echo-2\n" +
                 "...\n";
-        assertEquals(expected, file("?append=true"), "file append");
+        assertEquals(expected, file("?append=true"),
+                "file append should preserve both message batches");
     }
 
     // Test writing data to a file without append mode
     @Test
+    @DisplayName("Overwrites file when append is disabled")
     public void file() throws IOException {
         final String expected = "mid2: mid2\n" +
                 "next2: word\n" +
                 "echo: echo-2\n" +
                 "...\n";
-        assertEquals(expected, file(""), "file overwrite");
+        assertEquals(expected, file(""),
+                "file overwrite should keep only last message batch");
     }
 
     // Write expected messages to the file specified in the URL and verify its content
@@ -101,8 +107,9 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     }
 
     // Test writing messages to an HTTP endpoint and validate the response
-    @Disabled("long running test")
     @Test
+    @Disabled("Long-running HTTP queue test is disabled by default")
+    @DisplayName("Sends messages over http and reads queue")
     public void http() throws IOException, InterruptedException {
         InetSocketAddress address = new InetSocketAddress(0);
         HttpServer server = HttpServer.create(address, 0);
@@ -116,19 +123,23 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
             writeMessages(url);
             assertEquals(
                     "{\"mid\":\"mid\",\"next\":1,\"echo\":\"echo-1\"}\n",
-                    queue.poll(1, TimeUnit.SECONDS));
+                    queue.poll(1, TimeUnit.SECONDS),
+                    "first http message should match expected payload");
             assertEquals(
                     "{\"mid2\":\"mid2\",\"next2\":\"word\",\"echo\":\"echo-2\"}\n",
-                    queue.poll(1, TimeUnit.SECONDS));
-            assertNull(queue.poll(1, TimeUnit.MILLISECONDS));
+                    queue.poll(1, TimeUnit.SECONDS),
+                    "second http message should match expected payload");
+            assertNull(queue.poll(1, TimeUnit.MILLISECONDS),
+                    "no extra messages should remain in queue after /echo test");
         } finally {
             server.stop(1);
         }
     }
 
     // Another HTTP test that might be used in conjunction with queue-web-gateway. This is a work in progress.
-    @Disabled("test was added to work with queue-web-gateway, so work in progress")
     @Test
+    @Disabled("test was added to work with queue-web-gateway, so work in progress")
+    @DisplayName("Sends append messages over http and reads queue")
     public void http2() throws IOException, InterruptedException {
         InetSocketAddress address = new InetSocketAddress(0);
         HttpServer server = HttpServer.create(address, 0);
@@ -142,11 +153,14 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
             writeMessages(url);
             assertEquals(
                     "{\"mid\":\"mid\",\"next\":1,\"echo\":\"echo-1\"}\n",
-                    queue.poll(1, TimeUnit.SECONDS));
+                    queue.poll(1, TimeUnit.SECONDS),
+                    "first http append message should match expected payload");
             assertEquals(
                     "{\"mid2\":\"mid2\",\"next2\":\"word\",\"echo\":\"echo-2\"}\n",
-                    queue.poll(1, TimeUnit.SECONDS));
-            assertNull(queue.poll(1, TimeUnit.MILLISECONDS));
+                    queue.poll(1, TimeUnit.SECONDS),
+                    "second http append message should match expected payload");
+            assertNull(queue.poll(1, TimeUnit.MILLISECONDS),
+                    "no extra messages should remain in queue after /echo/append test");
         } finally {
             server.stop(1);
         }
@@ -154,6 +168,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
 
     // Test to ensure only JSON Wire is supported and if BINARY_LIGHT is used, an IllegalArgumentException is thrown.
     @Test
+    @DisplayName("Rejects binary wire type for http builder")
     public void httpBinary() throws IOException {
         assertThrows(IllegalArgumentException.class, () -> {
             InetSocketAddress address = new InetSocketAddress(0);
@@ -168,7 +183,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
             } finally {
                 server.stop(1);
             }
-        });
+        }, "http builder should reject binary light wire type");
     }
 
     // Interface representing a timed event.

@@ -3,6 +3,7 @@
  */
 package net.openhft.chronicle.wire;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,6 +19,7 @@ public class MicroLongConverterTest extends WireTestCommon {
      * This test ensures that MicroLongConverter properly converts microsecond timestamp and duration representations.
      */
     @Test
+    @DisplayName("Round-trip micro timestamps and duration values")
     public void testMicro() {
         String in = "!net.openhft.chronicle.wire.MicroLongConverterTest$Data {\n" +
                 "  time: 2019-01-20T23:45:11.123456,\n" +
@@ -26,7 +28,8 @@ public class MicroLongConverterTest extends WireTestCommon {
         // Deserialize the provided string into a Data object
         Data data = Marshallable.fromString(in);
         // Ensure the object's string representation matches the original input
-        assertEquals(in, data.toString());
+        assertEquals(in, data.toString(),
+                "Marshallable should round-trip micros and duration");
     }
 
     /**

@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class WireMarshallerDeepGraphTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Deep graph round trips in binary and text")
     public void deepGraphBinaryAndText() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT}) {
             Parent p = new Parent();
@@ -27,7 +29,15 @@ public class WireMarshallerDeepGraphTest extends WireTestCommon {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(512));
             w.write("o").object(p);
             Parent r = w.read("o").object(Parent.class);
-            assertEquals(p, r);
+            assertEquals(p,
+                    r,
+                    "Deep graph should round trip for " + wt);
+            assertEquals("p", r.title, "Parent title should round trip for " + wt);
+            assertEquals(2, r.children.size(), "Child count should round trip for " + wt);
+            assertEquals(1, r.children.get(0).id, "First child id should round trip for " + wt);
+            assertEquals("a", r.children.get(0).name, "First child name should round trip for " + wt);
+            assertEquals(2, r.children.get(1).id, "Second child id should round trip for " + wt);
+            assertEquals("b", r.children.get(1).name, "Second child name should round trip for " + wt);
         }
     }
 

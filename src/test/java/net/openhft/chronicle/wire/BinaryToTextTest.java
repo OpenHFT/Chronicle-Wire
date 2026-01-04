@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,6 +14,7 @@ public class BinaryToTextTest extends WireTestCommon {
 
     // Test conversion of binary data to text representation
     @Test
+    @DisplayName("Renders binary wire content as text")
     public void test() {
         Bytes<?> tbytes = Bytes.allocateElasticOnHeap();
         @NotNull Wire tw = new BinaryWire(tbytes);
@@ -20,6 +22,7 @@ public class BinaryToTextTest extends WireTestCommon {
         tw.writeDocument(false, w -> w.write(() -> "key").text("hello"));
         assertEquals("--- !!data #binary\n" +
                         "key: hello\n",
-                Wires.fromSizePrefixedBlobs(tw));
+                Wires.fromSizePrefixedBlobs(tw),
+                "Expected text output for binary wire document");
     }
 }

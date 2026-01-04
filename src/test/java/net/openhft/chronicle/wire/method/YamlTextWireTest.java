@@ -9,6 +9,7 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.YamlWire;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -34,7 +35,7 @@ public class YamlTextWireTest extends WireTestCommon {
     private String s;     // YAML formatted text to be tested
 
     /**
-     * Constructor for parameterized test instances.
+     * Initialises a parameterised test instance with YAML text input.
      *
      * @param name Name of the test scenario.
      * @param text YAML formatted text to be used in the test.
@@ -98,18 +99,23 @@ public class YamlTextWireTest extends WireTestCommon {
      * Tests the order and structure of fields processed by YamlWire and TextWire to ensure they are consistent.
      * The test verifies that both wires produce the same object representation from the given YAML text.
      */
+    @DisplayName("Compares field ordering between YamlWire and TextWire")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     public void orderTest(String name, String text) {
         initYamlTextWireTest(name, text);
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip YAML comparison");
 
         // Parse the text using YamlWire and TextWire, and create Fields objects
         Fields yw = YamlWire.from(s).getValueIn().object(Fields.class);
         Fields tw = TextWire.from(s).getValueIn().object(Fields.class);
 
         // Assert that the objects created from both wires are equal
-        assertEquals(tw, yw);
+        assertEquals(tw, yw, "YamlWire and TextWire should produce the same field ordering");
+        assertEquals(tw.a, yw.a, "Field a should match between YamlWire and TextWire");
+        assertEquals(tw.c, yw.c, "Field c should match between YamlWire and TextWire");
+        assertEquals(tw.b == null, yw.b == null, "Field b nullness should match between YamlWire and TextWire");
+        assertEquals(tw.d == null, yw.d == null, "Field d nullness should match between YamlWire and TextWire");
     }
 
     /**

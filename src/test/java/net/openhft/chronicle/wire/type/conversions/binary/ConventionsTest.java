@@ -10,6 +10,7 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -17,11 +18,12 @@ import java.lang.reflect.Field;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("unchecked")
-public class ConventionsTest extends WireTestCommon {
+class ConventionsTest extends WireTestCommon {
 
-    @SuppressWarnings("rawtypes")
     @Test
-    public void testTypeConversionsMaxValue() throws NoSuchFieldException, IllegalAccessException {
+    @SuppressWarnings("rawtypes")
+    @DisplayName("Converts max values across primitive wrapper types")
+    void testTypeConversionsMaxValue() throws NoSuchFieldException, IllegalAccessException {
 
         for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short
                 .class, Byte
@@ -38,14 +40,16 @@ public class ConventionsTest extends WireTestCommon {
             }
 
             // Assert equality between the expected value and the result of the test method
-            Assertions.assertEquals(extected, test(extected, type), "type=" + type);
+            Assertions.assertEquals(extected, test(extected, type),
+                    "max value should round-trip for type=" + type);
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
-    public void testTypeConversionsMinValue() throws IllegalAccessException, NoSuchFieldException {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @SuppressWarnings("rawtypes")
+    @DisplayName("Converts min values across primitive wrapper types")
+    void testTypeConversionsMinValue() throws IllegalAccessException, NoSuchFieldException {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip min value conversions");
 
         for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
                 .class, Float.class, Double.class}) {
@@ -61,33 +65,39 @@ public class ConventionsTest extends WireTestCommon {
             }
 
             // Assert equality between the expected value and the result of the test method
-            Assertions.assertEquals(extected, test(extected, type), "type=" + type);
+            Assertions.assertEquals(extected, test(extected, type),
+                    "min value should round-trip for type=" + type);
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
-    public void testTypeConversionsSmallNumber() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @SuppressWarnings("rawtypes")
+    @DisplayName("Converts small numeric string values across types")
+    void testTypeConversionsSmallNumber() {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip small number conversions");
 
         for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short
                 .class, Byte.class}) {
             // Use a small number as a string for the expected value
             @NotNull Object extected = "123"; // small number
             // Assert equality between the expected value and the result of the test method
-            Assertions.assertEquals(extected, String.valueOf(test(extected, type)), "type=" + type);
+            Assertions.assertEquals(extected, String.valueOf(test(extected, type)),
+                    "small number should round-trip for type=" + type);
         }
 
         // Special cases for floating-point numbers
-        Assertions.assertEquals(123.0, test("123", Double.class), 0);
-        Assertions.assertEquals(123.0, (double) test("123", Float.class), 0);
+        Assertions.assertEquals(123.0, test("123", Double.class), 0,
+                "double conversion should read 123.0");
+        Assertions.assertEquals(123.0, (double) test("123", Float.class), 0,
+                "float conversion should read 123.0");
 
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
-    public void testTypeConversionsConvertViaString() throws NoSuchFieldException, IllegalAccessException {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @SuppressWarnings("rawtypes")
+    @DisplayName("Converts values via string for numeric types")
+    void testTypeConversionsConvertViaString() throws NoSuchFieldException, IllegalAccessException {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip string conversion tests");
 
         for (@NotNull Class<?> type : new Class[]{Integer.class, Long.class, Short.class, Byte
                 .class}) {
@@ -106,18 +116,21 @@ public class ConventionsTest extends WireTestCommon {
             @Nullable final Object actual = test(value, extected.getClass());
 
             // Assert that the converted value matches the expected value
-            Assertions.assertEquals(extected, actual, "type=" + type);
+            Assertions.assertEquals(extected, actual,
+                    "value should round-trip via string for type=" + type);
         }
     }
 
     @Test
-    public void testTypeConversionsMaxUnsigned() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @DisplayName("Converts max unsigned values for long type")
+    void testTypeConversionsMaxUnsigned() {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip unsigned conversion tests");
 
         // Test conversions for maximum unsigned long value
         for (long shift : new long[]{8}) {
             long extected = 1L << shift;
-            Assertions.assertEquals(extected, (long) test(extected, Long.class));
+            Assertions.assertEquals(extected, (long) test(extected, Long.class),
+                    "unsigned max should round-trip for shift=" + shift);
         }
     }
 
@@ -167,7 +180,7 @@ public class ConventionsTest extends WireTestCommon {
                 return (T) (Double) wire.getValueIn().float64();
 
             // Throw an exception if the conversion is not supported
-            throw new UnsupportedOperationException("");
+            throw new UnsupportedOperationException("Unsupported destination type " + destinationType);
         } finally {
             // Release resources associated with the Bytes object
             bytes.releaseLast();

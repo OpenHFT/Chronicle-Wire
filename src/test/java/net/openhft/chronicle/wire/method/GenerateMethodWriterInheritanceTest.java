@@ -8,6 +8,7 @@ import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.*;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
@@ -27,6 +28,7 @@ class GenerateMethodWriterInheritanceTest extends WireTestCommon {
      * Tests that method writer generation works for the same class in the hierarchy.
      */
     @Test
+    @DisplayName("Method writer resolves same class in hierarchy")
     public void testSameClassInHierarchy() {
         // Create a new binary wire that uses padding
         final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
@@ -34,7 +36,8 @@ class GenerateMethodWriterInheritanceTest extends WireTestCommon {
 
         // Generate a method writer for AnInterface and ADescendant
         final AnInterface writer = wire.methodWriter(AnInterface.class, ADescendant.class);
-        assertInstanceOf(MethodWriter.class, writer);
+        assertInstanceOf(MethodWriter.class, writer,
+                "Method writer should be generated for interface plus descendant");
 
         // Invoke a method on the writer
         writer.sayHello("hello world");
@@ -46,20 +49,23 @@ class GenerateMethodWriterInheritanceTest extends WireTestCommon {
         final MethodReader reader = wire.methodReader(new SameInterfaceImpl(callRegistered));
 
         // Verify the method call is read and registered
-        assertTrue(reader.readOne());
-        assertTrue(callRegistered.get());
+        assertTrue(reader.readOne(), "Reader should process the sayHello call for descendant interface");
+        assertTrue(callRegistered.get(), "Implementation should receive the sayHello call for descendant interface");
 
         // Ensure that the default VanillaMethodReader is not used
-        assertFalse(reader instanceof VanillaMethodReader);
+        assertFalse(reader instanceof VanillaMethodReader,
+                "Reader should be generated for hierarchy test, not VanillaMethodReader");
 
         // Ensure that the writer is not a proxy, indicating successful compilation
-        assertFalse(Proxy.isProxyClass(writer.getClass()));
+        assertFalse(Proxy.isProxyClass(writer.getClass()),
+                "Writer should be generated for hierarchy test, not a proxy");
     }
 
     /**
      * Tests that method writer generation handles methods with the same name properly.
      */
     @Test
+    @DisplayName("Method writer handles same named methods")
     public void testSameNamedMethod() {
         // Similar setup as the previous test
         final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
@@ -67,26 +73,30 @@ class GenerateMethodWriterInheritanceTest extends WireTestCommon {
 
         // Generate a method writer for AnInterface with a method of the same name from another interface
         final AnInterface writer = wire.methodWriter(AnInterface.class, AnInterfaceSameName.class);
-        assertInstanceOf(MethodWriter.class, writer);
+        assertInstanceOf(MethodWriter.class, writer,
+                "Method writer should be generated for same-name interfaces");
 
         // Same testing process as the previous method
         writer.sayHello("hello world");
         final AtomicBoolean callRegistered = new AtomicBoolean();
         final MethodReader reader = wire.methodReader(new SameMethodNameImpl(callRegistered));
 
-        assertTrue(reader.readOne());
-        assertTrue(callRegistered.get());
+        assertTrue(reader.readOne(), "Reader should process the sayHello call for same-name interfaces");
+        assertTrue(callRegistered.get(), "Implementation should receive the sayHello call for same-name interfaces");
 
         // VanillaMethodReader is used in case compilation of generated reader failed.
-        assertFalse(reader instanceof VanillaMethodReader);
+        assertFalse(reader instanceof VanillaMethodReader,
+                "Reader should be generated for same-name test, not VanillaMethodReader");
 
         // Proxy method writer is constructed in case compilation of generated writer failed.
-        assertFalse(Proxy.isProxyClass(writer.getClass()));
+        assertFalse(Proxy.isProxyClass(writer.getClass()),
+                "Writer should be generated for same-name test, not a proxy");
     }
 
     // TODO: same names but different MethodIds should barf
 
     @Test
+    @DisplayName("Duplicate MethodId values are rejected by validation")
     public void testDuplicateMethodIds() {
         assertThrows(MethodWriterValidationException.class, () -> {
             final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
@@ -95,18 +105,19 @@ class GenerateMethodWriterInheritanceTest extends WireTestCommon {
             final VanillaMethodWriterBuilder<AnInterfaceMethodId> builder =
                     (VanillaMethodWriterBuilder<AnInterfaceMethodId>) wire.methodWriterBuilder(AnInterfaceMethodId.class);
             builder.addInterface(AnInterfaceSameMethodId.class).build();
-        });
+        }, "Duplicate MethodId values should fail validation");
     }
 
     // This test is expected to throw a MethodWriterValidationException when trying to generate a method writer for a class
     @Test
+    @DisplayName("Method writer rejects concrete class inputs")
     public void testGenerateForClass() {
         assertThrows(MethodWriterValidationException.class, () -> {
             final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
             // Attempt to generate a method writer for a non-interface class, expecting an exception
             wire.methodWriter(GenerateMethodWriterInheritanceTest.class);
-        });
+        }, "Method writer should reject non-interface types");
     }
 
     /**
@@ -115,8 +126,9 @@ class GenerateMethodWriterInheritanceTest extends WireTestCommon {
      * in certain dynamic proxy or code generation scenarios.
      */
     @Test
+    @DisplayName("Method writer supports long generated class names")
     public void testGenerateForLongGeneratedClassName() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for long class name test");
 
         // Allocate a new binary wire buffer
         final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
@@ -129,9 +141,12 @@ class GenerateMethodWriterInheritanceTest extends WireTestCommon {
         );
 
         // Assert that the proxy writer instance implements all three interfaces
-        assertInstanceOf(NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1.class, writer);
-        assertInstanceOf(NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener2.class, writer);
-        assertInstanceOf(NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener3.class, writer);
+        assertInstanceOf(NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener1.class, writer,
+                "Writer should implement first long-name interface");
+        assertInstanceOf(NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener2.class, writer,
+                "Writer should implement second long-name interface");
+        assertInstanceOf(NewOrderSingleListenerOmsHedgerTradeListenerOpenOrdersListenerPaidGivenTickListener3.class, writer,
+                "Writer should implement third long-name interface");
     }
 
     // Interfaces and classes used in the test:

@@ -5,15 +5,17 @@ package net.openhft.chronicle.wire.issue;
 
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class Issue844Test extends WireTestCommon {
+class Issue844Test extends WireTestCommon {
 
     @Test
-    public void nestedMapsJson() {
+    @DisplayName("Nested maps should round-trip JSON and YAML")
+    void nestedMapsJson() {
 
         // at least 3 levels of nested to reproduce this issue
         Object o2 = WireType.JSON_ONLY.fromString("\"serviceConfig\": {\n" +
@@ -37,14 +39,16 @@ public class Issue844Test extends WireTestCommon {
                         "    collection: ladder\n" +
                         "  }\n" +
                         "}\n",
-                WireType.YAML_ONLY.asString(o2));
+                WireType.YAML_ONLY.asString(o2),
+                "Nested map should render expected YAML structure");
         assertEquals(
                 "{\"serviceConfig\":{\"db\":{\"a\":{\"Hello\":\"World\"},\"mongodb\":{\"@net.openhft.chronicle.wire.issue.Issue844Test$Enum\":\"INSTANCE\"},\"collection\":\"ladder\"}}}",
-                WireType.JSON_ONLY.asString(o2)
+                WireType.JSON_ONLY.asString(o2),
+                "Nested map should render expected JSON structure"
         );
     }
 
-    public enum Enum {
+    enum Enum {
         INSTANCE
     }
 }

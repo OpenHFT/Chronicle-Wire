@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.util.Mocker;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,8 +22,9 @@ public class MethodReaderSuperInterfaceForSeveralReturnTypesTest extends WireTes
      * It aims to verify that method calls from interfaces `A`, `B`, and `C` (all having a relation to interface `D`)
      * are correctly written to and read from a BinaryWire.
      */
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
+    @DisplayName("Super interface chaining resolves distinct return types")
     public void test() {
         // Initialization of the wire with padding
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
@@ -40,15 +42,17 @@ public class MethodReaderSuperInterfaceForSeveralReturnTypesTest extends WireTes
 
         // Create a MethodReader and set up interception of method calls using Mocker
         MethodReader reader = wire.methodReader(Mocker.intercepting(A.class, "*", sb::append));
-        assertFalse(reader instanceof VanillaMethodReader);
-        assertTrue(reader.readOne());
+        assertFalse(reader instanceof VanillaMethodReader,
+                "MethodReader should use generated code for chained return types");
+        assertTrue(reader.readOne(), "Reader should process first chained call");
 
         // Re-create method reader to nullify previously saved chained call result
         wire.methodReader(Mocker.intercepting(A.class, "*", sb::append));
-        assertTrue(reader.readOne());
+        assertTrue(reader.readOne(), "Reader should process second chained call");
 
         // Check if the intercepted method calls were captured correctly
-        assertEquals("*b[]*end[]*c[]*end[]", sb.toString());
+        assertEquals("*b[]*end[]*c[]*end[]", sb.toString(),
+                "Intercepted calls should match chained return order");
     }
 
     /**

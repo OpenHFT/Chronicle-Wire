@@ -62,4 +62,20 @@ class ThreeSequence extends SelfDescribingMarshallable {
         // Reads the "text" field from the wire.
         text = wire.read("text").text();
     }
+
+    String getText() {
+        return text;
+    }
+
+    List<Rung> getA() {
+        return a;
+    }
+
+    List<Rung> getB() {
+        return b;
+    }
+
+    List<Rung> getC() {
+        return c;
+    }
 }

@@ -10,6 +10,7 @@ import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.wire.RawWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.Buffer;
@@ -19,9 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
- * This class tests the marshalling and unmarshalling of objects using ByteBuffers.
+ * Verifies RawWire marshalling and unmarshalling using ByteBuffer-backed Bytes for multiple DTO shapes.
  */
-public class ByteBufferMarshallingTest extends WireTestCommon {
+class ByteBufferMarshallingTest extends WireTestCommon {
 
     /**
      * Test the write and read capabilities of a ByteBuffer.
@@ -29,8 +30,9 @@ public class ByteBufferMarshallingTest extends WireTestCommon {
      * Finally, it asserts that the original and the read objects are the same.
      */
     @Test
-    public void writeReadByteBuffer() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @DisplayName("RawWire should round-trip AClass via ByteBuffer")
+    void writeReadByteBuffer() {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for ByteBuffer round-trip");
 
         // Initialize an elastic ByteBuffer and create a Wire for it
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -46,7 +48,7 @@ public class ByteBufferMarshallingTest extends WireTestCommon {
         o2.readMarshallable(wire);
 
         // Assert that the original and read objects are equal
-        assertEquals(o1, o2);
+        assertEquals(o1, o2, "Marshalled object should round-trip via RawWire");
         bytes.releaseLast();
     }
 
@@ -55,8 +57,9 @@ public class ByteBufferMarshallingTest extends WireTestCommon {
      * This test showcases the transition of data between two ByteBuffers.
      */
     @Test
-    public void writeReadViaByteBuffer() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @DisplayName("RawWire should round-trip via ByteBuffer transfer")
+    void writeReadViaByteBuffer() {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for ByteBuffer transfer");
 
         // Initialize an elastic ByteBuffer and create a Wire for it
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -93,7 +96,7 @@ public class ByteBufferMarshallingTest extends WireTestCommon {
         o2.readMarshallable(wire2);
 
         // Assert that the original and read objects are equal
-        assertEquals(o1, o2);
+        assertEquals(o1, o2, "Marshalled object should round-trip via ByteBuffer transfer");
         bytes.releaseLast();
         bytes2.releaseLast();
     }
@@ -103,8 +106,9 @@ public class ByteBufferMarshallingTest extends WireTestCommon {
      * This test demonstrates the use of ByteBuffers without explicitly using a Wire.
      */
     @Test
-    public void writeReadBytesViaByteBuffer() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @DisplayName("RawWire should round-trip Bytes via ByteBuffer")
+    void writeReadBytesViaByteBuffer() {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for Bytes and ByteBuffer test");
 
         // Initialize an elastic ByteBuffer
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -137,7 +141,7 @@ public class ByteBufferMarshallingTest extends WireTestCommon {
         o2.readMarshallable(bytes2);
 
         // Assert that the original and read objects are equal
-        assertEquals(o1, o2);
+        assertEquals(o1, o2, "Marshalled object should round-trip via Bytes and ByteBuffer");
         bytes.releaseLast();
         bytes2.releaseLast();
     }

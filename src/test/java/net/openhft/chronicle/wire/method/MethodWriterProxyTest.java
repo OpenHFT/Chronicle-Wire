@@ -7,6 +7,7 @@ import net.openhft.chronicle.core.Jvm;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
@@ -36,32 +37,35 @@ public class MethodWriterProxyTest extends MethodWriterTest {
     }
 
     // Test method inherited from the parent class but ignored due to a known issue
-    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     @Test
+    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/159 - multiOut proxy path")
+    @DisplayName("Proxy method writer uses multi-output wiring")
     @Override
     public void multiOut() {
         // Calls the same test method from the parent class
         super.multiOut();
-        fail();
+        fail("Disabled multiOut test should not continue past proxy assertions");
     }
 
     // Test method for testing primitives, ignored on specific conditions and known issues
-    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     @Test
+    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/159 - primitives proxy path")
+    @DisplayName("Proxy method writer handles primitive argument serialisation")
     @Override
     public void testPrimitives() {
         // Calls the test method for primitives from the parent class
         super.doTestPrimitives(true);
-        fail();
+        fail("Disabled primitives test should not continue past proxy assertions");
     }
 
     // Method to check the type of the writer object in the context of this test class
     @Override
     protected void checkWriterType(Object writer) {
         // Skip the check on Mac ARM architecture
-        assumeFalse(Jvm.isMacArm());
+        assumeFalse(Jvm.isMacArm(), "Proxy writer checks are disabled on Mac ARM");
 
         // Assert that the writer object is a proxy class
-        assertTrue(Proxy.isProxyClass(writer.getClass()));
+        assertTrue(Proxy.isProxyClass(writer.getClass()),
+                "Proxy writer should be used when codegen is disabled");
     }
 }

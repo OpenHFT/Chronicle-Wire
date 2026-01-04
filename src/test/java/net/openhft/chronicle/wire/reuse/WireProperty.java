@@ -24,17 +24,6 @@ public class WireProperty extends WireModel {
     @Nullable
     private String value;
 
-    /**
-     * Constructor for WireProperty.
-     *
-     * @param reference The reference of the wire property.
-     * @param path The path of the wire property.
-     * @param name The name of the wire property.
-     * @param value The value of the wire property.
-     * @param id Unique identifier.
-     * @param revision Revision number.
-     * @param key Key associated with the wire property.
-     */
     public WireProperty(@Nullable String reference, @Nullable String path, @Nullable String name, @Nullable String value, long id, int revision, String key) {
         super(id, revision, key);
         this.reference = reference;

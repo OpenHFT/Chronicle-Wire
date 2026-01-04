@@ -10,6 +10,7 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
@@ -20,17 +21,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class JSON222IndividualTest extends WireTestCommon {
 
     // Test empty JSON object representation
     @Test
+    @DisplayName("JSON writer should serialise empty object")
     public void testEmptyBrackets() {
         checkSerialized("{}", new LinkedHashMap<>());
     }
 
     // Test JSON string representation with a tab character
     @Test
+    @DisplayName("JSON writer should serialise tab characters")
     public void testTab() {
         checkSerialized("\"hello\\tworld\"\n", "hello\tworld");
         checkDeserialized("hello\tworld", "\"hello\\tworld\"");
@@ -38,6 +42,7 @@ public class JSON222IndividualTest extends WireTestCommon {
 
     // Test JSON string representation with a special unicode character
     @Test
+    @DisplayName("JSON writer should serialise special Unicode characters")
     public void testSpecial() {
         checkSerialized("\"\\u1000\"\n", "\u1000");
         checkDeserialized("\u1000", "\"\\u1000\"");
@@ -45,6 +50,7 @@ public class JSON222IndividualTest extends WireTestCommon {
 
     // Test nested JSON arrays
     @Test
+    @DisplayName("JSON writer should serialise nested arrays")
     public void nestedSeq() {
         @SuppressWarnings("rawtypes")
         @NotNull List list = Arrays.asList(3L, Collections.singletonList(4L));
@@ -58,6 +64,7 @@ public class JSON222IndividualTest extends WireTestCommon {
 
     // Test parsing of a JSON object with array as key
     @Test
+    @DisplayName("JSON reader should parse array keys")
     public void parseArrayKey() {
         checkDeserialized("{5=[6], [7]=}", "{ '5': [ 6 ], [ 7 ] }\n");
     }
@@ -77,7 +84,8 @@ public class JSON222IndividualTest extends WireTestCommon {
                 throw e;
             }
 
-            assertEquals(expected, wire.toString());
+            assertEquals(expected, wire.toString(),
+                    "Serialised output should match expected JSON");
 
         } finally {
             // Release resources to prevent memory leaks
@@ -92,7 +100,8 @@ public class JSON222IndividualTest extends WireTestCommon {
         // Validate the input with an external YAML parser
         try {
             @NotNull Yaml yaml = new Yaml();
-            Object o = yaml.load(new StringReader(input));
+            Object loaded = yaml.load(new StringReader(input));
+            assertNotNull(loaded, "Yaml parse result should not be null");
         } catch (Exception e) {
             throw e;
         }
@@ -101,7 +110,8 @@ public class JSON222IndividualTest extends WireTestCommon {
         @Nullable Object o = wire.getValueIn()
                 .object();
 
-        assertEquals(expected, o.toString());
+        assertEquals(expected, o.toString(),
+                "Deserialised object should match expected string");
 
         // Release resources to prevent memory leaks
         wire.bytes().releaseLast();

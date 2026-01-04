@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -15,8 +16,10 @@ public class Base85LongConverterTest extends WireTestCommon {
 
     // A sample string to test the parsing functionality.
     private static final CharSequence TEST_STRING = "world";
+    private static final String PREFIX_HELLO = "hello";
 
     @Test
+    @DisplayName("Parses Base85 leading zeros as zero")
     public void parseLeadingZero() {
         LongConverter c = Base85LongConverter.INSTANCE;
         assertEquals(0L, c.parse("0"), "base85 single zero should decode to 0L");
@@ -35,6 +38,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Parses and appends Base85 tokens correctly")
     public void parse() {
         // Obtain the singleton instance of Base85LongConverter
         LongConverter c = Base85LongConverter.INSTANCE;
@@ -46,11 +50,12 @@ public class Base85LongConverterTest extends WireTestCommon {
             StringBuilder sb = new StringBuilder();
             c.append(sb, v);
             assertEquals(s, sb.toString(),
-                    "base85 roundtrip conversion should preserve original text representation");
+                    "Expected base85 round-trip for input=" + s);
         }
     }
 
     @Test
+    @DisplayName("Parses Base85 subsequences without error safely")
     public void parseSubsequence() {
         LongConverter c = Base85LongConverter.INSTANCE;
         String s = ",a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0,";
@@ -60,6 +65,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Rejects overly long Base85 input strings")
     public void parseLengthCheck() {
         assertThrows(IllegalArgumentException.class, () ->
                         Base85LongConverter.INSTANCE.parse(getClass().getCanonicalName()),
@@ -67,6 +73,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Rejects invalid Base85 substring bounds cases")
     public void parseSubstringLengthCheck() {
         assertThrows(IllegalArgumentException.class, () ->
                         Base85LongConverter.INSTANCE.parse("ABCD", -1, 3),
@@ -74,6 +81,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("Formats and parses Base85 values correctly")
     public void asString() {
         // Obtain the singleton instance of Base85LongConverter
         LongConverter c = Base85LongConverter.INSTANCE;
@@ -92,18 +100,21 @@ public class Base85LongConverterTest extends WireTestCommon {
 
     // Validate the append operation for a known input string
     @Test
+    @DisplayName("Appends Base85 text for known input")
     public void testAppend() {
         LongConverterTestSupport.assertAppend(TEST_STRING, Base85LongConverter.INSTANCE);
     }
 
     // Validate appending data with pre-existing content in the buffer
     @Test
+    @DisplayName("Appends Base85 text with existing data")
     public void testAppendWithExistingData() {
-        LongConverterTestSupport.assertAppendWithPrefix(TEST_STRING, Base85LongConverter.INSTANCE, "hello");
+        LongConverterTestSupport.assertAppendWithPrefix(TEST_STRING, Base85LongConverter.INSTANCE, PREFIX_HELLO);
     }
 
     // Ensure safe character conversion using TextWire
     @Test
+    @DisplayName("Allows safe Base85 characters in TextWire")
     public void allSafeCharsTextWire() {
         // Create a TextWire instance with elastic on heap bytes and configure it to use text documents
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
@@ -114,6 +125,7 @@ public class Base85LongConverterTest extends WireTestCommon {
 
     // Ensure safe character conversion using YamlWire
     @Test
+    @DisplayName("Allows safe Base85 characters in YamlWire")
     public void allSafeCharsYamlWire() {
         // Create a YamlWire instance with elastic on heap bytes and configure it to use text documents
         Wire wire = new YamlWire();

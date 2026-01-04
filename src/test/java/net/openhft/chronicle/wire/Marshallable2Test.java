@@ -7,8 +7,10 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.Validatable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,6 +20,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 class Marshallable2Test extends WireTestCommon {
 
     // Instance variable for the WireType being tested in this instance of the test
@@ -44,21 +49,22 @@ class Marshallable2Test extends WireTestCommon {
     // Test case to verify if the Wire's WriteDocumentContext behaves correctly in terms of being empty or not
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Checks write document emptiness transitions correctly")
     public void writeDocumentIsEmpty(WireType wireType) {
         initMarshallable2Test(wireType);
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(16);
         Wire wire = wireType.apply(bytes);
         try (DocumentContext dc = wire.writingDocument()) {
             WriteDocumentContext wdc = (WriteDocumentContext) dc;
-            assertTrue(wdc.isEmpty());
+            assertTrue(wdc.isEmpty(), "new writing document should be empty");
             wdc.wire().write("hi");
-            assertFalse(wdc.isEmpty());
+            assertFalse(wdc.isEmpty(), "writing document should not be empty after write");
         }
         try (DocumentContext dc = wire.writingDocument(true)) {
             WriteDocumentContext wdc = (WriteDocumentContext) dc;
-            assertTrue(wdc.isEmpty());
+            assertTrue(wdc.isEmpty(), "meta writing document should be empty initially");
             wdc.wire().write("hi");
-            assertFalse(wdc.isEmpty());
+            assertFalse(wdc.isEmpty(), "meta writing document should not be empty after write");
         }
     }
 
@@ -66,9 +72,11 @@ class Marshallable2Test extends WireTestCommon {
     @MethodSource("wireTypes")
     @SuppressWarnings("rawtypes")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Round-trips nested object with validation")
     public void testObject(WireType wireType) {
         initMarshallable2Test(wireType);
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory disabled; skip nested object test");
 
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         Wire wire = wireType.apply(bytes);
@@ -78,41 +86,54 @@ class Marshallable2Test extends WireTestCommon {
 
         wire.getValueOut().object(source);
         Outer target = wire.getValueIn().object(source.getClass());
-        assertEquals(source, target);
-        assertTrue(target.validated);
+        assertEquals(source, target,
+                "object should round-trip for wireType=" + wireType);
+        assertTrue(target.validated,
+                "validatable should be invoked during read for wireType=" + wireType);
     }
 
     // Test case to verify if writing to the Wire is complete under various conditions
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Tracks writing completion across chained documents")
     public void writingIsComplete(WireType wireType) {
         initMarshallable2Test(wireType);
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         Wire wire = wireType.apply(bytes);
-        assertTrue(wire.writingIsComplete());
+        assertTrue(wire.writingIsComplete(),
+                "wire should be complete before any writes");
         try (DocumentContext dc = wire.writingDocument()) {
-            assertFalse(dc.wire().writingIsComplete());
+            assertFalse(dc.wire().writingIsComplete(),
+                    "writing document should not be complete during write");
             dc.wire().write("say").text("hi");
         }
-        assertTrue(wire.writingIsComplete());
+        assertTrue(wire.writingIsComplete(),
+                "wire should be complete after writing document");
 
         try (WriteDocumentContext dc = (WriteDocumentContext) wire.acquireWritingDocument(false)) {
-            assertFalse(dc.wire().writingIsComplete());
+            assertFalse(dc.wire().writingIsComplete(),
+                    "writing document should not be complete during chained write with chainedElement true");
             dc.wire().write("say").text("hi");
             dc.chainedElement(true);
         }
-        assertFalse(wire.writingIsComplete());
+        assertFalse(wire.writingIsComplete(),
+                "wire should not be complete after chained element");
 
         try (WriteDocumentContext dc = (WriteDocumentContext) wire.acquireWritingDocument(false)) {
-            assertFalse(dc.wire().writingIsComplete());
+            assertFalse(dc.wire().writingIsComplete(),
+                    "writing document should not be complete during chained write with chainedElement false");
             dc.wire().write("say").text("hi");
             dc.chainedElement(false);
         }
-        assertTrue(wire.writingIsComplete());
+        assertTrue(wire.writingIsComplete(),
+                "wire should be complete after final chained element");
     }
 
     // Static class representing an outer object that contains nested inner objects and implements the Validatable interface
     @SuppressWarnings("unused")
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     private static class Outer extends SelfDescribingMarshallable implements Validatable {
         final String name;
         Inner1 inner1;

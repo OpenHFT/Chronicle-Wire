@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire.domestic.streaming.reduction;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -17,7 +18,7 @@ import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
+class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
 
     private static final List<MarketData> MARKET_DATA_SET = Arrays.asList(
             new MarketData("MSFT", 10, 11, 9),
@@ -26,7 +27,8 @@ public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
     );
 
     @Test
-    public void lastMarketDataPerSymbolCustom() {
+    @DisplayName("Custom min/max reductions per symbol and globally")
+    void lastMarketDataPerSymbolCustom() {
 
         // This first Accumulation will keep track of the min and max value for all symbols
 
@@ -51,12 +53,15 @@ public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
         final Map<String, MinMax> expected = MARKET_DATA_SET.stream()
                 .collect(toMap(MarketData::symbol, MinMax::new, MinMax::merge));
 
-        assertEquals(expectedGlobal, globalListener.reduction());
-        assertEquals(expected, listener.reduction());
+        assertEquals(expectedGlobal, globalListener.reduction(),
+                "Global reduction should track min/max across all symbols");
+        assertEquals(expected, listener.reduction(),
+                "Per-symbol reduction should track min/max per symbol");
     }
 
     @Test
-    public void lastMarketDataPerSymbol() {
+    @DisplayName("Reduction should keep last MarketData per symbol")
+    void lastMarketDataPerSymbol() {
 
         final Reduction<Map<String, MarketData>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class).build())
@@ -69,11 +74,13 @@ public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
         final Map<String, MarketData> expected = MARKET_DATA_SET.stream()
                 .collect(toMap(MarketData::symbol, Function.identity(), replacingMerger()));
 
-        assertEquals(expected, listener.reduction());
+        assertEquals(expected, listener.reduction(),
+                "Reduction should keep the last MarketData per symbol");
     }
 
     @Test
-    public void symbolSet() {
+    @DisplayName("Reduction should collect all unique symbols")
+    void symbolSet() {
 
         Reduction<Set<String>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class)
@@ -88,7 +95,8 @@ public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
                 .map(MarketData::symbol)
                 .collect(toSet());
 
-        assertEquals(expected, listener.reduction());
+        assertEquals(expected, listener.reduction(),
+                "Symbol set reduction should collect all unique symbols");
     }
 
 }

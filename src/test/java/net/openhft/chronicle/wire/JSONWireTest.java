@@ -10,7 +10,9 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
@@ -101,6 +103,7 @@ public class JSONWireTest extends WireTestCommon {
 
     // Test to verify that opening brackets in the JSON are correctly processed
     @Test
+    @DisplayName("JSONWire should read events without opening brackets")
     public void testOpenBracket() {
         @NotNull StringBuilder sb = new StringBuilder();
 
@@ -134,6 +137,7 @@ public class JSONWireTest extends WireTestCommon {
 
     // Test to check if the JSONWire can process JSON strings without spaces correctly
     @Test
+    @DisplayName("JSONWire should parse JSON without spaces")
     public void testNoSpaces() {
         @NotNull Wire wire = createWire("\"echo\":\"\"");
         @NotNull VanillaWireParser parser = new VanillaWireParser(soutWireParselet(), VanillaWireParser.SKIP_READABLE_BYTES);
@@ -149,8 +153,9 @@ public class JSONWireTest extends WireTestCommon {
 
     // Test for verifying how lists are formatted in JSONWire
     @Test
+    @DisplayName("JSONWire should format lists with quoted fields")
     public void testListFormatting() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testListFormatting");
 
         @NotNull Wire wire = createWire();
 
@@ -174,8 +179,9 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should round-trip null string fields")
     public void testNullString() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testNullString");
 
         // Create a new wire instance
         @NotNull Wire w = createWire();
@@ -198,8 +204,9 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should render bytes as text values")
     public void testBytes() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testBytes");
 
         // Create a new wire instance
         @NotNull Wire w = createWire();
@@ -227,8 +234,9 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should parse float values from JSON")
     public void testFloatFromJson() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testFloatFromJson");
 
         // Create a new FooEvent and set its foo value
         FooEvent foo = new FooEvent();
@@ -243,8 +251,9 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should marshall with two list fields")
     public void testMarshallableWithTwoLists() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testMarshallableWithTwoLists");
 
         // Create a new wire instance
         @NotNull Wire wire = createWire();
@@ -291,8 +300,9 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should write map of named keys")
     public void testMapOfNamedKeys() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testMapOfNamedKeys");
 
         MapHolder mh = new MapHolder(); // Create a new MapHolder object
         Map<RetentionPolicy, Double> map = Collections.singletonMap(RetentionPolicy.CLASS, 0.1); // Define a map with a single entry
@@ -301,6 +311,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should read map of named keys")
     public void testMapOfNamedKeys2() {
         String str = "{\"map\":{\"CLASS\":0.1}}";
         MapHolder mh = JSON.fromString(MapHolder.class, str);
@@ -312,8 +323,9 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should read LocalDate calendar value instances")
     public void testDate() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testDate");
 
         Dates dates = new Dates(); // Create a new Dates object
         dates.date = LocalDate.of(2021, 5, 28); // Set specific LocalDate
@@ -333,6 +345,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should reject comma inside value text")
     public void commaIsNotInAValue() {
         String text = "[1,2,3]"; // Define a string representation of a list
         Wire wire = createWire(); // Create a new wire
@@ -347,6 +360,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should parse arrays inside dictionaries")
     public void testArrayInDictionary() {
         String text = "[320 , {\"as\":[1 ,\n2\n, 3]}]"; // Define a string with a list that contains an integer and a dictionary
         final JSONWire jsonWire = new JSONWire(Bytes.from(text)); // Create a new JSONWire with the given text
@@ -355,8 +369,9 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should handle null date values")
     public void testDateNull() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testDateNull");
 
         Dates dates = new Dates(); // Create a new Dates object with presumably null fields
         @NotNull CharSequence str = WireType.JSON.asString(dates); // Convert the Dates object to a JSON string
@@ -368,6 +383,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should parse nested arrays in dictionaries")
     public void testArrayInDictionary2() {
         // Define a complex JSON string containing nested arrays and dictionaries
         String str = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
@@ -381,8 +397,9 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should handle array delimiter without spaces")
     public void testArrayDelimiterNoSpace() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testArrayDelimiterNoSpace");
 
         // A complex JSON string causing some parsing issues
         String str = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
@@ -400,8 +417,9 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should quote fields for empty sequences")
     public void testQuotedFieldsEmptySequence() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testQuotedFieldsEmptySequence");
 
         // Create a JSON string with different field types
         final Bytes<byte[]> data = Bytes.allocateElasticOnHeap();
@@ -425,8 +443,9 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should handle nested maps with integer keys")
     public void nestedMapWithIntegerKeys() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for nestedMapWithIntegerKeys");
 
         MapWithIntegerKeysHolder mh = new MapWithIntegerKeysHolder(); // Create an instance of MapWithIntegerKeysHolder
         // Populate the maps inside the MapWithIntegerKeysHolder object with test data
@@ -448,8 +467,9 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should write layout with explicit fields")
     public void testWritingLayout() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testWritingLayout");
 
         final Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(1024); // Create an elastic byte buffer
         final JSONWire wire = new JSONWire(bytes, true); // Create a JSONWire object
@@ -464,6 +484,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should escape unicode values when writing")
     public void escapeUnicodeValues() {
         Map<Object, Object> map = new HashMap<>(); // Create a new HashMap
         for (int code = 0x0000; code <= 0x0020; code++) {
@@ -501,6 +522,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should copy typed data to binary and back")
     public void copyTypedDataToBinaryAndBack() {
         ignoreException("Unable to copy object safely, message will not be repeated");
         String str = "{\"a\":{\"@Mapped\":{\"b\":\"c\",\"d\":123.4}},\"e\":{\"@Scalar\":\"Value\"},\"f\":{\"@Mapped2\":{\"b\":\"c\"}},\"g\":{\"@Scalar2\":12345.6}}";
@@ -514,8 +536,9 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should parse type literal form one")
     public void typeLiteral1() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for typeLiteral1");
 
         String expected = "{\"@net.openhft.chronicle.wire.JSONWireTest$DtoWithClassReference\":{\"implClass\":{\"@type\":\"net.openhft.chronicle.wire.JSONWireTest\"},\"bool\":false}}";
         Object o = WireType.JSON_ONLY.fromString(expected);
@@ -524,8 +547,9 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should parse second type literal form")
     public void typeLiteralTest2() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for typeLiteralTest2");
 
         DtoWithClassReference dtoWithClassReference = new DtoWithClassReference();
         dtoWithClassReference.implClass = this.getClass();
@@ -538,8 +562,9 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("JSONWire should handle null list with multiple fields")
     public void testNullListCollectionWithMultipleFieldsJson() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testNullListCollectionWithMultipleFieldsJson");
 
         ClassAliasPool.CLASS_ALIASES.addAlias(CollectionContainer.class);
         CollectionContainer container = WireType.JSON_ONLY.fromString("{ \"@CollectionContainer\": { \"collection\": [null, \"testValue\"] } }");
@@ -556,21 +581,33 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     // A class to represent a nested structure for testing JSON serialization
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     private static class Value extends SelfDescribingMarshallable {
         final Inner a = new Inner(); // Inner object
 
         // Nested class to define an inner structure of the Value class
+        @SuppressFBWarnings(
+                value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+                justification = "Fields are populated via Wire marshalling in tests.")
         private static class Inner extends SelfDescribingMarshallable {
             String b = "c"; // A single field with a default value
         }
     }
 
     // Another simple class extending a hypothetical abstract class "AbstractEventCfg"
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     private static class FooEvent extends AbstractEventCfg<FooEvent> {
         float foo; // A single float field
     }
 
     // A simple class representing an item with some properties
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     private static class Item extends SelfDescribingMarshallable {
         String name;       // Name of the item
         long number1;      // Some numerical value
@@ -644,6 +681,9 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     // Class to encapsulate date-related fields including local, local with time, and zoned date-times
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     private static class Dates extends SelfDescribingMarshallable {
         LocalDate date;           // Representing a date without time-zone
         LocalDateTime dateTime;   // Representing a date-time without a time-zone
@@ -655,6 +695,9 @@ public class JSONWireTest extends WireTestCommon {
 
     // Class to represent an entity with two fields and two lists of strings
     // Don't reorder these fields, or it will break testQuotedFieldsEmptySequence
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     private static final class SimpleTwoLists implements Marshallable {
         int field1; // Integer field 1
         int field2; // Integer field 2
@@ -678,11 +721,17 @@ public class JSONWireTest extends WireTestCommon {
         }
     }
 
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     private static class DtoWithClassReference extends SelfDescribingMarshallable {
         private Class<?> implClass;
         private boolean bool;
     }
 
+    @SuppressFBWarnings(
+            value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+            justification = "Fields are populated via Wire marshalling in tests.")
     private static class CollectionContainer {
         private Collection<String> collection;
     }

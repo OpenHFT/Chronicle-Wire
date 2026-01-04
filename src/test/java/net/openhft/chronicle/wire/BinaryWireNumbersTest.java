@@ -5,11 +5,13 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,17 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings({"deprecation", "removal"})
 public class BinaryWireNumbersTest extends WireTestCommon {
     private static final float VAL1 = 12345678901234567.0f;
-    private static int counter = 0;
-    private int len;
-    private WriteValue expected;
-    private WriteValue perform;
-
-    // Constructor initializes values for each test iteration
-    public void initBinaryWireNumbersTest(int len, WriteValue expected, WriteValue perform) {
-        this.len = len;
-        this.expected = expected;
-        this.perform = perform;
-    }
 
     // Provides a collection of parameters to run the tests with
     public static Collection<Object[]> data() {
@@ -77,18 +68,16 @@ public class BinaryWireNumbersTest extends WireTestCommon {
     // Test the BinaryWire number serialization using the given parameters
     @MethodSource("data")
     @ParameterizedTest
+    @DisplayName("Serialises numeric values with expected lengths")
     public void doTest(int len, WriteValue expected, WriteValue perform) {
-        initBinaryWireNumbersTest(len, expected, perform);
-        assertTrue(len > 0, "len must be positive");
-        assertNotNull(expected, "expected value writer");
-        assertNotNull(perform, "performed value writer");
-        if (counter++ == 18)
-            Thread.yield();
-        test(expected, perform);
+        assertTrue(len > 0, "fixed length should be > 0 for test case, len=" + len);
+        assertNotNull(expected, "writer should be non-null for fixed length test case, len=" + len);
+        assertNotNull(perform, "Perform writer should be non-null for fixed length test case, len=" + len);
+        test(len, expected, perform);
     }
 
     // Compares the serialized values from expected and perform operations
-    private void test(@NotNull WriteValue expected, @NotNull WriteValue perform) {
+    private void test(int len, @NotNull WriteValue expected, @NotNull WriteValue perform) {
         @SuppressWarnings("rawtypes")
         @NotNull Bytes<?> bytes1 = allocateElasticOnHeap();
         @NotNull Wire wire1 = new BinaryWire(bytes1, true, false, false, Integer.MAX_VALUE, "binary");

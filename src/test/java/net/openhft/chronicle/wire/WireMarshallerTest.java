@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,8 +15,10 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 public class WireMarshallerTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Binary wire marshaller preserves object content")
     public void usesBinary() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory is required for binary marshaller test");
 
         // Add an alias for the WMTwoFields class.
         ClassAliasPool.CLASS_ALIASES.addAlias(WMTwoFields.class);
@@ -56,7 +59,9 @@ public class WireMarshallerTest extends WireTestCommon {
                 "   c2 69 64                                        # id:\n" +
                 "   a6 d2 02 96 49                                  # 1234567890\n" +
                 "   c2 74 73                                        # ts:\n" +
-                "   a7 2b 20 d2 5c 8a 97 05 00                      # 1573995402108971\n", bytes.toHexString());
+                "   a7 2b 20 d2 5c 8a 97 05 00                      # 1573995402108971\n",
+                bytes.toHexString(),
+                "Binary hex dump should match expected layout");
 
         // Release the resources used by the HexDumpBytes object.
         bytes.releaseLast();

@@ -9,6 +9,7 @@ import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.utils.RecordHistory;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,18 +20,21 @@ public class MethodReaderWithHistoryTest extends WireTestCommon {
 
     // Test with text wire type
     @Test
+    @DisplayName("Method reader preserves history on TEXT wire")
     public void text() {
         assertTrue(doTest(WireType.TEXT), "method reader with history: wireType=TEXT");
     }
 
     // Test with YAML-only wire type
     @Test
+    @DisplayName("Method reader preserves history on YAML_ONLY wire")
     public void yaml() {
         assertTrue(doTest(WireType.YAML_ONLY), "method reader with history: wireType=YAML_ONLY");
     }
 
     // Test with binary wire type
     @Test
+    @DisplayName("Method reader preserves history on BINARY wire")
     public void binary() {
         assertTrue(doTest(WireType.BINARY), "method reader with history: wireType=BINARY");
     }
@@ -58,23 +62,23 @@ public class MethodReaderWithHistoryTest extends WireTestCommon {
 
         String[] says = {null};
         MethodReader reader = wire.methodReader((RecordHistorySays) h -> {
-            assertEquals(1, h.sourceId(0));
-            assertEquals(11, h.sourceIndex(0));
+            assertEquals(1, h.sourceId(0), "First history source id should be 1");
+            assertEquals(11, h.sourceIndex(0), "First history source index should be 11");
             return (Saying) s -> says[0] = s;
         });
-        assertTrue(reader.readOne());
-        assertEquals("hello", says[0]);
+        assertTrue(reader.readOne(), "Reader should process first history message");
+        assertEquals("hello", says[0], "First message payload should be hello");
 
         // Read and validate the second message and its history
         String[] says2 = {null};
         MethodReader reader2 = wire.methodReader((RecordHistorySays) h -> {
-            assertEquals(2, h.sourceId(0));
-            assertEquals(22, h.sourceIndex(0));
+            assertEquals(2, h.sourceId(0), "Second history source id should be 2");
+            assertEquals(22, h.sourceIndex(0), "Second history source index should be 22");
             return (Saying) s -> says2[0] = s;
         });
 
-        assertTrue(reader2.readOne());
-        assertEquals("bye", says2[0]);
+        assertTrue(reader2.readOne(), "Reader should process second history message");
+        assertEquals("bye", says2[0], "Second message payload should be bye");
         return true;
     }
 

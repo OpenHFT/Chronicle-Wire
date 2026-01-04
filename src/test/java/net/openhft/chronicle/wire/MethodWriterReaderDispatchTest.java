@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class MethodWriterReaderDispatchTest extends WireTestCommon {
 
     @Test
+    @DisplayName("Reader dispatches known methods and skips unknown events")
     public void dispatchKnownMethodsAndIgnoreUnknown() {
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap(256));
         Api writer = w.methodWriter(Api.class);
@@ -41,9 +43,9 @@ public class MethodWriterReaderDispatchTest extends WireTestCommon {
             // drain
             continue;
         }
-        assertEquals(2, seen.size());
-        assertTrue(seen.get(0).startsWith("a:"));
-        assertTrue(seen.get(1).startsWith("b:"));
+        assertEquals(2, seen.size(), "Reader should dispatch two known methods");
+        assertTrue(seen.get(0).startsWith("a:"), "First dispatched call should start with the a: marker");
+        assertTrue(seen.get(1).startsWith("b:"), "Second dispatched call should start with the b: marker");
     }
 
     interface Api {

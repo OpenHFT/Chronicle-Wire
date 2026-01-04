@@ -5,11 +5,12 @@ package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.wire.WireTypeConverter;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class WireTypeConverterTest {
+class WireTypeConverterTest {
 
-    private final String json = "{\"@FixEngineCfg\":{\"SERVER-CLIENT\":{\"connectionType\":\"initiator\",\n" +
+    private static final String JSON = "{\"@FixEngineCfg\":{\"SERVER-CLIENT\":{\"connectionType\":\"initiator\",\n" +
             "\"connectionStrategy\":{\"@AlwaysStartOnPrimaryConnectionStrategy\":{}},\n" +
             "\"senderCompID\":\"CLIENT\",\n" +
             "\"fixVersion\":\"V4_4\",\n" +
@@ -27,7 +28,7 @@ public class WireTypeConverterTest {
             "\"autoLogon\":true,\n" +
             "\"compIdValidation\":\"strict\"}}}";
 
-    private final String yaml = "!FixEngineCfg {\n" +
+    private static final String YAML = "!FixEngineCfg {\n" +
             "  SERVER-CLIENT: {\n" +
             "    connectionType: initiator,\n" +
             "    connectionStrategy: !AlwaysStartOnPrimaryConnectionStrategy { },\n" +
@@ -51,13 +52,17 @@ public class WireTypeConverterTest {
             "}\n";
 
     @Test
-    public void testYamlToJson() {
-        Assertions.assertEquals(json,
-                new WireTypeConverter().yamlToJson(yaml).toString().replaceAll(",", ",\n"));
+    @DisplayName("YAML conversion should produce JSON output")
+    void testYamlToJson() {
+        Assertions.assertEquals(JSON,
+                new WireTypeConverter().yamlToJson(YAML).toString().replaceAll(",", ",\n"),
+                "YAML to JSON conversion should match expected output");
     }
 
     @Test
-    public void testJsonToYaml() {
-        Assertions.assertEquals(yaml, new WireTypeConverter().jsonToYaml(json).toString());
+    @DisplayName("JSON conversion should produce YAML output")
+    void testJsonToYaml() {
+        Assertions.assertEquals(YAML, new WireTypeConverter().jsonToYaml(JSON).toString(),
+                "JSON to YAML conversion should match expected output");
     }
 }

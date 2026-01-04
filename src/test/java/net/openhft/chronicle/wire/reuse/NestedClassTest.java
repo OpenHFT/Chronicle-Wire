@@ -9,6 +9,7 @@ import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -23,7 +24,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * It tests the serialization and deserialization of OuterClass instances
  * with different Wire formats.
  */
-public class NestedClassTest extends WireTestCommon {
+class NestedClassTest extends WireTestCommon {
     // Static instances of OuterClass for testing.
     private static final OuterClass outerClass1 = new OuterClass();
     private static final OuterClass outerClass2 = new OuterClass();
@@ -51,19 +52,9 @@ public class NestedClassTest extends WireTestCommon {
         outerClass2.addListB().setTextNumber("num2B", 22);
     }
 
-    // Function to create Wire instances for each test run.
-    @SuppressWarnings("rawtypes")
-    private Function<Bytes<?>, Wire> wireType;
-
-    // Constructor to inject the Wire creation function.
-    @SuppressWarnings("rawtypes")
-    public void initNestedClassTest(Function<Bytes<?>, Wire> wireType) {
-        this.wireType = wireType;
-    }
-
     // Method to provide different combinations of Wire instances for testing.
     @SuppressWarnings("rawtypes")
-    public static Collection<Object[]> combinations() {
+    static Collection<Object[]> combinations() {
         return Arrays.asList(
                 new Object[]{(Function<Bytes<?>, Wire>) bytes -> new BinaryWire(bytes, false, true, false, 128, "binary")},
                 new Object[]{WireType.TEXT},
@@ -76,12 +67,12 @@ public class NestedClassTest extends WireTestCommon {
     }
 
     // Test method to verify multiple reads of OuterClass instances.
-    @MethodSource("combinations")
-    @SuppressWarnings("rawtypes")
     @ParameterizedTest
-    public void testMultipleReads(Function<Bytes<?>, Wire> wireType) {
-        initNestedClassTest(wireType);
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @MethodSource("combinations")
+    @DisplayName("Nested OuterClass round-trips across wire types")
+    @SuppressWarnings("rawtypes")
+    void testMultipleReads(Function<Bytes<?>, Wire> wireType) {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for nested class tests");
 
         OuterClassWireTestSupport.assertTwoOuterClasses(wireType, OuterClass::new, outerClass1, outerClass2, false);
     }

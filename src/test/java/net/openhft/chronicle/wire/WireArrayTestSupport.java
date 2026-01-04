@@ -20,11 +20,11 @@ final class WireArrayTestSupport {
         wire.write("a").object(noObjects);
 
         if (expectTextString && wire instanceof TextWire) {
-            assertEquals("a: []\n", wire.toString());
+            assertEquals("a: []\n", wire.toString(), "Text wire should render empty array as []");
         }
 
         Object[] object = wire.read().object(Object[].class);
-        assertEquals(0, object.length);
+        assertEquals(0, object.length, "Empty array should read back with length zero");
     }
 
     static void assertSimpleStringArrayRoundTrip(Supplier<Wire> wireSupplier, boolean expectTextString) {
@@ -37,12 +37,12 @@ final class WireArrayTestSupport {
                     "  abc,\n" +
                     "  def,\n" +
                     "  ghi\n" +
-                    "]\n", wire.toString());
+                    "]\n", wire.toString(), "Text wire should render string array contents");
         }
 
         Object[] object2 = wire.read().object(Object[].class);
-        assertEquals(3, object2.length);
-        assertEquals("[abc, def, ghi]", Arrays.toString(object2));
+        assertEquals(3, object2.length, "String array should read back three elements");
+        assertEquals("[abc, def, ghi]", Arrays.toString(object2), "String array order should remain abc def ghi");
     }
 
     static void assertMixedArraysRoundTrip(Wire wire) {
@@ -54,11 +54,11 @@ final class WireArrayTestSupport {
         wire.write("three").object(Object[].class, a3);
 
         Object o1 = wire.read().object(Object[].class);
-        assertArrayEquals(a1, (Object[]) o1);
+        assertArrayEquals(a1, (Object[]) o1, "Empty array should round trip unchanged");
         Object o2 = wire.read().object(Object[].class);
-        assertArrayEquals(a2, (Object[]) o2);
+        assertArrayEquals(a2, (Object[]) o2, "Single long array should round trip unchanged");
         Object o3 = wire.read().object(Object[].class);
-        assertArrayEquals(a3, (Object[]) o3);
+        assertArrayEquals(a3, (Object[]) o3, "Mixed array should round trip unchanged");
     }
 
     static void writeAndAssertMixedArrays(Wire wire) {

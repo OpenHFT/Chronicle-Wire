@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire.map;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.Wires;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.Closeable;
@@ -16,7 +17,7 @@ import java.util.function.Function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Test suite for custom map implementations and their serialization.
+ * Test suite for custom map implementations and their serialisation.
  * Inherits from WireTestCommon for common test setup and teardown functionalities.
  */
 @SuppressWarnings("serial")
@@ -27,6 +28,7 @@ public class MapCustomTest extends WireTestCommon {
      * Validates the equality of the original and the copied objects.
      */
     @Test
+    @DisplayName("Deep copy should preserve custom map contents")
     public void test() {
         // Initialize a MapsHolder with sample values
         MapsHolder<Integer> mapsHolder = new MapsHolder<>(10, "one");
@@ -35,7 +37,7 @@ public class MapCustomTest extends WireTestCommon {
         MapsHolder<Integer> result = Wires.deepCopy(mapsHolder);
 
         // Assert that the copied object is equivalent to the original
-        assertEquals(result, mapsHolder);
+        assertEquals(result, mapsHolder, "Deep copy should preserve the map contents");
     }
 
     /**
@@ -106,7 +108,7 @@ public class MapCustomTest extends WireTestCommon {
     }
 
     /**
-     * Extended version of IntMap.
+     * Extends IntMap with a different generic signature for nested map tests.
      */
     public static class IntSuperMap<S, T> extends IntMap<Function<Integer, T>, S> {
         // No-op.
@@ -135,7 +137,7 @@ public class MapCustomTest extends WireTestCommon {
     }
 
     /**
-     * A more generic version of IntMap.
+     * Provides a generic IntMap variant to validate marshalling of raw types.
      */
     @SuppressWarnings("rawtypes")
     public static class GeneralMap extends IntMap {

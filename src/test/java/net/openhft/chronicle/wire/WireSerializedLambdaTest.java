@@ -12,6 +12,7 @@ import net.openhft.chronicle.core.util.SerializableUpdater;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -35,20 +36,26 @@ public class WireSerializedLambdaTest extends WireTestCommon {
     // Ensure that the test is not executed for Java versions 21 and above
     @BeforeEach
     public void notSupportedInJava21() {
-        assumeFalse(Jvm.majorVersion() >= 21);
+        assumeFalse(Jvm.majorVersion() >= 21,
+                "Serialized lambda tests require Java 20 or earlier");
     }
 
     // Test to check if various lambda functions are serializable
     @Test
+    @DisplayName("Serializable lambda detection recognises function classes")
     public void testIsLambda() {
         @NotNull Function<String, String> fun = (Function<String, String> & Serializable) String::toUpperCase;
-        assertTrue(WireSerializedLambda.isSerializableLambda(fun.getClass()));
+        assertTrue(WireSerializedLambda.isSerializableLambda(fun.getClass()),
+                "String method reference should be serialisable lambda");
         int a = 5;
         @NotNull SerializableFunction<Integer, Integer> fun2 = i -> i + a;
-        assertTrue(WireSerializedLambda.isSerializableLambda(fun2.getClass()));
+        assertTrue(WireSerializedLambda.isSerializableLambda(fun2.getClass()),
+                "Captured lambda should be serialisable lambda");
         SerializableUpdater<AtomicInteger> upd = AtomicInteger::incrementAndGet;
-        assertTrue(WireSerializedLambda.isSerializableLambda(upd.getClass()));
-        assertFalse(WireSerializedLambda.isSerializableLambda(this.getClass()));
+        assertTrue(WireSerializedLambda.isSerializableLambda(upd.getClass()),
+                "Updater lambda should be serialisable lambda");
+        assertFalse(WireSerializedLambda.isSerializableLambda(this.getClass()),
+                "Test class should not be serialisable lambda");
     }
 
     // Helper function to test text-based wire formats
@@ -75,18 +82,26 @@ public class WireSerializedLambdaTest extends WireTestCommon {
                     "  ca: [ ]\n" +
                     "}\n" +
                     "two: !Fun ADD_A\n" +
-                    "three: !Update INCR\n", wire.bytes().toString());
+                    "three: !Update INCR\n",
+                    wire.bytes().toString(),
+                    "Text wire should serialise expected lambda entries");
 
             @Nullable Function<String, String> function = wire.read(() -> "one").object(Function.class);
-            assertEquals("HELLO", function.apply("hello"));
+            assertEquals("HELLO",
+                    function.apply("hello"),
+                    "Text wire uppercase function should convert hello string");
 
             @Nullable Function<String, String> function2 = wire.read(() -> "two").object(Function.class);
-            assertEquals("helloA", function2.apply("hello"));
+            assertEquals("helloA",
+                    function2.apply("hello"),
+                    "Text wire add A function should append A");
 
             @Nullable Consumer<AtomicLong> updater = wire.read(() -> "three").object(Consumer.class);
             @NotNull AtomicLong aLong = new AtomicLong();
             updater.accept(aLong);
-            assertEquals(1, aLong.get());
+            assertEquals(1,
+                    aLong.get(),
+                    "Text wire updater should increment atomic value");
             return true;
         } finally {
             wire.bytes().releaseLast();
@@ -95,18 +110,23 @@ public class WireSerializedLambdaTest extends WireTestCommon {
 
     // Test the serialization and deserialization using TextWire
     @Test
+    @DisplayName("Text wire round trips serialised lambdas")
     public void testTextWire() {
-        assertTrue(doTestText(WireType.TEXT), "serialized lambda: wireType=TEXT");
+        assertTrue(doTestText(WireType.TEXT),
+                "Serialised lambda should round trip in TEXT wire");
     }
 
     // Test the serialization and deserialization using YamlWire
     @Test
+    @DisplayName("YAML wire round trips serialised lambdas")
     public void testYamlWire() {
-        assertTrue(doTestText(WireType.YAML_ONLY), "serialized lambda: wireType=YAML_ONLY");
+        assertTrue(doTestText(WireType.YAML_ONLY),
+                "Serialised lambda should round trip in YAML wire");
     }
 
     // Test the serialization and deserialization using BinaryWire
     @Test
+    @DisplayName("Binary wire round trips serialised lambdas")
     public void testBinaryWire() {
         @NotNull Wire wire = new BinaryWire(new HexDumpBytes());
 
@@ -151,18 +171,25 @@ public class WireSerializedLambdaTest extends WireTestCommon {
                         "c5 74 68 72 65 65                               # three:\n" +
                         "b6 06 55 70 64 61 74 65                         # Update\n" +
                         "e4 44 45 43 52                                  # DECR\n",
-                wire.bytes().toHexString());
+                wire.bytes().toHexString(),
+                "Binary wire should serialise expected lambda bytes");
 
         @Nullable Function<String, String> function = wire.read().object(Function.class);
-        assertEquals("HELLO", function.apply("hello"));
+        assertEquals("HELLO",
+                function.apply("hello"),
+                "Binary wire uppercase function should convert hello string");
 
         @Nullable Function<String, String> function2 = wire.read(() -> "two").object(Function.class);
-        assertEquals("helloA", function2.apply("hello"));
+        assertEquals("helloA",
+                function2.apply("hello"),
+                "Binary wire add A function should append A");
 
         @Nullable Consumer<AtomicLong> updater = wire.read(() -> "three").object(Consumer.class);
         @NotNull AtomicLong aLong = new AtomicLong();
         updater.accept(aLong);
-        assertEquals(-1, aLong.get());
+        assertEquals(-1,
+                aLong.get(),
+                "Binary wire updater should decrement atomic value");
 
         wire.bytes().releaseLast();
     }

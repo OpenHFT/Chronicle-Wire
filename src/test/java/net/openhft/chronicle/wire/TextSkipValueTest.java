@@ -4,8 +4,10 @@
 package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,6 +15,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressFBWarnings(
+        value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
+        justification = "Fields are populated via Wire marshalling in tests.")
 public class TextSkipValueTest extends WireTestCommon {
 
     // This will store the input string for each run of the test.
@@ -76,6 +81,7 @@ public class TextSkipValueTest extends WireTestCommon {
     }
 
     // This is the actual test that will run once for each input string provided by combinations() method.
+    @DisplayName("Skips value and leaves end marker")
     @MethodSource("combinations")
     @ParameterizedTest
     public void skipValue(String input) {
@@ -89,6 +95,7 @@ public class TextSkipValueTest extends WireTestCommon {
         wire.consumePadding();
         // After skipping the value and consuming padding,
         // the next value in the wire should be "end". Assert this expectation.
-        assertEquals("end", wire.bytes().toString());
+        assertEquals("end", wire.bytes().toString(),
+                "skipValue should leave the end marker for input=" + input);
     }
 }

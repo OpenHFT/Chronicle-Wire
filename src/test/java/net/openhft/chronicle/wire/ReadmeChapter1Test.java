@@ -9,6 +9,7 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
@@ -25,103 +27,106 @@ public class ReadmeChapter1Test extends WireTestCommon {
 
     @BeforeEach
     public void hasDirect() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for README chapter examples");
     }
 
-    @SuppressWarnings("unused")
     @Test
+    @SuppressWarnings("unused")
+    @DisplayName("Example 1: write fields in text, binary, and raw wire")
     public void example1() {
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
-/*
-```
-
-Now you can choice which format you are using.  As the wire formats are themselves unbuffered, you can use them with the same buffer, but in general using one wire format is easier.
-```java
- */
+        /*
+        ```
+        
+        Now you can choice which format you are using.  As the wire formats are themselves unbuffered, you can use them with the same buffer, but in general using one wire format is easier.
+        ```java
+         */
         @NotNull Wire wire = WireType.TEXT.apply(bytes);
         // or
         @NotNull WireType wireType = WireType.TEXT;
         Wire wireB = wireType.apply(bytes);
+        assertTrue(wireB != null, "Wire instance should be created for wireType example");
         // or
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         @NotNull Wire wire2 = new BinaryWire(bytes2);
         // or
-        Bytes<ByteBuffer> bytes3 = Bytes.elasticByteBuffer();
-        @NotNull Wire wire3 = new RawWire(bytes3);
-/*
-```
-So now you can write to the wire with a simple document.
-```java
- */
+        /*
+        ```
+        So now you can write to the wire with a simple document.
+        ```java
+         */
         wire.write(() -> "message").text("Hello World")
                 .write(() -> "number").int64(1234567890L)
                 .write(() -> "code").asEnum(TimeUnit.SECONDS)
                 .write(() -> "price").float64(10.50);
-/*
-```
-prints
-```yaml
- */
-/*
-message: Hello World
-number: 1234567890
-code: SECONDS
-price: 10.5
-```
-
-```java
-*/
-// the same code as for text wire
+        /*
+        ```
+        prints
+        ```yaml
+         */
+        /*
+        message: Hello World
+        number: 1234567890
+        code: SECONDS
+        price: 10.5
+        ```
+        
+        ```java
+        */
+        // the same code as for text wire
         wire2.write(() -> "message").text("Hello World")
                 .write(() -> "number").int64(1234567890L)
                 .write(() -> "code").asEnum(TimeUnit.SECONDS)
                 .write(() -> "price").float64(10.50);
 
-// to obtain the underlying ByteBuffer to write to a Channel
+        // to obtain the underlying ByteBuffer to write to a Channel
         @Nullable ByteBuffer byteBuffer = bytes2.underlyingObject();
         byteBuffer.position(0);
         byteBuffer.limit(bytes2.length());
-/*
-```
-
-prints
-```
-00000000 C7 6D 65 73 73 61 67 65  EB 48 65 6C 6C 6F 20 57 ·message ·Hello W
-00000010 6F 72 6C 64 C6 6E 75 6D  62 65 72 A3 D2 02 96 49 orld·num ber····I
-00000020 C4 63 6F 64 65 E7 53 45  43 4F 4E 44 53 C5 70 72 ·code·SE CONDS·pr
-00000030 69 63 65 90 00 00 28 41                          ice···(A
-```
-
-Using the RawWire strips away all the meta data to reduce the size of the message, and improve speed.
-The down side is that we cannot easily see what the message contains.
-*/
+        /*
+        ```
+        
+        prints
+        ```
+        00000000 C7 6D 65 73 73 61 67 65  EB 48 65 6C 6C 6F 20 57 ·message ·Hello W
+        00000010 6F 72 6C 64 C6 6E 75 6D  62 65 72 A3 D2 02 96 49 orld·num ber····I
+        00000020 C4 63 6F 64 65 E7 53 45  43 4F 4E 44 53 C5 70 72 ·code·SE CONDS·pr
+        00000030 69 63 65 90 00 00 28 41                          ice···(A
+        ```
+        
+        Using the RawWire strips away all the meta data to reduce the size of the message, and improve speed.
+        The down side is that we cannot easily see what the message contains.
+        */
         // the same code as for text wire
+        Bytes<ByteBuffer> bytes3 = Bytes.elasticByteBuffer();
+        @NotNull Wire wire3 = new RawWire(bytes3);
         wire3.write(() -> "message").text("Hello World")
                 .write(() -> "number").int64(1234567890L)
                 .write(() -> "code").asEnum(TimeUnit.SECONDS)
                 .write(() -> "price").float64(10.50);
-/*
-```
-prints in RawWire
-```
-00000000 0B 48 65 6C 6C 6F 20 57  6F 72 6C 64 D2 02 96 49 ·Hello W orld···I
-00000010 00 00 00 00 07 53 45 43  4F 4E 44 53 00 00 00 00 ·····SEC ONDS····
-00000020 00 00 25 40                                      ··%@
-```
-*/
+        /*
+        ```
+        prints in RawWire
+        ```
+        00000000 0B 48 65 6C 6C 6F 20 57  6F 72 6C 64 D2 02 96 49 ·Hello W orld···I
+        00000010 00 00 00 00 07 53 45 43  4F 4E 44 53 00 00 00 00 ·····SEC ONDS····
+        00000020 00 00 25 40                                      ··%@
+        ```
+        */
         bytes.releaseLast();
         bytes2.releaseLast();
         bytes3.releaseLast();
     }
 
     @Test
+    @DisplayName("Example 2: marshallable data in text and binary")
     public void example2() {
-/*
-
-## simple example with a data type
-
-*/
+        /*
+        
+        ## simple example with a data type
+        
+        */
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
@@ -132,21 +137,22 @@ prints in RawWire
 
         @NotNull Data data2 = new Data();
         data2.readMarshallable(wire);
+        assertData(data2, "Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.5);
 
-/*
-```
-prints
-```yaml
-message: Hello World
-number: 1234567890
-code: NANOSECONDS
-price: 10.5
-
-Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
-```
-To write in binary instead
-```java
-*/
+        /*
+        ```
+        prints
+        ```yaml
+        message: Hello World
+        number: 1234567890
+        code: NANOSECONDS
+        price: 10.5
+        
+        Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
+        ```
+        To write in binary instead
+        ```java
+        */
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         @NotNull Wire wire2 = new BinaryWire(bytes2);
 
@@ -154,27 +160,29 @@ To write in binary instead
 
         @NotNull Data data3 = new Data();
         data3.readMarshallable(wire2);
-/*
-```
-prints
-```
-00000000 C7 6D 65 73 73 61 67 65  EB 48 65 6C 6C 6F 20 57 ·message ·Hello W
-00000010 6F 72 6C 64 C6 6E 75 6D  62 65 72 A3 D2 02 96 49 orld·num ber····I
-00000020 C8 74 69 6D 65 55 6E 69  74 EB 4E 41 4E 4F 53 45 ·timeUni t·NANOSE
-00000030 43 4F 4E 44 53 C5 70 72  69 63 65 90 00 00 28 41 CONDS·pr ice···(A
-
-Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
-```
-*/
+        assertData(data3, "Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.5);
+        /*
+        ```
+        prints
+        ```
+        00000000 C7 6D 65 73 73 61 67 65  EB 48 65 6C 6C 6F 20 57 ·message ·Hello W
+        00000010 6F 72 6C 64 C6 6E 75 6D  62 65 72 A3 D2 02 96 49 orld·num ber····I
+        00000020 C8 74 69 6D 65 55 6E 69  74 EB 4E 41 4E 4F 53 45 ·timeUni t·NANOSE
+        00000030 43 4F 4E 44 53 C5 70 72  69 63 65 90 00 00 28 41 CONDS·pr ice···(A
+        
+        Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
+        ```
+        */
         bytes.releaseLast();
         bytes2.releaseLast();
     }
 
     @Test
+    @DisplayName("Example 3: marshallable field in text and binary")
     public void example3() {
-/*
-## simple example with a data type
-*/
+        /*
+        ## simple example with a data type
+        */
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
@@ -185,22 +193,23 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 
         @NotNull Data data2 = new Data();
         wire.read(() -> "mydata").marshallable(data2);
+        assertData(data2, "Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.5);
 
-/*
-```
-prints
-```yaml
-mydata: {
-  message: Hello World,
-  number: 1234567890,
-  timeUnit: NANOSECONDS,
-  price: 10.5
-}
-Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
-```
-To write in binary instead
-```java
-*/
+        /*
+        ```
+        prints
+        ```yaml
+        mydata: {
+          message: Hello World,
+          number: 1234567890,
+          timeUnit: NANOSECONDS,
+          price: 10.5
+        }
+        Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
+        ```
+        To write in binary instead
+        ```java
+        */
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         @NotNull Wire wire2 = new BinaryWire(bytes2);
 
@@ -208,29 +217,31 @@ To write in binary instead
 
         @NotNull Data data3 = new Data();
         wire2.read(() -> "mydata").marshallable(data3);
-/*
-```
-prints
-```
-00000000 C6 6D 79 64 61 74 61 82  40 00 00 00 C7 6D 65 73 ·mydata· @····mes
-00000010 73 61 67 65 EB 48 65 6C  6C 6F 20 57 6F 72 6C 64 sage·Hel lo World
-00000020 C6 6E 75 6D 62 65 72 A3  D2 02 96 49 C8 74 69 6D ·number· ···I·tim
-00000030 65 55 6E 69 74 EB 4E 41  4E 4F 53 45 43 4F 4E 44 eUnit·NA NOSECOND
-00000040 53 C5 70 72 69 63 65 90  00 00 28 41             S·price· ··(A
-
-Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
-```
-*/
+        assertData(data3, "Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.5);
+        /*
+        ```
+        prints
+        ```
+        00000000 C6 6D 79 64 61 74 61 82  40 00 00 00 C7 6D 65 73 ·mydata· @····mes
+        00000010 73 61 67 65 EB 48 65 6C  6C 6F 20 57 6F 72 6C 64 sage·Hel lo World
+        00000020 C6 6E 75 6D 62 65 72 A3  D2 02 96 49 C8 74 69 6D ·number· ···I·tim
+        00000030 65 55 6E 69 74 EB 4E 41  4E 4F 53 45 43 4F 4E 44 eUnit·NA NOSECOND
+        00000040 53 C5 70 72 69 63 65 90  00 00 28 41             S·price· ··(A
+        
+        Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
+        ```
+        */
         bytes.releaseLast();
         bytes2.releaseLast();
     }
 
     @Test
+    @DisplayName("Example 4: type aliases for marshallable objects")
     public void example4() {
-/*
-## simple example with a data type with a type
-```java
-*/
+        /*
+        ## simple example with a data type with a type
+        ```java
+        */
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
@@ -242,58 +253,61 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
         wire.write(() -> "mydata").object(data);
 
         @Nullable Data data2 = wire.read(() -> "mydata").object(Data.class);
+        assertTrue(data2 != null, "Data should be read from text wire example");
 
-/*
-```
-prints
-```yaml
-mydata: !Data {
-  message: Hello World,
-  number: 1234567890,
-  timeUnit: NANOSECONDS,
-  price: 10.5
-}
-Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
-```
-To write in binary instead
-```java
-*/
+        /*
+        ```
+        prints
+        ```yaml
+        mydata: !Data {
+          message: Hello World,
+          number: 1234567890,
+          timeUnit: NANOSECONDS,
+          price: 10.5
+        }
+        Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
+        ```
+        To write in binary instead
+        ```java
+        */
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         @NotNull Wire wire2 = new BinaryWire(bytes2);
 
         wire2.write(() -> "mydata").object(data);
 
         @Nullable Data data3 = wire2.read(() -> "mydata").object(Data.class);
-/*
-```
-prints
-```
-00000000 C6 6D 79 64 61 74 61 B6  04 44 61 74 61 82 40 00 ·mydata· ·Data·@·
-00000010 00 00 C7 6D 65 73 73 61  67 65 EB 48 65 6C 6C 6F ···messa ge·Hello
-00000020 20 57 6F 72 6C 64 C6 6E  75 6D 62 65 72 A3 D2 02  World·n umber···
-00000030 96 49 C8 74 69 6D 65 55  6E 69 74 EB 4E 41 4E 4F ·I·timeU nit·NANO
-00000040 53 45 43 4F 4E 44 53 C5  70 72 69 63 65 90 00 00 SECONDS· price···
-00000050 28 41                                            (A
-
-Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
-```
-*/
+        assertTrue(data3 != null, "Data should be read from binary wire example");
+        /*
+        ```
+        prints
+        ```
+        00000000 C6 6D 79 64 61 74 61 B6  04 44 61 74 61 82 40 00 ·mydata· ·Data·@·
+        00000010 00 00 C7 6D 65 73 73 61  67 65 EB 48 65 6C 6C 6F ···messa ge·Hello
+        00000020 20 57 6F 72 6C 64 C6 6E  75 6D 62 65 72 A3 D2 02  World·n umber···
+        00000030 96 49 C8 74 69 6D 65 55  6E 69 74 EB 4E 41 4E 4F ·I·timeU nit·NANO
+        00000040 53 45 43 4F 4E 44 53 C5  70 72 69 63 65 90 00 00 SECONDS· price···
+        00000050 28 41                                            (A
+        
+        Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
+        ```
+        */
 
         bytes.releaseLast();
         bytes2.releaseLast();
     }
 
     @Test
+    @DisplayName("Example 5: size-prefixed documents read back correctly")
     public void example5() {
-/*
-## Write a message with a thread safe size prefix.
-
-The benefits of using this approach ares that
- - the reader can block until the message is complete.
- - if you have concurrent writers, they will block unless the size if know in which case it skip the message(s) still being written.
-
-```java
-*/
+        /*
+        ## Write a message with a thread safe size prefix.
+        
+        The benefits of using this approach ares that
+         - the reader can block until the message is complete.
+         - if you have concurrent writers, they will block unless the size if know in which case it skip the message(s) still being written.
+        
+        ```java
+        */
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
@@ -305,23 +319,24 @@ The benefits of using this approach ares that
         wire.writeDocument(false, data);
 
         @NotNull Data data2 = new Data();
-        assertTrue(wire.readDocument(null, data2));
+        assertTrue(wire.readDocument(null, data2),
+                "Text wire should read size-prefixed document into data");
 
-/*
-```
-prints
-```yaml
---- !!data
-message: Hello World
-number: 1234567890
-timeUnit: NANOSECONDS
-price: 10.5
-
-Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
-```
-To write in binary instead
-```java
-*/
+        /*
+        ```
+        prints
+        ```yaml
+        --- !!data
+        message: Hello World
+        number: 1234567890
+        timeUnit: NANOSECONDS
+        price: 10.5
+        
+        Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
+        ```
+        To write in binary instead
+        ```java
+        */
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         @NotNull Wire wire2 = new BinaryWire(bytes2);
         wire2.usePadding(true);
@@ -329,31 +344,33 @@ To write in binary instead
         wire2.writeDocument(false, data);
 
         @NotNull Data data3 = new Data();
-        assertTrue(wire2.readDocument(null, data3));
-/*
-```
-prints
-```
---- !!data #binary
-message: Hello World
-number: 1234567890
-timeUnit: NANOSECONDS
-price: 10.5
-
-Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
-```
-*/
+        assertTrue(wire2.readDocument(null, data3),
+                "Binary wire should read size-prefixed document into data");
+        /*
+        ```
+        prints
+        ```
+        --- !!data #binary
+        message: Hello World
+        number: 1234567890
+        timeUnit: NANOSECONDS
+        price: 10.5
+        
+        Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
+        ```
+        */
         bytes.releaseLast();
         bytes2.releaseLast();
     }
 
     @Test
+    @DisplayName("Example 6: sequence of records round-trips")
     public void example6() {
-/*
-## Write a message with a sequence of records
-
-```java
-*/
+        /*
+        ## Write a message with a sequence of records
+        
+        ```java
+        */
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
@@ -374,44 +391,45 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
                 .sequence(dataList, (l, v) -> {
                     while (v.hasNextSequenceItem())
                         l.add(v.object(Data.class));
-                })));
+                })),
+                "Text wire should read sequence data into list");
         dataList.forEach(System.out::println);
 
-/*
-```
-prints
-```yaml
---- !!data
-mydata: [
-  !Data {
-    message: Hello World,
-    number: 98765,
-    timeUnit: HOURS,
-    price: 1.5
-}
-,
-  !Data {
-    message: G'Day All,
-    number: 1212121,
-    timeUnit: MINUTES,
-    price: 12.34
-}
-,
-  !Data {
-    message: Howyall,
-    number: 1234567890,
-    timeUnit: SECONDS,
-    price: 1000
-}
-]
-
-Data{message='Hello World', number=98765, timeUnit=HOURS, price=1.5}
-Data{message='G'Day All', number=1212121, timeUnit=MINUTES, price=12.34}
-Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
-```
-To write in binary instead
-```java
-*/
+        /*
+        ```
+        prints
+        ```yaml
+        --- !!data
+        mydata: [
+          !Data {
+            message: Hello World,
+            number: 98765,
+            timeUnit: HOURS,
+            price: 1.5
+        }
+        ,
+          !Data {
+            message: G'Day All,
+            number: 1212121,
+            timeUnit: MINUTES,
+            price: 12.34
+        }
+        ,
+          !Data {
+            message: Howyall,
+            number: 1234567890,
+            timeUnit: SECONDS,
+            price: 1000
+        }
+        ]
+        
+        Data{message='Hello World', number=98765, timeUnit=HOURS, price=1.5}
+        Data{message='G'Day All', number=1212121, timeUnit=MINUTES, price=12.34}
+        Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
+        ```
+        To write in binary instead
+        ```java
+        */
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         @NotNull Wire wire2 = new BinaryWire(bytes2);
         wire2.usePadding(true);
@@ -424,52 +442,54 @@ To write in binary instead
                 .sequence(dataList2, (l, v) -> {
                     while (v.hasNextSequenceItem())
                         l.add(v.object(Data.class));
-                })));
+                })),
+                "Binary wire should read sequence data into list");
         dataList2.forEach(System.out::println);
-/*
-```
-prints
-```
---- !!data #binary
-mydata: [
-  !Data {
-    message: Hello World,
-    number: 98765,
-    timeUnit: HOURS,
-    price: 1.5
-}
-,
-  !Data {
-    message: G'Day All,
-    number: 1212121,
-    timeUnit: MINUTES,
-    price: 12.34
-}
-,
-  !Data {
-    message: Howyall,
-    number: 1234567890,
-    timeUnit: SECONDS,
-    price: 1000
-}
-]
-
-Data{message='Hello World', number=98765, timeUnit=HOURS, price=1.5}
-Data{message='G'Day All', number=1212121, timeUnit=MINUTES, price=12.34}
-Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
-```
-*/
+        /*
+        ```
+        prints
+        ```
+        --- !!data #binary
+        mydata: [
+          !Data {
+            message: Hello World,
+            number: 98765,
+            timeUnit: HOURS,
+            price: 1.5
+        }
+        ,
+          !Data {
+            message: G'Day All,
+            number: 1212121,
+            timeUnit: MINUTES,
+            price: 12.34
+        }
+        ,
+          !Data {
+            message: Howyall,
+            number: 1234567890,
+            timeUnit: SECONDS,
+            price: 1000
+        }
+        ]
+        
+        Data{message='Hello World', number=98765, timeUnit=HOURS, price=1.5}
+        Data{message='G'Day All', number=1212121, timeUnit=MINUTES, price=12.34}
+        Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
+        ```
+        */
         bytes.releaseLast();
         bytes2.releaseLast();
     }
 
     @Test
+    @DisplayName("Example 7: object value out and in")
     public void example7() {
-/*
-
-## simple example with a data type
-
-*/
+        /*
+        
+        ## simple example with a data type
+        
+        */
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
 
@@ -480,49 +500,52 @@ Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
         wire.getValueOut().object(data);
 
         @Nullable Object o = wire.getValueIn().object(Object.class);
-        if (o instanceof Data) {
-            @Nullable Data data2 = (Data) o;
-        }
+        assertTrue(o instanceof Data, "ValueIn object should be Data for text wire example");
 
-/*
-```
-prints
-```yaml
-!Data {
-  message: Hello World,
-  number: 1234567890,
-  timeUnit: NANOSECONDS,
-  price: 10.5
-}
-Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
-```
-To write in binary instead
-```java
-*/
+        /*
+        ```
+        prints
+        ```yaml
+        !Data {
+          message: Hello World,
+          number: 1234567890,
+          timeUnit: NANOSECONDS,
+          price: 10.5
+        }
+        Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
+        ```
+        To write in binary instead
+        ```java
+        */
         Bytes<ByteBuffer> bytes2 = Bytes.elasticByteBuffer();
         @NotNull Wire wire2 = new BinaryWire(bytes2);
 
         wire2.getValueOut().object(data);
 
         @Nullable Object o2 = wire2.getValueIn().object(Object.class);
-        if (o2 instanceof Data) {
-            @NotNull Data data2 = (Data) o2;
-        }
-/*
-```
-prints
-```
-00000000 B6 04 44 61 74 61 82 40  00 00 00 C7 6D 65 73 73 ··Data·@ ····mess
-00000010 61 67 65 EB 48 65 6C 6C  6F 20 57 6F 72 6C 64 C6 age·Hell o World·
-00000020 6E 75 6D 62 65 72 A3 D2  02 96 49 C8 74 69 6D 65 number·· ··I·time
-00000030 55 6E 69 74 EB 4E 41 4E  4F 53 45 43 4F 4E 44 53 Unit·NAN OSECONDS
-00000040 C5 70 72 69 63 65 90 00  00 28 41                ·price·· ·(A
-
-Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
-```
-*/
+        assertTrue(o2 instanceof Data, "ValueIn object should be Data for binary wire example");
+        /*
+        ```
+        prints
+        ```
+        00000000 B6 04 44 61 74 61 82 40  00 00 00 C7 6D 65 73 73 ··Data·@ ····mess
+        00000010 61 67 65 EB 48 65 6C 6C  6F 20 57 6F 72 6C 64 C6 age·Hell o World·
+        00000020 6E 75 6D 62 65 72 A3 D2  02 96 49 C8 74 69 6D 65 number·· ··I·time
+        00000030 55 6E 69 74 EB 4E 41 4E  4F 53 45 43 4F 4E 44 53 Unit·NAN OSECONDS
+        00000040 C5 70 72 69 63 65 90 00  00 28 41                ·price·· ·(A
+        
+        Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
+        ```
+        */
         bytes.releaseLast();
         bytes2.releaseLast();
+    }
+
+    private static void assertData(Data data, String message, long number, TimeUnit timeUnit, double price) {
+        assertEquals(message, data.getMessage(), "message should match expected value");
+        assertEquals(number, data.getNumber(), "number should match expected value");
+        assertEquals(timeUnit, data.getTimeUnit(), "timeUnit should match expected value");
+        assertEquals(price, data.getPrice(), 0.0, "price should match expected value");
     }
 }
 /*
@@ -545,8 +568,20 @@ class Data extends SelfDescribingMarshallable {
         this.price = price;
     }
 
-/*
-```
- */
+    String getMessage() {
+        return message;
+    }
+
+    long getNumber() {
+        return number;
+    }
+
+    TimeUnit getTimeUnit() {
+        return timeUnit;
+    }
+
+    double getPrice() {
+        return price;
+    }
 
 }

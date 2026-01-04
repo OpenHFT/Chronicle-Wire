@@ -52,6 +52,7 @@ BinaryWire, fixed=true, numericField=false, fieldLess=true
  */
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -62,34 +63,10 @@ import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FIX42Test extends WireTestCommon {
-    // Test ID for identification
-    private int testId;
-
-    // Flag to determine if the test is fixed
-    private boolean fixed;
-
-    // Flag to determine if the field is numeric
-    private boolean numericField;
-
-    // Flag to determine if the field is absent
-    private boolean fieldLess;
-
-    // Dump string for storing binary representations
-    private String dump;
-
     // Elastic byte buffer for writing and reading data
     @SuppressWarnings("rawtypes")
     @NotNull
     private final Bytes<?> bytes = allocateElasticOnHeap();
-
-    // Constructor to initialize the test parameters
-    public void initFIX42Test(int testId, boolean fixed, boolean numericField, boolean fieldLess, String dump) {
-        this.testId = testId;
-        this.fixed = fixed;
-        this.numericField = numericField;
-        this.fieldLess = fieldLess;
-        this.dump = dump;
-    }
 
     // Provides various combinations of parameters to run the test with
     public static Collection<Object[]> combinations() {
@@ -140,7 +117,7 @@ public class FIX42Test extends WireTestCommon {
 
     // Construct a Wire instance based on testId and other configuration flags
     @NotNull
-    private Wire createWire() {
+    private Wire createWire(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         // Clear any data in the 'bytes' field before constructing the Wire
         bytes.clear();
 
@@ -155,10 +132,10 @@ public class FIX42Test extends WireTestCommon {
     // Test method to dump the wire representation of a MarketDataSnapshot instance
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Dumps FIX42 market data snapshot for wire variants")
     public void dump(int testId, boolean fixed, boolean numericField, boolean fieldLess, String dump) {
-        initFIX42Test(testId, fixed, numericField, fieldLess, dump);
         // Create a Wire instance
-        @NotNull Wire wire = createWire();
+        @NotNull Wire wire = createWire(testId, fixed, numericField, fieldLess);
 
         // Initialize a MarketDataSnapshot instance with some sample values
         @NotNull MarketDataSnapshot mds = new MarketDataSnapshot("EURUSD", 1.1187, 1.1179);
@@ -170,10 +147,15 @@ public class FIX42Test extends WireTestCommon {
         System.out.println(wire.getClass().getSimpleName() + ", fixed=" + fixed + ", numericField=" + numericField + ", fieldLess=" + fieldLess);
 
         // Assert the wire's content, using either its string or hex representation
-        if (!wire.isBinary())
-            assertEquals(dump, wire.bytes().toString());
-        else
-            assertEquals(dump, wire.bytes().toHexString());
+        if (!wire.isBinary()) {
+            String actual = wire.bytes().toString();
+            assertEquals(dump, actual,
+                    "text dump should match expected output for testId=" + testId);
+        } else {
+            String actual = wire.bytes().toHexString();
+            assertEquals(dump, actual,
+                    "binary dump should match expected output for testId=" + testId);
+        }
     }
 
     // Inner static class representing a snapshot of market data

@@ -13,7 +13,7 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Utility class for creating and comparing WireProperty and WireCollection objects.
+ * Utility class for creating and comparing WireProperty and WireCollection objects in reuse tests.
  */
 class WireUtils {
 
@@ -65,9 +65,9 @@ class WireUtils {
      * @param b The second WireModel instance.
      */
     private static void compareWireModel(@NotNull WireModel a, @NotNull WireModel b) {
-        assertEquals(a.getId(), b.getId());
-        assertEquals(a.getRevision(), b.getRevision());
-        assertEquals(a.getKey(), b.getKey());
+        assertEquals(a.getId(), b.getId(), "WireModel id should match");
+        assertEquals(a.getRevision(), b.getRevision(), "WireModel revision should match");
+        assertEquals(a.getKey(), b.getKey(), "WireModel key should match");
     }
 
     /**
@@ -78,10 +78,10 @@ class WireUtils {
      */
     private static void compareWireProperty(@NotNull WireProperty a, @NotNull WireProperty b) {
         compareWireModel(a, b);
-        assertEquals(a.getReference(), b.getReference());
-        assertEquals(a.getValue(), b.getValue());
-        assertEquals(a.getName(), b.getName());
-        assertEquals(a.getPath(), b.getPath());
+        assertEquals(a.getReference(), b.getReference(), "WireProperty reference should match");
+        assertEquals(a.getValue(), b.getValue(), "WireProperty value should match");
+        assertEquals(a.getName(), b.getName(), "WireProperty name should match");
+        assertEquals(a.getPath(), b.getPath(), "WireProperty path should match");
     }
 
     /**
@@ -92,19 +92,19 @@ class WireUtils {
      */
     public static void compareWireCollection(@NotNull WireCollection a, @NotNull WireCollection b) {
         compareWireModel(a, b);
-        assertEquals(a.getReference(), b.getReference());
-        assertEquals(a.getName(), b.getName());
-        assertEquals(a.getPath(), b.getPath());
+        assertEquals(a.getReference(), b.getReference(), "WireCollection reference should match");
+        assertEquals(a.getName(), b.getName(), "WireCollection name should match");
+        assertEquals(a.getPath(), b.getPath(), "WireCollection path should match");
 
-        assertEquals(a.getCollections().size(), b.getCollections().size());
-        assertEquals(a.getProperties().size(), b.getProperties().size());
+        assertEquals(a.getCollections().size(), b.getCollections().size(), "WireCollection children count should match");
+        assertEquals(a.getProperties().size(), b.getProperties().size(), "WireCollection properties count should match");
 
         // Check each property and collection in 'a' against the corresponding elements in 'b'
         a.getProperties().values().forEach(c -> {
             if (b.getProperties().containsKey(c.getReference())) {
                 compareWireProperty(c, b.getProperties().get(c.getReference()));
             } else {
-                Assertions.fail("Cannot match property child element WireProperty");
+                Assertions.fail("WireCollection should include property child element for reference " + c.getReference());
             }
         });
 
@@ -112,7 +112,7 @@ class WireUtils {
             if (b.getCollections().containsKey(c.getReference())) {
                 compareWireCollection(c, b.getCollections().get(c.getReference()));
             } else {
-                Assertions.fail("Cannot match collection child element WireCollection");
+                Assertions.fail("WireCollection should include child collection for reference " + c.getReference());
             }
         });
     }

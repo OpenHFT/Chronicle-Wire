@@ -49,11 +49,6 @@ class TwoArrays extends SelfDescribingMarshallable implements Closeable {
         closed = true;
     }
 
-    /**
-     * Checks if the TwoArrays instance is closed.
-     *
-     * @return true if closed, otherwise false.
-     */
     @Override
     public boolean isClosed() {
         return closed;

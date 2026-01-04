@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteOrder;
@@ -15,6 +16,7 @@ public class HexDumpTest extends WireTestCommon {
 
     // Test the endian behavior of HexDumpBytes
     @Test
+    @DisplayName("Writes int bytes in little endian order")
     public void testEndian() {
 
         // If the native byte order isn't LITTLE_ENDIAN, we exit the test
@@ -29,7 +31,8 @@ public class HexDumpTest extends WireTestCommon {
         b.writeInt(0x0a0b0c0d);
 
         // Assert that the byte representation is as expected
-        assertEquals("0d 0c 0b 0a\n", b.toHexString());
+        assertEquals("0d 0c 0b 0a\n", b.toHexString(),
+                "hex dump should match little endian int encoding");
 
         // Release the last byte buffer reference
         b.releaseLast();

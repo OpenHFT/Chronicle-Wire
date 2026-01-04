@@ -148,11 +148,15 @@ public class WireTestCommon {
             long v = c.parse(s, oldPos, newPos);
             StringBuilder sb = new StringBuilder();
             c.append(sb, v);
-            assertEquals(s.substring(oldPos, newPos), sb.toString());
+            assertEquals(s.substring(oldPos, newPos),
+                    sb.toString(),
+                    "Substring round trip should match converter output");
             oldPos = newPos + 1;
             comparisons--;
         }
-        assertEquals(0, comparisons);
+        assertEquals(0,
+                comparisons,
+                "All substring comparisons should be consumed");
     }
 
     @AfterEach
@@ -183,7 +187,7 @@ public class WireTestCommon {
     // Restore the original value of GENERATE_TUPLES after the test execution
     @AfterEach
     public void restoreGenerateTuples() {
-        Wires.GENERATE_TUPLES = gt;
+        Wires.setGenerateTuples(gt);
     }
 
     @BeforeEach

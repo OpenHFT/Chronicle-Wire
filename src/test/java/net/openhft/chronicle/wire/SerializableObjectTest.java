@@ -237,10 +237,6 @@ final class SerializableObjectTest extends WireTestCommon {
         try {
             // Create an instance if not provided
             Object source = o == null ? aClass.getConstructor().newInstance() : o;
-            // Sanity check to ensure non-null toString representation
-            if (source.toString() == null)
-                return false;
-
             // Attempt to serialize the object
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -298,7 +294,7 @@ final class SerializableObjectTest extends WireTestCommon {
         try {
             return supplier.get();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Supplier threw an exception", e);
         }
     }
 
@@ -338,6 +334,7 @@ final class SerializableObjectTest extends WireTestCommon {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @TestFactory
+    @DisplayName("Serialisable objects round-trip across wire types")
     Stream<DynamicTest> test() {
         List<WireTypeObject> caseList = cases().collect(Collectors.toList());
         Assertions.assertFalse(caseList.isEmpty(), "test case list should contain serializable object test cases");

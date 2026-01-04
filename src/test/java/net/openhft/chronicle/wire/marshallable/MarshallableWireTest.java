@@ -12,6 +12,7 @@ import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -21,26 +22,15 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // Runner to enable parameterized tests for the MarshallableWireTest class
-public class MarshallableWireTest extends WireTestCommon {
-
-    // Type of wire to be tested
-    private WireType wireType;
-
-    // Marshallable object for test scenarios
-    private Marshallable m;
-
-    // Constructor initializes the WireType and Marshallable object for the test scenario
-    public void initMarshallableWireTest(WireType wireType, Marshallable m) {
-        this.wireType = wireType;
-        this.m = m;
-    }
+class MarshallableWireTest extends WireTestCommon {
 
     @BeforeEach
-    public void hasDirect() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for Marshallable wire tests");
     }
 
     // Provide test data combinations for the parameterized test
@@ -77,10 +67,8 @@ public class MarshallableWireTest extends WireTestCommon {
     @MethodSource("combinations")
     @SuppressWarnings("rawtypes")
     @ParameterizedTest
-    public void writeMarshallable(WireType wireType, Marshallable m) {
-
-        initMarshallableWireTest(wireType, m);
-
+    @DisplayName("Selected wire should round-trip Marshallable instances")
+    void writeMarshallable(WireType wireType, Marshallable m) {
         // Allocate memory for writing data
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
@@ -95,9 +83,20 @@ public class MarshallableWireTest extends WireTestCommon {
         // Read back the object from the wire
         @Nullable Object m2 = wire.getValueIn().object();
 
+        assertNotNull(m2, "Wire round-trip should return non-null object for " + m.getClass().getSimpleName());
+
+        if (m instanceof Nested && m2 instanceof Nested) {
+            assertEquals(((Nested) m).fieldFingerprint(), ((Nested) m2).fieldFingerprint(),
+                    "Nested field fingerprint should round-trip for wireType=" + wireType);
+        }
+        if (m instanceof ScalarValues && m2 instanceof ScalarValues) {
+            assertEquals(((ScalarValues) m).fieldFingerprint(), ((ScalarValues) m2).fieldFingerprint(),
+                    "ScalarValues field fingerprint should round-trip for wireType=" + wireType);
+        }
+
         // Assert that the written and read objects are the same
         if (!m.equals(m2))
-            assertEquals(m, m2);
+            assertEquals(m, m2, "Marshallable should round-trip via selected wire type");
 
         // Release the allocated memory
         bytes.releaseLast();
