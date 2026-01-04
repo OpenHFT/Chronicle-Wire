@@ -9,12 +9,12 @@ import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // Class to test JSON schema generation
-public class GenerateJsonSchemaMainTest extends WireTestCommon {
+class GenerateJsonSchemaMainTest extends WireTestCommon {
 
     // Test method to verify schema generation for a given class
     @Test
     @DisplayName("Generates expected json schema for ITop")
-    public void generateSchemaFor() throws ClassNotFoundException {
+    void generateSchemaFor() throws ClassNotFoundException {
         // Generate the schema for the ITop class
         final String main0 = GenerateJsonSchemaMain.main0(ITop.class.getName());
 

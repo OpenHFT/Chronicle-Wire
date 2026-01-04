@@ -16,22 +16,22 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BrokenChainTest extends WireTestCommon {
+class BrokenChainTest extends WireTestCommon {
     @Test
     @DisplayName("Broken chain is ignored on YAML_ONLY wire")
-    public void brokenChainYaml() {
+    void brokenChainYaml() {
         assertTrue(doBrokenChain(WireType.YAML_ONLY), "broken chain: wireType=YAML_ONLY");
     }
 
     @Test
     @DisplayName("Broken chain is ignored on TEXT wire")
-    public void brokenChainText() {
+    void brokenChainText() {
         assertTrue(doBrokenChain(WireType.TEXT), "broken chain: wireType=TEXT");
     }
 
     @Test
     @DisplayName("Broken chain is ignored on BINARY_LIGHT wire")
-    public void brokenChainBinary() {
+    void brokenChainBinary() {
         assertTrue(doBrokenChain(WireType.BINARY_LIGHT), "broken chain: wireType=BINARY_LIGHT");
     }
 

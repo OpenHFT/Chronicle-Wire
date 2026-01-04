@@ -19,10 +19,10 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // see also UnsafeTextBytesTest
 // Class to test the serialization and deserialization of double values.
-public class DoubleTest extends WireTestCommon {
+class DoubleTest extends WireTestCommon {
 
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip double serialisation tests");
     }
@@ -33,7 +33,7 @@ public class DoubleTest extends WireTestCommon {
     // Test the serialisation format of two double values without trailing zeros.
     @Test
     @DisplayName("Serialises two doubles without trailing zeros")
-    public void testParsingForTwoDoubles() {
+    void testParsingForTwoDoubles() {
         CLASS_ALIASES.addAlias(TwoDoubleDto.class);
 
         // Expected serialized format
@@ -54,7 +54,7 @@ public class DoubleTest extends WireTestCommon {
     // Test the serialization of many double values ensuring no trailing zeros.
     @Test
     @DisplayName("Serialises many doubles without trailing zeros")
-    public void testManyDoubles() {
+    void testManyDoubles() {
         // Create an elastic buffer for serialization
         final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 

@@ -22,13 +22,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * Targets the 132 missed branches identified in coverage analysis.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class TextValueInEdgeCaseTest extends WireTestCommon {
+class TextValueInEdgeCaseTest extends WireTestCommon {
 
     // ========== Escape Sequence Tests ==========
 
     @Test
     @DisplayName("TextWire should read newline escape sequences")
-    public void testNewlineEscape() {
+    void testNewlineEscape() {
         TextWire wire = TextWire.from("field: \"line1\\nline2\"");
         String result = wire.read("field").text();
         assertEquals("line1\nline2", result, "Text value should convert \\n escape to newline");
@@ -36,7 +36,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read tab escape sequences")
-    public void testTabEscape() {
+    void testTabEscape() {
         TextWire wire = TextWire.from("field: \"col1\\tcol2\"");
         String result = wire.read("field").text();
         assertEquals("col1\tcol2", result, "Text value should convert \\t escape to tab");
@@ -44,7 +44,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read carriage return escape sequences")
-    public void testCarriageReturnEscape() {
+    void testCarriageReturnEscape() {
         TextWire wire = TextWire.from("field: \"line1\\rline2\"");
         String result = wire.read("field").text();
         assertEquals("line1\rline2", result, "Text value should convert \\r escape to carriage return");
@@ -52,7 +52,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read backslash escape sequences")
-    public void testBackslashEscape() {
+    void testBackslashEscape() {
         TextWire wire = TextWire.from("field: \"path\\\\to\\\\file\"");
         String result = wire.read("field").text();
         assertEquals("path\\to\\file", result, "Text value should convert \\\\ escape to backslash");
@@ -60,7 +60,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read double quote escape sequences")
-    public void testDoubleQuoteEscape() {
+    void testDoubleQuoteEscape() {
         TextWire wire = TextWire.from("field: \"say \\\"hello\\\"\"");
         String result = wire.read("field").text();
         assertEquals("say \"hello\"", result, "Text value should unescape escaped double quotes");
@@ -68,7 +68,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read multiple escape sequences in one value")
-    public void testMultipleEscapes() {
+    void testMultipleEscapes() {
         TextWire wire = TextWire.from("field: \"line1\\n\\tindented\\r\\n\"");
         String result = wire.read("field").text();
         assertEquals("line1\n\tindented\r\n", result, "Text value should convert mixed escape sequences");
@@ -78,42 +78,42 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read double quoted string values")
-    public void testDoubleQuotedString() {
+    void testDoubleQuotedString() {
         TextWire wire = TextWire.from("field: \"hello world\"");
         assertEquals("hello world", wire.read("field").text(), "TextWire should read double quoted string value");
     }
 
     @Test
     @DisplayName("TextWire should read single quoted string values")
-    public void testSingleQuotedString() {
+    void testSingleQuotedString() {
         TextWire wire = TextWire.from("field: 'hello world'");
         assertEquals("hello world", wire.read("field").text(), "TextWire should read single quoted string value");
     }
 
     @Test
     @DisplayName("TextWire should read unquoted string values")
-    public void testUnquotedString() {
+    void testUnquotedString() {
         TextWire wire = TextWire.from("field: helloworld");
         assertEquals("helloworld", wire.read("field").text(), "TextWire should read unquoted string value");
     }
 
     @Test
     @DisplayName("TextWire should read quoted string with colon")
-    public void testQuotedStringWithColon() {
+    void testQuotedStringWithColon() {
         TextWire wire = TextWire.from("field: \"key: value\"");
         assertEquals("key: value", wire.read("field").text(), "TextWire should keep colon inside quoted string");
     }
 
     @Test
     @DisplayName("TextWire should read quoted string with hash symbol")
-    public void testQuotedStringWithHash() {
+    void testQuotedStringWithHash() {
         TextWire wire = TextWire.from("field: \"#not a comment\"");
         assertEquals("#not a comment", wire.read("field").text(), "TextWire should keep hash inside quoted string");
     }
 
     @Test
     @DisplayName("TextWire should read empty quoted string values")
-    public void testEmptyQuotedString() {
+    void testEmptyQuotedString() {
         TextWire wire = TextWire.from("field: \"\"");
         assertEquals("", wire.read("field").text(), "TextWire should read empty double quoted string");
 
@@ -125,14 +125,14 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read positive numbers with explicit plus sign")
-    public void testPositiveWithPlusSign() {
+    void testPositiveWithPlusSign() {
         TextWire wire = TextWire.from("val: +42");
         assertEquals(42, wire.read("val").int32(), "TextWire should parse + sign integer value");
     }
 
     @Test
     @DisplayName("TextWire should read hexadecimal number values")
-    public void testHexNumbers() {
+    void testHexNumbers() {
         TextWire wire = TextWire.from("a: 0xFF\nb: 0x0\nc: 0xABCDEF");
         assertEquals(255, wire.read("a").int32(), "TextWire should parse hex 0xFF as 255");
         assertEquals(0, wire.read("b").int32(), "TextWire should parse hex 0x0 as 0");
@@ -141,7 +141,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read scientific notation values")
-    public void testScientificNotation() {
+    void testScientificNotation() {
         TextWire wire = TextWire.from("a: 1.2e3\nb: 1E-10\nc: 5.5E+2");
         assertEquals(1200.0, wire.read("a").float64(), 0.001, "TextWire should parse 1.2e3 as 1200.0");
         assertEquals(1E-10, wire.read("b").float64(), 1E-15, "TextWire should parse 1E-10 as 1e-10");
@@ -150,7 +150,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read negative number values")
-    public void testNegativeNumbers() {
+    void testNegativeNumbers() {
         TextWire wire = TextWire.from("a: -128\nb: -32768\nc: -2147483648");
         assertEquals(-128, wire.read("a").int8(), "TextWire should parse negative byte value");
         assertEquals(-32768, wire.read("b").int16(), "TextWire should parse negative short value");
@@ -159,7 +159,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read floating point values")
-    public void testFloatingPoint() {
+    void testFloatingPoint() {
         TextWire wire = TextWire.from("a: 3.14159\nb: -2.5\nc: 0.0\nd: .5");
         assertEquals(3.14159, wire.read("a").float64(), 0.00001, "TextWire should parse positive float value");
         assertEquals(-2.5, wire.read("b").float64(), 0.00001, "TextWire should parse negative float value");
@@ -169,7 +169,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read long boundary values")
-    public void testLongBoundaries() {
+    void testLongBoundaries() {
         TextWire wire = TextWire.from("max: 9223372036854775807\nminPlusOne: -9223372036854775807");
         assertEquals(Long.MAX_VALUE, wire.read("max").int64(), "TextWire should parse max long value");
         assertEquals(Long.MIN_VALUE + 1, wire.read("minPlusOne").int64(), "TextWire should parse min+1 long value");
@@ -179,7 +179,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     @Test
     @Disabled("Underscored number format not supported - needs investigation")
     @DisplayName("TextWire should read underscored numeric literals")
-    public void testUnderscoredNumbers() {
+    void testUnderscoredNumbers() {
         TextWire wire = TextWire.from("val: 1_000_000");
         assertEquals(1000000, wire.read("val").int32(), "TextWire should parse underscored numeric literal");
     }
@@ -188,7 +188,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     @Test
     @Disabled("Octal format 0o prefix not supported - needs investigation")
     @DisplayName("TextWire should read octal numeric literals")
-    public void testOctalNumbers() {
+    void testOctalNumbers() {
         TextWire wire = TextWire.from("val: 0o777");
         assertEquals(511, wire.read("val").int32(), "TextWire should parse octal 0o777 as 511");
     }
@@ -197,7 +197,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     @Test
     @Disabled("Binary format 0b prefix not supported - needs investigation")
     @DisplayName("TextWire should read binary numeric literals")
-    public void testBinaryNumbers() {
+    void testBinaryNumbers() {
         TextWire wire = TextWire.from("val: 0b1111");
         assertEquals(15, wire.read("val").int32(), "TextWire should parse binary 0b1111 as 15");
     }
@@ -208,7 +208,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     @Test
     @Disabled("Special .nan value not parsed as NaN - needs investigation")
     @DisplayName("TextWire should read special NaN literal value")
-    public void testNaNValue() {
+    void testNaNValue() {
         TextWire wire = TextWire.from("val: .nan");
         assertTrue(Double.isNaN(wire.read("val").float64()), "TextWire should parse .nan as NaN");
     }
@@ -217,7 +217,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     @Test
     @Disabled("Special .inf value not parsed as Infinity - needs investigation")
     @DisplayName("TextWire should read special infinity values")
-    public void testInfinityValues() {
+    void testInfinityValues() {
         TextWire wire = TextWire.from("pos: .inf\nneg: -.inf");
         assertEquals(Double.POSITIVE_INFINITY, wire.read("pos").float64(), "TextWire should parse .inf as positive infinity");
         assertEquals(Double.NEGATIVE_INFINITY, wire.read("neg").float64(), "TextWire should parse -.inf as negative infinity");
@@ -227,7 +227,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     @Test
     @Disabled("Tilde null marker not parsed as null - needs investigation")
     @DisplayName("TextWire should read tilde null marker token")
-    public void testTildeAsNull() {
+    void testTildeAsNull() {
         TextWire wire = TextWire.from("val: ~");
         assertNull(wire.read("val").text(), "TextWire should parse tilde as null");
     }
@@ -236,7 +236,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read common boolean representations")
-    public void testBooleanVariants() {
+    void testBooleanVariants() {
         TextWire wire = TextWire.from("a: true\nb: false\nc: yes\nd: no");
         assertTrue(wire.read("a").bool(), "TextWire should parse token 'true' as true");
         assertFalse(wire.read("b").bool(), "TextWire should parse token 'false' as false");
@@ -248,7 +248,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
     @Test
     @Disabled("on/off boolean literals not parsed as booleans - needs investigation")
     @DisplayName("TextWire should read on/off boolean representations")
-    public void testBooleanOnOff() {
+    void testBooleanOnOff() {
         TextWire wire = TextWire.from("e: on\nf: off");
         assertTrue(wire.read("e").bool(), "TextWire should parse token 'on' as true");
         assertFalse(wire.read("f").bool(), "TextWire should parse token 'off' as false");
@@ -256,7 +256,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read boolean with consumer callback")
-    public void testBoolWithConsumer() {
+    void testBoolWithConsumer() {
         TextWire wire = TextWire.from("val: true");
         AtomicReference<Boolean> result = new AtomicReference<>();
         wire.read("val").bool(result, AtomicReference::set);
@@ -267,7 +267,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read int8 with consumer callback")
-    public void testInt8WithConsumer() {
+    void testInt8WithConsumer() {
         TextWire wire = TextWire.from("val: 42");
         AtomicInteger result = new AtomicInteger();
         wire.read("val").int8(result, AtomicInteger::set);
@@ -276,7 +276,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read int16 with consumer callback")
-    public void testInt16WithConsumer() {
+    void testInt16WithConsumer() {
         TextWire wire = TextWire.from("val: 12345");
         AtomicInteger result = new AtomicInteger();
         wire.read("val").int16(result, AtomicInteger::set);
@@ -285,7 +285,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read int32 with consumer callback")
-    public void testInt32WithConsumer() {
+    void testInt32WithConsumer() {
         TextWire wire = TextWire.from("val: 1234567");
         AtomicInteger result = new AtomicInteger();
         wire.read("val").int32(result, AtomicInteger::set);
@@ -294,7 +294,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read int64 with consumer callback")
-    public void testInt64WithConsumer() {
+    void testInt64WithConsumer() {
         TextWire wire = TextWire.from("val: 9876543210");
         AtomicLong result = new AtomicLong();
         wire.read("val").int64(result, AtomicLong::set);
@@ -303,7 +303,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read uint8 with consumer callback")
-    public void testUint8WithConsumer() {
+    void testUint8WithConsumer() {
         TextWire wire = TextWire.from("val: 255");
         AtomicInteger result = new AtomicInteger();
         wire.read("val").uint8(result, AtomicInteger::set);
@@ -312,7 +312,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read uint16 with consumer callback")
-    public void testUint16WithConsumer() {
+    void testUint16WithConsumer() {
         TextWire wire = TextWire.from("val: 65535");
         AtomicInteger result = new AtomicInteger();
         wire.read("val").uint16(result, AtomicInteger::set);
@@ -321,7 +321,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read uint32 with consumer callback")
-    public void testUint32WithConsumer() {
+    void testUint32WithConsumer() {
         TextWire wire = TextWire.from("val: 4294967295");
         AtomicLong result = new AtomicLong();
         wire.read("val").uint32(result, AtomicLong::set);
@@ -330,7 +330,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read float32 with consumer callback")
-    public void testFloat32WithConsumer() {
+    void testFloat32WithConsumer() {
         TextWire wire = TextWire.from("val: 3.14");
         AtomicReference<Float> result = new AtomicReference<>();
         wire.read("val").float32(result, AtomicReference::set);
@@ -339,7 +339,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read float64 with consumer callback")
-    public void testFloat64WithConsumer() {
+    void testFloat64WithConsumer() {
         TextWire wire = TextWire.from("val: 3.14159265359");
         AtomicReference<Double> result = new AtomicReference<>();
         wire.read("val").float64(result, AtomicReference::set);
@@ -350,7 +350,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read UUID identifier values")
-    public void testUUID() {
+    void testUUID() {
         UUID expected = UUID.randomUUID();
         TextWire wire = TextWire.from("id: " + expected);
         assertEquals(expected, wire.read("id").uuid(), "TextWire should round-trip UUID value");
@@ -358,7 +358,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read UUID with consumer callback")
-    public void testUUIDWithConsumer() {
+    void testUUIDWithConsumer() {
         UUID expected = UUID.randomUUID();
         TextWire wire = TextWire.from("id: " + expected);
         AtomicReference<UUID> result = new AtomicReference<>();
@@ -370,7 +370,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read empty sequence list values")
-    public void testEmptySequence() {
+    void testEmptySequence() {
         TextWire wire = TextWire.from("list: []");
         List<Integer> items = new ArrayList<>();
         wire.read("list").sequence(items, (list, v) -> {
@@ -383,7 +383,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read sequence items correctly")
-    public void testSequenceWithItems() {
+    void testSequenceWithItems() {
         TextWire wire = TextWire.from("list: [1, 2, 3]");
         List<Integer> items = new ArrayList<>();
         wire.read("list").sequence(items, (list, v) -> {
@@ -399,7 +399,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read sequence string items")
-    public void testSequenceWithStrings() {
+    void testSequenceWithStrings() {
         TextWire wire = TextWire.from("list: [alpha, beta, gamma]");
         List<String> items = new ArrayList<>();
         wire.read("list").sequence(items, (list, v) -> {
@@ -417,7 +417,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read empty marshallable object values")
-    public void testEmptyMarshallable() {
+    void testEmptyMarshallable() {
         TextWire wire = TextWire.from("obj: {}");
         AtomicInteger count = new AtomicInteger(0);
         wire.read("obj").marshallable(w -> {
@@ -431,7 +431,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read nested marshallable values")
-    public void testNestedMarshallable() {
+    void testNestedMarshallable() {
         TextWire wire = TextWire.from("outer: { inner: { value: 42 } }");
         AtomicInteger value = new AtomicInteger();
         wire.read("outer").marshallable(outer -> outer.read("inner").marshallable(inner -> value.set(inner.read("value").int32())));
@@ -442,7 +442,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should skip various value types")
-    public void testSkipValueVariousTypes() {
+    void testSkipValueVariousTypes() {
         TextWire wire = TextWire.from("int: 42\ntext: hello\nlist: [1, 2]\nobj: { x: 1 }\nfinal: found");
         wire.read("int").skipValue();
         wire.read("text").skipValue();
@@ -455,14 +455,14 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read field values after comments")
-    public void testCommentHandling() {
+    void testCommentHandling() {
         TextWire wire = TextWire.from("# This is a comment\nfield: value");
         assertEquals("value", wire.read("field").text(), "TextWire should skip comment and read value");
     }
 
     @Test
     @DisplayName("TextWire should read values with inline comments")
-    public void testInlineComment() {
+    void testInlineComment() {
         TextWire wire = TextWire.from("field: value # inline comment\nnext: data");
         assertEquals("value", wire.read("field").text(), "TextWire should read value before inline comment");
         assertEquals("data", wire.read("next").text(), "TextWire should read next field after comment");
@@ -472,7 +472,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("ValueIn should report bracket type for mapping")
-    public void testBracketTypeMapping() {
+    void testBracketTypeMapping() {
         TextWire wire = TextWire.from("field: { a: 1 }");
         wire.read("field");
         BracketType type = wire.getValueIn().getBracketType();
@@ -481,7 +481,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("ValueIn should report bracket type for sequence")
-    public void testBracketTypeSequence() {
+    void testBracketTypeSequence() {
         TextWire wire = TextWire.from("field: [1, 2, 3]");
         wire.read("field");
         BracketType type = wire.getValueIn().getBracketType();
@@ -490,7 +490,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("ValueIn should report bracket type for scalar")
-    public void testBracketTypeScalar() {
+    void testBracketTypeScalar() {
         TextWire wire = TextWire.from("field: value");
         wire.read("field");
         BracketType type = wire.getValueIn().getBracketType();
@@ -501,7 +501,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read text into StringBuilder buffer")
-    public void testTextToStringBuilder() {
+    void testTextToStringBuilder() {
         TextWire wire = TextWire.from("field: hello world");
         StringBuilder sb = new StringBuilder();
         wire.read("field").textTo(sb);
@@ -510,7 +510,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read text into Bytes buffer")
-    public void testTextToBytes() {
+    void testTextToBytes() {
         TextWire wire = TextWire.from("field: hello bytes");
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         wire.read("field").textTo(bytes);
@@ -522,7 +522,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read byte array values")
-    public void testByteArrayReading() {
+    void testByteArrayReading() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         TextWire wire = new TextWire(bytes);
         byte[] data = {1, 2, 3, 4, 5};
@@ -537,7 +537,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read typed string object")
-    public void testTypedString() {
+    void testTypedString() {
         TextWire wire = TextWire.from("obj: !java.lang.String hello");
         Object result = wire.read("obj").object();
         assertEquals("hello", result, "TextWire should read typed String value");
@@ -545,7 +545,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read typed integer object")
-    public void testTypedInteger() {
+    void testTypedInteger() {
         TextWire wire = TextWire.from("obj: !int 42");
         Object result = wire.read("obj").object();
         assertInstanceOf(Number.class, result, "Typed int object should be a Number");
@@ -556,14 +556,14 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("ValueIn should return parent wireIn reference instance")
-    public void testWireInReference() {
+    void testWireInReference() {
         TextWire wire = TextWire.from("field: value");
         assertSame(wire, wire.getValueIn().wireIn(), "ValueIn should return parent wire instance");
     }
 
     @Test
     @DisplayName("ValueIn should return runtime classLookup instance for lookups")
-    public void testClassLookup() {
+    void testClassLookup() {
         TextWire wire = TextWire.from("field: value");
         assertNotNull(wire.getValueIn().classLookup(), "ValueIn classLookup should not be null");
     }
@@ -572,7 +572,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read unicode escape sequences")
-    public void testUnicodeEscape() {
+    void testUnicodeEscape() {
         TextWire wire = TextWire.from("field: \"\\u0048\\u0065\\u006C\\u006C\\u006F\"");
         String result = wire.read("field").text();
         assertEquals("Hello", result, "TextWire should decode unicode escapes to characters");
@@ -580,7 +580,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read extended unicode escapes")
-    public void testExtendedUnicodeEscape() {
+    void testExtendedUnicodeEscape() {
         TextWire wire = TextWire.from("field: \"\\u00E9\\u00F1\"");
         String result = wire.read("field").text();
         assertEquals("\u00E9\u00F1", result, "TextWire should decode extended unicode escapes");
@@ -590,7 +590,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should handle multiline quoted strings")
-    public void testMultilineQuotedString() {
+    void testMultilineQuotedString() {
         TextWire wire = TextWire.from("field: \"line1\\nline2\\nline3\"");
         String result = wire.read("field").text();
         assertEquals("line1\nline2\nline3", result, "TextWire should handle multiline content");
@@ -600,21 +600,21 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should preserve leading spaces in quoted strings")
-    public void testLeadingSpacesInQuotes() {
+    void testLeadingSpacesInQuotes() {
         TextWire wire = TextWire.from("field: \"  hello\"");
         assertEquals("  hello", wire.read("field").text(), "TextWire should preserve leading spaces");
     }
 
     @Test
     @DisplayName("TextWire should preserve trailing spaces in quoted strings")
-    public void testTrailingSpacesInQuotes() {
+    void testTrailingSpacesInQuotes() {
         TextWire wire = TextWire.from("field: \"hello  \"");
         assertEquals("hello  ", wire.read("field").text(), "TextWire should preserve trailing spaces");
     }
 
     @Test
     @DisplayName("TextWire should decode tab escape sequences in strings")
-    public void testTabCharacters() {
+    void testTabCharacters() {
         TextWire wire = TextWire.from("field: \"a\\tb\\tc\"");
         assertEquals("a\tb\tc", wire.read("field").text(), "tab escape sequence should decode to tab character");
     }
@@ -623,14 +623,14 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read unquoted character literal tokens")
-    public void testReadCharacter() {
+    void testReadCharacter() {
         TextWire wire = TextWire.from("char: A");
         assertEquals('A', wire.read("char").character(), "unquoted character literal should parse as 'A'");
     }
 
     @Test
     @DisplayName("TextWire should read quoted character literal tokens")
-    public void testReadQuotedCharacter() {
+    void testReadQuotedCharacter() {
         TextWire wire = TextWire.from("char: \"B\"");
         assertEquals('B', wire.read("char").character(), "quoted character literal should parse as 'B'");
     }
@@ -639,7 +639,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should parse LocalDate from ISO date")
-    public void testLocalDate() {
+    void testLocalDate() {
         TextWire wire = TextWire.from("date: 2024-06-15");
         java.time.LocalDate date = wire.read("date").object(java.time.LocalDate.class);
         assertEquals(java.time.LocalDate.of(2024, 6, 15), date, "LocalDate should match ISO date input");
@@ -647,7 +647,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should parse LocalTime from hh:mm:ss input")
-    public void testLocalTime() {
+    void testLocalTime() {
         TextWire wire = TextWire.from("time: \"14:30:45\"");
         java.time.LocalTime time = wire.read("time").object(java.time.LocalTime.class);
         assertEquals(java.time.LocalTime.of(14, 30, 45), time, "LocalTime should match hh:mm:ss input");
@@ -655,7 +655,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should parse LocalDateTime from ISO date-time")
-    public void testLocalDateTime() {
+    void testLocalDateTime() {
         TextWire wire = TextWire.from("datetime: \"2024-06-15T14:30:45\"");
         java.time.LocalDateTime dt = wire.read("datetime").object(java.time.LocalDateTime.class);
         assertEquals(java.time.LocalDateTime.of(2024, 6, 15, 14, 30, 45), dt,
@@ -666,7 +666,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should parse enum token into WireType")
-    public void testEnumReading() {
+    void testEnumReading() {
         TextWire wire = TextWire.from("type: BINARY");
         WireType result = wire.read("type").asEnum(WireType.class);
         assertEquals(WireType.BINARY, result, "enum token should map to WireType.BINARY");
@@ -674,7 +674,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read typed enum values")
-    public void testTypedEnum() {
+    void testTypedEnum() {
         TextWire wire = TextWire.from("type: !net.openhft.chronicle.wire.WireType BINARY");
         Object result = wire.read("type").object();
         assertEquals(WireType.BINARY, result, "TextWire should parse typed enum value");
@@ -684,7 +684,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read type literal values")
-    public void testTypeLiteral() {
+    void testTypeLiteral() {
         TextWire wire = TextWire.from("class: !type java.lang.String");
         Class<?> result = wire.read("class").typeLiteral();
         assertEquals(String.class, result, "TextWire should parse type literal");
@@ -694,7 +694,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should detect null values with isNull")
-    public void testIsNull() {
+    void testIsNull() {
         TextWire wire = TextWire.from("notNull: value");
         assertFalse(wire.read("notNull").isNull(), "notNull field should report isNull false");
     }
@@ -703,7 +703,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should update hasMore after each field read")
-    public void testHasMore() {
+    void testHasMore() {
         TextWire wire = TextWire.from("a: 1\nb: 2");
         assertTrue(wire.hasMore(), "Wire with content should have more");
         wire.read("a").int32();
@@ -716,7 +716,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read nested sequence of integers")
-    public void testNestedSequence() {
+    void testNestedSequence() {
         TextWire wire = TextWire.from("matrix: [[1, 2], [3, 4]]");
         List<List<Integer>> result = new ArrayList<>();
         wire.read("matrix").sequence(result, (outer, outerReader) -> {
@@ -740,7 +740,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should parse boxed Integer object value")
-    public void testBoxedIntegerReading() {
+    void testBoxedIntegerReading() {
         TextWire wire = TextWire.from("val: 42");
         Integer result = wire.read("val").object(Integer.class);
         assertEquals(42, result, "TextWire should parse Integer object");
@@ -748,7 +748,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should parse boxed Long object value")
-    public void testBoxedLongReading() {
+    void testBoxedLongReading() {
         TextWire wire = TextWire.from("val: 9876543210");
         Long result = wire.read("val").object(Long.class);
         assertEquals(9876543210L, result, "TextWire should parse Long object");
@@ -756,7 +756,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should parse boxed Double object value")
-    public void testBoxedDoubleReading() {
+    void testBoxedDoubleReading() {
         TextWire wire = TextWire.from("val: 3.14159");
         Double result = wire.read("val").object(Double.class);
         assertEquals(3.14159, result, 0.00001, "TextWire should parse Double object");
@@ -764,7 +764,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should parse String object value")
-    public void testStringObjectReading() {
+    void testStringObjectReading() {
         TextWire wire = TextWire.from("val: hello");
         String result = wire.read("val").object(String.class);
         assertEquals("hello", result, "TextWire should parse String object");
@@ -774,7 +774,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read int array values")
-    public void testIntArrayReading() {
+    void testIntArrayReading() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         TextWire wire = new TextWire(bytes);
         int[] data = {1, 2, 3, 4, 5};
@@ -787,7 +787,7 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should read String array values")
-    public void testStringArrayReading() {
+    void testStringArrayReading() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         TextWire wire = new TextWire(bytes);
         String[] data = {"one", "two", "three"};
@@ -802,14 +802,14 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should handle quoted field keys")
-    public void testQuotedFieldKey() {
+    void testQuotedFieldKey() {
         TextWire wire = TextWire.from("\"special:key\": value");
         assertEquals("value", wire.read("special:key").text(), "TextWire should handle quoted field key");
     }
 
     @Test
     @DisplayName("TextWire should handle field keys with numbers")
-    public void testNumericFieldKey() {
+    void testNumericFieldKey() {
         TextWire wire = TextWire.from("field123: value");
         assertEquals("value", wire.read("field123").text(), "TextWire should handle numeric field key");
     }
@@ -818,14 +818,14 @@ public class TextValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should handle empty string field")
-    public void testEmptyStringField() {
+    void testEmptyStringField() {
         TextWire wire = TextWire.from("empty: \"\"");
         assertEquals("", wire.read("empty").text(), "TextWire should read empty string");
     }
 
     @Test
     @DisplayName("TextWire should handle missing value as empty string")
-    public void testMissingValueAsEmpty() {
+    void testMissingValueAsEmpty() {
         TextWire wire = TextWire.from("field: ");
         assertEquals("", wire.read("field").text(), "TextWire should read missing value as empty string");
     }

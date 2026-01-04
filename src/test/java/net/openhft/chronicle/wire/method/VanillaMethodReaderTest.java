@@ -26,7 +26,7 @@ import java.util.concurrent.BlockingQueue;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class VanillaMethodReaderTest extends WireTestCommon {
+class VanillaMethodReaderTest extends WireTestCommon {
 
     private A instance;
 
@@ -37,7 +37,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     @DisplayName("Method reader handles metadata and data calls")
-    public void testMethodReaderWriterMetadata() {
+    void testMethodReaderWriterMetadata() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for metadata reader test");
 
         Bytes<?> b = Bytes.allocateElasticOnHeap();
@@ -86,7 +86,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     @DisplayName("Read expected method calls from text wire documents")
-    public void readMethods() throws IOException {
+    void readMethods() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for readMethods test");
 
         Wire wire = new TextWire(BytesUtil.readFile("methods/in.yaml"))
@@ -108,7 +108,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     @Test
     @SuppressWarnings("unused")
     @DisplayName("Read collection method calls from wire documents")
-    public void readMethodsCollections() throws IOException, InterruptedException {
+    void readMethodsCollections() throws IOException, InterruptedException {
         Wire wire = new TextWire(BytesUtil.readFile("methods-collections-in.yaml"))
                 .useTextDocuments();
         BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
@@ -126,7 +126,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reader dispatches subclass parameters correctly in order")
-    public void testSubclasses() {
+    void testSubclasses() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap())
                 .useTextDocuments();
         MRTListener writer = wire.methodWriter(MRTListener.class);
@@ -196,7 +196,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     @DisplayName("Writer uses type metadata when interceptor is null")
-    public void methodInterceptorNull() {
+    void methodInterceptorNull() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap())
                 .useTextDocuments();
         MRTListener writer = wire.methodWriterBuilder(MRTListener.class)
@@ -232,7 +232,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     @DisplayName("Nested unknown class is preserved in tuples")
-    public void testNestedUnknownClass() {
+    void testNestedUnknownClass() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for nested unknown class test");
 
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
@@ -262,7 +262,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     @DisplayName("Unknown class does not throw with tuple generation enabled")
-    public void testUnknownClassDoesntThrow() {
+    void testUnknownClassDoesntThrow() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for unknown class tuple test");
 
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
@@ -295,7 +295,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     @DisplayName("Unknown class throws without tuple generation")
-    public void testUnknownClassThrow() {
+    void testUnknownClassThrow() {
         assertThrows(ClassNotFoundRuntimeException.class, () -> {
             assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for unknown class throw test");
 
@@ -330,7 +330,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     @DisplayName("Message history clears after method reader")
-    public void testMessageHistoryCleared() {
+    void testMessageHistoryCleared() {
         Assumptions.assumeFalse(Boolean.getBoolean("history.as.bytes"),
                 "History-as-bytes mode changes message history handling");
         try {
@@ -358,7 +358,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     @DisplayName("Overloaded method names should be rejected by reader")
-    public void testOverloaded() {
+    void testOverloaded() {
         assertThrows(IllegalStateException.class, () -> {
             Jvm.recordExceptions();
             try {
@@ -374,13 +374,13 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @Test
     @DisplayName("Parse metadata without scanning mode enabled")
-    public void parseMetaData() {
+    void parseMetaData() {
         assertTrue(doParseMetaData(false), "Metadata parse should succeed without scanning");
     }
 
     @Test
     @DisplayName("Parse metadata with scanning mode enabled")
-    public void parseMetaDataScanning() {
+    void parseMetaDataScanning() {
         assertTrue(doParseMetaData(true), "Metadata parse should succeed with scanning enabled");
     }
 

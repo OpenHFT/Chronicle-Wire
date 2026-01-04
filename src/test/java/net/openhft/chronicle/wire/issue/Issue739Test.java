@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 /**
  * see https://github.com/OpenHFT/Chronicle-Wire/issues/739
  */
-public class Issue739Test extends WireTestCommon {
+class Issue739Test extends WireTestCommon {
 
     static class One extends SelfDescribingMarshallable {
         final String text;
@@ -48,7 +48,7 @@ public class Issue739Test extends WireTestCommon {
     }
 
     @Test
-    public void fieldAnchorAlias() {
+    void fieldAnchorAlias() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Wire wire = new YamlWire(Bytes.wrapForRead(("three: !net.openhft.chronicle.wire.issue.Issue739Test$Three\n" +
@@ -65,7 +65,7 @@ public class Issue739Test extends WireTestCommon {
     }
 
     @Test
-    public void interfaceFieldAnchorAlias() {
+    void interfaceFieldAnchorAlias() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Wire wire = new YamlWire(Bytes.wrapForRead(("three: !net.openhft.chronicle.wire.issue.Issue739Test$IThree\n" +
@@ -82,7 +82,7 @@ public class Issue739Test extends WireTestCommon {
     }
 
     @Test
-    public void anchorOfTextField() {
+    void anchorOfTextField() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Wire wire = new YamlWire(Bytes.wrapForRead(("three: !net.openhft.chronicle.wire.issue.Issue739Test$IThree\n" +

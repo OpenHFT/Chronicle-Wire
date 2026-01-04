@@ -18,13 +18,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SuppressFBWarnings(
         value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
         justification = "Fields are populated via Wire marshalling in tests.")
-public class TextSkipValueTest extends WireTestCommon {
+class TextSkipValueTest extends WireTestCommon {
 
     // This will store the input string for each run of the test.
     private String input;
 
     // Constructor that initializes the 'input' member variable.
-    public void initTextSkipValueTest(String input) {
+    void initTextSkipValueTest(String input) {
         this.input = input;
     }
 
@@ -84,7 +84,7 @@ public class TextSkipValueTest extends WireTestCommon {
     @DisplayName("Skips value and leaves end marker")
     @MethodSource("combinations")
     @ParameterizedTest
-    public void skipValue(String input) {
+    void skipValue(String input) {
         initTextSkipValueTest(input);
         // Create a TextWire from the input string.
         Wire wire = TextWire.from(input);

@@ -24,11 +24,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * Exercises ValueIn array readers using sequences for common wire types.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class ValueInArrayReadersTest extends WireTestCommon {
+class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads double arrays from wire sequences")
-    public void readDoubleArrayFromSequence() {
+    void readDoubleArrayFromSequence() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
             w.write("arr").sequence(v -> {
@@ -47,7 +47,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads int arrays from wire sequences")
-    public void readIntArrayFromSequence() {
+    void readIntArrayFromSequence() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
             w.write("arr").sequence(v -> {
@@ -66,7 +66,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads byte arrays from binary sequences only")
-    public void readBytesArrayBinaryOnly() {
+    void readBytesArrayBinaryOnly() {
         // Text/YAML use base64 and may compress; validate binary where exact bytes round-trip is expected.
         Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap(256));
         byte[] in = {10, 20, 30};
@@ -84,7 +84,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads double array with delta compression")
-    public void readDoubleArrayDelta() {
+    void readDoubleArrayDelta() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
             // Write base value 10.0 and deltas: +1, +2, +3
@@ -107,7 +107,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Handles empty array delta with empty sequence")
-    public void readEmptyDoubleArrayDelta() {
+    void readEmptyDoubleArrayDelta() {
         Wire w = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
         w.write("empty").sequence(v -> { });
 
@@ -121,7 +121,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
     @Test
     @Disabled("Fails with IORuntime exception - needs investigation")
     @DisplayName("Handles zero-length target array for double delta")
-    public void readZeroLengthDoubleArrayDelta() {
+    void readZeroLengthDoubleArrayDelta() {
         Wire w = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
         w.write("values").sequence(v -> v.float64(1.0));
 
@@ -132,7 +132,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads long array from wire sequence")
-    public void readLongArrayFromSequence() {
+    void readLongArrayFromSequence() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
             long[] expected = {100L, 200L, 300L};
@@ -151,7 +151,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads long array with delta compression")
-    public void readLongArrayDelta() {
+    void readLongArrayDelta() {
         Wire w = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
         // Write base value 1000 and deltas: +10, +20, +30
         w.write("deltas").sequence(v -> {
@@ -172,7 +172,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Handles empty long array delta sequence")
-    public void readEmptyLongArrayDelta() {
+    void readEmptyLongArrayDelta() {
         Wire w = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
         w.write("empty").sequence(v -> { });
 
@@ -183,7 +183,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads boolean array from wire sequence")
-    public void readBooleanArrayFromSequence() {
+    void readBooleanArrayFromSequence() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
             boolean[] expected = {true, false, true, false};
@@ -204,7 +204,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
     @Test
     @Disabled("Fails with IORuntime exception - array truncation behaviour needs investigation")
     @DisplayName("Truncates array when more items than capacity")
-    public void truncatesArrayOnOverflow() {
+    void truncatesArrayOnOverflow() {
         Wire w = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
         w.write("many").sequence(v -> {
             for (int i = 0; i < 10; i++) {
@@ -220,7 +220,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads list of strings from sequence")
-    public void readListOfStrings() {
+    void readListOfStrings() {
         Wire w = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
         w.write("items").sequence(v -> {
             v.text("one");
@@ -237,7 +237,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads integer set collection from sequence data")
-    public void readSetOfIntegers() {
+    void readSetOfIntegers() {
         Wire w = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
         w.write("items").sequence(v -> {
             v.int32(1);
@@ -255,7 +255,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads LocalDate value from text wire")
-    public void readLocalDate() {
+    void readLocalDate() {
         TextWire wire = TextWire.from("date: 2024-06-15");
         LocalDate result = wire.read("date").date();
         assertEquals(LocalDate.of(2024, 6, 15), result, "Parsed LocalDate should match expected value");
@@ -263,7 +263,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads LocalTime value from text wire")
-    public void readLocalTime() {
+    void readLocalTime() {
         TextWire wire = TextWire.from("time: 14:30:45");
         LocalTime result = wire.read("time").time();
         assertEquals(LocalTime.of(14, 30, 45), result, "Parsed LocalTime should match expected value");
@@ -271,7 +271,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads LocalDateTime value from text wire")
-    public void readLocalDateTime() {
+    void readLocalDateTime() {
         TextWire wire = TextWire.from("datetime: 2024-06-15T14:30:45");
         LocalDateTime result = wire.read("datetime").dateTime();
         assertEquals(LocalDateTime.of(2024, 6, 15, 14, 30, 45), result,
@@ -282,7 +282,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
     @Test
     @Disabled("Fails with ClassCast exception - may indicate bug in ZonedDateTime parsing")
     @DisplayName("Reads ZonedDateTime value from text wire")
-    public void readZonedDateTime() {
+    void readZonedDateTime() {
         TextWire wire = TextWire.from("zdt: 2024-06-15T14:30:45Z[UTC]");
         ZonedDateTime result = wire.read("zdt").zonedDateTime();
         assertEquals(ZonedDateTime.of(2024, 6, 15, 14, 30, 45, 0, ZoneId.of("UTC")), result,
@@ -292,7 +292,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
     @Test
     @DisplayName("Reads Bytes array from wire sequence")
     @SuppressWarnings("rawtypes")
-    public void readBytesArrayFromSequence() {
+    void readBytesArrayFromSequence() {
         Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap(256));
         w.write("data").sequence(v -> {
             v.bytes(new byte[]{1, 2, 3});
@@ -309,7 +309,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
     @Test
     @DisplayName("Handles sequence with more elements than Bytes array capacity")
     @SuppressWarnings("rawtypes")
-    public void truncatesBytesArray() {
+    void truncatesBytesArray() {
         Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap(256));
         w.write("data").sequence(v -> {
             for (int i = 0; i < 5; i++) {
@@ -324,7 +324,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads collection with custom supplier from sequence")
-    public void readCollectionWithSupplier() {
+    void readCollectionWithSupplier() {
         Wire w = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
         w.write("items").sequence(v -> {
             v.text("alpha");
@@ -342,7 +342,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads sequence using TriConsumer callback handler")
-    public void readSequenceWithTriConsumer() {
+    void readSequenceWithTriConsumer() {
         Wire w = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
         w.write("pairs").sequence(v -> {
             v.int32(1);
@@ -367,7 +367,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads sequence with length using ToIntBiFunction")
-    public void readSequenceWithLength() {
+    void readSequenceWithLength() {
         Wire w = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
         w.write("items").sequence(v -> {
             v.text("a");
@@ -391,7 +391,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests hasNext and hasNextSequenceItem in sequence")
-    public void testHasNextInSequence() {
+    void testHasNextInSequence() {
         TextWire wire = TextWire.from("items: [1, 2, 3]");
         List<Integer> items = new ArrayList<>();
         wire.read("items").sequence(items, (list, v) -> {
@@ -411,7 +411,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests reading character from text value")
-    public void testCharacterReading() {
+    void testCharacterReading() {
         TextWire wire = TextWire.from("ch: A");
         char c = wire.read("ch").character();
         assertEquals('A', c, "Parsed character value should be 'A'");
@@ -419,7 +419,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
     @DisplayName("Character reader returns null for empty text wire input")
-    public void testCharacterEmptyText() {
+    void testCharacterEmptyText() {
         TextWire wire = TextWire.from("ch: \"\"");
         char c = wire.read("ch").character();
         assertEquals('\u0000', c, "Empty text value should return null character");
@@ -429,7 +429,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
     @Test
     @Disabled("Returns '~' literal instead of null character - needs investigation")
     @DisplayName("Character reader returns null for null text wire input")
-    public void testCharacterNullValue() {
+    void testCharacterNullValue() {
         TextWire wire = TextWire.from("ch: ~");
         char c = wire.read("ch").character();
         assertEquals('\u0000', c, "Null text value should return null character");

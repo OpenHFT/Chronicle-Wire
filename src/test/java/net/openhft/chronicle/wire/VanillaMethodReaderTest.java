@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // Extend WireTestCommon to inherit common utility and setup methods for wire tests
-public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTestCommon {
+class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Define an interface representing a method with a single message parameter
     public interface MyMethod {
@@ -26,7 +26,7 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
     // Test case to check the behavior of a predicate that always returns false
     @Test
     @DisplayName("Predicate false prevents any method dispatch")
-    public void testPredicateFalse() {
+    void testPredicateFalse() {
 
         // Allocate elastic bytes on heap and create a TextWire instance
         Bytes<byte[]> b = Bytes.allocateElasticOnHeap();
@@ -52,7 +52,7 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
     // Test case to check the behavior of a predicate that always returns true
     @Test
     @DisplayName("Predicate true allows single method dispatch")
-    public void testPredicateTrue() {
+    void testPredicateTrue() {
 
         // Allocate elastic bytes on heap and create a TextWire instance
         Bytes<byte[]> b = Bytes.allocateElasticOnHeap();
@@ -80,7 +80,7 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
     // Test case to log a binary message and validate its content
     @Test
     @DisplayName("Binary log message matches expected hex dump")
-    public void logMessage0() {
+    void logMessage0() {
 
         // do not check Mac as it lays it memory out differently
         Assumptions.assumeTrue(!OS.isMacOSX(),

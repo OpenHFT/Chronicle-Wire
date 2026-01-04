@@ -11,7 +11,7 @@ import net.openhft.chronicle.wire.converter.ShortText;
 
 import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
 
-public class PersonWireMain {
+class PersonWireMain {
     public static void main(String[] args) {
         // Add class alias for "Person" so that the short name can be used without package information
         ClassAliasPool.CLASS_ALIASES.addAlias(Person.class);

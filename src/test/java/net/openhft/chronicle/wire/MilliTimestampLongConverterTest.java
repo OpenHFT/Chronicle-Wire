@@ -10,7 +10,7 @@ import static net.openhft.chronicle.wire.MilliTimestampLongConverter.INSTANCE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class MilliTimestampLongConverterTest extends WireTestCommon {
+class MilliTimestampLongConverterTest extends WireTestCommon {
 
     // Define constant strings for different timestamp representations
     private static final String TIMESTAMP_STRING_UTC = "2023-02-15T05:31:49.856Z";
@@ -22,7 +22,7 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
     // Test the parsing functionality of the converter with current time
     @Test
     @DisplayName("Parse numeric millis and preserve value")
-    public void parse() {
+    void parse() {
         long now = System.currentTimeMillis();
 
         // Parse the current timestamp from its string representation and verify equality
@@ -38,7 +38,7 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
     // Test different date format parsing
     @Test
     @DisplayName("Parse slash and dash formats consistently")
-    public void parse2() {
+    void parse2() {
         assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"),
                 INSTANCE.parse("2020-09-18T01:02:03.456"),
                 "Slash and dash formats should parse identically for millis");
@@ -53,7 +53,7 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
     // Test if trailing 'Z' in the timestamp does not affect parsing
     @Test
     @DisplayName("Parse subsequences and ignore extra digits")
-    public void parse3() {
+    void parse3() {
         assertEquals(INSTANCE.parse("202020/09/18T01:02:03.456", 2, 25),
                 INSTANCE.parse("2020-09-18T01:02:03.4567890", 0, 23),
                 "Subsequence parsing should match full-string parsing");
@@ -61,7 +61,7 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Ignore trailing Z when parsing millis")
-    public void testTrailingZ() {
+    void testTrailingZ() {
         final String text = "2020-09-18T01:02:03.456";
         assertEquals(INSTANCE.parse(text), INSTANCE.parse(text + "Z"),
                 "Trailing Z should not affect millis parsing");
@@ -70,7 +70,7 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
     // Verify that timestamps without timezone are treated as local timestamps
     @Test
     @DisplayName("Assume local zone when timestamp lacks offset")
-    public void datesWithNoTimezoneAreAssumedToBeLocal() {
+    void datesWithNoTimezoneAreAssumedToBeLocal() {
         MilliTimestampLongConverter mtlc = new MilliTimestampLongConverter("America/New_York");
         assertEquals(mtlc.parse("2020-09-17T21:02:03.456-04:00"),
                 mtlc.parse("2020-09-17T21:02:03.456"),
@@ -80,7 +80,7 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
     // Test if timestamps are correctly appended for Melbourne timezone
     @Test
     @DisplayName("Append Melbourne timestamp with zone offset")
-    public void appendTest() {
+    void appendTest() {
         final MilliTimestampLongConverter converter = new MilliTimestampLongConverter("Australia/Melbourne");
         StringBuilder builder = new StringBuilder();
         converter.append(builder, TIMESTAMP);
@@ -91,7 +91,7 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
     // Test if timestamps are correctly appended for UTC timezone
     @Test
     @DisplayName("Append UTC timestamp without zone suffix")
-    public void appendTestUTC() {
+    void appendTestUTC() {
         final MilliTimestampLongConverter converter = new MilliTimestampLongConverter("UTC");
         StringBuilder builder = new StringBuilder();
         converter.append(builder, TIMESTAMP);
@@ -102,7 +102,7 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
     // Test the round-trip conversion for various timezones, ensuring consistency in parsing and conversion back to string
     @Test
     @DisplayName("Round-trip millis for UTC and Melbourne")
-    public void roundTripTest() {
+    void roundTripTest() {
         MilliTimestampLongConverter utc = new MilliTimestampLongConverter("UTC");
         assertEquals(TIMESTAMP, utc.parse(TIMESTAMP_STRING_UTC_NO_SUFFIX),
                 "UTC parse should round-trip millis value");

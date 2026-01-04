@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @SuppressWarnings({"rawtypes", "try", "deprecation", "removal"})
-public class BinaryWire2Test extends WireTestCommon {
+class BinaryWire2Test extends WireTestCommon {
     private static final String COMPRESSION_SAMPLE = "xxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyy2yyyyyyyyyyyyyyyyy";
     private static final String EXPECTED_UNICODE_WIRE = "--- !!data #binary\n" +
             "data: !!UpdateEvent {\n" +
@@ -43,7 +43,7 @@ public class BinaryWire2Test extends WireTestCommon {
     Bytes<?> bytes = new HexDumpBytes();
 
     // Constructor to set the padding parameter
-    public void initBinaryWire2Test(boolean usePadding) {
+    void initBinaryWire2Test(boolean usePadding) {
         this.usePadding = usePadding;
     }
 
@@ -69,7 +69,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should reject unmarshallable object")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire unmarshallable Object uses padding {0}")
-    public void unmarshallableObject(boolean usePadding) {
+    void unmarshallableObject(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         assertThrows(IllegalArgumentException.class, () -> {
             BinaryWire wire = createWire();
@@ -81,7 +81,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should read correct length")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Read Length uses padding {0}")
-    public void testReadLength(boolean usePadding) {
+    void testReadLength(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         Map<Integer, String> wireCodes = new TreeMap<>();
         for (Field field : BinaryWireCode.class.getDeclaredFields()) {
@@ -175,7 +175,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should round trip boolean values")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Bool uses padding {0}")
-    public void testBool(boolean usePadding) {
+    void testBool(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Wire wire = createWire();
         wire.write().bool(false)
@@ -198,7 +198,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should round trip BytesStore values")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Bytes Store uses padding {0}")
-    public void testBytesStore(boolean usePadding) {
+    void testBytesStore(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Wire wire = createWire();
         wire.write().object(Bytes.from("Hello"));
@@ -213,7 +213,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should write object with TreeMap")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire write Object With Tree Map uses padding {0}")
-    public void writeObjectWithTreeMap(boolean usePadding) {
+    void writeObjectWithTreeMap(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         WireMapTestSupport.assertObjectWithTreeMap(WireType.BINARY::apply);
     }
@@ -222,7 +222,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should round trip float32 values")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Float32 uses padding {0}")
-    public void testFloat32(boolean usePadding) {
+    void testFloat32(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Wire wire = createWire();
         wire.write().float32(0.0F)
@@ -238,7 +238,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should preserve NaN values")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire NaN uses padding {0}")
-    public void testNaN(boolean usePadding) {
+    void testNaN(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Wire wire = createWire();
         wire.getValueOut()
@@ -251,7 +251,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should round trip time values")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Time uses padding {0}")
-    public void testTime(boolean usePadding) {
+    void testTime(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Wire wire = createWire();
         LocalTime now = LocalTime.now();
@@ -268,7 +268,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should round trip zoned date time")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Zoned Date Time uses padding {0}")
-    public void testZonedDateTime(boolean usePadding) {
+    void testZonedDateTime(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Wire wire = createWire();
         WireTemporalTestSupport.assertZonedDateTimes(wire);
@@ -278,7 +278,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should round trip local date")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Local Date uses padding {0}")
-    public void testLocalDate(boolean usePadding) {
+    void testLocalDate(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Wire wire = createWire();
         WireTemporalTestSupport.assertLocalDates(wire);
@@ -288,7 +288,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should round trip legacy date")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Date uses padding {0}")
-    public void testDate(boolean usePadding) {
+    void testDate(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Wire wire = createWire();
 
@@ -305,7 +305,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should reuse existing date instance")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Date Existing uses padding {0}")
-    public void testDateExisting(boolean usePadding) {
+    void testDateExisting(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         final String dateString = "1999-12-31";
         final java.util.Date expected = java.sql.Date.valueOf(dateString);
@@ -323,7 +323,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should round trip UUID values")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Uuid uses padding {0}")
-    public void testUuid(boolean usePadding) {
+    void testUuid(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Wire wire = createWire();
         UUID uuid = UUID.randomUUID();
@@ -340,7 +340,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should serialise sequence values")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Sequence uses padding {0}")
-    public void testSequence(boolean usePadding) {
+    void testSequence(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory is required for sequence test");
 
@@ -406,7 +406,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should write sequence context data")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Sequence Context uses padding {0}")
-    public void testSequenceContext(boolean usePadding) {
+    void testSequenceContext(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory is required for sequence context test");
 
@@ -474,7 +474,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should round trip enum values")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Enum uses padding {0}")
-    public void testEnum(boolean usePadding) {
+    void testEnum(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Wire wire = createWire();
         wire.write().object(WireType.BINARY)
@@ -521,7 +521,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should read field after text")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire field After Text uses padding {0}")
-    public void fieldAfterText(boolean usePadding) {
+    void fieldAfterText(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         assumeFalse(usePadding, "field-after-text test requires padding disabled");  // Ensure padding is not used for this test
 
@@ -551,7 +551,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should read field after null event value")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire field After Null uses padding {0}")
-    public void fieldAfterNull(boolean usePadding) {
+    void fieldAfterNull(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> writeUpdateEvent(w, null));
@@ -574,7 +574,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should read field after null in document context")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire field After Null Context uses padding {0}")
-    public void fieldAfterNullContext(boolean usePadding) {
+    void fieldAfterNullContext(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         // Ignore a specific exception that might occur during this test
         ignoreException("Unable to copy object safely, message will not be repeated: " +
@@ -629,7 +629,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should read demarshallable values")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire read Demarshallable uses padding {0}")
-    public void readDemarshallable(boolean usePadding) {
+    void readDemarshallable(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Wire wire = createWire();
 
@@ -657,7 +657,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should compress with gzip")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Compress With Gzip uses padding {0}")
-    public void testCompressWithGzip(boolean usePadding) {
+    void testCompressWithGzip(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Wire wire = createWire();
 
@@ -691,7 +691,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should use binary compression")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Binary Compression uses padding {0}")
-    public void testBinaryCompression(boolean usePadding) {
+    void testBinaryCompression(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         assertEquals(COMPRESSION_SAMPLE, testCompression("binary"), "binary compression should round-trip sample text");
     }
@@ -700,7 +700,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should use gzip compression")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Gzip Compression uses padding {0}")
-    public void testGzipCompression(boolean usePadding) {
+    void testGzipCompression(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         assertEquals(COMPRESSION_SAMPLE, testCompression("gzip"), "gzip compression should round-trip sample text");
     }
@@ -709,7 +709,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should use LZW compression")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Lzw Compression uses padding {0}")
-    public void testLzwCompression(boolean usePadding) {
+    void testLzwCompression(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         assertEquals(COMPRESSION_SAMPLE, testCompression("lzw"), "lzw compression should round-trip sample text");
     }
@@ -745,7 +745,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire Byte Array Value With Real Bytes Negative")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Byte Array Value With Real Bytes Negative uses padding {0}")
-    public void testByteArrayValueWithRealBytesNegative(boolean usePadding) {
+    void testByteArrayValueWithRealBytesNegative(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Wire wire = createWire();
 
@@ -774,7 +774,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should round trip bytes array")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Bytes Array uses padding {0}")
-    public void testBytesArray(boolean usePadding) {
+    void testBytesArray(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Wire wire = createWire();
         @NotNull SplittableRandom rand = new SplittableRandom(0x9e3779b9);
@@ -795,7 +795,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should handle small arrays")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Small Array uses padding {0}")
-    public void testSmallArray(boolean usePadding) {
+    void testSmallArray(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("index")
@@ -811,7 +811,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should round trip type literals")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Type Literal uses padding {0}")
-    public void testTypeLiteral(boolean usePadding) {
+    void testTypeLiteral(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         assumeFalse(usePadding, "type literal test requires padding disabled");
 
@@ -833,7 +833,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should read byte array values")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Byte Array uses padding {0}")
-    public void testByteArray(boolean usePadding) {
+    void testByteArray(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         assumeFalse(usePadding, "byte array test requires padding disabled");
         @NotNull Wire wire = createWire();
@@ -871,7 +871,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should read object keys")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Object Keys uses padding {0}")
-    public void testObjectKeys(boolean usePadding) {
+    void testObjectKeys(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Map<MyMarshallable, String> map = new LinkedHashMap<>();
         map.put(new MyMarshallable("key1"), "value1");
@@ -904,7 +904,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should read bytes literal")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Bytes Literal uses padding {0}")
-    public void testBytesLiteral(boolean usePadding) {
+    void testBytesLiteral(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         assumeFalse(usePadding, "bytes literal test requires padding disabled");  // Skip this test if padding is used
 
@@ -934,7 +934,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @Disabled("TODO fix: unicode hex dump output differs from expected")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Unicode Read And Write Hex uses padding {0}")
-    public void testUnicodeReadAndWriteHex(boolean usePadding) {
+    void testUnicodeReadAndWriteHex(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         bytes.releaseLast();
         bytes = new HexDumpBytes();
@@ -946,7 +946,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire Unicode Read And Write Direct")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Unicode Read And Write Direct uses padding {0}")
-    public void testUnicodeReadAndWriteDirect(boolean usePadding) {
+    void testUnicodeReadAndWriteDirect(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         assumeFalse(usePadding, "direct unicode test requires padding disabled");  // Skip this test if padding is used
 
@@ -962,7 +962,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @ParameterizedTest(name = "Binary wire Unicode Read And Write On Heap uses padding {0}")
     @Disabled("TODO fix: unicode heap output differs from expected")
     @MethodSource("wireTypes")
-    public void testUnicodeReadAndWriteOnHeap(boolean usePadding) {
+    void testUnicodeReadAndWriteOnHeap(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         bytes.releaseLast();
         bytes = allocateElasticOnHeap();  // Allocate memory for the bytes on the heap
@@ -994,7 +994,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should write map values")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Write Map uses padding {0}")
-    public void testWriteMap(boolean usePadding) {
+    void testWriteMap(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
 
@@ -1018,7 +1018,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should read bytes values")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Read Bytes uses padding {0}")
-    public void testreadBytes(boolean usePadding) {
+    void testreadBytes(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         // Create a new BinaryWire with heap allocated storage
         @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
@@ -1040,7 +1040,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should write decimal values")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Writing Decimals uses padding {0}")
-    public void testWritingDecimals(boolean usePadding) {
+    void testWritingDecimals(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         // Create a new BinaryWire with heap allocated storage
         @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
@@ -1111,7 +1111,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should write decimal values with scale")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire Writing Decimals 2 uses padding {0}")
-    public void testWritingDecimals2(boolean usePadding) {
+    void testWritingDecimals2(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         // Create a new BinaryWire with heap allocated storage
         @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
@@ -1136,7 +1136,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @DisplayName("Binary wire should read CharSequence values")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Binary wire read Char Sequence uses padding {0}")
-    public void readCharSequence(boolean usePadding) {
+    void readCharSequence(boolean usePadding) {
         initBinaryWire2Test(usePadding);
         // Create a wire and write "hello world" as an object
         Wire wire = createWire();

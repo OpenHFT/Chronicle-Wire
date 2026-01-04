@@ -18,12 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // Test class for testing JSON wire DTO functionalities.
-public class JSONWireDTOTest extends WireTestCommon {
+class JSONWireDTOTest extends WireTestCommon {
 
     // Test to verify serialization and deserialization of DTO using JSONWire.
     @Test
     @DisplayName("Serialises dto to json and back")
-    public void dto() {
+    void dto() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip json dto test");
 

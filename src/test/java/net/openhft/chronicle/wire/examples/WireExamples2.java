@@ -11,7 +11,7 @@ import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 /**
  * Demonstrates serialising and deserialising a {@link TextObject} using BinaryWire for example diagnostic output.
  */
-public class WireExamples2 {
+class WireExamples2 {
 
     /**
      * Entry point for the wire serialisation demonstration.

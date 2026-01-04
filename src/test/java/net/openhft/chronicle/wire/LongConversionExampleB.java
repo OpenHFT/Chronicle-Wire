@@ -5,7 +5,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-public class LongConversionExampleB {
+class LongConversionExampleB {
 
     // Initializing static block to add the House class as an alias to CLASS_ALIASES
     static {

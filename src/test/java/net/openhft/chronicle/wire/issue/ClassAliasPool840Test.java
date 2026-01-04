@@ -15,13 +15,13 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ClassAliasPool840Test {
+class ClassAliasPool840Test {
     /**
      * Regression coverage for custom alias lookup in issue 840.
      */
     @Test
     @DisplayName("Custom ClassLookup resolves aliases for typedMarshallable")
-    public void typeIsLoadedByClassLookup() {
+    void typeIsLoadedByClassLookup() {
         ClassLookup customClassLookup = new ClassLookup() {
             @Override
             public Class<?> forName(CharSequence name) throws ClassNotFoundRuntimeException {

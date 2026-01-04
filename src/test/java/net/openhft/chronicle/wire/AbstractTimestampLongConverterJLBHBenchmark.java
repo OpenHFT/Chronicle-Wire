@@ -10,7 +10,7 @@ import net.openhft.chronicle.jlbh.JLBHTask;
 import net.openhft.chronicle.jlbh.TeamCityHelper;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class AbstractTimestampLongConverterJLBHBenchmark implements JLBHTask {
+class AbstractTimestampLongConverterJLBHBenchmark implements JLBHTask {
 
     // Constants for testing
     private static final long TIMESTAMP_MILLIS = 1675177572L;

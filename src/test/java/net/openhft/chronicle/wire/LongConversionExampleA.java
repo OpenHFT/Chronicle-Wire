@@ -5,7 +5,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.converter.Base64;
 
-public class LongConversionExampleA {
+class LongConversionExampleA {
 
     // Initializing static block to add the House class as an alias to CLASS_ALIASES
     static {

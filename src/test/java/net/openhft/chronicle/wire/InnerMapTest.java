@@ -17,12 +17,12 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class InnerMapTest extends WireTestCommon {
+class InnerMapTest extends WireTestCommon {
 
     // A test case to verify the marshaling and demarshaling of the `MyMarshable` class
     @Test
     @DisplayName("Round-trips nested maps and marshallables")
-    public void testMyInnnerMap() {
+    void testMyInnnerMap() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip inner map test");
 

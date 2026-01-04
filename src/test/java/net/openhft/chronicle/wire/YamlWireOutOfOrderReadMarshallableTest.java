@@ -12,11 +12,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class YamlWireOutOfOrderReadMarshallableTest extends WireTestCommon {
+class YamlWireOutOfOrderReadMarshallableTest extends WireTestCommon {
 
     @Test
     @DisplayName("Flow mapping preserves manual read order")
-    public void flowMappingKeepsManualReadMarshallableInOrder() {
+    void flowMappingKeepsManualReadMarshallableInOrder() {
         assertOutOfOrderManualReadMarshallable(
                 flowYaml("c", "b", "a"),
                 flowYaml("b", "c", "a"),
@@ -25,7 +25,7 @@ public class YamlWireOutOfOrderReadMarshallableTest extends WireTestCommon {
 
     @Test
     @DisplayName("Indented mapping preserves manual read order")
-    public void indentedMappingKeepsManualReadMarshallableInOrder() {
+    void indentedMappingKeepsManualReadMarshallableInOrder() {
         assertOutOfOrderManualReadMarshallable(
                 indentedYaml("c", "b", "a"),
                 indentedYaml("b", "c", "a"),

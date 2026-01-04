@@ -11,11 +11,11 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BinaryWireNestedDocumentTest extends WireTestCommon {
+class BinaryWireNestedDocumentTest extends WireTestCommon {
 
     @Test
     @DisplayName("Round-trips nested marshallable document with map hierarchy")
-    public void roundTripsNestedMarshallable() {
+    void roundTripsNestedMarshallable() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -35,4 +35,3 @@ public class BinaryWireNestedDocumentTest extends WireTestCommon {
         }
     }
 }
-

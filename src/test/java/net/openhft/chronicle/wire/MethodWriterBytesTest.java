@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  * It extends the WireTestCommon from the `net.openhft.chronicle.wire` package for common test setup and utilities.
  */
 @SuppressWarnings("rawtypes")
-public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCommon {
+class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCommon {
     // A blocking queue to hold Bytes instances, used for synchronization between writer and reader.
     private final ArrayBlockingQueue<Bytes> q = new ArrayBlockingQueue<>(1);
 
@@ -26,7 +26,7 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
      */
     @Test
     @DisplayName("Bytes payload can be written and read")
-    public void test() throws InterruptedException {
+    void test() throws InterruptedException {
         // Initialization of the wire
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap());
         Print printer = w.methodWriter(Print.class);
@@ -54,7 +54,7 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
 
     @Test
     @DisplayName("Reused Bytes remain stable across dispatches")
-    public void reusedBytesRemainStableAcrossDispatches() throws InterruptedException {
+    void reusedBytesRemainStableAcrossDispatches() throws InterruptedException {
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         Print printer = wire.methodWriter(Print.class);
         Bytes<?> reusable = Bytes.allocateElasticOnHeap();
@@ -86,7 +86,7 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
 
     @Test
     @DisplayName("Producer mutation during callback does not corrupt payload")
-    public void producerMutationDuringCallbackDoesNotCorruptPayload() throws InterruptedException {
+    void producerMutationDuringCallbackDoesNotCorruptPayload() throws InterruptedException {
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         Bytes<?> shared = Bytes.allocateElasticOnHeap();
         try {

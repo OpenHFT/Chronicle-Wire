@@ -28,11 +28,11 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 @SuppressFBWarnings(
         value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
         justification = "Fields are populated via Wire marshalling in tests.")
-public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
+class TimestampLongConverterZoneIdsTest extends WireTestCommon {
 
     private Future<?> future;
 
-    public void initTimestampLongConverterZoneIdsTest(String zoneId, ConverterType converterType, Future<?> future) {
+    void initTimestampLongConverterZoneIdsTest(String zoneId, ConverterType converterType, Future<?> future) {
         this.future = future;
     }
 
@@ -64,7 +64,7 @@ public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
     @DisplayName("Converts sample timestamps across zone ids")
     @MethodSource("combinations")
     @ParameterizedTest(name = "zoneId={0}, converterType={1}")
-    public void testManyZones(String zoneId, ConverterType converterType, Future<?> future) throws ExecutionException, InterruptedException {
+    void testManyZones(String zoneId, ConverterType converterType, Future<?> future) throws ExecutionException, InterruptedException {
         initTimestampLongConverterZoneIdsTest(zoneId, converterType, future);
         assertNull(future.get(), "zone conversion future should return null for zoneId=" + zoneId);
     }

@@ -19,12 +19,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class ReadDocumentContextTest extends WireTestCommon {
+class ReadDocumentContextTest extends WireTestCommon {
 
     // Test for writing a document that's not complete using non-shared memory
     @Test
     @DisplayName("Read not-complete document in non-shared memory")
-    public void testWritingNotCompleteDocument() {
+    void testWritingNotCompleteDocument() {
 
         // Create an elastic byte buffer
         Bytes<?> b = Bytes.allocateElasticOnHeap();
@@ -81,7 +81,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
     // Test for writing a document that's not complete using shared memory
     @Test
     @DisplayName("Read not-complete document in shared memory")
-    public void testWritingNotCompleteDocumentShared() throws IOException {
+    void testWritingNotCompleteDocumentShared() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for shared memory document tests");
 
         // Create a MappedBytes buffer with shared memory from a temp file
@@ -157,7 +157,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
 
     @Test
     @DisplayName("Empty metadata document should remain empty with no payload bytes")
-    public void testEmptyMessage() {
+    void testEmptyMessage() {
         // Create an elastic byte buffer
         Bytes<?> b = Bytes.allocateElasticOnHeap();
 
@@ -191,7 +191,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
 
     @Test
     @DisplayName("Read limit at 2 bytes blocks document header")
-    public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt2Bytes() {
+    void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt2Bytes() {
         // Create an elastic byte buffer
         Bytes<?> b = Bytes.allocateElasticOnHeap();
 
@@ -256,7 +256,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
 
     @Test
     @DisplayName("Read limit at 5 bytes blocks document header")
-    public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt5Bytes() {
+    void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt5Bytes() {
         // Create an elastic byte buffer
         Bytes<?> b = Bytes.allocateElasticOnHeap();
 

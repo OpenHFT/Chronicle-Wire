@@ -23,13 +23,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * Targets the 113 missed branches identified in coverage analysis.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class AbstractWireEdgeCaseTest extends WireTestCommon {
+class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     // ========== Constructor and Basic Configuration Tests ==========
 
     @Test
     @DisplayName("BinaryWire should support use8bit flag mode")
-    public void testUse8bitFlag() {
+    void testUse8bitFlag() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire8bit = new BinaryWire(bytes, true, false, false, 128, "binary", false);
         assertNotNull(wire8bit, "Wire with 8-bit mode should be created");
@@ -41,7 +41,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("AbstractWire should store and return custom classLookup registry")
-    public void testClassLookup() {
+    void testClassLookup() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -55,7 +55,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should return underlying bytes storage instance")
-    public void testBytesAccess() {
+    void testBytesAccess() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -64,7 +64,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should return bytesComment bytes content value")
-    public void testBytesComment() {
+    void testBytesComment() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -75,7 +75,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should accept comment listener registration")
-    public void testCommentListener() {
+    void testCommentListener() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -91,7 +91,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should set and return headerNumber state for document header")
-    public void testHeaderNumber() {
+    void testHeaderNumber() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -112,7 +112,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
     @Test
     @Disabled("clear() does not reset header number - needs investigation")
     @DisplayName("clear should reset header number state")
-    public void testClearResetsHeaderNumber() {
+    void testClearResetsHeaderNumber() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -127,7 +127,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should set and return pauser instance for backoff strategy")
-    public void testPauser() {
+    void testPauser() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -149,7 +149,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should set and return padding flag state")
-    public void testUsePadding() {
+    void testUsePadding() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -166,7 +166,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("addPadding should add requested byte count")
-    public void testAddPadding() {
+    void testAddPadding() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -181,7 +181,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("writeDocument should write data content payload")
-    public void testWriteDocument() {
+    void testWriteDocument() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -193,7 +193,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("writeDocument should write metadata content payload")
-    public void testWriteDocumentMetadata() {
+    void testWriteDocumentMetadata() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -207,7 +207,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should set and return parent object reference")
-    public void testParentObject() {
+    void testParentObject() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -223,7 +223,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should update isInsideHeader flag state")
-    public void testIsInsideHeader() {
+    void testIsInsideHeader() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -240,7 +240,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should report binary wire type")
-    public void testBinaryWireType() {
+    void testBinaryWireType() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -249,7 +249,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should report non-binary wire type")
-    public void testTextWireType() {
+    void testTextWireType() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         TextWire wire = new TextWire(bytes);
 
@@ -258,7 +258,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should report non-binary wire type")
-    public void testYamlWireType() {
+    void testYamlWireType() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         YamlWire wire = new YamlWire(bytes);
 
@@ -269,7 +269,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Bytes should update read position state")
-    public void testReadPosition() {
+    void testReadPosition() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -285,7 +285,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Bytes should update write position state")
-    public void testWritePosition() {
+    void testWritePosition() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -301,7 +301,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should round-trip basic values correctly")
-    public void testBinaryWireRoundTrip() {
+    void testBinaryWireRoundTrip() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -318,7 +318,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should round-trip basic values correctly")
-    public void testTextWireRoundTrip() {
+    void testTextWireRoundTrip() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         TextWire wire = new TextWire(bytes);
 
@@ -335,7 +335,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should round-trip basic values correctly")
-    public void testYamlWireRoundTrip() {
+    void testYamlWireRoundTrip() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         YamlWire wire = new YamlWire(bytes);
 
@@ -354,7 +354,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("reset should clear wire state fully")
-    public void testReset() {
+    void testReset() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -369,7 +369,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should create reusable objectOutput instance")
-    public void testObjectOutput() {
+    void testObjectOutput() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -379,7 +379,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should create reusable objectInput instance")
-    public void testObjectInput() {
+    void testObjectInput() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -391,7 +391,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should honour write limit behaviour")
-    public void testWriteLimit() {
+    void testWriteLimit() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -409,7 +409,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Boundary values should round-trip across wire types")
-    public void testBoundaryValuesAcrossWireTypes() {
+    void testBoundaryValuesAcrossWireTypes() {
         for (WireType wireType : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             Wire wire = wireType.apply(bytes);
@@ -433,7 +433,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire.readDataHeader returns HeaderType.NONE for empty bytes")
-    public void testReadDataHeaderEmpty() {
+    void testReadDataHeaderEmpty() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -444,7 +444,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire.readDataHeader handles includeMetaData flag for metadata")
-    public void testReadDataHeaderMetadata() {
+    void testReadDataHeaderMetadata() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -460,7 +460,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("readDataHeader should skip metadata when not requested")
-    public void testReadDataHeaderSkipMetadata() {
+    void testReadDataHeaderSkipMetadata() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -477,7 +477,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire.readDataHeader returns DATA for non-meta document")
-    public void testReadDataHeaderData() {
+    void testReadDataHeaderData() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -494,7 +494,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire.generateTuples updates and returns the flag value")
-    public void testGenerateTuples() {
+    void testGenerateTuples() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -511,7 +511,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire.notCompleteIsNotPresent updates and returns the flag value")
-    public void testNotCompleteIsNotPresent() {
+    void testNotCompleteIsNotPresent() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -528,7 +528,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire.forceNotInsideHeader resets insideHeader flag state")
-    public void testForceNotInsideHeader() {
+    void testForceNotInsideHeader() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -543,7 +543,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire.readEventNumber returns Long.MIN_VALUE by default")
-    public void testReadEventNumber() {
+    void testReadEventNumber() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -555,7 +555,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Document write should work with padding enabled")
-    public void testDocumentWriteWithPadding() {
+    void testDocumentWriteWithPadding() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(true);
@@ -567,7 +567,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Document write should work with padding disabled")
-    public void testDocumentWriteWithoutPadding() {
+    void testDocumentWriteWithoutPadding() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -581,7 +581,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire.writeFirstHeader returns true for empty header bytes")
-    public void testWriteFirstHeader() {
+    void testWriteFirstHeader() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -592,7 +592,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire.writeFirstHeader returns false when header already written")
-    public void testWriteFirstHeaderAlreadyWritten() {
+    void testWriteFirstHeaderAlreadyWritten() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -608,7 +608,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should handle multiple sequential documents")
-    public void testMultipleDocuments() {
+    void testMultipleDocuments() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(1024);
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -633,7 +633,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should handle elastic bytes that grow")
-    public void testElasticBytesGrowth() {
+    void testElasticBytesGrowth() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -655,7 +655,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire from non-shared bytes should have notCompleteIsNotPresent false")
-    public void testNonSharedBytesNotCompleteIsNotPresent() {
+    void testNonSharedBytesNotCompleteIsNotPresent() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -669,7 +669,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire.headNumberCheck accepts callback without throwing")
-    public void testHeadNumberCheck() {
+    void testHeadNumberCheck() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -688,7 +688,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("readFirstHeader should throw on capacity too small")
-    public void testReadFirstHeaderCapacityTooSmall() {
+    void testReadFirstHeaderCapacityTooSmall() {
         // Create bytes with insufficient capacity
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(2);
         bytes.writeLimit(2);
@@ -700,7 +700,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("readFirstHeader should throw on non-ready header")
-    public void testReadFirstHeaderNotReady() {
+    void testReadFirstHeaderNotReady() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         bytes.writeInt(0);  // Write a NOT_INITIALIZED (0) header
         BinaryWire wire = new BinaryWire(bytes);
@@ -713,7 +713,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("readAndSetLength should set correct read position and limit")
-    public void testReadAndSetLength() {
+    void testReadAndSetLength() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -738,7 +738,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire.padToCacheAlign aligns the write position")
-    public void testPadToCacheAlign() {
+    void testPadToCacheAlign() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -757,7 +757,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("readDocument should read complete data documents correctly")
-    public void testReadDocument() {
+    void testReadDocument() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -775,7 +775,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("readDocument should handle metadata documents correctly")
-    public void testReadDocumentMetadata() {
+    void testReadDocumentMetadata() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -793,7 +793,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("readDocument should return false when document header is absent")
-    public void testReadDocumentEmpty() {
+    void testReadDocumentEmpty() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -807,7 +807,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("acquireStringBuilder should return reusable cached builder instance")
-    public void testAcquireStringBuilder() {
+    void testAcquireStringBuilder() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -822,7 +822,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("hasMore should return true when wire has unread payload")
-    public void testHasMoreTrue() {
+    void testHasMoreTrue() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -835,7 +835,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("hasMore should return false when buffer has no data fields")
-    public void testHasMoreFalse() {
+    void testHasMoreFalse() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -846,7 +846,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("writeEventName should write event with given name")
-    public void testWriteEventName() {
+    void testWriteEventName() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -857,7 +857,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("writeEventName with WireKey should write event correctly")
-    public void testWriteEventNameWireKey() {
+    void testWriteEventNameWireKey() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -871,7 +871,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("startEvent should open event context for nested fields")
-    public void testStartEndEvent() {
+    void testStartEndEvent() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -886,7 +886,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("copyTo should copy wire content to another wire")
-    public void testCopyTo() {
+    void testCopyTo() {
         Bytes<?> srcBytes = Bytes.allocateElasticOnHeap();
         BinaryWire srcWire = new BinaryWire(srcBytes);
 
@@ -905,7 +905,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("writeNotCompleteDocument should write incomplete header marker")
-    public void testWriteNotCompleteDocument() {
+    void testWriteNotCompleteDocument() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -918,7 +918,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should use little endian byte order")
-    public void testByteOrder() {
+    void testByteOrder() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -938,7 +938,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should report correct wire type")
-    public void testWireTypeReporting() {
+    void testWireTypeReporting() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
         BinaryWire binaryWire = new BinaryWire(bytes);
@@ -957,7 +957,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("readEventName should read previously written event name")
-    public void testReadEventName() {
+    void testReadEventName() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -975,7 +975,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should toggle dropDefault flag state")
-    public void testDropDefault() {
+    void testDropDefault() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -989,7 +989,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("isEmpty should return true when document header is absent")
-    public void testIsEmptyTrue() {
+    void testIsEmptyTrue() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -998,7 +998,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("isEmpty should return false after writing a document field")
-    public void testIsEmptyFalse() {
+    void testIsEmptyFalse() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -1011,7 +1011,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire.writeComment should handle comment text")
-    public void testWriteComment() {
+    void testWriteComment() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -1022,7 +1022,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire.writeComment should write comment text")
-    public void testWriteCommentText() {
+    void testWriteCommentText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         TextWire wire = new TextWire(bytes);
 
@@ -1041,7 +1041,7 @@ public class AbstractWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should round-trip typed marshallable object")
-    public void testTypedMarshallableRoundTrip() {
+    void testTypedMarshallableRoundTrip() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 

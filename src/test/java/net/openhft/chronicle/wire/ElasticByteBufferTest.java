@@ -17,7 +17,7 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // Test class focusing on the functionality of elastic byte buffers with wire operations.
-public class ElasticByteBufferTest extends WireTestCommon {
+class ElasticByteBufferTest extends WireTestCommon {
 
     private static String repeat(char ch, int length) {
         char[] data = new char[length];
@@ -27,7 +27,7 @@ public class ElasticByteBufferTest extends WireTestCommon {
 
     @Test
     @DisplayName("Writes text into elastic byte buffer wire")
-    public void testElasticByteBufferWithWire() {
+    void testElasticByteBufferWithWire() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip elastic byte buffer wire test");
 
@@ -59,7 +59,7 @@ public class ElasticByteBufferTest extends WireTestCommon {
 
     @Test
     @DisplayName("Resizes direct elastic buffer when capacity exceeded")
-    public void directElasticBufferResizesWhenCapacityIsExceeded() {
+    void directElasticBufferResizesWhenCapacityIsExceeded() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip direct elastic buffer resize test");
 

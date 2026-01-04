@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * This class tests BinaryWire behaviour with mapped bytes, reference counts, and read paths in file storage.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class BinaryWireWithMappedBytesTest extends WireTestCommon {
+class BinaryWireWithMappedBytesTest extends WireTestCommon {
 
     // Defines if the MappedFile should retain its contents
     private static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
@@ -43,7 +43,7 @@ public class BinaryWireWithMappedBytesTest extends WireTestCommon {
     @Test
     @SuppressWarnings("rawtypes")
     @DisplayName("Reads references correctly at start of mapped bytes")
-    public void testRefAtStart() throws FileNotFoundException {
+    void testRefAtStart() throws FileNotFoundException {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip mapped bytes test");
 
         // Define the file for the test and ensure its deletion if it already exists

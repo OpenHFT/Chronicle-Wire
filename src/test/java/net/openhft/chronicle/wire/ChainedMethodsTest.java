@@ -18,7 +18,7 @@ import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRIT
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class ChainedMethodsTest extends WireTestCommon {
+class ChainedMethodsTest extends WireTestCommon {
 
     // Specifies the parameters to be used for the test runs.
     public static Collection<Object[]> data() {
@@ -69,7 +69,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     @DisplayName("Chains methods in TextWire without errors")
-    public void chainedText(boolean disableProxyCodegen) {
+    void chainedText(boolean disableProxyCodegen) {
         withDisableProxyCodegen(disableProxyCodegen, () -> {
             TextWire wire = new TextWire(Bytes.allocateElasticOnHeap(128))
                     .useTextDocuments();
@@ -81,7 +81,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     @DisplayName("Chains methods in YamlWire without errors")
-    public void chainedYaml(boolean disableProxyCodegen) {
+    void chainedYaml(boolean disableProxyCodegen) {
         withDisableProxyCodegen(disableProxyCodegen, () -> {
             Wire wire = Wire.newYamlWireOnHeap();
             verifyChainedTextual(wire, disableProxyCodegen);
@@ -92,7 +92,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     @DisplayName("Chains methods in BinaryWire without errors")
-    public void chainedBinary(boolean disableProxyCodegen) {
+    void chainedBinary(boolean disableProxyCodegen) {
         withDisableProxyCodegen(disableProxyCodegen, () -> {
             // Assume the test should not run if the condition is true.
             assumeFalse(disableProxyCodegen,
@@ -144,7 +144,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     @DisplayName("Chains binary methods with varying argument counts")
-    public void chainedBinaryVariousArgsNumber(boolean disableProxyCodegen) {
+    void chainedBinaryVariousArgsNumber(boolean disableProxyCodegen) {
         withDisableProxyCodegen(disableProxyCodegen, () -> {
             // Assume the test should not run if the condition is true.
             assumeFalse(disableProxyCodegen,
@@ -221,7 +221,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     @DisplayName("Creates nested return type calls in BinaryWire")
-    public void testNestedReturnType(boolean disableProxyCodegen) {
+    void testNestedReturnType(boolean disableProxyCodegen) {
         withDisableProxyCodegen(disableProxyCodegen, () -> {
             if (disableProxyCodegen)
                 expectException("Falling back to proxy method writer");

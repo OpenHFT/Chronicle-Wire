@@ -25,7 +25,7 @@ class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.WireTestCom
 
     private WireType wireType;
 
-    public void initHandleSkippedValueReadsTest(WireType wireType) {
+    void initHandleSkippedValueReadsTest(WireType wireType) {
         this.wireType = wireType;
     }
 
@@ -44,7 +44,7 @@ class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.WireTestCom
     @MethodSource("data")
     @DisplayName("Handle skipped value reads in metadata and data")
     @ParameterizedTest(name = "wire type {0} handles skipped values without scanning")
-    public void test(WireType wireType) {
+    void test(WireType wireType) {
         initHandleSkippedValueReadsTest(wireType);
         String output = doTest(false);
         assertTrue(output.contains("M meta[one]"),
@@ -54,7 +54,7 @@ class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.WireTestCom
     @MethodSource("data")
     @DisplayName("Handle skipped value reads with scanning enabled")
     @ParameterizedTest(name = "wire type {0} handles skipped values with scanning")
-    public void testScanning(WireType wireType) {
+    void testScanning(WireType wireType) {
         initHandleSkippedValueReadsTest(wireType);
         String output = doTest(true);
         assertTrue(output.contains("M meta[one]"),
@@ -171,7 +171,7 @@ class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.WireTestCom
     @MethodSource("data")
     @DisplayName("Handle skipped value reads for index2index metadata")
     @ParameterizedTest(name = "wire type {0} handles index2index without scanning")
-    public void index2index(WireType wireType) {
+    void index2index(WireType wireType) {
         initHandleSkippedValueReadsTest(wireType);
         String output = doIndex2index(false);
         assertTrue(output.contains("M meta[one]"),
@@ -181,7 +181,7 @@ class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.WireTestCom
     @MethodSource("data")
     @DisplayName("Handle skipped value reads for index2index with scanning")
     @ParameterizedTest(name = "wire type {0} handles index2index with scanning")
-    public void index2indexScanning(WireType wireType) {
+    void index2indexScanning(WireType wireType) {
         initHandleSkippedValueReadsTest(wireType);
         String output = doIndex2index(true);
         assertTrue(output.contains("M meta[one]"),

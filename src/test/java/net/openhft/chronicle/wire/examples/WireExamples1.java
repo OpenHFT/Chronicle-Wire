@@ -10,7 +10,7 @@ import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.YamlWire;
 
-public class WireExamples1 {
+class WireExamples1 {
 
     public static void main(String[] args) {
         example1();

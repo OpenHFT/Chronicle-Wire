@@ -14,11 +14,11 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class WireMarshallerDeepGraphTest extends WireTestCommon {
+class WireMarshallerDeepGraphTest extends WireTestCommon {
 
     @Test
     @DisplayName("Deep graph round trips in binary and text")
-    public void deepGraphBinaryAndText() {
+    void deepGraphBinaryAndText() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT}) {
             Parent p = new Parent();
             p.children.add(new Child(1, "a"));

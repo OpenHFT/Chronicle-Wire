@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * These tests verify correct behaviour under concurrent access.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class WireConcurrencyTest extends WireTestCommon {
+class WireConcurrencyTest extends WireTestCommon {
 
     private static final int THREAD_COUNT = 4;
     private static final int ITERATIONS_PER_THREAD = 100;
@@ -29,7 +29,7 @@ public class WireConcurrencyTest extends WireTestCommon {
 
     @Test
     @DisplayName("Multiple threads with independent BinaryWire instances should work")
-    public void testIndependentBinaryWireInstances() throws Exception {
+    void testIndependentBinaryWireInstances() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
         CountDownLatch latch = new CountDownLatch(THREAD_COUNT);
         AtomicBoolean failed = new AtomicBoolean(false);
@@ -60,7 +60,7 @@ public class WireConcurrencyTest extends WireTestCommon {
 
     @Test
     @DisplayName("Multiple threads with independent TextWire instances should work")
-    public void testIndependentTextWireInstances() throws Exception {
+    void testIndependentTextWireInstances() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
         CountDownLatch latch = new CountDownLatch(THREAD_COUNT);
         AtomicBoolean failed = new AtomicBoolean(false);
@@ -90,7 +90,7 @@ public class WireConcurrencyTest extends WireTestCommon {
 
     @Test
     @DisplayName("Multiple threads with independent YamlWire instances should work")
-    public void testIndependentYamlWireInstances() throws Exception {
+    void testIndependentYamlWireInstances() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
         CountDownLatch latch = new CountDownLatch(THREAD_COUNT);
         AtomicBoolean failed = new AtomicBoolean(false);
@@ -137,7 +137,7 @@ public class WireConcurrencyTest extends WireTestCommon {
 
     @Test
     @DisplayName("Concurrent object serialization should work with independent wires")
-    public void testConcurrentObjectSerialization() throws Exception {
+    void testConcurrentObjectSerialization() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
         CountDownLatch latch = new CountDownLatch(THREAD_COUNT);
         AtomicBoolean failed = new AtomicBoolean(false);
@@ -191,7 +191,7 @@ public class WireConcurrencyTest extends WireTestCommon {
 
     @Test
     @DisplayName("WireType.apply should be thread-safe")
-    public void testWireTypeApplyThreadSafety() throws Exception {
+    void testWireTypeApplyThreadSafety() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
         CountDownLatch latch = new CountDownLatch(THREAD_COUNT);
         AtomicBoolean failed = new AtomicBoolean(false);
@@ -223,7 +223,7 @@ public class WireConcurrencyTest extends WireTestCommon {
 
     @Test
     @DisplayName("Elastic buffer resize should work with independent instances")
-    public void testConcurrentElasticResize() throws Exception {
+    void testConcurrentElasticResize() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
         CountDownLatch latch = new CountDownLatch(THREAD_COUNT);
         AtomicBoolean failed = new AtomicBoolean(false);
@@ -271,7 +271,7 @@ public class WireConcurrencyTest extends WireTestCommon {
 
     @Test
     @DisplayName("Rapid wire creation and disposal should not leak")
-    public void testRapidCreateDispose() throws Exception {
+    void testRapidCreateDispose() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
         CountDownLatch latch = new CountDownLatch(THREAD_COUNT);
         AtomicInteger totalCreated = new AtomicInteger(0);
@@ -306,7 +306,7 @@ public class WireConcurrencyTest extends WireTestCommon {
 
     @Test
     @DisplayName("Mixed wire types under concurrency should work")
-    public void testMixedWireTypesConcurrent() throws Exception {
+    void testMixedWireTypesConcurrent() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
         CountDownLatch latch = new CountDownLatch(THREAD_COUNT);
         AtomicBoolean failed = new AtomicBoolean(false);

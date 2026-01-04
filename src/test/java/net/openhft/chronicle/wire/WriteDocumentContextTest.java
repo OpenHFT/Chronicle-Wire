@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class WriteDocumentContextTest extends WireTestCommon {
+class WriteDocumentContextTest extends WireTestCommon {
 
     // Writes three key-value pairs to the given Wire using nested DocumentContexts
     private static void writeThreeKeys(Wire wire) {
@@ -43,7 +43,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
     // Test writing nested key-value pairs in plain text format
     @Test
     @DisplayName("Nested plain text writes three key entries")
-    public void nestedPlainText() {
+    void nestedPlainText() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         writeThreeKeys(wire);
         assertEquals("key: 0\n" +
@@ -57,7 +57,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
     // Test writing chained key-value pairs in plain text format
     @Test
     @DisplayName("Chained plain text writes three key entries")
-    public void chainedPlainText() {
+    void chainedPlainText() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         writeThreeChainedKeys(wire);
         assertEquals("key: 0\n" +
@@ -71,7 +71,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
     // Test writing nested key-value pairs in TextWire format
     @Test
     @DisplayName("Nested text wire writes three key entries")
-    public void nestedText() {
+    void nestedText() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
         writeThreeKeys(wire);
@@ -88,7 +88,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
     // Test writing chained key-value pairs in TextWire format
     @Test
     @DisplayName("Chained text wire writes three key entries")
-    public void chainedText() {
+    void chainedText() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
         writeThreeChainedKeys(wire);
@@ -106,7 +106,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
     @Test
     @Disabled("TODO fix YAML length prefix handling for documents")
     @DisplayName("Nested YAML wire writes three key entries")
-    public void nestedYaml() {
+    void nestedYaml() {
         Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
 
         writeThreeKeys(wire);
@@ -124,7 +124,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
     @Test
     @Disabled("TODO fix YAML chained length prefix handling")
     @DisplayName("Chained YAML wire writes three key entries")
-    public void chainedYaml() {
+    void chainedYaml() {
         Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
 
         writeThreeChainedKeys(wire);
@@ -141,7 +141,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
     // Test writing nested key-value pairs in BinaryWire format
     @Test
     @DisplayName("Nested binary wire writes three key entries")
-    public void nestedBinary() {
+    void nestedBinary() {
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
 
@@ -158,7 +158,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
     // Test writing chained key-value pairs in BinaryWire format
     @Test
     @DisplayName("Chained binary wire writes three key entries")
-    public void chainedBinary() {
+    void chainedBinary() {
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
 

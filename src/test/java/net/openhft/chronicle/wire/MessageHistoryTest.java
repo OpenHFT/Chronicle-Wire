@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class MessageHistoryTest extends WireTestCommon {
+class MessageHistoryTest extends WireTestCommon {
     private static final String EXPECTED_COPYABLE_YAML = "history: {\n" +
             "  sources: [\n" +
             "    1,\n" +
@@ -33,7 +33,7 @@ public class MessageHistoryTest extends WireTestCommon {
     // Test to check if clearing and retrieving the MessageHistory works correctly.
     @Test
     @DisplayName("MessageHistory get and clear should create a fresh instance")
-    public void checkHistoryGetClear() {
+    void checkHistoryGetClear() {
         // Retrieve the current message history.
         MessageHistory mg = MessageHistory.get();
         assertNotNull(mg, "MessageHistory.get should return a history instance");
@@ -52,7 +52,7 @@ public class MessageHistoryTest extends WireTestCommon {
     // Test the deep copy functionality of the VanillaMessageHistory.
     @Test
     @DisplayName("VanillaMessageHistory deep copy preserves sources and timings")
-    public void checkDeepCopy() {
+    void checkDeepCopy() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for deep copy history test");
 
         // Initialize a new history and add sources and timings.
@@ -67,7 +67,7 @@ public class MessageHistoryTest extends WireTestCommon {
     // Test to check if an exception is thrown when history exceeds maximum size.
     @Test
     @DisplayName("MessageHistory should enforce maximum size limit")
-    public void checkHistoryMaxSizeException() {
+    void checkHistoryMaxSizeException() {
         VanillaMessageHistory container1 = new VanillaMessageHistory();
         container1.useBytesMarshallable(!OS.isMacOSX());
         container1.addSourceDetails(true);
@@ -95,7 +95,7 @@ public class MessageHistoryTest extends WireTestCommon {
     // Test the serialization of bytes in the VanillaMessageHistory.
     @Test
     @DisplayName("MessageHistory should serialise and deserialise byte streams")
-    public void checkSerialiseBytes() {
+    void checkSerialiseBytes() {
 
         // Initialize a new history and add sources and timings.
         VanillaMessageHistory history = new SetTimeMessageHistory();
@@ -145,7 +145,7 @@ public class MessageHistoryTest extends WireTestCommon {
     // Test the toString() representation of the VanillaMessageHistory.
     @Test
     @DisplayName("MessageHistory toString renders expected hex and text")
-    public void checkToString() {
+    void checkToString() {
         {
             VanillaMessageHistory history = new SetTimeMessageHistory();
             history.historyWallClock(true);
@@ -224,7 +224,7 @@ public class MessageHistoryTest extends WireTestCommon {
     // Tests the readMarshallable functionality using different configurations.
     @Test
     @DisplayName("MessageHistory readMarshallable matches expected wire output")
-    public void testReadMarshallable() {
+    void testReadMarshallable() {
         {
             SetTimeMessageHistory vmh = new SetTimeMessageHistory();
             vmh.historyWallClock(true);
@@ -288,7 +288,7 @@ public class MessageHistoryTest extends WireTestCommon {
 
     @Test
     @DisplayName("MessageHistory should write self describing wire header")
-    public void testWriteHistorySelfDescribing() {
+    void testWriteHistorySelfDescribing() {
         {
             final SetTimeMessageHistory history = new SetTimeMessageHistory();
             history.useBytesMarshallable(false);
@@ -309,14 +309,14 @@ public class MessageHistoryTest extends WireTestCommon {
 
     @Test
     @DisplayName("Copyable history should use self describing YAML")
-    public void copyableSelfDescribing() {
+    void copyableSelfDescribing() {
         assertEquals(EXPECTED_COPYABLE_YAML, doCopyableTest(false),
                 "Copyable history should round-trip with self describing YAML");
     }
 
     @Test
     @DisplayName("Copyable history should use bytes marshalling")
-    public void copyableBytes() {
+    void copyableBytes() {
         assertEquals(EXPECTED_COPYABLE_YAML, doCopyableTest(true),
                 "Copyable history should round-trip with bytes marshalling");
     }
@@ -352,7 +352,7 @@ public class MessageHistoryTest extends WireTestCommon {
 
     @Test
     @DisplayName("MessageHistory should write bytes-marshallable header")
-    public void testWriteHistoryAsBytes() {
+    void testWriteHistoryAsBytes() {
         try {
             final SetTimeMessageHistory history = new SetTimeMessageHistory();
             history.useBytesMarshallable(true);

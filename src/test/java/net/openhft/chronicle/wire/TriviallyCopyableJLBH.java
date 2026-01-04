@@ -16,7 +16,7 @@ import static net.openhft.chronicle.core.io.IOTools.deleteDirWithFiles;
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
 @SuppressWarnings("this-escape")
-public class TriviallyCopyableJLBH implements JLBHTask {
+class TriviallyCopyableJLBH implements JLBHTask {
 
     static {
         System.setProperty("jvm.resource.tracing", "false");
@@ -133,7 +133,7 @@ public class TriviallyCopyableJLBH implements JLBHTask {
 
         // reads 'this' instance and writes a copy of it to the bytes.
         @Override
-        public void writeMarshallable(BytesOut<?> bytes) {
+       public void writeMarshallable(BytesOut<?> bytes) {
             bytes.unsafeWriteObject(this, START, LENGTH);
         }
 

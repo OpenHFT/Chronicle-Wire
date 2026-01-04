@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * across YAML and binary formats.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class Issue272Test {
+class Issue272Test {
 
     /**
      * Test case to handle the serialisation and deserialisation of int arrays
@@ -30,7 +30,7 @@ public class Issue272Test {
      */
     @Test
     @DisplayName("Wire should serialise arrays across wire types")
-    public void arrays() {
+    void arrays() {
         Bytes<?> buffer = Bytes.allocateElasticOnHeap();
 
         // Define two int arrays for testing
@@ -109,7 +109,7 @@ public class Issue272Test {
      */
     @Test
     @DisplayName("Wire should serialise map structures across wire types")
-    public void map() {
+    void map() {
         // Create an input string with Yaml format to be parsed
         String input = "to: dest1\n" +
                 "send: message\n" +

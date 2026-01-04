@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 /**
  * Demonstrates YAML anchor functionality in Chronicle Wire using shared configurations.
  */
-public class YamlAnchorSimpleDemoTest extends WireTestCommon {
+class YamlAnchorSimpleDemoTest extends WireTestCommon {
 
     @SuppressFBWarnings(
             value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD", "NP_UNWRITTEN_FIELD"},
@@ -37,7 +37,7 @@ public class YamlAnchorSimpleDemoTest extends WireTestCommon {
     @SuppressFBWarnings(
             value = "NP_UNWRITTEN_FIELD",
             justification = "Wire marshalling populates fields without explicit setters.")
-    public void shouldShareFieldValuesUsingAnchors() {
+    void shouldShareFieldValuesUsingAnchors() {
         String yaml = "!net.openhft.chronicle.wire.YamlAnchorSimpleDemoTest$MultiConfig {\n" +
                 "  first: {\n" +
                 "    text: &sharedText hello,\n" +
@@ -71,7 +71,7 @@ public class YamlAnchorSimpleDemoTest extends WireTestCommon {
     @SuppressFBWarnings(
             value = "NP_UNWRITTEN_FIELD",
             justification = "Wire marshalling populates fields without explicit setters.")
-    public void shouldShareObjectInstancesUsingAnchors() {
+    void shouldShareObjectInstancesUsingAnchors() {
         String yaml = "first: &shared !net.openhft.chronicle.wire.YamlAnchorSimpleDemoTest$Config {\n" +
                 "  text: shared config,\n" +
                 "  value: 999\n" +

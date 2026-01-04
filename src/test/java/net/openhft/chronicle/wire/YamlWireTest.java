@@ -38,12 +38,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"rawtypes", "unchecked", "try", "serial", "deprecation", "removal"})
-public class YamlWireTest extends AbstractWireTest {
+class YamlWireTest extends AbstractWireTest {
     private static final Wire wire = Wire.newYamlWireOnHeap(); // Initialize a static YAML wire
     private boolean usePadding; // Flag to indicate if padding should be used
 
     // Constructor for initializing the usePadding flag
-    public void initYamlWireTest(boolean usePadding) {
+    void initYamlWireTest(boolean usePadding) {
         this.usePadding = usePadding;
     }
 
@@ -59,7 +59,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML comment lines are ignored in reads")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML comment behaviour uses padding setting {0}")
-    public void comment(boolean usePadding) {
+    void comment(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire(); // Create a new Wire object
         wire.writeComment("\thi: omg"); // Write a comment to the wire
@@ -74,7 +74,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML type tags can appear without field")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Type Instead Of Field behaviour uses padding setting {0}")
-    public void testTypeInsteadOfField(boolean usePadding) {
+    void testTypeInsteadOfField(boolean usePadding) {
         initYamlWireTest(usePadding);
         Wire wire = YamlWire.from("!!null \"\"");
         StringBuilder sb = new StringBuilder();
@@ -87,7 +87,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML write Object With Tree Map")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML write Object With Tree Map behaviour uses padding setting {0}")
-    public void writeObjectWithTreeMap(boolean usePadding) {
+    void writeObjectWithTreeMap(boolean usePadding) {
         initYamlWireTest(usePadding);
         Wire wire = createWire(); // Create a new Wire object
         // Initialize and populate an ObjectWithTreeMap
@@ -117,7 +117,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML hex values parse from string")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML From String 2 behaviour uses padding setting {0}")
-    public void testFromString2(boolean usePadding) {
+    void testFromString2(boolean usePadding) {
         initYamlWireTest(usePadding);
         // Loop over integer values and assert their deserialization
         for (int i = 0; i <= 256; i++) {
@@ -133,7 +133,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML large hex values parse correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Large Hex behaviour uses padding setting {0}")
-    public void testLargeHex(boolean usePadding) {
+    void testLargeHex(boolean usePadding) {
         initYamlWireTest(usePadding);
         Wire w = YamlWire.from(
                 "magic: 0xCAFEBABE\n");
@@ -144,7 +144,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML C style octal values parse")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML C Style Octal behaviour uses padding setting {0}")
-    public void testCStyleOctal(boolean usePadding) {
+    void testCStyleOctal(boolean usePadding) {
         initYamlWireTest(usePadding);
         // Do we need it?
         Wire w = YamlWire.from("perms: 0644\n");
@@ -155,7 +155,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML style octal values parse correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "Yaml Style Octal behaviour uses padding setting {0}")
-    public void testYamlStyleOctal(boolean usePadding) {
+    void testYamlStyleOctal(boolean usePadding) {
         initYamlWireTest(usePadding);
         Wire w = YamlWire.from("perms: 0o750\n");
         assertEquals(488, w.read("perms").int64(), "YAML-style octal 0o750 should parse to decimal 488");
@@ -165,7 +165,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML complex map parses from string")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML From String behaviour uses padding setting {0}")
-    public void testFromString(boolean usePadding) {
+    void testFromString(boolean usePadding) {
         initYamlWireTest(usePadding);
         @Nullable Object w = WireType.YAML.fromString("changedRow: {\n" +
                 "  row: [\n" +
@@ -187,7 +187,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML empty writes produce empty fields")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Write behaviour uses padding setting {0}")
-    public void testWrite(boolean usePadding) {
+    void testWrite(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire(); // Create a new Wire object
         wire.write(); // Write a few empty fields
@@ -201,7 +201,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML Write To Binary And Tries To Convert To Text")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Write To Binary And Tries To Convert To Text behaviour uses padding setting {0}")
-    public void testWriteToBinaryAndTriesToConvertToText(boolean usePadding) {
+    void testWriteToBinaryAndTriesToConvertToText(boolean usePadding) {
         initYamlWireTest(usePadding);
         Wire wire = WireType.BINARY.apply(Bytes.allocateElasticOnHeap()); // Create a binary wire
         wire.usePadding(usePadding); // Set padding
@@ -237,7 +237,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML reads round trip from text")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Read behaviour uses padding setting {0}")
-    public void testRead(boolean usePadding) {
+    void testRead(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write();  // Write an empty field
@@ -258,7 +258,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML reads with separators round trip")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Read 1 behaviour uses padding setting {0}")
-    public void testRead1(boolean usePadding) {
+    void testRead1(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write().text("1");
@@ -282,7 +282,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML reads with comments round trip")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Read 2 behaviour uses padding setting {0}")
-    public void testRead2(boolean usePadding) {
+    void testRead2(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write().text("");
@@ -311,7 +311,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML int8 values round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML int 8 behaviour uses padding setting {0}")
-    public void int8(boolean usePadding) {
+    void int8(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();  // Create a new Wire object
 
@@ -331,7 +331,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML int16 values round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML int 16 behaviour uses padding setting {0}")
-    public void int16(boolean usePadding) {
+    void int16(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();  // Create a new Wire object
 
@@ -351,7 +351,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML uint8 values round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML uint 8 behaviour uses padding setting {0}")
-    public void uint8(boolean usePadding) {
+    void uint8(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire(); // Create a new Wire object
         WireSmallIntTestSupport.writeUint8Triplet(wire);
@@ -370,7 +370,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML uint16 values round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML uint 16 behaviour uses padding setting {0}")
-    public void uint16(boolean usePadding) {
+    void uint16(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire(); // Create a new Wire object
         WireSmallIntTestSupport.writeUint16Triplet(wire);
@@ -389,7 +389,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML uint32 values round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML uint 32 behaviour uses padding setting {0}")
-    public void uint32(boolean usePadding) {
+    void uint32(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire(); // Create a new Wire object
         WireSmallIntTestSupport.writeUint32Triplet(wire);
@@ -408,7 +408,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML int32 values round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML int 32 behaviour uses padding setting {0}")
-    public void int32(boolean usePadding) {
+    void int32(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire(); // Create a new Wire object
         WireSmallIntTestSupport.writeInt32Triplet(wire);
@@ -427,7 +427,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML int64 values round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML int 64 behaviour uses padding setting {0}")
-    public void int64(boolean usePadding) {
+    void int64(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write().int64(1); // Write a few 64-bit integers
@@ -455,7 +455,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML float64 values round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML float 64 behaviour uses padding setting {0}")
-    public void float64(boolean usePadding) {
+    void float64(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write().float64(1);  // Write a few 64-bit floats
@@ -482,7 +482,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML text values round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML text behaviour uses padding setting {0}")
-    public void text(boolean usePadding) {
+    void text(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write().text("Hello");  // Write a type text
@@ -514,7 +514,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML type prefixes round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML type behaviour uses padding setting {0}")
-    public void type(boolean usePadding) {
+    void type(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write().typePrefix("MyType").text("");  // Write a type prefix
@@ -543,7 +543,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML boolean values round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Bool behaviour uses padding setting {0}")
-    public void testBool(boolean usePadding) {
+    void testBool(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire(); // Create a new Wire object
         WirePrimitiveTestSupport.assertBooleanRoundTrip(wire);
@@ -553,7 +553,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML float32 values round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Float 32 behaviour uses padding setting {0}")
-    public void testFloat32(boolean usePadding) {
+    void testFloat32(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire(); // Create a new Wire object
         WirePrimitiveTestSupport.assertFloat32RoundTrip(wire, this);
@@ -563,7 +563,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML time values round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Time behaviour uses padding setting {0}")
-    public void testTime(boolean usePadding) {
+    void testTime(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire(); // Create a new Wire object
         LocalTime now = LocalTime.now(); // Get current time
@@ -577,7 +577,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML date values round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Date behaviour uses padding setting {0}")
-    public void testDate(boolean usePadding) {
+    void testDate(boolean usePadding) {
         initYamlWireTest(usePadding);
         final Wire wire = createWire();
         WireTemporalTestSupport.assertLocalDates(wire);
@@ -586,7 +586,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML UUID values round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Uuid behaviour uses padding setting {0}")
-    public void testUuid(boolean usePadding) {
+    void testUuid(boolean usePadding) {
         initYamlWireTest(usePadding);
         final Wire wire = createWire();
         WireTemporalTestSupport.assertUuids(wire);
@@ -595,7 +595,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML type tags parse without spaces")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Type Without Space behaviour uses padding setting {0}")
-    public void testTypeWithoutSpace(boolean usePadding) {
+    void testTypeWithoutSpace(boolean usePadding) {
         initYamlWireTest(usePadding);
         final Wire wire = createWire();
 
@@ -605,7 +605,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML NaN values parse without loss")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML NAN Value behaviour uses padding setting {0}")
-    public void testNANValue(boolean usePadding) {
+    void testNANValue(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();
 
@@ -615,7 +615,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML quoting rules handle escapes correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Quoting behaviour uses padding setting {0}")
-    public void testQuoting(boolean usePadding) {
+    void testQuoting(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();
         wire.bytes().append(
@@ -642,7 +642,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML binary values decode from base64")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Binary behaviour uses padding setting {0}")
-    public void testBinary(boolean usePadding) {
+    void testBinary(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();
         wire.bytes().append("b: !byte[] !!binary AAAAAAA=\n" +
@@ -655,7 +655,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML ABCD bytes round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML ABCD Bytes behaviour uses padding setting {0}")
-    public void testABCDBytes(boolean usePadding) {
+    void testABCDBytes(boolean usePadding) {
         initYamlWireTest(usePadding);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for ABCD bytes test");
 
@@ -668,7 +668,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML ABC StringBuilder round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML ABC String Builder behaviour uses padding setting {0}")
-    public void testABCStringBuilder(boolean usePadding) {
+    void testABCStringBuilder(boolean usePadding) {
         initYamlWireTest(usePadding);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for ABC StringBuilder test");
 
@@ -680,7 +680,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML bytes round trip via wire")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Bytes behaviour uses padding setting {0}")
-    public void testBytes(boolean usePadding) {
+    void testBytes(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();
         @NotNull byte[] allBytes = new byte[256];
@@ -695,7 +695,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML context dump reflects parsing state")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Context Dump behaviour uses padding setting {0}")
-    public void testContextDump(boolean usePadding) {
+    void testContextDump(boolean usePadding) {
         initYamlWireTest(usePadding);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for context dump test");
 
@@ -731,7 +731,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML context dump reports key offsets")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Context Dump 2 behaviour uses padding setting {0}")
-    public void testContextDump2(boolean usePadding) {
+    void testContextDump2(boolean usePadding) {
         initYamlWireTest(usePadding);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for second context dump test");
 
@@ -757,7 +757,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML consume any skips values safely")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Consume Any behaviour uses padding setting {0}")
-    public void testConsumeAny(boolean usePadding) {
+    void testConsumeAny(boolean usePadding) {
         initYamlWireTest(usePadding);
         Bytes<?> from = Bytes.from("A: \n" +
                 "  b: 1234\n" +
@@ -783,7 +783,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML Map Read And Write Strings")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Map Read And Write Strings behaviour uses padding setting {0}")
-    public void testMapReadAndWriteStrings(boolean usePadding) {
+    void testMapReadAndWriteStrings(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
@@ -813,7 +813,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML map values inside map entries")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Map In Map behaviour uses padding setting {0}")
-    public void testMapInMap(boolean usePadding) {
+    void testMapInMap(boolean usePadding) {
         initYamlWireTest(usePadding);
         WireMapTestSupport.assertMapInMap("WithMap: {\n" +
                 "  innerMap: {\n" +
@@ -826,7 +826,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML Map In Map With Question Marks")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Map In Map With Question Marks behaviour uses padding setting {0}")
-    public void testMapInMapWithQuestionMarks(boolean usePadding) {
+    void testMapInMapWithQuestionMarks(boolean usePadding) {
         initYamlWireTest(usePadding);
         WireMapTestSupport.assertMapWithQuestionMarks("WithMap: {\n" +
                 "  innerMap: {\n" +
@@ -839,7 +839,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML Map Read And Write Integers")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Map Read And Write Integers behaviour uses padding setting {0}")
-    public void testMapReadAndWriteIntegers(boolean usePadding) {
+    void testMapReadAndWriteIntegers(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final YamlWire wire = new YamlWire(bytes);
@@ -871,7 +871,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML Map Read And Write Marshable")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Map Read And Write Marshable behaviour uses padding setting {0}")
-    public void testMapReadAndWriteMarshable(boolean usePadding) {
+    void testMapReadAndWriteMarshable(boolean usePadding) {
         initYamlWireTest(usePadding);
         WireMapTestSupport.assertMarshallableMap(YamlWire::new);
     }
@@ -879,7 +879,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML exception types round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Exception behaviour uses padding setting {0}")
-    public void testException(boolean usePadding) {
+    void testException(boolean usePadding) {
         initYamlWireTest(usePadding);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for exception round trip test");
 
@@ -891,7 +891,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML enum values round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Enum behaviour uses padding setting {0}")
-    public void testEnum(boolean usePadding) {
+    void testEnum(boolean usePadding) {
         initYamlWireTest(usePadding);
         ClassAliasPool.CLASS_ALIASES.addAlias(WireType.class, "WireType");
 
@@ -905,7 +905,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML LZW compression round trips as text")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML LZW Compression As Text behaviour uses padding setting {0}")
-    public void testLZWCompressionAsText(boolean usePadding) {
+    void testLZWCompressionAsText(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();
         WireTestSupport.assertLzwCompressionAsText(wire, Bytes::allocateElasticDirect);
@@ -914,7 +914,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML string arrays round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML String Arrays behaviour uses padding setting {0}")
-    public void testStringArrays(boolean usePadding) {
+    void testStringArrays(boolean usePadding) {
         initYamlWireTest(usePadding);
         WireCollectionTestSupport.assertStringArraysRoundTrip(this::createWire);
     }
@@ -922,7 +922,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML string lists round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML String List behaviour uses padding setting {0}")
-    public void testStringList(boolean usePadding) {
+    void testStringList(boolean usePadding) {
         initYamlWireTest(usePadding);
         WireCollectionTestSupport.assertStringListRoundTrip(this::createWire);
     }
@@ -930,7 +930,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML list literals parse into strings")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML from List behaviour uses padding setting {0}")
-    public void fromList(boolean usePadding) {
+    void fromList(boolean usePadding) {
         initYamlWireTest(usePadding);
         for (String text : new String[]{
                 "[a, b, c]",
@@ -948,7 +948,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML string sets round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML String Set behaviour uses padding setting {0}")
-    public void testStringSet(boolean usePadding) {
+    void testStringSet(boolean usePadding) {
         initYamlWireTest(usePadding);
         WireCollectionTestSupport.assertStringSetRoundTrip(this::createWire);
     }
@@ -956,7 +956,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML string maps round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML String Map behaviour uses padding setting {0}")
-    public void testStringMap(boolean usePadding) {
+    void testStringMap(boolean usePadding) {
         initYamlWireTest(usePadding);
         assertTrue(WireMapTestSupport.writeAndReadStringMap(YamlWire::new), "string map should serialize and deserialize correctly via YamlWire");
     }
@@ -964,7 +964,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML nested mapping tokens decode correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Y Nested Decode behaviour uses padding setting {0}")
-    public void testYNestedDecode(boolean usePadding) {
+    void testYNestedDecode(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull String s = "cluster: {\n" +
                 "  host1: {\n" +
@@ -1054,7 +1054,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML null values serialise correctly in output")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML write Null behaviour uses padding setting {0}")
-    public void writeNull(boolean usePadding) {
+    void writeNull(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();
         String written = WireNullTestSupport.writeNulls(wire, w -> w.getValueOut().object(null), Circle.class);
@@ -1067,7 +1067,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML all character values round trip")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML All Chars behaviour uses padding setting {0}")
-    public void testAllChars(boolean usePadding) {
+    void testAllChars(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();
 
@@ -1077,7 +1077,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML demarshallable values read correctly from wire")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML read Demarshallable behaviour uses padding setting {0}")
-    public void readDemarshallable(boolean usePadding) {
+    void readDemarshallable(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = new YamlWire(allocateElasticOnHeap())
                 .useBinaryDocuments();
@@ -1090,7 +1090,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML Byte Array Value With Real Bytes Negative")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Byte Array Value With Real Bytes Negative behaviour uses padding setting {0}")
-    public void testByteArrayValueWithRealBytesNegative(boolean usePadding) {
+    void testByteArrayValueWithRealBytesNegative(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();
 
@@ -1100,7 +1100,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML byte arrays round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Byte Array behaviour uses padding setting {0}")
-    public void testByteArray(boolean usePadding) {
+    void testByteArray(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();
 
@@ -1110,7 +1110,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML object keys serialise with types")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Object Keys behaviour uses padding setting {0}")
-    public void testObjectKeys(boolean usePadding) {
+    void testObjectKeys(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Map<MyMarshallable, String> map = new LinkedHashMap<>();
         map.put(new MyMarshallable("key1"), "value1");
@@ -1140,7 +1140,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML rejects unserialisable Thread values safely")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML write Unserializable behaviour uses padding setting {0}")
-    public void writeUnserializable(boolean usePadding) {
+    void writeUnserializable(boolean usePadding) {
         initYamlWireTest(usePadding);
         assertThrows(IllegalArgumentException.class, () -> {
             assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for Thread test");
@@ -1152,7 +1152,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML rejects unserialisable Socket values safely")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML write Unserializable 2 behaviour uses padding setting {0}")
-    public void writeUnserializable2(boolean usePadding) {
+    void writeUnserializable2(boolean usePadding) {
         initYamlWireTest(usePadding);
         assertThrows(IllegalArgumentException.class, () -> {
             assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for Socket test");
@@ -1165,7 +1165,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML rejects unserialisable SocketChannel values safely")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML write Unserializable 3 behaviour uses padding setting {0}")
-    public void writeUnserializable3(boolean usePadding) throws IOException {
+    void writeUnserializable3(boolean usePadding) throws IOException {
         initYamlWireTest(usePadding);
         assertThrows(IllegalArgumentException.class, () -> {
             assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for SocketChannel test");
@@ -1178,7 +1178,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML character values round trip correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML write Character behaviour uses padding setting {0}")
-    public void writeCharacter(boolean usePadding) {
+    void writeCharacter(boolean usePadding) {
         initYamlWireTest(usePadding);
         @NotNull Wire wire = createWire();
         WireCharacterTestSupport.assertCharacterRoundTrip(wire, true);
@@ -1188,7 +1188,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML string array values round trip")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML String Array behaviour uses padding setting {0}")
-    public void testStringArray(boolean usePadding) {
+    void testStringArray(boolean usePadding) {
         initYamlWireTest(usePadding);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for string array test");
 
@@ -1198,7 +1198,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML bytes can update after deserialisation")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Set Bytes After Deserialization behaviour uses padding setting {0}")
-    public void testSetBytesAfterDeserialization(boolean usePadding) {
+    void testSetBytesAfterDeserialization(boolean usePadding) {
         initYamlWireTest(usePadding);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for bytes update test");
 
@@ -1217,7 +1217,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML array type literals parse correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Array Types behaviour uses padding setting {0}")
-    public void testArrayTypes(boolean usePadding) {
+    void testArrayTypes(boolean usePadding) {
         initYamlWireTest(usePadding);
         Wire wire = createWire();
         wire.bytes().append("a: !type byte[]\n" +
@@ -1232,7 +1232,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML array type literals parse quoted")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Array Types 1 behaviour uses padding setting {0}")
-    public void testArrayTypes1(boolean usePadding) {
+    void testArrayTypes1(boolean usePadding) {
         initYamlWireTest(usePadding);
         Wire wire = createWire();
         wire.bytes().append("a: !type \"[B\", b: !type \"String[]\", c: hi");
@@ -1245,7 +1245,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML array type literals parse list form")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Array Types 2 behaviour uses padding setting {0}")
-    public void testArrayTypes2(boolean usePadding) {
+    void testArrayTypes2(boolean usePadding) {
         initYamlWireTest(usePadding);
         Wire wire = createWire();
         wire.bytes().append("a: [ !type byte[] ], b: !type String[], c: hi");
@@ -1274,7 +1274,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML nested EnumSet values round trip")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML nested With Enum Set behaviour uses padding setting {0}")
-    public void nestedWithEnumSet(boolean usePadding) {
+    void nestedWithEnumSet(boolean usePadding) {
         initYamlWireTest(usePadding);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for EnumSet round trip");
 
@@ -1302,7 +1302,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML Double Precision Over Yaml Wire")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Double Precision Over Yaml Wire behaviour uses padding setting {0}")
-    public void testDoublePrecisionOverYamlWire(boolean usePadding) {
+    void testDoublePrecisionOverYamlWire(boolean usePadding) {
         initYamlWireTest(usePadding);
         final Bytes<?> bytes = allocateElasticOnHeap();
 
@@ -1320,7 +1320,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML comment blocks preserve original ordering")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML reads Comment behaviour uses padding setting {0}")
-    public void readsComment(boolean usePadding) {
+    void readsComment(boolean usePadding) {
         initYamlWireTest(usePadding);
         Wire wire = createWire();
         String actual = WireCommentTestSupport.exerciseReadComments(wire);
@@ -1337,7 +1337,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML metadata reads from wire correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML read Meta Data behaviour uses padding setting {0}")
-    public void readMetaData(boolean usePadding) {
+    void readMetaData(boolean usePadding) {
         initYamlWireTest(usePadding);
         WireTestSupport.assertReadMetaData(wire);
     }
@@ -1345,7 +1345,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML nested lists preserve interleaved comments")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Nested List Interleaved Comments behaviour uses padding setting {0}")
-    public void testNestedListInterleavedComments(boolean usePadding) {
+    void testNestedListInterleavedComments(boolean usePadding) {
         initYamlWireTest(usePadding);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for interleaved comments test");
 
@@ -1370,7 +1370,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML lists preserve interleaved comments correctly")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML List Interleaved Comments behaviour uses padding setting {0}")
-    public void testListInterleavedComments(boolean usePadding) {
+    void testListInterleavedComments(boolean usePadding) {
         initYamlWireTest(usePadding);
         List<String> obj = WireType.YAML.fromString(
                 "     # first\n" +
@@ -1389,7 +1389,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML method calls write data payloads")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML put Data behaviour uses padding setting {0}")
-    public void putData(boolean usePadding) {
+    void putData(boolean usePadding) {
         initYamlWireTest(usePadding);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for method writer data test");
 
@@ -1419,7 +1419,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML empty document reports no data")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Empty Yaml Document behaviour uses padding setting {0}")
-    public void testEmptyYamlDocument(boolean usePadding) {
+    void testEmptyYamlDocument(boolean usePadding) {
         initYamlWireTest(usePadding);
         Wire wire = createWire();
         wire.bytes().append("");
@@ -1430,7 +1430,7 @@ public class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML large document reads all keys")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML Large Yaml Document behaviour uses padding setting {0}")
-    public void testLargeYamlDocument(boolean usePadding) {
+    void testLargeYamlDocument(boolean usePadding) {
         initYamlWireTest(usePadding);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for large document test");
 
@@ -1450,7 +1450,7 @@ public class YamlWireTest extends AbstractWireTest {
     @MethodSource("wireTypes")
     @SuppressWarnings("UnnecessaryUnicodeEscape")
     @ParameterizedTest(name = "YAML Special Characters In Strings behaviour uses padding setting {0}")
-    public void testSpecialCharactersInStrings(boolean usePadding) {
+    void testSpecialCharactersInStrings(boolean usePadding) {
         initYamlWireTest(usePadding);
         Wire wire = createWire();
         wire.bytes().append("text: \"Line1\\nLine2\\tTabbed\\u263A\"");

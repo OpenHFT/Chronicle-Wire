@@ -12,7 +12,7 @@ import java.util.UUID;
 
 // Main class to demonstrate the serialization of data in various Wire formats.
 @SuppressWarnings({"deprecation", "removal"})
-public class StreamMain {
+class StreamMain {
     public static void main(String[] args) {
         // Register the class alias for FileFormat class for efficient serialization.
         ClassAliasPool.CLASS_ALIASES.addAlias(FileFormat.class);

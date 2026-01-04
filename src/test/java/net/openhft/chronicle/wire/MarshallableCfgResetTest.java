@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class MarshallableCfgResetTest extends net.openhft.chronicle.wire.WireTestCommon {
+class MarshallableCfgResetTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Represents an engine with a configuration whether it's electric or not
     public static class Engine extends AbstractMarshallableCfg {
@@ -39,7 +39,7 @@ public class MarshallableCfgResetTest extends net.openhft.chronicle.wire.WireTes
      */
     @Test
     @DisplayName("Resets marshallable cfg values on read")
-    public void test() {
+    void test() {
         // Create a boat instance with an engine that is not electric
         Boat k9f = new Boat(new Engine(false));
 

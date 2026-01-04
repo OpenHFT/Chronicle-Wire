@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import static net.openhft.chronicle.wire.MicroTimestampLongConverter.INSTANCE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class MicroTimestampLongConverterTest extends WireTestCommon {
+class MicroTimestampLongConverterTest extends WireTestCommon {
 
     // Define constant strings for different timestamp representations
     private static final String TIMESTAMP_STRING_UTC = "2023-02-15T05:31:49.856123Z";
@@ -21,7 +21,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
     // Test if the parse method correctly interprets timestamps
     @Test
     @DisplayName("Parse numeric micros and preserve millis")
-    public void parse() {
+    void parse() {
         long now = System.currentTimeMillis();
         // Uncomment the below lines if needed
         // long parse1 = INSTANCE.parse(Long.toString(now));
@@ -35,7 +35,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
     // Test different date format parsing
     @Test
     @DisplayName("Parse slash and dash formats consistently")
-    public void parse2() {
+    void parse2() {
         assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"),
                 INSTANCE.parse("2020-09-18T01:02:03.456"),
                 "Slash and dash formats should parse identically for millis");
@@ -50,7 +50,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
     // Check if trailing 'Z' in timestamp does not affect parsing
     @Test
     @DisplayName("Parse subsequences and ignore extra digits")
-    public void parse3() {
+    void parse3() {
         assertEquals(INSTANCE.parse("202020/09/18T01:02:03.456789", 2, 28),
                 INSTANCE.parse("2020-09-18T01:02:03.4567890123", 0, 26),
                 "Subsequence parsing should match full-string parsing");
@@ -58,7 +58,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Ignore trailing Z when parsing micros")
-    public void testTrailingZ() {
+    void testTrailingZ() {
         final String text = "2020-09-18T01:02:03.456789";
         assertEquals(INSTANCE.parse(text), INSTANCE.parse(text + "Z"),
                 "Trailing Z should not affect micro parsing");
@@ -67,7 +67,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
     // Test timestamp parsing with New York timezone
     @Test
     @DisplayName("Parse and render timestamps in New York")
-    public void parseNewYorkTimeZone() {
+    void parseNewYorkTimeZone() {
         MicroTimestampLongConverter mtlc = new MicroTimestampLongConverter("America/New_York");
         long time = INSTANCE.parse("2020/09/18T01:02:03.456789");
         final String str = mtlc.asString(time);
@@ -80,7 +80,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
     // Verify that timestamps without timezone are treated as local timestamps
     @Test
     @DisplayName("Assume local zone when timestamp lacks offset")
-    public void datesWithNoTimezoneAreAssumedToBeLocal() {
+    void datesWithNoTimezoneAreAssumedToBeLocal() {
         MicroTimestampLongConverter mtlc = new MicroTimestampLongConverter("America/New_York");
         assertEquals(mtlc.parse("2020-09-17T21:02:03.456789-04:00"),
                 mtlc.parse("2020-09-17T21:02:03.456789"),
@@ -90,7 +90,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
     // Test if timestamps are correctly appended for Melbourne timezone
     @Test
     @DisplayName("Append Melbourne timestamp with zone offset")
-    public void appendTest() {
+    void appendTest() {
         final MicroTimestampLongConverter converter = new MicroTimestampLongConverter("Australia/Melbourne");
         StringBuilder builder = new StringBuilder();
         converter.append(builder, TIMESTAMP);
@@ -101,7 +101,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
     // Test if timestamps are correctly appended for UTC timezone
     @Test
     @DisplayName("Append UTC timestamp without zone suffix")
-    public void appendTestUTC() {
+    void appendTestUTC() {
         final MicroTimestampLongConverter converter = new MicroTimestampLongConverter("UTC");
         StringBuilder builder = new StringBuilder();
         converter.append(builder, TIMESTAMP);
@@ -112,7 +112,7 @@ public class MicroTimestampLongConverterTest extends WireTestCommon {
     // Test round-trip conversion for various timezones
     @Test
     @DisplayName("Round-trip micros for UTC and Melbourne")
-    public void roundTripTest() {
+    void roundTripTest() {
         MicroTimestampLongConverter utc = new MicroTimestampLongConverter("UTC");
         assertEquals(TIMESTAMP, utc.parse(TIMESTAMP_STRING_UTC_NO_SUFFIX),
                 "UTC parse should round-trip micros value");

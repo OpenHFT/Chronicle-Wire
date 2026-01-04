@@ -14,13 +14,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * Based on java.lang.Long parsing semantics and overflow behaviour.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class WireIntegerOverflowTest extends WireTestCommon {
+class WireIntegerOverflowTest extends WireTestCommon {
 
     // ========== Long Boundary Tests ==========
 
     @Test
     @DisplayName("All wire types should handle Long.MAX_VALUE exactly")
-    public void testLongMaxValue() {
+    void testLongMaxValue() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -35,7 +35,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle Long.MIN_VALUE exactly")
-    public void testLongMinValue() {
+    void testLongMinValue() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -50,7 +50,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle Long.MAX_VALUE - 1")
-    public void testLongMaxValueMinus1() {
+    void testLongMaxValueMinus1() {
         long value = Long.MAX_VALUE - 1;
 
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
@@ -67,7 +67,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle Long.MIN_VALUE + 1")
-    public void testLongMinValuePlus1() {
+    void testLongMinValuePlus1() {
         long value = Long.MIN_VALUE + 1;
 
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
@@ -86,7 +86,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle Integer.MAX_VALUE exactly")
-    public void testIntMaxValue() {
+    void testIntMaxValue() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -101,7 +101,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle Integer.MIN_VALUE exactly")
-    public void testIntMinValue() {
+    void testIntMinValue() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -118,7 +118,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle Byte boundaries")
-    public void testByteBoundaries() {
+    void testByteBoundaries() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -139,7 +139,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle Short boundaries")
-    public void testShortBoundaries() {
+    void testShortBoundaries() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -164,7 +164,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle JS safe integer boundary (2^53)")
-    public void testJsSafeIntegerBoundary() {
+    void testJsSafeIntegerBoundary() {
         // JavaScript safe integer max: 2^53 = 9007199254740992
         long jsSafeMax = 9007199254740992L;
         // First unsafe: 2^53 + 1 = 9007199254740993
@@ -190,7 +190,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should parse numbers with leading plus sign")
-    public void testLeadingPlusSign() {
+    void testLeadingPlusSign() {
         String yaml = "val: +42\n";
         Bytes<?> bytes = Bytes.from(yaml);
         TextWire wire = new TextWire(bytes);
@@ -201,7 +201,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should parse numbers with leading plus sign")
-    public void testLeadingPlusSignYaml() {
+    void testLeadingPlusSignYaml() {
         String yaml = "val: +42\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -212,7 +212,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should parse hexadecimal numbers from text")
-    public void testHexNumbers() {
+    void testHexNumbers() {
         String yaml = "val: 0xFF\n";
         Bytes<?> bytes = Bytes.from(yaml);
         TextWire wire = new TextWire(bytes);
@@ -223,7 +223,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should parse zero hexadecimal values")
-    public void testZeroHex() {
+    void testZeroHex() {
         String yaml = "val: 0x0\n";
         Bytes<?> bytes = Bytes.from(yaml);
         TextWire wire = new TextWire(bytes);
@@ -236,7 +236,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle negative numbers correctly")
-    public void testNegativeNumbers() {
+    void testNegativeNumbers() {
         long[] negatives = {-1, -127, -128, -255, -256, -32767, -32768, -65535, -65536};
 
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
@@ -257,7 +257,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle powers of 2 boundaries")
-    public void testPowerOfTwoBoundaries() {
+    void testPowerOfTwoBoundaries() {
         // Powers of 2 from 2^0 to 2^62
         for (int exp = 0; exp <= 62; exp++) {
             long power = 1L << exp;
@@ -286,7 +286,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should preserve high-bit long values")
-    public void testHighBitLongValues() {
+    void testHighBitLongValues() {
         // Values with high bit set (would be negative if signed)
         long[] highBits = {
                 0x8000000000000000L,  // Long.MIN_VALUE
@@ -311,7 +311,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle zero correctly")
-    public void testZeroValues() {
+    void testZeroValues() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -334,7 +334,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reading wider type as narrower should work within range")
-    public void testTypeNarrowingWithinRange() {
+    void testTypeNarrowingWithinRange() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -352,7 +352,7 @@ public class WireIntegerOverflowTest extends WireTestCommon {
 
     @Test
     @DisplayName("Values at type boundary transitions should round-trip")
-    public void testTypeBoundaryTransitions() {
+    void testTypeBoundaryTransitions() {
         // Values at boundaries where encoding/representation might change
         long[] boundaries = {
                 127, 128,        // 1-byte to 2-byte

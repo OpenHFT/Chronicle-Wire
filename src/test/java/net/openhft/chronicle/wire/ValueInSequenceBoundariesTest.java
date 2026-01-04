@@ -13,11 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Covers empty, single, and larger sequences to hit hasNextSequenceItem boundary edge scenarios.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class ValueInSequenceBoundariesTest extends WireTestCommon {
+class ValueInSequenceBoundariesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Handles empty and single sequence boundaries")
-    public void emptyAndSingle() {
+    void emptyAndSingle() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
             w.write("e").sequence(v -> {
@@ -50,7 +50,7 @@ public class ValueInSequenceBoundariesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Handles multiple sequence items across boundary")
-    public void manyItems() {
+    void manyItems() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(1024));
             w.write("m").sequence(v -> {

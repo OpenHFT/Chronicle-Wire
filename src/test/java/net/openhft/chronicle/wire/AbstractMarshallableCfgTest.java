@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class AbstractMarshallableCfgTest extends WireTestCommon {
+class AbstractMarshallableCfgTest extends WireTestCommon {
     static class MyAMC extends AbstractMarshallableCfg {
         final NestedAMC nestedAMC = new NestedAMC();  // Configuration nested inside MyAMC
         final NestedSDM nestedSDM = new NestedSDM();  // Self-describing data nested inside MyAMC
@@ -36,7 +36,7 @@ public class AbstractMarshallableCfgTest extends WireTestCommon {
     // Test the string representation of the MyAMC configuration
     @Test
     @DisplayName("Renders configuration to string with defaults")
-    public void asString() {
+    void asString() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip toString configuration test");
 
         MyAMC myAMC = new MyAMC();
@@ -70,7 +70,7 @@ public class AbstractMarshallableCfgTest extends WireTestCommon {
     // Test the deep copy functionality
     @Test
     @DisplayName("Deep copy clones nested configuration values")
-    public void deepCopy() {
+    void deepCopy() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip deep copy configuration test");
 
         MyAMC myAMC = new MyAMC();

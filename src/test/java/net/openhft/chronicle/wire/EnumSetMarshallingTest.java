@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 /**
  * Verifies EnumSet marshalling and unmarshalling across BinaryWire with expected text forms.
  */
-public class EnumSetMarshallingTest extends WireTestCommon {
+class EnumSetMarshallingTest extends WireTestCommon {
 
     // Serialized representation of a complete set of thread states
     private static final String FULL_SET_SERIALISED_FORM =
@@ -47,7 +47,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
      */
     @Test
     @DisplayName("BinaryWire should serialise and read empty EnumSet values")
-    public void shouldMarshallEmptySet() {
+    void shouldMarshallEmptySet() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip empty EnumSet marshalling");
 
@@ -77,7 +77,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
      */
     @Test
     @DisplayName("BinaryWire should serialise and read full EnumSet")
-    public void shouldMarshallFullSet() {
+    void shouldMarshallFullSet() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip full EnumSet marshalling");
 
@@ -108,7 +108,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
      */
     @Test
     @DisplayName("BinaryWire should allocate EnumSet when target is null")
-    public void shouldUnmarshallToContainerWithNullValue() {
+    void shouldUnmarshallToContainerWithNullValue() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip null EnumSet unmarshalling");
 
@@ -140,7 +140,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
      */
     @Test
     @DisplayName("BinaryWire should keep EnumSet instances distinct")
-    public void shouldAllowMultipleInstancesInObjectGraph() {
+    void shouldAllowMultipleInstancesInObjectGraph() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip multi instance EnumSet test");
 

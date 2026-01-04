@@ -16,7 +16,7 @@ import java.util.Map;
 import static net.openhft.chronicle.bytes.util.BinaryLengthLength.LENGTH_8BIT;
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
-public class MessageRoutingExample {
+class MessageRoutingExample {
 
     static {
         // used to allow for the objects in the streamed data to take the simple name rather than the full path name of the class

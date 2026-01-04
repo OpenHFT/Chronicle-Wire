@@ -12,7 +12,7 @@ import java.time.ZoneId;
 
 // Define a test class named 'TestMarshallableZoneId' that tests
 // serialization and deserialization of objects containing ZoneId fields
-public class MarshallableFixtureZoneId {
+class MarshallableFixtureZoneId {
 
     // Define a static nested class named 'MySelfDescribingMarshallable',
     // which extends 'SelfDescribingMarshallable' and includes a 'ZoneId' field
@@ -27,7 +27,7 @@ public class MarshallableFixtureZoneId {
     // to test serialization and deserialization of 'MySelfDescribingMarshallable' objects
     @Test
     @DisplayName("ZoneId should round-trip for SelfDescribingMarshallable instances")
-    public void testMySelfDescribingMarshallable() {
+    void testMySelfDescribingMarshallable() {
 
         // Create and initialize an instance of 'MySelfDescribingMarshallable',
         // setting its 'zoneId' field to "UTC"
@@ -61,7 +61,7 @@ public class MarshallableFixtureZoneId {
     // to test serialization and deserialization of 'MyAbstractMarshallableCfg' objects
     @Test
     @DisplayName("ZoneId should round-trip for AbstractMarshallableCfg instances")
-    public void testMyAbstractMarshallableCfg() {
+    void testMyAbstractMarshallableCfg() {
 
         // Create and initialize an instance of 'MyAbstractMarshallableCfg',
         // setting its 'zoneId' field to "UTC"

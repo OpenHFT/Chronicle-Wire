@@ -33,7 +33,7 @@ interface WithDefault {
  * Test class for validating the handling of default methods in the WithDefault interface.
  * Extends WireTestCommon for common wire testing utilities.
  */
-public class DefaultMethodHandlingTest extends WireTestCommon {
+class DefaultMethodHandlingTest extends WireTestCommon {
 
     /**
      * Executes tests for method writers and readers with the specified WireType.
@@ -79,7 +79,7 @@ public class DefaultMethodHandlingTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Default method handling on TEXT wire")
-    public void withDefault() {
+    void withDefault() {
         assertTrue(doTest(WireType.TEXT), "Default method handling should succeed on TEXT wire");
     }
 
@@ -88,7 +88,7 @@ public class DefaultMethodHandlingTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Default method handling on YAML_ONLY wire")
-    public void withDefaultYaml() {
+    void withDefaultYaml() {
         assertTrue(doTest(WireType.YAML_ONLY), "Default method handling should succeed on YAML_ONLY wire");
     }
 }

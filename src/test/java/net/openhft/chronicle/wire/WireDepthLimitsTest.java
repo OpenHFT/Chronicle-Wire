@@ -19,13 +19,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * Verifies behaviour with deeply nested structures and large data sets.
  */
 @SuppressWarnings({"deprecation", "removal", "unchecked"})
-public class WireDepthLimitsTest extends WireTestCommon {
+class WireDepthLimitsTest extends WireTestCommon {
 
     // ========== Deep Nesting Tests ==========
 
     @Test
     @DisplayName("BinaryWire should handle moderately deep nesting (10 levels)")
-    public void testModerateNestingBinary() {
+    void testModerateNestingBinary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(1024);
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -42,7 +42,7 @@ public class WireDepthLimitsTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle deep nesting (50 levels)")
-    public void testDeepNestingBinary() {
+    void testDeepNestingBinary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(4096);
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -57,7 +57,7 @@ public class WireDepthLimitsTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle very deep nesting (100 levels)")
-    public void testVeryDeepNestingBinary() {
+    void testVeryDeepNestingBinary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(8192);
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -78,7 +78,7 @@ public class WireDepthLimitsTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle large sequence (1000 items)")
-    public void testLargeSequenceBinary() {
+    void testLargeSequenceBinary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32768);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -105,7 +105,7 @@ public class WireDepthLimitsTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle large sequence (10000 items)")
-    public void testVeryLargeSequenceBinary() {
+    void testVeryLargeSequenceBinary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(131072);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -131,7 +131,7 @@ public class WireDepthLimitsTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle large map (1000 entries)")
-    public void testLargeMapBinary() {
+    void testLargeMapBinary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(65536);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -162,7 +162,7 @@ public class WireDepthLimitsTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle very long field names")
-    public void testVeryLongFieldNames() {
+    void testVeryLongFieldNames() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(4096);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -189,7 +189,7 @@ public class WireDepthLimitsTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle very long string values")
-    public void testVeryLongStringValues() {
+    void testVeryLongStringValues() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(1024 * 1024);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -211,7 +211,7 @@ public class WireDepthLimitsTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle nested sequence structures")
-    public void testNestedSequences() {
+    void testNestedSequences() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(4096);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -257,7 +257,7 @@ public class WireDepthLimitsTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle object with many fields")
-    public void testManyFields() {
+    void testManyFields() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(65536);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -295,7 +295,7 @@ public class WireDepthLimitsTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should handle deep nesting (20 levels)")
-    public void testDeepNestingText() {
+    void testDeepNestingText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(4096);
         TextWire wire = new TextWire(bytes);
 
@@ -309,7 +309,7 @@ public class WireDepthLimitsTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle deep nesting (20 levels)")
-    public void testDeepNestingYaml() {
+    void testDeepNestingYaml() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(4096);
         YamlWire wire = new YamlWire(bytes);
 
@@ -325,7 +325,7 @@ public class WireDepthLimitsTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle mixed deep structures")
-    public void testMixedDeepStructures() {
+    void testMixedDeepStructures() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(16384);
         BinaryWire wire = new BinaryWire(bytes);
 

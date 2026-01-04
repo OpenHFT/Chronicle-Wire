@@ -15,12 +15,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // This class provides tests for default marshaller functionalities.
-public class DefaultMarshallerTest extends WireTestCommon {
+class DefaultMarshallerTest extends WireTestCommon {
 
     // Test the deserialization process with nested arrays.
     @Test
     @DisplayName("Deserialises nested enum arrays with default marshaller")
-    public void testDeserializeWithNestedArray() {
+    void testDeserializeWithNestedArray() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip default marshaller nested array test");
 
@@ -70,7 +70,7 @@ public class DefaultMarshallerTest extends WireTestCommon {
     // Test the deserialization process.
     @Test
     @DisplayName("Deserialises nested objects and maps with default marshaller")
-    public void testDeserialize() {
+    void testDeserialize() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip default marshaller object round-trip test");
 

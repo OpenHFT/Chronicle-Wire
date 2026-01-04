@@ -24,11 +24,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BinaryWireScalarCoverageTest extends WireTestCommon {
+class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Round-trips common scalar values in binary wire")
-    public void roundTripsCommonScalarTypes() {
+    void roundTripsCommonScalarTypes() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -67,7 +67,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
     @Test
     @DisplayName("BinaryWire should round-trip int8 scalar values")
     @SuppressWarnings("deprecation")
-    public void testInt8Values() {
+    void testInt8Values() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -85,7 +85,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
     @Test
     @DisplayName("BinaryWire should round-trip uint8 scalar values")
     @SuppressWarnings("deprecation")
-    public void testUint8Values() {
+    void testUint8Values() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -108,7 +108,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should round-trip int16 scalar values")
-    public void testInt16Values() {
+    void testInt16Values() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -125,7 +125,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should round-trip uint16 scalar values")
-    public void testUint16Values() {
+    void testUint16Values() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -143,7 +143,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
     @Test
     @DisplayName("BinaryWire should round-trip uint32 scalar values")
     @SuppressWarnings("deprecation")
-    public void testUint32Values() {
+    void testUint32Values() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -166,7 +166,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should round-trip float32 scalar values")
-    public void testFloat32Values() {
+    void testFloat32Values() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -183,7 +183,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should read NaN and infinity values")
-    public void testSpecialFloatValues() {
+    void testSpecialFloatValues() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -200,7 +200,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should round-trip LocalDate value instances")
-    public void testLocalDate() {
+    void testLocalDate() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -214,7 +214,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should round-trip LocalTime value instances")
-    public void testLocalTime() {
+    void testLocalTime() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -228,7 +228,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should round-trip LocalDateTime value instances")
-    public void testLocalDateTime() {
+    void testLocalDateTime() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -242,7 +242,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should round-trip ZonedDateTime value instances")
-    public void testZonedDateTime() {
+    void testZonedDateTime() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -256,7 +256,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should round-trip UUID value instances")
-    public void testUUID() {
+    void testUUID() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -270,7 +270,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should round-trip Map entry values")
-    public void testMap() {
+    void testMap() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Map<String, Integer> map = new HashMap<>();
         map.put("one", 1);
@@ -291,7 +291,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should round-trip List entry values")
-    public void testList() {
+    void testList() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         List<String> list = new ArrayList<>();
         list.add("alpha");
@@ -312,7 +312,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should round-trip byte array values")
-    public void testBytesArray() {
+    void testBytesArray() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -327,7 +327,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should round-trip null object values")
-    public void testNullValue() {
+    void testNullValue() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -340,7 +340,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should round-trip empty string values")
-    public void testEmptyString() {
+    void testEmptyString() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -353,7 +353,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should skip first value and read next entry")
-    public void testSkipValue() {
+    void testSkipValue() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -370,7 +370,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
     @Test
     @DisplayName("BinaryWire should deliver int32 value to consumer")
     @SuppressWarnings("deprecation")
-    public void testInt32WithConsumer() {
+    void testInt32WithConsumer() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -385,7 +385,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should deliver int64 value to consumer")
-    public void testInt64WithConsumer() {
+    void testInt64WithConsumer() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -400,7 +400,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should deliver float64 value to consumer")
-    public void testFloat64WithConsumer() {
+    void testFloat64WithConsumer() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -416,7 +416,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
     @Test
     @DisplayName("BinaryWire should deliver boolean values to consumer")
     @SuppressWarnings("deprecation")
-    public void testBoolWithConsumer() {
+    void testBoolWithConsumer() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -435,7 +435,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should report binary wire format")
-    public void testIsBinary() {
+    void testIsBinary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
         assertTrue(wire.isBinary(), "BinaryWire should report binary wire format as true");
@@ -443,7 +443,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should read nested marshallable values")
-    public void testNestedMarshallable() {
+    void testNestedMarshallable() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -458,7 +458,7 @@ public class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should read sequence using hasNextSequenceItem")
-    public void testSequenceHasNextItem() {
+    void testSequenceHasNextItem() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
         List<Integer> source = new ArrayList<>();

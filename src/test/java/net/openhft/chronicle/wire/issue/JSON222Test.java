@@ -29,7 +29,7 @@ import static java.nio.charset.StandardCharsets.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class JSON222Test extends WireTestCommon {
+class JSON222Test extends WireTestCommon {
 
     // Provide the test parameters from a collection of files found in a specific directory
     @NotNull
@@ -64,7 +64,7 @@ public class JSON222Test extends WireTestCommon {
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
     @DisplayName("JSON files should parse with TextWire")
-    public void testJSONAsTextWire(@NotNull String fileName, File file) throws IOException {
+    void testJSONAsTextWire(@NotNull String fileName, File file) throws IOException {
         assertTrue(testJSON(WireType.TEXT, file),
                 "JSON file should parse with TEXT wire for " + file.getName());
     }
@@ -74,7 +74,7 @@ public class JSON222Test extends WireTestCommon {
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
     @DisplayName("JSON files should parse with YAML wire")
-    public void testJSONAsYamlWire(@NotNull String fileName, File file) throws IOException {
+    void testJSONAsYamlWire(@NotNull String fileName, File file) throws IOException {
         assertTrue(testJSON(WireType.YAML_ONLY, file),
                 "JSON file should parse with YAML_ONLY wire for " + file.getName());
     }

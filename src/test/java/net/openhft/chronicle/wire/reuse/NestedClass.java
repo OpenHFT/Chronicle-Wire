@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
  * enable serialization and deserialization using Chronicle Wire.
  * It contains two fields: a String 'text' and a double 'number'.
  */
-public class NestedClass implements Marshallable {
+class NestedClass implements Marshallable {
     // Field to store text data
     private String text;
     // Field to store numeric data
@@ -51,7 +51,7 @@ public class NestedClass implements Marshallable {
      * @param text The text to set.
      * @param number The numeric value to set.
      */
-    public void setTextNumber(String text, double number) {
+    void setTextNumber(String text, double number) {
         this.text = text;
         this.number = number;
     }

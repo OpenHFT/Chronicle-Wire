@@ -18,16 +18,16 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class WireStringCollectionTest extends net.openhft.chronicle.wire.WireTestCommon {
+class WireStringCollectionTest extends net.openhft.chronicle.wire.WireTestCommon {
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory is required for string collection wire test");
     }
 
     @Test
     @DisplayName("String collection round trips via wire")
-    public void readAndWrite() {
+    void readAndWrite() {
         // Add an alias for ContainsList class
         ClassAliasPool.CLASS_ALIASES.addAlias(ContainsList.class);
 

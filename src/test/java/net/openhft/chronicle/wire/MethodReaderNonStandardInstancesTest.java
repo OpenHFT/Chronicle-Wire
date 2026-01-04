@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * This class provides tests for non-standard instances being passed to the MethodReader.
  * It extends the WireTestCommon which provides utilities for monitoring thread and exception behaviors during tests.
  */
-public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
+class MethodReaderNonStandardInstancesTest extends WireTestCommon {
 
     /**
      * Test case to verify that an anonymous class can be passed to MethodReader.
@@ -30,7 +30,7 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
     @Test
     @SuppressWarnings("deprecation")
     @DisplayName("Anonymous class can be used with MethodReader")
-    public void testAnonymousClassCanBePassedToMethodReader() {
+    void testAnonymousClassCanBePassedToMethodReader() {
         // Initialization of the wire with padding
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
@@ -61,7 +61,7 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
     @Test
     @SuppressWarnings("deprecation")
     @DisplayName("Core class can be used with MethodReader")
-    public void testCoreClassCanBePassedToMethodReader() throws Exception {
+    void testCoreClassCanBePassedToMethodReader() throws Exception {
         // Initialization of the wire with padding
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
@@ -92,7 +92,7 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
     @Test
     @SuppressWarnings("deprecation")
     @DisplayName("Lambda can be used with MethodReader")
-    public void testLambdaCanBePassedToMethodReader() {
+    void testLambdaCanBePassedToMethodReader() {
         // Initialization of the wire with padding
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);

@@ -17,7 +17,7 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class ReadmePojoTest extends WireTestCommon {
+class ReadmePojoTest extends WireTestCommon {
     static {
         // Registering 'MyPojos' class for aliasing purposes
         ClassAliasPool.CLASS_ALIASES.addAlias(MyPojos.class);
@@ -25,7 +25,7 @@ public class ReadmePojoTest extends WireTestCommon {
 
     @Test
     @DisplayName("Marshallable list round-trips from string and file")
-    public void testFromString() throws IOException {
+    void testFromString() throws IOException {
         // Initialize a MyPojos instance with two MyPojo entries
         @NotNull MyPojos mps = new MyPojos("test-list");
         mps.myPojos.add(new MyPojo("text1", 1, 1.1));
@@ -53,7 +53,7 @@ public class ReadmePojoTest extends WireTestCommon {
 
     @Test
     @DisplayName("Text wire map dump matches expected format")
-    public void testMapDump() {
+    void testMapDump() {
         // Creating a LinkedHashMap with various key-value pairs
         @NotNull Map<String, Object> map = new LinkedHashMap<>();
         map.put("text", "words");

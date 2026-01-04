@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Critical for financial trading systems where numeric precision matters.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class WireNumericEdgeCasesTest extends WireTestCommon {
+class WireNumericEdgeCasesTest extends WireTestCommon {
 
     // ========== Negative Zero Tests ==========
 
@@ -23,7 +23,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
     @Test
     @Disabled("BinaryWire: Negative zero round-trips as positive zero - needs investigation")
     @DisplayName("BinaryWire should preserve negative zero bit pattern")
-    public void testNegativeZeroPreservationBinary() {
+    void testNegativeZeroPreservationBinary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -40,7 +40,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
     @Test
     @Disabled("TextWire: Negative zero round-trips as positive zero - needs investigation")
     @DisplayName("TextWire should preserve negative zero bit pattern")
-    public void testNegativeZeroPreservationText() {
+    void testNegativeZeroPreservationText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         TextWire wire = new TextWire(bytes);
 
@@ -57,7 +57,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
     @Test
     @Disabled("YamlWire: Negative zero round-trips as positive zero - needs investigation")
     @DisplayName("YamlWire should preserve negative zero bit pattern")
-    public void testNegativeZeroPreservationYaml() {
+    void testNegativeZeroPreservationYaml() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         YamlWire wire = new YamlWire(bytes);
 
@@ -72,7 +72,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Negative zero should compare equal to positive zero")
-    public void testNegativeZeroEquality() {
+    void testNegativeZeroEquality() {
         // This is IEEE 754 behaviour - -0.0 == 0.0
         assertTrue(-0.0 == 0.0, "Negative and positive zero should be equal by IEEE 754");
         assertNotEquals(Double.doubleToLongBits(-0.0), Double.doubleToLongBits(0.0),
@@ -83,7 +83,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should preserve Double.MIN_VALUE (smallest positive subnormal)")
-    public void testSubnormalMinValueBinary() {
+    void testSubnormalMinValueBinary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -97,7 +97,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should preserve Double.MIN_VALUE (smallest positive subnormal)")
-    public void testSubnormalMinValueText() {
+    void testSubnormalMinValueText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         TextWire wire = new TextWire(bytes);
 
@@ -111,7 +111,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should preserve Double.MIN_VALUE (smallest positive subnormal)")
-    public void testSubnormalMinValueYaml() {
+    void testSubnormalMinValueYaml() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         YamlWire wire = new YamlWire(bytes);
 
@@ -125,7 +125,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Double.MIN_NORMAL (smallest normal) should round-trip in BinaryWire")
-    public void testMinNormalValueBinary() {
+    void testMinNormalValueBinary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -141,7 +141,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
     @Test
     @Disabled("TextWire loses precision for Double.MIN_NORMAL - needs investigation")
     @DisplayName("Double.MIN_NORMAL (smallest normal) should round-trip in TextWire")
-    public void testMinNormalValueText() {
+    void testMinNormalValueText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         TextWire wire = new TextWire(bytes);
 
@@ -157,7 +157,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
     @Test
     @Disabled("YamlWire loses precision for Double.MIN_NORMAL - needs investigation")
     @DisplayName("Double.MIN_NORMAL (smallest normal) should round-trip in YamlWire")
-    public void testMinNormalValueYaml() {
+    void testMinNormalValueYaml() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         YamlWire wire = new YamlWire(bytes);
 
@@ -173,7 +173,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Standard NaN should round-trip in BinaryWire")
-    public void testNaNBinary() {
+    void testNaNBinary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -186,7 +186,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Standard NaN should round-trip in TextWire")
-    public void testNaNText() {
+    void testNaNText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         TextWire wire = new TextWire(bytes);
 
@@ -199,7 +199,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Standard NaN should round-trip in YamlWire")
-    public void testNaNYaml() {
+    void testNaNYaml() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         YamlWire wire = new YamlWire(bytes);
 
@@ -214,7 +214,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
     @Test
     @Disabled("Custom NaN bit pattern not preserved - may canonicalise to standard NaN")
     @DisplayName("Custom NaN bit patterns should be preserved")
-    public void testCustomNaNBitPattern() {
+    void testCustomNaNBitPattern() {
         // Quiet NaN with custom payload
         long customNaNBits = 0x7FF8000000000001L;
         double customNaN = Double.longBitsToDouble(customNaNBits);
@@ -237,7 +237,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Double positive infinity value should round-trip")
-    public void testPositiveInfinity() {
+    void testPositiveInfinity() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -253,7 +253,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Double negative infinity value should round-trip")
-    public void testNegativeInfinity() {
+    void testNegativeInfinity() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -271,7 +271,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Float NaN value should round-trip correctly")
-    public void testFloatNaN() {
+    void testFloatNaN() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -286,7 +286,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Float infinity values should round-trip correctly")
-    public void testFloatInfinities() {
+    void testFloatInfinities() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -304,7 +304,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Float.MIN_VALUE (smallest positive subnormal) should round-trip")
-    public void testFloatMinValue() {
+    void testFloatMinValue() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -322,7 +322,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Value at JS safe integer boundary (2^53) should round-trip")
-    public void testJsSafeIntegerBoundary() {
+    void testJsSafeIntegerBoundary() {
         long jsSafeMax = 9007199254740992L; // 2^53
 
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
@@ -340,7 +340,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Value beyond JS safe integer (2^53 + 1) should round-trip as long")
-    public void testBeyondJsSafeInteger() {
+    void testBeyondJsSafeInteger() {
         long beyondSafe = 9007199254740993L; // 2^53 + 1
 
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
@@ -360,7 +360,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Very small scientific notation values should preserve precision")
-    public void testSmallScientificNotation() {
+    void testSmallScientificNotation() {
         double verySmall = 1e-21;
 
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
@@ -378,7 +378,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Very large scientific notation values should preserve precision")
-    public void testLargeScientificNotation() {
+    void testLargeScientificNotation() {
         double veryLarge = 1e21;
 
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
@@ -398,7 +398,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Double.MAX_VALUE should round-trip")
-    public void testDoubleMaxValue() {
+    void testDoubleMaxValue() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -414,7 +414,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("-Double.MAX_VALUE should round-trip")
-    public void testNegativeDoubleMaxValue() {
+    void testNegativeDoubleMaxValue() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -432,7 +432,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Currency amounts with 2 decimal places should preserve precision")
-    public void testCurrencyPrecision() {
+    void testCurrencyPrecision() {
         double[] amounts = {0.01, 0.10, 1.23, 99.99, 1000000.01, 9999999.99};
 
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
@@ -454,7 +454,7 @@ public class WireNumericEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Basis points (0.0001) should preserve precision")
-    public void testBasisPointsPrecision() {
+    void testBasisPointsPrecision() {
         double basisPoint = 0.0001;
         double[] values = {basisPoint, basisPoint * 25, basisPoint * 100, basisPoint * 10000};
 

@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
  * Represents a property in a wire format, extending the WireModel.
  * Contains fields like reference, path, name, and value.
  */
-public class WireProperty extends WireModel {
+class WireProperty extends WireModel {
 
     // Nullable fields for the wire property
     @Nullable
@@ -67,7 +67,7 @@ public class WireProperty extends WireModel {
         return reference;
     }
 
-    public void setReference(@Nullable String reference) {
+    void setReference(@Nullable String reference) {
         this.reference = reference;
     }
 
@@ -76,7 +76,7 @@ public class WireProperty extends WireModel {
         return path;
     }
 
-    public void setPath(@Nullable String path) {
+    void setPath(@Nullable String path) {
         this.path = path;
     }
 
@@ -85,7 +85,7 @@ public class WireProperty extends WireModel {
         return name;
     }
 
-    public void setName(@Nullable String name) {
+    void setName(@Nullable String name) {
         this.name = name;
     }
 
@@ -94,7 +94,7 @@ public class WireProperty extends WireModel {
         return value;
     }
 
-    public void setValue(@Nullable String value) {
+    void setValue(@Nullable String value) {
         this.value = value;
     }
 }

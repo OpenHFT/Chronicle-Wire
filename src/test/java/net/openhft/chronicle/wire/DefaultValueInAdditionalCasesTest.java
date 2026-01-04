@@ -15,11 +15,11 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Covers DefaultValueIn branches for bytes, text, and primitive defaults in TextWire.
  */
-public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
+class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Handles bytes text and match branches safely")
-    public void bytesTextAndMatchBranches() {
+    void bytesTextAndMatchBranches() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
 
@@ -45,7 +45,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Uses zero defaults when primitive default is null")
-    public void primitiveDefaultsAreZeroWhenNull() {
+    void primitiveDefaultsAreZeroWhenNull() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         dvi.defaultValue = null;
@@ -65,7 +65,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads bytes array default into target buffer")
-    public void bytesArrayAccessor() {
+    void bytesArrayAccessor() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         byte[] data = {1, 2, 3};
@@ -79,7 +79,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.text returns null for null defaultValue in WireIn")
-    public void textReturnsNullForNullDefault() {
+    void textReturnsNullForNullDefault() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         dvi.defaultValue = null;
@@ -88,7 +88,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.text returns toString for non-null default")
-    public void textReturnsToStringOfDefault() {
+    void textReturnsToStringOfDefault() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         dvi.defaultValue = "hello";
@@ -100,7 +100,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.textTo returns null for null defaultValue StringBuilder")
-    public void textToStringBuilderNullDefault() {
+    void textToStringBuilderNullDefault() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         dvi.defaultValue = null;
@@ -110,7 +110,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.textTo appends defaultValue into StringBuilder")
-    public void textToStringBuilderNonNull() {
+    void textToStringBuilderNonNull() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         dvi.defaultValue = "world";
@@ -123,7 +123,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("int8 methods should handle null and numeric defaults")
-    public void int8MethodsHandleNullAndNumeric() {
+    void int8MethodsHandleNullAndNumeric() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
 
@@ -140,7 +140,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("uint8 methods should handle null and numeric defaults")
-    public void uint8MethodsHandleNullAndNumeric() {
+    void uint8MethodsHandleNullAndNumeric() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
 
@@ -156,7 +156,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("int16 and uint16 methods should handle defaults")
-    public void int16Uint16MethodsHandleDefaults() {
+    void int16Uint16MethodsHandleDefaults() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
 
@@ -174,7 +174,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.uint32 consumer handles null and numeric defaults")
-    public void uint32MethodHandleDefaults() {
+    void uint32MethodHandleDefaults() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
 
@@ -190,7 +190,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.float32 returns correct default values")
-    public void float32MethodReturnDefault() {
+    void float32MethodReturnDefault() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
 
@@ -205,7 +205,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.bool handles true, false, and null defaults")
-    public void boolHandlesVariousDefaults() {
+    void boolHandlesVariousDefaults() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
 
@@ -226,7 +226,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.typePrefix returns void.class for null default")
-    public void typePrefixReturnsVoidForNull() {
+    void typePrefixReturnsVoidForNull() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         dvi.defaultValue = null;
@@ -235,7 +235,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.typePrefix returns value class for non-null defaultValue type")
-    public void typePrefixReturnsClassOfDefault() {
+    void typePrefixReturnsClassOfDefault() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         dvi.defaultValue = "hello";
@@ -247,7 +247,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("typePrefix consumer should receive null for defaults")
-    public void typePrefixConsumerReceivesNull() {
+    void typePrefixConsumerReceivesNull() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         dvi.defaultValue = "test";
@@ -261,7 +261,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.isNull reports true only for null defaultValue")
-    public void isNullReturnsCorrectly() {
+    void isNullReturnsCorrectly() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
 
@@ -274,7 +274,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.isPresent returns false for all default states")
-    public void isPresentAlwaysFalse() {
+    void isPresentAlwaysFalse() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
 
@@ -287,7 +287,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.isTyped returns false for all default states")
-    public void isTypedAlwaysFalse() {
+    void isTypedAlwaysFalse() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
 
@@ -302,7 +302,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.hasNext returns false for default values")
-    public void hasNextAlwaysFalse() {
+    void hasNextAlwaysFalse() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         dvi.defaultValue = null;
@@ -311,7 +311,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.hasNextSequenceItem returns false for default state")
-    public void hasNextSequenceItemAlwaysFalse() {
+    void hasNextSequenceItemAlwaysFalse() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         dvi.defaultValue = null;
@@ -320,7 +320,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.sequence returns false for default values")
-    public void sequenceBiConsumerReturnsFalse() {
+    void sequenceBiConsumerReturnsFalse() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         dvi.defaultValue = null;
@@ -335,7 +335,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("readLength() should always return 0 for defaults")
-    public void readLengthReturnsZero() {
+    void readLengthReturnsZero() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         dvi.defaultValue = null;
@@ -344,7 +344,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.skipValue returns the original WireIn")
-    public void skipValueReturnsWireIn() {
+    void skipValueReturnsWireIn() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         assertSame(tw, dvi.skipValue(), "DefaultValueIn.skipValue should return the original WireIn");
@@ -352,7 +352,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.getBracketType returns NONE for defaults")
-    public void getBracketTypeReturnsNone() {
+    void getBracketTypeReturnsNone() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         assertEquals(BracketType.NONE, dvi.getBracketType(), "DefaultValueIn.getBracketType should return NONE for defaults");
@@ -360,7 +360,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.typedMarshallable returns the default object value")
-    public void typedMarshallableReturnsDefault() {
+    void typedMarshallableReturnsDefault() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
 
@@ -373,7 +373,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.typeLiteral returns defaultValue as Type")
-    public void typeLiteralReturnsDefault() {
+    void typeLiteralReturnsDefault() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
 
@@ -388,7 +388,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.objectWithInferredType returns the default object value")
-    public void objectWithInferredTypeReturnsDefault() {
+    void objectWithInferredTypeReturnsDefault() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
 
@@ -399,7 +399,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.marshallable returns the default value unchanged")
-    public void marshallableReturnsDefault() {
+    void marshallableReturnsDefault() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
 
@@ -410,7 +410,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.bytesMatch reports false for non-BytesStore defaults")
-    public void bytesMatchFalseForNonBytesStore() {
+    void bytesMatchFalseForNonBytesStore() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         dvi.defaultValue = "not bytes";
@@ -423,7 +423,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("DefaultValueIn.resetState call completes without exceptions")
-    public void resetStateDoesNotThrow() {
+    void resetStateDoesNotThrow() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         dvi.resetState();  // Should not throw

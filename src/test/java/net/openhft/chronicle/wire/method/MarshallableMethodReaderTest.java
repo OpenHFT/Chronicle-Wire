@@ -19,12 +19,12 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 // Extends WireTestCommon to inherit thread dump and exception monitoring features
-public class MarshallableMethodReaderTest extends net.openhft.chronicle.wire.WireTestCommon {
+class MarshallableMethodReaderTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Test method to verify the functionality of MethodReader with 'say' method
     @Test
     @DisplayName("Method reader handles single say call")
-    public void test() {
+    void test() {
         // Creates a Wire instance with predefined input
         Wire wire = new TextWire(Bytes.from("say: hi")).useTextDocuments();
 
@@ -41,14 +41,14 @@ public class MarshallableMethodReaderTest extends net.openhft.chronicle.wire.Wir
     // Test for ignoring methods without scanning
     @Test
     @DisplayName("Unknown methods are ignored without scanning")
-    public void ignoredMethods() {
+    void ignoredMethods() {
         assertTrue(doIgnoredMethods(false), "method reader should process unknown methods when scanning disabled");
     }
 
     // Test for ignoring methods with scanning
     @Test
     @DisplayName("Unknown methods are skipped with scanning")
-    public void ignoredMethodsScanning() {
+    void ignoredMethodsScanning() {
         assertTrue(doIgnoredMethods(true), "method reader should skip unknown methods when scanning enabled");
     }
 
@@ -113,7 +113,7 @@ public class MarshallableMethodReaderTest extends net.openhft.chronicle.wire.Wir
         }
 
         // Method not called as it's not declared in the Saying interface
-        public void bye(String reason) {
+        void bye(String reason) {
         }
     }
 }

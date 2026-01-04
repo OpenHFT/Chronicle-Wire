@@ -14,17 +14,17 @@ import java.util.BitSet;
 
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class BitSetTest extends WireTestCommon {
+class BitSetTest extends WireTestCommon {
 
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip BitSet tests");
     }
 
     // Test the equality of a BitSet after being written and read from a wire
     @Test
     @DisplayName("Round-trips BitSet with single bit set")
-    public void testBitSetEquals() {
+    void testBitSetEquals() {
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.TEXT.apply(b);
@@ -43,7 +43,7 @@ public class BitSetTest extends WireTestCommon {
     // Test the equality of a BitSet with multiple bits set after being written and read from a wire
     @Test
     @DisplayName("Round-trips BitSet with multiple bits set")
-    public void testBitSetEquals2() {
+    void testBitSetEquals2() {
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.TEXT.apply(b);
@@ -63,7 +63,7 @@ public class BitSetTest extends WireTestCommon {
     // Test the conversion of a BitSet to text format after being written to a wire
     @Test
     @DisplayName("Serialises BitSet to text format with expected output")
-    public void testBitSetToText() {
+    void testBitSetToText() {
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.TEXT.apply(b);
@@ -85,7 +85,7 @@ public class BitSetTest extends WireTestCommon {
     // Test the conversion of a BitSet with multiple bits set to text format after being written to a wire
     @Test
     @DisplayName("Serialises BitSet with multiple bits to text format")
-    public void testBitSet2ToText() {
+    void testBitSet2ToText() {
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.TEXT.apply(b);
@@ -109,7 +109,7 @@ public class BitSetTest extends WireTestCommon {
     // Test reading a BitSet into an existing BitSet instance using 'using' from a wire
     @Test
     @DisplayName("Reuses target BitSet instance when reading values")
-    public void testBitSetUsing() {
+    void testBitSetUsing() {
 
         BitSet using = new BitSet(4);
         using.set(1);

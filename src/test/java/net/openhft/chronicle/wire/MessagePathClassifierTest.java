@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("deprecation")
-public class MessagePathClassifierTest extends WireTestCommon {
+class MessagePathClassifierTest extends WireTestCommon {
 
     // Utility function to convert a string into a VanillaMessageHistory object.
     private static VanillaMessageHistory messageHistory(String cs) {
@@ -20,7 +20,7 @@ public class MessagePathClassifierTest extends WireTestCommon {
     // Test that the pathFor method correctly identifies the path ID of a message based on its sources.
     @Test
     @DisplayName("Path ids resolve from source suffixes")
-    public void pathFor() {
+    void pathFor() {
         MessagePathClassifier mpc =
                 new MessagePathClassifier()
                         .addPathForSourcesEnding(4, 4)
@@ -48,7 +48,7 @@ public class MessagePathClassifierTest extends WireTestCommon {
     // Test the toString method of MessagePathClassifier to ensure it correctly displays source patterns and path IDs.
     @Test
     @DisplayName("Classifier toString de-duplicates source patterns")
-    public void addPathForSourcesEnding() {
+    void addPathForSourcesEnding() {
         final MessagePathClassifier mpc = new MessagePathClassifier()
                 .addPathForSourcesEnding(4, 4)
                 .addPathForSourcesEnding(123, 1, 2, 3)
@@ -61,7 +61,7 @@ public class MessagePathClassifierTest extends WireTestCommon {
     // Test for an exception to be thrown when a source pattern is duplicated in MessagePathClassifier.
     @Test
     @DisplayName("Duplicate source pattern rejects conflicting id")
-    public void addPathForSourcesEnding2() {
+    void addPathForSourcesEnding2() {
         assertThrows(IllegalArgumentException.class, () ->
                 new MessagePathClassifier()
                         .addPathForSourcesEnding(4, 4)

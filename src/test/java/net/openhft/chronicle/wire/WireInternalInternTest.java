@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 // This class tests the internal interning behavior of the Wire component.
-public class WireInternalInternTest extends WireTestCommon {
+class WireInternalInternTest extends WireTestCommon {
 
     // Static initializer block to add aliases to the WireInternal component upon class loading.
     static {
@@ -29,7 +29,7 @@ public class WireInternalInternTest extends WireTestCommon {
     private String typeValue;
 
     // Constructor to set the test input value.
-    public void initWireInternalInternTest(String typeValue) {
+    void initWireInternalInternTest(String typeValue) {
         this.typeValue = typeValue;
     }
 
@@ -50,7 +50,7 @@ public class WireInternalInternTest extends WireTestCommon {
     }
 
     // Helper to ensure that when values are interned, the same instance is returned for the same input.
-    public void intern() {
+    void intern() {
         int sep = typeValue.indexOf(' ');
         Class<?> type = ClassAliasPool.CLASS_ALIASES.forName(
                 typeValue.substring(1, sep));
@@ -72,7 +72,7 @@ public class WireInternalInternTest extends WireTestCommon {
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Marshallable returns interned instances for values")
-    public void marshallable(String typeValue) {
+    void marshallable(String typeValue) {
         initWireInternalInternTest(typeValue);
         // Creating a Marshallable object from the test input value.
         Object o = Marshallable.fromString(typeValue);

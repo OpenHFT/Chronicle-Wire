@@ -12,11 +12,11 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Verifies lifecycle of writingDocument/readingDocument across Binary and Text wires.
  */
-public class DocumentContextLifecycleTest extends WireTestCommon {
+class DocumentContextLifecycleTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads and exhausts documents in binary wire")
-    public void binaryReadWriteAndExhaust() {
+    void binaryReadWriteAndExhaust() {
         Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap(256));
         // write two docs
         try (DocumentContext dc = w.writingDocument()) {
@@ -45,7 +45,7 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads and exhausts documents in text wire")
-    public void textUseTextDocumentsLifecycle() {
+    void textUseTextDocumentsLifecycle() {
         Wire w = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
         try (DocumentContext dc = w.writingDocument()) {
             dc.wire().write("x").int64(11L);
@@ -72,7 +72,7 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
 
     @Test
     @DisplayName("Rollback should keep document available for reread")
-    public void rollbackKeepsDocumentAvailableForNextRead() {
+    void rollbackKeepsDocumentAvailableForNextRead() {
         Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap(256));
         try (DocumentContext dc = w.writingDocument()) {
             dc.wire().write("item").text("value");

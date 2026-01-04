@@ -24,11 +24,11 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * Validates that Bytes reference counts remain stable when multiple {@link ReferenceOwner}s
  * reserve and release handles on different threads.
  */
-public class BytesReferenceCountingTest extends WireTestCommon {
+class BytesReferenceCountingTest extends WireTestCommon {
 
     @Test
     @DisplayName("Maintains reference counts for heap bytes across owners")
-    public void heapBytesMaintainReferenceCountsAcrossOwners() throws InterruptedException {
+    void heapBytesMaintainReferenceCountsAcrossOwners() throws InterruptedException {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         assertEquals(1, bytes.refCount(), "newly allocated heap bytes should have initial reference count of 1");
         try {
@@ -43,7 +43,7 @@ public class BytesReferenceCountingTest extends WireTestCommon {
 
     @Test
     @DisplayName("Warns when owner leaks and force releases bytes")
-    public void warnLoggedWhenOwnerLeakedAndForceReleased() {
+    void warnLoggedWhenOwnerLeakedAndForceReleased() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         assertEquals(1, bytes.refCount(), "newly allocated bytes should have initial reference count of 1 before any reservations");
         try {
@@ -64,7 +64,7 @@ public class BytesReferenceCountingTest extends WireTestCommon {
 
     @Test
     @DisplayName("Maintains reference counts for direct bytes across owners")
-    public void directBytesMaintainReferenceCountsAcrossOwners() throws InterruptedException {
+    void directBytesMaintainReferenceCountsAcrossOwners() throws InterruptedException {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip direct bytes test");
         Bytes<?> bytes = Bytes.allocateElasticDirect(64);
         assertEquals(1, bytes.refCount(), "newly allocated direct bytes should have initial reference count of 1");

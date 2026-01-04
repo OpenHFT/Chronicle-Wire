@@ -15,11 +15,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class ReadAnyWireDetectionTest extends WireTestCommon {
+class ReadAnyWireDetectionTest extends WireTestCommon {
 
     @Test
     @DisplayName("ReadAnyWire detects wire type and reads payload")
-    public void detectsWireTypeAndReadsPayload() {
+    void detectsWireTypeAndReadsPayload() {
         for (WireCase testCase : cases()) {
             Bytes<?> encoded = encode(testCase.type, wire -> {
                 try (DocumentContext dc = wire.writingDocument(false)) {

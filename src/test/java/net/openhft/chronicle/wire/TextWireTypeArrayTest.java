@@ -11,12 +11,12 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // This test class is designed to validate the behavior of TextWire when dealing with arrays of types.
-public class TextWireTypeArrayTest extends WireTestCommon {
+class TextWireTypeArrayTest extends WireTestCommon {
 
     // This test verifies the unmarshalling behavior for arrays of types using TextWire.
     @Test
     @DisplayName("Unmarshals arrays of types using text wire")
-    public void shouldUnmarshalArrayOfType() {
+    void shouldUnmarshalArrayOfType() {
         // Initialize the byte storage
         final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 

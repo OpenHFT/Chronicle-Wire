@@ -72,7 +72,7 @@ class WireModel extends SelfDescribingMarshallable {
         return id;
     }
 
-    public void setId(long id) {
+    void setId(long id) {
         this.id = id;
     }
 
@@ -80,7 +80,7 @@ class WireModel extends SelfDescribingMarshallable {
         return revision;
     }
 
-    public void setRevision(int revision) {
+    void setRevision(int revision) {
         this.revision = revision;
     }
 
@@ -89,7 +89,7 @@ class WireModel extends SelfDescribingMarshallable {
         return key;
     }
 
-    public void setKey(@Nullable String key) {
+    void setKey(@Nullable String key) {
         this.key = key;
     }
 }

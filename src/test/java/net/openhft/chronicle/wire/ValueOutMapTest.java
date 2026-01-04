@@ -12,11 +12,11 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ValueOutMapTest extends WireTestCommon {
+class ValueOutMapTest extends WireTestCommon {
 
     @Test
     @DisplayName("Writes and reads map entries with values")
-    public void writesAndReadsMaps() {
+    void writesAndReadsMaps() {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("name", "alice");
         map.put("count", 12L);
@@ -30,4 +30,3 @@ public class ValueOutMapTest extends WireTestCommon {
         assertEquals(map, read, "Expected map round-trip to preserve entries");
     }
 }
-

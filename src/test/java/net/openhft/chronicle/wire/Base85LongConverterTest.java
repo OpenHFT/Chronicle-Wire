@@ -12,7 +12,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Base85LongConverterTest extends WireTestCommon {
+class Base85LongConverterTest extends WireTestCommon {
 
     // A sample string to test the parsing functionality.
     private static final CharSequence TEST_STRING = "world";
@@ -20,7 +20,7 @@ public class Base85LongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Parses Base85 leading zeros as zero")
-    public void parseLeadingZero() {
+    void parseLeadingZero() {
         LongConverter c = Base85LongConverter.INSTANCE;
         assertEquals(0L, c.parse("0"), "base85 single zero should decode to 0L");
         assertEquals(0L, c.parse("00"), "base85 two zeros should decode to 0L");
@@ -39,7 +39,7 @@ public class Base85LongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Parses and appends Base85 tokens correctly")
-    public void parse() {
+    void parse() {
         // Obtain the singleton instance of Base85LongConverter
         LongConverter c = Base85LongConverter.INSTANCE;
         // Iterate through predefined strings, validate parsing and string reconstruction
@@ -56,7 +56,7 @@ public class Base85LongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Parses Base85 subsequences without error safely")
-    public void parseSubsequence() {
+    void parseSubsequence() {
         LongConverter c = Base85LongConverter.INSTANCE;
         String s = ",a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0,";
         int comparisons = 11;
@@ -66,7 +66,7 @@ public class Base85LongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Rejects overly long Base85 input strings")
-    public void parseLengthCheck() {
+    void parseLengthCheck() {
         assertThrows(IllegalArgumentException.class, () ->
                         Base85LongConverter.INSTANCE.parse(getClass().getCanonicalName()),
                 "base85 parser should reject strings exceeding maximum encodable length");
@@ -74,7 +74,7 @@ public class Base85LongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Rejects invalid Base85 substring bounds cases")
-    public void parseSubstringLengthCheck() {
+    void parseSubstringLengthCheck() {
         assertThrows(IllegalArgumentException.class, () ->
                         Base85LongConverter.INSTANCE.parse("ABCD", -1, 3),
                 "base85 parser should reject negative start indices in substring parsing");
@@ -82,7 +82,7 @@ public class Base85LongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Formats and parses Base85 values correctly")
-    public void asString() {
+    void asString() {
         // Obtain the singleton instance of Base85LongConverter
         LongConverter c = Base85LongConverter.INSTANCE;
         long sample = 0x1234_5678_9abc_def0L;
@@ -101,21 +101,21 @@ public class Base85LongConverterTest extends WireTestCommon {
     // Validate the append operation for a known input string
     @Test
     @DisplayName("Appends Base85 text for known input")
-    public void testAppend() {
+    void testAppend() {
         LongConverterTestSupport.assertAppend(TEST_STRING, Base85LongConverter.INSTANCE);
     }
 
     // Validate appending data with pre-existing content in the buffer
     @Test
     @DisplayName("Appends Base85 text with existing data")
-    public void testAppendWithExistingData() {
+    void testAppendWithExistingData() {
         LongConverterTestSupport.assertAppendWithPrefix(TEST_STRING, Base85LongConverter.INSTANCE, PREFIX_HELLO);
     }
 
     // Ensure safe character conversion using TextWire
     @Test
     @DisplayName("Allows safe Base85 characters in TextWire")
-    public void allSafeCharsTextWire() {
+    void allSafeCharsTextWire() {
         // Create a TextWire instance with elastic on heap bytes and configure it to use text documents
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         assertInstanceOf(TextWire.class, wire, "wire instance should be TextWire for base85 safe character validation");
@@ -126,7 +126,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     // Ensure safe character conversion using YamlWire
     @Test
     @DisplayName("Allows safe Base85 characters in YamlWire")
-    public void allSafeCharsYamlWire() {
+    void allSafeCharsYamlWire() {
         // Create a YamlWire instance with elastic on heap bytes and configure it to use text documents
         Wire wire = new YamlWire();
         assertInstanceOf(YamlWire.class, wire, "wire instance should be YamlWire for base85 safe character validation");

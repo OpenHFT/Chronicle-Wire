@@ -21,7 +21,7 @@ import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class MarshallableTest extends WireTestCommon {
+class MarshallableTest extends WireTestCommon {
     private static final String EXPECTED_DTO1 = "!net.openhft.chronicle.wire.MarshallableTest$DTO1 {\n" +
             "  one: CLASS,\n" +
             "  two: [\n" +
@@ -34,7 +34,7 @@ public class MarshallableTest extends WireTestCommon {
     // Test to check if the fromFile() method of Marshallable throws an IOException for an empty file.
     @Test
     @DisplayName("Rejects empty file when reading marshallable")
-    public void fromFile() {
+    void fromFile() {
         assertThrows(IOException.class, () ->
                 fail("fromFile should throw IOException for empty-file.yaml, but returned "
                         + Marshallable.fromFile("empty-file.yaml")),
@@ -44,7 +44,7 @@ public class MarshallableTest extends WireTestCommon {
     // Test to check if Marshallable.fromString() method returns an empty string when an empty string is provided.
     @Test
     @DisplayName("Marshallable.fromString should return zero-length output string for empty input text")
-    public void testEmptyFromString() {
+    void testEmptyFromString() {
         assertEquals("", Marshallable.fromString(""),
                 "fromString should return a zero-length string for blank input text");
     }
@@ -53,7 +53,7 @@ public class MarshallableTest extends WireTestCommon {
     @Test
     @Disabled("Undefined behaviour for single double-quote input")
     @DisplayName("Rejects single double-quote input string content")
-    public void testFromString2() {
+    void testFromString2() {
         assertThrows(IllegalArgumentException.class, () -> {
             Object o = Marshallable.fromString("\"");
             assertNotNull(o, "Parsed object for double-quote input should not be null before exception");
@@ -64,7 +64,7 @@ public class MarshallableTest extends WireTestCommon {
     @Test
     @Disabled("Undefined behaviour for single quote input parsing")
     @DisplayName("Rejects single quote input string content")
-    public void testFromString3() {
+    void testFromString3() {
         assertThrows(IllegalArgumentException.class, () -> {
             Object o = Marshallable.fromString("'");
             assertNotNull(o, "Parsed object for single-quote input should not be null before exception");
@@ -75,7 +75,7 @@ public class MarshallableTest extends WireTestCommon {
     @Test
     @SuppressWarnings("rawtypes")
     @DisplayName("Writes and reads marshallable to bytes")
-    public void testBytesMarshallable() {
+    void testBytesMarshallable() {
         @NotNull Marshallable m = new MyTypes();
 
         @NotNull Bytes<?> bytes = allocateElasticOnHeap();
@@ -90,7 +90,7 @@ public class MarshallableTest extends WireTestCommon {
     @Test
     @SuppressWarnings("rawtypes")
     @DisplayName("Checks equals after round-trip marshalling")
-    public void testEquals() {
+    void testEquals() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         assertTrue(bytes.isElastic(), "Bytes buffer should be elastic for equals marshalling test");
         @NotNull final MyTypes source = new MyTypes();
@@ -125,7 +125,7 @@ public class MarshallableTest extends WireTestCommon {
     // Test the copying process using WireType.TEXT
     @Test
     @DisplayName("Copies DTO using text wire format")
-    public void testCopy() {
+    void testCopy() {
         assertEquals(EXPECTED_DTO1, doTestCopy(WireType.TEXT),
                 "Copy via TEXT wire should match expected DTO1");
     }
@@ -134,7 +134,7 @@ public class MarshallableTest extends WireTestCommon {
     @Test
     @Disabled("YAML_ONLY copy does not match expected DTO1 yet")
     @DisplayName("Copies DTO using YAML_ONLY wire format")
-    public void testCopyYaml() {
+    void testCopyYaml() {
         assertEquals(EXPECTED_DTO1, doTestCopy(WireType.YAML_ONLY),
                 "Copy via YAML_ONLY wire should match expected DTO1");
     }
@@ -142,7 +142,7 @@ public class MarshallableTest extends WireTestCommon {
     // Test equality of two objects containing arrays
     @Test
     @DisplayName("Compares equality for DTO array content")
-    public void equalsWithArray() {
+    void equalsWithArray() {
         WithArray a = new WithArray();
         WithArray b = new WithArray();
         assertEquals(a, b, "Empty DTO arrays should compare equal");
@@ -158,7 +158,7 @@ public class MarshallableTest extends WireTestCommon {
     // Test to confirm certain expected exceptions and object behaviors during marshalling
     @Test
     @DisplayName("Validates defaults for static and non static data")
-    public void test() {
+    void test() {
         expectException("Found this$0, in class net.openhft.chronicle.wire.MarshallableTest$NonStaticData which will be ignored!");
 
         StaticData staticData0 = Marshallable.fromString(StaticData.class, "{ }");
@@ -180,7 +180,7 @@ public class MarshallableTest extends WireTestCommon {
     // Test the reset functionality of the MyTypes object. This should reset all its fields to default values.
     @Test
     @DisplayName("Resets marshallable fields to default values")
-    public void testReset() {
+    void testReset() {
         MyTypes mt = new MyTypes()
                 .flag(true)
                 .b((byte) 1)
@@ -219,7 +219,7 @@ public class MarshallableTest extends WireTestCommon {
     // Test to get and set the field "three" in DTO1 using getField and setField methods
     @Test
     @DisplayName("Gets and sets field using reflection helpers")
-    public void getField() throws NoSuchFieldException {
+    void getField() throws NoSuchFieldException {
         DTO1 dto1 = new DTO1();
         LocalDate three = dto1.getField("three", LocalDate.class);
         assertNull(three, "DTO1.three should default to null");
@@ -232,7 +232,7 @@ public class MarshallableTest extends WireTestCommon {
     // Test the getLongField and setLongField methods with different edge cases on the StaticData class
     @Test
     @DisplayName("Gets and sets long fields with edge values")
-    public void getLongField() throws NoSuchFieldException {
+    void getLongField() throws NoSuchFieldException {
         StaticData sd = new StaticData();
         long anInt = sd.getLongField("anInt");
         assertEquals(100, anInt, "StaticData.anInt default should be 100");

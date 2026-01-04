@@ -6,7 +6,7 @@ package net.openhft.chronicle.wire.bytesmarshallable;
 // Class: BenchBytesMain
 // A performance benchmarking class designed to test the efficiency
 // and performance of byte-related operations.
-public class BenchBytesMain {
+class BenchBytesMain {
 
     // Main method: entry point of the application, intended for
     // running the benchmarking test related to bytes operations.

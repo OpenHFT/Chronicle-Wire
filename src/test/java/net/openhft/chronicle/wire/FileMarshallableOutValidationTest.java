@@ -20,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * Tests for URL validation when creating file based MarshallableOut instances.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class FileMarshallableOutValidationTest extends WireTestCommon {
+class FileMarshallableOutValidationTest extends WireTestCommon {
 
     @Test
     @DisplayName("Rejects url path traversal when building marshallable out")
-    public void rejectsParentTraversal() throws Exception {
+    void rejectsParentTraversal() throws Exception {
         assertThrows(IllegalArgumentException.class, () -> {
             File dir = new File(OS.getTarget(), "valtest");
             Path dirPath = dir.toPath();

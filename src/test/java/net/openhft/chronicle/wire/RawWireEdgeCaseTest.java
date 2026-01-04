@@ -10,11 +10,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RawWireEdgeCaseTest extends WireTestCommon {
+class RawWireEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("RawWire reads primitives in order and underflows at end")
-    public void writesAndReadsPrimitives() {
+    void writesAndReadsPrimitives() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         RawWire wire = new RawWire(bytes);
 

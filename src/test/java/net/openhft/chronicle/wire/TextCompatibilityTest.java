@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SuppressFBWarnings(
         value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
         justification = "Fields are populated via Wire marshalling in tests.")
-public class TextCompatibilityTest extends WireTestCommon {
+class TextCompatibilityTest extends WireTestCommon {
 
     private static final long MAX_TEXT_BYTES = 50;
 
@@ -37,7 +37,7 @@ public class TextCompatibilityTest extends WireTestCommon {
     private String expected;
 
     // Constructor to initialize the test with a specific file and its expected content.
-    public void initTextCompatibilityTest(String filename, String expected) {
+    void initTextCompatibilityTest(String filename, String expected) {
         this.filename = filename;
         this.expected = expected;
     }
@@ -127,7 +127,7 @@ public class TextCompatibilityTest extends WireTestCommon {
     @DisplayName("Verifies text compatibility against YAML fixtures")
     @MethodSource("combinations")
     @ParameterizedTest
-    public void test(String filename, String expected) {
+    void test(String filename, String expected) {
         initTextCompatibilityTest(filename, expected);
         CompatibilityResult result = runTest(filename, expected, false);
         if (result.skipped) {

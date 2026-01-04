@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
  * Class representing a nested structure for testing partial serialization and deserialization in Chronicle Wire.
  * It demonstrates custom read logic for marshalling a subset of fields and writing additional fields.
  */
-public class NestedReadSubset implements Marshallable {
+class NestedReadSubset implements Marshallable {
     private String text;
     private String text2 = "";
     private double number;

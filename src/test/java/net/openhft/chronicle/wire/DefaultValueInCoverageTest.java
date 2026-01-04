@@ -17,11 +17,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DefaultValueInCoverageTest extends WireTestCommon {
+class DefaultValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Handles bytes pointer and boolean branches with defaults")
-    public void handlesBytesPointerAndBooleanBranches() {
+    void handlesBytesPointerAndBooleanBranches() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         DefaultValueIn valueIn = new DefaultValueIn(wire);
         PointerBytesStore pointer = new PointerBytesStore();
@@ -42,7 +42,7 @@ public class DefaultValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Supplies default values across readers and primitives")
-    public void suppliesDefaultValuesAcrossReaders() throws InvalidMarshallableException {
+    void suppliesDefaultValuesAcrossReaders() throws InvalidMarshallableException {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         DefaultValueIn valueIn = new DefaultValueIn(wire);
 
@@ -76,7 +76,7 @@ public class DefaultValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Delegates sequence and marshallable invocations correctly")
-    public void sequenceAndMarshallableDelegatesInvocations() {
+    void sequenceAndMarshallableDelegatesInvocations() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         DefaultValueIn valueIn = new DefaultValueIn(wire);
         valueIn.defaultValue = null;
@@ -97,7 +97,7 @@ public class DefaultValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Uses class lookup when converting default object")
-    public void objectConversionFollowsClassLookup() {
+    void objectConversionFollowsClassLookup() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         DefaultValueIn valueIn = new DefaultValueIn(wire);
 

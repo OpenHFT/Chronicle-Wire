@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class Issue751Test extends WireTestCommon {
+class Issue751Test extends WireTestCommon {
 
     public static class One extends SelfDescribingMarshallable {
         final Comparable<?> text;
@@ -62,7 +62,7 @@ public class Issue751Test extends WireTestCommon {
 
     @Test
     @DisplayName("Comparable fields should serialise to YAML")
-    public void comparableField() {
+    void comparableField() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for comparable field test");
 
         Wire wire = new YamlWire();

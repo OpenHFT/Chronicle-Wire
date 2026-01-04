@@ -14,11 +14,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MethodWriterReaderDispatchTest extends WireTestCommon {
+class MethodWriterReaderDispatchTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reader dispatches known methods and skips unknown events")
-    public void dispatchKnownMethodsAndIgnoreUnknown() {
+    void dispatchKnownMethodsAndIgnoreUnknown() {
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap(256));
         Api writer = w.methodWriter(Api.class);
         writer.a(1);

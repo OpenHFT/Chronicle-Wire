@@ -12,11 +12,11 @@ import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class VanillaFieldInfoTest extends WireTestCommon {
+class VanillaFieldInfoTest extends WireTestCommon {
 
     @Test
     @DisplayName("FieldInfo should read primitive and generic metadata")
-    public void readsWritesPrimitiveAndGenericMetadata() throws Exception {
+    void readsWritesPrimitiveAndGenericMetadata() throws Exception {
         Sample sample = new Sample();
         Field number = Sample.class.getDeclaredField("number");
         VanillaFieldInfo numberInfo = new VanillaFieldInfo("number", int.class, BracketType.NONE, number);
@@ -39,7 +39,7 @@ public class VanillaFieldInfoTest extends WireTestCommon {
 
     @Test
     @DisplayName("FieldInfo equality should cover primitive and object fields")
-    public void equalityCoversPrimitivesAndObjectPaths() throws Exception {
+    void equalityCoversPrimitivesAndObjectPaths() throws Exception {
         Sample first = new Sample();
         Sample second = new Sample();
         Field ch = Sample.class.getDeclaredField("character");

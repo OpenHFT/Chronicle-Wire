@@ -21,13 +21,13 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 // Use Parameterized runner for performing tests with different WireType instances.
 @SuppressWarnings({"deprecation", "removal"})
-public class TextBinaryWireTest extends WireTestCommon {
+class TextBinaryWireTest extends WireTestCommon {
 
     // The specific WireType for the current test run.
     private WireType wireType;
 
     // Constructor to initialize the test with a specific WireType instance.
-    public void initTextBinaryWireTest(WireType wireType) {
+    void initTextBinaryWireTest(WireType wireType) {
 
         this.wireType = wireType;
     }
@@ -49,7 +49,7 @@ public class TextBinaryWireTest extends WireTestCommon {
     @DisplayName("Identifies wire type from runtime wire instance lookup")
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
-    public void testValueOf(WireType wireType) {
+    void testValueOf(WireType wireType) {
         initTextBinaryWireTest(wireType);
         Wire wire = createWire();
         @NotNull WireType wt = WireType.valueOf(wire);
@@ -69,7 +69,7 @@ public class TextBinaryWireTest extends WireTestCommon {
     @DisplayName("Reads document at explicit position for each wire type")
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
-    public void readingDocumentLocation(WireType wireType) {
+    void readingDocumentLocation(WireType wireType) {
         initTextBinaryWireTest(wireType);
         Wire wire = createWire();
         if (wire instanceof TextWire)
@@ -89,7 +89,7 @@ public class TextBinaryWireTest extends WireTestCommon {
     @DisplayName("Reads comments across supported wire types")
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
-    public void testReadComment(WireType wireType) {
+    void testReadComment(WireType wireType) {
         initTextBinaryWireTest(wireType);
         // Only execute for specific wireTypes.
         assumeTrue(wireType == WireType.TEXT || wireType == WireType.BINARY || wireType == WireType.YAML,
@@ -108,7 +108,7 @@ public class TextBinaryWireTest extends WireTestCommon {
     @DisplayName("Reads enum events and values as objects")
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
-    public void readFieldAsObject(WireType wireType) {
+    void readFieldAsObject(WireType wireType) {
         initTextBinaryWireTest(wireType);
         // Exclude certain wireTypes.
         assumeFalse(wireType == WireType.RAW || wireType == WireType.FIELDLESS_BINARY,
@@ -131,7 +131,7 @@ public class TextBinaryWireTest extends WireTestCommon {
     @DisplayName("Reads numeric event keys and values")
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
-    public void readFieldAsLong(WireType wireType) {
+    void readFieldAsLong(WireType wireType) {
         initTextBinaryWireTest(wireType);
         // Exclude certain wireTypes.
         assumeFalse(wireType == WireType.RAW || wireType == WireType.FIELDLESS_BINARY,
@@ -158,7 +158,7 @@ public class TextBinaryWireTest extends WireTestCommon {
     @DisplayName("Converts boolean and numeric values to int32")
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
-    public void testConvertToNum(WireType wireType) {
+    void testConvertToNum(WireType wireType) {
         initTextBinaryWireTest(wireType);
         // Exclude certain wireTypes.
         assumeFalse(wireType == WireType.RAW || /* No support for bool conversions */ wireType == WireType.YAML,

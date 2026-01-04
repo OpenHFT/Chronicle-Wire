@@ -24,7 +24,7 @@ import static org.easymock.EasyMock.*;
 public class MethodWriterTest extends WireTestCommon {
     @Test
     @DisplayName("Method writer serialises subclass events correctly")
-    public void testSubclasses() {
+    void testSubclasses() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
 
         Event writer = wire.methodWriterBuilder(Event.class).genericEvent("event").build();
@@ -92,7 +92,7 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Default method calls are written to wire")
-    public void testDefault() {
+    void testDefault() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
 
@@ -107,7 +107,7 @@ public class MethodWriterTest extends WireTestCommon {
     @Test
     @SuppressWarnings("deprecation")
     @DisplayName("Method writer can write to multiple outputs")
-    public void multiOut() {
+    void multiOut() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
         Event event = wire.methodWriter(Event.class);
@@ -136,7 +136,7 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Static Closeable methods are ignored by writer")
-    public void ignoreStatic() {
+    void ignoreStatic() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
 
         Closeable writer = wire.methodWriter(Closeable.class);
@@ -147,7 +147,7 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     @DisplayName("No-args methods serialise as empty strings")
-    public void testNoArgs() {
+    void testNoArgs() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
 
@@ -172,7 +172,7 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Update interceptor captures method argument text")
-    public void testUpdateListener() {
+    void testUpdateListener() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
 
@@ -195,7 +195,7 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Update interceptor suppresses writes when returning false")
-    public void testUpdateListenerCheckUpdateInterceptorReturnValue() {
+    void testUpdateListenerCheckUpdateInterceptorReturnValue() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
         StringMethod instance = wire.methodWriterBuilder(StringMethod.class).updateInterceptor((methodName, t) -> false).build();
@@ -208,7 +208,7 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Micro timestamp arguments serialise with expected format")
-    public void testMicroTS() {
+    void testMicroTS() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
 
@@ -235,7 +235,7 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Primitive arguments round-trip via method writer")
-    public void testPrimitives() {
+    void testPrimitives() {
         assertTrue(doTestPrimitives(false), "primitive arguments should survive method writer serialization round-trip");
     }
 
@@ -271,7 +271,7 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Marshalling exceptions roll back partial writes")
-    public void testExceptionInMarshallingRollsBack() {
+    void testExceptionInMarshallingRollsBack() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
         HasMarshallable instance = wire.methodWriterBuilder(HasMarshallable.class).build();
@@ -286,7 +286,7 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Multiple interface inheritance resolves ignore method")
-    public void testMultipleImplsInheritBoth() {
+    void testMultipleImplsInheritBoth() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
         InheritBoth instance = wire.methodWriterBuilder(InheritBoth.class).build();
@@ -296,7 +296,7 @@ public class MethodWriterTest extends WireTestCommon {
     @Test
     @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/274")
     @DisplayName("Multiple interface return values are unsupported")
-    public void testMultipleImplsReturnValues() {
+    void testMultipleImplsReturnValues() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
         ReturnValues instance = wire.methodWriterBuilder(ReturnValues.class).build();
@@ -305,7 +305,7 @@ public class MethodWriterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Return value workaround uses inherited interfaces")
-    public void testMultipleImplsReturnValuesWorkAround() {
+    void testMultipleImplsReturnValuesWorkAround() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
         ReturnValuesWorkAround instance = wire.methodWriterBuilder(ReturnValuesWorkAround.class).build();
@@ -318,7 +318,7 @@ public class MethodWriterTest extends WireTestCommon {
     }
 
     @FunctionalInterface
-    interface Event {
+    public interface Event {
         void event(String eventName, Object o);
     }
 

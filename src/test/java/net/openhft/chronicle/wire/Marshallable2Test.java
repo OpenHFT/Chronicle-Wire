@@ -29,7 +29,7 @@ class Marshallable2Test extends WireTestCommon {
     private WireType wireType;
 
     // Constructor that initializes the WireType for this instance of the test
-    public void initMarshallable2Test(WireType wireType) {
+    void initMarshallable2Test(WireType wireType) {
         this.wireType = wireType;
     }
 
@@ -50,7 +50,7 @@ class Marshallable2Test extends WireTestCommon {
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Checks write document emptiness transitions correctly")
-    public void writeDocumentIsEmpty(WireType wireType) {
+    void writeDocumentIsEmpty(WireType wireType) {
         initMarshallable2Test(wireType);
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(16);
         Wire wire = wireType.apply(bytes);
@@ -73,7 +73,7 @@ class Marshallable2Test extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Round-trips nested object with validation")
-    public void testObject(WireType wireType) {
+    void testObject(WireType wireType) {
         initMarshallable2Test(wireType);
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip nested object test");
@@ -96,7 +96,7 @@ class Marshallable2Test extends WireTestCommon {
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Tracks writing completion across chained documents")
-    public void writingIsComplete(WireType wireType) {
+    void writingIsComplete(WireType wireType) {
         initMarshallable2Test(wireType);
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         Wire wire = wireType.apply(bytes);

@@ -6,7 +6,7 @@ package net.openhft.chronicle.wire.bytesmarshallable;
 // Class: BenchUtf8StringMain
 // A class for performance benchmarking, particularly designed to
 // test the efficiency and performance of UTF-8 string-related operations.
-public class BenchUtf8StringMain {
+class BenchUtf8StringMain {
 
     // Main method: entry point of the application, designed for
     // running the benchmarking test related to UTF-8 string operations.

@@ -18,13 +18,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * duplicate keys, and document boundaries.
  */
 @SuppressWarnings({"deprecation", "removal", "unchecked"})
-public class WireYamlStructuralTest extends WireTestCommon {
+class WireYamlStructuralTest extends WireTestCommon {
 
     // ========== Duplicate Key Tests ==========
 
     @Test
     @DisplayName("YamlWire should handle duplicate keys (last value wins)")
-    public void testDuplicateKeysLastWins() {
+    void testDuplicateKeysLastWins() {
         String yaml = "key: first\nkey: second\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -37,7 +37,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle duplicate keys in flow mapping")
-    public void testDuplicateKeysInFlowMapping() {
+    void testDuplicateKeysInFlowMapping() {
         String yaml = "{key: 1, key: 2}\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -58,7 +58,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle empty YAML content safely")
-    public void testEmptyContent() {
+    void testEmptyContent() {
         Bytes<?> bytes = Bytes.from("");
         YamlWire wire = new YamlWire(bytes);
 
@@ -68,7 +68,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle whitespace-only content")
-    public void testWhitespaceOnlyContent() {
+    void testWhitespaceOnlyContent() {
         Bytes<?> bytes = Bytes.from("   \n\n   \n");
         YamlWire wire = new YamlWire(bytes);
 
@@ -78,7 +78,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle document start marker")
-    public void testDocumentStartMarker() {
+    void testDocumentStartMarker() {
         String yaml = "---\nkey: value\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -89,7 +89,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle document end marker")
-    public void testDocumentEndMarker() {
+    void testDocumentEndMarker() {
         String yaml = "key: value\n...\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -102,7 +102,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should ignore YAML line comments")
-    public void testLineComments() {
+    void testLineComments() {
         String yaml = "# This is a comment\nkey: value # inline comment\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -113,7 +113,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle comment-only lines between fields")
-    public void testCommentsBetweenFields() {
+    void testCommentsBetweenFields() {
         String yaml = "key1: value1\n# comment\nkey2: value2\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -130,7 +130,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
     @Test
     @Disabled("YamlWire treats ~ as literal string, not null - differs from standard YAML")
     @DisplayName("YamlWire should handle explicit null with tilde")
-    public void testExplicitNullTilde() {
+    void testExplicitNullTilde() {
         String yaml = "key: ~\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -143,7 +143,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
     @Test
     @Disabled("YamlWire treats null as literal string - differs from standard YAML")
     @DisplayName("YamlWire should handle explicit null keyword")
-    public void testExplicitNullKeyword() {
+    void testExplicitNullKeyword() {
         String yaml = "key: null\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -154,7 +154,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should treat empty mapping values as null or empty string")
-    public void testEmptyValue() {
+    void testEmptyValue() {
         String yaml = "key:\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -169,7 +169,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle empty sequences without errors")
-    public void testEmptySequence() {
+    void testEmptySequence() {
         String yaml = "items: []\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -183,7 +183,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
     @Test
     @Disabled("YamlWire throws IllegalStateException for block sequences - needs investigation")
     @DisplayName("YamlWire should handle block sequence lists")
-    public void testBlockSequence() {
+    void testBlockSequence() {
         String yaml = "items:\n  - one\n  - two\n  - three\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -198,7 +198,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle flow sequence with mixed spacing")
-    public void testFlowSequenceMixedSpacing() {
+    void testFlowSequenceMixedSpacing() {
         String yaml = "items: [a,b , c,  d]\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -212,7 +212,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle empty mappings without errors")
-    public void testEmptyMapping() {
+    void testEmptyMapping() {
         String yaml = "data: {}\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -224,7 +224,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle nested mapping structures")
-    public void testNestedMappings() {
+    void testNestedMappings() {
         String yaml = "outer:\n  inner:\n    value: 42\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -237,7 +237,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle single-quoted strings with escaped quote")
-    public void testSingleQuotedWithEscapedQuote() {
+    void testSingleQuotedWithEscapedQuote() {
         String yaml = "key: 'it''s a test'\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -248,7 +248,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle double-quoted strings with escapes")
-    public void testDoubleQuotedWithEscapes() {
+    void testDoubleQuotedWithEscapes() {
         String yaml = "key: \"line1\\nline2\"\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -260,7 +260,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle unquoted strings with special starters")
-    public void testUnquotedSpecialStarters() {
+    void testUnquotedSpecialStarters() {
         // Values that look like other YAML constructs but are strings
         String yaml = "key: true-ish\n";
         Bytes<?> bytes = Bytes.from(yaml);
@@ -274,7 +274,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should parse octal-looking strings correctly")
-    public void testOctalLookingStrings() {
+    void testOctalLookingStrings() {
         String yaml = "key: 0777\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -288,7 +288,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should parse hexadecimal scalar strings")
-    public void testHexStrings() {
+    void testHexStrings() {
         String yaml = "key: 0xFF\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -302,7 +302,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle literal block scalar")
-    public void testLiteralBlockScalar() {
+    void testLiteralBlockScalar() {
         String yaml = "key: |\n  line1\n  line2\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -315,7 +315,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle folded block scalar")
-    public void testFoldedBlockScalar() {
+    void testFoldedBlockScalar() {
         String yaml = "key: >\n  line1\n  line2\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -328,7 +328,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle standard boolean true values")
-    public void testBooleanTrueVariations() {
+    void testBooleanTrueVariations() {
         // YamlWire only supports true/True/TRUE, not yes/on
         String[] trueValues = {"true", "True", "TRUE"};
 
@@ -346,7 +346,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
     @Test
     @Disabled("YamlWire only supports true/false, not yes/no/on/off - differs from YAML 1.1")
     @DisplayName("YamlWire should handle YAML 1.1 boolean variations")
-    public void testBooleanYaml11Variations() {
+    void testBooleanYaml11Variations() {
         String[] trueValues = {"yes", "Yes", "YES", "on", "On", "ON"};
 
         for (String trueVal : trueValues) {
@@ -361,7 +361,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle standard boolean false values")
-    public void testBooleanFalseVariations() {
+    void testBooleanFalseVariations() {
         // YamlWire only supports false/False/FALSE, not no/off
         String[] falseValues = {"false", "False", "FALSE"};
 
@@ -379,7 +379,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle simple anchor and alias")
-    public void testSimpleAnchorAlias() {
+    void testSimpleAnchorAlias() {
         String yaml = "anchor: &ref value\nalias: *ref\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -395,7 +395,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
     @Test
     @Disabled("Circular anchor reference handling needs investigation")
     @DisplayName("YamlWire should handle circular anchor references gracefully")
-    public void testCircularAnchorReference() {
+    void testCircularAnchorReference() {
         // This YAML has a circular reference
         String yaml = "a: &1\n  child: *1\n";
         Bytes<?> bytes = Bytes.from(yaml);
@@ -419,7 +419,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle quoted keys with special characters")
-    public void testQuotedKeysWithSpecialChars() {
+    void testQuotedKeysWithSpecialChars() {
         String yaml = "\"key:with:colons\": value\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -430,7 +430,7 @@ public class WireYamlStructuralTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle keys with spaces")
-    public void testKeysWithSpaces() {
+    void testKeysWithSpaces() {
         String yaml = "\"key with spaces\": value\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);

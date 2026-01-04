@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("all")
-public class DocumentContextTest extends WireTestCommon {
+class DocumentContextTest extends WireTestCommon {
 
     // Test multi-message serialization in TEXT format.
     @Test
-    public void multiMessageText() {
+    void multiMessageText() {
         // Create a wire of TEXT type
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
@@ -33,7 +33,7 @@ public class DocumentContextTest extends WireTestCommon {
     // Test multi-message serialization in BINARY format.
     @Test
     @SuppressWarnings("deprecation")
-    public void multiMessageBinary() {
+    void multiMessageBinary() {
         // Create a wire of BINARY type with hex dump
         BinaryWire wire = new BinaryWire(new HexDumpBytes());
         wire.usePadding(true);

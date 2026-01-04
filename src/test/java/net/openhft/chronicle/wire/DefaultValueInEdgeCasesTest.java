@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Regression coverage for default values when fields are absent versus explicit null in TextWire parsing.
  */
-public class DefaultValueInEdgeCasesTest extends WireTestCommon {
+class DefaultValueInEdgeCasesTest extends WireTestCommon {
 
     public static class WithDefaults extends SelfDescribingMarshallable {
         int i = 7;
@@ -20,7 +20,7 @@ public class DefaultValueInEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Preserves defaults when fields are absent")
-    public void absentFieldsPreserveDefaults() {
+    void absentFieldsPreserveDefaults() {
         String doc = "!" + WithDefaults.class.getName() + " { i: 10 }";
         WithDefaults wd = WireType.TEXT.fromString(WithDefaults.class, doc);
         assertEquals(10, wd.i, "explicit i should override default when present");
@@ -29,7 +29,7 @@ public class DefaultValueInEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Overrides defaults when explicit null is provided")
-    public void explicitNullOverridesWrapper() {
+    void explicitNullOverridesWrapper() {
         // Use YAML null literal to ensure a true null is parsed.
         String doc = "!" + WithDefaults.class.getName() + " { s: !!null }";
         WithDefaults wd = WireType.TEXT.fromString(WithDefaults.class, doc);

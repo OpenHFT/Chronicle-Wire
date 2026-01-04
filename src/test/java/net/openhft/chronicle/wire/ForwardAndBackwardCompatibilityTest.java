@@ -18,7 +18,7 @@ import java.util.Collection;
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
 // Using the Parameterized runner for JUnit tests to enable parameter-driven tests
-public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
+class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
 
     // Provides the set of WireTypes to be used as parameters for the tests
     public static Collection<Object[]> data() {
@@ -32,7 +32,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Reads DTO1 data with DTO2 schema")
-    public void backwardsCompatibility(WireType wireType) {
+    void backwardsCompatibility(WireType wireType) {
         // Expecting an exception due to class replacement
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2");
 
@@ -67,7 +67,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Reads DTO2 data with DTO1 schema")
-    public void forwardCompatibility(WireType wireType) {
+    void forwardCompatibility(WireType wireType) {
         // Expecting an exception due to class replacement
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1");
 
@@ -100,7 +100,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Reads older document content after new data appended")
-    public void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads(WireType wireType) {
+    void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads(WireType wireType) {
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             // Creating a Wire instance

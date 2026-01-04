@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CharSequenceObjectMapTest extends WireTestCommon {
+class CharSequenceObjectMapTest extends WireTestCommon {
 
     // Test the put operation of the CharSequenceObjectMap
     @Test
     @DisplayName("Stores and retrieves string keys in map")
-    public void put() {
+    void put() {
         // Initialize a new CharSequenceObjectMap with a capacity of 10
         CharSequenceObjectMap<String> map = new CharSequenceObjectMap<>(10);
 

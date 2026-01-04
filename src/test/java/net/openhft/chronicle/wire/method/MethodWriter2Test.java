@@ -23,12 +23,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 // Test class for verifying the behavior of a method writer with different argument types and update interceptor
 // run with -DdumpCode to see the generated code
-public class MethodWriter2Test extends WireTestCommon {
+class MethodWriter2Test extends WireTestCommon {
 
     // Test to verify that method calls with DTO arguments are allowed through
     @Test
     @DisplayName("UpdateInterceptor allows DTO calls through writer")
-    public void allowThrough() {
+    void allowThrough() {
         ignoreException("Generated code to call updateInterceptor for public abstract void net.openhft.chronicle.wire.method.FundingListener.fundingPrimitive(int) will box and generate garbage");
         check(true, ARGUMENT.DTO);
     }
@@ -36,14 +36,14 @@ public class MethodWriter2Test extends WireTestCommon {
     // Test to verify that method calls with primitive arguments are allowed through
     @Test
     @DisplayName("UpdateInterceptor allows primitive calls through writer")
-    public void allowThroughPrimitive() {
+    void allowThroughPrimitive() {
         check(true, ARGUMENT.PRIMITIVE);
     }
 
     // Test to verify that method calls with no arguments are allowed through
     @Test
     @DisplayName("UpdateInterceptor allows no-arg calls through writer")
-    public void allowThroughNoArg() {
+    void allowThroughNoArg() {
         ignoreException("Generated code to call updateInterceptor for public abstract void net.openhft.chronicle.wire.method.FundingListener.fundingPrimitive(int) will box and generate garbage");
         check(true, ARGUMENT.NONE);
     }
@@ -51,21 +51,21 @@ public class MethodWriter2Test extends WireTestCommon {
     // Test to verify that method calls with DTO arguments are blocked
     @Test
     @DisplayName("UpdateInterceptor blocks DTO calls in writer")
-    public void block() {
+    void block() {
         check(false, ARGUMENT.DTO);
     }
 
     // Test to verify that method calls with primitive arguments are blocked
     @Test
     @DisplayName("UpdateInterceptor blocks primitive calls in writer")
-    public void blockPrimitive() {
+    void blockPrimitive() {
         check(false, ARGUMENT.PRIMITIVE);
     }
 
     // Test to verify that method calls with no arguments are blocked
     @Test
     @DisplayName("UpdateInterceptor blocks no-arg calls in writer")
-    public void blockNoArg() {
+    void blockNoArg() {
         check(false, ARGUMENT.NONE);
     }
 

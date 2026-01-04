@@ -10,25 +10,25 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class BinaryWireAnchorTest extends WireTestCommon {
+class BinaryWireAnchorTest extends WireTestCommon {
 
     static class ExposedBinaryWire extends BinaryWire {
         public ExposedBinaryWire(Bytes<?> bytes) {
             super(bytes);
         }
 
-        public void callAnchor() {
+        void callAnchor() {
             anchor(this);
         }
 
-        public void callFieldAnchor() {
+        void callFieldAnchor() {
             fieldAnchor(this);
         }
     }
 
     @Test
     @DisplayName("Anchor helpers throw for unexpected code paths")
-    public void anchorMethodsThrowUnexpectedCode() {
+    void anchorMethodsThrowUnexpectedCode() {
         ExposedBinaryWire wire = new ExposedBinaryWire(Bytes.allocateElasticOnHeap());
         assertThrows(IORuntimeException.class, wire::callAnchor,
                 "Expected anchor() to reject unexpected call");

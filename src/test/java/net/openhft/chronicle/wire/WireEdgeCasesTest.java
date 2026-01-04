@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests empty/null handling, boundary values, and round-trip consistency.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class WireEdgeCasesTest extends WireTestCommon {
+class WireEdgeCasesTest extends WireTestCommon {
 
     private static final WireType[] ALL_WIRE_TYPES = {
         WireType.BINARY, WireType.TEXT, WireType.YAML
@@ -32,7 +32,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests empty string handling across wire types")
-    public void testEmptyStringAcrossWireTypes() {
+    void testEmptyStringAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             Wire wire = wireType.apply(bytes);
@@ -47,7 +47,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests null string handling across wire types")
-    public void testNullStringAcrossWireTypes() {
+    void testNullStringAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             Wire wire = wireType.apply(bytes);
@@ -62,7 +62,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests empty byte array handling across wire types")
-    public void testEmptyByteArrayAcrossWireTypes() {
+    void testEmptyByteArrayAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             Wire wire = wireType.apply(bytes);
@@ -79,7 +79,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests empty sequence handling across wire types")
-    public void testEmptySequenceAcrossWireTypes() {
+    void testEmptySequenceAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             Wire wire = wireType.apply(bytes);
@@ -101,7 +101,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
     @Test
     @Disabled("IllegalAccess with lambda in marshallable - Java module access issue")
     @DisplayName("Tests empty marshallable handling across wire types")
-    public void testEmptyMarshallableAcrossWireTypes() {
+    void testEmptyMarshallableAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             Wire wire = wireType.apply(bytes);
@@ -124,7 +124,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests byte boundary values across wire types")
-    public void testByteBoundariesAcrossWireTypes() {
+    void testByteBoundariesAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             Wire wire = wireType.apply(bytes);
@@ -149,7 +149,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests short boundary values across wire types")
-    public void testShortBoundariesAcrossWireTypes() {
+    void testShortBoundariesAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             Wire wire = wireType.apply(bytes);
@@ -171,7 +171,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests int boundary values across wire types")
-    public void testIntBoundariesAcrossWireTypes() {
+    void testIntBoundariesAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             Wire wire = wireType.apply(bytes);
@@ -193,7 +193,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests long boundary values across wire types")
-    public void testLongBoundariesAcrossWireTypes() {
+    void testLongBoundariesAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             Wire wire = wireType.apply(bytes);
@@ -218,7 +218,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests special float values across wire types")
-    public void testSpecialFloatsAcrossWireTypes() {
+    void testSpecialFloatsAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(512);
             Wire wire = wireType.apply(bytes);
@@ -246,7 +246,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests special double values across wire types")
-    public void testSpecialDoublesAcrossWireTypes() {
+    void testSpecialDoublesAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(512);
             Wire wire = wireType.apply(bytes);
@@ -276,7 +276,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests boolean values across wire types")
-    public void testBooleanAcrossWireTypes() {
+    void testBooleanAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             Wire wire = wireType.apply(bytes);
@@ -295,7 +295,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests UUID values across wire types")
-    public void testUUIDAcrossWireTypes() {
+    void testUUIDAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             Wire wire = wireType.apply(bytes);
@@ -323,7 +323,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests int32 consumer callback across wire types")
-    public void testInt32ConsumerAcrossWireTypes() {
+    void testInt32ConsumerAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             Wire wire = wireType.apply(bytes);
@@ -339,7 +339,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests int64 consumer callback across wire types")
-    public void testInt64ConsumerAcrossWireTypes() {
+    void testInt64ConsumerAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             Wire wire = wireType.apply(bytes);
@@ -355,7 +355,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests float64 consumer callback across wire types")
-    public void testFloat64ConsumerAcrossWireTypes() {
+    void testFloat64ConsumerAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             Wire wire = wireType.apply(bytes);
@@ -373,7 +373,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("SkipValue should work across all wire types")
-    public void testSkipValueAcrossWireTypes() {
+    void testSkipValueAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(512);
             Wire wire = wireType.apply(bytes);
@@ -403,7 +403,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
     @Test
     @Disabled("IllegalAccess with nested lambda in marshallable - Java module access issue")
     @DisplayName("Tests nested marshallable across wire types")
-    public void testNestedMarshallableAcrossWireTypes() {
+    void testNestedMarshallableAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(512);
             Wire wire = wireType.apply(bytes);
@@ -421,7 +421,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests nested sequences across wire types")
-    public void testNestedSequencesAcrossWireTypes() {
+    void testNestedSequencesAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(512);
             Wire wire = wireType.apply(bytes);
@@ -462,7 +462,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests sequence with mixed types across wire types")
-    public void testMixedTypeSequenceAcrossWireTypes() {
+    void testMixedTypeSequenceAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(512);
             Wire wire = wireType.apply(bytes);
@@ -495,7 +495,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests getBracketType for sequence across wire types")
-    public void testBracketTypeSequenceAcrossWireTypes() {
+    void testBracketTypeSequenceAcrossWireTypes() {
         // Skip BinaryWire as it uses different encoding
         for (WireType wireType : new WireType[]{WireType.TEXT, WireType.YAML}) {
             Wire wire;
@@ -512,7 +512,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests getBracketType for mapping across wire types")
-    public void testBracketTypeMappingAcrossWireTypes() {
+    void testBracketTypeMappingAcrossWireTypes() {
         // Skip BinaryWire as it uses different encoding
         for (WireType wireType : new WireType[]{WireType.TEXT, WireType.YAML}) {
             Wire wire;
@@ -531,7 +531,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests character values across wire types")
-    public void testCharacterAcrossWireTypes() {
+    void testCharacterAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             Wire wire = wireType.apply(bytes);
@@ -552,7 +552,7 @@ public class WireEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests textTo StringBuilder across wire types")
-    public void testTextToStringBuilderAcrossWireTypes() {
+    void testTextToStringBuilderAcrossWireTypes() {
         for (WireType wireType : ALL_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             Wire wire = wireType.apply(bytes);

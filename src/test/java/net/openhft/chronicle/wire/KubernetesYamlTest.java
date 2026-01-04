@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @RequiredForClient
-public class KubernetesYamlTest extends WireTestCommon {
+class KubernetesYamlTest extends WireTestCommon {
 
     // Directory path to Kubernetes YAML files
     private static final String DIR = "/yaml/k8s/";
@@ -66,7 +66,7 @@ public class KubernetesYamlTest extends WireTestCommon {
     // Test cases for the "example*.yaml" Kubernetes file
     @Test
     @DisplayName("Kubernetes YAML reader should parse example1 resource")
-    public void testExample1() {
+    void testExample1() {
         assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example1.yaml"),
                 "Kubernetes YAML resource example1.yaml should be available");
         doTest("example1.yaml",
@@ -77,7 +77,7 @@ public class KubernetesYamlTest extends WireTestCommon {
 
     @Test
     @DisplayName("Kubernetes YAML reader should parse example2 resource")
-    public void testExample2() {
+    void testExample2() {
         assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example2.yaml"),
                 "Kubernetes YAML resource example2.yaml should be available");
         doTest("example2.yaml",
@@ -89,7 +89,7 @@ public class KubernetesYamlTest extends WireTestCommon {
 
     @Test
     @DisplayName("Kubernetes YAML reader should parse example3 resource")
-    public void testExample3() {
+    void testExample3() {
         assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example3.yaml"),
                 "Kubernetes YAML resource example3.yaml should be available");
         doTest("example3.yaml",
@@ -99,7 +99,7 @@ public class KubernetesYamlTest extends WireTestCommon {
 
     @Test
     @DisplayName("Kubernetes YAML reader should parse example4 resource")
-    public void testExample4() {
+    void testExample4() {
         assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example4.yaml"),
                 "Kubernetes YAML resource example4.yaml should be available");
         doTest("example4.yaml",
@@ -123,7 +123,7 @@ public class KubernetesYamlTest extends WireTestCommon {
 
     @Test
     @DisplayName("Kubernetes YAML reader should parse example5 resource")
-    public void testExample5() {
+    void testExample5() {
         assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example5.yaml"),
                 "Kubernetes YAML resource example5.yaml should be available");
         doTest("example5.yaml",
@@ -168,7 +168,7 @@ public class KubernetesYamlTest extends WireTestCommon {
 
     @Test
     @DisplayName("Kubernetes YAML reader should parse example6 resource")
-    public void testExample6() {
+    void testExample6() {
         assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example6.yaml"),
                 "Kubernetes YAML resource example6.yaml should be available");
         doTest("example6.yaml", "{apiVersion=v1, items=[{apiVersion=v1, kind=Service, metadata={annotations={" +
@@ -203,7 +203,7 @@ public class KubernetesYamlTest extends WireTestCommon {
 
     @Test
     @DisplayName("Kubernetes YAML reader should parse example7 resource")
-    public void testExample7() {
+    void testExample7() {
         assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example7.yaml"),
                 "Kubernetes YAML resource example7.yaml should be available");
         doTest("example7.yaml", "{containers=[{env=[{name=POD_ID, valueFrom=null}, {name=LOG_PATH, value=/var/log/mycompany/$(POD_ID)/logs}]}]}");
@@ -211,7 +211,7 @@ public class KubernetesYamlTest extends WireTestCommon {
 
     @Test
     @DisplayName("Kubernetes YAML reader should parse example8 resource")
-    public void testExample8() {
+    void testExample8() {
         assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example8.yaml"),
                 "Kubernetes YAML resource example8.yaml should be available");
         doTest("example8.yaml", "{kind=List, apiVersion=v1, items=[" +
@@ -226,7 +226,7 @@ public class KubernetesYamlTest extends WireTestCommon {
 
     @Test
     @DisplayName("Kubernetes YAML reader should parse example9 resource")
-    public void testExample9() {
+    void testExample9() {
         assertNotNull(KubernetesYamlTest.class.getResource(DIR + "example9.yaml"),
                 "Kubernetes YAML resource example9.yaml should be available");
         doTest("example9.yaml", "{kind=List, apiVersion=v1, items=[" +

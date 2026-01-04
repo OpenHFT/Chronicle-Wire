@@ -15,13 +15,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * directives, bare documents, and document markers.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class WireYamlDocumentStreamTest extends WireTestCommon {
+class WireYamlDocumentStreamTest extends WireTestCommon {
 
     // ========== Document Marker Tests ==========
 
     @Test
     @DisplayName("YamlWire should parse single document with explicit start marker")
-    public void testSingleDocumentWithStartMarker() {
+    void testSingleDocumentWithStartMarker() {
         String yaml = "---\nkey: value\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -32,7 +32,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should parse document without explicit start marker")
-    public void testBareDocument() {
+    void testBareDocument() {
         String yaml = "key: value\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -43,7 +43,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle document end marker")
-    public void testDocumentEndMarker() {
+    void testDocumentEndMarker() {
         String yaml = "key: value\n...\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -54,7 +54,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle both start and end markers")
-    public void testStartAndEndMarkers() {
+    void testStartAndEndMarkers() {
         String yaml = "---\nkey: value\n...\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -67,7 +67,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should parse first document in multi-document stream")
-    public void testMultiDocumentFirstDoc() {
+    void testMultiDocumentFirstDoc() {
         String yaml = "---\nfirst: doc1\n---\nsecond: doc2\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -78,7 +78,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle empty first document blocks")
-    public void testEmptyFirstDocument() {
+    void testEmptyFirstDocument() {
         String yaml = "---\n---\nkey: value\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -95,7 +95,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle document with only markers")
-    public void testDocumentWithOnlyMarkers() {
+    void testDocumentWithOnlyMarkers() {
         String yaml = "---\n...\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -114,7 +114,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle YAML version directive")
-    public void testYamlVersionDirective() {
+    void testYamlVersionDirective() {
         String yaml = "%YAML 1.2\n---\nkey: value\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -131,7 +131,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle YAML TAG directives")
-    public void testTagDirective() {
+    void testTagDirective() {
         String yaml = "%TAG !e! tag:example.com,2000:\n---\nkey: value\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -147,7 +147,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle unknown directive gracefully")
-    public void testUnknownDirective() {
+    void testUnknownDirective() {
         String yaml = "%UNKNOWN directive value\n---\nkey: value\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -165,7 +165,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle leading blank lines")
-    public void testLeadingBlankLines() {
+    void testLeadingBlankLines() {
         String yaml = "\n\n\nkey: value\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -176,7 +176,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle leading comment lines")
-    public void testLeadingComment() {
+    void testLeadingComment() {
         String yaml = "# This is a comment\nkey: value\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -187,7 +187,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle multiple leading comments")
-    public void testMultipleLeadingComments() {
+    void testMultipleLeadingComments() {
         String yaml = "# Comment 1\n# Comment 2\n# Comment 3\nkey: value\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -198,7 +198,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle comment before document marker")
-    public void testCommentBeforeMarker() {
+    void testCommentBeforeMarker() {
         String yaml = "# Header comment\n---\nkey: value\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -211,7 +211,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should differentiate --- from similar content")
-    public void testMarkerLikeContent() {
+    void testMarkerLikeContent() {
         // Content that looks like marker but isn't
         String yaml = "key: '---'\n";
         Bytes<?> bytes = Bytes.from(yaml);
@@ -223,7 +223,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should treat --- in the middle of values")
-    public void testMarkerInMiddleOfLine() {
+    void testMarkerInMiddleOfLine() {
         String yaml = "key: a---b\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -234,7 +234,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should treat ... tokens inside values")
-    public void testEndMarkerInValue() {
+    void testEndMarkerInValue() {
         String yaml = "key: '...'\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -247,7 +247,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle --- with trailing spaces")
-    public void testMarkerWithTrailingSpaces() {
+    void testMarkerWithTrailingSpaces() {
         String yaml = "---   \nkey: value\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -258,7 +258,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle --- with trailing comment")
-    public void testMarkerWithTrailingComment() {
+    void testMarkerWithTrailingComment() {
         String yaml = "--- # start of document\nkey: value\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -271,7 +271,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle scalar-only document")
-    public void testScalarOnlyDocument() {
+    void testScalarOnlyDocument() {
         String yaml = "---\njust a string\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -287,7 +287,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle sequence document payloads")
-    public void testSequenceDocument() {
+    void testSequenceDocument() {
         String yaml = "---\n- item1\n- item2\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -305,7 +305,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should treat --- as field name not document marker")
-    public void testTextWireMarkerHandling() {
+    void testTextWireMarkerHandling() {
         String text = "---: value\n";
         Bytes<?> bytes = Bytes.from(text);
         TextWire wire = new TextWire(bytes);
@@ -325,7 +325,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle whitespace-only content")
-    public void testWhitespaceOnlyContent() {
+    void testWhitespaceOnlyContent() {
         String yaml = "   \n   \n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -340,7 +340,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle comment-only content")
-    public void testCommentOnlyContent() {
+    void testCommentOnlyContent() {
         String yaml = "# Just a comment\n# Another comment\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -356,7 +356,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle inline comment after value")
-    public void testInlineCommentAfterValue() {
+    void testInlineCommentAfterValue() {
         String yaml = "key: value # inline comment\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -367,7 +367,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle comment between fields")
-    public void testCommentBetweenFields() {
+    void testCommentBetweenFields() {
         String yaml = "key1: value1\n# comment\nkey2: value2\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -384,7 +384,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
     @Test
     @Disabled("YamlWire does not properly parse documents with type tags - needs investigation")
     @DisplayName("YamlWire should handle document type tag")
-    public void testDocumentTypeTag() {
+    void testDocumentTypeTag() {
         String yaml = "--- !custom\nkey: value\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -402,7 +402,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
 
     @Test
     @DisplayName("Read position should advance correctly with document markers")
-    public void testReadPositionWithMarkers() {
+    void testReadPositionWithMarkers() {
         String yaml = "---\nkey: value\n";
         Bytes<?> bytes = Bytes.from(yaml);
         YamlWire wire = new YamlWire(bytes);
@@ -419,7 +419,7 @@ public class WireYamlDocumentStreamTest extends WireTestCommon {
     @Test
     @Disabled("YamlWire returns null when BOM precedes document marker - needs BOM stripping")
     @DisplayName("YamlWire should handle UTF-8 BOM before document")
-    public void testBomBeforeDocument() {
+    void testBomBeforeDocument() {
         // UTF-8 BOM is EF BB BF (U+FEFF)
         String yaml = "\uFEFF---\nkey: value\n";
         Bytes<?> bytes = Bytes.from(yaml);

@@ -50,7 +50,7 @@ class MyServiceImpl implements MyService {
  * The example showcases serializing method calls and their arguments, and later
  * deserializing and executing these methods.
  */
-public class ChronicleWireMethodExample {
+class ChronicleWireMethodExample {
 
     // GPT-4 Generated example
     public static void main(String[] args) {

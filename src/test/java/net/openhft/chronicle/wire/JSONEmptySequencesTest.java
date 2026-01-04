@@ -13,11 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 // This test class is for validating JSON sequences.
-public class JSONEmptySequencesTest extends net.openhft.chronicle.wire.WireTestCommon {
+class JSONEmptySequencesTest extends net.openhft.chronicle.wire.WireTestCommon {
     // Test for verifying the handling of empty and non-empty JSON sequences.
     @Test
     @DisplayName("Parses empty and populated sequences in JSON wire")
-    public void emptySequence() {
+    void emptySequence() {
         // Add an alias for the Foo class to simplify the YAML representation.
         ClassAliasPool.CLASS_ALIASES.addAlias(Foo.class);
 

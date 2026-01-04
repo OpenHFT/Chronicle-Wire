@@ -75,12 +75,12 @@ class SimpleMetaData extends AbstractClassGenerator.MetaData<SimpleMetaData> {
 }
 
 // Tests for the AbstractClassGenerator's functionality
-public class AbstractClassGeneratorTest extends WireTestCommon {
+class AbstractClassGeneratorTest extends WireTestCommon {
 
     // Test case to validate the SimpleClassGenerator's functionality
     @Test
     @DisplayName("Generates simple callable class from metadata")
-    public void simpleGenerator() throws Exception {
+    void simpleGenerator() throws Exception {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip simple generator test");
 
         assertEquals("Hello World", doTest("Hello World"), "Simple generator should echo hello message");
@@ -106,7 +106,7 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
     // Test case to validate the interceptor's functionality in the UIClassGenerator
     @Test
     @DisplayName("Generates UI class with update interceptor")
-    public void useInterceptor() throws Exception {
+    void useInterceptor() throws Exception {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip interceptor generator test");
 
         // StringWriter to capture the interceptor's output

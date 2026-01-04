@@ -14,7 +14,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * is thrown back to the user call.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class UnknownFieldsTest extends WireTestCommon {
+class UnknownFieldsTest extends WireTestCommon {
 
     // Static initialization block to add class aliases to ClassAliasPool for the test variations
     static {
@@ -26,7 +26,7 @@ public class UnknownFieldsTest extends WireTestCommon {
     // Test to verify if the expected exception is thrown and not suppressed
     @Test
     @DisplayName("Propagates unexpected field exception without swallowing")
-    public void testExceptionIsNotSwallowed() {
+    void testExceptionIsNotSwallowed() {
         try {
             WireType.TEXT.fromString("!Variation1 {\n" +
                     "    object: !Inner {\n" +
@@ -44,7 +44,7 @@ public class UnknownFieldsTest extends WireTestCommon {
     // Test to verify if the expected exception's transformation is correctly handled
     @Test
     @DisplayName("Propagates unexpected field exception without transformation")
-    public void testExceptionIsNotTransformed() {
+    void testExceptionIsNotTransformed() {
         try {
             WireType.TEXT.fromString("!Variation2 {\n" +
                     "    object: !Inner {\n" +

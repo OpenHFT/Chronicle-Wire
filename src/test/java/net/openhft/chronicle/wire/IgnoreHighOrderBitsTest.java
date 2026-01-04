@@ -13,7 +13,7 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class IgnoreHighOrderBitsTest extends WireTestCommon {
+class IgnoreHighOrderBitsTest extends WireTestCommon {
 
     /**
      * Writes to the output stream the eight low-order bits of the argument b. The 24 high-order bits of b are ignored.
@@ -21,7 +21,7 @@ public class IgnoreHighOrderBitsTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Writes only low order byte for int write")
-    public void testWriteByte() throws IOException {
+    void testWriteByte() throws IOException {
         // Create a new HexDumpBytes object to represent byte sequences in a human-readable format
         @SuppressWarnings("rawtypes") final Bytes<?> bytes = new HexDumpBytes();
         try {

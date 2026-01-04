@@ -12,11 +12,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class WireMarshallerTest extends WireTestCommon {
+class WireMarshallerTest extends WireTestCommon {
 
     @Test
     @DisplayName("Binary wire marshaller preserves object content")
-    public void usesBinary() {
+    void usesBinary() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory is required for binary marshaller test");
 

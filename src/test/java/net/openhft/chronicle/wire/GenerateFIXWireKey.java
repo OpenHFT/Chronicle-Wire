@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 // Class to generate FIX Wire keys from an XML file
-public class GenerateFIXWireKey {
+class GenerateFIXWireKey {
 
     // Main method to read and process the XML
     public static void main(String[] args) throws IOException {

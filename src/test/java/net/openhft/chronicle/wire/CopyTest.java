@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class CopyTest extends WireTestCommon {
+class CopyTest extends WireTestCommon {
 
     // Define the combinations of wire types and settings for the test
     public static Collection<Object[]> wireTypes() {
@@ -51,7 +51,7 @@ public class CopyTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @ParameterizedTest(name = "from: {0}, to: {1}, withType: {2}")
     @DisplayName("Copies wire data across formats with optional type metadata")
-    public void testCopy(WireType from, WireType to, boolean withType) {
+    void testCopy(WireType from, WireType to, boolean withType) {
         // Create source bytes and wire objects
         Bytes<?> bytesFrom = Bytes.allocateElasticOnHeap(64);
         Wire wireFrom = from.apply(bytesFrom);

@@ -16,11 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class JSONWireTypesTest extends WireTestCommon {
+class JSONWireTypesTest extends WireTestCommon {
     @Test
     @SuppressWarnings("unchecked")
     @DisplayName("Serialises nested sets with json only wire")
-    public void nestedSets() {
+    void nestedSets() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip nested sets json test");
 

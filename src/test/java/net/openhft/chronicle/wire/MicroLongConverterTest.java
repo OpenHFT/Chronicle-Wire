@@ -13,14 +13,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * It extends the WireTestCommon for common test setup and utilities.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class MicroLongConverterTest extends WireTestCommon {
+class MicroLongConverterTest extends WireTestCommon {
 
     /**
      * This test ensures that MicroLongConverter properly converts microsecond timestamp and duration representations.
      */
     @Test
     @DisplayName("Round-trip micro timestamps and duration values")
-    public void testMicro() {
+    void testMicro() {
         String in = "!net.openhft.chronicle.wire.MicroLongConverterTest$Data {\n" +
                 "  time: 2019-01-20T23:45:11.123456,\n" +
                 "  ttl: PT1H15M\n" +

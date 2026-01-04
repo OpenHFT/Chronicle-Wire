@@ -53,21 +53,21 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"rawtypes", "unchecked", "try", "serial", "deprecation"})
-public class TextWireTest extends AbstractWireTest {
+class TextWireTest extends AbstractWireTest {
 
     // Create a new TextWire instance with an elastic heap allocated buffer
     private static final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
     private Bytes<?> bytes;
 
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip text wire tests");
     }
 
     // Test to check if white space within type specifications is handled correctly.
     @Test
     @DisplayName("Text wire reads lists from text input")
-    public void fromList() {
+    void fromList() {
         for (String text : new String[]{
                 "[a , b\n, c]",
                 "[ 'a'\n, 'b' , 'c' ]",
@@ -82,7 +82,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire accepts whitespace in type declarations")
-    public void testWhiteSpaceInType() {
+    void testWhiteSpaceInType() {
         try {
             // Deserialize from string and check if the object is correctly formed
             Object o = Marshallable.fromString("key: !" + DTO.class.getName() + " {\n" +
@@ -99,7 +99,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test handling of Bytes data type in TextWire.
     @Test
     @DisplayName("Text wire round-trips bytes fields and values")
-    public void testBytes() {
+    void testBytes() {
         final Wire wire = createWire();
         @NotNull byte[] allBytes = new byte[256];
         for (int i = 0; i < 256; i++)
@@ -116,7 +116,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test handling of comments in TextWire.
     @Test
     @DisplayName("Text wire ignores comments when reading fields")
-    public void comment() {
+    void comment() {
         final Wire wire = createWire();
         wire.writeComment("\thi: omg");
         wire.write("hi").text("there");
@@ -126,7 +126,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test handling of type specification instead of an actual field in TextWire.
     @Test
     @DisplayName("Text wire handles type marker without field")
-    public void testTypeInsteadOfField() {
+    void testTypeInsteadOfField() {
         Wire wire = TextWire.from("!!null \"\"");
         StringBuilder sb = new StringBuilder();
         wire.read(sb).object(Object.class);
@@ -136,7 +136,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test serialization with fields accompanied by comments in TextWire.
     @Test
     @DisplayName("Text wire serialises fields with inline comments")
-    public void testFieldWithComment() {
+    void testFieldWithComment() {
         FieldWithComment f = new FieldWithComment();
         f.field = "hello world";
         Assertions.assertEquals("!net.openhft.chronicle.wire.TextWireTest$FieldWithComment {\n" +
@@ -147,7 +147,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test serialization with multiple fields accompanied by comments in TextWire.
     @Test
     @DisplayName("Text wire serialises multiple fields with comments")
-    public void testFieldWithComment2() {
+    void testFieldWithComment2() {
         FieldWithComment2 f = new FieldWithComment2();
         f.field = "hello world";
         Assertions.assertEquals("!net.openhft.chronicle.wire.TextWireTest$FieldWithComment2 {\n" +
@@ -159,7 +159,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test correct handling of comments placed after string values in TextWire.
     @Test
     @DisplayName("Text wire parses comments after string values")
-    public void testCommentAfterString() {
+    void testCommentAfterString() {
         Map<String, Object> o = Marshallable.fromString("{\n" +
                 "  pattern: '@Symbol =~ \"[A-L].*\"', # quoted\n" +
                 "  policy: ROUND_ROBIN, # unquoted\n" +
@@ -174,7 +174,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test to ensure that unexpected fields in the serialized string are properly handled and deserialized.
     @Test
     @DisplayName("Text wire captures unexpected fields into map")
-    public void handleUnexpectedFields() {
+    void handleUnexpectedFields() {
         // Deserialize a string with more fields than the TwoFields class has.
         // Fields "d", "e", and "f" are not part of TwoFields, and should be collected in the "others" field.
         TwoFields tf = Marshallable.fromString("!" + TwoFields.class.getName() + " {" +
@@ -227,7 +227,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test to check the license validation for different WireTypes.
     @Test
     @DisplayName("Text wire licence check for availability")
-    public void licenseCheck() {
+    void licenseCheck() {
         // Verify that TEXT WireType doesn't require any license check.
         WireType.TEXT.licenceCheck();
         assertTrue(WireType.TEXT.isAvailable(), "TEXT wire type should be available without license check");
@@ -236,14 +236,14 @@ public class TextWireTest extends AbstractWireTest {
     // Test to ensure that objects with TreeMap fields are correctly serialized and deserialized.
     @Test
     @DisplayName("Text wire writes objects with TreeMap fields")
-    public void writeObjectWithTreeMap() {
+    void writeObjectWithTreeMap() {
         WireMapTestSupport.assertObjectWithTreeMap(WireType.TEXT::apply);
     }
 
     // Test to ensure a serialized string with a nested map structure can be deserialized into a Map.
     @Test
     @DisplayName("Text wire parses nested map from string input")
-    public void testFromString() {
+    void testFromString() {
         @Nullable Object w = WireType.TEXT.fromString("changedRow: {\n" +
                 "  row: [\n" +
                 "  ],\n" +
@@ -264,7 +264,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test to verify deserialization of integer values presented in hexadecimal format.
     @Test
     @DisplayName("Text wire parses hex values from string input")
-    public void testFromString2() {
+    void testFromString2() {
         // Iterate through integers from 0 to 256.
         for (int i = 0; i <= 256; i++) {
             // Deserialize a string containing the integer in uppercase and lowercase hexadecimal format.
@@ -280,7 +280,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test to serialize a data structure in BINARY format and then try to convert it to TEXT format.
     @Test
     @DisplayName("Text wire Write To Binary And Tries To Convert To Text")
-    public void testWriteToBinaryAndTriesToConvertToText() {
+    void testWriteToBinaryAndTriesToConvertToText() {
 
         Bytes<?> b = allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(b);
@@ -310,7 +310,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test to ensure calling the 'write()' method multiple times will produce the expected string.
     @Test
     @DisplayName("Text wire writes empty fields for each entry")
-    public void testWrite() {
+    void testWrite() {
         @NotNull Wire wire = createWire();
         wire.write();
         wire.write();
@@ -330,7 +330,7 @@ public class TextWireTest extends AbstractWireTest {
     @Test
     @DisplayName("Text wire reads standard fields and values")
     @Override
-    public void testRead() {
+    void testRead() {
         @NotNull Wire wire = createWire();
 
         // Write values to the wire
@@ -345,7 +345,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test to validate reading using specific keys from the wire
     @Test
     @DisplayName("Text wire reads placeholders and field names")
-    public void testRead1() {
+    void testRead1() {
         @NotNull Wire wire = createWire();
 
         // Write values to the wire
@@ -362,7 +362,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test to validate reading values into a StringBuilder
     @Test
     @DisplayName("Text wire reads field names into StringBuilder")
-    public void testRead2() {
+    void testRead2() {
         @NotNull Wire wire = createWire();
 
         // Write values to the wire
@@ -391,7 +391,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test to validate writing and reading 8-bit integers from the wire
     @Test
     @DisplayName("Text wire round-trips int8 triplet values")
-    public void int8() {
+    void int8() {
         @NotNull Wire wire = createWire();
 
         WireSmallIntTestSupport.writeInt8Triplet(wire);
@@ -409,7 +409,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test case to validate writing and reading 16-bit integers from the wire
     @Test
     @DisplayName("Text wire round-trips int16 triplet values")
-    public void int16() {
+    void int16() {
         @NotNull Wire wire = createWire();
 
         WireSmallIntTestSupport.writeInt16Triplet(wire);
@@ -427,7 +427,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test case to validate writing and reading unsigned 8-bit integers from the wire
     @Test
     @DisplayName("Text wire round-trips uint8 triplet values")
-    public void uint8() {
+    void uint8() {
         @NotNull Wire wire = createWire();
 
         WireSmallIntTestSupport.writeUint8Triplet(wire);
@@ -445,7 +445,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test case to validate writing and reading unsigned 16-bit integers from the wire
     @Test
     @DisplayName("Text wire round-trips uint16 triplet values")
-    public void uint16() {
+    void uint16() {
         @NotNull Wire wire = createWire();
 
         WireSmallIntTestSupport.writeUint16Triplet(wire);
@@ -463,7 +463,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test case to validate writing and reading unsigned 32-bit integers from the wire
     @Test
     @DisplayName("Text wire round-trips uint32 triplet values")
-    public void uint32() {
+    void uint32() {
         @NotNull Wire wire = createWire();
 
         WireSmallIntTestSupport.writeUint32Triplet(wire);
@@ -481,7 +481,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test case to validate writing and reading 32-bit integers from the wire
     @Test
     @DisplayName("Text wire round-trips int32 triplet values")
-    public void int32() {
+    void int32() {
         @NotNull Wire wire = createWire();
 
         WireSmallIntTestSupport.writeInt32Triplet(wire);
@@ -499,7 +499,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test case to validate writing and reading 64-bit integers from the wire
     @Test
     @DisplayName("Text wire round-trips int64 fields and values")
-    public void int64() {
+    void int64() {
         @NotNull Wire wire = createWire();
 
         // Write 64-bit integers to the wire with various keys
@@ -518,7 +518,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test case for writing and reading 64-bit floating point numbers
     @Test
     @DisplayName("Text wire round-trips float64 fields and values")
-    public void float64() {
+    void float64() {
         @NotNull Wire wire = createWire();
 
         // Write 64-bit floating point numbers to the wire with various keys
@@ -539,7 +539,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test case for writing and reading text values
     @Test
     @DisplayName("Text wire round-trips text fields and names")
-    public void text() {
+    void text() {
         @NotNull Wire wire = createWire();
 
         // Write text values to the wire
@@ -563,7 +563,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test case for writing and reading type prefixes
     @Test
     @DisplayName("Text wire round-trips type prefixes for fields")
-    public void type() {
+    void type() {
         @NotNull Wire wire = createWire();
 
         // Write type prefixes to the wire
@@ -592,7 +592,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test case for working with custom types having empty body
     @Test
     @DisplayName("Text wire reads type with empty value")
-    public void testTypeWithEmpty() {
+    void testTypeWithEmpty() {
         // Expect warning about blank marshallable value for empty type body
         expectException("was blank where '{}' is required");
 
@@ -617,7 +617,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test case for working with single quoted custom types
     @Test
     @DisplayName("Text wire parses single quoted string values")
-    public void testSingleQuote() {
+    void testSingleQuote() {
         // Expect warning about blank marshallable value for empty type body
         expectException("was blank where '{}' is required");
 
@@ -636,7 +636,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test case for writing and reading boolean values
     @Test
     @DisplayName("Text wire round-trips boolean values and fields")
-    public void testBool() {
+    void testBool() {
         @NotNull Wire wire = createWire();
 
         WirePrimitiveTestSupport.assertBooleanRoundTrip(wire);
@@ -645,7 +645,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test case for writing and reading 32-bit floating point numbers
     @Test
     @DisplayName("Text wire round-trips float32 values and fields")
-    public void testFloat32() {
+    void testFloat32() {
         @NotNull Wire wire = createWire();
 
         WirePrimitiveTestSupport.assertFloat32RoundTrip(wire, this);
@@ -654,7 +654,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test case for writing and reading LocalTime values
     @Test
     @DisplayName("Text wire round-trips local time values")
-    public void testTime() {
+    void testTime() {
         @NotNull Wire wire = createWire();
 
         LocalTime now = LocalTime.now();
@@ -670,7 +670,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test case for working with LocalDate values
     @Test
     @DisplayName("Text wire round-trips local date values")
-    public void testDate() {
+    void testDate() {
         @NotNull Wire wire = createWire();
 
         WireTemporalTestSupport.assertLocalDates(wire);
@@ -679,7 +679,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test case for working with UUID values
     @Test
     @DisplayName("Text wire round-trips UUID values and fields")
-    public void testUuid() {
+    void testUuid() {
         @NotNull Wire wire = createWire();
 
         WireTemporalTestSupport.assertUuids(wire);
@@ -687,7 +687,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire parses type name without space")
-    public void testTypeWithoutSpace() {
+    void testTypeWithoutSpace() {
         @NotNull Wire wire = createWire();
 
         WireTestSupport.assertTypeWithoutSpace(wire);
@@ -695,7 +695,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire parses NaN numeric values")
-    public void testNANValue() {
+    void testNANValue() {
         @NotNull Wire wire = createWire();
 
         WireTestSupport.assertNanValues(wire);
@@ -703,7 +703,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire reads ABCD bytes from text")
-    public void testABCDBytes() {
+    void testABCDBytes() {
         @NotNull Wire wire = createWire();
 
         WireAbcTestSupport.assertAbcdBytes(wire, false);
@@ -712,7 +712,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test the string building behavior for ABC objects with Wire.
     @Test
     @DisplayName("Text wire reads ABC into StringBuilder")
-    public void testABCStringBuilder() {
+    void testABCStringBuilder() {
         @NotNull Wire wire = createWire();
 
         WireAbcTestSupport.assertAbcStringBuilder(wire, Arrays.asList("This is an A", "This is a B"));
@@ -721,7 +721,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test reading and writing of a string map with Wire.
     @Test
     @DisplayName("Text wire reads and writes string maps")
-    public void testMapReadAndWriteStrings() {
+    void testMapReadAndWriteStrings() {
         @NotNull final Bytes<?> localBytes = allocateElasticOnHeap();
         try {
             @NotNull final Map<String, String> expected = new LinkedHashMap<>();
@@ -755,7 +755,7 @@ public class TextWireTest extends AbstractWireTest {
     @Test
     @DisplayName("Text wire reads bytes field values")
     @Disabled("TODO fix: bytes field leak leaves unreleased bytes")
-    public void testBytesField() {
+    void testBytesField() {
         DtoWithBytesField dto = new DtoWithBytesField(), dto2 = null;
         byte[] binaryData = {1, 2, 3, 4};
         dto.bytes = Bytes.wrapForRead(binaryData);
@@ -779,7 +779,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test reading and writing a map with integer keys and values to/from a Wire.
     @Test
     @DisplayName("Text wire reads and writes integer maps")
-    public void testMapReadAndWriteIntegers() {
+    void testMapReadAndWriteIntegers() {
         // Create a byte store and wire to work with
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = WireType.TEXT.apply(bytes);
@@ -814,7 +814,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test parsing a map within a map from a string
     @Test
     @DisplayName("Text wire reads nested maps from text")
-    public void testMapInMap() {
+    void testMapInMap() {
         WireMapTestSupport.assertMapInMap("WithMap: {\n" +
                 "  innerMap: {\n" +
                 "    AUDUSD: AUDUSD1,\n" +
@@ -826,7 +826,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test parsing a map with question marks (indicating explicit keys) within another map from a string
     @Test
     @DisplayName("Text wire reads nested maps with question marks")
-    public void testMapInMapWithQuestionMarks() {
+    void testMapInMapWithQuestionMarks() {
         WireMapTestSupport.assertMapWithQuestionMarks("WithMap: {\n" +
                 "  innerMap: {\n" +
                 "    ? AUDUSD: AUDUSD1,\n" +
@@ -838,14 +838,14 @@ public class TextWireTest extends AbstractWireTest {
     // Test reading and writing a map with Marshallable keys and values to/from a Wire.
     @Test
     @DisplayName("Text wire reads and writes marshallable maps")
-    public void testMapReadAndWriteMarshable() {
+    void testMapReadAndWriteMarshable() {
         WireMapTestSupport.assertMarshallableMap(WireType.TEXT::apply);
     }
 
     // Test writing an exception to a Wire and then reading it back.
     @Test
     @DisplayName("Text wire serialises and deserialises exceptions")
-    public void testException() {
+    void testException() {
         WireTestSupport.assertExceptionRoundTrip(/* helper asserts include messages */ WireType.TEXT.apply(allocateElasticOnHeap()),
                 "net.openhft.chronicle.wire.TextWireTest");
     }
@@ -853,7 +853,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test writing an enum to a Wire and then reading it back.
     @Test
     @DisplayName("Text wire serialises and deserialises enums")
-    public void testEnum() {
+    void testEnum() {
         // Register an alias for the WireType enum
         ClassAliasPool.CLASS_ALIASES.addAlias(WireType.class, "WireType");
 
@@ -869,7 +869,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test LZW compression of text strings written to a Wire.
     @Test
     @DisplayName("Text wire LZW Compression As Text")
-    public void testLZWCompressionAsText() {
+    void testLZWCompressionAsText() {
         @NotNull Wire wire = createWire();
         WireTestSupport.assertLzwCompressionAsText(wire, Bytes::allocateElasticOnHeap);
     }
@@ -877,21 +877,21 @@ public class TextWireTest extends AbstractWireTest {
     // Test writing arrays of strings to a Wire and reading them back.
     @Test
     @DisplayName("Text wire round-trips string array values")
-    public void testStringArrays() {
+    void testStringArrays() {
         WireCollectionTestSupport.assertStringArraysRoundTrip(this::createWire);
     }
 
     // Test writing lists of strings to a Wire and reading them back.
     @Test
     @DisplayName("Text wire round-trips string list values")
-    public void testStringList() {
+    void testStringList() {
         WireCollectionTestSupport.assertStringListRoundTrip(this::createWire);
     }
 
     // Test writing sets of strings to a Wire and reading them back.
     @Test
     @DisplayName("Text wire round-trips string set values")
-    public void testStringSet() {
+    void testStringSet() {
         WireCollectionTestSupport.assertStringSetRoundTrip(this::createWire);
     }
 
@@ -900,7 +900,7 @@ public class TextWireTest extends AbstractWireTest {
     @Test
     @DisplayName("Text wire round-trips string map values")
     @Disabled("Disabled pending text string map round-trip fix")
-    public void testStringMap() {
+    void testStringMap() {
         // Create a wire instance
         @NotNull Wire wire = createWire();
 
@@ -927,7 +927,7 @@ public class TextWireTest extends AbstractWireTest {
     // This test case demonstrates how to decode nested structures from a textual representation.
     @Test
     @DisplayName("Text wire decodes nested structures correctly")
-    public void testNestedDecode() {
+    void testNestedDecode() {
         final String s = "cluster: {\n" +
                 "  host1: {\n" +
                 "     hostId: 1,\n" +
@@ -979,7 +979,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test writing null objects to the wire and reading them back.
     @Test
     @DisplayName("Text wire writes null values and markers")
-    public void writeNull() {
+    void writeNull() {
         @NotNull Wire wire = createWire();
         String text = WireNullTestSupport.writeNulls(wire, w -> w.write().object(null), Circle.class);
         assertFalse(text.isEmpty(), "null object should produce non-empty output");
@@ -989,7 +989,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test to ensure all characters within the defined range are correctly written and read from a Wire
     @Test
     @DisplayName("Text wire writes and reads all chars")
-    public void testAllChars() {
+    void testAllChars() {
         @NotNull Wire wire = createWire();
 
         WireTestSupport.assertAllCharsRoundTrip(/* helper asserts include messages */ wire);
@@ -998,7 +998,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test reading of a demarshallable object from the Wire and ensuring its integrity
     @Test
     @DisplayName("Text wire reads demarshallable objects from text")
-    public void readDemarshallable() {
+    void readDemarshallable() {
         @NotNull Wire wire = createWire();
         WireTestSupport.writeDemarshallable(wire);
 
@@ -1016,7 +1016,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test writing and reading of a byte array with negative values to and from the Wire
     @Test
     @DisplayName("Text wire Byte Array Value With Real Bytes Negative")
-    public void testByteArrayValueWithRealBytesNegative() {
+    void testByteArrayValueWithRealBytesNegative() {
         @NotNull Wire wire = createWire();
 
         WireTestSupport.assertByteArrayValueWithSwapLeaf(/* helper asserts include messages */ wire);
@@ -1025,7 +1025,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test that ensures execution of 'testByteArrayValueWithRealBytesNegative' and then resets the wire and runs 'uint16'
     @Test
     @DisplayName("Text wire handles two sequential documents")
-    public void two() {
+    void two() {
         testByteArrayValueWithRealBytesNegative();
         wire.reset();
         assertEquals(0, wire.bytes().readRemaining(), "two: bytes empty after reset");
@@ -1035,7 +1035,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test for writing and reading byte arrays of various lengths to and from the Wire.
     @Test
     @DisplayName("Text wire round-trips byte array values")
-    public void testByteArray() {
+    void testByteArray() {
         final Wire wire = createWire();
         wire.usePadding(true);
 
@@ -1045,7 +1045,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test to ensure a map with custom marshallable keys is correctly written and read from the Wire.
     @Test
     @DisplayName("Text wire parses object keys correctly")
-    public void testObjectKeys() {
+    void testObjectKeys() {
         // Create a map with custom Marshallable objects as keys.
         @NotNull Map<MyMarshallable, String> map = new LinkedHashMap<>();
         map.put(new MyMarshallable("key1"), "value1");
@@ -1085,7 +1085,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test for attempting to serialize a non-serializable object (current thread).
     @Test
     @DisplayName("Text wire rejects unserialisable object write case 1")
-    public void writeUnserializable1() {
+    void writeUnserializable1() {
         assertThrows(IllegalArgumentException.class, () ->
                         System.out.println(TEXT.asString(Thread.currentThread())),
                 "text wire should reject Thread when serialising");
@@ -1094,7 +1094,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test for attempting to serialize a non-serializable object (socket instance).
     @Test
     @DisplayName("Text wire rejects unserialisable object write case 2")
-    public void writeUnserializable2() {
+    void writeUnserializable2() {
         assertThrows(IllegalArgumentException.class, () -> {
             @NotNull Socket s = new Socket();
             System.out.println(TEXT.asString(s));
@@ -1104,7 +1104,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test for attempting to serialize a non-serializable object (socket channel instance).
     @Test
     @DisplayName("Text wire rejects unserialisable object write case 3")
-    public void writeUnserializable3() throws IOException {
+    void writeUnserializable3() throws IOException {
         assertThrows(IllegalArgumentException.class, () -> {
             SocketChannel sc = SocketChannel.open();
             System.out.println(TEXT.asString(sc));
@@ -1114,7 +1114,7 @@ public class TextWireTest extends AbstractWireTest {
     // Test to ensure characters are correctly written to and read back from the Wire.
     @Test
     @DisplayName("Text wire writes character values correctly")
-    public void writeCharacter() {
+    void writeCharacter() {
         final Wire wire = createWire();
 
         WireCharacterTestSupport.assertCharacterRoundTrip(wire, false);
@@ -1124,14 +1124,14 @@ public class TextWireTest extends AbstractWireTest {
     // Test to verify the correct deserialization of String arrays from Wire.
     @Test
     @DisplayName("Text wire reads string arrays into fields")
-    public void testStringArray() {
+    void testStringArray() {
         WireStringArrayTestSupport.assertStringArrayRoundTrip(this::createWire);
     }
 
     // Test to ensure bytes can be correctly set after deserialization from Wire.
     @Test
     @DisplayName("Text wire Set Bytes After Deserialization")
-    public void testSetBytesAfterDeserialization() {
+    void testSetBytesAfterDeserialization() {
         // Deserialize a BytesWrapper instance from a string representation.
         BytesWrapper bw = Marshallable.fromString("!net.openhft.chronicle.wire.TextWireTest$BytesWrapper {\n" +
                 "  bytes: \"\"\n" +
@@ -1153,7 +1153,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire formats doubles using engineering notation")
-    public void testDoubleEngineering() {
+    void testDoubleEngineering() {
         // Registering an alias 'D' for the DoubleWrapper class to shorten the serialized format.
         ClassAliasPool.CLASS_ALIASES.addAlias(DoubleWrapper.class, "D");
 
@@ -1211,7 +1211,7 @@ public class TextWireTest extends AbstractWireTest {
     // Tests the consistency of serialization and deserialization of NestedList objects and various property combinations.
     @Test
     @DisplayName("Text wire reads nested list structures")
-    public void testNestedList() {
+    void testNestedList() {
         // Create a NestedList instance from its serialized string representation.
         NestedList nl = Marshallable.fromString("!" + NestedList.class.getName() + " {\n" +
                 "  name: name,\n" +
@@ -1281,7 +1281,7 @@ public class TextWireTest extends AbstractWireTest {
     // Tests different array types using Wire that they are correctly identified and the values are correctly retrieved.
     @Test
     @DisplayName("Text wire handles array type descriptors")
-    public void testArrayTypes() {
+    void testArrayTypes() {
         // Create a Wire instance and append serialized array types and a text.
         Wire wire = createWire();
         wire.bytes().append("a: !type byte[], b: !type String[], c: hi");
@@ -1298,7 +1298,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire handles array type descriptors case 1")
-    public void testArrayTypes1() {
+    void testArrayTypes1() {
         // Create a Wire instance and append data to its bytes
         Wire wire = createWire();
         wire.bytes().append("a: !type [B;, b: !type String[], c: hi");
@@ -1311,7 +1311,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire handles array type descriptors case 2")
-    public void testArrayTypes2() {
+    void testArrayTypes2() {
         // Iterate over a set of primitive class types
         for (Class<?> clz : new Class[]{byte.class, char.class, int.class, long.class, double.class, float.class, boolean.class}) {
             // Create a Wire instance and append data with the current class type to its bytes
@@ -1347,7 +1347,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire nested With Enum Set")
-    public void nestedWithEnumSet() {
+    void nestedWithEnumSet() {
         // Create a Wire instance and a NestedWithEnumSet object
         final Wire wire = createWire();
         NestedWithEnumSet n = new NestedWithEnumSet();
@@ -1377,7 +1377,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire parses numeric format with variant")
-    public void testParse2() {
+    void testParse2() {
         // Create and populate a MyDto object
         MyDto myDto1 = new MyDto();
 
@@ -1398,7 +1398,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire converts long values using converter")
-    public void longConverter() {
+    void longConverter() {
         // Create a TwoLongs instance with specified long values
         TwoLongs twoLongs = new TwoLongs(0x1234567890abcdefL, -1);
 
@@ -1414,7 +1414,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire Double Precision Over Text Wire")
-    public void testDoublePrecisionOverTextWire() {
+    void testDoublePrecisionOverTextWire() {
         // Create a Wire instance and write a double value to it
         Wire wire = createWire();
         final double d = 0.000212345678901;
@@ -1430,7 +1430,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire Map Of Named Keys")
-    public void testMapOfNamedKeys() {
+    void testMapOfNamedKeys() {
         // Create a MapHolder and initialize its map with various implementations and contents
         MapHolder mh = new MapHolder();
         Map<RetentionPolicy, Double> map = Collections.singletonMap(RetentionPolicy.CLASS, 0.1);
@@ -1446,7 +1446,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire Null Consumed Issue 269")
-    public void testNullConsumedIssue269() {
+    void testNullConsumedIssue269() {
         // Deserialize a FieldWithEnum instance from a string representation
         final FieldWithEnum fwe = Marshallable.fromString("!" + FieldWithEnum.class.getName() + " {" +
                 "allowedFoos: !!null \"\",\n" +
@@ -1461,7 +1461,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire parses comma inside value text")
-    public void commaInAValue() {
+    void commaInAValue() {
         // Append a string to a new Wire instance and read the value as an object
         String text = "[1,2,3]";
         Wire wire = createWire();
@@ -1478,7 +1478,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire comma In A Value 2")
-    public void commaInAValue2() {
+    void commaInAValue2() {
         // Create a string with multiple data types (numbers and a string)
         String text = "[1,2,3,\"c\"]";
 
@@ -1495,7 +1495,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire parses duration values correctly")
-    public void testDuration() {
+    void testDuration() {
         // Create a DurationHolder object with a set duration
         DurationHolder dh = new DurationHolder(1, Duration.ofSeconds(63));
         String h = dh.toString();
@@ -1512,7 +1512,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire reads comments and preserves events")
-    public void readsComment() {
+    void readsComment() {
         Wire wire = createWire();
         String actual = WireCommentTestSupport.exerciseReadComments(wire);
 
@@ -1527,14 +1527,14 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire reads metadata documents correctly")
-    public void readMetaData() {
+    void readMetaData() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         WireTestSupport.assertReadMetaData(wire);
     }
 
     @Test
     @DisplayName("Text wire Nested List Interleaved Comments")
-    public void testNestedListInterleavedComments() {
+    void testNestedListInterleavedComments() {
         // Deserialize a string containing a nested list with interleaved comments to an object.
         YamlWireTest.StringArray obj = WireType.TEXT.fromString(YamlWireTest.StringArray.class,
                 "     # first\n" +
@@ -1557,7 +1557,7 @@ public class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire lists interleaved comments correctly")
-    public void testListInterleavedComments() {
+    void testListInterleavedComments() {
         // Deserialize a string containing a list with interleaved comments to an object.
         List<String> obj = Marshallable.fromString(
                 "     # first\n" +

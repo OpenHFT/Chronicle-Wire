@@ -13,13 +13,13 @@ import org.junit.jupiter.api.Test;
 
 // This test suite is designed to verify compatibility behaviors of the TextWire class,
 // especially when fields are added or modified.
-public class TextWireCompatibilityTest extends WireTestCommon {
+class TextWireCompatibilityTest extends WireTestCommon {
 
     // Test to check the behavior when fields are added in the middle of a marshallable object.
     // The main purpose is to ensure that compatibility is maintained during such changes.
     @Test
     @DisplayName("Maintains compatibility when fields are added in the middle")
-    public void testAddFieldsInTheMiddle() {
+    void testAddFieldsInTheMiddle() {
         // Create a new TextWire instance with an elastic heap allocated buffer
         @NotNull Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(100));
 

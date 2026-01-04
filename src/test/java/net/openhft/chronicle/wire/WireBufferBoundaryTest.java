@@ -15,13 +15,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * or triggers buffer expansion.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class WireBufferBoundaryTest extends WireTestCommon {
+class WireBufferBoundaryTest extends WireTestCommon {
 
     // ========== Elastic Buffer Resize Tests ==========
 
     @Test
     @DisplayName("BinaryWire should handle elastic resize during write")
-    public void testElasticResizeDuringWriteBinary() {
+    void testElasticResizeDuringWriteBinary() {
         // Start with small buffer, write more data than initial capacity
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         BinaryWire wire = new BinaryWire(bytes);
@@ -37,7 +37,7 @@ public class WireBufferBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should handle elastic resize during write")
-    public void testElasticResizeDuringWriteText() {
+    void testElasticResizeDuringWriteText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         TextWire wire = new TextWire(bytes);
 
@@ -51,7 +51,7 @@ public class WireBufferBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle elastic resize during write")
-    public void testElasticResizeDuringWriteYaml() {
+    void testElasticResizeDuringWriteYaml() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         YamlWire wire = new YamlWire(bytes);
 
@@ -67,7 +67,7 @@ public class WireBufferBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle strings exceeding 16-bit length prefix (>64KB)")
-    public void testLargeStringBeyond64KB() {
+    void testLargeStringBeyond64KB() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(70000);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -84,7 +84,7 @@ public class WireBufferBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle many small fields")
-    public void testManySmallFields() {
+    void testManySmallFields() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
             Wire wire = wt.apply(bytes);
@@ -109,7 +109,7 @@ public class WireBufferBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle zero-length string")
-    public void testZeroLengthStringBinary() {
+    void testZeroLengthStringBinary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -122,7 +122,7 @@ public class WireBufferBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should handle zero-length string")
-    public void testZeroLengthStringText() {
+    void testZeroLengthStringText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         TextWire wire = new TextWire(bytes);
 
@@ -136,7 +136,7 @@ public class WireBufferBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle zero-length string")
-    public void testZeroLengthStringYaml() {
+    void testZeroLengthStringYaml() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         YamlWire wire = new YamlWire(bytes);
 
@@ -150,7 +150,7 @@ public class WireBufferBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle zero-length bytes")
-    public void testZeroLengthBytes() {
+    void testZeroLengthBytes() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -170,7 +170,7 @@ public class WireBufferBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("Position should be preserved after elastic resize")
-    public void testPositionPreservationAfterResize() {
+    void testPositionPreservationAfterResize() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -198,7 +198,7 @@ public class WireBufferBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle 4-byte UTF-8 character")
-    public void testFourByteUtf8Binary() {
+    void testFourByteUtf8Binary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -213,7 +213,7 @@ public class WireBufferBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should handle 4-byte UTF-8 character")
-    public void testFourByteUtf8Text() {
+    void testFourByteUtf8Text() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         TextWire wire = new TextWire(bytes);
 
@@ -227,7 +227,7 @@ public class WireBufferBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle 4-byte UTF-8 character")
-    public void testFourByteUtf8Yaml() {
+    void testFourByteUtf8Yaml() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         YamlWire wire = new YamlWire(bytes);
 
@@ -243,7 +243,7 @@ public class WireBufferBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("Write that exactly fills initial buffer should work")
-    public void testExactlyFullBuffer() {
+    void testExactlyFullBuffer() {
         // This test verifies behaviour when write exactly fills the buffer
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
@@ -270,7 +270,7 @@ public class WireBufferBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("Sequential writes followed by sequential reads should work")
-    public void testSequentialWriteRead() {
+    void testSequentialWriteRead() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
             Wire wire = wt.apply(bytes);
@@ -294,7 +294,7 @@ public class WireBufferBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("Mixed type writes near buffer boundary should work")
-    public void testMixedTypesNearBoundary() {
+    void testMixedTypesNearBoundary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -323,7 +323,7 @@ public class WireBufferBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("Nested structure near buffer boundary should work")
-    public void testNestedStructureNearBoundary() {
+    void testNestedStructureNearBoundary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);

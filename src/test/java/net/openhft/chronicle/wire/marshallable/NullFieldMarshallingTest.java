@@ -20,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class NullFieldMarshallingTest extends WireTestCommon {
+class NullFieldMarshallingTest extends WireTestCommon {
     private Map<ExceptionKey, Integer> exceptions;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         exceptions = Jvm.recordExceptions();
     }
 
@@ -44,7 +44,7 @@ public class NullFieldMarshallingTest extends WireTestCommon {
 
     @Test
     @DisplayName("Null abstract field remains null for text marshalling")
-    public void testAbstractNullFieldUnmarshalledCorrectlyText() {
+    void testAbstractNullFieldUnmarshalledCorrectlyText() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for text marshalling test");
 
         VO object = new VO();
@@ -58,7 +58,7 @@ public class NullFieldMarshallingTest extends WireTestCommon {
 
     @Test
     @DisplayName("Null abstract field remains null for binary marshalling")
-    public void testAbstractNullFieldUnmarshalledCorrectlyBinary() {
+    void testAbstractNullFieldUnmarshalledCorrectlyBinary() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for binary marshalling test");
 
         VO object = new VO();

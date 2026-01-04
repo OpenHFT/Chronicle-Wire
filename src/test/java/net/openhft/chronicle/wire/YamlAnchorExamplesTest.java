@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * Examples of YAML anchor usage in Chronicle Wire.
  * These examples are referenced in the README.adoc documentation.
  */
-public class YamlAnchorExamplesTest extends WireTestCommon {
+class YamlAnchorExamplesTest extends WireTestCommon {
 
     // tag::database-config-classes[]
     @SuppressFBWarnings(
@@ -87,7 +87,7 @@ public class YamlAnchorExamplesTest extends WireTestCommon {
     // end::server-config-classes[]
 
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for YAML anchor examples");
     }
 
@@ -96,7 +96,7 @@ public class YamlAnchorExamplesTest extends WireTestCommon {
     @SuppressFBWarnings(
             value = "NP_UNWRITTEN_FIELD",
             justification = "Wire marshalling populates fields without explicit setters.")
-    public void testBasicYamlFieldAnchors() {
+    void testBasicYamlFieldAnchors() {
         // tag::basic-yaml-example[]
         String yaml = "database: {\n" +
                 "  host: &dbHost \"production.example.com\",\n" +
@@ -141,7 +141,7 @@ public class YamlAnchorExamplesTest extends WireTestCommon {
     @SuppressFBWarnings(
             value = "NP_UNWRITTEN_FIELD",
             justification = "Wire marshalling populates fields without explicit setters.")
-    public void testObjectAnchors() {
+    void testObjectAnchors() {
         // tag::object-anchor-example[]
         String yaml = "defaults: &defaultServer !net.openhft.chronicle.wire.YamlAnchorExamplesTest$ServerConfig {\n" +
                 "  timeout: 30,\n" +

@@ -7,7 +7,7 @@ import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 
 // B2Class is a child class of BClass, which provides a versioned serialization mechanism.
-public class B2Class extends BClass {
+class B2Class extends BClass {
 
     // Defines the current version of the marshallable object. Useful when future changes are made to the class and backward compatibility is required.
     private static final int MASHALLABLE_VERSION = 1;

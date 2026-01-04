@@ -18,13 +18,13 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 @SuppressFBWarnings(
         value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
         justification = "Fields are populated via Wire marshalling in tests.")
-public class ProjectTest extends WireTestCommon {
+class ProjectTest extends WireTestCommon {
 
     // Test case to verify the projection functionality between two data transfer objects.
     @Test
     @SuppressWarnings("unchecked")
     @DisplayName("Projects values between compatible DTO objects")
-    public void testProject() {
+    void testProject() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for projection tests");
 
         // Initialize the first DTO with sample data
@@ -46,7 +46,7 @@ public class ProjectTest extends WireTestCommon {
     // Test case to verify the projection functionality with nested marshallable objects.
     @Test
     @DisplayName("Projects nested marshallable objects without loss")
-    public void testProjectWithNestedMarshallable() {
+    void testProjectWithNestedMarshallable() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for nested projection tests");
 
         // Initialize the simple object with a nested inner object and sample data

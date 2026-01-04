@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class TextDocumentTest extends WireTestCommon {
+class TextDocumentTest extends WireTestCommon {
 
     // A helper function that performs the test on documents given a wireType.
     private static boolean doTestDocument(WireType wireType) {
@@ -62,7 +62,7 @@ public class TextDocumentTest extends WireTestCommon {
     // Test the document writing and reading for TEXT wireType.
     @Test
     @DisplayName("Reads and writes text document headers")
-    public void testDocument() {
+    void testDocument() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip text document test");
 
         Assertions.assertTrue(doTestDocument(WireType.TEXT), "text document: wireType=TEXT");
@@ -72,7 +72,7 @@ public class TextDocumentTest extends WireTestCommon {
     @Test
     @Disabled("Disabled pending YAML document round-trip fix")
     @DisplayName("Reads and writes YAML document headers")
-    public void testDocumentYaml() {
+    void testDocumentYaml() {
         Assertions.assertTrue(doTestDocument(WireType.YAML_ONLY), "text document: wireType=YAML_ONLY");
     }
 

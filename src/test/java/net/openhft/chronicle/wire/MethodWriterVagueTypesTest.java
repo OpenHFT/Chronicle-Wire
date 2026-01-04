@@ -22,14 +22,14 @@ import java.util.function.BiConsumer;
  * It extends the WireTestCommon from the `net.openhft.chronicle.wire` package for common test setup and utilities.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
+class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
     private final ArrayBlockingQueue<Object> singleQ = new ArrayBlockingQueue<>(1);
     private final ArrayBlockingQueue<Object> doubleQ = new ArrayBlockingQueue<>(2);
     private final List<Map<Class<?>, Object>> usedObjects = Arrays.asList(new HashMap<>(), new HashMap<>());
     private final Class<?>[] prevObjClasses = new Class<?>[2];
     private Boolean multipleNonMarshallableParamTypes;
 
-    public void initMethodWriterVagueTypesTest(Boolean multipleNonMarshallableParamTypes) {
+    void initMethodWriterVagueTypesTest(Boolean multipleNonMarshallableParamTypes) {
         this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
     }
 
@@ -90,7 +90,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Single argument messages round-trip with vague types")
-    public void testSingle(Boolean multipleNonMarshallableParamTypes) throws Exception {
+    void testSingle(Boolean multipleNonMarshallableParamTypes) throws Exception {
         initMethodWriterVagueTypesTest(multipleNonMarshallableParamTypes);
         // Initialization of the wire
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap());
@@ -112,7 +112,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Double argument messages round-trip with vague types")
-    public void testDouble(Boolean multipleNonMarshallableParamTypes) throws Exception {
+    void testDouble(Boolean multipleNonMarshallableParamTypes) throws Exception {
         initMethodWriterVagueTypesTest(multipleNonMarshallableParamTypes);
         // Initialization of the wire
         Wire w = new TextWire(Bytes.allocateElasticOnHeap());
@@ -139,7 +139,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Final container messages round-trip with vague types")
-    public void testDoubleFinal(Boolean multipleNonMarshallableParamTypes) throws Exception {
+    void testDoubleFinal(Boolean multipleNonMarshallableParamTypes) throws Exception {
         initMethodWriterVagueTypesTest(multipleNonMarshallableParamTypes);
         // Initialization of the wire
         Wire w = new TextWire(Bytes.allocateElasticOnHeap());
@@ -161,7 +161,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Primitive key messages round-trip with vague types")
-    public void testPrimitive(Boolean multipleNonMarshallableParamTypes) throws Exception {
+    void testPrimitive(Boolean multipleNonMarshallableParamTypes) throws Exception {
         initMethodWriterVagueTypesTest(multipleNonMarshallableParamTypes);
         // Initialization of the wire
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap());

@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SuppressFBWarnings(
         value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
         justification = "Fields are populated via Wire marshalling in tests.")
-public class WireDumperTest extends WireTestCommon {
+class WireDumperTest extends WireTestCommon {
 
     // Instance variables for the test setup and expected outputs
     private Bytes<?> bytes;
@@ -28,7 +28,7 @@ public class WireDumperTest extends WireTestCommon {
     private final Map<WireType, String> expectedPartialContent = new EnumMap<>(WireType.class);
 
     // Constructor to set up the test environment based on a WireType
-    public void initWireDumperTest(final String name, final WireType wireType) {
+    void initWireDumperTest(final String name, final WireType wireType) {
         bytes = Bytes.allocateElasticOnHeap(); // Allocate elastic bytes
         wire = wireType.apply(bytes);          // Create a wire based on the given WireType
         wire.usePadding(true);
@@ -56,7 +56,7 @@ public class WireDumperTest extends WireTestCommon {
     @MethodSource("parameters")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Serialises full document content for each wire type")
-    public void shouldSerialiseContent(final String name, final WireType wireType) {
+    void shouldSerialiseContent(final String name, final WireType wireType) {
         initWireDumperTest(name, wireType);
         // Writing values to the wire
         wire.writeDocument(17L, ValueOut::int64);
@@ -83,7 +83,7 @@ public class WireDumperTest extends WireTestCommon {
     @MethodSource("parameters")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Serialises partial document content for each wire type")
-    public void shouldSerialisePartialContent(final String name, final WireType wireType) {
+    void shouldSerialisePartialContent(final String name, final WireType wireType) {
         initWireDumperTest(name, wireType);
         // Writing partial content to the wire
         wire.writeDocument(17L, ValueOut::int64);
@@ -97,7 +97,7 @@ public class WireDumperTest extends WireTestCommon {
 
     // Overridden method to perform clean up after each test case
     @Override
-    public void preAfter() {
+    void preAfter() {
         bytes.releaseLast();  // Releasing the last bytes used
     }
 

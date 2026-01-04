@@ -16,26 +16,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // Test class extending WireTestCommon to test MethodReader functionality with history recording
-public class MethodReaderWithHistoryTest extends WireTestCommon {
+class MethodReaderWithHistoryTest extends WireTestCommon {
 
     // Test with text wire type
     @Test
     @DisplayName("Method reader preserves history on TEXT wire")
-    public void text() {
+    void text() {
         assertTrue(doTest(WireType.TEXT), "method reader with history: wireType=TEXT");
     }
 
     // Test with YAML-only wire type
     @Test
     @DisplayName("Method reader preserves history on YAML_ONLY wire")
-    public void yaml() {
+    void yaml() {
         assertTrue(doTest(WireType.YAML_ONLY), "method reader with history: wireType=YAML_ONLY");
     }
 
     // Test with binary wire type
     @Test
     @DisplayName("Method reader preserves history on BINARY wire")
-    public void binary() {
+    void binary() {
         assertTrue(doTest(WireType.BINARY), "method reader with history: wireType=BINARY");
     }
 

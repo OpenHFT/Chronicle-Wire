@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DemarshallableMethodReaderTest {
+class DemarshallableMethodReaderTest {
 
     public static Collection<Wire> combinations() {
         return Arrays.asList(
@@ -41,7 +41,7 @@ public class DemarshallableMethodReaderTest {
     @MethodSource("combinations")
     @ParameterizedTest
     @DisplayName("Writes and reads multiple demarshallable messages")
-    public void writesAndReadsMultipleMessages(Wire wire) {
+    void writesAndReadsMultipleMessages(Wire wire) {
         MessageListener writer = wire.methodWriter(MessageListener.class);
         writer.onMessage(new SelfDescribingDemarshallableObject("msg1", 1.5));
         writer.onMessage(new SelfDescribingDemarshallableObject("msg2", 2.3));

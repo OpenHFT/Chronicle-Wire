@@ -17,12 +17,12 @@ import static net.openhft.chronicle.wire.WireType.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // This class is for testing different wire formats
-public class ReadAnyWireTest extends WireTestCommon {
+class ReadAnyWireTest extends WireTestCommon {
 
     // A test case to test the TEXT wire format
     @Test
     @DisplayName("READ_ANY reads values written by text wire")
-    public void testReadAny() {
+    void testReadAny() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for READ_ANY text wire test");
 
         // Create a buffer to hold wire data
@@ -43,7 +43,7 @@ public class ReadAnyWireTest extends WireTestCommon {
     // Another test for the TEXT wire format
     @Test
     @DisplayName("READ_ANY reads first text wire entry")
-    public void testCreateReadAnyFirstTextWire() {
+    void testCreateReadAnyFirstTextWire() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for READ_ANY first text wire test");
 
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -57,7 +57,7 @@ public class ReadAnyWireTest extends WireTestCommon {
     // Test the BINARY wire format
     @Test
     @DisplayName("READ_ANY reads first binary wire entry")
-    public void testCreateReadAnyFirstBinaryWire() {
+    void testCreateReadAnyFirstBinaryWire() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for READ_ANY first binary wire test");
 
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -71,7 +71,7 @@ public class ReadAnyWireTest extends WireTestCommon {
     // Test the JSON wire format
     @Test
     @DisplayName("READ_ANY reads first JSON wire entry")
-    public void testCreateReadAnyFirstJSONWire() {
+    void testCreateReadAnyFirstJSONWire() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for READ_ANY first JSON wire test");
 
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -86,7 +86,7 @@ public class ReadAnyWireTest extends WireTestCommon {
     @Test
     @Disabled("Disabled until fieldless binary detection is fixed")
     @DisplayName("READ_ANY reads first fieldless binary wire entry")
-    public void testCreateReadAnyFirstFIELDLESS_BINARYWire() {
+    void testCreateReadAnyFirstFIELDLESS_BINARYWire() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for READ_ANY fieldless binary wire test");
 
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();

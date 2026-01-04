@@ -11,7 +11,7 @@ import net.openhft.chronicle.wire.converter.ShortText;
  * Represents a person with example attributes.
  * Uses {@link SelfDescribingMarshallable} for wire-friendly serialisation.
  */
-public class Person extends SelfDescribingMarshallable {
+class Person extends SelfDescribingMarshallable {
 
     private String name;
 

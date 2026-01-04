@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * ByteArrayReuseTest extends WireTestCommon to test the reuse of byte arrays during
  * serialization and deserialization in Chronicle Wire.
  */
-public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestCommon {
+class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     private static final class RoundTripResult {
         private final String hex;
@@ -47,7 +47,7 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
      */
     @Test
     @DisplayName("Reuses byte arrays in self-describing format")
-    public void writeReadBytesArray() {
+    void writeReadBytesArray() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for byte array reuse tests");
 
         RoundTripResult result = writeReadBytesArrayRoundTrip(true);
@@ -76,7 +76,7 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
      */
     @Test
     @DisplayName("Reuses byte arrays in binary format")
-    public void writeReadBytesArrayBinary() {
+    void writeReadBytesArrayBinary() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for byte array reuse binary tests");
 
         RoundTripResult result = writeReadBytesArrayRoundTrip(false);

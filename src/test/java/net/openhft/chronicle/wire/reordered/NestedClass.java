@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
  * It demonstrates custom read and write logic for marshalling, handling nested objects and different data types.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class NestedClass implements Marshallable {
+class NestedClass implements Marshallable {
     private String text;
     private String text2;
     private double number;
@@ -76,7 +76,7 @@ public class NestedClass implements Marshallable {
      * @param text   The text for the nested instance.
      * @param number The number for the nested instance.
      */
-    public void nest(String text, double number) {
+    void nest(String text, double number) {
         this.doublyNested = new NestedClass().setTextNumber(text, number);
     }
 

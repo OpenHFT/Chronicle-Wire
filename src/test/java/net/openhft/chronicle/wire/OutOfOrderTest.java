@@ -14,7 +14,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class OutOfOrderTest extends WireTestCommon {
+class OutOfOrderTest extends WireTestCommon {
     // Define JSON snippets to be used in tests
     private static final String start = "{ \"a\": 1, ";
     private static final String records = "\"records\":[{\"id\":1}], ";
@@ -23,7 +23,7 @@ public class OutOfOrderTest extends WireTestCommon {
 
     @Test
     @DisplayName("Out-of-order JSON fields round-trip correctly")
-    public void outOfOrder() {
+    void outOfOrder() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for out-of-order JSON test");
 
         // Test JSON with just the start and end

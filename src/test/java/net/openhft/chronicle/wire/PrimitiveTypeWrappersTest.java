@@ -15,12 +15,12 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @SuppressWarnings("rawtypes")
-public class PrimitiveTypeWrappersTest extends WireTestCommon {
+class PrimitiveTypeWrappersTest extends WireTestCommon {
 
     private boolean isTextWire;  // Variable to determine if using text wire format
 
     // Constructor to initialize the isTextWire flag
-    public void initPrimitiveTypeWrappersTest(Object isTextWire) {
+    void initPrimitiveTypeWrappersTest(Object isTextWire) {
         this.isTextWire = (Boolean) isTextWire;
     }
 
@@ -37,7 +37,7 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
     @SuppressWarnings("unchecked")
     @ParameterizedTest
     @DisplayName("Numbers round-trip across wrapper types")
-    public void testNumbers(Object isTextWire) {
+    void testNumbers(Object isTextWire) {
         initPrimitiveTypeWrappersTest(isTextWire);
         // Define wrapper classes for numbers
         @NotNull final Class[] types = {Byte.class,
@@ -64,7 +64,7 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Numbers retain original wrapper type on read")
-    public void testNumbers2(Object isTextWire) {
+    void testNumbers2(Object isTextWire) {
         initPrimitiveTypeWrappersTest(isTextWire);
         @NotNull final Number[] nums = {(byte) 1, (short) 1, (float) 1, 1, (long) 1, (double) 1};
 
@@ -83,7 +83,7 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Character round-trips as Character type")
-    public void testCharacter(Object isTextWire) {
+    void testCharacter(Object isTextWire) {
         initPrimitiveTypeWrappersTest(isTextWire);
         @NotNull final Wire wire = wireFactory();
         wire.write().object('1');
@@ -97,7 +97,7 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("String written reads back as Character")
-    public void testCharacterWritenAsString(Object isTextWire) {
+    void testCharacterWritenAsString(Object isTextWire) {
         initPrimitiveTypeWrappersTest(isTextWire);
         @NotNull final Wire wire = wireFactory();
         wire.write().object("1");
@@ -110,7 +110,7 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Character written reads back as String")
-    public void testCharReadAsString(Object isTextWire) {
+    void testCharReadAsString(Object isTextWire) {
         initPrimitiveTypeWrappersTest(isTextWire);
         @NotNull final Wire wire = wireFactory();
         wire.write().object('1');
@@ -123,7 +123,7 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Long string reads first character only")
-    public void testStoreStringReadAsChar(Object isTextWire) {
+    void testStoreStringReadAsChar(Object isTextWire) {
         initPrimitiveTypeWrappersTest(isTextWire);
         @NotNull final Wire wire = wireFactory();
         wire.write().object("LONG STRING");

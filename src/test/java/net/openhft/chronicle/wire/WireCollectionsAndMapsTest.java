@@ -15,11 +15,11 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Exercises sequences and maps to hit ValueIn/ValueOut collection branches.
  */
-public class WireCollectionsAndMapsTest extends WireTestCommon {
+class WireCollectionsAndMapsTest extends WireTestCommon {
 
     @Test
     @DisplayName("Sequence read and write across wire types")
-    public void sequenceReadWrite() {
+    void sequenceReadWrite() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             final Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 
@@ -68,7 +68,7 @@ public class WireCollectionsAndMapsTest extends WireTestCommon {
 
     @Test
     @DisplayName("Maps round trip via marshallable across wire types")
-    public void mapsRoundTripViaMarshallable() {
+    void mapsRoundTripViaMarshallable() {
         // Use ValueIn.marshallableAsMap across supported wire types.
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Map<String, Object> in = new LinkedHashMap<>();

@@ -16,12 +16,12 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class UsingTestMarshallableFixture extends net.openhft.chronicle.wire.WireTestCommon {
+class UsingTestMarshallableFixture extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Test case to verify the conversion of a Marshallable object to its text representation
     @Test
     @DisplayName("Serialises marshallable fixture to text wire")
-    public void testConverMarshallableToTextName() {
+    void testConverMarshallableToTextName() {
 
         // Initialize a MarshallableFixture object and set its name
         @NotNull MarshallableFixture testMarshallable = new MarshallableFixture();
@@ -58,7 +58,7 @@ public class UsingTestMarshallableFixture extends net.openhft.chronicle.wire.Wir
     // This test addresses the WIRE-37 issue
     @Test
     @DisplayName("Reads typed marshallable using numeric key")
-    public void testMarshall() {
+    void testMarshall() {
 
         // Create a ByteBuffer to hold the serialized data
         @SuppressWarnings("rawtypes")
@@ -88,7 +88,7 @@ public class UsingTestMarshallableFixture extends net.openhft.chronicle.wire.Wir
     // Test case to check the write and read functionality for a Marshallable object
     @Test
     @DisplayName("Round-trips sorted filter with nested marshallables")
-    public void test() {
+    void test() {
 
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(bytes);

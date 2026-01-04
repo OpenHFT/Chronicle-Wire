@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class JSONWireTest extends WireTestCommon {
+class JSONWireTest extends WireTestCommon {
 
     // Utility function to test copying from a JSONWire to a binary wire and back to a JSONWire.
     private static void testCopyToBinaryAndBack(CharSequence str) {
@@ -103,7 +103,7 @@ public class JSONWireTest extends WireTestCommon {
     // Test to verify that opening brackets in the JSON are correctly processed
     @Test
     @DisplayName("JSONWire should read events without opening brackets")
-    public void testOpenBracket() {
+    void testOpenBracket() {
         @NotNull StringBuilder sb = new StringBuilder();
 
         @NotNull Wire wire1 = createWire("\"echo\":\"Hello\"\n\"echo2\":\"Hello2\"\n");
@@ -137,7 +137,7 @@ public class JSONWireTest extends WireTestCommon {
     // Test to check if the JSONWire can process JSON strings without spaces correctly
     @Test
     @DisplayName("JSONWire should parse JSON without spaces")
-    public void testNoSpaces() {
+    void testNoSpaces() {
         @NotNull Wire wire = createWire("\"echo\":\"\"");
         @NotNull VanillaWireParser parser = new VanillaWireParser(soutWireParselet(), VanillaWireParser.SKIP_READABLE_BYTES);
         parser.parseOne(wire);
@@ -153,7 +153,7 @@ public class JSONWireTest extends WireTestCommon {
     // Test for verifying how lists are formatted in JSONWire
     @Test
     @DisplayName("JSONWire should format lists with quoted fields")
-    public void testListFormatting() {
+    void testListFormatting() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testListFormatting");
 
         @NotNull Wire wire = createWire();
@@ -179,7 +179,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should round-trip null string fields")
-    public void testNullString() {
+    void testNullString() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testNullString");
 
         // Create a new wire instance
@@ -204,7 +204,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should render bytes as text values")
-    public void testBytes() {
+    void testBytes() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testBytes");
 
         // Create a new wire instance
@@ -234,7 +234,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should parse float values from JSON")
-    public void testFloatFromJson() {
+    void testFloatFromJson() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testFloatFromJson");
 
         // Create a new FooEvent and set its foo value
@@ -251,7 +251,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should marshall with two list fields")
-    public void testMarshallableWithTwoLists() {
+    void testMarshallableWithTwoLists() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testMarshallableWithTwoLists");
 
         // Create a new wire instance
@@ -300,7 +300,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should write map of named keys")
-    public void testMapOfNamedKeys() {
+    void testMapOfNamedKeys() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testMapOfNamedKeys");
 
         MapHolder mh = new MapHolder(); // Create a new MapHolder object
@@ -311,7 +311,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should read map of named keys")
-    public void testMapOfNamedKeys2() {
+    void testMapOfNamedKeys2() {
         String str = "{\"map\":{\"CLASS\":0.1}}";
         MapHolder mh = JSON.fromString(MapHolder.class, str);
         assertNotNull(mh.map, "deserialized map should not be null");
@@ -323,7 +323,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should read LocalDate calendar value instances")
-    public void testDate() {
+    void testDate() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testDate");
 
         Dates dates = new Dates(); // Create a new Dates object
@@ -345,7 +345,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should reject comma inside value text")
-    public void commaIsNotInAValue() {
+    void commaIsNotInAValue() {
         String text = "[1,2,3]"; // Define a string representation of a list
         Wire wire = createWire(); // Create a new wire
         wire.bytes().append(text); // Append the list string to the wire
@@ -360,7 +360,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should parse arrays inside dictionaries")
-    public void testArrayInDictionary() {
+    void testArrayInDictionary() {
         String text = "[320 , {\"as\":[1 ,\n2\n, 3]}]"; // Define a string with a list that contains an integer and a dictionary
         final JSONWire jsonWire = new JSONWire(Bytes.from(text)); // Create a new JSONWire with the given text
         final Object list = jsonWire.getValueIn().object(); // Extract the object from the JSONWire
@@ -369,7 +369,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should handle null date values")
-    public void testDateNull() {
+    void testDateNull() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testDateNull");
 
         Dates dates = new Dates(); // Create a new Dates object with presumably null fields
@@ -383,7 +383,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should parse nested arrays in dictionaries")
-    public void testArrayInDictionary2() {
+    void testArrayInDictionary2() {
         // Define a complex JSON string containing nested arrays and dictionaries
         String str = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
         final JSONWire jsonWire = new JSONWire(Bytes.from(str)); // Create a JSONWire object from the str
@@ -397,7 +397,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should handle array delimiter without spaces")
-    public void testArrayDelimiterNoSpace() {
+    void testArrayDelimiterNoSpace() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testArrayDelimiterNoSpace");
 
         // A complex JSON string causing some parsing issues
@@ -417,7 +417,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should quote fields for empty sequences")
-    public void testQuotedFieldsEmptySequence() {
+    void testQuotedFieldsEmptySequence() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testQuotedFieldsEmptySequence");
 
         // Create a JSON string with different field types
@@ -443,7 +443,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should handle nested maps with integer keys")
-    public void nestedMapWithIntegerKeys() {
+    void nestedMapWithIntegerKeys() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for nestedMapWithIntegerKeys");
 
         MapWithIntegerKeysHolder mh = new MapWithIntegerKeysHolder(); // Create an instance of MapWithIntegerKeysHolder
@@ -467,7 +467,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should write layout with explicit fields")
-    public void testWritingLayout() {
+    void testWritingLayout() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testWritingLayout");
 
         final Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(1024); // Create an elastic byte buffer
@@ -484,7 +484,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should escape unicode values when writing")
-    public void escapeUnicodeValues() {
+    void escapeUnicodeValues() {
         Map<Object, Object> map = new HashMap<>(); // Create a new HashMap
         for (int code = 0x0000; code <= 0x0020; code++) {
             map.put("key", (char) code); // Add an entry to the map with the character representation of the current code point
@@ -522,7 +522,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should copy typed data to binary and back")
-    public void copyTypedDataToBinaryAndBack() {
+    void copyTypedDataToBinaryAndBack() {
         ignoreException("Unable to copy object safely, message will not be repeated");
         String str = "{\"a\":{\"@Mapped\":{\"b\":\"c\",\"d\":123.4}},\"e\":{\"@Scalar\":\"Value\"},\"f\":{\"@Mapped2\":{\"b\":\"c\"}},\"g\":{\"@Scalar2\":12345.6}}";
         assertTrue(str.contains("\"@Mapped\"")
@@ -536,7 +536,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should parse type literal form one")
-    public void typeLiteral1() {
+    void typeLiteral1() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for typeLiteral1");
 
         String expected = "{\"@net.openhft.chronicle.wire.JSONWireTest$DtoWithClassReference\":{\"implClass\":{\"@type\":\"net.openhft.chronicle.wire.JSONWireTest\"},\"bool\":false}}";
@@ -547,7 +547,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should parse second type literal form")
-    public void typeLiteralTest2() {
+    void typeLiteralTest2() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for typeLiteralTest2");
 
         DtoWithClassReference dtoWithClassReference = new DtoWithClassReference();
@@ -562,7 +562,7 @@ public class JSONWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("JSONWire should handle null list with multiple fields")
-    public void testNullListCollectionWithMultipleFieldsJson() {
+    void testNullListCollectionWithMultipleFieldsJson() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for testNullListCollectionWithMultipleFieldsJson");
 
         ClassAliasPool.CLASS_ALIASES.addAlias(CollectionContainer.class);

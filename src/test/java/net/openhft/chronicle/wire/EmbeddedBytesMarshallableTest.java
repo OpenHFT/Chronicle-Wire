@@ -21,18 +21,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // Test class focusing on the serialization and deserialization of Marshallables with embedded bytes.
-public class EmbeddedBytesMarshallableTest extends WireTestCommon {
+class EmbeddedBytesMarshallableTest extends WireTestCommon {
 
     // Before each test, check the current architecture and skip if it's ARM or Azul Zing.
     @BeforeEach
-    public void checkArch() {
+    void checkArch() {
         assumeFalse(Jvm.isArm() || Jvm.isAzulZing(), "ARM or Azul Zing detected; skip embedded bytes tests");
     }
 
     // Test clearing and appending new data to the embedded bytes.
     @Test
     @DisplayName("Clears and updates embedded bytes content")
-    public void testClear() {
+    void testClear() {
         // Register the alias for the class.
         ClassAliasPool.CLASS_ALIASES.addAlias(EBM.class);
 
@@ -59,7 +59,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     // Test serialization and deserialization with certain expected output.
     @Test
     @DisplayName("Serialises embedded bytes into hex dump")
-    public void ebm() {
+    void ebm() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip embedded bytes marshalling test");
 
         // Register the alias for the class.
@@ -96,7 +96,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
 
     @Test
     @DisplayName("Trivially copyable fields round-trip for embedded bytes")
-    public void triviallyCopyableFieldsRoundTrip() {
+    void triviallyCopyableFieldsRoundTrip() {
         EBM1 ebm1 = new EBM1();
         ebm1.l0 = 11L;
         ebm1.i0 = 12;
@@ -169,7 +169,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     // Test deserialization with no data. Expected to throw a DecoratedBufferUnderflowException.
     @Test
     @DisplayName("Empty input buffer should be rejected with underflow exception")
-    public void noData() {
+    void noData() {
         assertThrows(DecoratedBufferUnderflowException.class, () -> {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
             EBM ebm = new EBM();
@@ -181,7 +181,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     // Expected to throw an IllegalStateException.
     @Test
     @DisplayName("Rejects invalid description with zero field count")
-    public void invalidDescription() {
+    void invalidDescription() {
         assertThrows(IllegalStateException.class, () -> {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
             bytes.readLimit(64); // even bit count i.e. 0
@@ -194,7 +194,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     // Expected to throw an IllegalStateException.
     @Test
     @DisplayName("Rejects invalid description with insufficient data")
-    public void invalidDescription2() {
+    void invalidDescription2() {
         assertThrows(IllegalStateException.class, () -> {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
             bytes.append("abcd"); // tries to read too much data.
@@ -208,7 +208,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     // and an attempt to read more data than available. Expected to throw an IllegalStateException.
     @Test
     @DisplayName("Rejects invalid description with even bit count")
-    public void invalidDescription3() {
+    void invalidDescription3() {
         assertThrows(IllegalStateException.class, () -> {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
             bytes.append("abce"); // even bit count &&  tries to read too much data.
@@ -222,7 +222,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     // Expected to throw an IllegalStateException.
     @Test
     @DisplayName("Rejects description with even bit count marker")
-    public void invalidDescription4() {
+    void invalidDescription4() {
         assertThrows(IllegalStateException.class, () -> {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
             bytes.append("3\0\0\0"); // even bit count
@@ -236,7 +236,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     // Expected to throw an IllegalStateException.
     @Test
     @DisplayName("Rejects excessive field counts in description")
-    public void excessiveFieldCounts() {
+    void excessiveFieldCounts() {
         assertThrows(IllegalStateException.class, () -> {
             int desc = (200 << 24) | (200 << 16) | 1;
             int length = 200 * 8 + 200 * 4 + 1;

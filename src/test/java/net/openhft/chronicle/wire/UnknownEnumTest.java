@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // Class to test behavior of Wire in the context of Enums, especially unknown Enums
-public class UnknownEnumTest extends WireTestCommon {
+class UnknownEnumTest extends WireTestCommon {
 
     // Serialized map data, presumably representing an unknown Enum value for testing purposes
     private static final byte[] SERIALISED_MAP_DATA = {
@@ -34,7 +34,7 @@ public class UnknownEnumTest extends WireTestCommon {
     // Test to check how the Wire handles an unknown dynamic Enum
     @Test
     @DisplayName("Handles unknown dynamic enum values as text")
-    public void testUnknownDynamicEnum() {
+    void testUnknownDynamicEnum() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip unknown enum test");
 
         Wire wire = createWire();
@@ -54,7 +54,7 @@ public class UnknownEnumTest extends WireTestCommon {
     // Test to check how the Wire handles an unknown static Enum
     @Test
     @DisplayName("Throws when reading unknown static enum value")
-    public void testUnknownStaticEnum() {
+    void testUnknownStaticEnum() {
         Wire wire = createWire();
         wire.write("value").text("Maybe");
 
@@ -68,7 +68,7 @@ public class UnknownEnumTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Binary wire throws when enum type is unknown")
-    public void shouldConvertEnumValueToStringWhenTypeIsNotKnownInBinaryWireThrows() {
+    void shouldConvertEnumValueToStringWhenTypeIsNotKnownInBinaryWireThrows() {
         assertThrows(ClassNotFoundRuntimeException.class, () -> {
             final Bytes<ByteBuffer> bytes = Bytes.wrapForRead(ByteBuffer.wrap(SERIALISED_MAP_DATA));
 
@@ -83,7 +83,7 @@ public class UnknownEnumTest extends WireTestCommon {
     // This test ensures that TextWire produces a friendly error message for unknown Enum types
     @Test
     @DisplayName("Text wire emits friendly error for unknown enum type")
-    public void shouldGenerateFriendlyErrorMessageWhenTypeIsNotKnownInTextWire() {
+    void shouldGenerateFriendlyErrorMessageWhenTypeIsNotKnownInTextWire() {
         try {
             final Wire textWire = TextWire.from("enumField: !UnknownEnum QUX")
                                             .generateTuples(true);

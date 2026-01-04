@@ -14,7 +14,7 @@ import net.openhft.chronicle.wire.NanoTimestampLongConverter;
  * Extends `BytesInBinaryMarshallable` to support binary serialization
  * and implements the `Event` interface for event-specific behaviors.
  */
-public class ChronicleEvent extends BytesInBinaryMarshallable implements Event {
+class ChronicleEvent extends BytesInBinaryMarshallable implements Event {
 
     // Timestamp indicating when the event was sent, converted using NanoTimestampLongConverter
     @LongConversion(NanoTimestampLongConverter.class)
@@ -71,7 +71,7 @@ public class ChronicleEvent extends BytesInBinaryMarshallable implements Event {
         return transactTimeNS;
     }
 
-    public void text3(String text3) {
+    void text3(String text3) {
         this.text3 = text3;
     }
 

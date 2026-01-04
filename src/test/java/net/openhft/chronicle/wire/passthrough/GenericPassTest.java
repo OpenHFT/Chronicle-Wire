@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test class extending WireTestCommon to validate the behavior of method readers and writers
  * in Chronicle Wire, specifically focusing on passing messages through brokers.
  */
-public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
+class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     /**
      * Tests the functionality of a saying broker by writing and reading messages through Chronicle Wire.
@@ -24,7 +24,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
      */
     @Test
     @DisplayName("Saying broker passes messages through wires")
-    public void sayingBroker() {
+    void sayingBroker() {
         // Create a wire for writing a message
         Wire wire1 = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
         final SayingBroker sayingBroker = wire1.methodWriter(SayingBroker.class);
@@ -58,7 +58,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
      */
     @Test
     @DisplayName("Opaque message passes through TextWire unchanged")
-    public void passingOpaqueMessage() {
+    void passingOpaqueMessage() {
         // Create a wire with an invalid byte sequence to simulate an opaque message
         Bytes<?> bytes0 = Bytes.allocateElasticOnHeap(1);
         bytes0.writeUnsignedByte(0x82);  // Invalid byte in every wire type
@@ -95,7 +95,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
      */
     @Test
     @DisplayName("Opaque message passes through BinaryWire unchanged")
-    public void passingOpaqueMessageBinary() {
+    void passingOpaqueMessageBinary() {
         // Create a wire with an invalid byte sequence to simulate an opaque message
         Bytes<?> bytes0 = Bytes.allocateElasticOnHeap(1);
         bytes0.writeUnsignedByte(0x82); // Invalid byte in binary wire format

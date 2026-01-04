@@ -18,14 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Test class extending WireTestCommon to validate the pass-through functionality of method writers
  * and readers in Chronicle Wire using different wire formats.
  */
-public class PassThroughTest extends WireTestCommon {
+class PassThroughTest extends WireTestCommon {
 
     /**
      * Tests the pass-through functionality using TextWire, ensuring that the method reader can
      * read and pass through the input text correctly.
      */
     @Test
-    public void testPassThroughputText() {
+    void testPassThroughputText() {
         String input = "to: dest1\n" +
                 "send: message\n" +
                 "...\n" +
@@ -69,7 +69,7 @@ public class PassThroughTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Method writer produces expected text document")
-    public void methodWriterText() {
+    void methodWriterText() {
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         final Destination destination = wire2.methodWriter(Destination.class);
         try (DocumentContext dc = destination.to("dest")) {
@@ -89,7 +89,7 @@ public class PassThroughTest extends WireTestCommon {
      * read and pass through the input YAML text correctly.
      */
     @Test
-    public void testPassThroughputYaml() {
+    void testPassThroughputYaml() {
         String input = "to: dest1\n" +
                 "send: message\n" +
                 "...\n" +
@@ -133,7 +133,7 @@ public class PassThroughTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Method writer produces expected YAML document")
-    public void methodWriterYaml() {
+    void methodWriterYaml() {
         // Create a YAML wire for writing
         Wire wire2 = Wire.newYamlWireOnHeap();
         final Destination destination = wire2.methodWriter(Destination.class);
@@ -156,7 +156,7 @@ public class PassThroughTest extends WireTestCommon {
      * read and pass through binary formatted messages correctly.
      */
     @Test
-    public void testPassThroughputBinary() {
+    void testPassThroughputBinary() {
         String input = "to: dest1\n" +
                 "send: message\n" +
                 "...\n" +
@@ -244,7 +244,7 @@ public class PassThroughTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Method writer produces expected binary document")
-    public void methodWriterBinary() {
+    void methodWriterBinary() {
         // Create a binary wire for writing
         Wire wire2 = WireType.BINARY_LIGHT.apply(new HexDumpBytes());
         final Destination destination = wire2.methodWriter(Destination.class);

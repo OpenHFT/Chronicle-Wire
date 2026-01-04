@@ -24,13 +24,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * Targets the 197 missed branches identified in coverage analysis.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class BinaryValueInEdgeCaseTest extends WireTestCommon {
+class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     // ========== Numeric Boundary Tests ==========
 
     @Test
     @DisplayName("Reads minimum and maximum byte values")
-    public void testByteMinMax() {
+    void testByteMinMax() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -49,7 +49,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads minimum and maximum short values")
-    public void testShortMinMax() {
+    void testShortMinMax() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -66,7 +66,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads minimum and maximum int values")
-    public void testIntMinMax() {
+    void testIntMinMax() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -83,7 +83,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads minimum and maximum long values")
-    public void testLongMinMax() {
+    void testLongMinMax() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -101,7 +101,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads unsigned byte values without sign extension")
-    public void testUnsignedByte() {
+    void testUnsignedByte() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -124,7 +124,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads unsigned short values without sign extension")
-    public void testUnsignedShort() {
+    void testUnsignedShort() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -141,7 +141,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads unsigned int values without sign extension")
-    public void testUnsignedInt() {
+    void testUnsignedInt() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -168,7 +168,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
     @Test
     @Disabled("Negative zero not preserved in float round-trip - needs investigation")
     @DisplayName("Reads special float values including signed zero")
-    public void testSpecialFloats() {
+    void testSpecialFloats() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -193,7 +193,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
     @Test
     @Disabled("Negative zero not preserved in double round-trip - needs investigation")
     @DisplayName("Reads special double values including signed zero")
-    public void testSpecialDoubles() {
+    void testSpecialDoubles() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -216,7 +216,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads float32 values via consumer callback")
-    public void testFloat32WithConsumer() {
+    void testFloat32WithConsumer() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -233,7 +233,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads empty and null string values consistently")
-    public void testEmptyAndNullStrings() {
+    void testEmptyAndNullStrings() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -250,7 +250,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads strings with special escape characters")
-    public void testStringsWithSpecialChars() {
+    void testStringsWithSpecialChars() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -269,7 +269,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads textTo into supplied StringBuilder buffer")
-    public void testTextToStringBuilder() {
+    void testTextToStringBuilder() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -286,7 +286,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads empty byte arrays without nulls")
-    public void testEmptyByteArray() {
+    void testEmptyByteArray() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -302,7 +302,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads various sized byte arrays safely")
-    public void testVariousSizedByteArrays() {
+    void testVariousSizedByteArrays() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -323,7 +323,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads empty sequence with no item entries")
-    public void testEmptySequence() {
+    void testEmptySequence() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -342,7 +342,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads sequence with mixed value types")
-    public void testSequenceWithMixedTypes() {
+    void testSequenceWithMixedTypes() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -371,7 +371,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads nested sequences of integer values")
-    public void testNestedSequences() {
+    void testNestedSequences() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -411,7 +411,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads empty marshallable with no field entries")
-    public void testEmptyMarshallable() {
+    void testEmptyMarshallable() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -432,7 +432,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads deeply nested marshallable structures safely")
-    public void testDeeplyNestedMarshallable() {
+    void testDeeplyNestedMarshallable() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -449,7 +449,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads UUID values across boundary cases")
-    public void testUUID() {
+    void testUUID() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -470,7 +470,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads UUID values via consumer callback")
-    public void testUUIDWithConsumer() {
+    void testUUIDWithConsumer() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -488,7 +488,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads boolean values via consumer callback")
-    public void testBoolWithConsumer() {
+    void testBoolWithConsumer() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -509,7 +509,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Skips various value types before final read")
-    public void testSkipValueVariousTypes() {
+    void testSkipValueVariousTypes() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -537,7 +537,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads values with type prefix metadata")
-    public void testTypePrefix() {
+    void testTypePrefix() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -557,7 +557,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read character values correctly")
-    public void testCharacter() {
+    void testCharacter() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -576,7 +576,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read date and time values")
-    public void testDateTime() {
+    void testDateTime() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -599,7 +599,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read list of strings in order")
-    public void testListOfStrings() {
+    void testListOfStrings() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
         List<String> input = new ArrayList<>();
@@ -622,7 +622,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read map of strings to integers")
-    public void testMapOfStringsToIntegers() {
+    void testMapOfStringsToIntegers() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
         Map<String, Integer> input = new HashMap<>();
@@ -647,7 +647,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read int8 with consumer callback")
-    public void testInt8WithConsumer() {
+    void testInt8WithConsumer() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -662,7 +662,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read int16 with consumer callback")
-    public void testInt16WithConsumer() {
+    void testInt16WithConsumer() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -677,7 +677,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read int32 with consumer callback")
-    public void testInt32WithConsumer() {
+    void testInt32WithConsumer() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -692,7 +692,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read int64 with consumer callback")
-    public void testInt64WithConsumer() {
+    void testInt64WithConsumer() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -709,7 +709,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read int as long without loss")
-    public void testIntAsLong() {
+    void testIntAsLong() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -723,7 +723,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read byte as int without sign extension issues")
-    public void testByteAsInt() {
+    void testByteAsInt() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -738,7 +738,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read short as long without loss")
-    public void testShortAsLong() {
+    void testShortAsLong() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -752,7 +752,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read float as double without loss")
-    public void testFloatAsDouble() {
+    void testFloatAsDouble() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -766,7 +766,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read integer as double without loss")
-    public void testIntAsDouble() {
+    void testIntAsDouble() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -782,7 +782,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read values with numeric field IDs")
-    public void testNumericFieldIds() {
+    void testNumericFieldIds() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
         wire.usePadding(false);
@@ -798,7 +798,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should handle missing fields gracefully")
-    public void testMissingField() {
+    void testMissingField() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -813,7 +813,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read int array values")
-    public void testIntArray() {
+    void testIntArray() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -828,7 +828,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read long array values")
-    public void testLongArray() {
+    void testLongArray() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -843,7 +843,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read double array values")
-    public void testDoubleArray() {
+    void testDoubleArray() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -858,7 +858,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read String array values")
-    public void testStringArray() {
+    void testStringArray() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -875,7 +875,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should round-trip enum constant values")
-    public void testEnumValue() {
+    void testEnumValue() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -889,7 +889,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read enum via asEnum method")
-    public void testAsEnum() {
+    void testAsEnum() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -905,7 +905,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should round-trip Class type literal values")
-    public void testClassValue() {
+    void testClassValue() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -921,7 +921,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read boxed Integer values")
-    public void testBoxedInteger() {
+    void testBoxedInteger() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -936,7 +936,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read boxed Long values")
-    public void testBoxedLong() {
+    void testBoxedLong() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -951,7 +951,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read boxed Double values")
-    public void testBoxedDouble() {
+    void testBoxedDouble() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -966,7 +966,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read boxed Boolean values")
-    public void testBoxedBoolean() {
+    void testBoxedBoolean() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -985,7 +985,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should round-trip ZonedDateTime value with UTC zone")
-    public void testZonedDateTime() {
+    void testZonedDateTime() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -1001,7 +1001,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should round-trip Duration value with minutes")
-    public void testDuration() {
+    void testDuration() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -1018,7 +1018,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should handle explicit null for object types")
-    public void testExplicitNullObject() {
+    void testExplicitNullObject() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -1032,7 +1032,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should preserve null entry in sequence")
-    public void testNullInSequence() {
+    void testNullInSequence() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -1061,7 +1061,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn isNull should detect null values")
-    public void testIsNull() {
+    void testIsNull() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -1078,7 +1078,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should handle stop-bit encoded boundaries")
-    public void testStopBitBoundaries() {
+    void testStopBitBoundaries() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -1101,7 +1101,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryValueIn should read numeric string as number")
-    public void testNumericStringAsNumber() {
+    void testNumericStringAsNumber() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -1135,7 +1135,7 @@ public class BinaryValueInEdgeCaseTest extends WireTestCommon {
         }
 
         @Override
-        public void writeMarshallable(WireOut wire) {
+       public void writeMarshallable(WireOut wire) {
             wire.write("name").text(name);
             wire.write("value").int32(value);
         }

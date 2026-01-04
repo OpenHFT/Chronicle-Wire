@@ -19,9 +19,9 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class WireResetTest extends WireTestCommon {
+class WireResetTest extends WireTestCommon {
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory is required for reset tests");
     }
@@ -29,7 +29,7 @@ public class WireResetTest extends WireTestCommon {
     @Test
     @DisplayName("Reset keeps event open after reset")
     //https://github.com/OpenHFT/Chronicle-Wire/issues/225
-    public void test() {
+    void test() {
         Event event = new Event();
         assertFalse(event.isClosed(), "event should not be closed after initialization");
 
@@ -40,7 +40,7 @@ public class WireResetTest extends WireTestCommon {
     @Test
     @DisplayName("Reset keeps AbstractCloseable event open after reset")
     //https://github.com/OpenHFT/Chronicle-Wire/issues/225
-    public void testEventAbstractCloseable() {
+    void testEventAbstractCloseable() {
         try (EventAbstractCloseable event = new EventAbstractCloseable()) {
             assertFalse(event.isClosed(), "abstract closeable event should not be closed after initialization");
 
@@ -52,7 +52,7 @@ public class WireResetTest extends WireTestCommon {
     @Test
     @DisplayName("Deep reset clears nested fields safely")
     //https://github.com/OpenHFT/Chronicle-Wire/issues/732
-    public void testDeepReset() {
+    void testDeepReset() {
         Event event1 = new Event();
         final Identifier identifier1 = event1.identifier;
         event1.identifier.id = "id";
@@ -101,7 +101,7 @@ public class WireResetTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Deep reset clears LocalDate fields safely")
-    public void canDeepResetOnDtosContainingLocalDates() {
+    void canDeepResetOnDtosContainingLocalDates() {
         Event e = new Event();
         e.someDate = LocalDate.now();
         e.reset();

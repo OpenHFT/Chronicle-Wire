@@ -17,11 +17,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * and validates via round-trip parsing.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class YamlValueOutFormattingBranchesTest extends WireTestCommon {
+class YamlValueOutFormattingBranchesTest extends WireTestCommon {
 
     @Test
     @DisplayName("YAML value output round trips complex values")
-    public void writeAndReadComplexYaml() {
+    void writeAndReadComplexYaml() {
         Wire w = WireType.YAML.apply(Bytes.allocateElasticOnHeap(512));
 
         // Values likely to exercise quoting and multi-line formatting branches
@@ -60,7 +60,7 @@ public class YamlValueOutFormattingBranchesTest extends WireTestCommon {
 
     @Test
     @DisplayName("YAML output writes quoted and multiline values")
-    public void writesQuotedAndMultilineValues() {
+    void writesQuotedAndMultilineValues() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         YamlWire wire = new YamlWire(bytes);
 

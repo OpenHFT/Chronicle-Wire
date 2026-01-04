@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * without OOB reads, infinite loops, or memory corruption.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class WireTruncationTest extends WireTestCommon {
+class WireTruncationTest extends WireTestCommon {
 
     // ========== Binary Wire Truncation Tests ==========
 
@@ -24,7 +24,7 @@ public class WireTruncationTest extends WireTestCommon {
     @Test
     @Disabled("BinaryWire throws AssertionError on truncated field name - needs investigation")
     @DisplayName("BinaryWire should handle truncated field name length prefix")
-    public void testTruncatedFieldNameLengthPrefix() {
+    void testTruncatedFieldNameLengthPrefix() {
         // Write a valid message first
         Bytes<?> fullBytes = Bytes.allocateElasticOnHeap();
         BinaryWire fullWire = new BinaryWire(fullBytes);
@@ -48,7 +48,7 @@ public class WireTruncationTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle truncated int value")
-    public void testTruncatedIntValue() {
+    void testTruncatedIntValue() {
         Bytes<?> fullBytes = Bytes.allocateElasticOnHeap();
         BinaryWire fullWire = new BinaryWire(fullBytes);
         fullWire.write("key").int64(Long.MAX_VALUE);
@@ -73,7 +73,7 @@ public class WireTruncationTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle truncated string length")
-    public void testTruncatedStringLength() {
+    void testTruncatedStringLength() {
         Bytes<?> fullBytes = Bytes.allocateElasticOnHeap();
         BinaryWire fullWire = new BinaryWire(fullBytes);
         fullWire.write("key").text("This is a long string value that should be truncated");
@@ -98,7 +98,7 @@ public class WireTruncationTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle empty bytes gracefully")
-    public void testEmptyBytes() {
+    void testEmptyBytes() {
         Bytes<?> emptyBytes = Bytes.allocateElasticOnHeap(0);
         BinaryWire wire = new BinaryWire(emptyBytes);
 
@@ -117,7 +117,7 @@ public class WireTruncationTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should handle truncated YAML key")
-    public void testTruncatedYamlKey() {
+    void testTruncatedYamlKey() {
         String yaml = "key: value\n";
         // Truncate mid-key
         String truncated = yaml.substring(0, 2);
@@ -136,7 +136,7 @@ public class WireTruncationTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should handle truncated quoted string")
-    public void testTruncatedQuotedString() {
+    void testTruncatedQuotedString() {
         String yaml = "key: \"This is a quoted string\"\n";
         // Truncate mid-quote
         String truncated = yaml.substring(0, 15);
@@ -154,7 +154,7 @@ public class WireTruncationTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should handle truncated escape sequence")
-    public void testTruncatedEscapeSequence() {
+    void testTruncatedEscapeSequence() {
         String yaml = "key: \"line1\\nline2\"\n";
         // Truncate at the backslash
         int backslashPos = yaml.indexOf('\\');
@@ -174,7 +174,7 @@ public class WireTruncationTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle truncated flow sequence")
-    public void testTruncatedFlowSequence() {
+    void testTruncatedFlowSequence() {
         String yaml = "items: [a, b, c, d]\n";
         // Truncate mid-sequence
         String truncated = yaml.substring(0, 12);
@@ -191,7 +191,7 @@ public class WireTruncationTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle truncated flow mapping")
-    public void testTruncatedFlowMapping() {
+    void testTruncatedFlowMapping() {
         String yaml = "data: {a: 1, b: 2}\n";
         // Truncate mid-mapping
         String truncated = yaml.substring(0, 12);
@@ -208,7 +208,7 @@ public class WireTruncationTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle truncated anchor references")
-    public void testTruncatedAnchor() {
+    void testTruncatedAnchor() {
         String yaml = "anchor: &myanchor value\n";
         // Truncate mid-anchor
         String truncated = yaml.substring(0, 12);
@@ -227,7 +227,7 @@ public class WireTruncationTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle truncated UTF-8 sequence")
-    public void testTruncatedUtf8Sequence() {
+    void testTruncatedUtf8Sequence() {
         // 4-byte UTF-8 emoji
         String emoji = "\uD83D\uDE00";
         Bytes<?> fullBytes = Bytes.allocateElasticOnHeap();
@@ -256,7 +256,7 @@ public class WireTruncationTest extends WireTestCommon {
 
     @Test
     @DisplayName("Read position should not go backwards after truncation error")
-    public void testPositionSanityAfterTruncation() {
+    void testPositionSanityAfterTruncation() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
         wire.write("key").text("value");
@@ -285,7 +285,7 @@ public class WireTruncationTest extends WireTestCommon {
     @Test
     @Disabled("BinaryWire may loop on certain truncated patterns - needs investigation")
     @DisplayName("Truncated wire should not cause infinite loop")
-    public void testNoInfiniteLoopOnTruncation() {
+    void testNoInfiniteLoopOnTruncation() {
         // Create minimal truncated data that might trigger loop
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(2);
         bytes.writeByte((byte) 0xFF);  // Could be misinterpreted as length
@@ -313,7 +313,7 @@ public class WireTruncationTest extends WireTestCommon {
 
     @Test
     @DisplayName("Truncation should produce consistent error types")
-    public void testConsistentErrorTypes() {
+    void testConsistentErrorTypes() {
         // Multiple truncation scenarios should produce predictable exception hierarchy
         String yaml = "key: value\n";
 

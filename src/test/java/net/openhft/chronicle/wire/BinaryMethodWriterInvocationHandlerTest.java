@@ -13,11 +13,11 @@ import java.lang.reflect.Proxy;
 import static org.easymock.EasyMock.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class BinaryMethodWriterInvocationHandlerTest extends WireTestCommon {
+class BinaryMethodWriterInvocationHandlerTest extends WireTestCommon {
 
     @Test
     @DisplayName("Closes target when proxy is closed")
-    public void testOnClose() {
+    void testOnClose() {
         Closeable closeable = createMock(Closeable.class);
 
         // Setting expectations on the mock: When the close() method is called, do nothing.

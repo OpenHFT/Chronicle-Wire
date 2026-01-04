@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class CNFREOnMissingClassTest extends WireTestCommon {
+class CNFREOnMissingClassTest extends WireTestCommon {
 
     /**
      * Validates that a ClassNotFoundRuntimeException is correctly thrown when attempting
@@ -22,7 +22,7 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Missing class alias should raise ClassNotFoundRuntimeException on parse")
-    public void throwClassNotFoundRuntimeExceptionOnMissingClassAlias() {
+    void throwClassNotFoundRuntimeExceptionOnMissingClassAlias() {
         TwoFields defaults = new TwoFields();
         assertNull(defaults.name, "TwoFields name should default to null");
         assertNull(defaults.fieldOne, "TwoFields fieldOne should default to null");
@@ -45,7 +45,7 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Missing class for field raises ClassNotFoundRuntimeException")
-    public void throwClassNotFoundRuntimeExceptionOnMissingClassForField() {
+    void throwClassNotFoundRuntimeExceptionOnMissingClassForField() {
         assertThrows(ClassNotFoundRuntimeException.class, () -> {
             Wires.setGenerateTuples(false);
             ClassAliasPool.CLASS_ALIASES.addAlias(TwoFields.class);
@@ -67,7 +67,7 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Missing class for Object field raises ClassNotFoundRuntimeException")
-    public void throwClassNotFoundRuntimeExceptionOnMissingClassForField2() {
+    void throwClassNotFoundRuntimeExceptionOnMissingClassForField2() {
         UsesTwoFields defaults = new UsesTwoFields();
         assertNull(defaults.bothFields, "UsesTwoFields bothFields should default to null");
         assertNull(defaults.name, "UsesTwoFields name should default to null");
@@ -78,7 +78,7 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
 
     @Test
     @DisplayName("Missing class for non-tuple field raises ClassNotFoundRuntimeException")
-    public void throwClassNotFoundRuntimeExceptionOnMissingClassForFieldNotATuple() {
+    void throwClassNotFoundRuntimeExceptionOnMissingClassForFieldNotATuple() {
         assertThrows(ClassNotFoundRuntimeException.class, () ->
                 testFieldNotObject0(true, null),
                 "Missing non-tuple field class should raise ClassNotFoundRuntimeException");
@@ -107,7 +107,7 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Missing class for interface field raises ClassNotFoundRuntimeException")
-    public void throwClassNotFoundRuntimeExceptionOnMissingClassForInterfaceField() {
+    void throwClassNotFoundRuntimeExceptionOnMissingClassForInterfaceField() {
         UsesInterfaceField defaults = new UsesInterfaceField();
         assertNull(defaults.bothFields, "UsesInterfaceField bothFields should default to null");
         assertNull(defaults.name, "UsesInterfaceField name should default to null");
@@ -123,7 +123,7 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Tuple generation works when interface field class is missing")
-    public void useTupleOnMissingClassForInterfaceField() {
+    void useTupleOnMissingClassForInterfaceField() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for tuple generation test");
 
         String expected = "!UsesInterfaceField {\n" +

@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.io.InputStream;
 
 @Deprecated(/* Should be fully covered by YamlSpecificationTest */)
-public class YamlSpecTest extends WireTestCommon {
+class YamlSpecTest extends WireTestCommon {
     private static final String DIR = "/yaml/spec/";
 
     private static boolean doTest(String file, String expected) {
@@ -32,7 +32,7 @@ public class YamlSpecTest extends WireTestCommon {
 
     @Test
     @DisplayName("YAML spec 2.18 flow scalars parse")
-    public void test2_18Multi_lineFlowScalarsFixed() {
+    void test2_18Multi_lineFlowScalarsFixed() {
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             InputStream is = YamlSpecTest.class.getResourceAsStream(DIR + "2_18Multi_lineFlowScalarsFixed.yaml");
@@ -54,7 +54,7 @@ public class YamlSpecTest extends WireTestCommon {
 
     @Test
     @DisplayName("YAML spec 2.21 miscellaneous parse")
-    public void test2_21MiscellaneousFixed() {
+    void test2_21MiscellaneousFixed() {
         Assertions.assertTrue(doTest("2_21MiscellaneousFixed.yaml", "{null=, booleans=[true, false], string=012345}"),
                 "YAML spec 2.21 should match expected output");
     }

@@ -47,7 +47,7 @@ class MarshallableFixture extends SelfDescribingMarshallable {
 
     // Defining a setter method for the 'name' field,
     // which clears the current content and appends the given CharSequence
-    public void setName(CharSequence name) {
+    void setName(CharSequence name) {
         this.name.setLength(0); // Clearing the current content of 'name'
         this.name.append(name); // Appending the new content to 'name'
     }
@@ -60,7 +60,7 @@ class MarshallableFixture extends SelfDescribingMarshallable {
 
     // Defining a setter method for the 'count' field,
     // which updates the 'count' field with the provided integer value
-    public void setCount(int count) {
+    void setCount(int count) {
         this.count = count;
     }
 }

@@ -16,7 +16,7 @@ import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class BinaryWireNumbersTest extends WireTestCommon {
+class BinaryWireNumbersTest extends WireTestCommon {
     private static final float VAL1 = 12345678901234567.0f;
 
     // Provides a collection of parameters to run the tests with
@@ -68,7 +68,7 @@ public class BinaryWireNumbersTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Serialises numeric values with expected lengths")
-    public void doTest(int len, WriteValue expected, WriteValue perform) {
+    void doTest(int len, WriteValue expected, WriteValue perform) {
         assertTrue(len > 0, "fixed length should be > 0 for test case, len=" + len);
         assertNotNull(expected, "writer should be non-null for fixed length test case, len=" + len);
         assertNotNull(perform, "Perform writer should be non-null for fixed length test case, len=" + len);

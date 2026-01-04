@@ -16,10 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * Exercises BinaryWire HexDumpBytes output when TwoArrays round-trips array capacity, used counts, and element values.
  */
-public class TwoArraysTest extends WireTestCommon {
+class TwoArraysTest extends WireTestCommon {
     @Test
     @DisplayName("TwoArrays serialises and deserialises via BinaryWire")
-    public void testTwoArrays() {
+    void testTwoArrays() {
         // Ignore exceptions with specific error message
         ignoreException("BytesMarshallable found in field which is not matching exactly");
 

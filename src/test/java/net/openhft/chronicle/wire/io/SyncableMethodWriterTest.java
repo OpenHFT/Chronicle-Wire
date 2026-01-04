@@ -22,7 +22,7 @@ import java.io.FileNotFoundException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
+class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     private static final String EXPECTED = "say: hello\n" +
             "...\n" +
@@ -58,7 +58,7 @@ public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTes
     // Test the ability to use the custom method writer to write a message and then synchronize the wire
     @Test
     @DisplayName("On-heap method writer syncs after say calls")
-    public void sayAndSync() {
+    void sayAndSync() {
         final OnHeapBytes bytes = Bytes.allocateElasticOnHeap();
         try {
             assertEquals(EXPECTED, doTest(bytes), "On-heap say/sync output should match expected format");
@@ -81,7 +81,7 @@ public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTes
     // Test the say and sync operations but this time with a MappedBytes instance which maps bytes to a file
     @Test
     @DisplayName("Mapped bytes writer syncs after say calls")
-    public void sayAndSyncMappedBytes() throws FileNotFoundException {
+    void sayAndSyncMappedBytes() throws FileNotFoundException {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for mapped bytes test");
         final File file = IOTools.createTempFile("sayAndSyncMappedBytes");
         file.deleteOnExit();

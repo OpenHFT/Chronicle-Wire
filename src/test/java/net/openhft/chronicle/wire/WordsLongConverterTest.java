@@ -11,12 +11,12 @@ import java.util.SplittableRandom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class WordsLongConverterTest extends WireTestCommon {
+class WordsLongConverterTest extends WireTestCommon {
 
     // Test how WordsLongConverter integrates with YAML Wire
     @Test
     @DisplayName("Words converter serialises values into YAML")
-    public void inYaml() {
+    void inYaml() {
         // Initialize YAML wire
         Wire wire = Wire.newYamlWireOnHeap();
 
@@ -42,7 +42,7 @@ public class WordsLongConverterTest extends WireTestCommon {
     // Test the conversion of longs to strings
     @Test
     @DisplayName("Words converter formats long values consistently")
-    public void asString() {
+    void asString() {
         // Initialize WordsLongConverter
         LongConverter bic = new WordsLongConverter();
 
@@ -76,7 +76,7 @@ public class WordsLongConverterTest extends WireTestCommon {
     // Test the parsing capabilities of WordsLongConverter
     @Test
     @DisplayName("Words converter parses strings into long values")
-    public void parse() {
+    void parse() {
         // Initialize WordsLongConverter
         LongConverter bic = new WordsLongConverter();
         for (String s : ("square.army.plan.player.wash.disk\n" +

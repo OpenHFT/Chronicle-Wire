@@ -17,16 +17,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * The object primarily deals with StringBuilder data and provides mechanisms
  * for reading and writing that data with Wire.
  */
-public class MarshallableObj implements Marshallable {
+class MarshallableObj implements Marshallable {
     private final StringBuilder builder = new StringBuilder();
 
     // Clears the current content of the builder
-    public void clear() {
+    void clear() {
         builder.setLength(0);
     }
 
     // Appends a character sequence to the builder
-    public void append(CharSequence cs) {
+    void append(CharSequence cs) {
         builder.append(cs);
     }
 

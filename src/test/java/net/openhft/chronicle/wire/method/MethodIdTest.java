@@ -21,7 +21,7 @@ class MethodIdTest extends WireTestCommon {
     // Test method to verify serialization and deserialization of methods with various IDs
     @Test
     @DisplayName("MethodId encodes binary and YAML outputs")
-    public void methodIdInBinary() {
+    void methodIdInBinary() {
         // Create a new BinaryWire instance with specified configurations
         Wire wire = new BinaryWire(new HexDumpBytes(), true, true, false, 128, "");
 

@@ -16,11 +16,11 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * Exercises {@link Bytes} elastic behaviour without Wire involvement to prove capacity growth
  * maintains reader/writer cursor invariants.
  */
-public class ElasticBytesCapacityTest extends WireTestCommon {
+class ElasticBytesCapacityTest extends WireTestCommon {
 
     @Test
     @DisplayName("Grows heap bytes and preserves positions")
-    public void heapBytesGrowAndRestorePositions() {
+    void heapBytesGrowAndRestorePositions() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         try {
             assertElasticGrowthPreservesState(bytes);
@@ -31,7 +31,7 @@ public class ElasticBytesCapacityTest extends WireTestCommon {
 
     @Test
     @DisplayName("Grows direct bytes and preserves positions")
-    public void directBytesGrowAndRestorePositions() {
+    void directBytesGrowAndRestorePositions() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip direct bytes capacity test");
         Bytes<?> bytes = Bytes.allocateElasticDirect(32);

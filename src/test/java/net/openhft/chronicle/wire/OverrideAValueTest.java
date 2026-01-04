@@ -15,12 +15,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // Class OverrideAValueTest extends WireTestCommon to perform tests related to value overrides and immutability
-public class OverrideAValueTest extends WireTestCommon {
+class OverrideAValueTest extends WireTestCommon {
 
     // Test to ensure deserialization does not modify immutable objects
     @Test
     @DisplayName("Immutable constant remains unchanged on deserialisation")
-    public void testDontTouchImmutables() {
+    void testDontTouchImmutables() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for immutable deserialisation test");
 
         // Deserialization of a NumberHolder instance with num set to 2
@@ -33,7 +33,7 @@ public class OverrideAValueTest extends WireTestCommon {
     // Test to ensure deserialization does not modify immutable nested objects
     @Test
     @DisplayName("Immutable nested constant remains unchanged after deserialisation")
-    public void testDontTouchImmutables2() {
+    void testDontTouchImmutables2() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for nested immutable test");
 
         // Mark NumberHolder class as immutable
@@ -49,7 +49,7 @@ public class OverrideAValueTest extends WireTestCommon {
     // Test to ensure that class changes during deserialization are handled appropriately
     @Test
     @DisplayName("Class change is allowed during deserialisation")
-    public void testAllowClassChange() {
+    void testAllowClassChange() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for class change deserialisation test");
 
         // Deserialization of a ParentHolder instance with a nested SubClass object having name "bob" and value 3.3

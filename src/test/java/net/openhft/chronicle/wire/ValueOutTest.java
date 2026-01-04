@@ -20,12 +20,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SuppressFBWarnings(
         value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
         justification = "Fields are populated via Wire marshalling in tests.")
-public class ValueOutTest {
+class ValueOutTest {
 
     private WireType wireType;
 
     // Constructor to initialize the WireType for testing
-    public void initValueOutTest(WireType wireType) {
+    void initValueOutTest(WireType wireType) {
         this.wireType = wireType;
     }
 
@@ -41,7 +41,7 @@ public class ValueOutTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
     @DisplayName("Round-trips byte array with generic object read")
-    public void test(WireType wireType) {
+    void test(WireType wireType) {
         initValueOutTest(wireType);
         // Apply the wire type and ensure padding is used if binary
         final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
@@ -70,7 +70,7 @@ public class ValueOutTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
     @DisplayName("Round-trips byte array with requested type")
-    public void testRequestedType(WireType wireType) {
+    void testRequestedType(WireType wireType) {
         initValueOutTest(wireType);
         // Initialize the Wire object and enable padding for binary format
         final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
@@ -95,7 +95,7 @@ public class ValueOutTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
     @DisplayName("Round-trips all byte values for each wire type")
-    public void testAllBytes(WireType wireType) {
+    void testAllBytes(WireType wireType) {
         initValueOutTest(wireType);
         // Apply the wire type, ensuring padding is applied if binary
         final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());

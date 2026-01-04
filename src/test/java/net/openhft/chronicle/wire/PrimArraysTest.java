@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SuppressFBWarnings(
         value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
         justification = "Fields are populated via Wire marshalling in tests.")
-public class PrimArraysTest extends WireTestCommon {
+class PrimArraysTest extends WireTestCommon {
 
     // Class variables to hold the parameters
     private WireType wireType;
@@ -30,7 +30,7 @@ public class PrimArraysTest extends WireTestCommon {
     private String asText;
 
     // Constructor that initializes the class variables
-    public void initPrimArraysTest(WireType wireType, Object array, String asText) {
+    void initPrimArraysTest(WireType wireType, Object array, String asText) {
         this.wireType = wireType;
         this.array = array;
         this.asText = asText;
@@ -87,7 +87,7 @@ public class PrimArraysTest extends WireTestCommon {
     @MethodSource("combinations")
     @ParameterizedTest(name = "wt={0}, asText={2}")
     @DisplayName("Primitive arrays round-trip across wire types")
-    public void testPrimArray(WireType wireType, Object array, String asText) {
+    void testPrimArray(WireType wireType, Object array, String asText) {
         initPrimArraysTest(wireType, array, asText);
         Wire wire = createWire();  // Create a wire instance based on the wireType
         try {

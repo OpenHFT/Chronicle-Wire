@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * This class tests the behavior of NaN values when used in different data types like primitives, wrappers, and objects.
  * The tests emphasize the importance of consistent behavior when comparing such entities containing NaN.
  */
-public class CompareNaNTest extends WireTestCommon {
+class CompareNaNTest extends WireTestCommon {
 
     /**
      * Test the comparison behavior for primitive data types containing NaN values.
@@ -26,7 +26,7 @@ public class CompareNaNTest extends WireTestCommon {
      */
     @Test
     @DisplayName("NaN primitives should compare equal in DTO")
-    public void testPrim() {
+    void testPrim() {
         @NotNull PrimDTO a = new PrimDTO(Double.NaN, Float.NaN);
         @NotNull PrimDTO b = new PrimDTO(Double.NaN, Float.NaN);
         assertTrue(Double.isNaN(a.d), "PrimDTO.d should be NaN for double input");
@@ -41,7 +41,7 @@ public class CompareNaNTest extends WireTestCommon {
      */
     @Test
     @DisplayName("NaN wrapper values should compare equal in DTO")
-    public void testWrapDTO() {
+    void testWrapDTO() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for NaN wrapper DTO test");
 
         @NotNull WrapDTO a = new WrapDTO(Double.NaN, Float.NaN);
@@ -58,7 +58,7 @@ public class CompareNaNTest extends WireTestCommon {
      */
     @Test
     @DisplayName("NaN object values should compare equal in DTO")
-    public void testObjectWrapDTO() {
+    void testObjectWrapDTO() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for NaN object DTO test");
 
         @NotNull ObjectWrapDTO a = new ObjectWrapDTO(Double.NaN, Float.NaN);

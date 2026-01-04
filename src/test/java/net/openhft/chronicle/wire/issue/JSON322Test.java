@@ -22,11 +22,11 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 /**
  * Regression coverage for JSON type aliasing metadata behaviour in issue 322.
  */
-public class JSON322Test extends WireTestCommon {
+class JSON322Test extends WireTestCommon {
 
     @Test
     @DisplayName("JSON wire should support nested types")
-    public void supportNestedTypes() {
+    void supportNestedTypes() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for nested JSON type test");
 
         final Three three = new Three();
@@ -67,7 +67,7 @@ public class JSON322Test extends WireTestCommon {
 
     @Test
     @DisplayName("JSON wire should support alias types")
-    public void supportTypes() {
+    void supportTypes() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for alias JSON type test");
 
         ClassAliasPool.CLASS_ALIASES.addAlias(Combined322.class, TypeOne322.class, TypeTwo322.class);

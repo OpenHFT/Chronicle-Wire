@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import static net.openhft.chronicle.bytes.MethodReader.MESSAGE_HISTORY_METHOD_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MethodWriterHistoryTest extends WireTestCommon {
+class MethodWriterHistoryTest extends WireTestCommon {
 
     interface Events {
         void event(CharSequence value);
@@ -32,7 +32,7 @@ public class MethodWriterHistoryTest extends WireTestCommon {
 
     @Test
     @DisplayName("History event is prepended when recording is enabled")
-    public void historyEventIsPrependedWhenRecordingEnabled() {
+    void historyEventIsPrependedWhenRecordingEnabled() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         Wire wire = new RecordingTextWire(bytes);
         try {

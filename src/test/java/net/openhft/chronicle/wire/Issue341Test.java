@@ -19,7 +19,7 @@ import java.util.Collection;
 
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class Issue341Test extends WireTestCommon {
+class Issue341Test extends WireTestCommon {
 
     // This method specifies the different WireTypes the tests will run for.
     public static Collection<Object[]> data() {
@@ -36,7 +36,7 @@ public class Issue341Test extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Serialises Instant field across wire types")
-    public void instant(WireType wireType) {
+    void instant(WireType wireType) {
         final MyClass source = new MyClass();
         source.instant = Instant.ofEpochMilli(1_000_000_000_000L);
 
@@ -64,7 +64,7 @@ public class Issue341Test extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Serialises comparable serialisable across wire types")
-    public void testComparableSerializable(WireType wireType) {
+    void testComparableSerializable(WireType wireType) {
         // for backward compatibility, this doesn't support types
         assumeFalse(wireType == WireType.JSON,
                 "json wire does not support types for Issue341, wireType=" + wireType);

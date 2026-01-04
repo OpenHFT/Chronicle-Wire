@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Exercises {@link LongValueBitSet} across word boundaries to validate set, flip, clear, and sizing behaviour.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class LongValueBitSetOperationsTest extends WireTestCommon {
+class LongValueBitSetOperationsTest extends WireTestCommon {
 
     private static LongValueBitSet newSet(int bits) {
         // Bind to a BinaryWire so LongReferences are initialised
@@ -23,7 +23,7 @@ public class LongValueBitSetOperationsTest extends WireTestCommon {
 
     @Test
     @DisplayName("Sets, flips, and clears bits across words")
-    public void setGetFlipAcrossWords() {
+    void setGetFlipAcrossWords() {
         try (LongValueBitSet bs = newSet(128)) {
 
             // Set boundary bits
@@ -62,7 +62,7 @@ public class LongValueBitSetOperationsTest extends WireTestCommon {
 
     @Test
     @DisplayName("Calculates cardinality and byte array form")
-    public void cardinalityAndToByteArray() {
+    void cardinalityAndToByteArray() {
         try (LongValueBitSet bs = newSet(130)) {
             bs.set(1);
             bs.set(65);

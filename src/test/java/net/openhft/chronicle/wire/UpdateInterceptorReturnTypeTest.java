@@ -34,7 +34,7 @@ class UpdateInterceptorReturnTypeTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     @DisplayName("Interceptor writes data for void return type")
-    public void testUpdateInterceptorNoReturnType(boolean disableProxyCodegen) {
+    void testUpdateInterceptorNoReturnType(boolean disableProxyCodegen) {
         withDisableProxyCodegen(disableProxyCodegen, () -> {
             final Wire wire = createWire();
             wire
@@ -53,7 +53,7 @@ class UpdateInterceptorReturnTypeTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     @DisplayName("Interceptor returns default int and writes data")
-    public void testUpdateInterceptorWithIntReturnType(boolean disableProxyCodegen) {
+    void testUpdateInterceptorWithIntReturnType(boolean disableProxyCodegen) {
         withDisableProxyCodegen(disableProxyCodegen, () -> {
             final Wire wire = createWire();
             int value = wire
@@ -73,7 +73,7 @@ class UpdateInterceptorReturnTypeTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     @DisplayName("Interceptor returns writer for object return type")
-    public void testUpdateInterceptorWithObjectReturnType(boolean disableProxyCodegen) {
+    void testUpdateInterceptorWithObjectReturnType(boolean disableProxyCodegen) {
         withDisableProxyCodegen(disableProxyCodegen, () -> {
             final Wire wire = createWire();
             final WithObjectReturnType mw = wire
@@ -107,7 +107,7 @@ class UpdateInterceptorReturnTypeTest extends WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     @DisplayName("Interceptor writes ladderByQty updates for listener")
-    public void testUpdateInterceptorWithLadderByQtyListener(boolean disableProxyCodegen) {
+    void testUpdateInterceptorWithLadderByQtyListener(boolean disableProxyCodegen) {
         withDisableProxyCodegen(disableProxyCodegen, () -> {
             final Wire wire = createWire();
             wire

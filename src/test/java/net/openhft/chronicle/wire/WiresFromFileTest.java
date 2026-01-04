@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class WiresFromFileTest extends WireTestCommon {
+class WiresFromFileTest extends WireTestCommon {
     @Test
     @DisplayName("File deserialisation returns expected MDU list")
-    public void testFromFile() throws IOException {
+    void testFromFile() throws IOException {
         // Add an alias for MDU class
         ClassAliasPool.CLASS_ALIASES.addAlias(MDU.class);
 
@@ -43,7 +43,7 @@ public class WiresFromFileTest extends WireTestCommon {
 
     @Test
     @DisplayName("Stream from file yields expected symbols")
-    public void testStreamFromFile() throws IOException {
+    void testStreamFromFile() throws IOException {
         // Add an alias for MDU class
         ClassAliasPool.CLASS_ALIASES.addAlias(MDU.class);
 

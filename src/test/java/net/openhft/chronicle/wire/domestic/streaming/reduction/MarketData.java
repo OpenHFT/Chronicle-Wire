@@ -127,7 +127,7 @@ public final class MarketData extends SelfDescribingMarshallable implements Vali
      *
      * @param last Last traded price.
      */
-    public void last(double last) {
+    void last(double last) {
         this.last = last;
     }
 

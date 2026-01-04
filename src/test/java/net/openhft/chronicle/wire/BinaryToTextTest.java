@@ -10,12 +10,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class BinaryToTextTest extends WireTestCommon {
+class BinaryToTextTest extends WireTestCommon {
 
     // Test conversion of binary data to text representation
     @Test
     @DisplayName("Renders binary wire content as text")
-    public void test() {
+    void test() {
         Bytes<?> tbytes = Bytes.allocateElasticOnHeap();
         @NotNull Wire tw = new BinaryWire(tbytes);
         tw.usePadding(true);

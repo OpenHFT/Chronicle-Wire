@@ -10,13 +10,13 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class SizeLongConverterTest {
+class SizeLongConverterTest {
 
     private final SizeLongConverter converter = SizeLongConverter.INSTANCE;
 
     @Test
     @DisplayName("Size converter parses values with suffixes")
-    public void testParse() {
+    void testParse() {
         // Test parsing without suffix
         Assertions.assertEquals(123, converter.parse("123"), "Parse should return 123 without suffix");
 
@@ -34,28 +34,28 @@ public class SizeLongConverterTest {
 
     @Test
     @DisplayName("Size converter rejects invalid numeric input")
-    public void testParseInvalidNumber() {
+    void testParseInvalidNumber() {
         assertThrows(NumberFormatException.class, () ->
                 converter.parse("invalid"), "Invalid number input should raise NumberFormatException");
     }
 
     @Test
     @DisplayName("Size converter rejects empty input string")
-    public void testParseEmptyString() {
+    void testParseEmptyString() {
         assertThrows(NumberFormatException.class, () ->
                 converter.parse(""), "Empty input should raise NumberFormatException error");
     }
 
     @Test
     @DisplayName("Size converter rejects input without digits")
-    public void testParseNoDigit() {
+    void testParseNoDigit() {
         assertThrows(NumberFormatException.class, () ->
                 converter.parse("g"), "Input without digits should raise NumberFormatException");
     }
 
     @Test
     @DisplayName("Size converter formats values with suffixes")
-    public void testAppend() {
+    void testAppend() {
         Assertions.assertEquals("0", converter.asString(0), "Format should return 0 for zero");
 
         // Test appending without needing a suffix
@@ -73,7 +73,7 @@ public class SizeLongConverterTest {
 
     @Test
     @DisplayName("Size converter keeps non power values")
-    public void testAppendNonExactPowersOf1024() {
+    void testAppendNonExactPowersOf1024() {
         // Values that are not exact multiples of 1024^x should not have a suffix
         Assertions.assertEquals("1025", converter.asString(1025),
                 "Non exact 1K should keep full value");
@@ -85,7 +85,7 @@ public class SizeLongConverterTest {
 
     @Test
     @DisplayName("Size converter formats negative power values")
-    public void testAppendWithNegativeValues() {
+    void testAppendWithNegativeValues() {
         // Testing negative values
         Assertions.assertEquals("-1K", converter.asString(-1024),
                 "Negative 1K should format with K suffix");

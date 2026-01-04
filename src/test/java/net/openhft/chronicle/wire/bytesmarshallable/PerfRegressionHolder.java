@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
-public class PerfRegressionHolder {
+class PerfRegressionHolder {
     // A volatile integer barrier utilized possibly for ensuring visibility between threads
     private int barrier;
     // Initializing byte buffers: one direct (off-heap) and one on heap
@@ -48,7 +48,7 @@ public class PerfRegressionHolder {
     private MappedBytes mapped;
 
     // Method to perform a performance test using a provided Runnable
-    public void doTest(Runnable runnable) {
+    void doTest(Runnable runnable) {
         // Creating a temporary file and ensuring it will be deleted upon JVM exit
         File tmpFile = IOTools.createTempFile("regressionTest");
         tmpFile.deleteOnExit();
@@ -88,35 +88,35 @@ public class PerfRegressionHolder {
     }
 
     // Example test method for benchmarking a specific type of object
-    public void benchNull() {
+    void benchNull() {
         testAll2(this.dsf0, this.dsf2);  // Utilizing a variant of the testing method
     }
 
-    public void benchBytes() {
+    void benchBytes() {
         testAll(this.df1, this.df2);
     }
 
-    public void benchFields() {
+    void benchFields() {
         testAll(this.bf1, this.bf2);
     }
 
-    public void benchRefBytes() {
+    void benchRefBytes() {
         testAll(this.rf1, this.rf2);
     }
 
-    public void benchString() {
+    void benchString() {
         testAll(this.dsf1, this.dsf2);
     }
 
-    public void benchArrayString() {
+    void benchArrayString() {
         testAll(this.asf1, this.asf2);
     }
 
-    public void benchUtf8String() {
+    void benchUtf8String() {
         testAll(this.dusf1, this.dusf2);
     }
 
-    public void benchRefString() {
+    void benchRefString() {
         testAll(this.sf1, this.sf2);
     }
 
@@ -366,7 +366,7 @@ public class PerfRegressionHolder {
         // Write String fields to a byte sequence using memory offsets
         // and writing each string twice in different formats (8bit and UTF8) consecutively.
         @Override
-        public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
+       public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
             for (long offset : offsets) {
                 final String s = MEMORY.getObject(this, offset);
                 bytes.write8bit(s);  // Writing string in 8-bit format
@@ -403,7 +403,7 @@ public class PerfRegressionHolder {
         // Write String fields to a byte sequence using direct field access
         // and writing each string once in an 8bit format.
         @Override
-        public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
+       public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
             bytes.write8bit(a);
             bytes.write8bit(b);
             bytes.write8bit(c);
@@ -440,7 +440,7 @@ public class PerfRegressionHolder {
         // Overridden method to write String fields to a byte sequence using
         // UTF-8 encoding for string serialization.
         @Override
-        public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
+       public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
             bytes.writeUtf8(a);
             bytes.writeUtf8(b);
             bytes.writeUtf8(c);

@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * This test class extends the WireTestCommon, a class provided by the Chronicle Wire library
  * to facilitate the testing of wire-related functionality.
  */
-public class NanoTimeTest extends net.openhft.chronicle.wire.WireTestCommon {
+class NanoTimeTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     /**
      * This test checks the serialization and deserialization functionality using
@@ -24,7 +24,7 @@ public class NanoTimeTest extends net.openhft.chronicle.wire.WireTestCommon {
      */
     @Test
     @DisplayName("Serialises NanoTime fields into yaml wire")
-    public void yaml() {
+    void yaml() {
         // Initialize a YAML wire on the heap.
         Wire wire = Wire.newYamlWireOnHeap();
 

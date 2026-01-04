@@ -30,14 +30,14 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 @SuppressFBWarnings(
         value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
         justification = "Fields are populated via Wire marshalling in tests.")
-public class WireTests {
+class WireTests {
 
     // Member variables for parameterized tests
     private WireType wireType;
     private boolean usePadding;
 
     // Constructor to initialize test parameters
-    public void initWireTests(WireType wireType, boolean usePadding) {
+    void initWireTests(WireType wireType, boolean usePadding) {
         this.wireType = wireType;
         this.usePadding = usePadding;
     }
@@ -59,7 +59,7 @@ public class WireTests {
     @DisplayName("Hex long values round-trip with negative numbers")
     @MethodSource("data")
     @ParameterizedTest(name = "{index}: {0} padding: {1}")
-    public void testHexLongNegativeTest(WireType wireType, boolean usePadding) {
+    void testHexLongNegativeTest(WireType wireType, boolean usePadding) {
         initWireTests(wireType, usePadding);
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final long expectedLong1 = -1;
@@ -95,7 +95,7 @@ public class WireTests {
     @DisplayName("Lenient type literal returns raw type name")
     @MethodSource("data")
     @ParameterizedTest(name = "{index}: {0} padding: {1}")
-    public void testLenientTypeLiteral(WireType wireType, boolean usePadding) {
+    void testLenientTypeLiteral(WireType wireType, boolean usePadding) {
         initWireTests(wireType, usePadding);
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
@@ -120,7 +120,7 @@ public class WireTests {
     @DisplayName("Date values round trip through wire types")
     @MethodSource("data")
     @ParameterizedTest(name = "{index}: {0} padding: {1}")
-    public void testDate(WireType wireType, boolean usePadding) {
+    void testDate(WireType wireType, boolean usePadding) {
         initWireTests(wireType, usePadding);
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final Wire wire = createWire(b);
@@ -150,7 +150,7 @@ public class WireTests {
     @DisplayName("LocalDateTime values round trip through wire types")
     @MethodSource("data")
     @ParameterizedTest(name = "{index}: {0} padding: {1}")
-    public void testLocalDateTime(WireType wireType, boolean usePadding) {
+    void testLocalDateTime(WireType wireType, boolean usePadding) {
         initWireTests(wireType, usePadding);
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
@@ -170,7 +170,7 @@ public class WireTests {
     @DisplayName("ZonedDateTime values round trip through wire types")
     @MethodSource("data")
     @ParameterizedTest(name = "{index}: {0} padding: {1}")
-    public void testZonedDateTime(WireType wireType, boolean usePadding) {
+    void testZonedDateTime(WireType wireType, boolean usePadding) {
         initWireTests(wireType, usePadding);
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final Wire wire = createWire(b);
@@ -188,7 +188,7 @@ public class WireTests {
     @DisplayName("Skip values with numbers and strings")
     @MethodSource("data")
     @ParameterizedTest(name = "{index}: {0} padding: {1}")
-    public void testSkipValueWithNumbersAndStrings(WireType wireType, boolean usePadding) {
+    void testSkipValueWithNumbersAndStrings(WireType wireType, boolean usePadding) {
 
         initWireTests(wireType, usePadding);
 
@@ -217,7 +217,7 @@ public class WireTests {
     @DisplayName("Null values round-trip across wire types")
     @MethodSource("data")
     @ParameterizedTest(name = "{index}: {0} padding: {1}")
-    public void testWriteNull(WireType wireType, boolean usePadding) {
+    void testWriteNull(WireType wireType, boolean usePadding) {
         initWireTests(wireType, usePadding);
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final Wire wire = createWire(b);
@@ -244,7 +244,7 @@ public class WireTests {
     @DisplayName("Class typed marshallable round trips through wire")
     @MethodSource("data")
     @ParameterizedTest(name = "{index}: {0} padding: {1}")
-    public void testClassTypedMarshallableObject(WireType wireType, boolean usePadding) {
+    void testClassTypedMarshallableObject(WireType wireType, boolean usePadding) {
         initWireTests(wireType, usePadding);
         assumeFalse(wireType == WireType.JSON,
                 "JSON wire does not support class typed marshallable");
@@ -266,7 +266,7 @@ public class WireTests {
     @DisplayName("Unknown fields cleared between read contexts")
     @MethodSource("data")
     @ParameterizedTest(name = "{index}: {0} padding: {1}")
-    public void unknownFieldsAreClearedBetweenReadContexts(WireType wireType, boolean usePadding) {
+    void unknownFieldsAreClearedBetweenReadContexts(WireType wireType, boolean usePadding) {
         initWireTests(wireType, usePadding);
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         final Wire wire = createWire(b);
@@ -296,7 +296,7 @@ public class WireTests {
     @DisplayName("Reading peek YAML reflects document boundaries")
     @MethodSource("data")
     @ParameterizedTest(name = "{index}: {0} padding: {1}")
-    public void testReadingPeekYaml(WireType wireType, boolean usePadding) {
+    void testReadingPeekYaml(WireType wireType, boolean usePadding) {
         initWireTests(wireType, usePadding);
         assumeTrue(usePadding,
                 "Padding must be enabled for peek YAML test");
@@ -380,7 +380,7 @@ public class WireTests {
     @MethodSource("data")
     @ParameterizedTest(name = "{index}: {0} padding: {1}")
     // Test to ensure that isPresent() returns true when the value is actually present
-    public void isPresentReturnsTrueWhenValueIsPresent(WireType wireType, boolean usePadding) {
+    void isPresentReturnsTrueWhenValueIsPresent(WireType wireType, boolean usePadding) {
         initWireTests(wireType, usePadding);
         Bytes<?> b = Bytes.allocateElasticOnHeap();  // Create an elastic byte buffer
         final Wire wire = createWire(b);         // Create a Wire object
@@ -393,7 +393,7 @@ public class WireTests {
     @MethodSource("data")
     @ParameterizedTest(name = "{index}: {0} padding: {1}")
     // Test to ensure that isPresent() returns false when the value is not present
-    public void isPresentReturnsFalseWhenValueIsNotPresent(WireType wireType, boolean usePadding) {
+    void isPresentReturnsFalseWhenValueIsNotPresent(WireType wireType, boolean usePadding) {
         initWireTests(wireType, usePadding);
         Bytes<?> b = Bytes.allocateElasticOnHeap();  // Create an elastic byte buffer
         final Wire wire = createWire(b);         // Create a Wire object

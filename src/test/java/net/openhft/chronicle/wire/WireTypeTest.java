@@ -17,7 +17,7 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("deprecation")
-public class WireTypeTest extends WireTestCommon {
+class WireTypeTest extends WireTestCommon {
 
     // Add alias for MarshallableFixture class for the test
     static {
@@ -27,7 +27,7 @@ public class WireTypeTest extends WireTestCommon {
     // Test if the WireType enum is correctly identified by its name
     @Test
     @DisplayName("WireType values report the expected type name")
-    public void testNameFor() {
+    void testNameFor() {
         // Add alias for WireType class
         ClassAliasPool.CLASS_ALIASES.addAlias(WireType.class);
 
@@ -42,7 +42,7 @@ public class WireTypeTest extends WireTestCommon {
     // Test conversion from a MarshallableFixture object to String representations
     @Test
     @DisplayName("WireType formats fixtures to text and binary")
-    public void testAsString() {
+    void testAsString() {
         @NotNull MarshallableFixture tm = new MarshallableFixture();
         tm.setCount(1);
         tm.setName("name");
@@ -71,7 +71,7 @@ public class WireTypeTest extends WireTestCommon {
     // Test conversion from String representations to a MarshallableFixture object
     @Test
     @DisplayName("WireType parses fixtures from text and binary")
-    public void testFromString() {
+    void testFromString() {
         // Define the text representation
         @NotNull String asText = "!MarshallableFixture {\n" +
                 "  name: name,\n" +
@@ -101,7 +101,7 @@ public class WireTypeTest extends WireTestCommon {
     // Test WireType's ability to write and read from a file
     @Test
     @DisplayName("WireType round trips fixtures through files")
-    public void testFromFile() throws IOException {
+    void testFromFile() throws IOException {
         // Create a MarshallableFixture object
         @NotNull MarshallableFixture tm = new MarshallableFixture();
         tm.setCount(1);

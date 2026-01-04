@@ -19,13 +19,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SuppressFBWarnings(
         value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
         justification = "Fields are populated via Wire marshalling in tests.")
-public class NestedMapsTest extends WireTestCommon {
+class NestedMapsTest extends WireTestCommon {
 
     // Instance variable to store the type of wire for this test
     private WireType wireType;
 
     // Constructor that sets the wire type
-    public void initNestedMapsTest(WireType wireType) {
+    void initNestedMapsTest(WireType wireType) {
         this.wireType = wireType;
     }
 
@@ -45,7 +45,7 @@ public class NestedMapsTest extends WireTestCommon {
     @SuppressWarnings("incomplete-switch")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Round-trip nested maps across wire types")
-    public void testMapped(WireType wireType) {
+    void testMapped(WireType wireType) {
         initNestedMapsTest(wireType);
         // Initialize the Mapped object with words, numbers, and maps
         @NotNull Mapped m = new Mapped();
@@ -194,7 +194,7 @@ public class NestedMapsTest extends WireTestCommon {
     @SuppressWarnings("incomplete-switch")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Round-trip top-level mapped object across wires")
-    public void testMappedTopLevel(WireType wireType) {
+    void testMappedTopLevel(WireType wireType) {
         initNestedMapsTest(wireType);
         // Initialize Mapped object with given data
         @NotNull Mapped m = new Mapped();
@@ -271,7 +271,7 @@ public class NestedMapsTest extends WireTestCommon {
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Read and write maps using marshallable types")
-    public void testMapReadAndWrite(WireType wireType) {
+    void testMapReadAndWrite(WireType wireType) {
         initNestedMapsTest(wireType);
         // Create a byte buffer and initialize the wire
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();

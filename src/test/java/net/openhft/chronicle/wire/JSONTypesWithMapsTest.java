@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * This test class is associated with an issue raised in the Chronicle-Wire repository.
  * Refer: https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
-public class JSONTypesWithMapsTest extends net.openhft.chronicle.wire.WireTestCommon {
+class JSONTypesWithMapsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Provide two sets of parameters for the tests, based on whether types should be used or not.
     public static Collection<Object[]> wireTypes() {
@@ -55,7 +55,7 @@ public class JSONTypesWithMapsTest extends net.openhft.chronicle.wire.WireTestCo
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "useTypes={0} serialises json map values")
     @DisplayName("Serialises map values with optional type hints")
-    public void test(boolean useTypes) {
+    void test(boolean useTypes) {
         // Create a new JSONWire instance and decide if it should use types based on `useTypes`.
         final JSONWire jsonWire = new JSONWire()
                 .useTypes(useTypes);

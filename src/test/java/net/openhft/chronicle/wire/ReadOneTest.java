@@ -17,12 +17,12 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * This class is used to test the functionality related to reading individual messages and snapshots
  * from a Wire-based data structure, ensuring they can be read in the correct sequence.
  */
-public class ReadOneTest extends WireTestCommon {
+class ReadOneTest extends WireTestCommon {
 
     // Basic test for reading without scanning the wire
     @Test
     @DisplayName("ReadOne returns snapshot without scanning enabled")
-    public void test() throws InterruptedException {
+    void test() throws InterruptedException {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for readOne snapshot test");
 
         assertEquals("two", doTest(false), "Snapshot should return the latest value without scanning");
@@ -31,7 +31,7 @@ public class ReadOneTest extends WireTestCommon {
     // Test for reading the wire using scanning
     @Test
     @DisplayName("ReadOne returns snapshot with scanning enabled")
-    public void testScanning() throws InterruptedException {
+    void testScanning() throws InterruptedException {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for readOne scanning test");
 
         assertEquals("two", doTest(true), "Snapshot should return the latest value with scanning enabled");

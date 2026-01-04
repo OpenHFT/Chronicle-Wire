@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * from YAML services configuration sources.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class Issue609Test extends WireTestCommon {
+class Issue609Test extends WireTestCommon {
 
     /**
      * Tests the deserialisation of services from a YAML file and ensures that the deserialised object
@@ -31,7 +31,7 @@ public class Issue609Test extends WireTestCommon {
      */
     @Test
     @DisplayName("YAML services config should deserialise correctly")
-    public void testServices() throws IOException {
+    void testServices() throws IOException {
         // Deserialises the ChronicleServicesCfg from a YAML file
         final ChronicleServicesCfg obj = WireType.YAML.fromString(ChronicleServicesCfg.class, BytesUtil.readFile("yaml/services.yaml"));
 
@@ -53,7 +53,7 @@ public class Issue609Test extends WireTestCommon {
 
     @Test
     @DisplayName("Services config round-trips across wire types")
-    public void toYamlAndBackIssue824() {
+    void toYamlAndBackIssue824() {
         ChronicleServicesCfg expected = new ChronicleServicesCfg();
 
         ServiceCfg scfg = new ServiceCfg();

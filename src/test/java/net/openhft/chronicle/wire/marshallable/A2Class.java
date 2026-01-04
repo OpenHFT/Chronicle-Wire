@@ -8,7 +8,7 @@ import net.openhft.chronicle.wire.WireOut;
 import org.jetbrains.annotations.NotNull;
 
 // A2Class extends the functionality of AClass
-public class A2Class extends AClass {
+class A2Class extends AClass {
 
     // Constructor that initializes the A2Class by passing arguments to the superclass constructor
     public A2Class(int id, boolean flag, byte b, char ch, short s, int i, long l, float f, double d, String text) {

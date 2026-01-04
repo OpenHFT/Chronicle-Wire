@@ -13,11 +13,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * Exercises number formats and boolean parsing across common wire types.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class WireNumberFormatsTest extends WireTestCommon {
+class WireNumberFormatsTest extends WireTestCommon {
 
     @Test
     @DisplayName("Text wire parses numeric and boolean formats")
-    public void textFormats() {
+    void textFormats() {
         String s = "i: +5\n" +
                 "j: 00\n" +
                 "d: 1e3\n" +
@@ -44,7 +44,7 @@ public class WireNumberFormatsTest extends WireTestCommon {
 
     @Test
     @DisplayName("YAML wire parses numeric and boolean formats")
-    public void yamlFormats() {
+    void yamlFormats() {
         String s = "i: +7\n" +
                 "j: 000\n" +
                 "d: 2.5e2\n" +
@@ -71,7 +71,7 @@ public class WireNumberFormatsTest extends WireTestCommon {
 
     @Test
     @DisplayName("Binary wire round trips numeric extremes")
-    public void binaryExtremesRoundTrip() {
+    void binaryExtremesRoundTrip() {
         Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap(256));
         w.write("i32min").int32(Integer.MIN_VALUE);
         w.write("i32max").int32(Integer.MAX_VALUE);

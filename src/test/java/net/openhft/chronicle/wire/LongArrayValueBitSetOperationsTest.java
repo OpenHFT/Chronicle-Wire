@@ -12,11 +12,11 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Exercises {@link LongArrayValueBitSet} operations across multiple words to validate set, clear, and range behaviour.
  */
-public class LongArrayValueBitSetOperationsTest extends WireTestCommon {
+class LongArrayValueBitSetOperationsTest extends WireTestCommon {
 
     @Test
     @DisplayName("Performs basic set and range operations")
-    public void basicOps() {
+    void basicOps() {
         try (LongArrayValueBitSet bs = new LongArrayValueBitSet(192, new BinaryWire(Bytes.allocateElasticOnHeap(256)))) {
             bs.set(0);
             bs.set(64);

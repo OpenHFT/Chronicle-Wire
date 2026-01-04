@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * These scenarios are critical for production systems where data formats evolve over time.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class WireSchemaEvolutionTest extends WireTestCommon {
+class WireSchemaEvolutionTest extends WireTestCommon {
 
     // ========== Version 1 Classes ==========
 
@@ -112,7 +112,7 @@ public class WireSchemaEvolutionTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reading V2 data with V1 class should skip extra fields (BinaryWire)")
-    public void testForwardCompatibilityBinary() {
+    void testForwardCompatibilityBinary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -130,7 +130,7 @@ public class WireSchemaEvolutionTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reading V2 data with V1 class should skip extra fields (TextWire)")
-    public void testForwardCompatibilityText() {
+    void testForwardCompatibilityText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         TextWire wire = new TextWire(bytes);
 
@@ -146,7 +146,7 @@ public class WireSchemaEvolutionTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reading V2 data with V1 class should skip extra fields (YamlWire)")
-    public void testForwardCompatibilityYaml() {
+    void testForwardCompatibilityYaml() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         YamlWire wire = new YamlWire(bytes);
 
@@ -164,7 +164,7 @@ public class WireSchemaEvolutionTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reading V1 data with V2 class should use defaults for missing fields (BinaryWire)")
-    public void testBackwardCompatibilityBinary() {
+    void testBackwardCompatibilityBinary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -184,7 +184,7 @@ public class WireSchemaEvolutionTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reading V1 data with V2 class should use defaults for missing fields (TextWire)")
-    public void testBackwardCompatibilityText() {
+    void testBackwardCompatibilityText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         TextWire wire = new TextWire(bytes);
 
@@ -202,7 +202,7 @@ public class WireSchemaEvolutionTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reading V1 data with V2 class should use defaults for missing fields (YamlWire)")
-    public void testBackwardCompatibilityYaml() {
+    void testBackwardCompatibilityYaml() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         YamlWire wire = new YamlWire(bytes);
 
@@ -222,7 +222,7 @@ public class WireSchemaEvolutionTest extends WireTestCommon {
 
     @Test
     @DisplayName("Short value should be readable as long (type widening)")
-    public void testTypeWideningShortToLong() {
+    void testTypeWideningShortToLong() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -273,7 +273,7 @@ public class WireSchemaEvolutionTest extends WireTestCommon {
 
     @Test
     @DisplayName("Field order should not matter for self-describing wire")
-    public void testReorderedFields() {
+    void testReorderedFields() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -319,7 +319,7 @@ public class WireSchemaEvolutionTest extends WireTestCommon {
 
     @Test
     @DisplayName("Renamed field mapping should keep the new field null")
-    public void testRenamedFields() {
+    void testRenamedFields() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -362,7 +362,7 @@ public class WireSchemaEvolutionTest extends WireTestCommon {
 
     @Test
     @DisplayName("Nested objects should handle forward compatibility")
-    public void testNestedForwardCompatibility() {
+    void testNestedForwardCompatibility() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -383,7 +383,7 @@ public class WireSchemaEvolutionTest extends WireTestCommon {
 
     @Test
     @DisplayName("Nested objects should handle backward compatibility")
-    public void testNestedBackwardCompatibility() {
+    void testNestedBackwardCompatibility() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -424,7 +424,7 @@ public class WireSchemaEvolutionTest extends WireTestCommon {
 
     @Test
     @DisplayName("Empty object V1 should read as V2 with defaults")
-    public void testEmptyToNonEmpty() {
+    void testEmptyToNonEmpty() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -442,7 +442,7 @@ public class WireSchemaEvolutionTest extends WireTestCommon {
 
     @Test
     @DisplayName("Non-empty V2 object should read as empty V1 schema")
-    public void testNonEmptyToEmpty() {
+    void testNonEmptyToEmpty() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);

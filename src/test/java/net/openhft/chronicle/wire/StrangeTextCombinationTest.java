@@ -15,11 +15,11 @@ import java.util.Arrays;
 import java.util.Collection;
 
 // A parameterized test class that tests various string serialization behaviors for different WireTypes.
-public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireTestCommon {
+class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireTestCommon {
     private WireType wireType;
 
     // Constructor initializes the WireType for this instance of the test.
-    public void initStrangeTextCombinationTest(WireType wireType) {
+    void initStrangeTextCombinationTest(WireType wireType) {
         this.wireType = wireType;
     }
 
@@ -38,7 +38,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Round-trips string with leading space in wire format")
-    public void testPrependedSpace(WireType wireType) {
+    void testPrependedSpace(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String prependedSpace = " hello world";
         @NotNull final Wire wire = wireFactory();
@@ -53,7 +53,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Round-trips string with trailing space in wire format")
-    public void testPostpendedSpace(WireType wireType) {
+    void testPostpendedSpace(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String postpendedSpace = "hello world ";
         @NotNull final Wire wire = wireFactory();
@@ -67,7 +67,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Round-trips string with escaped quote sequence")
-    public void testSlashQuoteTest(WireType wireType) {
+    void testSlashQuoteTest(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = "\\\" ";
         @NotNull final Wire wire = wireFactory();
@@ -80,7 +80,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Round-trips string with yaml type syntax")
-    public void testYaml(WireType wireType) {
+    void testYaml(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = "!String{chars:hello world}";
         @NotNull final Wire wire = wireFactory();
@@ -97,7 +97,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Round-trips string literal with type prefix")
-    public void testString(WireType wireType) {
+    void testString(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = "!String";
         @NotNull final Wire wire = wireFactory();
@@ -110,7 +110,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Round-trips string literal with binary tag")
-    public void testBinary(WireType wireType) {
+    void testBinary(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = "!binary";
         @NotNull final Wire wire = wireFactory();
@@ -123,7 +123,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Round-trips string literal with leading space")
-    public void testBinaryWithSpace(WireType wireType) {
+    void testBinaryWithSpace(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = " !binary";
         @NotNull final Wire wire = wireFactory();
@@ -136,7 +136,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Round-trips empty string value in wire format")
-    public void testEmpty(WireType wireType) {
+    void testEmpty(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = "";
         @NotNull final Wire wire = wireFactory();
@@ -149,7 +149,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Round-trips null string value in wire format")
-    public void testNull(WireType wireType) {
+    void testNull(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @Nullable final String expected = nullText();
         @NotNull final Wire wire = wireFactory();
@@ -162,7 +162,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Round-trips newline string value in wire format")
-    public void testNewLine(WireType wireType) {
+    void testNewLine(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = "\n";
         @NotNull final Wire wire = wireFactory();
@@ -175,7 +175,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Round-trips null character string value in wire format")
-    public void testUnicode(WireType wireType) {
+    void testUnicode(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = "\u0000";
         @NotNull final Wire wire = wireFactory();
@@ -188,7 +188,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     @MethodSource("data")
     @ParameterizedTest
     @DisplayName("Round-trips xml tag string value in wire format")
-    public void testXML(WireType wireType) {
+    void testXML(WireType wireType) {
         initStrangeTextCombinationTest(wireType);
         @NotNull final String expected = "<name>rob austin</name>";
         @NotNull final Wire wire = wireFactory();

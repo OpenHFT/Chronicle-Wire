@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Covers scalar edge cases across common wire types to exercise ValueIn/ValueOut branches.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class WireScalarEdgeCasesTest extends WireTestCommon {
+class WireScalarEdgeCasesTest extends WireTestCommon {
 
     private static final WireType[] TYPES = {
             WireType.BINARY,
@@ -23,7 +23,7 @@ public class WireScalarEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Numeric and special values round trip")
-    public void numericAndSpecialValues() {
+    void numericAndSpecialValues() {
         for (WireType wt : TYPES) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 
@@ -82,7 +82,7 @@ public class WireScalarEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("Bytes and empty text round trip")
-    public void bytesAndEmptyText() {
+    void bytesAndEmptyText() {
         for (WireType wt : TYPES) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 

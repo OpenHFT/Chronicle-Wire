@@ -35,11 +35,11 @@ interface GMBZ extends GMBA, GMBB {
 
 // A JUnit test class
 @SuppressWarnings({"deprecation", "removal"})
-public class GenerateMethodBridgeTest extends WireTestCommon {
+class GenerateMethodBridgeTest extends WireTestCommon {
 
     @Test
     @DisplayName("Creates method bridge and routes calls")
-    public void createBridge() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    void createBridge() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip method bridge generation test");
 

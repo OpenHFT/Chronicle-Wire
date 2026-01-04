@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // This test class aims to test the deserialization from "naked" files using different wire types.
-public class DeserializeFromNakedFileTest extends WireTestCommon {
+class DeserializeFromNakedFileTest extends WireTestCommon {
 
     // Parameterized setup to generate combinations of wire types for testing.
     public static Collection<Object[]> combinations() {
@@ -32,7 +32,7 @@ public class DeserializeFromNakedFileTest extends WireTestCommon {
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Deserialises POJO from naked yaml file")
-    public void testPOJO(WireType wireType) throws IOException {
+    void testPOJO(WireType wireType) throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip naked file POJO test for wireType=" + wireType);
         PlainOldJavaClass res = wireType.fromFile(PlainOldJavaClass.class, "naked.yaml");
@@ -46,7 +46,7 @@ public class DeserializeFromNakedFileTest extends WireTestCommon {
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Deserialises self describing class from naked yaml file")
-    public void testSelfDescribing(WireType wireType) throws IOException {
+    void testSelfDescribing(WireType wireType) throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip naked file self describing test for wireType=" + wireType);
         SelfDescribingClass res = wireType.fromFile(SelfDescribingClass.class, "naked.yaml");
@@ -60,7 +60,7 @@ public class DeserializeFromNakedFileTest extends WireTestCommon {
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Deserialises bytes class from naked yaml file")
-    public void testBytes(WireType wireType) throws IOException {
+    void testBytes(WireType wireType) throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip naked file bytes test for wireType=" + wireType);
         // Skip the test if the WireType is YAML.

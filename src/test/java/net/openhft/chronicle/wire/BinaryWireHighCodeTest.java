@@ -13,12 +13,12 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class BinaryWireHighCodeTest extends WireTestCommon {
+class BinaryWireHighCodeTest extends WireTestCommon {
 
     // Test if the BinaryWireHighCode values are unique and no duplicates exist
     @Test
     @DisplayName("Ensures BinaryWireHighCode values are unique across all fields")
-    public void testUnique() throws IllegalAccessException {
+    void testUnique() throws IllegalAccessException {
         // Ensure there are no pre-defined values
         assertEquals(0, BinaryWireHighCode.values().length,
                 "Expected no enum values in BinaryWireHighCode");

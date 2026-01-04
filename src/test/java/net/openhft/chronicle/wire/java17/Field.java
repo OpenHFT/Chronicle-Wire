@@ -13,7 +13,7 @@ import java.util.Map;
  * Inherits the capabilities of SelfDescribingMarshallable to provide
  * self-describing marshalling and unmarshalling.
  */
-public class Field extends SelfDescribingMarshallable {
+class Field extends SelfDescribingMarshallable {
 
     // A map to maintain the required status for various field names
     private final Map<String, Required> required = new HashMap<>();
@@ -24,7 +24,7 @@ public class Field extends SelfDescribingMarshallable {
      * @param name     The name of the field.
      * @param required The required status of the field.
      */
-    public void required(String name, Required required) {
+    void required(String name, Required required) {
         this.required.put(name, required);
     }
 }

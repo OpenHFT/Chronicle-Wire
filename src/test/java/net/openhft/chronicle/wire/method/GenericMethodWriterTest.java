@@ -20,7 +20,7 @@ class GenericMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon 
      */
     @Test
     @DisplayName("Generic method writers round-trip via MethodReader")
-    public void genericParameter() {
+    void genericParameter() {
         // Create a new YAML wire in memory
         Wire wire = Wire.newYamlWireOnHeap();
 

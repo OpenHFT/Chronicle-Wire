@@ -15,14 +15,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * The Base64Test class tests the Base64 encoding and decoding functionalities
  * using the facilities provided by the WireTestCommon.
  */
-public class Base64Test extends net.openhft.chronicle.wire.WireTestCommon {
+class Base64Test extends net.openhft.chronicle.wire.WireTestCommon {
 
     /**
      * Test the Base64 encoding for various field types and validate against expected outputs.
      */
     @Test
     @DisplayName("Encodes multiple field types using Base64 in yaml")
-    public void onAnField() {
+    void onAnField() {
         // Create a new YAML wire with memory allocated on the heap
         Wire wire = Wire.newYamlWireOnHeap();
 

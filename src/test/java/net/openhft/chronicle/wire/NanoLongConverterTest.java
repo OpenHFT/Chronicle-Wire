@@ -9,12 +9,12 @@ import org.junit.jupiter.api.Test;
 import static net.openhft.chronicle.wire.NanoTimestampLongConverter.INSTANCE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class NanoLongConverterTest extends WireTestCommon {
+class NanoLongConverterTest extends WireTestCommon {
 
     // Test if a nanosecond timestamp and a duration string can be successfully converted into a Data object and back to the original string format.
     @Test
     @DisplayName("Round-trip nano timestamps and duration values")
-    public void testNano() {
+    void testNano() {
         // Create a string representation of a Data object with a nanosecond timestamp and a duration.
         String in = "!net.openhft.chronicle.wire.NanoLongConverterTest$Data {\n" +
                 "  time: 2019-01-20T23:45:11.123456789,\n" +
@@ -31,7 +31,7 @@ public class NanoLongConverterTest extends WireTestCommon {
     // Test if trailing 'Z' in the timestamp (indicating UTC time) does not affect parsing for nanoseconds.
     @Test
     @DisplayName("Ignore trailing Z when parsing nanos")
-    public void testTrailingZ() {
+    void testTrailingZ() {
         final String text = "2019-01-20T23:45:11.123456789";
         assertEquals(INSTANCE.parse(text), INSTANCE.parse(text + "Z"),
                 "Trailing Z should not affect nanos parsing");

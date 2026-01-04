@@ -20,13 +20,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * Targets the 83 missed branches identified in coverage analysis.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
+class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     // ========== Wire Document Context Tests ==========
 
     @Test
     @DisplayName("Wire should write and read document with string field")
-    public void testWriteReadDocumentString() {
+    void testWriteReadDocumentString() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -42,7 +42,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should write and read document with int field")
-    public void testWriteReadDocumentInt() {
+    void testWriteReadDocumentInt() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -58,7 +58,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should write and read document with long field")
-    public void testWriteReadDocumentLong() {
+    void testWriteReadDocumentLong() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -74,7 +74,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should write and read document with double field")
-    public void testWriteReadDocumentDouble() {
+    void testWriteReadDocumentDouble() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -90,7 +90,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should write and read document with boolean field")
-    public void testWriteReadDocumentBoolean() {
+    void testWriteReadDocumentBoolean() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -108,7 +108,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should write and read multiple documents")
-    public void testMultipleDocuments() {
+    void testMultipleDocuments() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -136,7 +136,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should write and read text document field")
-    public void testBinaryWireDocument() {
+    void testBinaryWireDocument() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(bytes);
 
@@ -152,7 +152,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should write and read text document field")
-    public void testYamlWireDocument() {
+    void testYamlWireDocument() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.YAML.apply(bytes);
 
@@ -170,7 +170,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should write and read null string field")
-    public void testNullStringValue() {
+    void testNullStringValue() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -188,7 +188,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should handle max int value")
-    public void testMaxIntValue() {
+    void testMaxIntValue() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -204,7 +204,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should handle min int value")
-    public void testMinIntValue() {
+    void testMinIntValue() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -220,7 +220,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should handle max long value")
-    public void testMaxLongValue() {
+    void testMaxLongValue() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -236,7 +236,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should handle min+1 long value")
-    public void testMinPlusOneLongValue() {
+    void testMinPlusOneLongValue() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -254,7 +254,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should round-trip empty string field")
-    public void testEmptyStringValue() {
+    void testEmptyStringValue() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -272,7 +272,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should handle long string value")
-    public void testLongStringValue() {
+    void testLongStringValue() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -296,7 +296,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should write and read metadata document")
-    public void testMetadataDocument() {
+    void testMetadataDocument() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -314,7 +314,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should handle mixed data and metadata documents")
-    public void testMixedDocumentTypes() {
+    void testMixedDocumentTypes() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -337,7 +337,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should handle nested marshallable object")
-    public void testNestedMarshallable() {
+    void testNestedMarshallable() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -355,7 +355,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should handle sequence in document")
-    public void testSequenceInDocument() {
+    void testSequenceInDocument() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -384,7 +384,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire should write and read event name")
-    public void testEventName() {
+    void testEventName() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 
@@ -404,7 +404,7 @@ public class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wire clear should reset write position to zero")
-    public void testWireClear() {
+    void testWireClear() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.TEXT.apply(bytes);
 

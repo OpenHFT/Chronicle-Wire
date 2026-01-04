@@ -14,11 +14,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * This class tests the capability of the MethodReader to handle parametrized interfaces hierarchy and chained calls.
  * This pattern arises when using Web Gateway.
  */
-public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTestCommon {
+class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTestCommon {
     @Test
     @SuppressWarnings("deprecation")
     @DisplayName("Definitive interface chain reads in order")
-    public void testDefinitive() {
+    void testDefinitive() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
 
@@ -61,7 +61,7 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
     @Test
     @SuppressWarnings("deprecation")
     @DisplayName("Indefinite interface chain reads in order")
-    public void testIndefinite() {
+    void testIndefinite() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
 
@@ -104,7 +104,7 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
     @Test
     @SuppressWarnings("deprecation")
     @DisplayName("Nested interface chain reads in order")
-    public void testNested() {
+    void testNested() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
 

@@ -24,11 +24,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * Coverage tests for YamlWire.TextValueIn branch behaviour and edge case paths.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class YamlWireValueInCoverageTest extends WireTestCommon {
+class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests getBracketType for mapping value types")
-    public void testGetBracketTypeMapping() {
+    void testGetBracketTypeMapping() {
         YamlWire wire = YamlWire.from("field: { a: 1 }");
         wire.read("field");
         BracketType type = wire.getValueIn().getBracketType();
@@ -37,7 +37,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests getBracketType for sequence value types")
-    public void testGetBracketTypeSequence() {
+    void testGetBracketTypeSequence() {
         YamlWire wire = YamlWire.from("field: [1, 2, 3]");
         wire.read("field");
         BracketType type = wire.getValueIn().getBracketType();
@@ -46,7 +46,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests getBracketType for scalar value types")
-    public void testGetBracketTypeScalar() {
+    void testGetBracketTypeScalar() {
         YamlWire wire = YamlWire.from("field: value");
         wire.read("field");
         BracketType type = wire.getValueIn().getBracketType();
@@ -55,7 +55,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests reading text from YAML with null tag")
-    public void testTextWithNullTag() {
+    void testTextWithNullTag() {
         YamlWire wire = YamlWire.from("field: !!null ''");
         String text = wire.read("field").text();
         assertNull(text, "Null tag should return null text");
@@ -63,7 +63,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests reading anchor and alias values")
-    public void testAnchorAndAlias() {
+    void testAnchorAndAlias() {
         YamlWire wire = YamlWire.from("a: &anchor hello\nb: *anchor");
         String first = wire.read("a").text();
         assertEquals("hello", first, "Anchor should read as hello");
@@ -75,7 +75,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
     @Test
     @Disabled("ANCHOR ref throws UnsupportedOperationException - needs investigation")
     @DisplayName("Tests reading object with anchor alias")
-    public void testObjectWithAnchor() {
+    void testObjectWithAnchor() {
         YamlWire wire = YamlWire.from("a: &ref { x: 1 }\nb: *ref");
         @SuppressWarnings("unchecked")
         Map<String, Object> first = wire.read("a").object(Map.class);
@@ -87,7 +87,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests bool method with consumer callback for true/false")
-    public void testBoolWithConsumer() {
+    void testBoolWithConsumer() {
         YamlWire wire = YamlWire.from("a: true\nb: false");
         AtomicBoolean resultA = new AtomicBoolean();
         AtomicBoolean resultB = new AtomicBoolean(true);
@@ -103,7 +103,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
     @Test
     @Disabled("Tilde returns false instead of null for boolean consumer - needs investigation")
     @DisplayName("Tests bool method with consumer callback for null value")
-    public void testBoolWithConsumerNullValue() {
+    void testBoolWithConsumerNullValue() {
         YamlWire wire = YamlWire.from("c: ~");
         AtomicReference<Boolean> resultC = new AtomicReference<>();
         wire.read("c").bool(resultC, AtomicReference::set);
@@ -112,7 +112,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests bool parsing with empty string")
-    public void testBoolEmptyString() {
+    void testBoolEmptyString() {
         YamlWire wire = YamlWire.from("empty: ''");
         AtomicReference<Boolean> result = new AtomicReference<>();
         wire.read("empty").bool(result, AtomicReference::set);
@@ -121,7 +121,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests int8 value with consumer callback")
-    public void testInt8WithConsumer() {
+    void testInt8WithConsumer() {
         YamlWire wire = YamlWire.from("val: 42");
         AtomicInteger result = new AtomicInteger();
         wire.read("val").int8(result, AtomicInteger::set);
@@ -130,7 +130,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests uint8 value with consumer callback")
-    public void testUint8WithConsumer() {
+    void testUint8WithConsumer() {
         YamlWire wire = YamlWire.from("val: 200");
         AtomicInteger result = new AtomicInteger();
         wire.read("val").uint8(result, AtomicInteger::set);
@@ -139,7 +139,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests int16 value with consumer callback")
-    public void testInt16WithConsumer() {
+    void testInt16WithConsumer() {
         YamlWire wire = YamlWire.from("val: 12345");
         AtomicInteger result = new AtomicInteger();
         wire.read("val").int16(result, AtomicInteger::set);
@@ -148,7 +148,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests uint16 value with consumer callback")
-    public void testUint16WithConsumer() {
+    void testUint16WithConsumer() {
         YamlWire wire = YamlWire.from("val: 50000");
         AtomicInteger result = new AtomicInteger();
         wire.read("val").uint16(result, AtomicInteger::set);
@@ -157,7 +157,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests int32 value with consumer callback")
-    public void testInt32WithConsumer() {
+    void testInt32WithConsumer() {
         YamlWire wire = YamlWire.from("val: 1234567");
         AtomicInteger result = new AtomicInteger();
         wire.read("val").int32(result, AtomicInteger::set);
@@ -166,7 +166,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests uint32 value with consumer callback")
-    public void testUint32WithConsumer() {
+    void testUint32WithConsumer() {
         YamlWire wire = YamlWire.from("val: 3000000000");
         AtomicLong result = new AtomicLong();
         wire.read("val").uint32(result, AtomicLong::set);
@@ -175,7 +175,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests int64 value with consumer callback")
-    public void testInt64WithConsumer() {
+    void testInt64WithConsumer() {
         YamlWire wire = YamlWire.from("val: 9876543210");
         AtomicLong result = new AtomicLong();
         wire.read("val").int64(result, AtomicLong::set);
@@ -184,7 +184,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests float32 value with consumer callback")
-    public void testFloat32WithConsumer() {
+    void testFloat32WithConsumer() {
         YamlWire wire = YamlWire.from("val: 3.14");
         AtomicReference<Float> result = new AtomicReference<>();
         wire.read("val").float32(result, AtomicReference::set);
@@ -193,7 +193,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests float64 value with consumer callback")
-    public void testFloat64WithConsumer() {
+    void testFloat64WithConsumer() {
         YamlWire wire = YamlWire.from("val: 3.14159265359");
         AtomicReference<Double> result = new AtomicReference<>();
         wire.read("val").float64(result, AtomicReference::set);
@@ -202,7 +202,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests skipValue on complex structure values")
-    public void testSkipValue() {
+    void testSkipValue() {
         YamlWire wire = YamlWire.from("skip: { nested: { deep: value } }\nkeep: important");
         wire.read("skip").skipValue();
         String kept = wire.read("keep").text();
@@ -211,7 +211,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests skipValue on sequence item values")
-    public void testSkipValueSequence() {
+    void testSkipValueSequence() {
         YamlWire wire = YamlWire.from("skip: [1, 2, 3]\nkeep: data");
         wire.read("skip").skipValue();
         String kept = wire.read("keep").text();
@@ -220,7 +220,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests reading UUID values from YAML")
-    public void testUuidWithConsumer() {
+    void testUuidWithConsumer() {
         UUID expected = UUID.randomUUID();
         YamlWire wire = YamlWire.from("id: " + expected);
         AtomicReference<UUID> result = new AtomicReference<>();
@@ -230,7 +230,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests textTo with StringBuilder output buffer")
-    public void testTextToStringBuilder() {
+    void testTextToStringBuilder() {
         YamlWire wire = YamlWire.from("field: hello world");
         StringBuilder sb = new StringBuilder();
         wire.read("field").textTo(sb);
@@ -241,7 +241,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
     @Test
     @Disabled("Returns '~' in StringBuilder instead of null - needs investigation")
     @DisplayName("Tests textTo handling for null YAML values")
-    public void testTextToNullValue() {
+    void testTextToNullValue() {
         YamlWire wire = YamlWire.from("field: ~");
         StringBuilder sb = new StringBuilder("old");
         StringBuilder result = wire.read("field").textTo(sb);
@@ -250,7 +250,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests textTo with Bytes output buffer")
-    public void testTextToBytes() {
+    void testTextToBytes() {
         YamlWire wire = YamlWire.from("field: hello bytes");
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         wire.read("field").textTo(bytes);
@@ -260,7 +260,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests reading nested map value structures")
-    public void testNestedMaps() {
+    void testNestedMaps() {
         YamlWire wire = YamlWire.from("outer:\n  middle:\n    inner: value");
         wire.read("outer").marshallable(w -> w.read("middle").marshallable(m -> {
             String inner = m.read("inner").text();
@@ -270,7 +270,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests hasNext behaviour in sequence reader")
-    public void testHasNextSequence() {
+    void testHasNextSequence() {
         YamlWire wire = YamlWire.from("list: [a, b]");
         List<String> items = new ArrayList<>();
         wire.read("list").sequence(items, (list, v) -> {
@@ -285,7 +285,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests bytes reading from YAML content")
-    public void testBytesReading() {
+    void testBytesReading() {
         YamlWire wire = YamlWire.from("data: hello");
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         wire.read("data").bytes(bytes);
@@ -295,7 +295,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests reading literal block scalar text")
-    public void testLiteralBlockScalar() {
+    void testLiteralBlockScalar() {
         YamlWire wire = YamlWire.from("text: |\n  line1\n  line2");
         String text = wire.read("text").text();
         assertTrue(text.contains("line1"), text + " should contain line1");
@@ -304,7 +304,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests reading values with comment lines")
-    public void testReadWithComment() {
+    void testReadWithComment() {
         YamlWire wire = YamlWire.from("# comment\nfield: value");
         String text = wire.read("field").text();
         assertEquals("value", text, "Reader should skip comment and read value");
@@ -314,7 +314,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
     @Test
     @Disabled("MAPPING_END IllegalStateException when skipping nested structures - needs investigation")
     @DisplayName("Tests consuming complex nested structure values")
-    public void testConsumeComplexNested() {
+    void testConsumeComplexNested() {
         YamlWire wire = YamlWire.from(
             "complex:\n" +
             "  list:\n" +
@@ -330,7 +330,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests reading empty sequence values correctly")
-    public void testEmptySequence() {
+    void testEmptySequence() {
         YamlWire wire = YamlWire.from("empty: []");
         List<String> items = new ArrayList<>();
         wire.read("empty").sequence(items, (list, v) -> {
@@ -343,7 +343,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests reading empty mapping values correctly")
-    public void testEmptyMapping() {
+    void testEmptyMapping() {
         YamlWire wire = YamlWire.from("empty: {}");
         Map<String, Object> map = new HashMap<>();
         wire.read("empty").marshallable(w -> {
@@ -354,7 +354,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests reading directives end marker values")
-    public void testDirectivesEnd() {
+    void testDirectivesEnd() {
         YamlWire wire = YamlWire.from("---\nfield: value");
         String text = wire.read("field").text();
         assertEquals("value", text, "Reader should handle directives end marker");
@@ -362,7 +362,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests resetState on YAML value reader")
-    public void testResetState() {
+    void testResetState() {
         YamlWire wire = YamlWire.from("field: value");
         wire.read("field").text();
         wire.getValueIn().resetState();
@@ -372,14 +372,14 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests classLookup delegation to value reader")
-    public void testClassLookup() {
+    void testClassLookup() {
         YamlWire wire = YamlWire.from("field: value");
         assertNotNull(wire.getValueIn().classLookup(), "ValueIn classLookup should not be null");
     }
 
     @Test
     @DisplayName("Tests wireIn delegation to parent wire")
-    public void testWireInDelegation() {
+    void testWireInDelegation() {
         YamlWire wire = YamlWire.from("field: value");
         assertSame(wire, wire.getValueIn().wireIn(), "wireIn should return parent wire");
     }
@@ -388,7 +388,7 @@ public class YamlWireValueInCoverageTest extends WireTestCommon {
     @Test
     @Disabled("readLength returns 0 instead of positive value - needs investigation")
     @DisplayName("Tests readLength for YAML content values")
-    public void testReadLength() {
+    void testReadLength() {
         YamlWire wire = YamlWire.from("field: value");
         wire.read("field");
         long length = wire.getValueIn().readLength();

@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Covers primitive scalars and a small sequence to exercise ValueIn/ValueOut
  * for Binary/Text/YAML wires.
  */
-public class WireRoundTripParamTest extends WireTestCommon {
+class WireRoundTripParamTest extends WireTestCommon {
 
     private static final WireType[] TYPES = {
             WireType.BINARY,
@@ -24,7 +24,7 @@ public class WireRoundTripParamTest extends WireTestCommon {
 
     @Test
     @DisplayName("Primitive scalars round trip across wire types")
-    public void primitivesRoundTrip() {
+    void primitivesRoundTrip() {
         for (WireType wt : TYPES) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 
@@ -68,7 +68,7 @@ public class WireRoundTripParamTest extends WireTestCommon {
 
     @Test
     @DisplayName("Sequences round trip across wire types")
-    public void sequenceRoundTrip() {
+    void sequenceRoundTrip() {
         for (WireType wt : TYPES) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 

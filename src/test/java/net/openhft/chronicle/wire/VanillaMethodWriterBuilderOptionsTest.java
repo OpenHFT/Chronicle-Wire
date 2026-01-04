@@ -14,11 +14,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class VanillaMethodWriterBuilderOptionsTest extends WireTestCommon {
+class VanillaMethodWriterBuilderOptionsTest extends WireTestCommon {
 
     @Test
     @DisplayName("Honours update interceptor and thread-safe toggle")
-    public void honoursUpdateInterceptorAndThreadSafeToggle() {
+    void honoursUpdateInterceptorAndThreadSafeToggle() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 

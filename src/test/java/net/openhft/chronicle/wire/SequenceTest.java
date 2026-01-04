@@ -21,13 +21,13 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 @SuppressFBWarnings(
         value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
         justification = "Fields are populated via Wire marshalling in tests.")
-public class SequenceTest extends WireTestCommon {
+class SequenceTest extends WireTestCommon {
 
     // Instance variable to hold the WireType.
     private WireType wireType;
 
     // Constructor to initialize the WireType.
-    public void initSequenceTest(WireType wireType) {
+    void initSequenceTest(WireType wireType) {
         this.wireType = wireType;
     }
 
@@ -45,7 +45,7 @@ public class SequenceTest extends WireTestCommon {
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Reads repeated sequences for each wire type")
-    public void test(WireType wireType) {
+    void test(WireType wireType) {
         initSequenceTest(wireType);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for sequence round-trip tests");
 
@@ -120,7 +120,7 @@ public class SequenceTest extends WireTestCommon {
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Reads a set as an object for each wire type")
-    public void readSetAsObject(WireType wireType) {
+    void readSetAsObject(WireType wireType) {
         initSequenceTest(wireType);
         // Allocate an elastic buffer on heap.
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
@@ -152,7 +152,7 @@ public class SequenceTest extends WireTestCommon {
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Reads a list as an object for each wire type")
-    public void readListAsObject(WireType wireType) {
+    void readListAsObject(WireType wireType) {
         initSequenceTest(wireType);
         // Allocate an elastic buffer on heap.
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
@@ -182,7 +182,7 @@ public class SequenceTest extends WireTestCommon {
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Reads a map as an object for each wire type")
-    public void readMapAsObject(WireType wireType) {
+    void readMapAsObject(WireType wireType) {
         initSequenceTest(wireType);
         // Ensure that the wire type isn't RAW.
         assumeFalse(wireType == WireType.RAW, "RAW wire does not support object map reads");

@@ -62,7 +62,7 @@ import java.util.Collection;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class FIX42Test extends WireTestCommon {
+class FIX42Test extends WireTestCommon {
     // Elastic byte buffer for writing and reading data
     @SuppressWarnings("rawtypes")
     @NotNull
@@ -133,7 +133,7 @@ public class FIX42Test extends WireTestCommon {
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Dumps FIX42 market data snapshot for wire variants")
-    public void dump(int testId, boolean fixed, boolean numericField, boolean fieldLess, String dump) {
+    void dump(int testId, boolean fixed, boolean numericField, boolean fieldLess, String dump) {
         // Create a Wire instance
         @NotNull Wire wire = createWire(testId, fixed, numericField, fieldLess);
 
@@ -174,7 +174,7 @@ public class FIX42Test extends WireTestCommon {
 
         // Method to serialize this object into a wire format
         @Override
-        public void writeMarshallable(@NotNull WireOut wire) {
+       public void writeMarshallable(@NotNull WireOut wire) {
             // Serialize the symbol, entry type, and prices to the provided wire
             wire.write(FIX42.Symbol).text(symbol)
                     .write(FIX42.NoMDEntries).int32(2)

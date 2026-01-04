@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class BracketsOnJSONWireTest extends net.openhft.chronicle.wire.WireTestCommon {
+class BracketsOnJSONWireTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Variable to store the actual message from the wire
     private String actual;
@@ -26,7 +26,7 @@ public class BracketsOnJSONWireTest extends net.openhft.chronicle.wire.WireTestC
     // Test the JSON_ONLY wire type with a method writer and reader using the Printer interface
     @Test
     @DisplayName("JSON_ONLY writes without brackets and reads back")
-    public void test() {
+    void test() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "direct memory required for JSON_ONLY wire test");
 
         // Create an elastic byte buffer to hold the wire data

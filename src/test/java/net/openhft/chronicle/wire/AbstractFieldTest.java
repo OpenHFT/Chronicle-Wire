@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class AbstractFieldTest extends WireTestCommon {
+class AbstractFieldTest extends WireTestCommon {
 
     // Provide a collection of WireTypes for parameterized testing.
     public static Collection<Object[]> wireTypes() {
@@ -34,7 +34,7 @@ public class AbstractFieldTest extends WireTestCommon {
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Serialises abstract field with self describing type")
-    public void abstractField(WireType wireType) {
+    void abstractField(WireType wireType) {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip abstract field test for MSDMHolder");
 
@@ -57,7 +57,7 @@ public class AbstractFieldTest extends WireTestCommon {
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Serialises concrete field with self describing type")
-    public void abstractField2(WireType wireType) {
+    void abstractField2(WireType wireType) {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip abstract field test for MSDMHolder2");
 

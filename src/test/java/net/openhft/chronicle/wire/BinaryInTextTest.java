@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class BinaryInTextTest extends WireTestCommon {
+class BinaryInTextTest extends WireTestCommon {
 
     // Specifies the set of wire types that will be passed to the test constructor
     public static Collection<Object[]> wireTypes() {
@@ -33,7 +33,7 @@ public class BinaryInTextTest extends WireTestCommon {
     @MethodSource("wireTypes")
     @SuppressWarnings("rawtypes")
     @DisplayName("Parses base64 bytes from text wire")
-    public void testBytesFromText(WireType wireType) {
+    void testBytesFromText(WireType wireType) {
         Bytes<?> a = wireType.fromString(Bytes.class, "A==");
         assertEquals("A==", a.toString(), "Base64 payload should round-trip for wireType=" + wireType);
 
@@ -54,7 +54,7 @@ public class BinaryInTextTest extends WireTestCommon {
     @ParameterizedTest(name = "{0}")
     @MethodSource("wireTypes")
     @DisplayName("Reserialises binary fields from text input")
-    public void testReserialize(WireType wireType) {
+    void testReserialize(WireType wireType) {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip reserialise test");
 
         BIT bit = wireType.fromString(BIT.class, "{\n" +

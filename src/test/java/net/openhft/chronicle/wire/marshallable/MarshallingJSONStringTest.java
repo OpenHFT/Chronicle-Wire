@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class MarshallingJSONStringTest implements Marshallable {
+class MarshallingJSONStringTest implements Marshallable {
 
     private String configAsJSON;
 
@@ -30,7 +30,7 @@ public class MarshallingJSONStringTest implements Marshallable {
 
     @Test
     @DisplayName("JSON content should remain without type prefix")
-    public void testNoPrefixAddedToJson() {
+    void testNoPrefixAddedToJson() {
 
         String configJson = "!net.openhft.chronicle.wire.marshallable.MarshallingJSONStringTest {\n" +
                 "  config: {\n" +

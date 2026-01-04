@@ -22,7 +22,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 @SuppressFBWarnings(
         value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
         justification = "Fields are populated via Wire marshalling in tests.")
-public class UnicodeStringTest extends WireTestCommon {
+class UnicodeStringTest extends WireTestCommon {
 
     // Suppressing unchecked warnings as Bytes class may handle various types
     @SuppressWarnings("rawtypes")
@@ -40,7 +40,7 @@ public class UnicodeStringTest extends WireTestCommon {
     private char ch;
 
     // Constructor initializes the character under test
-    public void initUnicodeStringTest(char ch) {
+    void initUnicodeStringTest(char ch) {
         this.ch = ch;
     }
 
@@ -87,7 +87,7 @@ public class UnicodeStringTest extends WireTestCommon {
     @DisplayName("Round-trips long unicode strings across code points")
     @MethodSource("combinations")
     @ParameterizedTest
-    public void testLongString(char ch) {
+    void testLongString(char ch) {
         initUnicodeStringTest(ch);
         wire.clear(); // Clear the wire for a fresh start
 

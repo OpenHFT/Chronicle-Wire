@@ -13,18 +13,18 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TupleInvocationHandlerTest extends WireTestCommon {
+class TupleInvocationHandlerTest extends WireTestCommon {
 
     private final boolean originalGenerateTuples = Wires.GENERATE_TUPLES;
 
     @AfterEach
-    public void restoreTuplesFlag() {
+    void restoreTuplesFlag() {
         Wires.setGenerateTuples(originalGenerateTuples);
     }
 
     @Test
     @DisplayName("Supports tuple field API and deep copy behaviour")
-    public void tupleSupportsFieldApiAndDeepCopy() throws InvalidMarshallableException, NoSuchFieldException {
+    void tupleSupportsFieldApiAndDeepCopy() throws InvalidMarshallableException, NoSuchFieldException {
         Wires.setGenerateTuples(true);
         SampleTuple tuple = Wires.tupleFor(SampleTuple.class, "sampleType");
         assertNotNull(tuple, "tuple instance should be created for sampleType conversion");

@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SuppressFBWarnings(
         value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
         justification = "Fields are populated via Wire marshalling in tests.")
-public class TestLongConversion {
+class TestLongConversion {
     private static final char SEPARATOR = '/';
     private LongConverter longConverter;
 
@@ -26,14 +26,14 @@ public class TestLongConversion {
                 new Object[]{Base85LongConverter.INSTANCE});
     }
 
-    public void initTestLongConversion(LongConverter longConverter) {
+    void initTestLongConversion(LongConverter longConverter) {
         this.longConverter = longConverter;
     }
 
     @DisplayName("Parses raw ints and appends values")
     @MethodSource("data")
     @ParameterizedTest
-    public void parseRawIntsV1(LongConverter longConverter) {
+    void parseRawIntsV1(LongConverter longConverter) {
 
         initTestLongConversion(longConverter);
 
@@ -56,7 +56,7 @@ public class TestLongConversion {
     @DisplayName("Parses raw ints with offsets and appends values")
     @MethodSource("data")
     @ParameterizedTest
-    public void parseRawIntsV2(LongConverter longConverter) {
+    void parseRawIntsV2(LongConverter longConverter) {
 
         initTestLongConversion(longConverter);
 

@@ -28,7 +28,7 @@ class GenerateMethodWriterInheritanceTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Method writer resolves same class in hierarchy")
-    public void testSameClassInHierarchy() {
+    void testSameClassInHierarchy() {
         // Create a new binary wire that uses padding
         final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
@@ -65,7 +65,7 @@ class GenerateMethodWriterInheritanceTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Method writer handles same named methods")
-    public void testSameNamedMethod() {
+    void testSameNamedMethod() {
         // Similar setup as the previous test
         final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
@@ -96,7 +96,7 @@ class GenerateMethodWriterInheritanceTest extends WireTestCommon {
 
     @Test
     @DisplayName("Duplicate MethodId values are rejected by validation")
-    public void testDuplicateMethodIds() {
+    void testDuplicateMethodIds() {
         assertThrows(MethodWriterValidationException.class, () -> {
             final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
@@ -110,7 +110,7 @@ class GenerateMethodWriterInheritanceTest extends WireTestCommon {
     // This test is expected to throw a MethodWriterValidationException when trying to generate a method writer for a class
     @Test
     @DisplayName("Method writer rejects concrete class inputs")
-    public void testGenerateForClass() {
+    void testGenerateForClass() {
         assertThrows(MethodWriterValidationException.class, () -> {
             final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
@@ -126,7 +126,7 @@ class GenerateMethodWriterInheritanceTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Method writer supports long generated class names")
-    public void testGenerateForLongGeneratedClassName() {
+    void testGenerateForLongGeneratedClassName() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for long class name test");
 
         // Allocate a new binary wire buffer

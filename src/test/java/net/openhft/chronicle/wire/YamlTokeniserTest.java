@@ -13,7 +13,7 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class YamlTokeniserTest extends WireTestCommon {
+class YamlTokeniserTest extends WireTestCommon {
 
     // Utility function to tokenize YAML from a given resource file
     public static String doTest(String resource) {
@@ -51,7 +51,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test to verify the tokenization of a specific YAML file representing Morse code
     @Test
     @DisplayName("YAML tokeniser handles morse code mapping")
-    public void morseCode() {
+    void morseCode() {
         // The expected tokenized representation of the morse-code.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -142,7 +142,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenising YAML content with mixed quotes
     @Test
     @DisplayName("YAML tokeniser handles mixed quote sequences")
-    public void mixedQuotes() {
+    void mixedQuotes() {
         // The expected tokenized representation of the mixed-quotes.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
@@ -163,7 +163,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing YAML content that describes an exception
     @Test
     @DisplayName("YAML tokeniser handles exception document tokens")
-    public void exception() {
+    void exception() {
         // The expected tokenized representation of the exception.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "TAG !data\n" +
@@ -234,7 +234,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing YAML content with incomplete int mapping
     @Test
     @DisplayName("YAML tokeniser handles incomplete int mapping")
-    public void intMappingIncomplete() {
+    void intMappingIncomplete() {
         // The expected tokenized representation of the int-mapping-incomplete.yaml
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -253,7 +253,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing YAML content with a complete int mapping
     @Test
     @DisplayName("YAML tokeniser handles int mapping tokens")
-    public void intMapping() {
+    void intMapping() {
         // The expected tokenized representation of the int-mapping.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -285,7 +285,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing YAML content with a complex mapping structure
     @Test
     @DisplayName("YAML tokeniser handles complex mapping tokens")
-    public void complexMapping() {
+    void complexMapping() {
         // The expected tokenized representation of the complex-mapping.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -331,7 +331,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML sequence of scalar values
     @Test
     @DisplayName("YAML spec 2.1 tokens match expected output")
-    public void eg2_1() {
+    void eg2_1() {
         // The expected tokenized representation of the 2_1_SequenceOfScalars.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
@@ -350,7 +350,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML mapping of scalar to scalar values
     @Test
     @DisplayName("YAML spec 2.2 tokens match expected output")
-    public void eg2_2() {
+    void eg2_2() {
         // The expected tokenized representation of the 2_2_MappingScalarsToScalars.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -375,7 +375,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML mapping of scalar to sequence values
     @Test
     @DisplayName("YAML spec 2.3 tokens match expected output")
-    public void eg2_3() {
+    void eg2_3() {
         // The expected tokenized representation of the 2_3_MappingScalarsToSequences.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -408,7 +408,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML sequence of mappings
     @Test
     @DisplayName("YAML spec 2.4 tokens match expected output")
-    public void eg2_4() {
+    void eg2_4() {
         // The expected tokenized representation of the 2_4_SequenceOfMappings.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
@@ -445,7 +445,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for verifying the tokenized output of an alternative version of 2_4_SequenceOfMappings.yaml
     @Test
     @DisplayName("YAML spec 2.4 output tokens match expected")
-    public void eg2_4out() {
+    void eg2_4out() {
         // The expected tokenized representation of the 2_4_SequenceOfMappings.out.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
@@ -482,7 +482,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Another test case for verifying the tokenized output of the 2_4_SequenceOfMappings.yaml
     @Test
     @DisplayName("YAML spec 2.4B tokens match expected output")
-    public void eg2_4B() {
+    void eg2_4B() {
         // The expected tokenized representation of the 2_4_SequenceOfMappings.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
@@ -519,7 +519,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML sequence of sequences
     @Test
     @DisplayName("YAML spec 2.5 tokens match expected output")
-    public void eg2_5() {
+    void eg2_5() {
         // The expected tokenized representation of the 2_5_SequenceOfSequences.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "SEQUENCE_START \n" +
@@ -559,7 +559,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML mapping of mappings structure
     @Test
     @DisplayName("YAML spec 2.6 tokens match expected output")
-    public void eg2_6() {
+    void eg2_6() {
         // The expected tokenized representation of the 2_6_MappingOfMappings.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -592,7 +592,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file with two separate documents in a single stream
     @Test
     @DisplayName("YAML spec 2.7 tokens match expected output")
-    public void eg2_7() {
+    void eg2_7() {
         // The expected tokenized representation of the 2_7_TwoDocumentsInAStream.yaml file
         assertEquals("COMMENT Ranking of 1998 home runs\n" +
                         "DIRECTIVES_END \n" +
@@ -621,7 +621,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file containing play-by-play actions in a sports event
     @Test
     @DisplayName("YAML spec 2.8 tokens match expected output")
-    public void eg2_8() {
+    void eg2_8() {
         // The expected tokenized representation of the 2_8_PlayByPlayFeed.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -656,7 +656,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file with comments indicating 1998 HR and RBI rankings
     @Test
     @DisplayName("YAML spec 2.9 tokens match expected output")
-    public void eg2_9() {
+    void eg2_9() {
         // The expected tokenized representation of the 2_9_SingleDocumentWithTwoComments.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -687,7 +687,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file featuring node anchors and aliases
     @Test
     @DisplayName("YAML spec 2.10 tokens match expected output")
-    public void eg2_10() {
+    void eg2_10() {
         // The expected tokenized representation of the 2_10_NodeAppearsTwiceInThisDocument.yaml file
         assertEquals("DIRECTIVES_END \n" +
                         "MAPPING_START \n" +
@@ -719,7 +719,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file with complex mappings between sequences
     @Test
     @DisplayName("YAML spec 2.11 tokens match expected output")
-    public void eg2_11() {
+    void eg2_11() {
         // The expected tokenized representation of the 2_11MappingBetweenSequences.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -759,7 +759,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file featuring a compact nested mapping of purchased items and their quantities
     @Test
     @DisplayName("YAML spec 2.12 tokens match expected output")
-    public void eg2_12() {
+    void eg2_12() {
         // The expected tokenized representation of the 2_12CompactNestedMapping.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -801,7 +801,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file that preserves newlines within literal blocks (ASCII Art)
     @Test
     @DisplayName("YAML spec 2.13 tokens match expected output")
-    public void eg2_13() {
+    void eg2_13() {
         // The expected tokenized representation of the 2_13InLiteralsNewlinesArePreserved.yaml file
         assertEquals(
                 "COMMENT ASCII Art\n" +
@@ -816,7 +816,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file that uses folded scalars to preserve newlines only at the end of double-indented lines
     @Test
     @DisplayName("YAML spec 2.14 tokens match expected output")
-    public void eg2_14() {
+    void eg2_14() {
         // The expected tokenized representation of the 2_14InThefoldedScalars.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -829,7 +829,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file featuring folded newlines
     @Test
     @DisplayName("YAML spec 2.15 tokens match expected output")
-    public void eg2_15() {
+    void eg2_15() {
         // The expected tokenized representation of the 2_15FoldedNewlines.yaml file
         assertEquals(
                 "LITERAL Sammy Sosa completed another fine season with great stats.   63 Home Runs   0.288 Batting Average What a year!\n",
@@ -840,7 +840,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file that relies on indentation to determine scope
     @Test
     @DisplayName("YAML spec 2.16 tokens match expected output")
-    public void eg2_16() {
+    void eg2_16() {
         // The expected tokenized representation of the 2_16IndentationDeterminesScope.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -865,7 +865,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file that contains various types of quoted scalars including Unicode, control, hex escapes, and single-quoted text
     @Test
     @DisplayName("YAML spec 2.17 tokens match expected output")
-    public void eg2_17() {
+    void eg2_17() {
         // The expected tokenized representation of the 2_17QuotedScalars.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -898,7 +898,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     @Test
     @Disabled("TODO fix YAML spec 2.18 token output")
     @DisplayName("YAML spec 2.18 tokens match expected output")
-    public void eg2_18() {
+    void eg2_18() {
         // The expected tokenized representation of the 2_18Multi_lineFlowScalars.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -918,7 +918,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file that contains various representations of integers
     @Test
     @DisplayName("YAML spec 2.19 tokens match expected output")
-    public void eg2_19() {
+    void eg2_19() {
         // The expected tokenized representation of the 2_19Integers.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -946,7 +946,7 @@ public class YamlTokeniserTest extends WireTestCommon {
 
     @Test
     @DisplayName("YAML spec 2.20 tokens match expected output")
-    public void eg2_20() {
+    void eg2_20() {
         // The expected tokenized representation of the 2_20FloatingPoint.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -978,7 +978,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file that contains miscellaneous types like null, boolean, and string
     @Test
     @DisplayName("YAML spec 2.21 tokens match expected output")
-    public void eg2_21() {
+    void eg2_21() {
         // The expected tokenized representation of the 2_21Miscellaneous.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -1005,7 +1005,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file that contains various representations of timestamps
     @Test
     @DisplayName("YAML spec 2.22 tokens match expected output")
-    public void eg2_22() {
+    void eg2_22() {
         // The expected tokenized representation of the 2_22Timestamps.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -1031,7 +1031,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file that contains various explicit tags including application-specific tags
     @Test
     @DisplayName("YAML spec 2.23 tokens match expected output")
-    public void eg2_23() {
+    void eg2_23() {
         // The expected tokenized representation of the 2_23VariousExplicitTags.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -1066,7 +1066,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file that contains globally-defined tags
     @Test
     @DisplayName("YAML spec 2.24 tokens match expected output")
-    public void eg2_24() {
+    void eg2_24() {
         // The expected tokenized representation of the 2_24GlobalTags.yaml file
         assertEquals(
                 "DIRECTIVE TAG ! tag:clarkevans.com,2002\n" +
@@ -1133,7 +1133,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file representing an unordered set
     @Test
     @DisplayName("YAML spec 2.25 tokens match expected output")
-    public void eg2_25() {
+    void eg2_25() {
         // Expected tokenized representation of the 2_25UnorderedSets.yaml file
         assertEquals(
                 "COMMENT Sets are represented as a\n" +
@@ -1157,7 +1157,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file representing an ordered mapping
     @Test
     @DisplayName("YAML spec 2.26 tokens match expected output")
-    public void eg2_26() {
+    void eg2_26() {
         // Expected tokenized representation of the 2_26OrderedMappings.yaml file
         assertEquals(
                 "COMMENT ordered maps are represented as\n" +
@@ -1193,7 +1193,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a complex YAML file representing an invoice
     @Test
     @DisplayName("YAML spec 2.27 tokens match expected output")
-    public void eg2_27() {
+    void eg2_27() {
         // Expected tokenized representation of the 2_27Invoice.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -1292,7 +1292,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file representing log files with multiple documents
     @Test
     @DisplayName("YAML spec 2.28 tokens match expected output")
-    public void eg2_28() {
+    void eg2_28() {
         // Expected tokenized representation of the 2_28LogFile.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -1373,7 +1373,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file representing a sample configuration
     @Test
     @DisplayName("YAML sample one tokenises correctly here")
-    public void sample1() {
+    void sample1() {
         // Expected tokenized representation of the sample1.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -1412,7 +1412,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML file containing metadata and a custom object type
     @Test
     @DisplayName("YAML sample two tokenises correctly here")
-    public void sample2() {
+    void sample2() {
         // Expected tokenized representation of the sample2.yaml file
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -1434,7 +1434,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML string containing an empty custom object type
     @Test
     @DisplayName("YAML sample three tokenises correctly here")
-    public void sample3() {
+    void sample3() {
         // Expected tokenized representation of the sample3.yaml string
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -1453,7 +1453,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML string containing multiple types of data
     @Test
     @DisplayName("YAML sample four tokenises correctly here")
-    public void sample4() {
+    void sample4() {
         // Expected tokenized representation of the sample4.yaml string
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -1478,7 +1478,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML string containing a mapping of mappings
     @Test
     @DisplayName("YAML sample five tokenises correctly here")
-    public void sample5() {
+    void sample5() {
         // Expected tokenized representation of the sample5.yaml string
         assertEquals(
                 "DIRECTIVES_END \n" +
@@ -1526,7 +1526,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML string containing nested mappings and an empty mapping
     @Test
     @DisplayName("YAML sample six tokenises correctly here")
-    public void sample6() {
+    void sample6() {
         // Expected tokenized representation of the sample6.yaml string
         assertEquals(
                 "COMMENT \n" +
@@ -1562,7 +1562,7 @@ public class YamlTokeniserTest extends WireTestCommon {
     // Test case for tokenizing a YAML string containing a tag and various field types
     @Test
     @DisplayName("YAML sample seven tokenises correctly here")
-    public void sample7() {
+    void sample7() {
         // Expected tokenized representation of the sample7.yaml string
         assertEquals(
                 "DIRECTIVES_END \n" +

@@ -21,7 +21,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class SerializableWireTest extends WireTestCommon {
+class SerializableWireTest extends WireTestCommon {
     // Parameterized tests with various combinations of wire types and serializable objects
     @NotNull // toString() implicility called here
     public static Collection<Object[]> combinations() {
@@ -54,7 +54,7 @@ public class SerializableWireTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @ParameterizedTest(name = "wire round-trip: wt={0}, object={1}, IME={2}")
     @DisplayName("Serialisable objects round-trip via wire")
-    public void writeMarshallable(WireType wireType, Serializable m, boolean ime) {
+    void writeMarshallable(WireType wireType, Serializable m, boolean ime) {
         // Ignore exceptions for certain test cases
         if (ime) // TODO Fix to be expected
             ignoreException(ek -> ek.throwable instanceof InvalidMarshallableException, "IME");
@@ -86,7 +86,7 @@ public class SerializableWireTest extends WireTestCommon {
     @MethodSource("combinations")
     @ParameterizedTest(name = "string builder round-trip: wt={0}, object={1}, IME={2}")
     @DisplayName("StringBuilder serialises inside marshallable containers correctly")
-    public void testStringBuilderSerialization(WireType wireType, Serializable m, boolean ime) {
+    void testStringBuilderSerialization(WireType wireType, Serializable m, boolean ime) {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = new BinaryWire(bytes);

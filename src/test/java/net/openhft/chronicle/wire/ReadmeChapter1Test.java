@@ -22,17 +22,17 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"java:S2699", "java:S125", "java:S1854", "java:S1481"})
-public class ReadmeChapter1Test extends WireTestCommon {
+class ReadmeChapter1Test extends WireTestCommon {
 
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for README chapter examples");
     }
 
     @Test
     @SuppressWarnings("unused")
     @DisplayName("Example 1: write fields in text, binary, and raw wire")
-    public void example1() {
+    void example1() {
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
         /*
@@ -120,7 +120,7 @@ public class ReadmeChapter1Test extends WireTestCommon {
 
     @Test
     @DisplayName("Example 2: marshallable data in text and binary")
-    public void example2() {
+    void example2() {
         /*
         
         ## simple example with a data type
@@ -178,7 +178,7 @@ public class ReadmeChapter1Test extends WireTestCommon {
 
     @Test
     @DisplayName("Example 3: marshallable field in text and binary")
-    public void example3() {
+    void example3() {
         /*
         ## simple example with a data type
         */
@@ -236,7 +236,7 @@ public class ReadmeChapter1Test extends WireTestCommon {
 
     @Test
     @DisplayName("Example 4: type aliases for marshallable objects")
-    public void example4() {
+    void example4() {
         /*
         ## simple example with a data type with a type
         ```java
@@ -297,7 +297,7 @@ public class ReadmeChapter1Test extends WireTestCommon {
 
     @Test
     @DisplayName("Example 5: size-prefixed documents read back correctly")
-    public void example5() {
+    void example5() {
         /*
         ## Write a message with a thread safe size prefix.
         
@@ -364,7 +364,7 @@ public class ReadmeChapter1Test extends WireTestCommon {
 
     @Test
     @DisplayName("Example 6: sequence of records round-trips")
-    public void example6() {
+    void example6() {
         /*
         ## Write a message with a sequence of records
         
@@ -483,7 +483,7 @@ public class ReadmeChapter1Test extends WireTestCommon {
 
     @Test
     @DisplayName("Example 7: object value out and in")
-    public void example7() {
+    void example7() {
         /*
         
         ## simple example with a data type

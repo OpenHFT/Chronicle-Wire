@@ -20,38 +20,38 @@ import static org.junit.jupiter.api.Assertions.*;
 
 // Test class extending WireTestCommon to test method writing and reading via interface implementations
 @SuppressWarnings({"deprecation", "removal"})
-public class MethodWriterByInterfaceTest extends WireTestCommon {
+class MethodWriterByInterfaceTest extends WireTestCommon {
 
     // Setup method to configure default object creation for interfaces before each test
     @BeforeEach
-    public void setup() {
+    void setup() {
         ObjectUtils.defaultObjectForInterface(c -> Class.forName(c.getName() + "mpl"));
     }
 
     // Teardown method to reset default object creation for interfaces after each test
     @AfterEach
-    public void teardown() {
+    void teardown() {
         ObjectUtils.defaultObjectForInterface(c -> c);
     }
 
     // Test method writing and reading via implementation with text wire type
     @Test
     @DisplayName("Write/read via implementation on TEXT wire")
-    public void writeReadViaImplementation() {
+    void writeReadViaImplementation() {
         checkWriteReadViaImplementation(WireType.TEXT, false);
     }
 
     // Test method writing and reading with text wire type and tuple generation enabled
     @Test
     @DisplayName("Write/read via implementation on TEXT wire with tuples")
-    public void writeReadViaImplementationGenerateTuples() {
+    void writeReadViaImplementationGenerateTuples() {
         checkWriteReadViaImplementation(WireType.TEXT, true);
     }
 
     // Test method writing and reading via implementation with YAML wire type
     @Test
     @DisplayName("Write/read via implementation on YAML_ONLY wire")
-    public void writeReadViaImplementationYaml() {
+    void writeReadViaImplementationYaml() {
         checkWriteReadViaImplementation(WireType.YAML_ONLY, false);
     }
 

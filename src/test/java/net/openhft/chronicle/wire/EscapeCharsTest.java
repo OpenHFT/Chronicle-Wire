@@ -23,12 +23,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 /**
  * Tests handling of escaped characters across various Wire output formats.
  */
-public class EscapeCharsTest extends WireTestCommon {
+class EscapeCharsTest extends WireTestCommon {
 
     // Override the threadDump from WireTestCommon to use the parent implementation
     @Override
     @BeforeEach
-    public void threadDump() {
+    void threadDump() {
         super.threadDump();
     }
 
@@ -103,7 +103,7 @@ public class EscapeCharsTest extends WireTestCommon {
     @MethodSource("combinations")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Handles escaped characters across wire types")
-    public void testEscaped(@NotNull String chs, Future<?> future) throws ExecutionException, InterruptedException {
+    void testEscaped(@NotNull String chs, Future<?> future) throws ExecutionException, InterruptedException {
         assertNull(future.get(),
                 "escape character task should complete without exception for " + chs);
     }

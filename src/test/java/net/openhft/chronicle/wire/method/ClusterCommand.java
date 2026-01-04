@@ -10,7 +10,7 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
  * Represents a command for the cluster operations which also describes
  * itself when marshalled. This command is linked with a specific cycle and service.
  */
-public class ClusterCommand extends SelfDescribingMarshallable {
+class ClusterCommand extends SelfDescribingMarshallable {
 
     // The service ID in bytes format, initialized as an elastic byte buffer
     private final Bytes<?> serviceId = Bytes.allocateElasticOnHeap();

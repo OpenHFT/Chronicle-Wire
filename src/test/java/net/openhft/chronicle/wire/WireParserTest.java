@@ -9,11 +9,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class WireParserTest extends WireTestCommon {
+class WireParserTest extends WireTestCommon {
 
     @Test
     @DisplayName("SkipReadable consumes all remaining readable bytes")
-    public void noOpReadOne() {
+    void noOpReadOne() {
         // Create an elastic byte buffer with an initial capacity of 128 bytes.
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
 

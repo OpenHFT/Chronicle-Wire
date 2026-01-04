@@ -31,19 +31,19 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireTestCommon {
+class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Before each test case, obtain a thread dump
     @Override
     @BeforeEach
-    public void threadDump() {
+    void threadDump() {
         super.threadDump();
     }
 
     // Test appending data to a file
     @Test
     @DisplayName("Appends output to file when append requested")
-    public void fileAppend() throws IOException {
+    void fileAppend() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip file append test");
         final String expected = "mid: mid\n" +
@@ -61,7 +61,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     // Test writing data to a file without append mode
     @Test
     @DisplayName("Overwrites file when append is disabled")
-    public void file() throws IOException {
+    void file() throws IOException {
         final String expected = "mid2: mid2\n" +
                 "next2: word\n" +
                 "echo: echo-2\n" +
@@ -110,7 +110,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     @Test
     @Disabled("Long-running HTTP queue test is disabled by default")
     @DisplayName("Sends messages over http and reads queue")
-    public void http() throws IOException, InterruptedException {
+    void http() throws IOException, InterruptedException {
         InetSocketAddress address = new InetSocketAddress(0);
         HttpServer server = HttpServer.create(address, 0);
         int port = server.getAddress().getPort();
@@ -140,7 +140,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     @Test
     @Disabled("test was added to work with queue-web-gateway, so work in progress")
     @DisplayName("Sends append messages over http and reads queue")
-    public void http2() throws IOException, InterruptedException {
+    void http2() throws IOException, InterruptedException {
         InetSocketAddress address = new InetSocketAddress(0);
         HttpServer server = HttpServer.create(address, 0);
         int port = server.getAddress().getPort();
@@ -169,7 +169,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     // Test to ensure only JSON Wire is supported and if BINARY_LIGHT is used, an IllegalArgumentException is thrown.
     @Test
     @DisplayName("Rejects binary wire type for http builder")
-    public void httpBinary() throws IOException {
+    void httpBinary() throws IOException {
         assertThrows(IllegalArgumentException.class, () -> {
             InetSocketAddress address = new InetSocketAddress(0);
             HttpServer server = HttpServer.create(address, 0);

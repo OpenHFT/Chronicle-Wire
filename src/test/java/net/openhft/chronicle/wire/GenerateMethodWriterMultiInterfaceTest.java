@@ -14,11 +14,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class GenerateMethodWriterMultiInterfaceTest extends WireTestCommon {
+class GenerateMethodWriterMultiInterfaceTest extends WireTestCommon {
 
     @Test
     @DisplayName("Builds writer supporting multiple interfaces safely")
-    public void builderSupportsAdditionalInterfaces() {
+    void builderSupportsAdditionalInterfaces() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 

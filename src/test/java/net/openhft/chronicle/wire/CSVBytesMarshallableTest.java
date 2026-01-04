@@ -16,7 +16,7 @@ import static net.openhft.chronicle.wire.Wires.acquireStringBuilderScoped;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class CSVBytesMarshallableTest extends WireTestCommon {
+class CSVBytesMarshallableTest extends WireTestCommon {
 
     // Bytes representing raw data for the tests
     private final Bytes<?> bytes = Bytes.from(
@@ -27,7 +27,7 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
     // Test for low level bytes marshalling using FXPrice
     @Test
     @DisplayName("Serialises CSV bytes into raw bytes output")
-    public void bytesMarshallable() {
+    void bytesMarshallable() {
         Bytes<?> bytes2 = Bytes.allocateElasticOnHeap();
         @NotNull FXPrice fxPrice = new FXPrice();
 
@@ -48,38 +48,38 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
     // wire marshalling.
     @Test
     @DisplayName("Marshals CSV records through JSON wire")
-    public void marshallableJSON() {
+    void marshallableJSON() {
         assertEquals(2, doTest(WireType.JSON, false), "Expected CSV record count for JSON wire");
     }
 
     @Test
     @DisplayName("Marshals CSV records through text wire")
-    public void marshallableTEXT() {
+    void marshallableTEXT() {
         assertEquals(2, doTest(WireType.TEXT, false), "Expected CSV record count for text wire");
     }
 
     @Test
     @DisplayName("Marshals CSV records through YAML wire")
-    public void marshallableYAML_ONLY() {
+    void marshallableYAML_ONLY() {
         assertEquals(2, doTest(WireType.YAML_ONLY, false), "Expected CSV record count for YAML wire");
     }
 
     @Test
     @DisplayName("Marshals CSV records through binary wire")
-    public void marshallableBINARY() {
+    void marshallableBINARY() {
         assertEquals(2, doTest(WireType.BINARY, true), "Expected CSV record count for binary wire");
     }
 
     @Test
     @DisplayName("Marshals CSV records through fieldless wire")
-    public void marshallableFIELDLESS() {
+    void marshallableFIELDLESS() {
         assertEquals(2, doTest(WireType.FIELDLESS_BINARY, true),
                 "Expected CSV record count for fieldless binary wire");
     }
 
     @Test
     @DisplayName("Marshals CSV records through raw wire")
-    public void marshallableRAW() {
+    void marshallableRAW() {
         assertEquals(2, doTest(WireType.RAW, true), "Expected CSV record count for raw wire");
     }
 

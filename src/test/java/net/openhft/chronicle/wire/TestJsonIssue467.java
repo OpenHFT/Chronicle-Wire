@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
 // relates to https://github.com/OpenHFT/Chronicle-Wire/issues/467
-public class TestJsonIssue467 {
+class TestJsonIssue467 {
 
     static class ResponseItem467 extends SelfDescribingMarshallable {
         public String index;
@@ -22,13 +22,13 @@ public class TestJsonIssue467 {
 
     @Test
     @DisplayName("Serialises response item to expected json payload")
-    public void test() {
+    void test() {
         assertResponseItemJson();
     }
 
     @Test
     @DisplayName("Serialises response item to expected json payload again")
-    public void test2() {
+    void test2() {
         assertResponseItemJson();
     }
 
@@ -90,7 +90,7 @@ public class TestJsonIssue467 {
 
     @Test
     @DisplayName("Reads json wire object into response item")
-    public void testWireObject() {
+    void testWireObject() {
         final Wire jsonWire = jsonResponseItem();
         ResponseItem467 responseItem467 = jsonWire.getValueIn().object(ResponseItem467.class);
 
@@ -104,7 +104,7 @@ public class TestJsonIssue467 {
 
     @Test
     @DisplayName("Reads json wire object into provided response instance")
-    public void testWireReusingObject() {
+    void testWireReusingObject() {
         final Wire jsonWire = jsonResponseItem();
         ResponseItem467 responseItem4671 = new ResponseItem467();
         ResponseItem467 responseItem467 = jsonWire.getValueIn().object(responseItem4671, ResponseItem467.class);

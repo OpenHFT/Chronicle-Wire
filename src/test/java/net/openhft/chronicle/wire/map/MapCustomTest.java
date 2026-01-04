@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Inherits from WireTestCommon for common test setup and teardown functionalities.
  */
 @SuppressWarnings("serial")
-public class MapCustomTest extends WireTestCommon {
+class MapCustomTest extends WireTestCommon {
 
     /**
      * Test the deep copy functionality of custom map holders.
@@ -29,7 +29,7 @@ public class MapCustomTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Deep copy should preserve custom map contents")
-    public void test() {
+    void test() {
         // Initialize a MapsHolder with sample values
         MapsHolder<Integer> mapsHolder = new MapsHolder<>(10, "one");
 

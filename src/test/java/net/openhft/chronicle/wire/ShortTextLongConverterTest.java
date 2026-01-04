@@ -12,13 +12,13 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ShortTextLongConverterTest extends WireTestCommon {
+class ShortTextLongConverterTest extends WireTestCommon {
 
     private static final CharSequence TEST_STRING = "world";
 
     @Test
     @DisplayName("Parses leading zeros and spaces into encoded long values")
-    public void parseLeadingZero() {
+    void parseLeadingZero() {
         LongConverter c = ShortTextLongConverter.INSTANCE;
         assertEquals(0L, c.parse(""), "empty string should parse to 0L");
         assertEquals(0L, c.parse(" "), "single space should parse to 0L");
@@ -41,7 +41,7 @@ public class ShortTextLongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Parses and appends short text values round-trip")
-    public void parse() {
+    void parse() {
         LongConverter c = ShortTextLongConverter.INSTANCE;
         for (String s : ",a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0".split(",")) {
             long v = c.parse(s);
@@ -53,7 +53,7 @@ public class ShortTextLongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Parses subsequences for comma-separated short text values")
-    public void parseSubsequence() {
+    void parseSubsequence() {
         LongConverter c = ShortTextLongConverter.INSTANCE;
         String s = ",a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0,";
         int comparisons = 11;
@@ -63,7 +63,7 @@ public class ShortTextLongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Rejects over-length text when parsing")
-    public void parseLengthCheck() {
+    void parseLengthCheck() {
         assertThrows(IllegalArgumentException.class, () ->
                         ShortTextLongConverter.INSTANCE.parse(getClass().getCanonicalName()),
                 "parsing text longer than maximum length should throw IllegalArgumentException");
@@ -71,7 +71,7 @@ public class ShortTextLongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Rejects invalid substring length in parse overload")
-    public void parseSubstringLengthCheck() {
+    void parseSubstringLengthCheck() {
         assertThrows(IllegalArgumentException.class, () ->
                         ShortTextLongConverter.INSTANCE.parse("abcd", 3, -2),
                 "parsing substring with invalid length should throw IllegalArgumentException");
@@ -79,7 +79,7 @@ public class ShortTextLongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Converts long values to short text and back")
-    public void asString() {
+    void asString() {
         LongConverter c = ShortTextLongConverter.INSTANCE;
         long sample = 0x1234_5678_9abc_def0L;
         assertEquals(sample, c.parse(c.asString(sample)), "long value should roundtrip through asString and parse");
@@ -94,20 +94,20 @@ public class ShortTextLongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Appends short text values to bytes")
-    public void testAppend() {
+    void testAppend() {
         LongConverterTestSupport.assertAppend(TEST_STRING, ShortTextLongConverter.INSTANCE);
     }
 
     @Test
     @DisplayName("Appends with existing prefix data preserved")
-    public void testAppendWithExistingData() {
+    void testAppendWithExistingData() {
         LongConverterTestSupport.assertAppendWithPrefix(TEST_STRING, ShortTextLongConverter.INSTANCE,
                 "hello prefix data value");
     }
 
     @Test
     @DisplayName("Validates safe character encoding in text wire")
-    public void allSafeCharsTextWire() {
+    void allSafeCharsTextWire() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         assertInstanceOf(TextWire.class, wire, "wire instance should be TextWire for safe character testing");
         LongConverterTestSupport.allSafeChars(wire, ShortTextLongConverter.INSTANCE);
@@ -115,7 +115,7 @@ public class ShortTextLongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Validates safe character encoding in YAML wire")
-    public void allSafeCharsYamlWire() {
+    void allSafeCharsYamlWire() {
         Wire wire = new YamlWire();
         assertInstanceOf(YamlWire.class, wire, "wire instance should be YamlWire for safe character testing");
         LongConverterTestSupport.allSafeChars(wire, ShortTextLongConverter.INSTANCE);

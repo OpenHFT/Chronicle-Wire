@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("unchecked")
-public class WireSerializedLambdaTest extends WireTestCommon {
+class WireSerializedLambdaTest extends WireTestCommon {
 
     // Static initializer block for class alias configurations
     static {
@@ -35,7 +35,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
 
     // Ensure that the test is not executed for Java versions 21 and above
     @BeforeEach
-    public void notSupportedInJava21() {
+    void notSupportedInJava21() {
         assumeFalse(Jvm.majorVersion() >= 21,
                 "Serialized lambda tests require Java 20 or earlier");
     }
@@ -43,7 +43,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
     // Test to check if various lambda functions are serializable
     @Test
     @DisplayName("Serializable lambda detection recognises function classes")
-    public void testIsLambda() {
+    void testIsLambda() {
         @NotNull Function<String, String> fun = (Function<String, String> & Serializable) String::toUpperCase;
         assertTrue(WireSerializedLambda.isSerializableLambda(fun.getClass()),
                 "String method reference should be serialisable lambda");
@@ -111,7 +111,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
     // Test the serialization and deserialization using TextWire
     @Test
     @DisplayName("Text wire round trips serialised lambdas")
-    public void testTextWire() {
+    void testTextWire() {
         assertTrue(doTestText(WireType.TEXT),
                 "Serialised lambda should round trip in TEXT wire");
     }
@@ -119,7 +119,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
     // Test the serialization and deserialization using YamlWire
     @Test
     @DisplayName("YAML wire round trips serialised lambdas")
-    public void testYamlWire() {
+    void testYamlWire() {
         assertTrue(doTestText(WireType.YAML_ONLY),
                 "Serialised lambda should round trip in YAML wire");
     }
@@ -127,7 +127,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
     // Test the serialization and deserialization using BinaryWire
     @Test
     @DisplayName("Binary wire round trips serialised lambdas")
-    public void testBinaryWire() {
+    void testBinaryWire() {
         @NotNull Wire wire = new BinaryWire(new HexDumpBytes());
 
         SerializableFunction<String, String> fun = String::toUpperCase;

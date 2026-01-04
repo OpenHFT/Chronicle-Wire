@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 /**
  * Verifies selective reading by routing MethodReader calls based on destination ids.
  */
-public class SkipsIgnoresEveryThingTest extends net.openhft.chronicle.wire.WireTestCommon {
+class SkipsIgnoresEveryThingTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     /**
      * Tests selective method invocation based on a condition. This test specifically focuses on
@@ -29,7 +29,7 @@ public class SkipsIgnoresEveryThingTest extends net.openhft.chronicle.wire.WireT
      */
     @Test
     @DisplayName("Selective reader skips even destinations with DontSayBad")
-    public void selective() {
+    void selective() {
         // Setup a wire with predefined text representing a sequence of messages
         String text = "to: 1\n" +
                 "say: hi\n" +

@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * Tests for validating the behaviour of field converters with long data type values.
  */
-public class LongConvertorFieldsTest {
+class LongConvertorFieldsTest {
 
     /**
      * DTO class representing data fields to be serialized using Base16 encoding.
@@ -57,7 +57,7 @@ public class LongConvertorFieldsTest {
      */
     @Test
     @DisplayName("Serialises Base16 fields using expected hex widths")
-    public void base16() {
+    void base16() {
         // Validate Base16 encoding with a range of positive values
         assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base16DTO {\n" +
                 "  b: 1,\n" +
@@ -120,7 +120,7 @@ public class LongConvertorFieldsTest {
      */
     @Test
     @DisplayName("Serialises Base64 fields using expected symbol widths")
-    public void base64() {
+    void base64() {
         // Validate Base64 encoding with a range of positive values
         assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base64DTO {\n" +
                 "  b: A,\n" +
@@ -183,7 +183,7 @@ public class LongConvertorFieldsTest {
      */
     @Test
     @DisplayName("Serialises Base85 fields with variable length text")
-    public void base85() {
+    void base85() {
         // Validate Base85 encoding with a range of positive values
         assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base85DTO {\n" +
                 "  b: 1,\n" +
@@ -205,7 +205,7 @@ public class LongConvertorFieldsTest {
 
     @Test
     @DisplayName("Round-trips Base85 special character values")
-    public void detectSpecialCharBase85() {
+    void detectSpecialCharBase85() {
         final String CHARS = "0123456789" +
                 ":;<=>?@" +
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ_" +
@@ -248,7 +248,7 @@ public class LongConvertorFieldsTest {
 
     @Test
     @DisplayName("Serialises ShortText fields with expected formatting")
-    public void shortText() {
+    void shortText() {
         assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$ShortTextDTO {\n" +
                 "  b: 1,\n" +
                 "  ch: g,\n" +
@@ -268,7 +268,7 @@ public class LongConvertorFieldsTest {
 
     @Test
     @DisplayName("Round-trips ShortText special character values")
-    public void detectSpecialChar() {
+    void detectSpecialChar() {
         final String CHARS = " " +
                 "123456789" +
                 ":;<=>?@" +
@@ -324,7 +324,7 @@ public class LongConvertorFieldsTest {
      */
     @Test
     @DisplayName("Serialises Words fields into readable tokens")
-    public void words() {
+    void words() {
         // Validate Words encoding with a range of positive values.
         // The expected results are arbitrary word mappings for demonstration.
         assertEquals("!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$WordsDTO {\n" +

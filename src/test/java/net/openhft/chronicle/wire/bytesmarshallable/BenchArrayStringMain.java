@@ -6,7 +6,7 @@ package net.openhft.chronicle.wire.bytesmarshallable;
 // Class: BenchArrayStringMain
 // A performance benchmarking class designed to test the efficiency
 // and performance of operations related to array strings.
-public class BenchArrayStringMain {
+class BenchArrayStringMain {
 
     // Main method: entry point of the application, intended for
     // running the benchmarking test related to array strings.

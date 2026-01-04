@@ -21,11 +21,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * Coverage tests for TextWire branch behaviour, parsing, and edge case paths.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class TextWireCoverageTest extends WireTestCommon {
+class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests unescape with various escape sequences")
-    public void testUnescapeSequences() {
+    void testUnescapeSequences() {
         StringBuilder sb = new StringBuilder("hello\\nworld");
         TextWire.unescape(sb);
         assertEquals("hello\nworld", sb.toString(), "Unescape should replace newline escape");
@@ -45,7 +45,7 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests strict mode setting in TextWire")
-    public void testStrictMode() {
+    void testStrictMode() {
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
         assertFalse(wire.strict(), "Strict mode should be disabled by default");
 
@@ -58,14 +58,14 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests isBinary returns false for TextWire mode flag")
-    public void testIsBinary() {
+    void testIsBinary() {
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
         assertFalse(wire.isBinary(), "TextWire should not be binary");
     }
 
     @Test
     @DisplayName("Tests useBinaryDocuments and useTextDocuments mode switches")
-    public void testDocumentContextModes() {
+    void testDocumentContextModes() {
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
         wire.useBinaryDocuments();
         assertNotNull(wire, "Wire should still be valid after useBinaryDocuments");
@@ -77,7 +77,7 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests acquireWritingDocument with chaining behaviour support")
-    public void testAcquireWritingDocument() {
+    void testAcquireWritingDocument() {
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
         wire.useTextDocuments();
 
@@ -90,7 +90,7 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests reading document context values from TextWire")
-    public void testReadingDocument() {
+    void testReadingDocument() {
         TextWire wire = TextWire.from("--- !!data\nfield: value\n...\n");
         try (DocumentContext dc = wire.readingDocument()) {
             if (dc.isPresent()) {
@@ -102,14 +102,14 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests classLookup setting and retrieval in TextWire")
-    public void testClassLookup() {
+    void testClassLookup() {
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
         assertNotNull(wire.classLookup(), "TextWire classLookup should not be null");
     }
 
     @Test
     @DisplayName("Tests writing and reading with quote escaping")
-    public void testQuoteEscaping() {
+    void testQuoteEscaping() {
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
         wire.write("field").text("value with \"quotes\"");
         String result = wire.read("field").text();
@@ -118,7 +118,7 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests writing and reading newline escapes")
-    public void testNewlineEscaping() {
+    void testNewlineEscaping() {
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
         wire.write("field").text("line1\nline2");
         String result = wire.read("field").text();
@@ -127,7 +127,7 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests reading float values from text")
-    public void testFloatReading() {
+    void testFloatReading() {
         TextWire wire = TextWire.from("a: 3.14\nb: -2.5\nc: 0.0");
         assertEquals(3.14f, wire.read("a").float32(), 0.001f, "Float value should read as 3.14");
         assertEquals(-2.5f, wire.read("b").float32(), 0.001f, "Float value should read as -2.5");
@@ -136,7 +136,7 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests reading double values from text")
-    public void testDoubleReading() {
+    void testDoubleReading() {
         TextWire wire = TextWire.from("val: 3.141592653589793");
         assertEquals(3.141592653589793, wire.read("val").float64(), 0.0000001,
                 "Double value should read as precise value");
@@ -144,28 +144,28 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests reading int8 values from text")
-    public void testInt8Reading() {
+    void testInt8Reading() {
         TextWire wire = TextWire.from("val: 127");
         assertEquals(127, wire.read("val").int8(), "Max byte value should be read");
     }
 
     @Test
     @DisplayName("Tests reading int16 values from text")
-    public void testInt16Reading() {
+    void testInt16Reading() {
         TextWire wire = TextWire.from("val: 32767");
         assertEquals(32767, wire.read("val").int16(), "Max short value should be read");
     }
 
     @Test
     @DisplayName("Tests reading int32 values from text")
-    public void testInt32Reading() {
+    void testInt32Reading() {
         TextWire wire = TextWire.from("val: 2147483647");
         assertEquals(2147483647, wire.read("val").int32(), "Max int value should be read");
     }
 
     @Test
     @DisplayName("Tests reading negative numeric values from text")
-    public void testNegativeValues() {
+    void testNegativeValues() {
         TextWire wire = TextWire.from("a: -128\nb: -32768\nc: -2147483648");
         assertEquals(-128, wire.read("a").int8(), "Min byte value should be read");
         assertEquals(-32768, wire.read("b").int16(), "Min short value should be read");
@@ -174,14 +174,14 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests reading hex numbers from text")
-    public void testHexNumbers() {
+    void testHexNumbers() {
         TextWire wire = TextWire.from("hex: 0xFF");
         assertEquals(255, wire.read("hex").int32(), "Hex value should parse to 255");
     }
 
     @Test
     @DisplayName("Tests reading boolean values from text")
-    public void testBoolReading() {
+    void testBoolReading() {
         TextWire wire = TextWire.from("a: true\nb: false\nc: yes\nd: no");
         assertTrue(wire.read("a").bool(), "Boolean flag should read as true");
         assertFalse(wire.read("b").bool(), "Boolean flag should read as false");
@@ -193,7 +193,7 @@ public class TextWireCoverageTest extends WireTestCommon {
     @Test
     @Disabled("Fails with IllegalAccess on MapMarshaller - needs investigation")
     @DisplayName("Tests writing and reading map values")
-    public void testMapWritingReading() {
+    void testMapWritingReading() {
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
         Map<String, Integer> map = new HashMap<>();
         map.put("one", 1);
@@ -208,7 +208,7 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests writing and reading list values")
-    public void testListWritingReading() {
+    void testListWritingReading() {
         List<String> list = new ArrayList<>();
         list.add("alpha");
         list.add("beta");
@@ -224,7 +224,7 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests reading values with type prefix")
-    public void testTypePrefix() {
+    void testTypePrefix() {
         TextWire wire = TextWire.from("obj: !java.lang.String hello");
         Object result = wire.read("obj").object();
         assertEquals("hello", result, "Typed object should be read");
@@ -232,7 +232,7 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests empty string handling in text wire")
-    public void testEmptyString() {
+    void testEmptyString() {
         TextWire wire = TextWire.from("empty: ''");
         assertEquals("", wire.read("empty").text(), "TextWire should read empty string");
     }
@@ -241,7 +241,7 @@ public class TextWireCoverageTest extends WireTestCommon {
     @Test
     @Disabled("Returns literal tilde instead of null - needs investigation")
     @DisplayName("Tests null value handling in text wire")
-    public void testNullValue() {
+    void testNullValue() {
         TextWire wire = TextWire.from("null: ~");
         assertNull(wire.read("null").text(), "TextWire null field value should be read");
     }
@@ -250,7 +250,7 @@ public class TextWireCoverageTest extends WireTestCommon {
     @Test
     @Disabled("NaN/Infinity not parsed as expected - needs investigation")
     @DisplayName("Tests special float values in text wire")
-    public void testSpecialFloatValues() {
+    void testSpecialFloatValues() {
         TextWire wire = TextWire.from("nan: .nan\ninf: .inf\nninf: -.inf");
         assertTrue(Double.isNaN(wire.read("nan").float64()), "NaN float value should be read");
         assertTrue(Double.isInfinite(wire.read("inf").float64()), "Infinity float value should be read");
@@ -262,7 +262,7 @@ public class TextWireCoverageTest extends WireTestCommon {
     @Test
     @Disabled("Literal block scalar parsing returns wrong content - needs investigation")
     @DisplayName("Tests multiline text block parsing in TextWire")
-    public void testMultilineText() {
+    void testMultilineText() {
         TextWire wire = TextWire.from("text: |\n  line 1\n  line 2\n  line 3");
         String text = wire.read("text").text();
         assertTrue(text.contains("line 1"), text + " should contain line 1");
@@ -271,7 +271,7 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests folded text block parsing in TextWire")
-    public void testFoldedText() {
+    void testFoldedText() {
         TextWire wire = TextWire.from("text: >\n  folded\n  text");
         String text = wire.read("text").text();
         assertNotNull(text, "Folded text should not be null");
@@ -279,14 +279,14 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests comment handling in text wire")
-    public void testCommentHandling() {
+    void testCommentHandling() {
         TextWire wire = TextWire.from("# This is a comment\nfield: value");
         assertEquals("value", wire.read("field").text(), "TextWire should skip comment");
     }
 
     @Test
     @DisplayName("Tests int64 value with consumer callback")
-    public void testInt64WithConsumer() {
+    void testInt64WithConsumer() {
         TextWire wire = TextWire.from("val: 9223372036854775807");
         AtomicLong result = new AtomicLong();
         wire.read("val").int64(result, AtomicLong::set);
@@ -296,7 +296,7 @@ public class TextWireCoverageTest extends WireTestCommon {
     @Test
     @DisplayName("Tests uint8 value with consumer callback")
     @SuppressWarnings("deprecation")
-    public void testUint8Reading() {
+    void testUint8Reading() {
         TextWire wire = TextWire.from("val: 255");
         AtomicInteger result = new AtomicInteger();
         wire.read("val").uint8(result, AtomicInteger::set);
@@ -306,7 +306,7 @@ public class TextWireCoverageTest extends WireTestCommon {
     @Test
     @DisplayName("Tests uint16 value with consumer callback")
     @SuppressWarnings("deprecation")
-    public void testUint16Reading() {
+    void testUint16Reading() {
         TextWire wire = TextWire.from("val: 65535");
         AtomicInteger result = new AtomicInteger();
         wire.read("val").uint16(result, AtomicInteger::set);
@@ -316,7 +316,7 @@ public class TextWireCoverageTest extends WireTestCommon {
     @Test
     @DisplayName("Tests uint32 value with consumer callback")
     @SuppressWarnings("deprecation")
-    public void testUint32Reading() {
+    void testUint32Reading() {
         TextWire wire = TextWire.from("val: 4294967295");
         AtomicLong result = new AtomicLong();
         wire.read("val").uint32(result, AtomicLong::set);
@@ -327,7 +327,7 @@ public class TextWireCoverageTest extends WireTestCommon {
     @Test
     @Disabled("Octal format 0o prefix not recognised - returns 0 instead of 511")
     @DisplayName("Tests reading octal numeric values from text")
-    public void testOctalNumbers() {
+    void testOctalNumbers() {
         TextWire wire = TextWire.from("oct: 0o777");
         assertEquals(511, wire.read("oct").int32(), "Octal value should parse to 511");
     }
@@ -336,14 +336,14 @@ public class TextWireCoverageTest extends WireTestCommon {
     @Test
     @Disabled("Binary format 0b prefix not recognised - returns 0 instead of 15")
     @DisplayName("Tests reading binary numeric values from text")
-    public void testBinaryNumbers() {
+    void testBinaryNumbers() {
         TextWire wire = TextWire.from("bin: 0b1111");
         assertEquals(15, wire.read("bin").int32(), "Binary value should parse to 15");
     }
 
     @Test
     @DisplayName("Tests hasNextSequenceItem correctly returns false for empty sequence")
-    public void testHasNextSequenceItemEmpty() {
+    void testHasNextSequenceItemEmpty() {
         TextWire wire = TextWire.from("seq: []");
         List<Integer> items = new ArrayList<>();
         wire.read("seq").sequence(items, (list, v) -> {
@@ -356,7 +356,7 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests object reading with explicit type")
-    public void testObjectWithType() {
+    void testObjectWithType() {
         TextWire wire = TextWire.from("value: !int 42");
         Object result = wire.read("value").object();
         assertInstanceOf(Number.class, result, "Explicit type should read as number");
@@ -365,21 +365,21 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests quoted strings with special characters")
-    public void testQuotedStringsSpecialChars() {
+    void testQuotedStringsSpecialChars() {
         TextWire wire = TextWire.from("field: \"hello: world\"");
         assertEquals("hello: world", wire.read("field").text(), "Quoted string should preserve colon");
     }
 
     @Test
     @DisplayName("Tests single quoted string values in text wire")
-    public void testSingleQuotedStrings() {
+    void testSingleQuotedStrings() {
         TextWire wire = TextWire.from("field: 'hello world'");
         assertEquals("hello world", wire.read("field").text(), "Single quoted string should read correctly");
     }
 
     @Test
     @DisplayName("Tests bytes writing and reading round-trip")
-    public void testBytesWritingReading() {
+    void testBytesWritingReading() {
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
         byte[] data = {1, 2, 3, 4, 5};
         wire.write("data").bytes(data);
@@ -389,7 +389,7 @@ public class TextWireCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("Tests skipValue across various types in TextWire")
-    public void testSkipValueVariousTypes() {
+    void testSkipValueVariousTypes() {
         TextWire wire = TextWire.from("a: 123\nb: [1, 2, 3]\nc: { x: 1 }\nd: value");
 
         wire.read("a").skipValue();

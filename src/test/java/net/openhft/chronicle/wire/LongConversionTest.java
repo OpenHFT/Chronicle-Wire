@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class LongConversionTest extends WireTestCommon {
+class LongConversionTest extends WireTestCommon {
 
     // Static initializer to add an alias for the LongHolder class to the CLASS_ALIASES pool
     static {
@@ -27,7 +27,7 @@ public class LongConversionTest extends WireTestCommon {
     // Test case to verify the correct serialization and deserialization of the LongHolder object
     @Test
     @DisplayName("Serialises and parses long conversion fields")
-    public void dto() {
+    void dto() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip long conversion dto test");
 
@@ -56,7 +56,7 @@ public class LongConversionTest extends WireTestCommon {
     // Test case to check the method using HexadecimalLongConverter
     @Test
     @DisplayName("Writes and reads method with long conversion")
-    public void method() {
+    void method() {
 
         // Initializing a new Wire instance with an elastic heap-allocated buffer
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(64))

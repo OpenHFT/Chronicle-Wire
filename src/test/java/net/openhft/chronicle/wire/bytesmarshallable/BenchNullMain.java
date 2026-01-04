@@ -6,7 +6,7 @@ package net.openhft.chronicle.wire.bytesmarshallable;
 // Class: BenchNullMain
 // A performance benchmarking class designed to test the efficiency
 // and performance of operations with null values.
-public class BenchNullMain {
+class BenchNullMain {
 
     // Main method: entry point of the application, intended for
     // running the benchmarking test related to null operations.

@@ -30,20 +30,20 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class WiresTest extends WireTestCommon {
+class WiresTest extends WireTestCommon {
 
     private final BytesContainer container1 = new BytesContainer();
     private final BytesContainer container2 = new BytesContainer();
 
     @Override
-    public void preAfter() {
+    void preAfter() {
         container1.bytesField.releaseLast();
         container2.bytesField.releaseLast();
     }
 
     @Test
     @DisplayName("Default compiler options include debug flags")
-    public void defaultCompilerOptions() throws Exception {
+    void defaultCompilerOptions() throws Exception {
         Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory is required for default compiler options test");
 
@@ -59,7 +59,7 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     @DisplayName("Custom compiler options include parameter names")
-    public void customCompilerOptions() throws Exception {
+    void customCompilerOptions() throws Exception {
         Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory is required for custom compiler options test");
 
@@ -78,7 +78,7 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     @DisplayName("Text wire parses NaN and Infinity values")
-    public void textWireNumberTest() {
+    void textWireNumberTest() {
         Assertions.assertTrue(Double.isNaN(TEXT.apply(Bytes.from("NaN")).getValueIn().float64()), "text wire should parse 'NaN' as double NaN");
         Assertions.assertTrue(Double.isInfinite(TEXT.apply(Bytes.from("Infinity")).getValueIn().float64()), "text wire should parse 'Infinity' as positive infinity");
         Assertions.assertTrue(Double.isInfinite(TEXT.apply(Bytes.from("-Infinity")).getValueIn().float64()), "text wire should parse '-Infinity' as negative infinity");
@@ -95,7 +95,7 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wires reset clears bytes fields safely")
-    public void resetShouldClearBytes() {
+    void resetShouldClearBytes() {
         Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory is required for bytes reset test");
 
@@ -111,7 +111,7 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     @DisplayName("Wires reset clears StringBuilder fields safely")
-    public void resetShouldClearArbitraryMutableFields() {
+    void resetShouldClearArbitraryMutableFields() {
         Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory is required for StringBuilder reset test");
 
@@ -133,7 +133,7 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     @DisplayName("CopyTo mutates existing bytes instances in place")
-    public void copyToShouldMutateBytes() {
+    void copyToShouldMutateBytes() {
         Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory is required for bytes copyTo test");
 
@@ -149,7 +149,7 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     @DisplayName("TupleFor handles unknown types with tuples")
-    public void unknownType() throws NoSuchFieldException {
+    void unknownType() throws NoSuchFieldException {
         Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory is required for unknown type tuple test");
 
@@ -172,7 +172,7 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     @DisplayName("Unknown types throw when tuples disabled")
-    public void unknownType2Throws2() {
+    void unknownType2Throws2() {
         assertThrows(ClassNotFoundRuntimeException.class, () -> {
             Wires.setGenerateTuples(false);
 
@@ -207,7 +207,7 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     @DisplayName("RecordAsYaml writes each call as document")
-    public void recordAsYaml() {
+    void recordAsYaml() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream ps = isoPrintStream(baos);
         Says says = Wires.recordAsYaml(Says.class, ps);
@@ -229,7 +229,7 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     @DisplayName("Replay appends YAML documents to output")
-    public void replay() throws IOException {
+    void replay() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream ps = isoPrintStream(baos);
         Says says = Wires.recordAsYaml(Says.class, ps);
@@ -269,7 +269,7 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     @DisplayName("Deep copy clears thread binding on bytes")
-    public void deepCopyNotBoundToThread() {
+    void deepCopyNotBoundToThread() {
         Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory is required for BytesMarshallable copyTo test");
         BytesContainerMarshallable bcm = new BytesContainerMarshallable();
@@ -282,7 +282,7 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     @DisplayName("CopyTo overwrites destination fields for marshallables")
-    public void copyTo() {
+    void copyTo() {
         OneTwoFour o124 = new OneTwoFour(11, 222, 44444);
         TwoFourThree o243 = new TwoFourThree(2, 4, 3);
         Wires.copyTo(o124, o243);
@@ -297,7 +297,7 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     @DisplayName("CopyTo allows partial hydration with validation")
-    public void copyToIncompleteValidation() {
+    void copyToIncompleteValidation() {
         OneTwoFour o124 = new OneTwoFour(11, 222, 44444);
         TwoFourThreeValidatable o243 = new TwoFourThreeValidatable(2, 4, 3);
         assertEquals("!net.openhft.chronicle.wire.WiresTest$TwoFourThreeValidatable {\n" +
@@ -316,7 +316,7 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     @DisplayName("CopyTo handles nested BytesMarshallable fields properly")
-    public void copyToContainsBytesMarshallable() {
+    void copyToContainsBytesMarshallable() {
         Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory is required for copyTo validation test");
 
@@ -328,7 +328,7 @@ public class WiresTest extends WireTestCommon {
 
     @Test
     @DisplayName("Deep copy preserves DynamicEnum marshallable fields")
-    public void deepCopyWillWorkWhenDynamicEnumIsAnnotatedAsMarshallable() {
+    void deepCopyWillWorkWhenDynamicEnumIsAnnotatedAsMarshallable() {
         Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory is required for DynamicEnum deep copy test");
 

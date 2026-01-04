@@ -9,7 +9,7 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
  * Represents funding information in a financial context.
  * This class is designed to be marshalled and unmarshalled easily with Chronicle Wire.
  */
-public class Funding extends SelfDescribingMarshallable {
+class Funding extends SelfDescribingMarshallable {
 
     private long symbol;          // Symbol identifier for the funding
     private double fr = Double.NaN; // Funding rate, defaulting to NaN (not a number)
@@ -43,7 +43,7 @@ public class Funding extends SelfDescribingMarshallable {
         return mins;
     }
 
-    public void mins(long minsUntilFunding) {
+    void mins(long minsUntilFunding) {
         this.mins = minsUntilFunding;
     }
 }

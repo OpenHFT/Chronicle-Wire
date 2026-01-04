@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class LongValueBitSetMoreOpsTest extends WireTestCommon {
+class LongValueBitSetMoreOpsTest extends WireTestCommon {
 
     private static LongValueBitSet bound(int bits) {
         return new LongValueBitSet(bits, new BinaryWire(Bytes.allocateElasticOnHeap(256)));
@@ -19,7 +19,7 @@ public class LongValueBitSetMoreOpsTest extends WireTestCommon {
 
     @Test
     @DisplayName("Finds previous and next clear bits")
-    public void previousAndNextClearBits() {
+    void previousAndNextClearBits() {
         try (LongValueBitSet bs = bound(256)) {
             bs.set(1);
             bs.set(63);
@@ -38,7 +38,7 @@ public class LongValueBitSetMoreOpsTest extends WireTestCommon {
 
     @Test
     @DisplayName("Streams and marshallable round-trip bitsets")
-    public void streamEqualsCopyFromAndMarshallRoundTrip() {
+    void streamEqualsCopyFromAndMarshallRoundTrip() {
         try (LongValueBitSet a = bound(128); LongValueBitSet b = bound(128)) {
             a.set(3);
             a.set(5);

@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 /* Based on
 https://github.com/OpenHFT/RFC/blob/master/Chronicle/Engine/Remote/Chronicle-Engine-0.1.md
  */
-public class RFCExamplesTest extends WireTestCommon {
+class RFCExamplesTest extends WireTestCommon {
 
     // This is what this test is trying to recreate.
     /*
@@ -28,7 +28,7 @@ public class RFCExamplesTest extends WireTestCommon {
      */
     @Test
     @DisplayName("RFC put examples serialise consistently across wire types")
-    public void testPuts() {
+    void testPuts() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for RFC example tests");
 
         // Allocate an elastic buffer on heap.

@@ -15,14 +15,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  * This class tests the capability of MethodWriter to handle methods with nested return types.
  * It extends the WireTestCommon for common test setup and utilities.
  */
-public class MethodWriterNestedReturnTypeTest extends WireTestCommon {
+class MethodWriterNestedReturnTypeTest extends WireTestCommon {
 
     /**
      * This test ensures that MethodWriter can handle methods with nested return types without resorting to proxy classes.
      */
     @Test
     @DisplayName("Nested return types generate a concrete writer")
-    public void testNestedReturnTypeIsSupportedInGeneratedWriter() {
+    void testNestedReturnTypeIsSupportedInGeneratedWriter() {
         // Initialization of the wire
         BinaryWire binaryWire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
 

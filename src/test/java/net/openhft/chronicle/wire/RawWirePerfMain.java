@@ -5,7 +5,7 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
 
-public class RawWirePerfMain extends WireTestCommon {
+class RawWirePerfMain extends WireTestCommon {
 
     public static void main(String[] args) {
         @NotNull BinaryWirePerfTest test = new BinaryWirePerfTest();

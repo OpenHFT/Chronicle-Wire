@@ -18,14 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Non-static inner classes in Java have a hidden field named 'this$0' which is a reference
  * to the outer instance. This class tests the serialization behavior with respect to this field.
  */
-public class This0AsTransientTest extends WireTestCommon {
+class This0AsTransientTest extends WireTestCommon {
 
     /**
      * Test serialization of MyClass1, which does not explicitly have a 'this$0' field.
      */
     @Test
     @DisplayName("MyClass1 serialises without outer reference field")
-    public void test1() {
+    void test1() {
         MyClass1 instance = new MyClass1(128);
         assertEquals(128L, instance.value, "MyClass1 value should match constructor input for toString");
         assertEquals("!net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass1 {\n" +
@@ -40,7 +40,7 @@ public class This0AsTransientTest extends WireTestCommon {
      */
     @Test
     @DisplayName("MyClass1 YAML write ignores this$0 field")
-    public void test1b() {
+    void test1b() {
         expectException("Found this$0, in class ");
         Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
         MyClass1 instance = new MyClass1(1111);
@@ -59,7 +59,7 @@ public class This0AsTransientTest extends WireTestCommon {
      */
     @Test
     @DisplayName("MyClass2 serialises without outer reference field")
-    public void test2() {
+    void test2() {
         MyClass2 instance = new MyClass2(128);
         assertEquals(128L, instance.value, "MyClass2 value should match constructor input for toString");
         assertEquals("!net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass2 {\n" +
@@ -75,7 +75,7 @@ public class This0AsTransientTest extends WireTestCommon {
      */
     @Test
     @DisplayName("MyClass2 YAML write ignores this$0 fields")
-    public void test2b() {
+    void test2b() {
         expectException("Found this$0, in class ");
         expectException("Found this$0$, in class ");
         Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());

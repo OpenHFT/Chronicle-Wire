@@ -20,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("unchecked")
-public class MonetaTest extends net.openhft.chronicle.wire.WireTestCommon {
+class MonetaTest extends net.openhft.chronicle.wire.WireTestCommon {
     // Test method for serialization and deserialization of a SortedSet with custom Comparable objects
     @Test
     @DisplayName("SortedSet of currency wrappers round-trips")
-    public void monetary() {
+    void monetary() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for serialisation test");
 
         // Create a sorted set of NonScalarComparable objects

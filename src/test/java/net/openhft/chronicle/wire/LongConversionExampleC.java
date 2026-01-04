@@ -9,7 +9,7 @@ import static net.openhft.chronicle.bytes.Bytes.*;
 import static net.openhft.chronicle.wire.WireType.*;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 
-public class LongConversionExampleC {
+class LongConversionExampleC {
 
     // Initializing static block to add the House class as an alias to CLASS_ALIASES
     static {

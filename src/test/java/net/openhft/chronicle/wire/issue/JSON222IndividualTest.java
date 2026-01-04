@@ -23,19 +23,19 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class JSON222IndividualTest extends WireTestCommon {
+class JSON222IndividualTest extends WireTestCommon {
 
     // Test empty JSON object representation
     @Test
     @DisplayName("JSON writer should serialise empty object")
-    public void testEmptyBrackets() {
+    void testEmptyBrackets() {
         checkSerialized("{}", new LinkedHashMap<>());
     }
 
     // Test JSON string representation with a tab character
     @Test
     @DisplayName("JSON writer should serialise tab characters")
-    public void testTab() {
+    void testTab() {
         checkSerialized("\"hello\\tworld\"\n", "hello\tworld");
         checkDeserialized("hello\tworld", "\"hello\\tworld\"");
     }
@@ -43,7 +43,7 @@ public class JSON222IndividualTest extends WireTestCommon {
     // Test JSON string representation with a special unicode character
     @Test
     @DisplayName("JSON writer should serialise special Unicode characters")
-    public void testSpecial() {
+    void testSpecial() {
         checkSerialized("\"\\u1000\"\n", "\u1000");
         checkDeserialized("\u1000", "\"\\u1000\"");
     }
@@ -51,7 +51,7 @@ public class JSON222IndividualTest extends WireTestCommon {
     // Test nested JSON arrays
     @Test
     @DisplayName("JSON writer should serialise nested arrays")
-    public void nestedSeq() {
+    void nestedSeq() {
         @SuppressWarnings("rawtypes")
         @NotNull List list = Arrays.asList(3L, Collections.singletonList(4L));
         checkSerialized("[\n" +
@@ -65,7 +65,7 @@ public class JSON222IndividualTest extends WireTestCommon {
     // Test parsing of a JSON object with array as key
     @Test
     @DisplayName("JSON reader should parse array keys")
-    public void parseArrayKey() {
+    void parseArrayKey() {
         checkDeserialized("{5=[6], [7]=}", "{ '5': [ 6 ], [ 7 ] }\n");
     }
 

@@ -22,12 +22,12 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 // The WireDynamicEnumTest class extends WireTestCommon to inherit its common functionalities.
 // This class is intended to test dynamic enumeration functionalities in the context of wiring.
 @SuppressWarnings("deprecation")
-public class WireDynamicEnumTest extends WireTestCommon {
+class WireDynamicEnumTest extends WireTestCommon {
 
     // This setup method is executed before each test.
     // It adds the required class aliases to the ClassAliasPool to facilitate serialization and deserialization.
     @BeforeEach
-    public void addClassAlias() {
+    void addClassAlias() {
         ClassAliasPool.CLASS_ALIASES.addAlias(HoldsWDENum.class);
         ClassAliasPool.CLASS_ALIASES.addAlias(UnwrapsWDENum.class);
         ClassAliasPool.CLASS_ALIASES.addAlias(UnwrapsWDENum2.class);
@@ -96,7 +96,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
     // This test validates the functionality of adding a dynamic enum using TEXT wire type.
     @Test
     @DisplayName("Dynamic enum reset should preserve explicit nulls")
-    public void dontResetDynamicEnum() {
+    void dontResetDynamicEnum() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Dynamic enum reset test requires direct memory");
 
         HoldsWDENum x = new HoldsWDENum(null, null);
@@ -117,21 +117,21 @@ public class WireDynamicEnumTest extends WireTestCommon {
 
     @Test
     @DisplayName("Dynamic enum additions should work for TEXT wire")
-    public void addedEnum() throws NoSuchFieldException {
+    void addedEnum() throws NoSuchFieldException {
         assertTrue(doAddedEnum(WireType.TEXT), "Dynamic enum additions should succeed for TEXT wire");
     }
 
     // This test validates the functionality of adding a dynamic enum using YAML_ONLY wire type.
     @Test
     @DisplayName("Dynamic enum additions should work for YAML_ONLY wire")
-    public void addedEnumYaml() throws NoSuchFieldException {
+    void addedEnumYaml() throws NoSuchFieldException {
         assertTrue(doAddedEnum(WireType.YAML_ONLY), "Dynamic enum additions should succeed for YAML_ONLY wire");
     }
 
     // This test method validates the deserialization process of the dynamic enums and checks the correctness of the output.
     @Test
     @DisplayName("Dynamic enum reader should deserialise text sequence")
-    public void deserialize() {
+    void deserialize() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Dynamic enum deserialise test requires direct memory");
 
         // Define the text input string representing the serialized form of the dynamic enums and their operations.
@@ -220,7 +220,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Dynamic enum reader should deserialise with custom handlers")
-    public void deserialize2() {
+    void deserialize2() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for dynamic enum test");
 
         // Define the input text string, which represents serialized data.
@@ -334,7 +334,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
     // Test the deep copy functionality of WDENums
     @Test
     @DisplayName("Dynamic enum deepCopy should preserve identity")
-    public void testDeepCopy() {
+    void testDeepCopy() {
         // Assert that the deep copy of WDENums.ONE is equal to WDENums.ONE
         assertEquals(WDENums.ONE, WDENums.ONE.deepCopy(),
                 "Deep copy should preserve enum identity for ONE");

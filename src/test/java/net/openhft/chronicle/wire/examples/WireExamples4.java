@@ -10,7 +10,7 @@ import net.openhft.chronicle.wire.Wire;
  * Demonstrates the Wire method writer and reader using {@link JSONWire}.
  * The example serialises and deserialises a method call for readable output.
  */
-public class WireExamples4 {
+class WireExamples4 {
 
     /**
      * Functional interface representing a message printer.

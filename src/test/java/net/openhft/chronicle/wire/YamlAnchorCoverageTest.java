@@ -11,11 +11,11 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class YamlAnchorCoverageTest extends WireTestCommon {
+class YamlAnchorCoverageTest extends WireTestCommon {
 
     @Test
     @DisplayName("YAML anchors and aliases resolve shared map content")
-    public void readsAnchorsAndAliases() {
+    void readsAnchorsAndAliases() {
         assertThrows(UnsupportedOperationException.class, () -> {
             String yaml = "common: &base { num: 7, text: 'hello' }\nfirst: *base\n";
             YamlWire wire = YamlWire.from(yaml);

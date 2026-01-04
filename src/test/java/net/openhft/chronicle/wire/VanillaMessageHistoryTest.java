@@ -19,7 +19,7 @@ class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTestCommo
     // Test to check the equality and hashcode of a VanillaMessageHistory object
     @Test
     @DisplayName("Serialises and compares message history state")
-    public void equalsHashCode() {
+    void equalsHashCode() {
 
         // Create and initialize a VanillaMessageHistory object
         VanillaMessageHistory vmh = new VanillaMessageHistory();

@@ -14,16 +14,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // Tests for handling unsupported changes in the wire format.
-public class UnsupportedChangesTest extends WireTestCommon {
+class UnsupportedChangesTest extends WireTestCommon {
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip unsupported change checks");
     }
 
     // Test the behavior when trying to parse a scalar value as a Marshallable object
     @Test
     @DisplayName("Falls back when scalar replaces marshallable field")
-    public void scalarToMarshallable() {
+    void scalarToMarshallable() {
         Nested nested = Marshallable.fromString(Nested.class, "{\n" +
                 "inner: 128\n" +
                 "}\n");
@@ -41,7 +41,7 @@ public class UnsupportedChangesTest extends WireTestCommon {
     // Method testing the scenario where a Marshallable object is being parsed as a scalar value.
     @Test
     @DisplayName("Falls back when marshallable replaces scalar double")
-    public void marshallableToScalar() {
+    void marshallableToScalar() {
         // Skip this test if it's running on an ARM architecture.
         assumeFalse(Jvm.isArm(), "ARM platforms use different floating-point handling");
 
@@ -66,7 +66,7 @@ public class UnsupportedChangesTest extends WireTestCommon {
     // Method testing the scenario where a Marshallable object is being parsed as a scalar long value.
     @Test
     @DisplayName("Falls back when marshallable replaces scalar long")
-    public void marshallableToScala2r() {
+    void marshallableToScala2r() {
         // Deserialize an IntWrapper object, providing a Marshallable instead of a scalar long for 'pnl'.
         IntWrapper wrapper = Marshallable.fromString(IntWrapper.class, "{\n" +
                 "pnl: { a: 128, b: 1.0 },\n" +
@@ -88,7 +88,7 @@ public class UnsupportedChangesTest extends WireTestCommon {
     // Method testing the scenario where a Marshallable object is being parsed as a scalar boolean value.
     @Test
     @DisplayName("Instantiates wrapper when marshallable replaces scalar boolean")
-    public void marshallableToScalar3() {
+    void marshallableToScalar3() {
         // Deserialize a BooleanWrapper object, providing a Marshallable instead of a scalar boolean for 'flag'.
         BooleanWrapper wrapper = Marshallable.fromString(BooleanWrapper.class, "{\n" +
                 "flag: { a: 128, b: 1.0 },\n" +

@@ -14,11 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Exercises less common ValueIn APIs, including empty sequences and binary bytesMatch behaviour.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class ValueInApisNegativeTest extends WireTestCommon {
+class ValueInApisNegativeTest extends WireTestCommon {
 
     @Test
     @DisplayName("Handles empty sequences and bytesMatch for binary wire")
-    public void emptySequenceAndBytesMatch() {
+    void emptySequenceAndBytesMatch() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 

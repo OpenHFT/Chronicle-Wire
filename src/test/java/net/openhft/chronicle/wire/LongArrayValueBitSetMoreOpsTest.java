@@ -10,11 +10,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class LongArrayValueBitSetMoreOpsTest extends WireTestCommon {
+class LongArrayValueBitSetMoreOpsTest extends WireTestCommon {
 
     @Test
     @DisplayName("Finds previous and next bits with ranges")
-    public void previousAndRangeOps() {
+    void previousAndRangeOps() {
         try (LongArrayValueBitSet bs = new LongArrayValueBitSet(256, new BinaryWire(Bytes.allocateElasticOnHeap(256)))) {
             bs.set(2, 70);
             assertTrue(bs.get(2), "range set should include bit 2");

@@ -15,7 +15,7 @@ import java.util.Map;
  * Represents a collection in the Wire model with various properties, including a reference, path, and name.
  * It can also contain properties and sub-collections.
  */
-public class WireCollection extends WireModel {
+class WireCollection extends WireModel {
 
     // Reference to another element or object in the model.
     @Nullable
@@ -101,7 +101,7 @@ public class WireCollection extends WireModel {
         return reference;
     }
 
-    public void setReference(@Nullable String reference) {
+    void setReference(@Nullable String reference) {
         this.reference = reference;
     }
 
@@ -110,7 +110,7 @@ public class WireCollection extends WireModel {
         return path;
     }
 
-    public void setPath(@Nullable String path) {
+    void setPath(@Nullable String path) {
         this.path = path;
     }
 
@@ -119,11 +119,11 @@ public class WireCollection extends WireModel {
         return name;
     }
 
-    public void setName(@Nullable String name) {
+    void setName(@Nullable String name) {
         this.name = name;
     }
 
-    public void clearProperties() {
+    void clearProperties() {
         properties.clear();
     }
 
@@ -132,11 +132,11 @@ public class WireCollection extends WireModel {
         return properties;
     }
 
-    public void setProperties(@Nullable Map<String, WireProperty> properties) {
+    void setProperties(@Nullable Map<String, WireProperty> properties) {
         this.properties = properties;
     }
 
-    public void addProperty(@NotNull WireProperty property) {
+    void addProperty(@NotNull WireProperty property) {
         this.properties.put(property.getReference(), property);
     }
 
@@ -145,11 +145,11 @@ public class WireCollection extends WireModel {
         return collections;
     }
 
-    public void setCollections(@Nullable Map<String, WireCollection> collections) {
+    void setCollections(@Nullable Map<String, WireCollection> collections) {
         this.collections = collections;
     }
 
-    public void addCollection(@NotNull WireCollection collection) {
+    void addCollection(@NotNull WireCollection collection) {
         this.collections.put(collection.getReference(), collection);
     }
 }

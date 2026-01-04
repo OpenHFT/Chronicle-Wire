@@ -17,11 +17,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 // Test class extending MethodWriterTest to test behavior of method writers when using proxies
-public class MethodWriterProxyTest extends MethodWriterTest {
+class MethodWriterProxyTest extends MethodWriterTest {
 
     // Method to set up the test environment before each test method
     @BeforeEach
-    public void before() {
+    void before() {
         // Disable proxy code generation for the duration of the tests
         System.setProperty("disableProxyCodegen", "true");
 
@@ -31,7 +31,7 @@ public class MethodWriterProxyTest extends MethodWriterTest {
 
     // Method to clean up and reset the environment after each test method
     @AfterEach
-    public void after() {
+    void after() {
         // Clear the property to re-enable proxy code generation
         System.clearProperty("disableProxyCodegen");
     }
@@ -41,7 +41,7 @@ public class MethodWriterProxyTest extends MethodWriterTest {
     @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/159 - multiOut proxy path")
     @DisplayName("Proxy method writer uses multi-output wiring")
     @Override
-    public void multiOut() {
+    void multiOut() {
         // Calls the same test method from the parent class
         super.multiOut();
         fail("Disabled multiOut test should not continue past proxy assertions");
@@ -52,7 +52,7 @@ public class MethodWriterProxyTest extends MethodWriterTest {
     @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/159 - primitives proxy path")
     @DisplayName("Proxy method writer handles primitive argument serialisation")
     @Override
-    public void testPrimitives() {
+    void testPrimitives() {
         // Calls the test method for primitives from the parent class
         super.doTestPrimitives(true);
         fail("Disabled primitives test should not continue past proxy assertions");

@@ -12,12 +12,12 @@ import java.util.SplittableRandom;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Base64LongConverterTest extends WireTestCommon {
+class Base64LongConverterTest extends WireTestCommon {
 
     // Validate the parsing of Base64 encoded strings to long and vice versa
     @Test
     @DisplayName("Parses and formats Base64 tokens correctly")
-    public void parse() {
+    void parse() {
         // Obtain the singleton instance of Base64LongConverter
         LongConverter c = Base64LongConverter.INSTANCE;
         // Iterate through predefined strings, validate conversion from string to long and back to string
@@ -30,7 +30,7 @@ public class Base64LongConverterTest extends WireTestCommon {
     // Validate string conversion of randomly generated long numbers
     @Test
     @DisplayName("Parses Base64 subsequences without error safely")
-    public void parseSubsequence() {
+    void parseSubsequence() {
         LongConverter c = Base64LongConverter.INSTANCE;
         String s = ",a,ab,abc,abcd,ab.de,123_56,1234567,12345678,123456789,z23456789,z234567890,O_________,";
         int comparisons = 13;
@@ -40,7 +40,7 @@ public class Base64LongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Rejects overly long Base64 input strings")
-    public void parseLengthCheck() {
+    void parseLengthCheck() {
         assertThrows(IllegalArgumentException.class, () ->
                 Base64LongConverter.INSTANCE.parse(getClass().getCanonicalName()),
                 "Base64 parse should reject long input");
@@ -48,7 +48,7 @@ public class Base64LongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Rejects invalid Base64 substring bounds cases")
-    public void parseSubstringLengthCheck() {
+    void parseSubstringLengthCheck() {
         assertThrows(IllegalArgumentException.class, () ->
                 Base64LongConverter.INSTANCE.parse("abcd", 0, 5),
                 "Base64 parse should reject invalid substring bounds");
@@ -56,7 +56,7 @@ public class Base64LongConverterTest extends WireTestCommon {
 
     @Test
     @DisplayName("Formats and parses random Base64 values")
-    public void asString() {
+    void asString() {
         // Obtain the singleton instance of Base64LongConverter
         LongConverter c = Base64LongConverter.INSTANCE;
         // Initialise a deterministic number generator for stable test coverage
@@ -76,7 +76,7 @@ public class Base64LongConverterTest extends WireTestCommon {
     // Ensure safe character conversion using TextWire
     @Test
     @DisplayName("Allows safe Base64 characters in TextWire")
-    public void allSafeCharsTextWire() {
+    void allSafeCharsTextWire() {
         // Create a TextWire instance with elastic on heap bytes and configure it to use text documents
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         assertInstanceOf(TextWire.class, wire, "TextWire instance should exist for safe character checks");
@@ -87,7 +87,7 @@ public class Base64LongConverterTest extends WireTestCommon {
     // Ensure safe character conversion using YamlWire
     @Test
     @DisplayName("Allows safe Base64 characters in YamlWire")
-    public void allSafeCharsYamlWire() {
+    void allSafeCharsYamlWire() {
         // Create a YamlWire instance with elastic on heap bytes and configure it to use text documents
         Wire wire = new YamlWire();
         assertInstanceOf(YamlWire.class, wire, "YamlWire instance should exist for safe character checks");

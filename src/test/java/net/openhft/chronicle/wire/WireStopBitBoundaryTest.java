@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * These boundaries are critical for binary format correctness.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class WireStopBitBoundaryTest extends WireTestCommon {
+class WireStopBitBoundaryTest extends WireTestCommon {
 
     // Stop-bit encoding boundaries
     // 1 byte: 0 to 127 (0x00 to 0x7F)
@@ -41,7 +41,7 @@ public class WireStopBitBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle all stop-bit encoding boundaries for int64")
-    public void testStopBitBoundariesInt64Binary() {
+    void testStopBitBoundariesInt64Binary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -76,7 +76,7 @@ public class WireStopBitBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle negative values at stop-bit boundaries")
-    public void testStopBitBoundariesNegativeInt64Binary() {
+    void testStopBitBoundariesNegativeInt64Binary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -104,7 +104,7 @@ public class WireStopBitBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle stop-bit boundaries for int32")
-    public void testStopBitBoundariesInt32Binary() {
+    void testStopBitBoundariesInt32Binary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -130,7 +130,7 @@ public class WireStopBitBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle stop-bit boundaries for int16")
-    public void testStopBitBoundariesInt16Binary() {
+    void testStopBitBoundariesInt16Binary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -155,7 +155,7 @@ public class WireStopBitBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should handle all numeric boundaries for int64")
-    public void testNumericBoundariesInt64Text() {
+    void testNumericBoundariesInt64Text() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         TextWire wire = new TextWire(bytes);
 
@@ -170,7 +170,7 @@ public class WireStopBitBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should handle negative boundary values")
-    public void testNegativeBoundariesText() {
+    void testNegativeBoundariesText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         TextWire wire = new TextWire(bytes);
 
@@ -193,7 +193,7 @@ public class WireStopBitBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle all numeric boundaries for int64")
-    public void testNumericBoundariesInt64Yaml() {
+    void testNumericBoundariesInt64Yaml() {
         for (long boundary : UNSIGNED_BOUNDARIES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
             YamlWire wire = new YamlWire(bytes);
@@ -207,7 +207,7 @@ public class WireStopBitBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle negative boundary values")
-    public void testNegativeBoundariesYaml() {
+    void testNegativeBoundariesYaml() {
         long[] negativeBoundaries = {
                 -1L, -127L, -128L, -129L,
                 -16383L, -16384L, -16385L,
@@ -229,7 +229,7 @@ public class WireStopBitBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should use efficient stop-bit encoding")
-    public void testStopBitEncodingEfficiency() {
+    void testStopBitEncodingEfficiency() {
         // Verify that small values use fewer bytes than large values
         Bytes<?> bytes1 = Bytes.allocateElasticOnHeap(32);
         BinaryWire wire1 = new BinaryWire(bytes1);
@@ -248,7 +248,7 @@ public class WireStopBitBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle field name stop-bit boundaries")
-    public void testFieldNameStopBitBoundaries() {
+    void testFieldNameStopBitBoundaries() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -275,7 +275,7 @@ public class WireStopBitBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle unsigned long values near boundaries")
-    public void testUnsignedLongBoundaries() {
+    void testUnsignedLongBoundaries() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -300,7 +300,7 @@ public class WireStopBitBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle power-of-two boundaries")
-    public void testPowerOfTwoBoundaries() {
+    void testPowerOfTwoBoundaries() {
         // Powers of 2 are important boundaries for many encodings
         long[] powersOf2 = {
                 1L, 2L, 4L, 8L, 16L, 32L, 64L, 128L,
@@ -327,7 +327,7 @@ public class WireStopBitBoundaryTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle 0xFF boundary values")
-    public void testByteMaxBoundaries() {
+    void testByteMaxBoundaries() {
         // Values at 0xFF boundaries (255, 256, etc.)
         long[] byteBoundaries = {
                 255L, 256L,           // 1-byte unsigned max

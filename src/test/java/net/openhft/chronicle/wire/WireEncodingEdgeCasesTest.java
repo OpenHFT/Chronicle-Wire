@@ -15,13 +15,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * surrogate pairs, control characters, and sign extension issues.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class WireEncodingEdgeCasesTest extends WireTestCommon {
+class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     // ========== UTF-8 Multibyte Character Tests ==========
 
     @Test
     @DisplayName("BinaryWire should handle 2-byte UTF-8 characters (Latin Extended)")
-    public void testTwoByteUtf8Binary() {
+    void testTwoByteUtf8Binary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -36,7 +36,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle 3-byte UTF-8 characters (CJK)")
-    public void testThreeByteUtf8Binary() {
+    void testThreeByteUtf8Binary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -51,7 +51,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle 4-byte UTF-8 characters (emoji)")
-    public void testFourByteUtf8Binary() {
+    void testFourByteUtf8Binary() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -66,7 +66,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should handle UTF-8 multibyte characters")
-    public void testMultibyteUtf8Text() {
+    void testMultibyteUtf8Text() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         TextWire wire = new TextWire(bytes);
 
@@ -80,7 +80,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle UTF-8 multibyte characters")
-    public void testMultibyteUtf8Yaml() {
+    void testMultibyteUtf8Yaml() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         YamlWire wire = new YamlWire(bytes);
 
@@ -98,7 +98,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
     @Disabled("Multi-key sequential read returns null for later keys - needs investigation")
     @Test
     @DisplayName("All wire types should handle valid surrogate pairs")
-    public void testValidSurrogatePairs() {
+    void testValidSurrogatePairs() {
         // First valid surrogate pair: U+10000 (Linear B Syllable B008 A)
         String firstPair = "\uD800\uDC00";
         // Last valid surrogate pair: U+10FFFF
@@ -122,7 +122,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle string with many surrogate pairs")
-    public void testManySurrogatePairs() {
+    void testManySurrogatePairs() {
         // Multiple emoji (each requires surrogate pair)
         String manyEmoji = "\uD83D\uDE00\uD83D\uDE01\uD83D\uDE02\uD83D\uDE03\uD83D\uDE04";
 
@@ -140,7 +140,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle NUL character (0x00)")
-    public void testNulCharacter() {
+    void testNulCharacter() {
         String withNul = "before\u0000after";
 
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
@@ -161,7 +161,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle tab character")
-    public void testTabCharacter() {
+    void testTabCharacter() {
         String withTab = "col1\tcol2\tcol3";
 
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
@@ -179,7 +179,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle carriage return and newline")
-    public void testCrLf() {
+    void testCrLf() {
         String withCrLf = "line1\r\nline2\nline3\rline4";
 
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
@@ -198,7 +198,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle BEL character (0x07)")
-    public void testBelCharacter() {
+    void testBelCharacter() {
         String withBel = "ding\u0007dong";
 
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
@@ -216,7 +216,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle DEL character (0x7F)")
-    public void testDelCharacter() {
+    void testDelCharacter() {
         String withDel = "before\u007Fafter";
 
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
@@ -236,7 +236,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle bytes 0x80-0xFF without sign extension")
-    public void testHighBitBytesNoSignExtension() {
+    void testHighBitBytesNoSignExtension() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -257,7 +257,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle Latin-1 extended characters")
-    public void testLatin1ExtendedCharacters() {
+    void testLatin1ExtendedCharacters() {
         // Latin-1 Supplement (0x80-0xFF as characters)
         StringBuilder sb = new StringBuilder();
         for (int i = 0x80; i <= 0xFF; i++) {
@@ -283,7 +283,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle empty string")
-    public void testEmptyString() {
+    void testEmptyString() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             Wire wire = wt.apply(bytes);
@@ -300,7 +300,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle whitespace-only strings")
-    public void testWhitespaceOnlyStrings() {
+    void testWhitespaceOnlyStrings() {
         String[] whitespaceStrings = {" ", "  ", "\t", "\n", " \t\n "};
 
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
@@ -323,7 +323,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle long ASCII strings")
-    public void testLongAsciiStrings() {
+    void testLongAsciiStrings() {
         // 10,000 character ASCII string
         StringBuilder sb = new StringBuilder(10000);
         for (int i = 0; i < 10000; i++) {
@@ -349,7 +349,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle long Unicode strings")
-    public void testLongUnicodeStrings() {
+    void testLongUnicodeStrings() {
         // 5,000 CJK characters (15,000 bytes in UTF-8)
         StringBuilder sb = new StringBuilder(5000);
         for (int i = 0; i < 5000; i++) {
@@ -377,7 +377,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("TextWire should handle backslash escape sequences")
-    public void testBackslashEscapesText() {
+    void testBackslashEscapesText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         TextWire wire = new TextWire(bytes);
 
@@ -392,7 +392,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("YamlWire should handle backslash escape sequences")
-    public void testBackslashEscapesYaml() {
+    void testBackslashEscapesYaml() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         YamlWire wire = new YamlWire(bytes);
 
@@ -409,7 +409,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle BMP boundary characters")
-    public void testBmpBoundaryCharacters() {
+    void testBmpBoundaryCharacters() {
         // Characters at BMP boundaries
         String bmpBoundary = "\uFFFF\uFFFE\u0000\u0001";
 
@@ -429,7 +429,7 @@ public class WireEncodingEdgeCasesTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle private use area characters")
-    public void testPrivateUseAreaCharacters() {
+    void testPrivateUseAreaCharacters() {
         // Private Use Area (U+E000 to U+F8FF)
         String privateUse = "\uE000\uE001\uF8FF";
 

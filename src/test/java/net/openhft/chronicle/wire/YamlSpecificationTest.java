@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SuppressFBWarnings(
         value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
         justification = "Fields are populated via Wire marshalling in tests.")
-public class YamlSpecificationTest extends WireTestCommon {
+class YamlSpecificationTest extends WireTestCommon {
 
     // Register class aliases for String, Circle, Shape, Line, and Label
     static {
@@ -41,7 +41,7 @@ public class YamlSpecificationTest extends WireTestCommon {
     private String input;
 
     // Parameterized constructor
-    public void initYamlSpecificationTest(String input) {
+    void initYamlSpecificationTest(String input) {
         this.input = input;
     }
 
@@ -83,7 +83,7 @@ public class YamlSpecificationTest extends WireTestCommon {
     @MethodSource("tests")
     @ParameterizedTest(name = "YAML spec case {0} should round trip")
     @DisplayName("YAML specification snippets round trip correctly")
-    public void decodeAs(String input) throws IOException {
+    void decodeAs(String input) throws IOException {
         initYamlSpecificationTest(input);
         String snippet = new String(getBytes(input + ".yaml"), StandardCharsets.UTF_8)
                 .replace("\r\n", "\n");

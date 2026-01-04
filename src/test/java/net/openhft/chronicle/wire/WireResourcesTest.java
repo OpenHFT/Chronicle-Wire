@@ -21,7 +21,7 @@ import static net.openhft.chronicle.core.io.ReferenceOwner.INIT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class WireResourcesTest extends WireTestCommon {
+class WireResourcesTest extends WireTestCommon {
 
     // Helper method to write a message into the given wire.
     private static void writeMessage(@NotNull Wire wire) {
@@ -33,7 +33,7 @@ public class WireResourcesTest extends WireTestCommon {
     }
 
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory is required for resource tests");
     }
@@ -41,7 +41,7 @@ public class WireResourcesTest extends WireTestCommon {
     // Test the process of closing mapped bytes and ensuring their resources are properly released.
     @Test
     @DisplayName("MappedBytes close releases resources and ref counts")
-    public void testMappedBytesClose() throws Exception {
+    void testMappedBytesClose() throws Exception {
         // Create a temporary file for the test and ensure it's deleted afterwards.
         File tmp = Files.createTempFile("chronicle-", ".wire").toFile();
         tmp.deleteOnExit();
@@ -88,7 +88,7 @@ public class WireResourcesTest extends WireTestCommon {
     // Test the process of releasing mapped bytes via wire and ensuring their resources are properly released.
     @Test
     @DisplayName("Wire release drops mapped bytes references")
-    public void testMappedBytesWireRelease() throws Exception {
+    void testMappedBytesWireRelease() throws Exception {
         // Create a temporary file for the test and ensure it's deleted afterwards.
         File tmp = Files.createTempFile("chronicle-", ".wire").toFile();
         tmp.deleteOnExit();
@@ -132,7 +132,7 @@ public class WireResourcesTest extends WireTestCommon {
     @Test
     // Test the process of releasing mapped bytes with multiple message writings and ensuring their resources are properly released.
     @DisplayName("Wire release after multiple writes releases resources")
-    public void testMappedBytesWireRelease2() throws Exception {
+    void testMappedBytesWireRelease2() throws Exception {
         // Create a temporary file for the test and ensure it's deleted afterwards.
         File tmp = Files.createTempFile("chronicle-", ".wire").toFile();
         tmp.deleteOnExit();

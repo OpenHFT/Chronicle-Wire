@@ -21,12 +21,12 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
+class MethodReaderInterceptorReturnsTest extends WireTestCommon {
 
     // Setting up before the tests
     @Override
     @BeforeEach
-    public void threadDump() {
+    void threadDump() {
         super.threadDump();
     }
 
@@ -36,7 +36,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Generated reader supports MethodReaderInterceptorReturns interceptors correctly")
-    public void testInterceptorSupportedInGeneratedCode() {
+    void testInterceptorSupportedInGeneratedCode() {
         CountDownLatch readerCreateLatch = new CountDownLatch(1);
         doTestInterceptorSupportedInGeneratedCode(readerCreateLatch, false);
         assertEquals(0, readerCreateLatch.getCount(), "single reader creation should release the latch");
@@ -48,7 +48,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Intercepting reader creation is safe under concurrency")
-    public void testInterceptingReaderConcurrentCreation() throws ExecutionException, InterruptedException, TimeoutException {
+    void testInterceptingReaderConcurrentCreation() throws ExecutionException, InterruptedException, TimeoutException {
         int concurrencyLevel = 5;
 
         // Creating a fixed-size thread pool to simulate concurrency
@@ -146,7 +146,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
     @Test
     @SuppressWarnings("deprecation")
     @DisplayName("Generating interceptor aggregates call information safely")
-    public void testGeneratingAggregatingInfoInterceptor() {
+    void testGeneratingAggregatingInfoInterceptor() {
         // Create a wire with a buffer of size 128 and padding enabled
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
@@ -190,7 +190,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
     @Test
     @SuppressWarnings("deprecation")
     @DisplayName("Generating interceptor skips null arguments in wire")
-    public void testGeneratingSkippingInterceptor() {
+    void testGeneratingSkippingInterceptor() {
         // Create a wire with a buffer of size 128 and padding enabled
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);

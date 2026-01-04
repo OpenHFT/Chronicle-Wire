@@ -32,7 +32,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test case for working with ZonedDateTime values
     @Test
     @DisplayName("Serialises and reads ZonedDateTime values correctly")
-    public void testZonedDateTime() {
+    void testZonedDateTime() {
         @NotNull Wire wire = createWire();
 
         // Create several ZonedDateTime instances: now, max, min
@@ -88,7 +88,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test to ensure a SortedSet is correctly written to and read from the Wire.
     @Test
     @DisplayName("Serialises and reads SortedSet values correctly")
-    public void testSortedSet() {
+    void testSortedSet() {
         // Initialize a new Wire instance.
         final Wire wire = createWire();
 
@@ -120,7 +120,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test to ensure a SortedMap is correctly written to and read from the Wire.
     @Test
     @DisplayName("Serialises and reads SortedMap values correctly")
-    public void testSortedMap() {
+    void testSortedMap() {
         // Initialize a new Wire instance.
         final Wire wire = createWire();
 
@@ -152,7 +152,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test to validate the behavior of writing and reading simple boolean values
     @Test
     @DisplayName("Writes and reads simple boolean fields")
-    public void testSimpleBool() {
+    void testSimpleBool() {
         @NotNull Wire wire = createWire();
 
         // Write two boolean values with keys "F" and "T"
@@ -176,7 +176,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test to validate the behavior when writing strings that cannot be converted to boolean
     @Test
     @DisplayName("Reads non-boolean text values as false")
-    public void testFailingBool() {
+    void testFailingBool() {
         @NotNull Wire wire = createWire();
 
         // Write two non-boolean strings with keys "A" and "B"
@@ -200,7 +200,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test to validate the reading of non-boolean strings as Boolean objects
     @Test
     @DisplayName("Reads non-boolean text as Boolean object result")
-    public void testFailingBoolean() {
+    void testFailingBoolean() {
         @NotNull Wire wire = createWire();
 
         // Write two non-boolean strings
@@ -225,7 +225,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test to validate the behavior when writing text with a leading space
     @Test
     @DisplayName("Preserves leading whitespace in text values")
-    public void testLeadingSpace() {
+    void testLeadingSpace() {
         @NotNull Wire wire = createWire();
 
         // Write a string with a leading space
@@ -258,7 +258,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test writing arrays of objects to a Wire and reading them back.
     @Test
     @DisplayName("Round-trips empty and simple arrays correctly")
-    public void testArrays() {
+    void testArrays() {
         // Create a wire instance
         @NotNull Wire wire = createWire();
 
@@ -271,7 +271,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test writing arrays with varying lengths and types of elements to a Wire and reading them back.
     @Test
     @DisplayName("Round-trips object arrays of varying size")
-    public void testArrays2() {
+    void testArrays2() {
         // Create a wire instance
         @NotNull Wire wire = createWire();
 
@@ -294,7 +294,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     @Test
     @DisplayName("Decompresses gzip text written to wire")
     @SuppressWarnings("deprecation")
-    public void testGZIPCompressionAsText() {
+    void testGZIPCompressionAsText() {
         // Create a wire instance and a string to compress
         @NotNull Wire wire = createWire();
         @NotNull final String s = "xxxxxxxxxxx1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
@@ -314,7 +314,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test to validate the behavior of writing and reading a long value
     @Test
     @DisplayName("Writes and reads int64 values correctly")
-    public void testInt64() {
+    void testInt64() {
         @NotNull Wire wire = createWire();
 
         // Write a long value with the key "VALUE"
@@ -332,7 +332,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test to validate the behavior of writing and reading a short value
     @Test
     @DisplayName("Writes and reads int16 values correctly")
-    public void testInt16() {
+    void testInt16() {
         @NotNull Wire wire = createWire();
 
         // Write a short value with the key "VALUE"
@@ -350,7 +350,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test to ensure that reading a value too large for a short throws an exception
     @Test
     @DisplayName("Rejects int16 overflow during read safely")
-    public void testInt16TooLarge() {
+    void testInt16TooLarge() {
         assertThrows(IllegalStateException.class, () -> {
             @NotNull Wire wire = createWire();
 
@@ -365,7 +365,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test to validate the behavior of writing and reading an integer value
     @Test
     @DisplayName("Writes and reads int32 values correctly")
-    public void testInt32() {
+    void testInt32() {
         @NotNull Wire wire = createWire();
 
         // Write an integer value with the keys "VALUE" and "VALUE2"
@@ -386,7 +386,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test to ensure that reading a value too large for an integer throws an exception
     @Test
     @DisplayName("Rejects int32 overflow during read safely")
-    public void testInt32TooLarge() {
+    void testInt32TooLarge() {
         assertThrows(IllegalStateException.class, () -> {
             @NotNull Wire wire = createWire();
 
@@ -401,7 +401,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test to validate writing using keys from the BWKey enum
     @Test
     @DisplayName("Writes enum keys without values correctly")
-    public void testWrite1() {
+    void testWrite1() {
         @NotNull Wire wire = createWire();
 
         // Write fields using BWKey enum values
@@ -417,7 +417,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test to validate writing with different string lengths
     @Test
     @DisplayName("Writes field names with long strings")
-    public void testWrite2() {
+    void testWrite2() {
         @NotNull Wire wire = createWire();
 
         // Write strings with varying lengths
@@ -433,7 +433,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test to validate reading from the wire
     @Test
     @DisplayName("Consumes bytes when reading fields from wire")
-    public void testRead() {
+    void testRead() {
         @NotNull Wire wire = createWire();
 
         // Write values to the wire
@@ -452,7 +452,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // Test the write behavior of custom Marshallable objects with Wire.
     @Test
     @DisplayName("Serialises and reads Marshallable objects correctly")
-    public void testWriteMarshallable() {
+    void testWriteMarshallable() {
         // Create wire instance
         final Wire wire = createWire();
         @NotNull MyTypesCustom mtA = MyTypesCustomTestSupport.createA();
@@ -502,7 +502,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
     // and verify the length of written fields.
     @Test
     @DisplayName("Reports field length for marshallable writes")
-    public void testWriteMarshallableAndFieldLength() {
+    void testWriteMarshallableAndFieldLength() {
         // Create wire instance
         final Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();

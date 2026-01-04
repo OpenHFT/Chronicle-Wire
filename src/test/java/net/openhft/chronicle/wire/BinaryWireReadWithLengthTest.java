@@ -13,11 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Illustrates Chronicle-Queue style copying of binary fragments into a textual representation.
  */
-public class BinaryWireReadWithLengthTest extends WireTestCommon {
+class BinaryWireReadWithLengthTest extends WireTestCommon {
 
     @Test
     @DisplayName("Copies map fragment to text wire")
-    public void copiesMapFragmentToText() {
+    void copiesMapFragmentToText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire writer = new BinaryWire(bytes);
         try (DocumentContext dc = writer.writingDocument(false)) {
@@ -40,7 +40,7 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
 
     @Test
     @DisplayName("Copies sequence fragment to text wire")
-    public void copiesSequenceFragmentToText() {
+    void copiesSequenceFragmentToText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire writer = new BinaryWire(bytes);
         try (DocumentContext dc = writer.writingDocument(false)) {
@@ -67,7 +67,7 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
 
     @Test
     @DisplayName("Copies entire wire into text output")
-    public void copyEntireWireToText() {
+    void copyEntireWireToText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire writer = new BinaryWire(bytes);
         writer.writeEventName("say").text("hello");
@@ -84,7 +84,7 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
 
     @Test
     @DisplayName("Copies messages one by one into text wire")
-    public void copyMessagesIndividually() {
+    void copyMessagesIndividually() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire writer = new BinaryWire(bytes);
         writer.writeEventName("alpha").text("one");

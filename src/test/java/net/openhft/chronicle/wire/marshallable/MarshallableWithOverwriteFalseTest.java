@@ -21,11 +21,11 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 /**
  * Exercises overwrite-false reads to ensure nested DTO list values persist after round-trip.
  */
-public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
+class MarshallableWithOverwriteFalseTest extends WireTestCommon {
 
     @Test
     @DisplayName("Overwrite false should preserve nested strings list")
-    public void test() {
+    void test() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for overwrite false test");
 
         // Create instances of MyDto2 and MyDto

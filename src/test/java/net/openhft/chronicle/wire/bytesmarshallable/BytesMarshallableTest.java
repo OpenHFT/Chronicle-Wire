@@ -25,11 +25,11 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class BytesMarshallableTest extends WireTestCommon {
+class BytesMarshallableTest extends WireTestCommon {
     private WireType wireType;
 
     // Constructor that accepts a wireType as a parameter
-    public void initBytesMarshallableTest(WireType wireType) {
+    void initBytesMarshallableTest(WireType wireType) {
         this.wireType = wireType;
     }
 
@@ -52,7 +52,7 @@ public class BytesMarshallableTest extends WireTestCommon {
     @MethodSource("combinations")
     @ParameterizedTest
     @DisplayName("Serialises and reads primitive DTOs correctly")
-    public void primitiveDto(WireType wireType) {
+    void primitiveDto(WireType wireType) {
         initBytesMarshallableTest(wireType);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip primitive DTO test");
 
@@ -104,7 +104,7 @@ public class BytesMarshallableTest extends WireTestCommon {
     @MethodSource("combinations")
     @ParameterizedTest
     @DisplayName("Serialises and reads custom primitive DTOs correctly")
-    public void primitiveDto2(WireType wireType) {
+    void primitiveDto2(WireType wireType) {
         initBytesMarshallableTest(wireType);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip primitive DTO2 test");
 
@@ -225,7 +225,7 @@ public class BytesMarshallableTest extends WireTestCommon {
 
         // Overridden method defining custom serialization logic for PrimDto2.
         @Override
-        public void writeMarshallable(BytesOut<?> bytes) {
+       public void writeMarshallable(BytesOut<?> bytes) {
             bytes.writeBoolean(flag);
             bytes.writeByte(s8);
             bytes.writeStopBit(ch);
@@ -278,7 +278,7 @@ public class BytesMarshallableTest extends WireTestCommon {
 
         // Overridden method defining custom serialization logic for ScalarDto2.
         @Override
-        public void writeMarshallable(BytesOut<?> out) {
+       public void writeMarshallable(BytesOut<?> out) {
             out.write8bit(text);
             out.write8bit(buffer);
             if (bytes == null) {

@@ -15,7 +15,7 @@ import java.util.function.BiConsumer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // Test class for validating the Trivially Copyable features with Chronicle Wire
-public class TriviallyCopyableTest extends WireTestCommon {
+class TriviallyCopyableTest extends WireTestCommon {
 
     // Test utility to perform read and write operations on byte buffers
     // with AA instances, and then check if the original and the result are equal
@@ -41,7 +41,7 @@ public class TriviallyCopyableTest extends WireTestCommon {
     // Test case using the unsafe marshaller (only for non-Azul Zing JVMs)
     @Test
     @DisplayName("Round-trips trivially copyable data via unsafe marshaller")
-    public void unsafe2() {
+    void unsafe2() {
         // Execute the test using AA's marshallers
         AA expected = new AA((byte) 1, (byte) 2, true, false, 'Y', (short) 6, 7, 8, 9, 10);
         AA actual = roundTrip(expected, (b, a) -> a.readMarshallable(b), (b, a) -> a.writeMarshallable(b));
@@ -96,7 +96,7 @@ public class TriviallyCopyableTest extends WireTestCommon {
         }
 
         // Read individual fields from the bytes
-        void readMarshallable1(BytesIn<?> bytes) throws IORuntimeException {
+        public void readMarshallable1(BytesIn<?> bytes) throws IORuntimeException {
             i = bytes.readInt();
             d = bytes.readDouble();
             l = bytes.readLong();
@@ -122,7 +122,7 @@ public class TriviallyCopyableTest extends WireTestCommon {
         }
 
         // Write individual fields into bytes
-        void writeMarshallable1(BytesOut<?> bytes) {
+       public void writeMarshallable1(BytesOut<?> bytes) {
             bytes.writeInt(i);
             bytes.writeDouble(d);
             bytes.writeLong(l);

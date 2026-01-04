@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * Test class to validate the handling of nested objects
  * during serialization and deserialization using the Wire framework.
  */
-public class WireBug38Test extends WireTestCommon {
+class WireBug38Test extends WireTestCommon {
 
     /**
      * Validates that a nested object can be correctly serialized and deserialized
@@ -30,7 +30,7 @@ public class WireBug38Test extends WireTestCommon {
      */
     @Test
     @DisplayName("TEXT wire preserves nested object structure")
-    public void testNestedObj() {
+    void testNestedObj() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for nested object test");
 
         // Define the TEXT WireType and a test string

@@ -3,7 +3,7 @@
  */
 package net.openhft.chronicle.wire.examples;
 
-public class WireExamples3 {
+class WireExamples3 {
 
     interface Printer {
         void print(String message);

@@ -37,7 +37,7 @@ class Issue327Test extends WireTestCommon {
         );
     }
 
-    public void initIssue327Test(boolean useTypes) {
+    void initIssue327Test(boolean useTypes) {
         this.useTypes = useTypes;
     }
 

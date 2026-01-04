@@ -27,7 +27,7 @@ import static net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtrac
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.replacingMerger;
 
 @SuppressWarnings({"deprecation", "removal"})
-public class StreamingDemoMain {
+class StreamingDemoMain {
 
     public static void main(String[] args) {
 

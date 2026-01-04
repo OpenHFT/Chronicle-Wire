@@ -26,12 +26,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SuppressFBWarnings(
         value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
         justification = "Fields are populated via Wire marshalling in tests.")
-public class WireToOutputStreamTest extends WireTestCommon {
+class WireToOutputStreamTest extends WireTestCommon {
 
     private WireType currentWireType;
 
     // Constructor to initialize the parameter
-    public void initWireToOutputStreamTest(WireType currentWireType) {
+    void initWireToOutputStreamTest(WireType currentWireType) {
         this.currentWireType = currentWireType;
     }
 
@@ -56,7 +56,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
     @ParameterizedTest(name = "{index}: {0}")
     @DisplayName("Wire output stream round trips timestamps")
     // Test to ensure the Timestamp object can be serialized and deserialized correctly
-    public void testTimestamp(WireType currentWireType) {
+    void testTimestamp(WireType currentWireType) {
         initWireToOutputStreamTest(currentWireType);
         final Wire wire = currentWireType.apply(Bytes.allocateElasticOnHeap(128));
         final Timestamp ts = new Timestamp(1234567890000L);
@@ -73,7 +73,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
     @ParameterizedTest(name = "{index}: {0}")
     @DisplayName("Wire output stream round trips without sockets")
     // Test serialization and deserialization without a socket
-    public void testNoSocket(WireType currentWireType) {
+    void testNoSocket(WireType currentWireType) {
         initWireToOutputStreamTest(currentWireType);
         final Wire wire = currentWireType.apply(Bytes.allocateElasticOnHeap(128));
         final AnObject ao = writeAnObject(wire);
@@ -88,7 +88,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
     @ParameterizedTest(name = "{index}: {0}")
     @DisplayName("Wire output stream round trips with sockets")
     // Test serialization and deserialization using a socket
-    public void testVisSocket(WireType currentWireType) throws IOException {
+    void testVisSocket(WireType currentWireType) throws IOException {
         initWireToOutputStreamTest(currentWireType);
         try (ServerSocket ss = new ServerSocket(0);
              Socket s = new Socket("localhost", ss.getLocalPort());

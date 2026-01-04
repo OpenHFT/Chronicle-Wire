@@ -36,14 +36,14 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 @SuppressFBWarnings(
         value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
         justification = "Fields are populated via Wire marshalling in tests.")
-public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
+class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     private String name; // Represents the name of the binary wire code.
     private int code;   // Represents the binary wire code.
     private Consumer<ValueOut> valueOutConsumer; // A consumer function to operate on a ValueOut.
 
     // Constructor for parameterized test.
-    public void initSkipValueTest(String name, int code, Consumer<ValueOut> valueOutConsumer) {
+    void initSkipValueTest(String name, int code, Consumer<ValueOut> valueOutConsumer) {
         this.name = name;
         this.code = code;
         this.valueOutConsumer = valueOutConsumer;
@@ -132,7 +132,7 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
     @MethodSource("data")
     @ParameterizedTest(name = "{index}: {0}")
     @DisplayName("Skips binary value and reads next text entry")
-    public void test(String name, int code, Consumer<ValueOut> valueOutConsumer) {
+    void test(String name, int code, Consumer<ValueOut> valueOutConsumer) {
         initSkipValueTest(name, code, valueOutConsumer);
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory disabled; skip skip-value test for name=" + name + ", code=" + code);

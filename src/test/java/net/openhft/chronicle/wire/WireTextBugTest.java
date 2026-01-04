@@ -17,12 +17,12 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 /**
  * @author Rob Austin
  */
-public class WireTextBugTest extends WireTestCommon {
+class WireTextBugTest extends WireTestCommon {
 
     @Test
     @DisplayName("Binary wire round trip preserves bug text")
     // Test for handling text within the Wire framework
-    public void testText() {
+    void testText() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory is required for wire text round trip");
 

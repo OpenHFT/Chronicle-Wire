@@ -16,7 +16,7 @@ import java.util.Collection;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 
 @Disabled("Long running performance test for wire serialisation")
-public class BinaryWirePerfTest extends WireTestCommon {
+class BinaryWirePerfTest extends WireTestCommon {
 
     // Define test parameters
     private int testId;
@@ -28,7 +28,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
     Bytes<?> bytes = allocateElasticOnHeap();
 
     // Constructor for parameterized test
-    public void initBinaryWirePerfTest(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
+    void initBinaryWirePerfTest(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -63,7 +63,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
     @MethodSource("combinations")
     @ParameterizedTest
     @DisplayName("Measures wire performance for marshallable types")
-    public void wirePerf(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
+    void wirePerf(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         initBinaryWirePerfTest(testId, fixed, numericField, fieldLess);
         @NotNull Wire wire = createBytes();
 
@@ -101,7 +101,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
     @MethodSource("combinations")
     @ParameterizedTest
     @DisplayName("Measures wire performance for integer fields")
-    public void wirePerfInts(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
+    void wirePerfInts(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         initBinaryWirePerfTest(testId, fixed, numericField, fieldLess);
         @NotNull Wire wire = createBytes();
         @NotNull MyType2 a = new MyType2();

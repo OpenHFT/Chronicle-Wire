@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Test class extending WireTestCommon to validate the behavior of method readers
  * with different levels of class/interface hierarchy in Chronicle Wire.
  */
-public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
+class VanillaMethodReaderHierarchyTest extends WireTestCommon {
     private final BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
 
     /**
@@ -30,7 +30,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Method reader handles simple interface calls")
-    public void testInterface() {
+    void testInterface() {
         Simple simple = queue::add;
         checkWriteRead(simple);
     }
@@ -40,7 +40,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Method reader handles descendant interface calls")
-    public void testInterfaceDescend() {
+    void testInterfaceDescend() {
         SimpleDescendant simple = queue::add;
         checkWriteRead(simple);
     }
@@ -50,7 +50,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Method reader handles descendant class implementations")
-    public void testDescendantClass() {
+    void testDescendantClass() {
         SimpleDescendant simple = new SimpleDescendantClass(queue);
         checkWriteRead(simple);
     }
@@ -61,7 +61,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Method reader handles abstract descendant classes")
-    public void testDescendantAbstractClass() {
+    void testDescendantAbstractClass() {
         // this was the problem - https://github.com/OpenHFT/Chronicle-Wire/issues/154
         SimpleDescendant simple = new SimpleDescendantClass2(queue);
         checkWriteRead(simple);
@@ -72,7 +72,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Method reader handles classes extending same interface")
-    public void testDescendantExtendsSameInterface() {
+    void testDescendantExtendsSameInterface() {
         SimpleDescendant simple = new SimpleDescendantClass3(queue);
         checkWriteRead(simple);
     }
@@ -82,7 +82,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      */
     @Test
     @DisplayName("Method reader supports duck typing interfaces")
-    public void testDuckTyping() {
+    void testDuckTyping() {
         DuckTyping simple = new DuckTyping(queue);
         checkWriteRead(simple);
     }

@@ -18,11 +18,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Small end-to-end flow using MethodWriter and VanillaMethodReader to
  * exercise method dispatch and basic argument serialisation.
  */
-public class MethodWriterReaderSimpleIntegrationTest extends WireTestCommon {
+class MethodWriterReaderSimpleIntegrationTest extends WireTestCommon {
 
     @Test
     @DisplayName("MethodWriter and MethodReader round-trip calls successfully")
-    public void roundTrip() {
+    void roundTrip() {
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap(256));
 
         Echo writer = w.methodWriter(Echo.class);

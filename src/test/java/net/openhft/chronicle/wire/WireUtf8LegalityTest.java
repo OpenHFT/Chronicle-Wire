@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Based on RFC 3629 requirements for valid UTF-8.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class WireUtf8LegalityTest extends WireTestCommon {
+class WireUtf8LegalityTest extends WireTestCommon {
 
     // ========== Valid UTF-8 Boundary Tests ==========
 
@@ -23,7 +23,7 @@ public class WireUtf8LegalityTest extends WireTestCommon {
     @Disabled("Multi-key sequential read returns null for later keys - needs investigation")
     @Test
     @DisplayName("BinaryWire should handle minimum code points for each byte length")
-    public void testMinimumCodePointsForByteLength() {
+    void testMinimumCodePointsForByteLength() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -54,7 +54,7 @@ public class WireUtf8LegalityTest extends WireTestCommon {
     @Disabled("Multi-key sequential read returns null for later keys - needs investigation")
     @Test
     @DisplayName("BinaryWire should handle maximum code points for each byte length")
-    public void testMaximumCodePointsForByteLength() {
+    void testMaximumCodePointsForByteLength() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -91,7 +91,7 @@ public class WireUtf8LegalityTest extends WireTestCommon {
     @Test
     @Disabled("YamlWire returns null when BOM precedes first key - needs BOM stripping")
     @DisplayName("Wire should handle UTF-8 BOM at start of content")
-    public void testUtf8BomAtStart() {
+    void testUtf8BomAtStart() {
         // UTF-8 BOM is EF BB BF (U+FEFF)
         String bomPlusContent = "\uFEFFkey: value";
         Bytes<?> bytes = Bytes.from(bomPlusContent);
@@ -105,7 +105,7 @@ public class WireUtf8LegalityTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should preserve BOM character in text")
-    public void testBomPreservationInText() {
+    void testBomPreservationInText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -125,7 +125,7 @@ public class WireUtf8LegalityTest extends WireTestCommon {
     @Disabled("Multi-key sequential read returns null for later keys - needs investigation")
     @Test
     @DisplayName("All wire types should handle valid surrogate pairs")
-    public void testValidSurrogatePairs() {
+    void testValidSurrogatePairs() {
         // First valid: U+10000 (D800 DC00)
         // Last valid: U+10FFFF (DBFF DFFF)
         String first = "\uD800\uDC00";
@@ -155,7 +155,7 @@ public class WireUtf8LegalityTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle C0 control characters")
-    public void testC0ControlCharacters() {
+    void testC0ControlCharacters() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -179,7 +179,7 @@ public class WireUtf8LegalityTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle DEL character (0x7F)")
-    public void testDelCharacter() {
+    void testDelCharacter() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -194,7 +194,7 @@ public class WireUtf8LegalityTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle C1 control characters (0x80-0x9F)")
-    public void testC1ControlCharacters() {
+    void testC1ControlCharacters() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -217,7 +217,7 @@ public class WireUtf8LegalityTest extends WireTestCommon {
 
     @Test
     @DisplayName("All wire types should handle various line endings")
-    public void testLineEndings() {
+    void testLineEndings() {
         String lf = "line1\nline2";
         String cr = "line1\rline2";
         String crlf = "line1\r\nline2";
@@ -250,7 +250,7 @@ public class WireUtf8LegalityTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should preserve leading and trailing whitespace")
-    public void testWhitespacePreservation() {
+    void testWhitespacePreservation() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -280,7 +280,7 @@ public class WireUtf8LegalityTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should preserve NFC vs NFD differences")
-    public void testUnicodeNormalisationPreservation() {
+    void testUnicodeNormalisationPreservation() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -312,7 +312,7 @@ public class WireUtf8LegalityTest extends WireTestCommon {
     @Disabled("Multi-key sequential read returns null for later keys - needs investigation")
     @Test
     @DisplayName("All wire types should handle Private Use Area characters")
-    public void testPrivateUseArea() {
+    void testPrivateUseArea() {
         // BMP Private Use: U+E000 to U+F8FF
         String bmpPrivate = "\uE000\uE001\uF8FF";
 
@@ -340,7 +340,7 @@ public class WireUtf8LegalityTest extends WireTestCommon {
 
     @Test
     @DisplayName("Replacement character U+FFFD should round-trip")
-    public void testReplacementCharacter() {
+    void testReplacementCharacter() {
         String withReplacement = "valid\uFFFDtext";
 
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
@@ -360,7 +360,7 @@ public class WireUtf8LegalityTest extends WireTestCommon {
 
     @Test
     @DisplayName("BinaryWire should handle Unicode non-characters")
-    public void testUnicodeNonCharacters() {
+    void testUnicodeNonCharacters() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -383,7 +383,7 @@ public class WireUtf8LegalityTest extends WireTestCommon {
     @Disabled("Multi-key sequential read returns null for later keys - needs investigation")
     @Test
     @DisplayName("BinaryWire should preserve zero-width characters")
-    public void testZeroWidthCharacters() {
+    void testZeroWidthCharacters() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 

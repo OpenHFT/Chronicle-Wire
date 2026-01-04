@@ -6,7 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.DistributedUniqueTimeProvider;
 
 // Main class illustrating event time serialization and performance measurement of time provision.
-public class EgMain {
+class EgMain {
 
     public static void main(String[] args) {
         // Create a time provider for a specific host ID.

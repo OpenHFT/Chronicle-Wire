@@ -459,7 +459,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
             return symbol;
         }
 
-        public void symbol(String symbol) {
+        void symbol(String symbol) {
             this.symbol = symbol;
         }
 
@@ -467,7 +467,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
             return noShares;
         }
 
-        public void noShares(long shares) {
+        void noShares(long shares) {
             this.noShares = shares;
         }
     }
@@ -491,7 +491,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
             return symbol;
         }
 
-        public void symbol(String symbol) {
+        void symbol(String symbol) {
             this.symbol = symbol;
         }
 
@@ -499,7 +499,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
             return header;
         }
 
-        public void header(String header) {
+        void header(String header) {
             this.header = header;
         }
 
@@ -507,7 +507,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
             return body;
         }
 
-        public void body(String body) {
+        void body(String body) {
             this.body = body;
         }
     }

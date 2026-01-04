@@ -50,7 +50,7 @@ public class WireTestCommon {
 
     // Activates the reference tracing before executing tests
     @BeforeEach
-    public void enableReferenceTracing() {
+    void enableReferenceTracing() {
         AbstractReferenceCounted.enableReferenceTracing();
     }
 
@@ -73,7 +73,7 @@ public class WireTestCommon {
 
     // Records exceptions before the test runs
     @BeforeEach
-    public void recordExceptions() {
+    void recordExceptions() {
         exceptions = Jvm.recordExceptions();
     }
 
@@ -160,7 +160,7 @@ public class WireTestCommon {
     }
 
     @AfterEach
-    public void afterChecks() {
+    void afterChecks() {
         preAfter(); // Any custom operations before the default cleanup
         CleaningThread.performCleanup(Thread.currentThread());
 
@@ -180,17 +180,17 @@ public class WireTestCommon {
 
     // Store the current value of GENERATE_TUPLES before test execution
     @BeforeEach
-    public void rememberGenerateTuples() {
+    void rememberGenerateTuples() {
         gt = Wires.GENERATE_TUPLES;
     }
 
     // Restore the original value of GENERATE_TUPLES after the test execution
     @AfterEach
-    public void restoreGenerateTuples() {
+    void restoreGenerateTuples() {
         Wires.setGenerateTuples(gt);
     }
 
     @BeforeEach
-    public void throwCNFRE() {
+    void throwCNFRE() {
     }
 }

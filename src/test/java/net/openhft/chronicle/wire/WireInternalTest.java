@@ -12,12 +12,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class WireInternalTest extends WireTestCommon {
+class WireInternalTest extends WireTestCommon {
 
     // Test the serialization and deserialization of a Throwable object using Wire's object method.
     @Test
     @DisplayName("Wire serialises Throwable using object method")
-    public void testThrowableAsObject() {
+    void testThrowableAsObject() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory is required for throwable object test");
 
@@ -51,7 +51,7 @@ public class WireInternalTest extends WireTestCommon {
     // Test the serialization and deserialization of a Throwable using Wire's dedicated throwable method.
     @Test
     @DisplayName("Wire serialises Throwable using throwable method")
-    public void testThrowable() {
+    void testThrowable() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory is required for throwable text test");
 
@@ -78,7 +78,7 @@ public class WireInternalTest extends WireTestCommon {
     // Test the conversion of a size-prefixed binary message to text using Wire.
     @Test
     @DisplayName("Binary blobs convert to expected text output")
-    public void testFromSizePrefixedBinaryToText() {
+    void testFromSizePrefixedBinaryToText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         @NotNull Wire wire = new BinaryWire(bytes);
         wire.usePadding(true);

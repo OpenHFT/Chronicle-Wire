@@ -20,7 +20,7 @@ import java.util.List;
 @SuppressFBWarnings(
         value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
         justification = "Fields are populated via Wire marshalling in tests.")
-public class JSONWireWithListsTest extends net.openhft.chronicle.wire.WireTestCommon {
+class JSONWireWithListsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Determines whether to use types during serialization
     private boolean useTypes;
@@ -35,7 +35,7 @@ public class JSONWireWithListsTest extends net.openhft.chronicle.wire.WireTestCo
     }
 
     // Constructor initializes the useTypes flag
-    public void initJSONWireWithListsTest(boolean useTypes) {
+    void initJSONWireWithListsTest(boolean useTypes) {
         this.useTypes = useTypes;
     }
 
@@ -64,7 +64,7 @@ public class JSONWireWithListsTest extends net.openhft.chronicle.wire.WireTestCo
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "useTypes={0} serialises json list values")
     @DisplayName("Serialises list values with optional types in json")
-    public void test(boolean useTypes) {
+    void test(boolean useTypes) {
         initJSONWireWithListsTest(useTypes);
         // Instantiating a JSON wire with or without types based on test parameter
         final JSONWire jsonWire = new JSONWire()

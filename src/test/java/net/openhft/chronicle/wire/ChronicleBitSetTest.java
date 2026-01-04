@@ -22,7 +22,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("unchecked")
-public class ChronicleBitSetTest extends WireTestCommon {
+class ChronicleBitSetTest extends WireTestCommon {
 
     // Random number generator for tests
     private final Random generator = new Random();
@@ -35,7 +35,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     private ChronicleBitSet emptyBS128;
 
     @SuppressWarnings("this-escape")
-    public void initChronicleBitSetTest(Class<?> clazz) {
+    void initChronicleBitSetTest(Class<?> clazz) {
         assumeTrue(Jvm.is64bit());
         this.clazz = clazz;
         emptyBS0 = createBitSet();
@@ -57,7 +57,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     // Capture a snapshot of all threads before test execution
     @Override
     @BeforeEach
-    public void threadDump() {
+    void threadDump() {
         super.threadDump();
     }
 
@@ -76,7 +76,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Finds next set bit from zero index")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testNextSetBit0(Class<?> clazz) {
+    void testNextSetBit0(Class<?> clazz) {
 
         initChronicleBitSetTest(clazz);
 
@@ -114,7 +114,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     }
 
     // Assert a failure with a given diagnostic message
-    public void fail(String diagnostic) {
+    void fail(String diagnostic) {
         Assertions.fail(diagnostic);
     }
 
@@ -187,7 +187,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Finds next set bit for random sets")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testNextSetBit(Class<?> clazz) {
+    void testNextSetBit(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         int failCount = 0;
 
@@ -223,7 +223,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Finds next clear bit for random sets")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testNextClearBit(Class<?> clazz) {
+    void testNextClearBit(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         int failCount = 0;
 
@@ -277,7 +277,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Sets, gets, clears, and flips bits")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testSetGetClearFlip(Class<?> clazz) {
+    void testSetGetClearFlip(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         int failCount = 0;
 
@@ -379,7 +379,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Computes andNot set difference across random sets")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testAndNot(Class<?> clazz) {
+    void testAndNot(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         int failCount = 0;
 
@@ -416,7 +416,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Computes logical AND across random sets")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testAnd(Class<?> clazz) {
+    void testAnd(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         int failCount = 0;
 
@@ -458,7 +458,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Clears last word when AND removes bits")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testAnd2(Class<?> clazz) {
+    void testAnd2(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         // Test the AND operation that clears the last word of the bitset
         ChronicleBitSet b4 = makeSet(2, 127);
@@ -480,7 +480,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Computes logical OR across random sets")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testOr(Class<?> clazz) {
+    void testOr(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         int failCount = 0;
 
@@ -534,7 +534,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Computes logical XOR across random sets")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testXor(Class<?> clazz) {
+    void testXor(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         int failCount = 0;
 
@@ -584,7 +584,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Compares equality across bitsets with same bits")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testEquals(Class<?> clazz) {
+    void testEquals(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         int failCount = 0;
 
@@ -613,7 +613,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Reports length based on highest set bit")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testLength(Class<?> clazz) {
+    void testLength(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         int failCount = 0;
 
@@ -683,7 +683,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Clears bit ranges and matches per-bit clear")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testClear(Class<?> clazz) {
+    void testClear(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         int failCount = 0;
 
@@ -702,7 +702,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Sets bit ranges and matches per-bit set")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testSet(Class<?> clazz) {
+    void testSet(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         int failCount = 0;
 
@@ -739,7 +739,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Flips bit ranges and matches per-bit flip")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testFlip(Class<?> clazz) {
+    void testFlip(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         int failCount = 0;
 
@@ -831,7 +831,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Detects intersection between bitsets with shared bits")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testIntersects(Class<?> clazz) {
+    void testIntersects(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         int failCount = 0;
 
@@ -876,7 +876,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Counts number of set bits accurately")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testCardinality(Class<?> clazz) {
+    void testCardinality(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         int failCount = 0;
 
@@ -906,7 +906,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Reports empty state after set and clear operations on bitsets")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testEmpty(Class<?> clazz) {
+    void testEmpty(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         int failCount = 0;
 
@@ -936,7 +936,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Reports empty state after random operations")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testEmpty2(Class<?> clazz) {
+    void testEmpty2(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         // Test the behavior of clear() method over a range
         {
@@ -1042,7 +1042,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Formats toString output for set bits in increasing order")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testToString(Class<?> clazz) {
+    void testToString(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         // Check the string representation of an empty ChronicleBitSet
         check(createBitSet().toString().equals("{}"), "toString should return empty braces for empty set");
@@ -1100,7 +1100,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
     @DisplayName("Honours De Morgan and XOR identities")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void testLogicalIdentities(Class<?> clazz) {
+    void testLogicalIdentities(Class<?> clazz) {
         initChronicleBitSetTest(clazz);
         int failCount = 0;
 

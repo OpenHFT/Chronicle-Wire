@@ -25,13 +25,13 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  *
  * @author greg allen
  */
-public class EnumWireTest extends WireTestCommon {
+class EnumWireTest extends WireTestCommon {
 
     // Field to hold the wire creation strategy for the current test iteration.
     private Function<Bytes<?>, Wire> createWire;
 
     // Constructor that sets up the wire creation strategy.
-    public void initEnumWireTest(Function<Bytes<?>, Wire> createWire) {
+    void initEnumWireTest(Function<Bytes<?>, Wire> createWire) {
         this.createWire = createWire;
     }
 
@@ -51,7 +51,7 @@ public class EnumWireTest extends WireTestCommon {
     @MethodSource("wires")
     @ParameterizedTest
     @DisplayName("Enum implementing Marshallable should round-trip by value")
-    public void testEnumImplementingMarshallable(Function<Bytes<?>, Wire> createWire) {
+    void testEnumImplementingMarshallable(Function<Bytes<?>, Wire> createWire) {
         initEnumWireTest(createWire);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for Marshallable enum round-trip");
 
@@ -63,7 +63,7 @@ public class EnumWireTest extends WireTestCommon {
     @MethodSource("wires")
     @ParameterizedTest
     @DisplayName("Enum without Marshallable should round-trip by name")
-    public void testEnumNotImplementingMarshallable(Function<Bytes<?>, Wire> createWire) {
+    void testEnumNotImplementingMarshallable(Function<Bytes<?>, Wire> createWire) {
         initEnumWireTest(createWire);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for non-Marshallable enum round-trip");
 
@@ -76,7 +76,7 @@ public class EnumWireTest extends WireTestCommon {
     @MethodSource("wires")
     @ParameterizedTest
     @DisplayName("Enum with ReadResolve should return singleton after round-trip")
-    public void testEnumImplementingMarshallableAndReadResolve(Function<Bytes<?>, Wire> createWire) {
+    void testEnumImplementingMarshallableAndReadResolve(Function<Bytes<?>, Wire> createWire) {
         initEnumWireTest(createWire);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for ReadResolve enum round-trip");
 

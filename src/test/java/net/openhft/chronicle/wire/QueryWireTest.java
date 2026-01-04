@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 // This class tests the functionalities related to the QueryWire's read and write operations.
 @SuppressWarnings({"deprecation", "removal"})
-public class QueryWireTest extends WireTestCommon {
+class QueryWireTest extends WireTestCommon {
 
     // Byte storage to hold serialized data
     private Bytes<?> bytes;
@@ -35,7 +35,7 @@ public class QueryWireTest extends WireTestCommon {
     // Test case to verify both write and read operations of the QueryWire
     @Test
     @DisplayName("Reads and writes basic query fields")
-    public void readWriteQuery() {
+    void readWriteQuery() {
 
         // Create a wire and write various data types to it
         @NotNull QueryWire wire = createWire();
@@ -75,7 +75,7 @@ public class QueryWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("Writes and reads query fragments with raw bytes")
-    public void writesAndReadsQueryFragments() {
+    void writesAndReadsQueryFragments() {
         Bytes<?> bytes = allocateElasticOnHeap();
         QueryWire writer = new QueryWire(bytes);
 
@@ -108,7 +108,7 @@ public class QueryWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("Percent-encoded characters remain literal in output")
-    public void percentEncodedCharactersRemainLiteral() {
+    void percentEncodedCharactersRemainLiteral() {
         @NotNull QueryWire wire = createWire();
         String literal = "value%2Bplus+space";
         wire.write("token").text(literal);
@@ -125,7 +125,7 @@ public class QueryWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("Handles zero bytes and dangling keys")
-    public void handlesZeroBytesAndDanglingKeys() {
+    void handlesZeroBytesAndDanglingKeys() {
         Bytes<?> storage = allocateElasticOnHeap();
         QueryWire wire = new QueryWire(storage);
         byte[] raw = {'A', 0, 'B'};
@@ -156,7 +156,7 @@ public class QueryWireTest extends WireTestCommon {
 
     @Test
     @DisplayName("Query output feeds text wire after formatting")
-    public void queryWireOutputCanFeedTextWireAfterFormatting() {
+    void queryWireOutputCanFeedTextWireAfterFormatting() {
         @NotNull QueryWire wire = createWire();
         wire.write("name").text("alpha beta");
         wire.write("count").int64(7);

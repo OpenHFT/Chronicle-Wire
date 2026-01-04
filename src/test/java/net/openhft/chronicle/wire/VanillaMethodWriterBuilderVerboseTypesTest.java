@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 @SuppressFBWarnings(
         value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
         justification = "Fields are populated via Wire marshalling in tests.")
-public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
+class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Static initialization block to alias two classes
     static {
@@ -38,13 +38,13 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
     private String expects;
 
     // Constructor initializes fields with parameterized values
-    public void initVanillaMethodWriterBuilderVerboseTypesTest(boolean verboseTypes, String expects) {
+    void initVanillaMethodWriterBuilderVerboseTypesTest(boolean verboseTypes, String expects) {
         this.verboseTypes = verboseTypes;
         this.expects = expects;
     }
 
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for this test");
     }
 
@@ -96,7 +96,7 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
     @MethodSource("combinations")
     @ParameterizedTest(name = "verboseTypes={0}, expected={1}")
     @DisplayName("Writes verbose type markers when enabled")
-    public void test(boolean verboseTypes, String expects) {
+    void test(boolean verboseTypes, String expects) {
         initVanillaMethodWriterBuilderVerboseTypesTest(verboseTypes, expects);
         // Allocate elastic bytes on heap and create a TextWire instance
         final Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap();

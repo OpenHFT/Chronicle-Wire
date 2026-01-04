@@ -20,7 +20,7 @@ import java.util.Collection;
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 
 @SuppressWarnings("this-escape")
-public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCommon {
+class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCommon {
 
     private final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
@@ -37,7 +37,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
     // Clean up resources after tests
     @AfterEach
     @Override
-    public void afterChecks() {
+    void afterChecks() {
         bytes.releaseLast();
         super.afterChecks();
     }
@@ -46,7 +46,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Reads StringBuilder fields across wire versions")
-    public void marshableStringBuilderTest(WireType wireType) {
+    void marshableStringBuilderTest(WireType wireType) {
         final Wire wire = wireType.apply(bytes);
         wire.usePadding(wire.isBinary());
         ClassLookup wrap1 = CLASS_ALIASES.wrap();
@@ -70,7 +70,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Reads older data with newer schema")
-    public void backwardsCompatibility(WireType wireType) {
+    void backwardsCompatibility(WireType wireType) {
         final Wire wire = wireType.apply(bytes);
         wire.usePadding(wire.isBinary());
         ClassLookup wrap1 = CLASS_ALIASES.wrap();
@@ -98,7 +98,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Reads newer data with older schema")
-    public void forwardCompatibility(WireType wireType) {
+    void forwardCompatibility(WireType wireType) {
         // Apply the given wireType to bytes to get a Wire instance
         final Wire wire = wireType.apply(bytes);
 

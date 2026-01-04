@@ -9,7 +9,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ValueInObjectFallbackTest extends WireTestCommon {
+class ValueInObjectFallbackTest extends WireTestCommon {
 
     @SuppressFBWarnings(
             value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
@@ -20,7 +20,7 @@ public class ValueInObjectFallbackTest extends WireTestCommon {
 
     @Test
     @DisplayName("Reads marshallable object via fallback object read")
-    public void readsMarshallableAsObject() {
+    void readsMarshallableAsObject() {
         String yaml = "value: { name: bob }";
         TextWire wire = TextWire.from(yaml);
         Holder holder = wire.read("value").object(null, Holder.class, false);

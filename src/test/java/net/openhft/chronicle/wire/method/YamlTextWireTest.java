@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * between YamlWire and TextWire in processing YAML formatted text.
  */
 @SuppressWarnings({"deprecation", "removal"})
-public class YamlTextWireTest extends WireTestCommon {
+class YamlTextWireTest extends WireTestCommon {
 
     // Static block to register class alias for Fields
     static {
@@ -40,7 +40,7 @@ public class YamlTextWireTest extends WireTestCommon {
      * @param name Name of the test scenario.
      * @param text YAML formatted text to be used in the test.
      */
-    public void initYamlTextWireTest(String name, String text) {
+    void initYamlTextWireTest(String name, String text) {
         // Name of the test scenario
         this.s = text;
     }
@@ -102,7 +102,7 @@ public class YamlTextWireTest extends WireTestCommon {
     @DisplayName("Compares field ordering between YamlWire and TextWire")
     @MethodSource("data")
     @ParameterizedTest(name = "{0}")
-    public void orderTest(String name, String text) {
+    void orderTest(String name, String text) {
         initYamlTextWireTest(name, text);
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip YAML comparison");
 
