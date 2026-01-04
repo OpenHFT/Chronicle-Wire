@@ -18,17 +18,17 @@ public enum BinaryWireCode {
 
     // Definitions for sequence lengths:
     /**
-     * Sequence length 0 to 255 bytes.
+     * Wire code for sequence length 0 to 255 bytes.
      */
     public static final int BYTES_LENGTH8 = 0x80;
 
     /**
-     * Sequence length 0 to 2^16-1 bytes.
+     * Wire code for sequence length 0 to 2^16-1 bytes.
      */
     public static final int BYTES_LENGTH16 = 0x81;
 
     /**
-     * Sequence length 0 to 2^32-1 bytes.
+     * Wire code for sequence length 0 to 2^32-1 bytes.
      */
     public static final int BYTES_LENGTH32 = 0x82;
 
@@ -50,19 +50,19 @@ public enum BinaryWireCode {
     public static final int ANCHOR = 0x88;
 
     /**
-     * Denotes an updated alias value.
+     * Denotes an updated alias value in the stream.
      */
     @Deprecated
     public static final int UPDATED_ALIAS = 0x89;
 
     /**
-     * Array of unsigned bytes.
+     * Array payload containing unsigned byte values.
      */
     public static final int U8_ARRAY = 0x8A;
     //        public static final int U16_ARRAY = 0x8B;
     //        public static final int I32_ARRAY = 0x8C;
     /**
-     * Array of 64-bit integers.
+     * Array payload containing 64-bit integer values.
      */
     public static final int I64_ARRAY = 0x8D;
 
@@ -77,7 +77,7 @@ public enum BinaryWireCode {
     public static final int PADDING = 0x8F;
 
     /**
-     * Represents a 32-bit floating-point number.
+     * Wire code representing a 32-bit floating-point number.
      */
     public static final int FLOAT32 = 0x90;
 
@@ -122,37 +122,37 @@ public enum BinaryWireCode {
     public static final int UUID = 0xA0;
 
     /**
-     * Unsigned 8-bit integer (byte).
+     * Unsigned 8-bit integer value encoded in the wire.
      */
     public static final int UINT8 = 0xA1;
 
     /**
-     * Unsigned 16-bit integer (short).
+     * Unsigned 16-bit integer value encoded in the wire.
      */
     public static final int UINT16 = 0xA2;
 
     /**
-     * Unsigned 32-bit integer.
+     * Unsigned 32-bit integer value encoded in the wire.
      */
     public static final int UINT32 = 0xA3;
 
     /**
-     * Signed 8-bit integer (byte).
+     * Wire code for signed 8-bit integer values.
      */
     public static final int INT8 = 0xA4;
 
     /**
-     * Signed 16-bit integer (short).
+     * Wire code for signed 16-bit integer values.
      */
     public static final int INT16 = 0xA5;
 
     /**
-     * Signed 32-bit integer.
+     * Wire code for signed 32-bit integer values.
      */
     public static final int INT32 = 0xA6;
 
     /**
-     * Signed 64-bit integer (long).
+     * Wire code for signed 64-bit integer values.
      */
     public static final int INT64 = 0xA7;
 
@@ -166,42 +166,42 @@ public enum BinaryWireCode {
      */
     public static final int SET_LOW_INT16 = 0xA9;
     //    public static final int FIXED_5 = 0xAA;
-//    public static final int FIXED_4 = 0xAB;
-//    public static final int FIXED_3 = 0xAC;
-//    public static final int FIXED_2 = 0xAD;
-//    public static final int FIXED_1 = 0xAE;
+    //    public static final int FIXED_4 = 0xAB;
+    //    public static final int FIXED_3 = 0xAC;
+    //    public static final int FIXED_2 = 0xAD;
+    //    public static final int FIXED_1 = 0xAE;
     /**
      * 64-bit integer to be displaying in hexadecimal format.
      */
     public static final int INT64_0x = 0xAF;
 
     /**
-     * boolean value representing 'false'.
+     * Wire code for boolean values representing false.
      */
     public static final int FALSE = 0xB0;
 
     /**
-     * boolean value representing 'true'.
+     * Wire code for boolean values representing true.
      */
     public static final int TRUE = 0xB1;
 
     /**
-     * Represents a time value.
+     * Wire code representing a time value.
      */
     public static final int TIME = 0xB2;
 
     /**
-     * Represents a date value.
+     * Wire code representing a date value.
      */
     public static final int DATE = 0xB3;
 
     /**
-     * Represents a date-time value.
+     * Wire code representing a date-time value.
      */
     public static final int DATE_TIME = 0xB4;
 
     /**
-     * Represents a zoned date-time value.
+     * Wire code representing a zoned date-time value.
      */
     public static final int ZONED_DATE_TIME = 0xB5;
 
@@ -216,7 +216,7 @@ public enum BinaryWireCode {
     public static final int FIELD_NAME_ANY = 0xB7;
 
     /**
-     * A String of any length
+     * Wire code for a string of any length.
      */
     public static final int STRING_ANY = 0xB8;
 
@@ -230,12 +230,12 @@ public enum BinaryWireCode {
      */
     public static final int FIELD_NUMBER = 0xBA;
     /**
-     * Represents the {@code null} value.
+     * Wire code representing the {@code null} value.
      */
     public static final int NULL = 0xBB;
 
     /**
-     * Represents a type literal.
+     * Wire code representing a type literal.
      */
     public static final int TYPE_LITERAL = 0xBC;
 
@@ -277,7 +277,7 @@ public enum BinaryWireCode {
     /**
      * Array storing the string representations for each binary wire code, facilitating easier debugging and logging.
      */
-    public static final String[] STRING_FOR_CODE = new String[256];
+    private static final String[] STRING_FOR_CODE = new String[256];
 
     // Static initializer to populate the STRING_FOR_CODE array:
     static {
@@ -299,7 +299,9 @@ public enum BinaryWireCode {
                     }
             }
         } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
+            AssertionError error = new AssertionError("Failed to initialise wire code names");
+            error.initCause(e);
+            throw error;
         }
     }
 

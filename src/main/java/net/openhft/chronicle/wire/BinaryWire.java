@@ -95,7 +95,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     private final FixedBinaryValueOut valueOut;
 
     /**
-     * Deserialises values from this wire.
+     * Deserialises values from this wire instance when reading.
      */
     @NotNull
     protected final BinaryValueIn valueIn;
@@ -474,7 +474,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             case BinaryWireHighCode.NUM6:
             case BinaryWireHighCode.NUM7:
                 if (first)
-                    throw new IllegalArgumentException();
+                    throw new IllegalArgumentException("Numeric code cannot start a copied field");
                 bytes.uncheckedReadSkipOne();
                 wire.getValueOut().uint8checked(peekCode);
                 break;
@@ -607,7 +607,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 // Process field values.
                 @Nullable StringBuilder fsb = readField(peekCode, ANY_CODE_MATCH.name(), ANY_CODE_MATCH.code(), acquireStringBuilder(), false);
                 if (!textable(fsb))
-                    throw new IllegalArgumentException();
+                    throw new IllegalArgumentException("Field name must be textable for copy operation");
                 wire.write(fsb);
                 break;
 
@@ -831,7 +831,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             try {
                 valueIn.consumeNext();
             } catch (InvalidMarshallableException e) {
-                throw new AssertionError(e);
+                throw new AssertionError("Failed to consume unexpected field value", e);
             } finally {
                 ValidatableUtil.endValidateDisabled();
             }
@@ -1191,7 +1191,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 // General parsing for non-direct memory.
                 AppendableUtil.parse8bit(bytes, sb, peekCode & 0x1f);
             } catch (IOException e) {
-                throw new AssertionError(e);
+                throw new AssertionError("Failed to parse small field contents", e);
             }
         }
         return sb;
@@ -1853,6 +1853,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 writeField(StringUtils.parseInt(name, 10));
                 return;
             } catch (NumberFormatException ignored) {
+                // Not a numeric field name.
             }
         }
 
@@ -2641,7 +2642,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (bytes.retainedHexDumpDescription())
                 bytes.writeHexDumpDescription("int32 for binding");
             int32forBinding(value);
-            BinaryIntReference reference = requireReference(intValue, BinaryIntReference.class, "int32forBinding");
+            BinaryIntReference reference = requireReference(intValue, BinaryIntReference.class,
+                    "int32 binding requires a BinaryIntReference");
             reference.bytesStore(bytes, bytes.writePosition() - 4, 4);
             return BinaryWire.this;
         }
@@ -2652,7 +2654,8 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (bytes.retainedHexDumpDescription())
                 bytes.writeHexDumpDescription("int64 for binding");
             int64forBinding(value);
-            BinaryLongReference reference = requireReference(longValue, BinaryLongReference.class, "int64forBinding");
+            BinaryLongReference reference = requireReference(longValue, BinaryLongReference.class,
+                    "int64 binding requires a BinaryLongReference");
             reference.bytesStore(bytes, bytes.writePosition() - 8, 8);
             return BinaryWire.this;
         }
@@ -2661,7 +2664,8 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public WireOut boolForBinding(final boolean value, @NotNull final BooleanValue booleanValue) {
             bool(value);
-            BinaryBooleanReference reference = requireReference(booleanValue, BinaryBooleanReference.class, "boolForBinding");
+            BinaryBooleanReference reference = requireReference(booleanValue, BinaryBooleanReference.class,
+                    "Boolean binding requires a BinaryBooleanReference");
             reference.bytesStore(bytes, bytes.writePosition() - 1, 1);
             return BinaryWire.this;
         }
@@ -2785,7 +2789,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     Wires.writeMarshallable(object, BinaryWire.this);
                 }
             } catch (IOException e) {
-                throw new IORuntimeException(e);
+                throw new IORuntimeException("Failed to marshall serialisable object to binary wire", e);
             }
 
             bytes.writeOrderedInt(position, Maths.toInt32(bytes.lengthWritten(position) - 4, "Document length %,d out of 32-bit int range."));
@@ -2819,7 +2823,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * Extends the FixedBinaryValueOut class to support binary value outputs with additional logic for converting
      * and writing different types of numbers, namely integers and longs.
      */
-     protected class BinaryValueOut extends FixedBinaryValueOut {
+    protected class BinaryValueOut extends FixedBinaryValueOut {
 
         /**
          * Creates a new binary value writer bound to the enclosing wire.
@@ -3527,7 +3531,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                 default:
                     cantRead(code);
-                    throw new AssertionError();
+                    throw new AssertionError("Unsupported code while reading bytes store: " + code);
             }
         }
 
@@ -3550,7 +3554,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             // Ensure enough bytes remain for reading the length specified
             if (length > bytes.readRemaining())
-                throw new BufferUnderflowException();
+                throw new BufferUnderflowException(/* reason: declared length exceeds remaining bytes */);
 
             int code = readCode();
             if (code == U8_ARRAY) {
@@ -3610,7 +3614,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 cantRead(code);
 
             if (length > bytes.readRemaining())
-                throw new BufferUnderflowException();
+                throw new BufferUnderflowException(/* reason: declared length exceeds remaining bytes */);
             long limit0 = bytes.readLimit();
             long limit = bytes.readPosition() + length;
             try {
@@ -4351,7 +4355,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 // todo get delta wire to support Function<Class, ReadMarshallable> correctly
                 return typedMarshallable();
 
-            @Nullable final Class<T>aClass = (Class<T>) typePrefix();
+            @Nullable final Class<T> aClass = (Class<T>) typePrefix();
 
             if (ReadMarshallable.class.isAssignableFrom(aClass)) {
                 final ReadMarshallable marshallable = marshallableFunction.apply(aClass);
@@ -4687,7 +4691,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
             // Ensure the value is within the byte range, otherwise throw an exception.
             if (value > Byte.MAX_VALUE || value < Byte.MIN_VALUE)
-                throw new IllegalStateException();
+                throw new IllegalStateException("Value is outside signed byte range: " + value);
             return (byte) value; // Cast the long value to a byte and return.
         }
 
@@ -4697,7 +4701,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             int code = readCode();
             final long value = isText(code) ? readTextAsLong(Short.MIN_VALUE) : readInt0(code);
             if (value > Short.MAX_VALUE || value < Short.MIN_VALUE)
-                throw new IllegalStateException();
+                throw new IllegalStateException("Value is outside signed short range: " + value);
             return (short) value;
         }
 
@@ -4938,7 +4942,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     len = bytes.readInt();  // Read a 32-bit integer value.
                     break;
                 default:
-                    throw new AssertionError(); // Throw an assertion error if the code is unrecognized.
+                    throw new AssertionError("Unsupported length code in binary wire: " + code);
             }
             return len;  // Return the read length.
         }

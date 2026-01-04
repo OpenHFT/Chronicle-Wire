@@ -240,7 +240,7 @@ public class WireMarshaller<T> {
      * Returns {@code null} for primitives, arrays and interfaces.
      */
     static <T> T defaultValueForType(@NotNull Class<T> tClass) {
-//        tClass = ObjectUtils.implementationToUse(tClass);
+        //        tClass = ObjectUtils.implementationToUse(tClass);
         if (ObjectUtils.isConcreteClass(tClass)
                 && !tClass.getName().startsWith("java")
                 && !tClass.isEnum()
@@ -257,7 +257,7 @@ public class WireMarshaller<T> {
                 IOTools.unmonitor(t);
                 return t;
             } catch (InstantiationException | IllegalAccessException e) {
-                throw new AssertionError(e);
+                throw assertionError("Failed to allocate default DynamicEnum instance", e);
             }
         }
         return null;
@@ -281,6 +281,12 @@ public class WireMarshaller<T> {
                 return cmp;
         }
         return Integer.compare(cs0.length(), cs1.length());
+    }
+
+    private static AssertionError assertionError(String message, Exception e) {
+        AssertionError error = new AssertionError(message);
+        error.initCause(e);
+        return error;
     }
 
     /**
@@ -417,7 +423,7 @@ public class WireMarshaller<T> {
             for (@NotNull FieldAccess field : fields)
                 field.write(t, out);
         } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
+            throw assertionError("Failed to write field values to WireOut", e);
         }
         bytes.adjustHexDumpIndentation(-1);
     }
@@ -436,7 +442,7 @@ public class WireMarshaller<T> {
             try {
                 field.getAsBytes(t, bytes);
             } catch (IllegalAccessException e) {
-                throw new AssertionError(e);
+                throw assertionError("Failed to write field values to Bytes", e);
             }
         }
     }
@@ -460,7 +466,7 @@ public class WireMarshaller<T> {
                 field.write(t, out, defaultValue, copy);
             }
         } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
+            throw assertionError("Failed to write field values with copy flag", e);
         }
     }
 
@@ -500,7 +506,7 @@ public class WireMarshaller<T> {
             }
             ValidatableUtil.validate(t);
         } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
+            throw assertionError("Failed to read field values in DTO order", e);
         }
     }
 
@@ -550,7 +556,7 @@ public class WireMarshaller<T> {
                 }
             }
         } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
+            throw assertionError("Failed to read field values in input order", e);
         }
     }
 
@@ -578,7 +584,7 @@ public class WireMarshaller<T> {
         try {
             fields[0].getAsBytes(t, bytes);
         } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
+            throw assertionError("Failed to write key field to bytes", e);
         }
     }
 
@@ -615,7 +621,7 @@ public class WireMarshaller<T> {
             return field.field.get(o);
 
         } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
+            throw assertionError("Failed to access field value by name", e);
         }
     }
 
@@ -642,7 +648,7 @@ public class WireMarshaller<T> {
                     : ObjectUtils.convertTo(Long.class, field2.get(o));
 
         } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
+            throw assertionError("Failed to access long field value", e);
         }
     }
 
@@ -664,7 +670,7 @@ public class WireMarshaller<T> {
             value = ObjectUtils.convertTo(field2.getType(), value);
             field2.set(o, value);
         } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
+            throw assertionError("Failed to set field value by name", e);
         }
     }
 
@@ -690,14 +696,14 @@ public class WireMarshaller<T> {
             else
                 field2.set(o, ObjectUtils.convertTo(field2.getType(), value));
         } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
+            throw assertionError("Failed to set long field value", e);
         }
     }
 
     /**
-     * Returns the default value of type T.
+     * Returns the cached default instance used for missing fields.
      *
-     * @return The default value of type T.
+     * @return the cached default instance, or null if unavailable
      */
     @Nullable
     public T defaultValue() {
@@ -715,7 +721,7 @@ public class WireMarshaller<T> {
                 field.setDefaultValue(defaultValue, o);
         } catch (IllegalAccessException e) {
             // should never happen as the types should match.
-            throw new AssertionError(e);
+            throw assertionError("Failed to reset fields to default values", e);
         }
     }
 
@@ -763,7 +769,7 @@ public class WireMarshaller<T> {
             } catch (NoSuchFieldException nsfe) {
                 return (LongConverter) ObjectUtils.newInstance(clazz);
             } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Failed to access long converter instance", e);
             }
         }
 
@@ -805,10 +811,10 @@ public class WireMarshaller<T> {
         }
 
         /**
-         * Retrieves the long value from an object.
+         * Retrieves the long field value using the unsafe offset.
          *
          * @param o The object from which to retrieve the value.
-         * @return The long value of the field.
+         * @return the long field value read via unsafe offset
          */
         protected long getLong(Object o) {
             return unsafeGetLong(o, offset);
@@ -1196,7 +1202,7 @@ public class WireMarshaller<T> {
         }
 
         /**
-         * Abstract method to get the value of a field from an object.
+         * Writes the field value to the ValueOut with type-specific handling.
          *
          * @param o        Object from which to get the value.
          * @param write    Output destination.
@@ -1240,7 +1246,7 @@ public class WireMarshaller<T> {
         }
 
         /**
-         * Abstract method to set the value of a field in an object.
+         * Reads the field value from ValueIn and applies it.
          *
          * @param o         Object to set the value in.
          * @param read      Input source.
@@ -1293,7 +1299,7 @@ public class WireMarshaller<T> {
     static class IntValueAccess extends FieldAccess {
 
         /**
-         * Constructor for the IntValueAccess class.
+         * Creates a FieldAccess wrapper for IntValue binding fields.
          *
          * @param field The field this FieldAccess is responsible for.
          */
@@ -1331,7 +1337,7 @@ public class WireMarshaller<T> {
     static class LongValueAccess extends FieldAccess {
 
         /**
-         * Constructor for the LongValueAccess class.
+         * Creates a FieldAccess wrapper for LongValue binding fields.
          *
          * @param field The field this FieldAccess is responsible for.
          */
@@ -1372,7 +1378,7 @@ public class WireMarshaller<T> {
         private final AsMarshallable asMarshallable; // Annotation indicating if the field should be treated as marshallable
 
         /**
-         * Constructor for the ObjectFieldAccess class.
+         * Creates a FieldAccess wrapper for object fields with marshalling hints.
          *
          * @param field  The field this FieldAccess is responsible for.
          * @param isLeaf A flag indicating whether the field is a leaf node.
@@ -1573,7 +1579,7 @@ public class WireMarshaller<T> {
     static class BytesFieldAccess extends FieldAccess {
 
         /**
-         * Constructor for the BytesFieldAccess class.
+         * Creates a FieldAccess wrapper for Bytes fields with wire decoding.
          *
          * @param field The Bytes field this FieldAccess is responsible for.
          */
@@ -1728,7 +1734,7 @@ public class WireMarshaller<T> {
                         return false;
                 return true;
             } catch (IllegalAccessException e) {
-                throw new AssertionError(e);
+                throw assertionError("Failed to compare array field values", e);
             }
         }
     }
@@ -1794,7 +1800,7 @@ public class WireMarshaller<T> {
                     return false;
             return Arrays.equals((byte[]) a1, (byte[]) a2);
         } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
+            throw assertionError("Failed to compare byte array values", e);
         }
     }
 
@@ -1814,7 +1820,7 @@ public class WireMarshaller<T> {
         private final BiConsumer<Object, ValueOut> sequenceGetter;
 
         // The type of the enum component
-        private final Class<?>componentType;
+        private final Class<?> componentType;
 
         // A supplier for creating an empty EnumSet of the component type
         private final Supplier<EnumSet> enumSetSupplier;
@@ -1856,13 +1862,13 @@ public class WireMarshaller<T> {
                                            ValueOut out,
                                            Object[] values,
                                            Field field,
-                                           Class<?>componentType)
+                                           Class<?> componentType)
                 throws InvalidMarshallableException {
             final EnumSet coll;
             try {
                 coll = (EnumSet) field.get(o);
             } catch (IllegalAccessException e) {
-                throw new AssertionError(e);
+                throw assertionError("Failed to read EnumSet field value", e);
             }
 
             for (Object v : values) {
@@ -1963,7 +1969,7 @@ public class WireMarshaller<T> {
         final Supplier<Collection> collectionSupplier;
 
         // The component type of the Collection
-        private final Class<?>componentType;
+        private final Class<?> componentType;
         private final Class<?> type;
         private final BiConsumer<Object, ValueOut> sequenceGetter;
 
@@ -1977,7 +1983,7 @@ public class WireMarshaller<T> {
          * @param componentType The type of the elements in the collection.
          * @param type The type of the collection itself.
          */
-        public CollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class<?>componentType, Class<?>type) {
+        public CollectionFieldAccess(@NotNull Field field, Boolean isLeaf, @Nullable Supplier<Collection> collectionSupplier, Class<?> componentType, Class<?> type) {
             super(field, isLeaf);
             this.collectionSupplier = collectionSupplier == null ? newInstance() : collectionSupplier;
             this.componentType = componentType;
@@ -1987,7 +1993,7 @@ public class WireMarshaller<T> {
                 try {
                     coll = (Collection) field.get(o);
                 } catch (IllegalAccessException e) {
-                    throw new AssertionError(e);
+                    throw assertionError("Failed to read collection field value", e);
                 }
                 if (coll instanceof RandomAccess) {
                     @NotNull List list = (List) coll;
@@ -1997,9 +2003,9 @@ public class WireMarshaller<T> {
                     }
                 } else if (coll == null) {
                     try {
-                        field.set(coll, null);
+                        field.set(o, null);
                     } catch (IllegalAccessException e) {
-                        throw new AssertionError(e);
+                        throw assertionError("Failed to clear collection field value", e);
                     }
                 } else {
                     for (Object element : coll) {
@@ -2048,12 +2054,11 @@ public class WireMarshaller<T> {
         }
 
         /**
-         * Provides a supplier to create a new instance of the collection type associated with this field access.
+         * Creates a supplier for the declared collection type.
          * <p>
-         * This method utilizes the ObjectUtils utility class to instantiate a new collection object
-         * based on the type.
+         * Uses ObjectUtils to instantiate the concrete collection class.
          *
-         * @return A supplier that can create a new instance of the collection type.
+         * @return a supplier that creates a new collection instance
          */
         private Supplier<Collection> newInstance() {
             return () -> (Collection) ObjectUtils.newInstance(type);
@@ -2156,12 +2161,11 @@ public class WireMarshaller<T> {
         }
 
         /**
-         * Provides a supplier to create a new instance of the collection type associated with this field access.
+         * Creates a supplier for string collection instances.
          * <p>
-         * This method utilizes the ObjectUtils utility class to instantiate a new collection object
-         * based on the type.
+         * Uses ObjectUtils to instantiate the concrete collection class.
          *
-         * @return A supplier that can create a new instance of the collection type.
+         * @return a supplier that creates a new string collection
          */
         private Supplier<Collection> newInstance() {
             return () -> (Collection) ObjectUtils.newInstance(type);
@@ -2572,7 +2576,7 @@ public class WireMarshaller<T> {
     static class ByteLongConverterFieldAccess extends LongConverterFieldAccess {
 
         /**
-         * Constructs a new instance
+         * Initialises byte field access with a long converter.
          *
          * @param field         The byte field to be accessed.
          * @param longConverter The converter to be used for the transformations.
@@ -2622,7 +2626,7 @@ public class WireMarshaller<T> {
     static class ShortLongConverterFieldAccess extends LongConverterFieldAccess {
 
         /**
-         * Constructs a new instance
+         * Initialises short field access with a long converter.
          *
          * @param field         The short field to be accessed.
          * @param longConverter The converter to be used for the transformations.
@@ -2672,7 +2676,7 @@ public class WireMarshaller<T> {
     static class CharLongConverterFieldAccess extends LongConverterFieldAccess {
 
         /**
-         * Constructs a new instance
+         * Initialises char field access with a long converter.
          *
          * @param field         The char field to be accessed.
          * @param longConverter The converter used for transformations.
@@ -2722,7 +2726,7 @@ public class WireMarshaller<T> {
     static class IntLongConverterFieldAccess extends LongConverterFieldAccess {
 
         /**
-         * Constructs a new instance
+         * Initialises int field access with a long converter.
          *
          * @param field         The int field to be accessed.
          * @param longConverter The converter used for transformations.

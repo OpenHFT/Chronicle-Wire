@@ -51,7 +51,7 @@ class ValueInStack {
      */
     public void pop() {
         if (level < 0)
-            throw new IllegalStateException();
+            throw new IllegalStateException("ValueInStack underflow at level " + level);
         level--;
     }
 

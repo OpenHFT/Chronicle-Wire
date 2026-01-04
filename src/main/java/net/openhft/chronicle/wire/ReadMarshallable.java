@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 public interface ReadMarshallable extends CommonMarshallable {
 
     /**
-     * An instance that ignores all input when reading.
+     * An instance that discards wire input when reading values.
      */
     @Deprecated(/* to be removed in 2027 */)
     ReadMarshallable DISCARD = w -> {};

@@ -145,7 +145,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
             lc = (LongConverter) ObjectUtils.newInstance(value);
         } catch (IllegalAccessException e) {
             // Throw an exception if there's a problem accessing the field.
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to access LongConverter INSTANCE for " + value.getName(), e);
         }
         LongConverter finalLc = lc;
         return a -> {

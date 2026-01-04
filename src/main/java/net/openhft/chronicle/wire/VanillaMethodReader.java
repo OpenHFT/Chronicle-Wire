@@ -81,7 +81,7 @@ public class VanillaMethodReader implements MethodReader {
     private boolean closed;
 
     /**
-     * Convenience constructor used by generated code.
+     * Convenience constructor for generated code with metadata handlers.
      *
      * @param in                             source of wire messages
      * @param ignoreDefault                  if true default interface methods are skipped
@@ -101,7 +101,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     /**
-     * Convenience constructor used by generated code.
+     * Convenience constructor for generated code with a field number parselet.
      *
      * @param in                             source of wire messages
      * @param ignoreDefault                  if true default interface methods are skipped
@@ -266,12 +266,12 @@ public class VanillaMethodReader implements MethodReader {
                             updateContext(contextHolder, methodHandle.invokeExact(arg));
                         }
                     } catch (Throwable t) {
-                        throw new InvocationTargetException(t);
+                        throw new InvocationTargetException(t, "Method handle invocation failed for " + method.getName());
                     }
                 }
             }
         } catch (InvocationTargetException e) {
-            throw new InvocationTargetRuntimeException(e);
+            throw new InvocationTargetRuntimeException(e /* method invocation failed */);
         } catch (Throwable e) {
             String msg = "Failure to dispatch message: " + method.getName() + " " + Arrays.asList(argHolder);
             Jvm.warn().on(target.getClass(), msg, e);
@@ -283,7 +283,7 @@ public class VanillaMethodReader implements MethodReader {
      * Used to support chained calls where methods return a new handler.
      */
     private static void updateContext(Object[] contextHolder, Object intercept) {
-//        System.err.println("context: " + (intercept == null ? null : intercept.getClass()));
+        //        System.err.println("context: " + (intercept == null ? null : intercept.getClass()));
         contextHolder[0] = intercept;
     }
 
@@ -516,7 +516,7 @@ public class VanillaMethodReader implements MethodReader {
      */
     public void throwExceptionIfClosed() {
         if (isClosed())
-            throw new IllegalStateException("Closed");
+            throw new IllegalStateException("Reader is closed.");
     }
 
     /**
@@ -800,7 +800,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     /**
-     * Read and dispatch a single message.
+     * Reads and dispatches a single message from the wire.
      */
     @Override
     public boolean readOne() throws InvocationTargetRuntimeException {
@@ -865,7 +865,7 @@ public class VanillaMethodReader implements MethodReader {
     }
 
     /**
-     * Return the configured {@link MethodReaderInterceptorReturns} if any.
+     * Returns the configured interceptor for return values, if any.
      */
     @Override
     public MethodReaderInterceptorReturns methodReaderInterceptorReturns() {

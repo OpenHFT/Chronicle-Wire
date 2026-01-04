@@ -14,7 +14,7 @@ package net.openhft.chronicle.wire;
  */
 @SuppressWarnings("deprecation")
 public enum NoDocumentContext implements DocumentContext {
-    /** The singleton instance of the NoDocumentContext */
+    /** Singleton instance used as a safe sentinel for missing document contexts. */
     INSTANCE;
 
     @Override

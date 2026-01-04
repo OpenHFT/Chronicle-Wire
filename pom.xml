@@ -22,6 +22,9 @@
     <description>Chronicle-Wire</description>
     <packaging>bundle</packaging>
     <properties>
+        <!-- JVM args for Surefire - inherited from root-parent-pom profiles (java11/java17) -->
+        <surefireArgLine></surefireArgLine>
+        <!-- jvm.requiredArgs and jvm.extraArgs inherited from parent profiles -->
         <!-- Define the target coverage thresholds as properties -->
         <jacoco.line.coverage>0.72</jacoco.line.coverage>
         <jacoco.branch.coverage>0.66</jacoco.branch.coverage>
@@ -93,6 +96,12 @@
             <groupId>net.openhft</groupId>
             <artifactId>chronicle-test-framework</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -251,6 +260,19 @@
                     <runOrder>hourly</runOrder>
                     <!-- Allow jacoco/others to inject via surefireArgLine along with JPMS flags -->
                     <argLine>${surefireArgLine} ${jvm.requiredArgs}</argLine>
+                </configuration>
+            </plugin>
+
+            <!-- Extend SpotBugs excludes for generated method writer/reader test classes -->
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <configuration>
+                    <includeFilterFile>net/openhft/quality/spotbugs26/chronicle-spotbugs-include.xml</includeFilterFile>
+                    <excludeFilterFile>net/openhft/quality/spotbugs26/chronicle-spotbugs-exclude.xml</excludeFilterFile>
+                    <excludeFilterFiles>
+                        <excludeFilterFile>${project.basedir}/config/spotbugs-exclude.xml</excludeFilterFile>
+                    </excludeFilterFiles>
                 </configuration>
             </plugin>
 

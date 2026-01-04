@@ -45,7 +45,7 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
     }
 
     /**
-     * Retrieves the encapsulated {@link DocumentContext} instance.
+     * Returns the current {@link DocumentContext} held by this wrapper.
      *
      * @return The current {@link DocumentContext} instance.
      */

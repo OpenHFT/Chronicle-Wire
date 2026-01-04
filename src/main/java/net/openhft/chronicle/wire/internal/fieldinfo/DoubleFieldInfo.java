@@ -44,7 +44,7 @@ public final class DoubleFieldInfo extends UnsafeFieldInfo {
         try {
             UnsafeMemory.unsafePutDouble(object, getOffset(), value);
         } catch (@NotNull NoSuchFieldException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException("Failed to set double field '" + name() + "'", e);
         }
     }
 

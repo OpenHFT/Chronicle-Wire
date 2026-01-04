@@ -80,7 +80,7 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
     }
 
     /**
-     * Validates a bit index range.
+     * Validates that the bit index range is non-negative and ordered.
      *
      * @param fromIndex inclusive start bit
      * @param toIndex   exclusive end bit
@@ -177,7 +177,7 @@ abstract class AbstractBitSetSupport extends AbstractCloseable {
     }
 
     /**
-     * Zeros out the target word.
+     * Clears all bits in the target word.
      *
      * @param wordIndex index of the word to clear
      */

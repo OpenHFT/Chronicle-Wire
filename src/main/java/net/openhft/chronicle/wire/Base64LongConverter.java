@@ -16,7 +16,7 @@ package net.openhft.chronicle.wire;
 public class Base64LongConverter extends AbstractLongConverter {
 
     /**
-     * A singleton instance of {@link Base64LongConverter}.
+     * Singleton instance shared for base64 conversions.
      */
     public static final Base64LongConverter INSTANCE = new Base64LongConverter();
 

@@ -264,7 +264,7 @@ public class DefaultValueIn implements ValueIn {
     }
 
     /**
-     * Always {@code false} as no sequence exists.
+     * Always {@code false} because default values do not expose a sequence.
      */
     @Override
     public boolean hasNext() {
@@ -272,7 +272,7 @@ public class DefaultValueIn implements ValueIn {
     }
 
     /**
-     * Always {@code false} as no sequence exists.
+     * Always {@code false} because default values have no sequence items to read.
      */
     @Override
     public boolean hasNextSequenceItem() {
@@ -288,7 +288,7 @@ public class DefaultValueIn implements ValueIn {
     }
 
     /**
-     * Not implemented for default values.
+     * Not implemented for default values; long array updates are unsupported.
      */
     @NotNull
     @Override
@@ -315,7 +315,7 @@ public class DefaultValueIn implements ValueIn {
     }
 
     /**
-     * Not implemented for default values.
+     * Not implemented for default values; BooleanValue updates are unsupported.
      */
     @Override
     public WireIn bool(@NotNull final BooleanValue ret) {
@@ -383,7 +383,7 @@ public class DefaultValueIn implements ValueIn {
     }
 
     /**
-     * Supplies a {@code null} type prefix.
+     * Supplies a {@code null} type prefix to indicate no explicit type for defaults.
      */
     @NotNull
     @Override
@@ -393,7 +393,7 @@ public class DefaultValueIn implements ValueIn {
     }
 
     /**
-     * Supplies a {@code null} type prefix to {@code ts} and returns the wire.
+     * Supplies a {@code null} type prefix to {@code ts} and returns the wire input.
      */
     @NotNull
     @Override
@@ -408,7 +408,7 @@ public class DefaultValueIn implements ValueIn {
     }
 
     /**
-     * Returns {@link #defaultValue} unchanged.
+     * Returns {@link #defaultValue} unchanged because no marshalling occurs for defaults.
      */
     @Nullable
     @Override
@@ -476,7 +476,7 @@ public class DefaultValueIn implements ValueIn {
     }
 
     /**
-     * Always {@link BracketType#NONE} as no value is read.
+     * Always {@link BracketType#NONE} because default values do not read brackets.
      */
     @NotNull
     @Override
@@ -490,7 +490,7 @@ public class DefaultValueIn implements ValueIn {
     }
 
     /**
-     * Returns {@link #defaultValue}.
+     * Returns {@link #defaultValue} because default values bypass type inference.
      */
     @Override
     public Object objectWithInferredType(Object using, SerializationStrategy strategy, Class<?> type) {
@@ -498,7 +498,7 @@ public class DefaultValueIn implements ValueIn {
     }
 
     /**
-     * Always {@code false}; nothing was found on the wire.
+     * Always {@code false}; default values are not read from a wire.
      */
     @Override
     public boolean isPresent() {
@@ -506,7 +506,7 @@ public class DefaultValueIn implements ValueIn {
     }
 
     /**
-     * Always {@code false}.
+     * Always {@code false}; default values do not carry explicit type markers.
      */
     @Override
     public boolean isTyped() {

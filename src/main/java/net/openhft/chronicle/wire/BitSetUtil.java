@@ -9,7 +9,7 @@ import java.lang.reflect.Field;
 import java.util.BitSet;
 
 /**
- * Utility class to access and manipulate the internals of the {@link BitSet} class.
+ * Utility class providing reflective access to {@link BitSet} word storage and usage metadata.
  * <p>
  * This class provides methods to directly interact with the underlying word storage
  * and related metadata of a BitSet. It leverages reflection to access private fields.

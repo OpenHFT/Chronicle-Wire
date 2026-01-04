@@ -65,7 +65,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         bytes.writeHexDumpDescription("msg-length");
         this.position = bytes.writePosition();
         metaDataBit = metaData ? Wires.META_DATA : 0;
-        tmpHeader = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
+        tmpHeader = metaDataBit | Wires.NOT_COMPLETE_UNKNOWN_LENGTH;
         bytes.writeInt(tmpHeader);
         rollback = false;
         notComplete = true;

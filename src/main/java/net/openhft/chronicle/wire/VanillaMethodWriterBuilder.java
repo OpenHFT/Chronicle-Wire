@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
- * Builder for dynamic proxies that write method calls to a {@link MarshallableOut}.
+ * Builder for dynamic proxies that write method calls to a {@link MarshallableOut} wire.
  *
  * <p>The writer attempts to generate and compile a dedicated implementation for
  * the configured interfaces. If generation is disabled or fails it falls back to
@@ -47,6 +47,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
 
     // Cache of generated writer classes keyed by name
     private static final Map<String, Class> classCache = new ConcurrentHashMap<>();
+    private static final Object CLASS_CACHE_LOCK = new Object();
 
     // Interfaces that must not be implemented by writer proxies
     private static final List<Class> invalidSuperInterfaces = Arrays.asList(
@@ -314,7 +315,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             } catch (ClassNotFoundException e) {
                 Class<?> clazz;
                 // only one thread at a time so two threads don't try to generate the same class.
-                synchronized (classCache) {
+                synchronized (CLASS_CACHE_LOCK) {
                     clazz = classCache.computeIfAbsent(fullClassName, this::newClass);
                 }
                 if (clazz != null && clazz != COMPILE_FAILED) {

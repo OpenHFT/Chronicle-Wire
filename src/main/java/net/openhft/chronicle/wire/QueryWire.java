@@ -105,7 +105,7 @@ public class QueryWire extends TextWire {
     }
 
     /**
-     * Starts a query parameter using the supplied key.
+     * Starts a query parameter using the key name from the supplied {@link WireKey}.
      * The value is written when a primitive writer is invoked.
      */
     @NotNull
@@ -115,7 +115,7 @@ public class QueryWire extends TextWire {
     }
 
     /**
-     * Starts a query parameter using the supplied key.
+     * Starts a query parameter using the supplied field name text.
      * The value is written when a primitive writer is invoked.
      */
     @NotNull
@@ -155,7 +155,7 @@ public class QueryWire extends TextWire {
     }
 
     /**
-     * Unsupported for query strings.
+     * Query strings do not support LongValue bindings.
      */
     @NotNull
     @Override
@@ -164,7 +164,7 @@ public class QueryWire extends TextWire {
     }
 
     /**
-     * Unsupported for query strings.
+     * Query strings do not support IntValue bindings.
      */
     @NotNull
     @Override
@@ -173,7 +173,7 @@ public class QueryWire extends TextWire {
     }
 
     /**
-     * Unsupported for query strings.
+     * Query strings do not support long array references.
      */
     @NotNull
     @Override
@@ -182,7 +182,7 @@ public class QueryWire extends TextWire {
     }
 
     /**
-     * Unsupported for query strings.
+     * Query strings do not support int array references.
      */
     @Override
     public @NotNull IntArrayValues newIntArrayReference() {
@@ -205,7 +205,7 @@ public class QueryWire extends TextWire {
         },
 
         /**
-         * Terminates a value at '&' (delimiter) or end of input.
+         * Terminates a query value at '&' (delimiter) or end of input.
          */
         QUERY_VALUE {
             @Override
@@ -288,7 +288,7 @@ public class QueryWire extends TextWire {
         }
 
         /**
-         * Unsupported for query strings.
+         * Query strings do not support writing raw {@link BytesStore} values.
          */
         @NotNull
         @Override
@@ -297,7 +297,7 @@ public class QueryWire extends TextWire {
         }
 
         /**
-         * Writes the raw bytes as-is.
+         * Writes the raw bytes without Base64 encoding.
          */
         @NotNull
         @Override
@@ -324,7 +324,7 @@ public class QueryWire extends TextWire {
         }
 
         /**
-         * Unsupported for query strings.
+         * Query strings do not support long array capacity declarations.
          */
         @NotNull
         @Override
@@ -333,7 +333,7 @@ public class QueryWire extends TextWire {
         }
 
         /**
-         * Unsupported for query strings.
+         * Query strings do not support long array value bindings.
          */
         @NotNull
         @Override
@@ -354,7 +354,7 @@ public class QueryWire extends TextWire {
         }
 
         /**
-         * Unsupported for query strings.
+         * Query strings do not support literal type names.
          */
         @NotNull
         @Override
@@ -363,7 +363,7 @@ public class QueryWire extends TextWire {
         }
 
         /**
-         * Unsupported for query strings.
+         * Query strings do not support translated type literals.
          */
         @NotNull
         @Override
@@ -372,7 +372,7 @@ public class QueryWire extends TextWire {
         }
 
         /**
-         * Unsupported for query strings.
+         * Query strings do not support int32 binding placeholders.
          */
         @NotNull
         @Override
@@ -381,7 +381,7 @@ public class QueryWire extends TextWire {
         }
 
         /**
-         * Unsupported for query strings.
+         * Query strings do not support bound int32 references.
          */
         @NotNull
         @Override
@@ -390,7 +390,7 @@ public class QueryWire extends TextWire {
         }
 
         /**
-         * Unsupported for query strings.
+         * Query strings do not support int64 binding placeholders.
          */
         @NotNull
         @Override
@@ -399,7 +399,7 @@ public class QueryWire extends TextWire {
         }
 
         /**
-         * Unsupported for query strings.
+         * Query strings do not support bound int64 references.
          */
         @NotNull
         @Override
@@ -429,7 +429,7 @@ public class QueryWire extends TextWire {
         }
 
         /**
-         * Writes a sequence with a provided class.
+         * Writes a sequence using a class token for formatting.
          */
         @NotNull
         @Override
@@ -479,7 +479,7 @@ public class QueryWire extends TextWire {
         }
 
         /**
-         * Unsupported for query strings.
+         * Query strings do not support map serialisation.
          */
         @NotNull
         @Override
@@ -488,7 +488,7 @@ public class QueryWire extends TextWire {
         }
 
         /**
-         * Unsupported for query strings.
+         * Query strings do not support unnamed nested writes.
          */
         @Override
         @NotNull
@@ -516,7 +516,7 @@ public class QueryWire extends TextWire {
      */
     class QueryValueIn extends TextValueIn {
         /**
-         * Returns the value text of the current parameter.
+         * Returns the current query parameter value text without decoding.
          */
         @Override
         public String text() {
@@ -526,7 +526,7 @@ public class QueryWire extends TextWire {
         }
 
         /**
-         * Reads the value text up to '&' and appends it to {@code a}.
+         * Reads the parameter value up to '&' and appends it to the {@link StringBuilder}.
          */
         @Nullable
         @Override
@@ -537,7 +537,7 @@ public class QueryWire extends TextWire {
         }
 
         /**
-         * Reads the value text up to '&' and appends it to {@code a}.
+         * Reads the parameter value up to '&' and appends it to the {@link Bytes} target.
          */
         @Nullable
         @Override

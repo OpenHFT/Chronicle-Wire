@@ -39,7 +39,9 @@ public interface Demarshallable {
                 Jvm.setAccessible(declaredConstructor);
                 return declaredConstructor;
             } catch (NoSuchMethodException e) {
-                throw new AssertionError(e);
+                AssertionError error = new AssertionError("Missing WireIn constructor for " + type.getName());
+                error.initCause(e);
+                throw error;
             }
         }
     };
@@ -61,11 +63,13 @@ public interface Demarshallable {
             return (T) constructor.newInstance(wireIn);
 
         } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
+            AssertionError error = new AssertionError("Cannot access WireIn constructor for " + clazz.getName());
+            error.initCause(e);
+            throw error;
         } catch (InvocationTargetException ite) {
             throw new IORuntimeException(ite.getCause());
         }  catch (Throwable e) {
-            throw new IORuntimeException(e);
+            throw new IORuntimeException("Failed to construct demarshallable " + clazz.getName(), e);
         }
     }
 }

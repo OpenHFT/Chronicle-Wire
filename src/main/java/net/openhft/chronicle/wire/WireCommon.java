@@ -59,15 +59,14 @@ public interface WireCommon {
     Bytes<?> bytes();
 
     /**
-     * Returns the bytes() but only for comment.
+     * Returns a bytes description used for comment rendering.
      *
      * @return the bytes() but only for comment
      */
     HexDumpBytesDescription<?> bytesComment();
 
     /**
-     * Creates and returns a new {@link IntValue}. The {@link IntValue} implementation that is
-     * returned depends on the wire implementation.
+     * Creates a new IntValue reference backed by the wire implementation.
      *
      * @return a new {@link IntValue}.
      */
@@ -75,8 +74,7 @@ public interface WireCommon {
     IntValue newIntReference();
 
     /**
-     * Creates and returns a new {@link LongValue}. The {@link LongValue} implementation that is
-     * returned depends on the wire implementation.
+     * Creates a new LongValue reference backed by the wire implementation.
      *
      * @return a new {@link LongValue}
      */
@@ -84,8 +82,7 @@ public interface WireCommon {
     LongValue newLongReference();
 
     /**
-     * Creates and returns a new {@link TwoLongValue}. The {@link TwoLongValue} implementation that
-     * is returned depends on the wire implementation.
+     * Creates a new TwoLongValue reference backed by the wire implementation.
      *
      * @return a new {@link TwoLongValue}
      */
@@ -95,8 +92,7 @@ public interface WireCommon {
     }
 
     /**
-     * Creates and returns a new {@link LongArrayValues}. The {@link LongArrayValues} implementation that
-     * is returned depends on the wire implementation.
+     * Creates a new LongArrayValues reference backed by the wire implementation.
      *
      * @return a new {@link LongArrayValues}
      */
@@ -104,8 +100,7 @@ public interface WireCommon {
     LongArrayValues newLongArrayReference();
 
     /**
-     * Creates and returns a new {@link IntArrayValues}. The {@link IntArrayValues} implementation that
-     * is returned depends on the wire implementation.
+     * Creates a new IntArrayValues reference backed by the wire implementation.
      *
      * @return a new {@link IntArrayValues}
      */
@@ -184,8 +179,7 @@ public interface WireCommon {
     boolean usePadding();
 
     /**
-     * Creates and returns a new {@link BooleanValue}. The {@link BooleanValue} implementation that is
-     * returned depends on the wire implementation.
+     * Creates a new BooleanValue reference backed by the wire implementation.
      *
      * @return a new {@link BooleanValue}.
      */
@@ -209,7 +203,7 @@ public interface WireCommon {
     boolean isBinary();
 
     /**
-     * Reset the state of the wire
+     * Resets the internal state of the wire implementation.
      */
     void reset();
 }

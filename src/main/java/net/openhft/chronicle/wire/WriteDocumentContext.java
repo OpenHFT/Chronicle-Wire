@@ -36,7 +36,7 @@ public interface WriteDocumentContext extends DocumentContext {
     void chainedElement(boolean chainedElement);
 
     /**
-     * Checks if the writing context is empty.
+     * Checks whether the writing context contains any data.
      *
      * @return {@code true} if the context is empty; otherwise, {@code false}.
      */

@@ -18,7 +18,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
- * Defines the standard interface for reading sequentially from a Bytes stream.
+ * Defines the standard interface for reading sequentially from a Bytes stream with explicit document boundaries.
  */
 @DontChain
 public interface WireIn extends WireCommon, MarshallableIn {
@@ -169,9 +169,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
     void clear();
 
     /**
-     * This consumes any padding before checking if readRemaining() &gt; 0 <p> NOTE: This method
-     * only works inside a document. Call it just before a document and it won't know not to read
-     * the read in case there is padding.
+     * Convenience alias for {@link #isNotEmptyAfterPadding()} when reading inside a document.
      *
      * @return if there is more data to be read in this document.
      */
@@ -180,9 +178,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     /**
-     * This consumes any padding before checking if readRemaining() &gt; 0 <p> NOTE: This method
-     * only works inside a document. Call it just before a document and it won't know not to read
-     * the read in case there is padding.
+     * Consumes document padding and reports whether additional content remains in the current document.
      *
      * @return if there is more data to be read in this document.
      */
@@ -192,7 +188,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
     }
 
     /**
-     * Checks if the WireIn is empty.
+     * Checks whether the underlying Bytes is empty at the current read position.
      *
      * @return true if empty, otherwise false.
      */
@@ -286,7 +282,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
     void commentListener(Consumer<CharSequence> commentListener);
 
     /**
-     * Consume a header if one is available.
+     * Consumes a data header if one is available within the current document range.
      *
      * @return true, if a message can be read between readPosition and readLimit, else false if no
      * header is ready.
@@ -314,7 +310,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
     void readAndSetLength(long position);
 
     /**
-     * Reads the first header in the stream with a timeout.
+     * Reads the first header in the stream, waiting up to the specified timeout for data to arrive.
      *
      * @param timeout   Maximum time to wait for a header to be available.
      * @param timeUnit  The unit of time for the timeout.
@@ -324,7 +320,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
     void readFirstHeader(long timeout, TimeUnit timeUnit) throws TimeoutException, StreamCorruptedException;
 
     /**
-     * Reads the first header in the stream.
+     * Reads the first header in the stream without waiting for further data to arrive.
      *
      * @throws StreamCorruptedException If there is an error in reading the header due to stream corruption.
      */
@@ -386,19 +382,19 @@ public interface WireIn extends WireCommon, MarshallableIn {
      */
     enum HeaderType {
         /**
-         * No header was found or read.
+         * No header marker was found at the current read position.
          */
         NONE,
         /**
-         * Data header was found or read.
+         * Data header marker was found at the current read position.
          */
         DATA,
         /**
-         * Metadata header was found or read.
+         * Metadata header marker was found at the current read position.
          */
         META_DATA,
         /**
-         * End-of-file marker was found or read.
+         * End-of-file marker was found at the current read position.
          */
         EOF
     }

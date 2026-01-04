@@ -16,7 +16,7 @@ import java.util.function.BiConsumer;
  */
 final class TextYamlCommon {
     /**
-     * Utility holder; not instantiable.
+     * Utility holder for shared text/YAML helpers; not instantiable.
      */
     private TextYamlCommon() {
     }

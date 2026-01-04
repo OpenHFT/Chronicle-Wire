@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * Classifies message paths based on the history of each message.
+ * Classifies message paths based on the recorded source history for each message.
  * <p>
  * In systems where messages may traverse several hops, known routes can be
  * registered as patterns of source IDs. Each pattern is linked to a {@code pathId}

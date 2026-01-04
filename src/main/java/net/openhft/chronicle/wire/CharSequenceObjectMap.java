@@ -64,11 +64,11 @@ public class CharSequenceObjectMap<T> {
             }
             h = (h + 1) & mask;  // Increment the hash and wrap it.
         }
-        throw new IllegalStateException("Map is full");
+        throw new IllegalStateException("Map is full; unable to insert key '" + name + "'");
     }
 
     /**
-     * Retrieve the value associated with a key.
+     * Retrieves the value mapped to the provided key by probing the open-addressed table.
      *
      * @param cs the key to search for
      * @return the mapped value, or {@code null} if the key is absent or the map is
@@ -84,7 +84,7 @@ public class CharSequenceObjectMap<T> {
                 return values[i];
             h = (h + 1) & mask;  // Increment the hash and wrap it.
         }
-        throw new IllegalStateException("Map is full");
+        throw new IllegalStateException("Map is full; lookup failed for key '" + cs + "'");
     }
 
     /**

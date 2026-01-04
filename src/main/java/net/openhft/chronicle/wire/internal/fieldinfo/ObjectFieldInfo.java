@@ -48,7 +48,7 @@ public final class ObjectFieldInfo extends UnsafeFieldInfo {
         try {
             UnsafeMemory.unsafePutObject(object, getOffset(), value2);
         } catch (@NotNull NoSuchFieldException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException("Failed to set object field '" + name() + "'", e);
         }
     }
 

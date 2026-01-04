@@ -161,7 +161,7 @@ public interface LongConverter {
     }
 
     /**
-     * Checks that the length of the provided text does not exceed the allowable maximum.
+     * Checks that the specified range within the provided text does not exceed the allowable maximum.
      *
      * @param textToCheck The text to check
      * @param beginIndex the beginning index, inclusive.

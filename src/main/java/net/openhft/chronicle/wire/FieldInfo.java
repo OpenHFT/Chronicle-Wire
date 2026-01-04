@@ -66,7 +66,7 @@ public interface FieldInfo {
             case MAP:
                 break;
             case HISTORY_MESSAGE:
-                throw new AssertionError();
+                throw new AssertionError("History message bracket type is not supported for " + aClass.getName());
             default:
                 // assume it could be a map
                 break;
@@ -129,8 +129,8 @@ public interface FieldInfo {
 
     /**
      * Returns the value of the field represented by this {@code FieldInfo} object
-     * as a {@code long} primitive. The provided {@code object} is used as a target
-     * to extract the field from.
+     * as a primitive long value. The provided {@code object} is used as a target
+     * from which the field value is extracted.
      *
      * @param object target instance from which to read
      * @return the value of the field represented by this {@code FieldInfo} object
@@ -140,8 +140,8 @@ public interface FieldInfo {
 
     /**
      * Returns the value of the field represented by this {@code FieldInfo} object
-     * as an {@code int} primitive. The provided {@code object} is used as a target
-     * to extract the field from.
+     * as a primitive int value. The provided {@code object} is used as a target
+     * from which the field value is extracted.
      *
      * @param object target instance from which to read
      * @return the value of the field represented by this {@code FieldInfo} object
@@ -151,8 +151,8 @@ public interface FieldInfo {
 
     /**
      * Returns the value of the field represented by this {@code FieldInfo} object
-     * as a {@code char} primitive. The provided {@code object} is used as a target
-     * to extract the field from.
+     * as a primitive char value. The provided {@code object} is used as a target
+     * from which the field value is extracted.
      *
      * @param object target instance from which to read
      * @return the value of the field represented by this {@code FieldInfo} object
@@ -162,8 +162,8 @@ public interface FieldInfo {
 
     /**
      * Returns the value of the field represented by this {@code FieldInfo} object
-     * as a {@code double} primitive. The provided {@code object} is used as a target
-     * to extract the field from.
+     * as a primitive double value. The provided {@code object} is used as a target
+     * from which the field value is extracted.
      *
      * @param object target instance from which to read
      * @return the value of the field represented by this {@code FieldInfo} object
@@ -172,9 +172,7 @@ public interface FieldInfo {
     double getDouble(Object object);
 
     /**
-     * Sets the value of the field represented by this {@code FieldInfo} object
-     * to the provided {@code value}. The provided {@code object} is used as a
-     * target to the extract eh field from.
+     * Sets the field value using an {@link Object} reference on the target instance.
      *
      * @param object target instance to modify
      * @param value  new value to set
@@ -182,9 +180,7 @@ public interface FieldInfo {
     void set(Object object, Object value) throws IllegalArgumentException;
 
     /**
-     * Sets the value of the field represented by this {@code FieldInfo} object
-     * to the provided {@code value}. The provided {@code object} is used as a
-     * target to the extract eh field from.
+     * Sets the field value as a primitive char on the target instance.
      *
      * @param object target instance to modify
      * @param value  new value to set
@@ -192,9 +188,7 @@ public interface FieldInfo {
     void set(Object object, char value) throws IllegalArgumentException;
 
     /**
-     * Sets the value of the field represented by this {@code FieldInfo} object
-     * to the provided {@code value}. The provided {@code object} is used as a
-     * target to the extract eh field from.
+     * Sets the field value as a primitive int on the target instance.
      *
      * @param object target instance to modify
      * @param value  new value to set
@@ -202,9 +196,7 @@ public interface FieldInfo {
     void set(Object object, int value) throws IllegalArgumentException;
 
     /**
-     * Sets the value of the field represented by this {@code FieldInfo} object
-     * to the provided {@code value} of type {@code long}. The provided {@code object} is used as a
-     * target from which the field is extracted.
+     * Sets the field value as a primitive long on the target instance.
      *
      * @param object The object containing the field to be set.
      * @param value  The value to set the field to.
@@ -215,9 +207,7 @@ public interface FieldInfo {
     void set(Object object, long value) throws IllegalArgumentException;
 
     /**
-     * Sets the value of the field represented by this {@code FieldInfo} object
-     * to the provided {@code value} of type {@code double}. The provided {@code object} is used as a
-     * target from which the field is extracted.
+     * Sets the field value as a primitive double on the target instance.
      *
      * @param object The object containing the field to be set.
      * @param value  The value to set the field to.

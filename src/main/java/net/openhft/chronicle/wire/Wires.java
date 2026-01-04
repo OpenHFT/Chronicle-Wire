@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.*;
@@ -140,7 +141,7 @@ public enum Wires {
             constructor.setAccessible(true);
             return typeName -> newInstance(constructor, typeName);
         } catch (Exception e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("Failed to create tuple proxy for " + tClass.getName(), e);
         }
     });
     /**
@@ -164,7 +165,17 @@ public enum Wires {
      * Flag indicating whether tuple generation is permitted via the
      * {@code wire.generate.tuples} system property.
      */
+    @SuppressFBWarnings(value = "MS_PKGPROTECT", justification = "Public API flag used by callers to control tuple generation.")
     public static boolean GENERATE_TUPLES = Jvm.getBoolean("wire.generate.tuples");
+
+    /**
+     * Updates the tuple generation flag for callers that need to override the default.
+     *
+     * @param generateTuples {@code true} to allow tuple generation, {@code false} to disable it
+     */
+    public static void setGenerateTuples(boolean generateTuples) {
+        GENERATE_TUPLES = generateTuples;
+    }
 
     // Used to ensure an untyped bytes warning is logged only once
     static volatile boolean warnedUntypedBytesOnce = false;
@@ -438,7 +449,7 @@ public enum Wires {
     }
 
     /**
-     * Creates a new JSONWire instance.
+     * Creates a new JSONWire instance with text documents enabled.
      *
      * @param bytes the byte buffer for the wire
      * @return a new instance of JSONWire
@@ -493,7 +504,7 @@ public enum Wires {
     }
 
     /**
-     * Creates a new TextWire instance with timestamps.
+     * Creates a new TextWire instance that adds timestamps.
      *
      * @param bytes the byte buffer for the wire
      * @return a new instance of TextWire with timestamps
@@ -585,7 +596,7 @@ public enum Wires {
     }
 
     /**
-     * Returns {@code true} if the header has not been initialised.
+     * Returns {@code true} when the header has not been initialised yet.
      *
      * @param len header bits to test
      * @return {@code true} when the header is {@link #NOT_INITIALIZED}
@@ -637,11 +648,11 @@ public enum Wires {
      * Writes data to the given WireOut using the provided writer.
      * It is inlined for performance optimization.
      *
+     * @param <T>     type of marshallable being written
      * @param wireOut the destination to write data
      * @param writer  the WriteMarshallable instance to write data
      * @return the position after writing the data
      * @throws InvalidMarshallableException if marshalling fails
-     * @param <T>     type of marshallable being written
      */
     @Deprecated(/* to be removed in 2027 */)
     public static <T extends WriteMarshallable> long writeData(
@@ -1051,7 +1062,8 @@ public enum Wires {
 
         // If we failed to create an instance of the object, throw an exception.
         if (using == null)
-            throw new ClassNotFoundRuntimeException(new ClassNotFoundException("failed to create instance of clazz=" + clazz + " is it aliased?"));
+            throw new ClassNotFoundRuntimeException(/* reason: instance must be created from clazz */
+                    new ClassNotFoundException("Failed to create instance for clazz=" + clazz + " - is it aliased?"));
 
         // Deserialize the object using the strategy.
         Object marshallable = in.marshallable(using, strategy);
@@ -1230,7 +1242,7 @@ public enum Wires {
             case UNKNOWN:
             case HISTORY_MESSAGE:
             default:
-                throw new AssertionError();
+                throw new AssertionError("Unsupported bracket type during object read: " + brackets);
         }
     }
 
@@ -1317,7 +1329,7 @@ public enum Wires {
             return (Marshallable) constructor.newInstance(new TupleInvocationHandler(typeName));
         } catch (Exception e) {
             // If any exception arises, wrap and throw it as an IllegalStateException.
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("Failed to construct tuple instance for " + typeName, e);
         }
     }
 
@@ -1337,7 +1349,7 @@ public enum Wires {
             tClass = (Class<T>) Marshallable.class;
         // Ensure the provided class is an interface.
         if (!tClass.isInterface()) {
-            Jvm.warn().on(Wires.class, "Cannot generate a class for " + typeName + " are you missing an alias?");
+            Jvm.warn().on(Wires.class, "Tuple generator cannot create a class for " + typeName + ", are you missing an alias?");
             return null;
         }
 
@@ -1503,7 +1515,7 @@ public enum Wires {
             return out.writeString(format);
         }
 
-                /**
+        /**
          * Attempts to parse a date string from a ValueIn object and return a corresponding Date object.
          *
          * @param in The ValueIn object containing the date string.
@@ -1533,7 +1545,7 @@ public enum Wires {
                         // If it's a number, interpret it as milliseconds from the epoch and return the corresponding Date.
                         return new Date(Long.parseLong(text));
                     } catch (NumberFormatException nfe) {
-                        throw new IORuntimeException(nfe);
+                        throw new IORuntimeException("Failed to parse numeric date value: " + text, nfe);
                     }
                 }
             }
@@ -1546,7 +1558,7 @@ public enum Wires {
                         return SDF_4.parse(text);
                     }
                 } catch (ParseException pe) {
-                    throw new IORuntimeException(pe);
+                    throw new IORuntimeException("Failed to parse yyyy-mm-dd date: " + text, pe);
                 }
             }
 
@@ -1816,7 +1828,7 @@ public enum Wires {
         }
 
         /**
-         * Returns the appropriate {@link SerializationStrategy} for the given class.
+         * Returns the serialisation strategy for Bytes and Base64 types.
          *
          * @param aClass The class to determine the serialization strategy for.
          * @return The corresponding serialization strategy for the given class or null if not found.

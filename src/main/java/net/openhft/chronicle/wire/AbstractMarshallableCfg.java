@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 public abstract class AbstractMarshallableCfg extends SelfDescribingMarshallable {
 
     /**
-     * Creates an empty configuration DTO.
+     * Creates an empty configuration DTO with default state.
      */
     protected AbstractMarshallableCfg() {
     }

@@ -13,10 +13,10 @@ enum Quotes {
     /** Represents the absence of a quotation mark. */
     NONE(' '),
 
-    /** Represents a single quotation mark. */
+    /** Represents a single quotation mark used for quoting text. */
     SINGLE('\''),
 
-    /** Represents a double quotation mark. */
+    /** Represents a double quotation mark used for quoting text. */
     DOUBLE('"');
 
     // The character representation of the quotation mark

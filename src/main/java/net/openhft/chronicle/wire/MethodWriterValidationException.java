@@ -4,7 +4,7 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Exception thrown when a generated {@link MethodWriter} cannot be created.
+ * Exception thrown when a generated method writer cannot be created during validation checks.
  *
  * <p>Generated writers are typically faster and richer than reflection based
  * proxies. When the generator configuration fails validation this exception is

@@ -229,7 +229,7 @@ public interface ChronicleBitSet extends Marshallable, Closeable {
     void andNot(ChronicleBitSet bitSet);
 
     /**
-     * Performs a logical AND with the given set.
+     * Applies a logical AND with the given set, clearing bits not present in both.
      *
      * @param bitSet other bit set
      */
@@ -243,7 +243,7 @@ public interface ChronicleBitSet extends Marshallable, Closeable {
     void xor(ChronicleBitSet bitSet);
 
     /**
-     * Performs a logical OR with the given set.
+     * Applies a logical OR with the given set, setting bits present in either set.
      *
      * @param bitSet other bit set
      */

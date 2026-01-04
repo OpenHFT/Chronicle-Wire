@@ -26,18 +26,18 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     public long start = -1;
     /** Start position of previous document, or -1 when none. */
     public long lastStart = -1;
-    /** Wire providing the bytes to read. */
+    /** Wire providing the bytes for this document. */
     @Nullable
     protected Wire wire;
-    /** Whether a document is currently present. */
+    /** True when a readable document header was parsed and data is available. */
     protected boolean present;
-    /** Whether the document is not complete. */
+    /** True when the current document frame is incomplete and needs more data. */
     protected boolean notComplete;
-    /** Current read position. */
+    /** Current read position within the active document. */
     protected long readPosition;
-    /** Current read limit. */
+    /** Current read limit for the active document. */
     protected long readLimit;
-    /** True if the current document is metadata. */
+    /** True when the current document frame is metadata rather than data. */
     protected boolean metaData;
     /** True if the document should be rolled back on close. */
     protected boolean rollback;
@@ -62,7 +62,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
     @Deprecated(/* to be removed in x.29 */)
     public BinaryReadDocumentContext(@Nullable Wire wire, boolean ensureFullRead) {
         this.wire = wire;
-        assert !ensureFullRead : "DeltaWire not supported";
+        assert !ensureFullRead : "DeltaWire mode is not supported";
     }
 
     @Override

@@ -224,7 +224,7 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
         throwExceptionIfClosed();
 
         if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
+            throw new IndexOutOfBoundsException("flip bitIndex < 0: " + bitIndex);
 
         int wordIndex = toWordIndex(bitIndex);
         expandTo(wordIndex);
@@ -232,14 +232,14 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
     }
 
     /**
-     * Atomically performs {@code word ^= param}.
+     * Atomically applies an XOR mask to the provided word value.
      */
     private void caret(LongValue word, long param) {
         set(word, param, (x, y) -> x ^ y);
     }
 
     /**
-     * Atomically performs {@code word &= param}.
+     * Atomically applies an AND mask to the provided word value.
      */
     private void and(LongValue word, final long param) {
         set(word, param, (x, y) -> x & y);
@@ -300,7 +300,7 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
     }
 
     /**
-     * Atomically performs {@code word |= param}.
+     * Atomically applies an OR mask to the provided word value.
      */
     private void pipe(LongValue word, long param) {
         // Set the desired bit by using the OR operation
@@ -349,7 +349,7 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
         throwExceptionIfClosed();
 
         if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
+            throw new IndexOutOfBoundsException("clear bitIndex < 0: " + bitIndex);
 
         int wordIndex = toWordIndex(bitIndex);
         if (wordIndex >= getWordsInUse())
@@ -390,7 +390,7 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
         throwExceptionIfClosed();
 
         if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
+            throw new IndexOutOfBoundsException("get bitIndex < 0: " + bitIndex);
 
         int wordIndex = toWordIndex(bitIndex);
         return (wordIndex < getWordsInUse())
@@ -409,7 +409,7 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
         throwExceptionIfClosed();
 
         if (fromIndex < 0)
-            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
+            throw new IndexOutOfBoundsException("nextSetBit fromIndex < 0: " + fromIndex);
 
         int u = toWordIndex(fromIndex);
 
@@ -448,7 +448,7 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
         throwExceptionIfClosed();
 
         if (fromIndex < 0)
-            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
+            throw new IndexOutOfBoundsException("nextSetBit range fromIndex < 0: " + fromIndex);
 
         int u = toWordIndex(fromIndex);
         if (u >= getWordsInUse())
@@ -488,7 +488,7 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
         // Neither spec nor implementation handle ChronicleBitSets of maximal length.
         // See 4816253.
         if (fromIndex < 0)
-            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
+            throw new IndexOutOfBoundsException("nextClearBit fromIndex < 0: " + fromIndex);
 
         int u = toWordIndex(fromIndex);
 
@@ -533,7 +533,7 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
             if (fromIndex == -1)
                 return -1;
             throw new IndexOutOfBoundsException(
-                    "fromIndex < -1: " + fromIndex);
+                    "previousSetBit fromIndex < -1: " + fromIndex);
         }
 
         int u = toWordIndex(fromIndex);
@@ -569,7 +569,7 @@ public class LongValueBitSet extends AbstractBitSetSupport implements Marshallab
             if (fromIndex == -1)
                 return -1;
             throw new IndexOutOfBoundsException(
-                    "fromIndex < -1: " + fromIndex);
+                    "previousClearBit fromIndex < -1: " + fromIndex);
         }
 
         int u = toWordIndex(fromIndex);

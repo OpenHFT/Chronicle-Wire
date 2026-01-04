@@ -4,7 +4,7 @@
 package net.openhft.chronicle.wire;
 
 /**
- * Interface for validating objects.
+ * Interface for validating objects against state invariants and configuration preconditions.
  *
  * <p>Implementations ensure the state of an object meets its invariants or
  * preconditions. It is often used for DTOs or configuration objects to ensure
@@ -15,7 +15,7 @@ package net.openhft.chronicle.wire;
 public interface Validate {
 
     /**
-     * Validates the provided object.
+     * Validates the provided object against invariants and preconditions.
      *
      * <p>If validation fails, this method should throw a descriptive
      * {@link RuntimeException} such as {@link IllegalStateException} or a custom

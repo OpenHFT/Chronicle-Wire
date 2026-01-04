@@ -107,8 +107,8 @@ public class WireDumper {
     }
 
     /**
-     * Dumps a specific region of the wire content, starting at {@code position}
-     * for {@code length} bytes, as a string.
+     * Dumps a specific region of the wire content using the default abbreviation setting.
+     * Starts at {@code position} for {@code length} bytes, formatted as a string.
      *
      * @param position The starting byte position in the wire's underlying buffer
      * @param length   The number of bytes to dump from the starting position

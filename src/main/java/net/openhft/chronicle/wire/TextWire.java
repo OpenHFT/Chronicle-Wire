@@ -239,7 +239,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Loads an Object from a file
+     * Loads an Object from a file path on disk.
      *
      * @param filename the file-path containing the object
      * @param <T>      the type of the object to load
@@ -463,7 +463,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             int ch = peekCode();
             // 10xx xxxx, 1111 xxxx
             if (ch > 0x80 && ((ch & 0xC0) == 0x80 || (ch & 0xF0) == 0xF0)) {
-                throw new IllegalStateException("Attempting to read binary as TextWire ch=" + Integer.toHexString(ch));
+                throw new IllegalStateException("Attempting to read binary field as TextWire ch=" + Integer.toHexString(ch));
             }
             if (ch < 0 || ch == '!' || ch == '[' || ch == '{') {
                 sb.setLength(0);
@@ -531,7 +531,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             int ch = peekCode();
             // 10xx xxxx, 1111 xxxx
             if (ch > 0x80 && ((ch & 0xC0) == 0x80 || (ch & 0xF0) == 0xF0)) {
-                throw new IllegalStateException("Attempting to read binary as TextWire ch=" + Integer.toHexString(ch));
+                throw new IllegalStateException("Attempting to read binary event as TextWire ch=" + Integer.toHexString(ch));
 
             } else if (ch == '?') {
                 bytes.readSkip(1);
@@ -1212,9 +1212,14 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
-     * Enum representing the absence of an object.
+     * Enum used as a sentinel for missing objects in TextWire.
      */
-    enum NoObject {NO_OBJECT}
+    enum NoObject {
+        /**
+         * Sentinel instance returned when no object is available.
+         */
+        NO_OBJECT
+    }
 
     /**
      * Represents a textual input value for deserialization. It manages a stack
@@ -1342,7 +1347,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                     try {
                         destination.append(Bytes.toString(bytes, bytes.readPosition(), len));
                     } catch (IOException e) {
-                        throw new AssertionError(e);
+                        throw new AssertionError("Unable to append text content from bytes: " + e);
                     }
                     // Advance the reading position by length of the content
                     bytes.readSkip(len);
@@ -1451,7 +1456,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                     // Append the read character to the provided appendable
                     destination.append(c);
                 } catch (IOException e) {
-                    throw new AssertionError(e);
+                    throw new AssertionError("Unable to append unsubstituted text: " + e);
                 }
                 // Continue reading until the end of the variable substitution syntax (i.e., '}')
             } while (!bytes.isEmpty() && c != '}');
@@ -1543,7 +1548,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                         bytesConsumer.readMarshallable(null);
                         parseWord(sb);
                     } else {
-                        throw new IORuntimeException("Unsupported type=" + sb);
+                        throw new IORuntimeException("Unsupported bytes tag type=" + sb);
                     }
                 } else {
                     textTo(sb);
@@ -1583,7 +1588,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                         return using != null ? using : EMPTY_BYTES;
                     }
 
-                    throw new IllegalStateException("unsupported type=" + stringBuilder);
+                    throw new IllegalStateException("Unsupported byte array type token=" + stringBuilder);
 
                 } else {
                     textTo(stringBuilder);
@@ -1766,7 +1771,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
                 // Prevent infinite loops by checking if reading position hasn't advanced
                 if (bytes.readPosition() == pos)
-                    throw new IllegalStateException("Stuck at pos " + pos + " " + bytes);
+                    throw new IllegalStateException("Stuck while consuming sequence at pos " + pos + " " + bytes);
             }
 
             // Consume any leading whitespace or padding
@@ -1807,7 +1812,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
                 // Prevent infinite loops by checking if the reading position hasn't advanced
                 if (bytes.readPosition() == pos)
-                    throw new IllegalStateException("Stuck at pos " + pos + " " + bytes);
+                    throw new IllegalStateException("Stuck while consuming map at pos " + pos + " " + bytes);
             }
             consumePadding();
 
@@ -1949,7 +1954,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             String s = bytes.parse8bit(StopCharTesters.CURLY_STOP);
 
             // Log a warning as this situation typically indicates a malformed or unexpected input
-            Jvm.warn().on(getClass(), "Cannot read " + s + "} as a number, treating as 0");
+            Jvm.warn().on(getClass(), "Text parser cannot read " + s + "} as a number; treating as 0");
 
             // Check the next character to see how to proceed
             if (",\n ".indexOf(peekCode()) >= 0)
@@ -2122,7 +2127,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 consumePadding(1);
                 char code2 = (char) readCode();
                 if (code2 != ']')
-                    throw new IORuntimeException("Expected a ] but got " + code2 + " (" + code2 + ")");
+                    throw new IORuntimeException("Expected closing ] after scalar sequence but got " + code2 + " (" + code2 + ")");
             }
             consumePadding(1);
             return true;
@@ -2138,7 +2143,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         /**
-         * Handles the processing of a sequence.
+         * Processes a sequence using the supplied reader and buffers.
          *
          * @param <T>       The type of items in the lists.
          * @param list      The main list that should be populated based on the buffer.
@@ -2177,7 +2182,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 consumePadding(1);
                 char code2 = (char) readCode();
                 if (code2 != ']')
-                    throw new IORuntimeException("Expected a ] but got " + code2 + " (" + code2 + ")");
+                    throw new IORuntimeException("Expected closing ] after list sequence but got " + code2 + " (" + code2 + ")");
             }
             consumePadding(1);
             return true;
@@ -2209,7 +2214,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                     consumePadding();
                     char code3 = (char) readCode();
                     if (code3 != ']')
-                        throw new IORuntimeException("Expected a ] but got " + code3 + " (" + code3 + ")");
+                        throw new IORuntimeException("Expected closing ] after typed sequence but got " + code3 + " (" + code3 + ")");
                 }
             }
 
@@ -2243,7 +2248,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             consumePadding();
             int code = peekCode();
             if (code != '{')
-                throw new IORuntimeException("Unsupported type " + (char) code);
+                throw new IORuntimeException("Unsupported marshallable start type " + (char) code);
 
             final long len = readLengthMarshallable();
 
@@ -2339,7 +2344,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                     return Wires.tupleFor(null, stringBuilder.toString());
                 }
                 String message = "Unable to load " + stringBuilder + ", is a class alias missing.";
-                throw new ClassNotFoundRuntimeException(new ClassNotFoundException(message));
+                throw new ClassNotFoundRuntimeException(/* class alias missing */ new ClassNotFoundException(message));
             }
 
             final String className = tClass.getName();
@@ -2437,7 +2442,8 @@ public class TextWire extends YamlWireOut<TextWire> {
                 typePrefix(null, (o, x) -> { /* sets acquireStringBuilder(); */});
 
             } else if (code == ',') {
-                Jvm.warn().on(getClass(), "Expected a {} but was blank for type " + object.getClass());
+                Jvm.warn().on(getClass(), "Marshallable value for type " + object.getClass()
+                        + " was blank where '{}' is required");
                 readCode();
                 return object;
 
@@ -2478,7 +2484,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             consumePadding(1);
             code = readCode();
             if (code != '}')
-                throw new IORuntimeException("Unterminated { while reading marshallable " +
+                throw new IORuntimeException("Unterminated { while reading marshallable object " +
                         object + ",code='" + (char) code + "', bytes=" + Bytes.toString(bytes, 1024)
                 );
             consumePadding(1);
@@ -2505,7 +2511,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 typePrefix(null, (o, x) -> { /* sets acquireStringBuilder(); */});
             } else if (code != '{') {
                 // Throw exception if unsupported type is encountered.
-                throw new IORuntimeException("Unsupported type " + stringForCode(code));
+                throw new IORuntimeException("Unsupported demarshallable start type " + stringForCode(code));
             }
 
             // Determine the length of the marshalled object.
@@ -2535,7 +2541,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             code = readCode();
             if (code != '}')
                 // If the object doesn't end with a closing brace '}', throw an exception.
-                throw new IORuntimeException("Unterminated { while reading marshallable " +
+                throw new IORuntimeException("Unterminated { while reading demarshallable instance " +
                         object + ",code='" + (char) code + "', bytes=" + Bytes.toString(bytes, 1024)
                 );
 
@@ -2627,7 +2633,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
                 // Unsupported type.
             } else {
-                throw new IORuntimeException("Unsupported type :" + str);
+                throw new IORuntimeException("Unsupported map type token=" + str);
             }
         }
 
@@ -2637,7 +2643,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             consumePadding();
             final StringBuilder stringBuilder = acquireStringBuilder();
             if (textTo(stringBuilder) == null)
-                throw new NullPointerException("value is null");
+                throw new NullPointerException("Boolean text value is null in TextWire.bool()");
 
             if (ObjectUtils.isTrue(stringBuilder))
                 return true;

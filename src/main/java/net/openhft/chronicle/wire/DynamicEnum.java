@@ -45,10 +45,10 @@ public interface DynamicEnum extends CoreDynamicEnum, Marshallable {
     }
 
     /**
-     * Not resettable, treat as immutable.
+     * Not resettable; treat this dynamic enum instance as immutable state.
      */
     @Override
     default void reset() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("DynamicEnum instances are immutable");
     }
 }

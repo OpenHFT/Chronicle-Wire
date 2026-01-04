@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Text based wire format for Comma Separated Values (CSV).
+ * Text based wire format for Comma Separated Values (CSV) with header support.
  *
  * <p>Suitable for simple tabular data where each line represents a record and fields
  * are delimited by commas. The first line is treated as a header row and defines the

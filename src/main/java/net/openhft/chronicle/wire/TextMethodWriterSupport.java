@@ -11,7 +11,7 @@ import net.openhft.chronicle.core.Jvm;
  */
 final class TextMethodWriterSupport {
     /**
-     * Utility holder; not instantiable.
+     * Utility holder for text method writer helpers; not instantiable.
      */
     private TextMethodWriterSupport() {
     }

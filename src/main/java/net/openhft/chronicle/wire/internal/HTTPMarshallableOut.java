@@ -70,7 +70,7 @@ public class HTTPMarshallableOut implements MarshallableOut {
                     Closeable.closeQuietly(conn);
                 }
             } catch (IOException ioe) {
-                throw new IORuntimeException(ioe);
+                throw new IORuntimeException("HTTP POST failed for " + url, ioe);
             }
             startWire();
         }

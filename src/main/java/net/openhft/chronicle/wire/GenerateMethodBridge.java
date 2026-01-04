@@ -31,7 +31,7 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
     private List<String> fnameList;
 
     /**
-     * Constructs a new instance with a fresh {@link MethodBridgeMetaData}.
+     * Constructs a new generator with fresh {@link MethodBridgeMetaData} for bridge code generation.
      */
     public GenerateMethodBridge() {
         super(new MethodBridgeMetaData());
@@ -65,7 +65,9 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
                     ? aClass.getConstructor(List.class).newInstance(toInvoke)
                     : aClass.getConstructor(List.class, UpdateInterceptor.class).newInstance(toInvoke, ui);
         } catch (Exception e) {
-            throw new AssertionError(e);
+            AssertionError error = new AssertionError("Failed to instantiate method bridge for " + destType.getName());
+            error.initCause(e);
+            throw error;
         }
     }
 
@@ -171,7 +173,7 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
         private List<Class<?>> invokes = new ArrayList<>();
 
         /**
-         * Returns the handler types.
+         * Returns the handler types that the generated bridge will dispatch to.
          */
         @Deprecated(/* to be removed in 2027, as it is only used in tests */)
         public List<Class<?>> invokes() {

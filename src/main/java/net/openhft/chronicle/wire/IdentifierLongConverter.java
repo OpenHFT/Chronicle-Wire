@@ -17,7 +17,7 @@ import net.openhft.chronicle.wire.converter.SymbolsLongConverter;
  */
 public class IdentifierLongConverter implements LongConverter {
     /**
-     * Singleton instance for reuse.
+     * Singleton instance for identifier parsing and formatting.
      */
     public static final IdentifierLongConverter INSTANCE = new IdentifierLongConverter();
 
@@ -72,8 +72,7 @@ public class IdentifierLongConverter implements LongConverter {
     }
 
     /**
-     * Appends a long identifier to a provided {@link StringBuilder} instance.
-     * The behavior changes depending on the magnitude of the identifier.
+     * Appends a long identifier to a {@link StringBuilder}, using base-66 or timestamp form.
      *
      * @param text the StringBuilder to append the identifier to
      * @param value the long identifier
@@ -81,7 +80,7 @@ public class IdentifierLongConverter implements LongConverter {
     @Override
     public void append(StringBuilder text, long value) {
         if (value < 0)
-            throw new IllegalArgumentException("value: " + value); // reserved
+            throw new IllegalArgumentException("Identifier value must be non-negative; value=" + value); // reserved
         if (value <= MAX_SMALL_ID)
             SMALL_POSITIVE.append(text, value);
         else
@@ -89,8 +88,7 @@ public class IdentifierLongConverter implements LongConverter {
     }
 
     /**
-     * Appends a long identifier to a provided {@link Bytes} instance.
-     * The behavior changes depending on the magnitude of the identifier.
+     * Appends a long identifier to {@link Bytes}, using base-66 or timestamp form.
      *
      * @param bytes the Bytes to append the identifier to
      * @param value the long identifier
@@ -98,7 +96,7 @@ public class IdentifierLongConverter implements LongConverter {
     @Override
     public void append(Bytes<?> bytes, long value) {
         if (value < 0)
-            throw new IllegalArgumentException("value: " + value); // reserved
+            throw new IllegalArgumentException("Negative identifier values are reserved; value=" + value); // reserved
         if (value <= MAX_SMALL_ID)
             SMALL_POSITIVE.append(bytes, value);
         else

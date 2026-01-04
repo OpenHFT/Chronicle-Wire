@@ -31,7 +31,7 @@ public interface Event<E extends Event<E>> extends BaseEvent<E> {
     }
 
     /**
-     * Assigns or replaces the identifier.
+     * Assigns or replaces the identifier used for routing or logging.
      *
      * @param eventId unique identifier to assign, should not be null; an empty
      *                string can be used when no specific ID is required

@@ -331,7 +331,7 @@ public final class StreamsUtil {
         @Override
         public T next() {
             if (next == null && !hasNext()) {
-                throw new NoSuchElementException();
+                throw new NoSuchElementException("No more elements available from stream iterator");
             }
             final T val = next;
             next = null;
@@ -394,7 +394,7 @@ public final class StreamsUtil {
         @Override
         public long nextLong() {
             if (next == Long.MIN_VALUE && !hasNext()) {
-                throw new NoSuchElementException();
+                throw new NoSuchElementException("No more long values available from stream iterator");
             }
             final long val = next;
             next = Long.MIN_VALUE;
@@ -458,7 +458,7 @@ public final class StreamsUtil {
         @Override
         public double nextDouble() {
             if (Double.isNaN(next) && !hasNext()) {
-                throw new NoSuchElementException();
+                throw new NoSuchElementException("No more double values available from stream iterator");
             }
             final double val = next;
             next = Double.NaN;

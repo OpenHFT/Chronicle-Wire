@@ -139,7 +139,7 @@ public final class DocumentExtractorUtil {
         }
 
         /**
-         * Returns the method name encapsulated by this instance.
+         * Returns the method name captured for extractor matching and logging.
          *
          * @return The method name.
          */

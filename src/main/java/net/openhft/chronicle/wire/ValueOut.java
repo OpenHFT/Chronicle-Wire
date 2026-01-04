@@ -73,7 +73,7 @@ public interface ValueOut {
     }
 
     /**
-     * Write a boolean value.
+     * Write a boolean value for the current wire field.
      *
      * @param flag value to write
      * @return parent wire for chaining
@@ -82,7 +82,7 @@ public interface ValueOut {
     WireOut bool(Boolean flag);
 
     /**
-     * Write a text value.
+     * Write a text value for the current wire field.
      *
      * @param s text to write
      * @return parent wire for chaining
@@ -102,7 +102,7 @@ public interface ValueOut {
     }
 
     /**
-     * Write a null value.
+     * Write a null marker for the current wire field.
      *
      * @return The WireOut instance for chained calls.
      */
@@ -125,7 +125,7 @@ public interface ValueOut {
     }
 
     /**
-     * Alias for {@link #text(char)}.
+     * Alias for {@link #text(char)} when writing a single character value.
      *
      * @param c character to write
      * @return parent wire for chaining
@@ -248,7 +248,7 @@ public interface ValueOut {
     ValueOut writeLength(long remaining);
 
     /**
-     * Write a sequence of bytes.
+     * Write a sequence of bytes to the current wire field.
      *
      * @param fromBytes  The array of bytes to be written.
      * @return The WireOut instance for chained calls.
@@ -942,7 +942,7 @@ public interface ValueOut {
     WireOut marshallable(WriteMarshallable object) throws InvalidMarshallableException;
 
     /**
-     * Writes a value that implements the {@link Serializable} interface to the wire output.
+     * Writes a {@link Serializable} object value to the wire output.
      *
      * @param object The Serializable object to be written.
      * @return The current instance of the WireOut.
@@ -1720,7 +1720,7 @@ public interface ValueOut {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> tmpBytes = stlBytes.get();
             Compression.compress(compression, uncompressedBytes, tmpBytes);
-        // Write the compressed bytes
+            // Write the compressed bytes
             bytes(compression, tmpBytes);
             return wireOut();
         }

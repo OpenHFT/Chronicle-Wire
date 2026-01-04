@@ -10,42 +10,42 @@ package net.openhft.chronicle.wire;
  */
 public enum YamlToken {
     /**
-     * No token identified.
+     * No token identified for the current input stream.
      */
     NONE,
-    /** YAML comment starting with '#'. */
+    /** YAML comment token starting with a '#' marker. */
     COMMENT,
-    /** Tag declaration such as {@code !type}. */
+    /** Tag declaration token such as {@code !type} marker. */
     TAG,
-    /** YAML directive (e.g. %YAML). */
+    /** YAML directive token such as {@code %YAML} header. */
     DIRECTIVE,
-    /** Marks the end of a document. */
+    /** Marks the end of a YAML document. */
     DOCUMENT_END(),
     /** Represents the end of the directives in a YAML document. */
     DIRECTIVES_END(DOCUMENT_END),
-    /** Key within a mapping. */
+    /** Key token within a YAML mapping. */
     MAPPING_KEY(NONE),
-    /** End of a mapping block. */
+    /** End token for a YAML mapping. */
     MAPPING_END(),
     /** Represents the start of a key-value mapping in a YAML document. */
     MAPPING_START(MAPPING_END),
-    /** End of a sequence block. */
+    /** End token for a YAML sequence. */
     SEQUENCE_END(),
-    /** Entry within a sequence. */
+    /** Entry token within a YAML sequence. */
     SEQUENCE_ENTRY,
     /** Represents the start of a sequence in a YAML document. */
     SEQUENCE_START(SEQUENCE_END),
-    /** Plain scalar text. */
+    /** Plain scalar text token in YAML. */
     TEXT,
-    /** Literal block scalar. */
+    /** Literal block scalar token in YAML. */
     LITERAL,
-    /** Anchor declaration (&amp;). */
+    /** Anchor declaration token such as {@code &} marker. */
     ANCHOR,
-    /** Anchor alias (*). */
+    /** Anchor alias token such as {@code *} marker. */
     ALIAS,
-    /** Reserved token type. */
+    /** Reserved token type for future extensions. */
     RESERVED,
-    /** Marks the end of a stream. */
+    /** Marks the end of a YAML stream. */
     STREAM_END,
     /** Represents the start of a YAML document stream. */
     STREAM_START(STREAM_END);

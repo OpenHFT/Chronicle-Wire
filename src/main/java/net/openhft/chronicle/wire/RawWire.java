@@ -321,7 +321,7 @@ public class RawWire extends AbstractWire implements Wire {
     }
 
     /**
-     * Returns the output for the next value. The name is not written.
+     * Returns the output for the next value without writing the field name.
      */
     @NotNull
     @Override
@@ -419,7 +419,9 @@ public class RawWire extends AbstractWire implements Wire {
                     try {
                         bytes.write(s, offset, readRemaining);
                     } catch (BufferUnderflowException | IllegalArgumentException e) {
-                        throw new AssertionError(e);
+                        AssertionError error = new AssertionError("Failed to write bytes content to raw wire.");
+                        error.initCause(e);
+                        throw error;
                     }
                 }
             } else {
@@ -661,7 +663,7 @@ public class RawWire extends AbstractWire implements Wire {
         @Override
         public WireOut int32forBinding(int value, @NotNull IntValue intValue) {
             int32forBinding(value);
-            BinaryIntReference reference = requireReference(intValue, BinaryIntReference.class, "int32forBinding");
+            BinaryIntReference reference = requireReference(intValue, BinaryIntReference.class, "raw wire int32 binding");
             reference.bytesStore(bytes, bytes.writePosition() - 4, 4);
             return RawWire.this;
         }
@@ -670,7 +672,7 @@ public class RawWire extends AbstractWire implements Wire {
         @Override
         public WireOut int64forBinding(long value, @NotNull LongValue longValue) {
             int64forBinding(value);
-            BinaryLongReference reference = requireReference(longValue, BinaryLongReference.class, "int64forBinding");
+            BinaryLongReference reference = requireReference(longValue, BinaryLongReference.class, "raw wire int64 binding");
             reference.bytesStore(bytes, bytes.writePosition() - 8, 8);
             return RawWire.this;
         }
@@ -679,7 +681,7 @@ public class RawWire extends AbstractWire implements Wire {
         @Override
         public WireOut boolForBinding(final boolean value, @NotNull final BooleanValue longValue) {
             bool(value);
-            BinaryBooleanReference reference = requireReference(longValue, BinaryBooleanReference.class, "boolForBinding");
+            BinaryBooleanReference reference = requireReference(longValue, BinaryBooleanReference.class, "raw wire boolean binding");
             reference.bytesStore(bytes, bytes.writePosition() - 1, 1);
             return RawWire.this;
         }
@@ -741,7 +743,7 @@ public class RawWire extends AbstractWire implements Wire {
                 else
                     Wires.writeMarshallable(object, RawWire.this);
             } catch (IOException e) {
-                throw new IORuntimeException(e);
+                throw new IORuntimeException("Failed to write marshallable to raw wire.", e);
             }
         }
 
@@ -904,7 +906,7 @@ public class RawWire extends AbstractWire implements Wire {
             long length = readLength();
 
             if (length > bytes.readRemaining())
-                throw new BufferUnderflowException();
+                throw new BufferUnderflowException(/* not enough bytes to read value */);
             long limit0 = bytes.readLimit();
             long limit = bytes.readPosition() + length;
             try {

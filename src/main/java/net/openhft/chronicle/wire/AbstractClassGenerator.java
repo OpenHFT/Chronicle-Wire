@@ -172,7 +172,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
                 try {
                     importSet.add(s);
                 } catch (Exception e) {
-                    Jvm.warn().on(getClass(), "Can't add an import for " + s);
+                    Jvm.warn().on(getClass(), "Class generator cannot add an import for " + s);
                     throw e;
                 }
             }
@@ -192,7 +192,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
     }
 
     /**
-     * Sets the maxCode value.
+     * Sets the maximum generated code length used for class names.
      *
      * @param maxCode The desired maxCode value.
      * @return The current instance of the class generator for chaining calls.
@@ -301,7 +301,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
     }
 
     /**
-     * Generates the implementation for a specific method.
+     * Generates the method body for a specific override signature.
      *
      * @param method The method whose code is being generated.
      * @param mainCode The code formatter where the generated code is appended.
@@ -320,7 +320,6 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
         StringBuilder params = new StringBuilder();
         Parameter[] parameters = method.getParameters();
         for (int i = 0, ptsLength = pts.length; i < ptsLength; i++) {
-            Class<?> pt = pts[i];
             mainCode.append(sep);
             params.append(sep);
             sep = ", ";
@@ -331,7 +330,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
                 pname = pname + paramList.size();
             paramList.add(pname);
             params.append(pname);
-            mainCode.append(nameForClass(pt)).append(' ').append(pname);
+            mainCode.append(nameForClass(pts[i])).append(' ').append(pname);
         }
         mainCode.append(") {\n");
 
@@ -452,7 +451,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
         private boolean useUpdateInterceptor;
 
         /**
-         * Creates empty metadata for a generated class.
+         * Initialises empty metadata for generated classes with defaults.
          */
         protected MetaData() {
         }
@@ -511,7 +510,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
         }
 
         /**
-         * Sets the interfaces for the class to be generated.
+         * Sets the interface set used when generating classes.
          *
          * @param interfaces A set of interfaces the generated class should implement.
          * @return An instance of the metadata for method chaining.

@@ -53,10 +53,10 @@ public class WordsLongConverter implements LongConverter {
             for (int i = 0; i < WORDS.length; i++) {
                 String word = WORDS[i];
                 Integer ii = WORD_ID.put(word, i);
-                assert ii == null : "Duplicate " + word;
+                assert ii == null : "Duplicate word detected in common-words list: " + word;
             }
         } catch (IOException e) {
-            throw new AssertionError(e);
+            throw new AssertionError("Failed to load common-words list for converter", e);
         }
     }
 

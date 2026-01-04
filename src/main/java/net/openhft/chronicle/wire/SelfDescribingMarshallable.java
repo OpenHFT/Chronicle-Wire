@@ -11,7 +11,7 @@ package net.openhft.chronicle.wire;
 public abstract class SelfDescribingMarshallable extends AbstractCommonMarshallable {
 
     /**
-     * Creates a self-describing marshallable.
+     * Creates a self-describing marshallable that always emits type metadata.
      */
     protected SelfDescribingMarshallable() {
     }

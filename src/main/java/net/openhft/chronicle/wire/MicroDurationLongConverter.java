@@ -60,7 +60,7 @@ public class MicroDurationLongConverter implements LongConverter {
     }
 
     /**
-     * Appends a {@link Duration} representation of the provided long value (in microseconds) to the provided {@link Bytes}.
+     * Appends a {@link Duration} representation of the provided long value (in microseconds) to the provided bytes output.
      *
      * @param bytes The {@link net.openhft.chronicle.bytes.Bytes} instance to
      *              which the ISO-8601 string representation of the duration

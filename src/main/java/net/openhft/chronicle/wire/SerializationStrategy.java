@@ -23,17 +23,17 @@ public interface SerializationStrategy {
      * the given 'using' object, if not null. The method uses the given {@link BracketType}
      * to aid in the deserialization.
      *
+     * @param <T> concrete object type being deserialised
      * @param clazz       expected class of the object, or {@code null} to infer
      *                    from the wire or {@code using} instance
-     * @param using       An optional object of type {@code T} that can be populated with the read data.
-     *      *              If null, a new object will be created or an exception might be thrown depending on implementation.
+     * @param using       an optional object of type {@code T} that can be populated with the read data
+     *                    if null, a new object will be created or an exception might be thrown depending on implementation
      * @param in          source of the wire data
      * @param bracketType hint about the expected structure such as map, sequence
      *                    or none
      * @return the populated or newly created object, or {@code null} if no
      * instance could be obtained
      * @throws InvalidMarshallableException if the deserialisation fails
-     * @param <T> concrete object type being deserialised
      */
     @Nullable
     <T> T readUsing(Class<?> clazz, T using, ValueIn in, BracketType bracketType) throws InvalidMarshallableException;

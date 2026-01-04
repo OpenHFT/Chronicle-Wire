@@ -20,7 +20,7 @@ import static java.util.Arrays.stream;
 import static java.util.Collections.*;
 
 /**
- * The {@code GenerateMethodWriter2} class is responsible for generating method writers based on the provided metadata.
+ * The GenerateMethodWriter2 class generates runtime method writer implementations from interface metadata and templates.
  * <p>
  * It extends the {@link AbstractClassGenerator} with metadata type {@link GMWMetaData}. This class internally maintains
  * a set of template methods that help in the method writer generation. These templates are based on certain method names
@@ -154,7 +154,6 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
             return;
         }
 
-        boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
         String wdc = nameForClass(WriteDocumentContext.class);
         boolean passthrough = returnType == DocumentContext.class;
         withLineNumber(mainCode)
@@ -168,6 +167,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         if (passthrough)
             mainCode.append(";\n");
         else mainCode.append(") {\n");
+        boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
         mainCode.append("_dc_.chainedElement(").append(String.valueOf(!terminating && !passthrough)).append(");\n");
         mainCode.append("if (_out_.recordHistory()) MessageHistory.writeHistory(_dc_);\n");
 
@@ -381,7 +381,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         }
 
         /**
-         * Gets the generic event.
+         * Returns the generic event name used for generated writer metadata in tests.
          *
          * @return The generic event string.
          */
@@ -391,7 +391,7 @@ public class GenerateMethodWriter2 extends AbstractClassGenerator<GenerateMethod
         }
 
         /**
-         * Sets the generic event.
+         * Sets the generic event name used by the generated writer metadata.
          *
          * @param genericEvent The generic event string.
          * @return The updated metadata instance.

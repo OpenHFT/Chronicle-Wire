@@ -5,10 +5,10 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 /**
- * An abstract class that serves as a base implementation for the {@link LongConverter} interface.
+ * Abstract base that delegates parsing and formatting to another {@link LongConverter}.
  * <p>
  * This class delegates the core conversion operations to an encapsulated {@link LongConverter} instance.
- * Subclasses can build upon this base while retaining or customizing the behavior of the underlying converter.
+ * Subclasses can build upon this base while retaining or customizing the behaviour of the underlying converter.
  */
 public abstract class AbstractLongConverter implements LongConverter {
 
@@ -73,7 +73,7 @@ public abstract class AbstractLongConverter implements LongConverter {
     }
 
     /**
-     * Appends the provided long value to the destination {@code StringBuilder}.
+     * Appends the numeric value to the supplied {@code StringBuilder} using the converter's symbol set.
      *
      * @param destinationBuilder the builder receiving the formatted value
      * @param numericValue the long value to convert and append
@@ -84,7 +84,7 @@ public abstract class AbstractLongConverter implements LongConverter {
     }
 
     /**
-     * Appends the provided long value to the destination {@code Bytes}.
+     * Appends the numeric value to the supplied {@code Bytes} using the converter's symbol set and encoding.
      *
      * @param destination the Bytes to append to
      * @param numericValue the long value to convert and append

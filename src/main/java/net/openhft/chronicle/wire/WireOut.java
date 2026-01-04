@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Defines the standard interface for sequential writing to a Bytes stream.
+ * Defines the standard interface for sequential writing to a Bytes stream with document framing.
  */
 @DontChain
 public interface WireOut extends WireCommon, MarshallableOut {
@@ -119,9 +119,9 @@ public interface WireOut extends WireCommon, MarshallableOut {
     ValueOut getValueOut();
 
     /**
-     * Get the ObjectOutput associated with this WireOut.
+     * Returns the ObjectOutput adapter associated with this WireOut instance.
      *
-     * @return The ObjectOutput associated with this WireOut.
+     * @return The ObjectOutput adapter associated with this WireOut instance.
      */
     ObjectOutput objectOutput();
 
@@ -239,7 +239,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
     }
 
     /**
-     * INTERNAL METHOD, call writingDocument instead
+     * Internal: update a document header; prefer {@link #writingDocument()} for public use.
      * <p>
      * Update/end a header for a document
      *
@@ -251,7 +251,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
     void updateHeader(long position, boolean metaData, int expectedHeader) throws StreamCorruptedException;
 
     /**
-     * INTERNAL METHOD, call writingDocument instead
+     * Internal: start a document header and reserve space; use {@link #writingDocument()} instead.
      * <p>
      * Start a header for a document
      *
@@ -262,7 +262,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
     long enterHeader(long safeLength);
 
     /**
-     * INTERNAL METHOD, call writingDocument instead
+     * Internal: write the first header if missing; use {@link #writingDocument()} instead.
      * <p>
      * Start the first header, if there is none This will increment the headerNumber as appropriate
      * if successful <p> Note: the file might contain other data and the caller has to check this.
@@ -272,14 +272,14 @@ public interface WireOut extends WireCommon, MarshallableOut {
     boolean writeFirstHeader();
 
     /**
-     * INTERNAL METHOD, call writingDocument instead
+     * Internal: finalise the first header after writing; use {@link #writingDocument()} instead.
      * <p>
      * update the first header after writing.
      */
     void updateFirstHeader();
 
     /**
-     * INTERNAL METHOD, call writingDocument instead
+     * Internal: finalise the first header with a known length; use {@link #writingDocument()} instead.
      * <p>
      * update the first header after writing {@code headerEndPos} bytes.
      *
@@ -357,15 +357,15 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /** Indicates the EOF marker state when writing documents. */
     enum EndOfWire {
         /**
-         * EOF marker is not present and was not written
+         * EOF marker is not present in the wire and no marker was written.
          */
         NOT_PRESENT,
         /**
-         * EOF marker was not present have been written and now in place
+         * EOF marker was absent, has been written, and is now in place.
          */
         PRESENT_AFTER_UPDATE,
         /**
-         * EOF marker is present
+         * EOF marker is already present in the wire stream.
          */
         PRESENT
     }

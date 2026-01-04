@@ -23,13 +23,13 @@ public class YamlKeys {
     long[] offsets = NO_OFFSETS;
 
     /**
-     * Creates an empty keys container.
+     * Creates an empty keys container for YAML offsets.
      */
     public YamlKeys() {
     }
 
     /**
-     * Adds a new offset to the collection.
+     * Adds a new offset to the YAML offset collection.
      *
      * @param offset The offset value to be added.
      */
@@ -51,7 +51,7 @@ public class YamlKeys {
     }
 
     /**
-     * Retrieves all the stored offsets.
+     * Retrieves all stored YAML offsets as an array.
      *
      * @return An array of stored offsets.
      */

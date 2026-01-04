@@ -1049,8 +1049,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         }
 
         /**
-         * Writes a special double value, e.g. NaN, to bytes in the context of Yaml Wire. For now this
-         * remains as an unquoted string representation.
+         * Writes a special float value, e.g. NaN, to bytes in the context of Yaml Wire.
+         * For now this remains as an unquoted string representation.
          */
         protected void writeSpecialFloatValueToBytes(Bytes<?> outputBytes, float value) {
             outputBytes.append(Float.toString(value));
@@ -1223,7 +1223,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 writeSavedEventName();
             }
             if (!(intValue instanceof TextIntReference))
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("TextIntReference required for int32 binding output");
             prependSeparator();
             long offset = bytes.writePosition();
             TextIntReference.write(bytes, value);
@@ -1252,7 +1252,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 writeSavedEventName();
             }
             if (!(longValue instanceof TextLongReference))
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("TextLongReference required for int64 binding output");
             prependSeparator();
             long offset = bytes.writePosition();
             TextLongReference.write(bytes, value);
@@ -1269,7 +1269,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 writeSavedEventName();
             }
             if (!(longValue instanceof TextBooleanReference))
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("TextBooleanReference required for boolean binding output");
             prependSeparator();
             long offset = bytes.writePosition();
             TextBooleanReference.write(value, bytes, offset);
@@ -1430,6 +1430,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 object.writeMarshallable(YamlWireOut.this);
                 if (bytes.writePosition() == 0)
                     bytes.append("{}");
+                leaf = wasLeaf0;
                 return wireOut();
             }
             boolean wasLeaf = leaf;
@@ -1540,7 +1541,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
                 else // Use the default Wires method to serialize the object
                     Wires.writeMarshallable(object, wireOut());
             } catch (IOException e) {
-                throw new IORuntimeException(e);
+                throw new IORuntimeException("Failed to write serialisable value to YAML wire", e);
             }
         }
 

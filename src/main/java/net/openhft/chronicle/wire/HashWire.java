@@ -27,7 +27,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 /**
- * A specialised {@link WireOut} used only for hashing.
+ * A specialised {@link WireOut} that computes a rolling hash instead of serialised output.
  * <p>
  * Values written to this wire are not serialised. The
  * {@linkplain #valueOut value writer} mixes each item into a rolling hash using
@@ -94,7 +94,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
     }
 
     /**
-     * As {@link #hash64(WriteMarshallable)} but returning 32 bits.
+     * Returns a 32-bit hash for the provided {@link WriteMarshallable} by truncating the 64-bit hash.
      *
      * @param value value to hash
      * @return 32-bit hash
@@ -104,7 +104,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
     }
 
     /**
-     * As {@link #hash64(Object)} but returning 32 bits.
+     * Returns a 32-bit hash for the provided object using the same mixing as {@link #hash64(Object)}.
      *
      * @param value value to hash
      * @return 32-bit hash
@@ -129,14 +129,14 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         return ClassAliasPool.CLASS_ALIASES;
     }
 
-    /** Reset the accumulated {@link #hash}. */
+    /** Reset the accumulated {@link #hash} to zero before reuse. */
     @Override
     public void clear() {
         hash = 0;
     }
 
     /**
-     * Alias for {@link #clear()}.
+     * Alias for {@link #clear()}, leaving the rolling hash at zero.
      */
     @Override
     public void reset() {
@@ -189,7 +189,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         return (int) (h ^ (h >>> 32));
     }
 
-    /** Hashes an anonymous value field. */
+    /** Hashes an anonymous value field and returns the hashing {@link ValueOut}. */
     @NotNull
     @Override
     public ValueOut write() {
@@ -248,7 +248,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         return this;
     }
 
-    /** Padding is ignored for hashing. */
+    /** Padding is ignored for hashing and does not alter the rolling hash. */
     @NotNull
     @Override
     public WireOut addPadding(int paddingToAdd) {
@@ -316,27 +316,27 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         throw new UnsupportedOperationException();
     }
 
-    /** Not applicable; returns {@code this} for chaining. */
+    /** Not applicable for hashing; returns {@code this} for fluent chaining without side effects. */
     @Override
     public HexDumpBytesDescription<?> bytesComment() {
         return this;
     }
 
-    /** Not supported. */
+    /** Not supported for hashing; HashWire does not allocate IntValue references. */
     @NotNull
     @Override
     public IntValue newIntReference() {
         throw new UnsupportedOperationException();
     }
 
-    /** Not supported. */
+    /** Not supported for hashing; HashWire does not allocate LongValue references. */
     @NotNull
     @Override
     public LongValue newLongReference() {
         throw new UnsupportedOperationException();
     }
 
-    /** Not supported. */
+    /** Not supported for hashing; HashWire does not allocate BooleanValue references. */
     @NotNull
     @Override
     public BooleanValue newBooleanReference() {
@@ -353,27 +353,27 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         return true; // text wire is orders of magnitude slower
     }
 
-    /** Not supported. */
+    /** Not supported for hashing; HashWire does not allocate LongArrayValues. */
     @NotNull
     @Override
     public LongArrayValues newLongArrayReference() {
         throw new UnsupportedOperationException();
     }
 
-    /** Not supported. */
+    /** Not supported for hashing; HashWire does not allocate IntArrayValues. */
     @Override
     public @NotNull IntArrayValues newIntArrayReference() {
         throw new UnsupportedOperationException();
     }
 
-    /** Unsupported by {@code HashWire}. */
+    /** Unsupported for HashWire; hashing does not use pausing behaviour. */
     @NotNull
     @Override
     public Pauser pauser() {
         throw new UnsupportedOperationException();
     }
 
-    /** Not supported. */
+    /** Not supported for HashWire; pauser settings have no effect on hashing. */
     @Override
     public void pauser(Pauser pauser) {
         throw new UnsupportedOperationException();
@@ -396,7 +396,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Mixes {@code Maths.hash64(s)} into the hash. */
+        /** Mixes {@code Maths.hash64(s)} into the rolling hash for text content. */
         @NotNull
         @Override
         public WireOut text(@Nullable CharSequence s) {
@@ -404,7 +404,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Mixes the byte value. */
+        /** Mixes the byte value into the rolling hash using {@link #M2}. */
         @NotNull
         @Override
         public WireOut int8(byte i8) {
@@ -428,7 +428,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Mixes the raw bytes array. */
+        /** Mixes the raw byte array content into the rolling hash. */
         @NotNull
         @Override
         public WireOut rawBytes(@NotNull byte[] value) {
@@ -436,7 +436,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Lengths are mixed with {@link #M3}. */
+        /** Mixes the remaining length into the rolling hash using {@link #M3}. */
         @NotNull
         @Override
         public ValueOut writeLength(long remaining) {
@@ -444,7 +444,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return this;
         }
 
-        /** Mixes the byte array content. */
+        /** Mixes the byte array content into the rolling hash using {@code Maths.hash64}. */
         @NotNull
         @Override
         public WireOut bytes(@NotNull byte[] fromBytes) {
@@ -462,7 +462,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
 
         }
 
-        /** Mixes the unsigned value. */
+        /** Mixes the unsigned 8-bit value into the rolling hash. */
         @NotNull
         @Override
         public WireOut uint8checked(int u8) {
@@ -470,7 +470,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Mixes the short value. */
+        /** Mixes the short value into the rolling hash using {@link #M2}. */
         @NotNull
         @Override
         public WireOut int16(short i16) {
@@ -478,7 +478,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Mixes the unsigned short value. */
+        /** Mixes the unsigned short value into the rolling hash using {@link #M2}. */
         @NotNull
         @Override
         public WireOut uint16checked(int u16) {
@@ -486,7 +486,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Mixes the code point. */
+        /** Mixes the UTF-8 code point into the rolling hash. */
         @NotNull
         @Override
         public WireOut utf8(int codepoint) {
@@ -494,7 +494,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Mixes the int value. */
+        /** Mixes the int value into the rolling hash using {@link #M2}. */
         @NotNull
         @Override
         public WireOut int32(int i32) {
@@ -502,7 +502,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Mixes the unsigned int value. */
+        /** Mixes the unsigned int value into the rolling hash using {@link #M2}. */
         @NotNull
         @Override
         public WireOut uint32checked(long u32) {
@@ -510,7 +510,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Mixes the long value. */
+        /** Mixes the long value into the rolling hash using {@link #M2}. */
         @NotNull
         @Override
         public WireOut int64(long i64) {
@@ -518,7 +518,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Unsupported. */
+        /** Unsupported for hashing; HashWire does not bind 128-bit values. */
         @NotNull
         @Override
         public WireOut int128forBinding(long i64x0, long i64x1, TwoLongValue longValue) {
@@ -531,7 +531,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return int64(i64);
         }
 
-        /** Hashes the capacity only. */
+        /** Hashes the array capacity only, without traversing elements. */
         @NotNull
         @Override
         public WireOut int64array(long capacity) {
@@ -539,14 +539,14 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Not supported. */
+        /** Not supported for hashing; HashWire ignores LongArrayValues binding. */
         @NotNull
         @Override
         public WireOut int64array(long capacity, LongArrayValues values) {
             throw new UnsupportedOperationException();
         }
 
-        /** Mixes the float bits. */
+        /** Mixes the float raw bits into the rolling hash. */
         @NotNull
         @Override
         public WireOut float32(float f) {
@@ -554,7 +554,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Mixes the double bits. */
+        /** Mixes the double raw bits into the rolling hash. */
         @NotNull
         @Override
         public WireOut float64(double d) {
@@ -562,7 +562,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Mixes the time's hash code. */
+        /** Mixes the LocalTime hash code into the rolling hash. */
         @NotNull
         @Override
         public WireOut time(@NotNull LocalTime localTime) {
@@ -570,7 +570,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Mixes the zonedDateTime hash code. */
+        /** Mixes the ZonedDateTime hash code into the rolling hash. */
         @NotNull
         @Override
         public WireOut zonedDateTime(@NotNull ZonedDateTime zonedDateTime) {
@@ -578,7 +578,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Mixes the date hash code. */
+        /** Mixes the LocalDate hash code into the rolling hash. */
         @NotNull
         @Override
         public WireOut date(@NotNull LocalDate localDate) {
@@ -586,7 +586,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Mixes the dateTime hash code. */
+        /** Mixes the LocalDateTime hash code into the rolling hash. */
         @NotNull
         @Override
         public WireOut dateTime(@NotNull LocalDateTime localDateTime) {
@@ -607,7 +607,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this.classLookup();
         }
 
-        /** Mixes the literal type name. */
+        /** Mixes the literal type name into the rolling hash. */
         @NotNull
         @Override
         public WireOut typeLiteral(@Nullable CharSequence type) {
@@ -615,7 +615,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Mixes the literal class name. */
+        /** Mixes the literal class name into the rolling hash. */
         @NotNull
         @Override
         public WireOut typeLiteral(@NotNull BiConsumer<Class, Bytes<?>> typeTranslator, @Nullable Class<?> type) {
@@ -623,7 +623,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Mixes the UUID's hash code. */
+        /** Mixes the UUID hash code into the rolling hash. */
         @NotNull
         @Override
         public WireOut uuid(@NotNull UUID uuid) {
@@ -631,35 +631,35 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Unsupported. */
+        /** Unsupported for hashing; HashWire does not bind int values. */
         @NotNull
         @Override
         public WireOut int32forBinding(int value) {
             throw new UnsupportedOperationException("todo");
         }
 
-        /** Unsupported. */
+        /** Unsupported for hashing; HashWire does not bind IntValue targets. */
         @NotNull
         @Override
         public WireOut int32forBinding(int value, @NotNull IntValue intValue) {
             throw new UnsupportedOperationException("todo");
         }
 
-        /** Unsupported. */
+        /** Unsupported for hashing; HashWire does not bind long values. */
         @NotNull
         @Override
         public WireOut int64forBinding(long value) {
             throw new UnsupportedOperationException("todo");
         }
 
-        /** Unsupported. */
+        /** Unsupported for hashing; HashWire does not bind LongValue targets. */
         @NotNull
         @Override
         public WireOut int64forBinding(long value, @NotNull LongValue longValue) {
             throw new UnsupportedOperationException("todo");
         }
 
-        /** Unsupported. */
+        /** Unsupported for hashing; HashWire does not bind BooleanValue targets. */
         @NotNull
         @Override
         public WireOut boolForBinding(final boolean value, @NotNull final BooleanValue longValue) {
@@ -690,7 +690,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Uses {@link Wires#writeMarshallable} for hashing. */
+        /** Uses {@link Wires#writeMarshallable} to mix the serialised form into the hash. */
         @NotNull
         @Override
         public WireOut marshallable(@NotNull Serializable object) throws InvalidMarshallableException {
@@ -698,7 +698,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Mixes the map's hash code. */
+        /** Mixes the map hash code into the rolling hash. */
         @NotNull
         @Override
         public WireOut map(@NotNull Map map) {
@@ -706,20 +706,20 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return HashWire.this;
         }
 
-        /** Returns the outer {@code HashWire}. */
+        /** Returns the outer {@code HashWire} to keep fluent chaining on the hashing wire. */
         @NotNull
         @Override
         public WireOut wireOut() {
             return HashWire.this;
         }
 
-        /** No-op. */
+        /** No-op for hashing; there is no per-value state to reset. */
         @Override
         public void resetState() {
             // No nothing
         }
 
-        /** No-op. */
+        /** No-op for hashing; element separators do not alter the hash. */
         @Override
         public void elementSeparator() {
         }

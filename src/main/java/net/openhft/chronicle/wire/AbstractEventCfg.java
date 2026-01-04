@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMarshallableCfg implements Event<E> {
 
     /**
-     * Creates an empty event configuration.
+     * Creates an empty event configuration with default identifiers.
      */
     public AbstractEventCfg() {
     }
@@ -37,7 +37,7 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
     private String serviceId = "";
 
     /**
-     * Returns the unique identifier for this event.
+     * Returns the unique identifier used to correlate this event.
      *
      * @return the current event ID
      */
@@ -49,7 +49,7 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
     }
 
     /**
-     * Sets a new identifier for this event.
+     * Sets the event identifier used for correlation and routing.
      *
      * @param eventId the unique identifier to assign; must not be null
      * @return this instance for chaining
@@ -62,7 +62,7 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
     }
 
     /**
-     * Returns the timestamp associated with this event.
+     * Returns the event timestamp recorded in the configured time unit.
      *
      * @return the event time in the unit defined by
      *         {@link ServicesTimestampLongConverter}
@@ -73,7 +73,7 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
     }
 
     /**
-     * Sets the timestamp for this event.
+     * Sets the event timestamp in the configured time unit.
      *
      * @param eventTime the new timestamp, typically in nanoseconds
      * @return this instance for chaining

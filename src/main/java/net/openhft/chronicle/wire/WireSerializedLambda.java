@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Helper class to support the serialisation of lambda expressions in Wire formats.
+ * Helper class that supports portable serialisation of lambda expressions in Wire formats.
  * <p>
  * This allows lambdas that are {@link java.io.Serializable} to be written to and read
  * from a {@link Wire}, preserving their capturing arguments and target functional
@@ -95,7 +95,7 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
                                     v2.object(sl.getCapturedArg(i));
                             }));
         } catch (Exception e) {
-            throw new AssertionError(e);
+            throw new AssertionError("Failed to serialise lambda to wire format", e);
         }
     }
 
@@ -139,7 +139,7 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
             Jvm.setAccessible(readResolve);
             return readResolve.invoke(sl);
         } catch (Exception e) {
-            throw new AssertionError(e);
+            throw new AssertionError("Failed to resolve serialised lambda instance", e);
         }
     }
 }

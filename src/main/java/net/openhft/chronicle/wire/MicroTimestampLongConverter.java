@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 public class MicroTimestampLongConverter extends AbstractTimestampLongConverter {
 
     /**
-     * The singleton instance of this converter.
+     * Singleton instance for microsecond timestamp conversion.
      */
     public static final MicroTimestampLongConverter INSTANCE = new MicroTimestampLongConverter();
 

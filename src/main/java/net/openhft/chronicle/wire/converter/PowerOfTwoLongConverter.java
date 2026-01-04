@@ -37,7 +37,7 @@ public class PowerOfTwoLongConverter implements LongConverter {
     private final int maxParseLength;
 
     /**
-     * Initializes a new instance with a given set of symbols.
+     * Initialises a converter with a symbol alphabet for power-of-two encoding.
      *
      * @param symbols A string containing unique symbols for conversion. The length of this string
      *                should be a power of 2.
@@ -112,7 +112,7 @@ public class PowerOfTwoLongConverter implements LongConverter {
     }
 
     /**
-     * Appends a long value to a StringBuilder.
+     * Appends a long value using the power-of-two alphabet to the supplied builder ({@link StringBuilder}).
      *
      * @param destinationBuilder the StringBuilder to append to
      * @param numericValue the long value to append
@@ -129,13 +129,13 @@ public class PowerOfTwoLongConverter implements LongConverter {
         StringUtils.reverse(destinationBuilder, start); // Reverse the result since it's constructed backward.
 
         if (destinationBuilder.length() > start + maxParseLength()) {
-            Jvm.warn().on(getClass(), "truncated because the value was too large");
+            Jvm.warn().on(getClass(), "StringBuilder output truncated because value exceeds maximum length");
             destinationBuilder.setLength(start + maxParseLength());
         }
     }
 
     /**
-     * Appends a long value to a Bytes object.
+     * Appends a long value using the power-of-two alphabet to the supplied bytes output ({@link Bytes}).
      *
      * @param destination the Bytes object to append to
      * @param numericValue the long value to append
@@ -152,7 +152,7 @@ public class PowerOfTwoLongConverter implements LongConverter {
         BytesUtil.reverse(destination, start); // Reverse the result for bytes.
 
         if (destination.length() > start + maxParseLength()) {
-            Jvm.warn().on(getClass(), "truncated because the value was too large");
+            Jvm.warn().on(getClass(), "Bytes output truncated because value exceeds maximum length");
             destination.readLimit((long) start + maxParseLength());
         }
     }

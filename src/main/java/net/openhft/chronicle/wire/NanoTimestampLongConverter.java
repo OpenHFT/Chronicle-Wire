@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class NanoTimestampLongConverter extends AbstractTimestampLongConverter {
 
     /**
-     * The singleton instance of this converter.
+     * Singleton instance for nanosecond timestamp conversion.
      */
     public static final NanoTimestampLongConverter INSTANCE = new NanoTimestampLongConverter();
 

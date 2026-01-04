@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -21,7 +22,18 @@ public enum YamlLogging {
      */
     @NotNull
     @Deprecated(/* to be removed in 2027 */)
+    @SuppressFBWarnings(value = "MS_PKGPROTECT", justification = "Public title prefix kept for compatibility until removal.")
     public static String title = "";
+
+    /**
+     * Updates the title prefix used in YAML logs.
+     *
+     * @param newTitle the new title prefix, or an empty string to clear it
+     */
+    @Deprecated(/* to be removed in 2027 */)
+    public static void setTitle(@NotNull String newTitle) {
+        title = newTitle;
+    }
 
     // Flag indicating whether server writes should be shown.
     // TODO Doesn't show all writes. Use clientReads instead.
@@ -186,21 +198,21 @@ public enum YamlLogging {
      */
     @Deprecated(/* to be removed in 2027 */)
     public enum YamlLoggingLevel {
-        /** Logging disabled. */
+        /** Logging is disabled for all YAML operations. */
         OFF {
             @Override
             public boolean isSet() {
                 return false;
             }
         },
-        /** Logging enabled only when debugging. */
+        /** Logging is enabled only when debugging is active. */
         DEBUG_ONLY {
             @Override
             public boolean isSet() {
                 return Jvm.isDebug();
             }
         },
-        /** Logging always enabled. */
+        /** Logging is always enabled for all YAML operations. */
         ON {
             @Override
             public boolean isSet() {

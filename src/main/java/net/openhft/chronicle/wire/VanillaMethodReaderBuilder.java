@@ -78,12 +78,12 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     /**
-     * Creates a default {@link WireParselet} that handles unrecognized methods.
-     * When an unrecognized method is encountered, it logs a warning or uses
+     * Creates a default {@link WireParselet} for unrecognised methods without class context.
+     * When an unrecognised method is encountered, it logs a warning or uses
      * the provided exception handler, depending on the method name's length.
      *
      * @param exceptionHandlerOnUnknownMethod The exception handler to use when a method is not recognized.
-     * @return A {@link WireParselet} that logs or handles unrecognized methods.
+     * @return A {@link WireParselet} that logs or handles unrecognised methods.
      */
     @Deprecated(/* to be removed in x.29 */)
     @NotNull
@@ -92,13 +92,13 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     /**
-     * Creates a default {@link WireParselet} that handles unrecognized methods.
-     * When an unrecognized method is encountered, it logs a warning or uses
+     * Creates a default {@link WireParselet} for unrecognised methods with class context.
+     * When an unrecognised method is encountered, it logs a warning or uses
      * the provided exception handler, depending on the method name's length.
      *
      * @param exceptionHandlerOnUnknownMethod The exception handler to use when a method is not recognized.
      * @param clazz The class on which the method was called, used for logging purposes.
-     * @return A {@link WireParselet} that logs or handles unrecognized methods.
+     * @return A {@link WireParselet} that logs or handles unrecognised methods.
      */
     public static WireParselet createDefaultParselet(ExceptionHandler exceptionHandlerOnUnknownMethod, Class<?> clazz) {
         return (s, v) -> {
@@ -154,7 +154,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     /**
-     * Sets a new default parselet.
+     * Sets a new default parselet for unrecognised method handling.
      *
      * @param defaultParselet The new default parselet.
      * @return This builder for chaining.
@@ -196,7 +196,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     /**
-     * Returns the {@code wireType} of the reader.
+     * Returns the configured wire type value for the reader.
      *
      * @return The {@code wireType} of the reader.
      */
@@ -206,7 +206,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     /**
-     * Sets the {@code wireType} of the reader.
+     * Sets the configured wire type value for the reader.
      *
      * @param wireType The {@code wireType} to set.
      * @return This builder instance for chaining.

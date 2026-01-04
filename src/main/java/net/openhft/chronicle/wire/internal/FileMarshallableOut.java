@@ -52,7 +52,7 @@ public class FileMarshallableOut implements MarshallableOut {
                 final Bytes<byte[]> bytes = Jvm.uncheckedCast(wire.bytes());
                 out.write(bytes.underlyingObject(), 0, (int) bytes.readLimit());
             } catch (IOException ioe) {
-                throw new IORuntimeException(ioe);
+                throw new IORuntimeException("Failed to write wire data to " + path0, ioe);
             }
 
             // Rename the temp file to the actual file if not in append mode
@@ -60,7 +60,7 @@ public class FileMarshallableOut implements MarshallableOut {
                 if (!options.append)
                     Files.move(Paths.get(path0), Paths.get(path), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
             } catch (IOException ioe) {
-                throw new IORuntimeException(ioe);
+                throw new IORuntimeException("Failed to move " + path0 + " to " + path, ioe);
             }
 
             // Clear the wire after writing to file
@@ -145,7 +145,7 @@ public class FileMarshallableOut implements MarshallableOut {
         try {
             return URLDecoder.decode(value, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            throw new IORuntimeException(e);
+            throw new IORuntimeException("UTF-8 decoding is not available for URI component", e);
         }
     }
 }

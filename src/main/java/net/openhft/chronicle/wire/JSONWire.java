@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 /**
- * Represents the JSON wire format.
+ * Represents the JSON wire format for text-based marshalling and parsing.
  * <p>
  * This class provides functionality for managing JSON data in a wire format.
  * It currently provides a subset of functionalities similar to the YAML wire format.
@@ -203,7 +203,7 @@ public class JSONWire extends TextWire {
                 if (ch == ':' || ch == '}' || ch == ']')
                     bytes.readSkip(-1);
 
-                    // !='l' to handle 'null' in JSON wire
+                // !='l' to handle 'null' in JSON wire
                 else if (ch != 'l' && (ch > 'F' && (ch < 'a' || ch > 'f'))) {
                     throw new IllegalArgumentException("Unexpected character in number '" + (char) ch + '\'');
                 }
@@ -781,7 +781,7 @@ public class JSONWire extends TextWire {
         private long start;
 
         /**
-         * Constructor for JSONWriteDocumentContext.
+         * Creates a JSON write document context for emitting JSON object syntax.
          *
          * @param wire The wire to be used for writing data
          */
@@ -971,10 +971,10 @@ public class JSONWire extends TextWire {
         }
 
         /**
-         * Write a special double value (e.g. NaN) as a string to the given bytes.
+         * Write a special float value (e.g. NaN) as a string to the given bytes.
          *
-         * @param bytes The bytes to append the stringified double value to
-         * @param value The double value to convert to a string
+         * @param bytes The bytes to append the stringified float value to
+         * @param value The float value to convert to a string
          */
         @Override
         protected void writeSpecialFloatValueToBytes(Bytes<?> bytes, float value) {
@@ -1292,12 +1292,12 @@ public class JSONWire extends TextWire {
         void readTypeDefinition(StringBuilder sb) {
             consumePadding();
             if (bytes.readChar() != '{')
-                throw new IORuntimeException("Expected { but got " + bytes);
+                throw new IORuntimeException("Type definition should start with '{' but got " + bytes);
             consumePadding();
             text(sb);
             consumePadding();
             final char colon = bytes.readChar();
-            assert colon == ':' : "Expected : but got " + colon;
+            assert colon == ':' : "Type definition should include ':' but got " + colon;
 
         }
 

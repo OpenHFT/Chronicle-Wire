@@ -41,7 +41,7 @@ public interface Reduction<T> extends ExcerptListener {
     void onExcerpt(@NotNull Wire wire, @NonNegative long index) throws InvalidMarshallableException;
 
     /**
-     * Returns a view of the underlying reduction.
+     * Returns a view of the underlying reduction state for inspection or reporting.
      *
      * @return Reduction view.
      */
@@ -71,8 +71,8 @@ public interface Reduction<T> extends ExcerptListener {
     // Basic static constructors
 
     /**
-     * Creates and returns a new {@code ReductionBuilder} that will use the provided
-     * {@code extractor} to extract elements of type {@code E}.
+     * Creates and returns a new {@code ReductionBuilder} for generic element extraction
+     * using the provided {@code extractor}.
      * <p>
      * This method initializes a generic reduction builder suitable for custom element types.
      *
@@ -104,8 +104,8 @@ public interface Reduction<T> extends ExcerptListener {
     }
 
     /**
-     * Creates and returns a new {@code DoubleReductionBuilder} that will use the provided
-     * {@code extractor} to extract elements of type {@code double}.
+     * Creates and returns a new {@code DoubleReductionBuilder} that extracts primitive
+     * {@code double} values using the provided {@code extractor}.
      * <p>
      * This method initializes a reduction builder specifically for handling double values.
      *

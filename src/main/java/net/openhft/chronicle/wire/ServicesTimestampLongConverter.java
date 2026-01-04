@@ -159,7 +159,7 @@ public class ServicesTimestampLongConverter implements LongConverter {
     }
 
     /**
-     * Appends a representation of the provided long timestamp (in the system-configured time unit) to the provided {@link Bytes}.
+     * Appends the formatted timestamp to the provided {@link Bytes} in the configured time unit.
      *
      * @param bytes The {@link net.openhft.chronicle.bytes.Bytes} instance to which the formatted
      *              string representation of the timestamp {@code value} will be appended, using the

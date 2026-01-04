@@ -18,7 +18,7 @@ import java.util.stream.StreamSupport;
  */
 final class ChronicleBitSetSupport {
     /**
-     * Utility holder; not instantiable.
+     * Utility holder for {@link ChronicleBitSet} helpers; not instantiable by design.
      */
     private ChronicleBitSetSupport() {
     }
@@ -106,7 +106,7 @@ final class ChronicleBitSetSupport {
                     next = bitSet.nextSetBit(next + 1);
                     return ret;
                 } else {
-                    throw new NoSuchElementException();
+                    throw new NoSuchElementException("No set bits remain for iteration");
                 }
             }
         }

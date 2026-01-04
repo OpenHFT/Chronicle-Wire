@@ -18,4 +18,13 @@ public class WriteAfterEOFException extends IllegalStateException {
     public WriteAfterEOFException() {
         super("You should not be able to write at EOF");
     }
+
+    /**
+     * Constructs a new instance of WriteAfterEOFException with a custom message.
+     *
+     * @param message the detail message for diagnostics
+     */
+    public WriteAfterEOFException(String message) {
+        super(message);
+    }
 }

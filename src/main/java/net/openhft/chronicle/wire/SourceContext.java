@@ -6,7 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.core.io.IORuntimeException;
 
 /**
- * Interface for accessing metadata about the origin of a message.
+ * Interface for accessing message origin metadata such as source identifier and queue position.
  * <p>
  * It exposes the source identifier and position of the current document.
  * A {@link DocumentContext} may implement this interface to provide

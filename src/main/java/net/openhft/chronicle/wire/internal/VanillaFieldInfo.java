@@ -17,7 +17,7 @@ import java.lang.reflect.Type;
 import java.util.Objects;
 
 /**
- * Reflection based {@link FieldInfo} implementation that uses standard {@link Field} access.
+ * Reflection based {@link FieldInfo} implementation that uses standard {@link Field} access for reads and writes.
  * <p>
  * Responsible for reading and writing field values, handling primitive special cases and reporting
  * generic type information for collection like fields.
@@ -92,7 +92,7 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         try {
             getField().set(object, value2);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException("Failed to set field '" + name + "' by reflection", e);
         }
     }
 
@@ -101,7 +101,7 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         try {
             getField().setInt(object, value);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException("Failed to set int field '" + name + "' by reflection", e);
         }
     }
 
@@ -110,7 +110,7 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         try {
             getField().setChar(object, value);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException("Failed to set char field '" + name + "' by reflection", e);
         }
     }
 
@@ -119,7 +119,7 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         try {
             getField().setLong(object, value);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException("Failed to set long field '" + name + "' by reflection", e);
         }
     }
 
@@ -128,7 +128,7 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
         try {
             getField().setDouble(object, value);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException("Failed to set double field '" + name + "' by reflection", e);
         }
     }
 

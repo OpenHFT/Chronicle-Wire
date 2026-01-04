@@ -16,28 +16,28 @@ public enum BinaryWireHighCode {
     /** Indicates the end of the data stream. */
     static final int END_OF_STREAM = -1;
 
-    /** Represents numerical values, no longer in use. */
+    /** Legacy numeric high code 0x0, retained for compatibility only. */
     static final int NUM0 = 0x0;
 
-    /** Represents numerical values, no longer in use. */
+    /** Legacy numeric high code 0x1, retained for compatibility only. */
     static final int NUM1 = 0x1;
 
-    /** Represents numerical values, no longer in use. */
+    /** Legacy numeric high code 0x2, retained for compatibility only. */
     static final int NUM2 = 0x2;
 
-    /** Represents numerical values, no longer in use. */
+    /** Legacy numeric high code 0x3, retained for compatibility only. */
     static final int NUM3 = 0x3;
 
-    /** Represents numerical values, no longer in use. */
+    /** Legacy numeric high code 0x4, retained for compatibility only. */
     static final int NUM4 = 0x4;
 
-    /** Represents numerical values, no longer in use. */
+    /** Legacy numeric high code 0x5, retained for compatibility only. */
     static final int NUM5 = 0x5;
 
-    /** Represents numerical values, no longer in use. */
+    /** Legacy numeric high code 0x6, retained for compatibility only. */
     static final int NUM6 = 0x6;
 
-    /** Represents numerical values, no longer in use. */
+    /** Legacy numeric high code 0x7, retained for compatibility only. */
     static final int NUM7 = 0x7;
 
     /**

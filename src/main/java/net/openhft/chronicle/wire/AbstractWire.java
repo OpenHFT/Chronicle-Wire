@@ -61,7 +61,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     protected Object parent;
     /** Listener invoked for comments encountered while reading. */
     protected Consumer<CharSequence> commentListener = IgnoringConsumer.IGNORING_CONSUMER;
-    /** Optional pauser used when blocking. */
+    /** Optional pauser used for blocking backoff behaviour. */
     private Pauser pauser;
     /** Optional timed pauser used while parsing. */
     private TimingPauser timedParser;
@@ -76,7 +76,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     private boolean generateTuples = GENERATE_TUPLES;
 
     /**
-     * Constructor for AbstractWire.
+     * Creates a wire backed by the supplied bytes.
      *
      * @param bytes   The underlying bytes representation.
      * @param use8bit Indicates if 8-bit encoding should be used.
@@ -185,7 +185,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     }
 
     /**
-     * Sets the HeadNumberChecker instance for this Wire.
+     * Sets the header number checker used for validation.
      *
      * @param headNumberChecker The HeadNumberChecker instance to set.
      */
@@ -231,13 +231,13 @@ public abstract class AbstractWire implements Wire, InternalWire {
         alignForRead(bytes);
         for (; ; ) {
             int header = bytes.peekVolatileInt();
-//            if (isReady(header)) {
+            //            if (isReady(header)) {
             if ((header & NOT_COMPLETE) != 0 || header == 0) {
                 if (header == END_OF_DATA)
                     return HeaderType.EOF;
                 return HeaderType.NONE;
             }
-//                if (isData(header))
+            //                if (isData(header))
             if ((header & META_DATA) == 0)
                 return HeaderType.DATA;
             if (includeMetaData && isReadyMetaData(header))
@@ -273,7 +273,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     }
 
     private void throwISE() {
-        throw new IllegalStateException();
+        throw new IllegalStateException("Header state is not ready for reading");
     }
 
     @Override
@@ -335,7 +335,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
 
         int len = lengthOf(header);
         if (!isReadyMetaData(header) || len > 64 << 10)
-            throw new StreamCorruptedException("Unexpected magic number " + Integer.toHexString(header));
+            throw new StreamCorruptedException("Unexpected magic number after waiting for header " + Integer.toHexString(header));
         bytes.readPositionRemaining(SPB_HEADER_SIZE, len);
     }
 
@@ -365,7 +365,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
                 if (header != END_OF_DATA)
                     Jvm.warn().on(getClass(), new Exception("Incomplete header found at pos: " + pos + ": " + Integer.toHexString(header) + ", overwriting"));
                 else
-                    throw new WriteAfterEOFException();
+                    throw new WriteAfterEOFException("Write attempted after end of data");
                 bytes.writeVolatileInt(pos, NOT_INITIALIZED);
                 break;
             }
@@ -406,7 +406,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
         int header = (int) value;
         if (metaData) header |= META_DATA;
         // shouldn't happen due to padding above.
-//        assert header == UNKNOWN_LENGTH;
+        //        assert header == UNKNOWN_LENGTH;
 
         assert insideHeader;
         insideHeader = false;

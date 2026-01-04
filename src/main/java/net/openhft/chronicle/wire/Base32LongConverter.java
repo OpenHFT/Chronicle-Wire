@@ -17,7 +17,7 @@ package net.openhft.chronicle.wire;
 public class Base32LongConverter extends AbstractLongConverter {
 
     /**
-     * The singleton instance of {@code Base32LongConverter}.
+     * Singleton instance shared for base32 conversions.
      */
     public static final Base32LongConverter INSTANCE = new Base32LongConverter();
 

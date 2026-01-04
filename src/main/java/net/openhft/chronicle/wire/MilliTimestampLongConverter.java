@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 public class MilliTimestampLongConverter extends AbstractTimestampLongConverter {
 
     /**
-     * The singleton instance of this converter.
+     * Singleton instance for millisecond timestamp conversion.
      */
     public static final MilliTimestampLongConverter INSTANCE = new MilliTimestampLongConverter();
 

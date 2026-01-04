@@ -65,20 +65,24 @@ class WireObjectOutput implements ObjectOutput {
             wire.getValueOut().bytes(Bytes.wrapForRead(b).readPositionRemaining(off, len));
     }
 
-    /** No-op. */
+    /**
+     * Flush is a no-op because writes are applied immediately.
+     */
     @Override
     public void flush() {
         // Do nothing
     }
 
-    /** No-op. */
+    /**
+     * Close is a no-op because the wire lifecycle is managed elsewhere.
+     */
     @Override
     public void close() {
         // Do nothing
     }
 
     /**
-     * Writes a boolean via {@link ValueOut#bool(boolean)}.
+     * Writes a boolean value via {@link ValueOut#bool(boolean)} on the current wire.
      */
     @Override
     public void writeBoolean(boolean v) {

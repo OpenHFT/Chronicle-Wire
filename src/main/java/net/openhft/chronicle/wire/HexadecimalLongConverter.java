@@ -15,7 +15,7 @@ package net.openhft.chronicle.wire;
 public class HexadecimalLongConverter extends AbstractLongConverter {
 
     /**
-     * The singleton instance of {@code HexadecimalLongConverter}.
+     * Singleton instance for lowercase hexadecimal long conversions.
      */
     public static final LongConverter INSTANCE = new HexadecimalLongConverter();
 

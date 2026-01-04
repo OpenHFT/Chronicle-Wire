@@ -8,7 +8,7 @@ package net.openhft.chronicle.wire;
  */
 final class TextEscapeUtil {
     /**
-     * Utility holder; not instantiable.
+     * Utility holder for YAML escape decoding; not instantiable.
      */
     private TextEscapeUtil() {
     }
@@ -56,17 +56,14 @@ final class TextEscapeUtil {
             }
             case 'u': {
                 indexRef[0]++;
-                char b3 = seq.charAt(indexRef[0]);
+                int value = Character.getNumericValue(seq.charAt(indexRef[0])) * 4096;
                 indexRef[0]++;
-                char b2 = seq.charAt(indexRef[0]);
+                value += Character.getNumericValue(seq.charAt(indexRef[0])) * 256;
                 indexRef[0]++;
-                char b1 = seq.charAt(indexRef[0]);
+                value += Character.getNumericValue(seq.charAt(indexRef[0])) * 16;
                 indexRef[0]++;
-                char b0 = seq.charAt(indexRef[0]);
-                return (char) (Character.getNumericValue(b3) * 4096 +
-                        Character.getNumericValue(b2) * 256 +
-                        Character.getNumericValue(b1) * 16 +
-                        Character.getNumericValue(b0));
+                value += Character.getNumericValue(seq.charAt(indexRef[0]));
+                return (char) value;
             }
             default:
                 return ch3;

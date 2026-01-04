@@ -6,7 +6,7 @@ package net.openhft.chronicle.wire.utils;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * A formatter specifically tailored for formatting Java source code.
+ * A formatter specifically tailored for formatting Java source code output strings.
  * <p>
  * By default, the formatter uses an indentation of 4 spaces for Java code,
  * in line with common Java coding conventions. However, this can be customized

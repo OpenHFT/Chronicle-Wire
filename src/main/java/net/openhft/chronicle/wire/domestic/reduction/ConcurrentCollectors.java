@@ -30,8 +30,8 @@ public final class ConcurrentCollectors {
     }
 
     /**
-     * Returns a concurrent {@code Collector} that reduces the input elements into a
-     * new {@code List}.
+     * Returns a concurrent {@code Collector} that reduces input elements into a
+     * new {@code List} while preserving encounter order.
      *
      * @param <T> the type of the input elements
      * @return a {@code Collector} which collects all the input elements into a
@@ -54,8 +54,8 @@ public final class ConcurrentCollectors {
     }
 
     /**
-     * Returns a concurrent {@code Collector} that reduces the input elements into a
-     * new {@code Set}.
+     * Returns a concurrent {@code Collector} that reduces input elements into a
+     * new {@code Set} with unordered semantics.
      *
      * <p>This is an {@link java.util.stream.Collector.Characteristics#UNORDERED unordered}
      * Collector.

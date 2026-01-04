@@ -54,7 +54,7 @@ public class NanoDurationLongConverter implements LongConverter {
     }
 
     /**
-     * Append the ISO-8601 form of the given duration to the supplied {@link Bytes}.
+     * Append the ISO-8601 form of the given duration to the supplied bytes output.
      *
      * @param bytes The {@link net.openhft.chronicle.bytes.Bytes} instance to which the ISO-8601 string representation of the duration {@code value} will be appended.
      * @param value The duration, expressed as a total number of nanoseconds, to be formatted and appended.

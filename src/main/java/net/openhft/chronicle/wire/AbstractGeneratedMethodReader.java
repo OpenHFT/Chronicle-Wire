@@ -50,7 +50,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
     private final MarshallableIn in;
     // Temporary buffer for cooperative message history writing.
     private final MessageHistoryThreadLocal tempMessageHistory;
-    /** Message history currently in use. */
+    /** Message history currently in use for this reader. */
     protected MessageHistory messageHistory;
     // True if {@link #readOneGenerated(WireIn)} processed a data event.
     /** Tracks whether a data event was handled in the current document. */
@@ -125,7 +125,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
 
             return method;
         } catch (NoSuchMethodException e) {
-            throw new AssertionError(e);
+            throw new AssertionError("Method lookup failed for " + clazz.getName() + "#" + name, e);
         }
     }
 
@@ -207,7 +207,6 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                 MethodReaderStatus mrs = context.isData()
                         ? readOneGenerated(wireIn)
                         : readOneMetaGenerated(wireIn);
-
                 // Update the decoding status based on the current read status.
                 switch (mrs) {
                     case HISTORY:
@@ -228,8 +227,10 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                 if (restIgnored())
                     return decoded;
 
+                long end = bytes.readPosition();
+                boolean progressed = end != start;
                 wireIn.consumePadding();
-                if (bytes.readPosition() == start) {
+                if (!progressed && bytes.readPosition() == start) {
                     logNonProgressWarning(bytes.readRemaining());
                     return decoded;
                 }
@@ -349,7 +350,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      */
     public void throwExceptionIfClosed() throws ClosedIllegalStateException {
         if (isClosed())
-            throw new ClosedIllegalStateException("Closed");
+            throw new ClosedIllegalStateException("Method reader is closed and cannot be used");
     }
 
     /**

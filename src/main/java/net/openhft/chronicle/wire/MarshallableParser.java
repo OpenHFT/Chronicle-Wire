@@ -6,7 +6,7 @@ package net.openhft.chronicle.wire;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Functional interface describing a strategy for deserialising data.
+ * Functional interface describing a strategy for deserialising wire values into domain objects.
  * <p>
  * Implementations convert a {@link ValueIn} representation to an object of type {@code T}.
  * This allows custom logic to be supplied wherever a {@code ValueIn} needs to be turned into a concrete object.

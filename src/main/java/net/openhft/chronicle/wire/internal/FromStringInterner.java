@@ -49,7 +49,7 @@ public abstract class FromStringInterner<T> {
     }
 
     /**
-     * Returns the interned value for the provided string.
+     * Returns the cached interned value for the provided string key, creating it if absent.
      *
      * @param s The string to be interned.
      * @return The interned representation.

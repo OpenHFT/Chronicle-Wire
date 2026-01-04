@@ -15,7 +15,7 @@ import net.openhft.chronicle.wire.LongConverter;
  */
 public class SizeLongConverter implements LongConverter {
     /**
-     * The singleton instance of this class.
+     * Singleton instance for K/M/G/T size suffix conversions.
      */
     public static final SizeLongConverter INSTANCE = new SizeLongConverter();
 

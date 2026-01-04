@@ -383,7 +383,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     /**
-     * Provides a supplier for a new {@link IntValue} reference using {@link BinaryIntReference}.
+     * Provides a supplier that creates {@link BinaryIntReference} instances for int values.
      *
      * @return A supplier that creates a new BinaryIntReference.
      */
@@ -393,7 +393,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     /**
-     * Provides a supplier for a new {@link BooleanValue} reference using {@link BinaryBooleanReference}.
+     * Provides a supplier that creates {@link BinaryBooleanReference} instances for boolean values.
      *
      * @return A supplier that creates a new BinaryBooleanReference.
      */
@@ -403,7 +403,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     /**
-     * Provides a supplier for a new {@link LongValue} reference using {@link BinaryLongReference}.
+     * Provides a supplier that creates {@link BinaryLongReference} instances for long values.
      *
      * @return A supplier that creates a new BinaryLongReference.
      */
@@ -412,7 +412,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     /**
-     * Provides a supplier for a new {@link TwoLongValue} reference using {@link BinaryTwoLongReference}.
+     * Provides a supplier that creates {@link BinaryTwoLongReference} instances for two-long values.
      *
      * @return A supplier that creates a new BinaryTwoLongReference.
      */
@@ -421,7 +421,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     }
 
     /**
-     * Provides a supplier for a new {@link LongArrayValues} reference using {@link BinaryLongArrayReference}.
+     * Provides a supplier that creates {@link BinaryLongArrayReference} instances for long arrays.
      *
      * @return A supplier that creates a new BinaryLongArrayReference.
      */

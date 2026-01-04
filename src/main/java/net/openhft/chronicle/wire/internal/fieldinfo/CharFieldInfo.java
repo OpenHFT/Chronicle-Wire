@@ -44,7 +44,7 @@ public final class CharFieldInfo extends UnsafeFieldInfo {
         try {
             UnsafeMemory.unsafePutChar(object, getOffset(), value);
         } catch (@NotNull NoSuchFieldException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException("Failed to set char field '" + name() + "'", e);
         }
     }
 

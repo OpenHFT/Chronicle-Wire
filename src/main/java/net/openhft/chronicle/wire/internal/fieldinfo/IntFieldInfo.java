@@ -44,7 +44,7 @@ public final class IntFieldInfo extends UnsafeFieldInfo {
         try {
             UnsafeMemory.unsafePutInt(object, getOffset(), value);
         } catch (@NotNull NoSuchFieldException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException("Failed to set int field '" + name() + "'", e);
         }
     }
 

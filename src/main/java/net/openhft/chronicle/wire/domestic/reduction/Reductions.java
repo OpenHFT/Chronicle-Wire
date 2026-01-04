@@ -34,8 +34,8 @@ public final class Reductions {
     // Specialized Reductions
 
     /**
-     * Creates and returns a new Reduction that will extract elements of type {@code long} using
-     * the provided {@code extractor} and will accumulate values using the provided {@code accumulator}.
+     * Creates and returns a new Reduction that extracts primitive long values using
+     * the provided {@code extractor} and accumulates results using the provided {@code accumulator}.
      * The initial state of the reduction will be the provided {@code identity}.
      * <p>
      * The returned Reduction is guaranteed to not create any internal objects.
@@ -62,8 +62,8 @@ public final class Reductions {
     }
 
     /**
-     * Creates and returns a new Reduction that will extract elements of type {@code double} using
-     * the provided {@code extractor} and will accumulate values using the provided {@code accumulator}.
+     * Creates and returns a new Reduction that extracts primitive double values using
+     * the provided {@code extractor} and accumulates floating point results using the provided {@code accumulator}.
      * The initial state of the reduction will be the provided {@code identity}.
      * <p>
      * The returned Reduction is guaranteed to not create any internal objects.

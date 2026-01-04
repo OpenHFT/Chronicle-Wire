@@ -58,7 +58,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Returns the type of object this serialization strategy supports, which is {@link Marshallable}.
+         * Returns the base type for the MARSHALLABLE strategy ({@link Marshallable}).
          *
          * @return The {@link Marshallable} class.
          */
@@ -99,7 +99,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Returns the most generic type of object this serialization strategy supports, which is {@link Object}.
+         * Returns the base type for the ANY_OBJECT strategy ({@link Object}).
          *
          * @return The {@link Object} class.
          */
@@ -110,7 +110,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Indicates that the bracket type for this strategy is unknown.
+         * ANY_OBJECT uses {@link BracketType#UNKNOWN} because the shape is inferred at runtime.
          *
          * @return The {@link BracketType#UNKNOWN}.
          */
@@ -138,7 +138,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Returns the most generic type of scalar this serialization strategy supports, which is {@link Object}.
+         * Returns the base type for the ANY_SCALAR strategy ({@link Object}).
          *
          * @return The {@link Object} class.
          */
@@ -149,7 +149,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Indicates that this strategy does not use any bracketing for serialization.
+         * ANY_SCALAR uses no bracketing for scalar serialisation.
          *
          * @return The {@link BracketType#NONE}.
          */
@@ -176,7 +176,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Returns the type of object this serialization strategy supports, which is {@link Enum}.
+         * Returns the enum base type handled by the ENUM strategy ({@link Enum}).
          *
          * @return The {@link Enum} class.
          */
@@ -187,7 +187,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Indicates that this strategy does not use any bracketing for serialization.
+         * ENUM values are written without brackets for serialisation.
          *
          * @return The {@link BracketType#NONE}.
          */
@@ -205,9 +205,6 @@ public enum SerializationStrategies implements SerializationStrategy {
      * of dynamic enums from the input source.
      */
     DYNAMIC_ENUM {
-
-        // Reflective field access to the ordinal of the Enum class
-        private final Field ordinal = Jvm.getField(Enum.class, "ordinal");
 
         /**
          * Reads a dynamic enum value from the provided input source.
@@ -236,7 +233,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Returns the type of object this serialization strategy supports, which is {@link Enum}.
+         * Returns the enum base type for dynamic enum serialisation ({@link Enum}).
          *
          * @return The {@link Enum} class.
          */
@@ -247,7 +244,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Indicates that the bracket type used for serialization is unknown.
+         * DYNAMIC_ENUM uses {@link BracketType#UNKNOWN} because the representation varies by value.
          *
          * @return The {@link BracketType#UNKNOWN}.
          */
@@ -270,10 +267,10 @@ public enum SerializationStrategies implements SerializationStrategy {
                 DynamicEnum o = (DynamicEnum) UnsafeMemory.INSTANCE.allocateInstance(type);
                 o.setField("name", "[unset]");
                 if (o instanceof Enum)
-                    ordinal.set(o, -1);
+                    ENUM_ORDINAL.set(o, -1);
                 return o;
             } catch (Exception e) {
-                throw new IORuntimeException(e);
+                throw new IORuntimeException("Failed to allocate a dynamic enum instance.", e);
             }
         }
     },
@@ -305,7 +302,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Returns the type of object this serialization strategy supports, which is {@link Object}.
+         * Returns the base type for the ANY_NESTED strategy ({@link Object}).
          *
          * @return The {@link Object} class.
          */
@@ -316,7 +313,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Indicates that the bracket type used for serialization is unknown.
+         * ANY_NESTED uses {@link BracketType#UNKNOWN} because nested shapes vary.
          *
          * @return The {@link BracketType#UNKNOWN}.
          */
@@ -356,7 +353,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Returns the type of object this serialization strategy supports, which is {@link Demarshallable}.
+         * Returns the base type for the DEMARSHALLABLE strategy ({@link Demarshallable}).
          *
          * @return The {@link Demarshallable} class.
          */
@@ -402,8 +399,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Returns the type of object this serialization strategy supports,
-         * which is {@link Serializable}.
+         * Returns the base type for the SERIALIZABLE strategy ({@link Serializable}).
          *
          * @return The {@link Serializable} class.
          */
@@ -433,14 +429,13 @@ public enum SerializationStrategies implements SerializationStrategy {
             try {
                 ((Externalizable) o).readExternal(in.wireIn().objectInput());
             } catch (@NotNull IOException | ClassNotFoundException e) {
-                throw new IORuntimeException(e);
+                throw new IORuntimeException("Failed to read Externalizable from wire input.", e);
             }
             return o;
         }
 
         /**
-         * Returns the type of object this serialization strategy supports,
-         * which is {@link Externalizable}.
+         * Returns the base type for the EXTERNALIZABLE strategy ({@link Externalizable}).
          *
          * @return The {@link Externalizable} class.
          */
@@ -494,8 +489,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Creates a new instance of a {@link Map}, either {@link LinkedHashMap} or
-         * {@link TreeMap} based on the type.
+         * Creates a {@link Map} instance for this strategy, choosing LinkedHashMap or TreeMap.
          *
          * @return The new {@link Map} instance.
          */
@@ -510,8 +504,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Returns the type of object this serialization strategy supports,
-         * which is {@link Map}.
+         * Returns the base Map type handled by the MAP strategy.
          *
          * @return The {@link Map} class.
          */
@@ -554,8 +547,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Creates a new instance of a {@link Set}, either {@link LinkedHashSet} or
-         * {@link TreeSet} based on the type.
+         * Creates a {@link Set} instance for this strategy, choosing LinkedHashSet or TreeSet.
          *
          * @return The new {@link Set} instance.
          */
@@ -566,8 +558,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Returns the type of object this serialization strategy supports,
-         * which is {@link Set}.
+         * Returns the base Set type handled by the SET strategy.
          *
          * @return The {@link Set} class.
          */
@@ -578,7 +569,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Specifies the bracket type associated with this strategy.
+         * SET uses SEQ brackets for serialising set elements.
          *
          * @return The bracket type.
          */
@@ -627,7 +618,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Creates a new instance of an {@link ArrayList}.
+         * Creates an ArrayList instance for list deserialisation.
          *
          * @return The new {@link List} instance.
          */
@@ -638,8 +629,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Returns the type of object this serialization strategy supports,
-         * which is {@link List}.
+         * Returns the base List type handled by the LIST strategy.
          *
          * @return The {@link List} class.
          */
@@ -650,7 +640,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Specifies the bracket type associated with this strategy.
+         * LIST uses SEQ brackets for serialising list elements.
          *
          * @return The bracket type.
          */
@@ -698,8 +688,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Returns the type of object this serialization strategy supports,
-         * which is an array.
+         * Returns the base array type handled by the ARRAY strategy (Object[]).
          *
          * @return The Object[].class.
          */
@@ -722,7 +711,7 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Specifies the bracket type associated with this strategy.
+         * ARRAY uses SEQ brackets for serialising array elements.
          *
          * @return The bracket type.
          */
@@ -803,16 +792,18 @@ public enum SerializationStrategies implements SerializationStrategy {
         }
 
         /**
-         * Specifies the bracket type associated with this strategy.
+         * PRIM_ARRAY uses SEQ brackets for serialising primitive array elements.
          *
          * @return The bracket type.
          */
         @NotNull
         @Override
-        public BracketType bracketType() {
-            return BracketType.SEQ;
-        }
+    public BracketType bracketType() {
+        return BracketType.SEQ;
+    }
     };
+
+    private static final Field ENUM_ORDINAL = Jvm.getField(Enum.class, "ordinal");
 
     /**
      * The provided methods and class are related to an object's instantiation and its bracket type
@@ -830,7 +821,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     }
 
     /**
-     * Specifies the bracket type associated with this strategy.
+     * Uses MAP brackets for the default strategy unless a constant overrides it.
      *
      * @return The bracket type. For this strategy, it is defined as MAP.
      */

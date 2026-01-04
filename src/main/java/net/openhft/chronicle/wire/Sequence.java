@@ -23,7 +23,7 @@ public interface Sequence {
     long NOT_FOUND = -1;
 
     /**
-     * gets the sequence for a writePosition
+     * Gets the sequence number for the supplied write position.
      * <p>
      * This method will only return a valid sequence number of the write position if the write position is the
      * last write position in the queue. YOU CAN NOT USE THIS METHOD TO LOOK UP RANDOM SEQUENCES FOR ANY WRITE POSITION.

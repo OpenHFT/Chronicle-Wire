@@ -401,7 +401,7 @@ public class GenerateMethodWriter {
                 importSet.add(nameForClass(interfaceClazz));
 
                 if (!interfaceClazz.isInterface())
-                    throw new MethodWriterValidationException("expecting an interface instead of class=" + interfaceClazz.getName());
+                    throw new MethodWriterValidationException("Method writer requires an interface; got class=" + interfaceClazz.getName());
 
                 // TODO: Need a test to show when an extra import is required.
                 // Methods extraction and generation
@@ -446,7 +446,7 @@ public class GenerateMethodWriter {
                 imports.append(", ");
 
                 if (!interfaceClazz.isInterface())
-                    throw new MethodWriterValidationException("expecting an interface instead of class=" + interfaceClazz.getName());
+                    throw new MethodWriterValidationException("Interface type expected for method writer proxy; class=" + interfaceClazz.getName());
 
                 for (Method dm : interfaceClazz.getMethods()) {
                     final int modifiers = dm.getModifiers();
@@ -644,7 +644,6 @@ public class GenerateMethodWriter {
         }
 
         body.append("MarshallableOut _out_ = this.out.get();\n");
-        boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
         boolean passthrough = returnType == DocumentContext.class;
 
         // MarshallableOut setup logic
@@ -659,6 +658,7 @@ public class GenerateMethodWriter {
         else
             body.append(") {\n");
         body.append("try {\n");
+        boolean terminating = returnType == Void.class || returnType == void.class || returnType.isPrimitive();
         body.append("_dc_.chainedElement(" + (!terminating && !passthrough) + ");\n");
         body.append("if (_out_.recordHistory()) MessageHistory.writeHistory(_dc_);\n");
 

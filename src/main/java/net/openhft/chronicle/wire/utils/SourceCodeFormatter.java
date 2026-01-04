@@ -52,7 +52,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
     }
 
     /**
-     * Returns the formatted string.
+     * Returns the formatted source code string.
      *
      * @return The formatted code string.
      */

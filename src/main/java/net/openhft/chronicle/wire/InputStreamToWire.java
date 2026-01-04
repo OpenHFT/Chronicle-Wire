@@ -79,7 +79,7 @@ public class InputStreamToWire {
     public Wire readOne() throws IOException {
         wire.clear();
         int length = dis.readInt();
-        if (length < 0) throw new StreamCorruptedException();
+        if (length < 0) throw new StreamCorruptedException("Negative frame length: " + length);
         bytes.ensureCapacity(length);
         byte[] array = bytes.underlyingObject().array();
         dis.readFully(array, 0, length);

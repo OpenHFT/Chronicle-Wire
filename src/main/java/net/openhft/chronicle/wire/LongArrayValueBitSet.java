@@ -491,8 +491,8 @@ public class LongArrayValueBitSet extends AbstractBitSetSupport implements Marsh
     }
 
     /**
-     * Identifies the closest bit set to {@code true} that occurs on or before the given starting index.
-     * If no such bit exists or if {@code -1} is the starting index, the method returns {@code -1}.
+     * Finds the nearest set bit at or before {@code fromIndex}.
+     * If no set bit exists or if {@code -1} is the starting index, the method returns {@code -1}.
      *
      * @param fromIndex The index to start the reverse search from (inclusive).
      * @return Index of the previous set bit or {@code -1} if no set bit is found.
@@ -506,7 +506,7 @@ public class LongArrayValueBitSet extends AbstractBitSetSupport implements Marsh
             if (fromIndex == -1)
                 return -1;
             throw new IndexOutOfBoundsException(
-                    "fromIndex < -1: " + fromIndex);
+                    "previousSetBit fromIndex < -1: " + fromIndex);
         }
 
         int u = toWordIndex(fromIndex);
@@ -529,8 +529,8 @@ public class LongArrayValueBitSet extends AbstractBitSetSupport implements Marsh
     }
 
     /**
-     * Identifies the closest bit set to {@code false} that occurs on or before the given starting index.
-     * If no such bit exists or if {@code -1} is the starting index, the method returns {@code -1}.
+     * Finds the nearest clear bit at or before {@code fromIndex}.
+     * If no clear bit exists or if {@code -1} is the starting index, the method returns {@code -1}.
      *
      * @param fromIndex The index to start the reverse search from (inclusive).
      * @return Index of the previous clear bit or {@code -1} if no clear bit is found.
@@ -544,7 +544,7 @@ public class LongArrayValueBitSet extends AbstractBitSetSupport implements Marsh
             if (fromIndex == -1)
                 return -1;
             throw new IndexOutOfBoundsException(
-                    "fromIndex < -1: " + fromIndex);
+                    "previousClearBit fromIndex < -1: " + fromIndex);
         }
 
         int u = toWordIndex(fromIndex);

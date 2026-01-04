@@ -127,7 +127,7 @@ public class GenerateMethodDelegate extends AbstractClassGenerator<GenerateMetho
      */
     public static class GMDMetaData extends AbstractClassGenerator.MetaData<GMDMetaData> {
         /**
-         * Creates metadata with default settings.
+         * Creates metadata with default settings for delegate generation.
          */
         public GMDMetaData() {
         }

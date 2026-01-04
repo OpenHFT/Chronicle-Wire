@@ -109,7 +109,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     private boolean addSourceDetails = false;
 
     /**
-     * Returns the thread-local instance of {@link MessageHistory}.
+     * Returns the per-thread {@link MessageHistory} used to avoid shared state between threads.
      *
      * @return Current thread's {@code MessageHistory} instance.
      */
@@ -167,7 +167,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         this.addSourceDetails = addSourceDetails;
     }
 
-    /** Clears all recorded entries. */
+    /** Clears recorded sources and timings so the instance can be reused safely. */
     @Override
     public void reset() {
         sources = timings = 0;
@@ -342,7 +342,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     /** Optimised binary deserialisation using direct memory access. */
     private void readMarshallableDirect(@NotNull BytesIn<?> bytes) {
         long addr = bytes.addressForRead(bytes.readPosition());
-        long start = addr;
         Memory memory = OS.memory();
         sources = memory.readByte(addr++);
         for (int i = 0; i < sources; i++) {
@@ -358,6 +357,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
             timingsArray[i] = memory.readLong(addr);
             addr += 8;
         }
+        long start = bytes.addressForRead(bytes.readPosition());
         bytes.readSkip(addr - start);
     }
 
@@ -391,7 +391,6 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     /** Optimised binary serialisation using direct memory access. */
     private void writeMarshallableDirect(BytesOut<?> b) {
         long addr = b.addressForWritePosition();
-        long start = addr;
         Memory memory = OS.memory();
         memory.writeByte(addr++, (byte) sources);
         for (int i = 0; i < sources; i++) {
@@ -409,6 +408,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         }
         memory.writeLong(addr, nanoTime()); // add time for this output
         addr += 8;
+        long start = b.addressForWritePosition();
         b.writeSkip(addr - start);
     }
 
@@ -556,7 +556,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         return copy2;
     }
 
-    /** Internal helper for {@link #toString()}. */
+    /** Builds the sources segment for {@link #toString()}, including ids and hex indices. */
     private CharSequence toStringSources() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < sources; i++) {
@@ -568,7 +568,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
         return sb;
     }
 
-    /** Internal helper for {@link #toString()}. */
+    /** Builds the timings segment for {@link #toString()}, honouring wall-clock formatting. */
     private CharSequence toStringTimings() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < timings; i++) {

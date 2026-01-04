@@ -13,11 +13,11 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 public abstract class AbstractFieldInfo implements FieldInfo {
 
     /**
-     * The name of the field.
+     * The logical name associated with this field.
      */
     protected final String name;
 
-    /** The declared type of the field. */
+    /** The declared Java type for this field. */
     protected final Class<?> type;
 
     /** The bracket type associated with the field. */

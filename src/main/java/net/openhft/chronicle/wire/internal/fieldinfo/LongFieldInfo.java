@@ -44,7 +44,7 @@ public final class LongFieldInfo extends UnsafeFieldInfo {
         try {
             UnsafeMemory.unsafePutLong(object, getOffset(), value);
         } catch (@NotNull NoSuchFieldException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException("Failed to set long field '" + name() + "'", e);
         }
     }
 

@@ -58,8 +58,8 @@ public enum WireInternal {
     // Collection of classes that are internable to reduce memory consumption.
     static final Set<Class> INTERNABLE = new HashSet<>(Arrays.asList(
             String.class,
-//            Date.class,
-//            TimeZone.class,
+            //            Date.class,
+            //            TimeZone.class,
             UUID.class,
             DayOfWeek.class,
             LocalDate.class,
@@ -73,8 +73,8 @@ public enum WireInternal {
             Year.class,
             YearMonth.class,
             ZonedDateTime.class
-//            ZoneId.class,
-//            ZoneOffset.class
+    //            ZoneId.class,
+    //            ZoneOffset.class
     ));
 
     // Map to store and retrieve object interners for specific classes.
@@ -141,7 +141,7 @@ public enum WireInternal {
         position = bytes.writePositionForHeader(wireOut.usePadding());
 
         int metaDataBit = metaData ? Wires.META_DATA : 0;
-        int len0 = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
+        int len0 = metaDataBit | Wires.NOT_COMPLETE_UNKNOWN_LENGTH;
         bytes.writeOrderedInt(len0);
         writer.writeMarshallable(wireOut);
         if (!wireOut.isBinary())
@@ -152,8 +152,8 @@ public enum WireInternal {
             wireOut.addPadding(bytesToSkip);
             position1 = bytes.writePosition();
         }
-//            if (position1 < position)
-//                System.out.println("Message truncated from " + position + " to " + position1);
+        //            if (position1 < position)
+        //                System.out.println("Message truncated from " + position + " to " + position1);
         int length;
         if (bytes instanceof HexDumpBytes) {
             // Todo: this looks suspicious. Why cast to int individually rather than use long arithmetics?
@@ -258,7 +258,7 @@ public enum WireInternal {
                     // bytes.readWithLength(len, b -> metaDataConsumer.accept(wireIn));
                     // Reading meta data, setting limits to ensure correct data length
                     if (len > bytes.readRemaining())
-                        throw new BufferUnderflowException();
+                        throw new BufferUnderflowException(/* metadata length exceeds remaining bytes */);
                     long limit0 = bytes.readLimit();
                     long limit = bytes.readPosition() + len;
                     try {
@@ -295,7 +295,8 @@ public enum WireInternal {
         int header = bytes.readInt();
 
         // Ensure the header is both ready and indicates data
-        assert Wires.isReady(header) && Wires.isData(header);
+        assert Wires.isReady(header) && Wires.isData(header)
+                : "rawReadData expects a ready data header";
 
         // Determine the length of the data from the header
         final int len = Wires.lengthOf(header);
@@ -367,7 +368,7 @@ public enum WireInternal {
                 try {
                     DETAILED_MESSAGE.set(finalThrowable, message);
                 } catch (IllegalAccessException e) {
-                    throw new AssertionError(e);
+                    throw new AssertionError("Unable to set detailed message via reflection: " + e);
                 }
             }
 

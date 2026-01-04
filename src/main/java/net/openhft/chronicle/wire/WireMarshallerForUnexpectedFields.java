@@ -87,7 +87,7 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
                             try {
                                 rm.unexpectedField(sb, vin);
                             } catch (Exception e) {
-                                throw new UnexpectedFieldHandlingException(e);
+                                throw new UnexpectedFieldHandlingException(/* unexpectedField handler failed */ e);
                             }
                         }
                     }
@@ -100,7 +100,7 @@ public class WireMarshallerForUnexpectedFields<T> extends WireMarshaller<T> {
                 }
             }
         } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
+            throw new AssertionError("Unable to copy field values via reflection: " + e);
         }
     }
 }

@@ -45,15 +45,14 @@ public enum GeneratedProxyClass {
 
         // Builds the initial portion of the proxy class's Java code.
         StringBuilder sb = new StringBuilder(512);
-        sb.append(String.format("package %s;\n" +
-                "\n" +
-                "import net.openhft.chronicle.core.Jvm;\n" +
-                "import net.openhft.chronicle.wire.MethodWriterInvocationHandlerSupplier;\n" +
-                "import java.lang.reflect.InvocationHandler;\n" +
-                "import java.lang.reflect.Method;\n" +
-                "import java.util.stream.IntStream;\n" +
-                "import java.util.ArrayList;\n" +
-                "import java.util.List;\n", packageName));
+        sb.append(String.format("package %s;%n%n" +
+                "import net.openhft.chronicle.core.Jvm;%n" +
+                "import net.openhft.chronicle.wire.MethodWriterInvocationHandlerSupplier;%n" +
+                "import java.lang.reflect.InvocationHandler;%n" +
+                "import java.lang.reflect.Method;%n" +
+                "import java.util.stream.IntStream;%n" +
+                "import java.util.ArrayList;%n" +
+                "import java.util.List;%n", packageName));
 
         sb.append("public class ")
                 .append(className)
@@ -234,7 +233,7 @@ public enum GeneratedProxyClass {
     }
 
     /**
-     * Creates a method signature for the given method.
+     * Creates a Java method signature string for the generated proxy method.
      *
      * @param dm        The method for which the signature needs to be created.
      * @param returnType The return type of the method.

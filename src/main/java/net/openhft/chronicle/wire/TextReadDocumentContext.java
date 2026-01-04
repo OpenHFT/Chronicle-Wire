@@ -19,28 +19,34 @@ public class TextReadDocumentContext implements ReadDocumentContext {
 
     // Byte sequences for start and end of the document
     /**
-     * Document start marker {@code ---}.
+     * Document start marker for text wire documents ({@code ---}).
      */
     public static final BytesStore<?, ?> SOD_SEP = BytesStore.from("---");
-    /** Document end marker {@code ...}. */
+    /** Document end marker for text wire documents ({@code ...}). */
     public static final BytesStore<?, ?> EOD_SEP = BytesStore.from("...");
 
     // The wire instance this context operates on
-    /** Wire this context reads from. */
+    /** Wire instance this context reads from when parsing text documents. */
     @Nullable
     protected Wire wire;
 
     // Indicators for the state of the document
-    /** Flags indicating presence and completeness. */
-    protected boolean present, notComplete;
+    /** Flag indicating whether a document is present in the wire. */
+    protected boolean present;
+
+    /** Flag indicating whether the current document is incomplete. */
+    protected boolean notComplete;
 
     // Metadata flag
     /** Flag indicating whether the current document is metadata. */
     private boolean metaData;
 
     // Position and limits for reading within the wire
-    /** Current read position and limit within the wire. */
-    private long readPosition, readLimit;
+    /** Current read position within the wire document. */
+    private long readPosition;
+
+    /** Current read limit for the document within the wire. */
+    private long readLimit;
 
     // Starting position (initialized to an invalid position)
     /** Start offset of the current document, {@code -1} when unknown. */
@@ -51,7 +57,7 @@ public class TextReadDocumentContext implements ReadDocumentContext {
     private boolean rollback;
 
     /**
-     * Constructor for the TextReadDocumentContext.
+     * Constructs a text document context for the supplied wire.
      *
      * @param wire The wire instance to be used by this context. Can be null.
      */

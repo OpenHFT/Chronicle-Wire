@@ -664,8 +664,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 return object;
             case NONE:
                 return null;
+            default:
+                throw new UnsupportedOperationException(yt.toString());
         }
-        throw new UnsupportedOperationException(yt.toString());
     }
 
     @Override
@@ -736,7 +737,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 YamlToken next = rereadWire.yt.next();
                 if (next == YamlToken.MAPPING_START) // indented rather than iin { }
                     next = rereadWire.yt.next();
-                assert next == YamlToken.MAPPING_KEY : "next: " + next;
+                assert next == YamlToken.MAPPING_KEY : "Mapping key token should appear here, got: " + next;
                 if (rereadWire.checkForMatch(keyName)) {
                     keys.removeIndex(i);
                     return rereadWire.valueIn;
@@ -1097,7 +1098,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 Object o = anchorValues.get(alias);
                 yt.next();
                 if (o == null)
-                    throw new IllegalStateException("Unknown alias " + alias + " with no corresponding anchor");
+                    throw new IllegalStateException("Unknown alias while resolving object anchor: " + alias);
                 return (E) o;
             } else if (current == YamlToken.ANCHOR) {
                 String alias = yt.text();
@@ -1175,7 +1176,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     alias = yt.text();
                     Object o = anchorValues.get(alias);
                     if (o == null)
-                        throw new IllegalStateException("Unknown alias " + alias + " with no corresponding anchor");
+                        throw new IllegalStateException("Unknown alias while reading text value: " + alias);
 
                     // yt.next(); ??
                     sb.append(o);
@@ -1299,7 +1300,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         /**
-         * Reads the length of a marshallable.
+         * Reads the byte length of the next marshallable value.
          *
          * @return The length of the marshallable.
          */
@@ -1762,7 +1763,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 }
                 default:
                     return null;
-/*
+                /*
 
                 case MAPPING_START:
                     if (tClass == null || tClass == Object.class || tClass == Map.class) {
@@ -1778,7 +1779,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     break;
                 case TEXT:
                     return text();
-*/
+                */
             }
         }
 
@@ -1850,7 +1851,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     return marshallable(object, strategy);
 
                 case SEQUENCE_START:
-                    Jvm.warn().on(getClass(), "Expected a {} but was blank for type " + object.getClass());
+                    Jvm.warn().on(getClass(), "Marshallable value for type " + object.getClass()
+                            + " was blank where '{}' is required");
                     consumeAny(yt.secondTopContext().indent);
                     return object;
 
@@ -1862,7 +1864,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     try {
                         wireIn().endEvent();
                     } catch (UnsupportedOperationException uoe) {
-                        throw new IORuntimeException("Unterminated { while reading marshallable " +
+                        throw new IORuntimeException("Unterminated { while reading marshallable map " +
                                 object + ",code='" + yt.current() + "', bytes=" + Bytes.toString(bytes, 1024)
                         );
                     }
@@ -1920,7 +1922,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
             consumePadding();
             if (yt.current() != YamlToken.MAPPING_END)
-                throw new IORuntimeException("Unterminated { while reading marshallable " +
+                throw new IORuntimeException("Unterminated { while reading demarshallable " +
                         object + ",code='" + yt.current() + "', bytes=" + Bytes.toString(bytes, 1024)
                 );
             yt.next();
@@ -2020,7 +2022,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             consumePadding();
             final StringBuilder stringBuilder = acquireStringBuilder();
             if (textTo(stringBuilder) == null)
-                throw new NullPointerException("value is null");
+                throw new NullPointerException("Boolean value is missing in YAML input");
 
             if (ObjectUtils.isTrue(stringBuilder))
                 return true;
@@ -2077,7 +2079,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     String alias = yt.text();
                     Object o = anchorValues.get(alias);
                     if (o == null)
-                        throw new IllegalStateException("Unknown alias " + alias + " with no corresponding anchor");
+                        throw new IllegalStateException("Unknown alias while reading long value: " + alias);
                     if (o instanceof Number)
                         return ((Number) o).longValue();
                     //noinspection DataFlowIssue
@@ -2107,7 +2109,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 yt.next();
             valueIn.skipType();
             if (yt.current() != YamlToken.TEXT) {
-                Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a double.");
+                Jvm.warn().on(getClass(), "Unable to read " + valueIn.objectBestEffort() + " as a double from non-text YAML.");
                 return 0;
             }
             switch (yt.current()) {
@@ -2116,7 +2118,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     String alias = yt.text();
                     Object o = anchorValues.get(alias);
                     if (o == null)
-                        throw new IllegalStateException("Unknown alias " + alias + " with no corresponding anchor");
+                        throw new IllegalStateException("Unknown alias while reading double value: " + alias);
                     if (o instanceof Number)
                         return ((Number) o).doubleValue();
                     //noinspection DataFlowIssue
@@ -2247,7 +2249,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     alias = yt.text();
                     o = anchorValues.get(alias);
                     if (o == null)
-                        throw new IllegalStateException("Unknown alias " + alias + " with no corresponding anchor");
+                        throw new IllegalStateException("Unknown alias while reading object value: " + alias);
 
                     yt.next();
                     return o;
@@ -2282,8 +2284,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          */
         @Nullable
         protected Object readNumberOrText() {
-            // Determine the kind of quote used for the YAML block
-            char blockQuoteChar = yt.blockQuote();
             // Extract the text content into a StringBuilder
             @Nullable StringBuilder s = textTo0(acquireStringBuilder());
             if (yt.current() == YamlToken.LITERAL)
@@ -2292,6 +2292,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 return true;
             if (StringUtils.isEqual(s, "false"))
                 return false;
+            // Determine the kind of quote used for the YAML block
+            char blockQuoteChar = yt.blockQuote();
             return readNumberOrTextFrom(blockQuoteChar, s);
         }
 
@@ -2374,7 +2376,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             } catch (NoSuchMethodException e) {
                 // ignored - method not found for conversion
             } catch (InvocationTargetException | IllegalAccessException e) {
-                throw new IllegalStateException(e);
+                throw new IllegalStateException("Failed to invoke valueOf for binary decode type " + type, e);
             }
 
             // If all conversion attempts failed, throw an exception

@@ -40,33 +40,33 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
     /**
      * Compares a given {@code WriteMarshallable} object with another object for equality.
      *
-     * @param $this The reference {@code WriteMarshallable} object.
+     * @param self The reference {@code WriteMarshallable} object.
      * @param o     The object to compare with.
      * @return {@code true} if both objects are equal, {@code false} otherwise.
      */
-    static boolean $equals(@NotNull WriteMarshallable $this, Object o) {
+    static boolean $equals(@NotNull WriteMarshallable self, Object o) {
         return o instanceof WriteMarshallable &&
-                ($this == o || Wires.isEquals($this, o));
+                (self == o || Wires.isEquals(self, o));
     }
 
     /**
      * Generates a 32-bit hash code for a given {@code WriteMarshallable} object.
      *
-     * @param $this The reference {@code WriteMarshallable} object.
+     * @param self The reference {@code WriteMarshallable} object.
      * @return The 32-bit hash code.
      */
-    static int $hashCode(WriteMarshallable $this) {
-        return HashWire.hash32($this);
+    static int $hashCode(WriteMarshallable self) {
+        return HashWire.hash32(self);
     }
 
     /**
      * Converts a given {@code WriteMarshallable} object into its string representation.
      *
-     * @param $this The reference {@code WriteMarshallable} object.
+     * @param self The reference {@code WriteMarshallable} object.
      * @return A string representation of the object.
      */
-    static String $toString(WriteMarshallable $this) {
-        return TEXT.asString($this);
+    static String $toString(WriteMarshallable self) {
+        return TEXT.asString(self);
     }
 
     /**

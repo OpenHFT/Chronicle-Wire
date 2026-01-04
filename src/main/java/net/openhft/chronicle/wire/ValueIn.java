@@ -106,7 +106,7 @@ public interface ValueIn {
     }
 
     /**
-     * Reads and returns the text data.
+     * Reads and returns the current field as text data.
      *
      * @return The text data or null.
      */
@@ -251,7 +251,7 @@ public interface ValueIn {
     }
 
     /**
-     * Provides the current WireIn instance.
+     * Provides the parent WireIn instance for the current reader context.
      *
      * @return The current WireIn instance.
      */
@@ -368,7 +368,7 @@ public interface ValueIn {
     @NotNull <T> WireIn int64(@NotNull T target, @NotNull ObjLongConsumer<T> longConsumer);
 
     /**
-     * Reads the value as a {@code float} and passes it to {@code floatConsumer} with
+     * Reads the value as a single-precision float and passes it to {@code floatConsumer} with
      * {@code target}.
      *
      * @param <T> type of the context object
@@ -380,7 +380,7 @@ public interface ValueIn {
     @NotNull <T> WireIn float32(@NotNull T target, @NotNull ObjFloatConsumer<T> floatConsumer);
 
     /**
-     * Reads the value as a {@code double} and passes it to {@code doubleConsumer} with
+     * Reads the value as a double-precision value and passes it to {@code doubleConsumer} with
      * {@code target}.
      *
      * @param <T> type of the context object
@@ -1081,7 +1081,7 @@ public interface ValueIn {
     }
 
     /**
-     * Reads a boolean value from the wire.
+     * Reads a boolean flag from the wire stream.
      *
      * @return The boolean value read from the wire.
      */
@@ -1272,7 +1272,7 @@ public interface ValueIn {
     }
 
     /**
-     * Reads an object of the specified class from the wire.
+     * Reads an object of the specified class from the wire stream.
      *
      * @param <E>   The expected type.
      * @param clazz The class of the object to read.
@@ -1316,7 +1316,7 @@ public interface ValueIn {
     }
 
     /**
-     * Reads an object from the wire.
+     * Reads an object using a reusable instance when one is supplied.
      *
      * @param <E>   The type of the object to read.
      * @param using An instance of the object to reuse, or null to create a new instance.
@@ -1339,7 +1339,7 @@ public interface ValueIn {
     }
 
     /**
-     * Reads an object from the wire.
+     * Reads an object using a factory function to obtain a reusable instance.
      *
      * @param <E>   The type of the object to read.
      * @param usingFunction A function to apply retrieve the instance of an object to reuse, or null to create a new instance.
@@ -1360,7 +1360,7 @@ public interface ValueIn {
     }
 
     /**
-     * Reads an object from the wire.
+     * Reads an object with optional best-effort parsing enabled.
      *
      * @param <E>        The type of the object to read.
      * @param using      An instance of the object to reuse, or null to create a new instance.
@@ -1383,7 +1383,7 @@ public interface ValueIn {
     BracketType getBracketType();
 
     /**
-     * Checks if the current value in the wire is null.
+     * Checks whether the current wire value is explicitly null.
      *
      * @return True if the current value is null, false otherwise.
      */
@@ -1423,7 +1423,7 @@ public interface ValueIn {
     Class<?> typePrefix();
 
     /**
-     * read a class with a super class or actual class as a hint
+     * Reads a class using the supplied super-class or actual class as a hint.
      *
      * @param tClass the super-class, or actual class to use
      * @return the class or an instance of an object to use.
@@ -1452,7 +1452,7 @@ public interface ValueIn {
     Object objectWithInferredType(Object using, SerializationStrategy strategy, Class<?> type) throws InvalidMarshallableException;
 
     /**
-     * Checks if a value is present in the data stream.
+     * Checks whether a value is present in the current data stream.
      *
      * @return True if a value is present, false otherwise.
      */
@@ -1461,7 +1461,7 @@ public interface ValueIn {
     }
 
     /**
-     * Reads a UUID from the wire.
+     * Reads a UUID value from the wire stream.
      *
      * @return The UUID read from the wire, or null if it cannot be read.
      */
@@ -1494,7 +1494,7 @@ public interface ValueIn {
     }
 
     /**
-     * Reads a boolean value from the wire.
+     * Reads a boolean value via {@link #bool()} for test compatibility.
      *
      * @return The boolean value read from the wire.
      */
@@ -1504,7 +1504,7 @@ public interface ValueIn {
     }
 
     /**
-     * Reads a byte value from the wire.
+     * Reads a signed byte value via {@link #int8()}.
      *
      * @return The byte value read from the wire.
      */
@@ -1513,7 +1513,7 @@ public interface ValueIn {
     }
 
     /**
-     * Reads a char value from the wire.
+     * Reads a UTF-16 character value via {@link #uint16()}.
      *
      * @return The char value read from the wire.
      */
@@ -1523,7 +1523,7 @@ public interface ValueIn {
     }
 
     /**
-     * Reads a short value from the wire.
+     * Reads a 16-bit short value via {@link #int16()}.
      *
      * @return The short value read from the wire.
      */
@@ -1533,7 +1533,7 @@ public interface ValueIn {
     }
 
     /**
-     * Reads an int value from the wire.
+     * Reads a 32-bit int value via {@link #int32()}.
      *
      * @return The int value read from the wire.
      */
@@ -1542,7 +1542,7 @@ public interface ValueIn {
     }
 
     /**
-     * Reads a long value from the wire.
+     * Reads a 64-bit long value via {@link #int64()}.
      *
      * @return The long value read from the wire.
      */
@@ -1551,7 +1551,7 @@ public interface ValueIn {
     }
 
     /**
-     * Reads a float value from the wire.
+     * Reads a 32-bit float value via {@link #float32()}.
      *
      * @return The float value read from the wire.
      */
@@ -1561,7 +1561,7 @@ public interface ValueIn {
     }
 
     /**
-     * Reads a double value from the wire.
+     * Reads a 64-bit double value via {@link #float64()}.
      *
      * @return The double value read from the wire.
      */
@@ -1570,7 +1570,7 @@ public interface ValueIn {
     }
 
     /**
-     * Reads a String from the wire.
+     * Reads a String value via {@link #text()}.
      *
      * @return The String read from the wire, or null if it cannot be read.
      */

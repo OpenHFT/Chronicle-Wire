@@ -10,7 +10,7 @@ package net.openhft.chronicle.wire;
 final class MethodWriterTypeUtil {
 
     /**
-     * Utility holder; not instantiable.
+     * Utility holder for writer type mapping; not instantiable.
      */
     private MethodWriterTypeUtil() {
     }

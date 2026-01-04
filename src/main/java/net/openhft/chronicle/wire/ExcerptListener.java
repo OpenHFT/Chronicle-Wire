@@ -10,19 +10,19 @@ import org.jetbrains.annotations.NotNull;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * A listener interface for receiving events when excerpts are encountered.
+ * Listener interface that receives callbacks when excerpts are encountered in a wire.
  */
 @FunctionalInterface
 public interface ExcerptListener {
 
     /**
-     * Invoked per each encountered excerpt.
+     * Invoked for each encountered excerpt with its wire and index.
      * <p>
      * If this method throws an Exception, it is relayed to the call site.
      * Therefore, care should be taken to minimise the probability of throwing Exceptions.
      *
      * @param wire  representing access to the excerpt that was stored (non-null).
-     * @param index in the queue where the except was placed (non-negative)
+     * @param index in the queue where the excerpt was placed (non-negative)
      */
     void onExcerpt(@NotNull Wire wire, @NonNegative long index) throws InvalidMarshallableException;
 

@@ -43,7 +43,7 @@ public class YamlTokeniser {
 
     // Stack to manage contextual information during tokenization
     /**
-     * Stack of active parsing contexts.
+     * Stack of active parsing contexts for YAML tokenisation.
      */
     protected final List<YTContext> contexts = new ArrayList<>();
 
@@ -359,7 +359,7 @@ public class YamlTokeniser {
                     return pushed.isEmpty() ? next0(minIndent) : popPushed();
                 }
                 break;
-        // Other symbols that might have specific semantics in certain YAML constructs
+                // Other symbols that might have specific semantics in certain YAML constructs
             case '+':
             case '$':
             case '(':
@@ -609,7 +609,6 @@ public class YamlTokeniser {
             return keyDefinitionToken; // If we are inside a flow structure, return the key token.
         }
         int pos = this.pushed.size();
-
         // Pop contexts until the current indent matches the existing context.
         while (currentIndentLevel < contextIndent()) {
             contextPop();
@@ -617,9 +616,12 @@ public class YamlTokeniser {
         int contextIndent = contextIndent();
 
         // Push the indented token if we are starting a new indentation level.
-        if (currentIndentedContextToken != null && currentIndentLevel != contextIndent)
+        if (currentIndentedContextToken != null && currentIndentLevel != contextIndent) {
             this.pushed.add(currentIndentedContextToken);
-        this.pushed.add(keyDefinitionToken);
+            this.pushed.add(keyDefinitionToken);
+        } else {
+            this.pushed.add(keyDefinitionToken);
+        }
 
         // Reverse the order of the tokens in the pushed stack.
         reversePushed(pos);
@@ -636,8 +638,6 @@ public class YamlTokeniser {
      * colon it is treated as a {@link YamlToken#MAPPING_KEY}.
      */
     private YamlToken readText(int currentIndentLevel) {
-        long pos = in.readPosition(); // Store the current position of input.
-
         blockQuote = 0;
         readWords(); // Read words until we reach a character that is not part of the scalar.
 
@@ -848,7 +848,8 @@ public class YamlTokeniser {
             }
             // Throw an exception if the end of input is reached without finding the closing quote.
             if (ch < 0) {
-                throw new IllegalStateException("Unterminated quotes " + in.subBytes(blockStart - 1, in.readPosition()));
+                throw new IllegalStateException("Unterminated double-quoted value in YAML input: " +
+                        in.subBytes(blockStart - 1, in.readPosition()));
             }
         }
     }
@@ -875,7 +876,8 @@ public class YamlTokeniser {
             }
             // Throw an exception if the end of input is reached without finding the closing quote.
             if (ch < 0) {
-                throw new IllegalStateException("Unterminated quotes " + in.subBytes(blockStart - 1, in.readPosition()));
+                throw new IllegalStateException("Unterminated single-quoted value in YAML input: " +
+                        in.subBytes(blockStart - 1, in.readPosition()));
             }
         }
     }
