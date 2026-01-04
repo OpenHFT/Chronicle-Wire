@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Project-specific SpotBugs exclusions.
+
+  These generated method writer/reader classes are created at test compile time.
+  They include helper fields that are intentionally unused, so SpotBugs reports
+  unread or unused fields. Exclude the generated classes to keep the gate
+  focused on hand-maintained code.
+-->
+<FindBugsFilter>
+
+    <!-- Generated MethodWriter classes for tests (wire-type suffixes). -->
+    <Match>
+        <Class name="~.*(Binarylight|BinaryLight|Text|Yaml|YAML|TEXT|JSON).*MethodWriter$"/>
+    </Match>
+
+    <!-- Generated MethodReader classes for tests (wire-type or test naming). -->
+    <Match>
+        <Class name="~.*(Test|MethodWriter|Binarylight|BinaryLight|Text|Yaml|YAML|TEXT|JSON).*MethodReader$"/>
+    </Match>
+
+    <!-- Generated MethodReader proxies under com.sun.proxy. -->
+    <Match>
+        <Class name="~net\\.openhft\\.chronicle\\.wire\\.method\\.com\\.sun\\.proxy\\..*MethodReader$"/>
+    </Match>
+
+    <!-- Generated interface readers without wire type suffix. -->
+    <Match>
+        <Class name="~net\\.openhft\\.chronicle\\.wire\\.I[A-Z].*MethodReader$"/>
+    </Match>
+
+    <!-- Runtime toggle for tuple generation; required to remain mutable. -->
+    <Match>
+        <Class name="net.openhft.chronicle.wire.Wires"/>
+        <Field name="GENERATE_TUPLES"/>
+        <Bug pattern="MS_CANNOT_BE_FINAL"/>
+    </Match>
+</FindBugsFilter>
