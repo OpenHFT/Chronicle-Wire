@@ -32,7 +32,7 @@ class TupleInvocationHandlerTest extends WireTestCommon {
         tuple.setField("alpha", "one");
         tuple.setField("beta", 2L);
         assertEquals("one", tuple.getField("alpha", String.class), "alpha field should read back as string");
-        assertEquals(Long.valueOf(2L), tuple.getField("beta", Long.class), "beta field should read back as long");
+        assertEquals(2L, tuple.getField("beta", Long.class), "beta field should read back as long");
         assertEquals("sampleType", tuple.className(), "className should match tuple type");
         assertTrue(tuple.usesSelfDescribingMessage(), "tuple should use self-describing messages");
 

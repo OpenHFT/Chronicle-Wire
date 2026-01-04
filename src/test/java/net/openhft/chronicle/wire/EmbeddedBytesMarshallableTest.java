@@ -50,7 +50,7 @@ class EmbeddedBytesMarshallableTest extends WireTestCommon {
 
         // Ensure the deserialized and modified data is as expected.
         Assertions.assertEquals("b0000000", e2.a.toString(),
-                "Expected embedded bytes to reflect updated content");
+                "Embedded bytes should reflect updated content");
 
         // Release the bytes.
         bytes.releaseLast();
@@ -77,7 +77,7 @@ class EmbeddedBytesMarshallableTest extends WireTestCommon {
                 "  b: a1234567890123456789abc,\n" +
                 "  c: a1234567890\n" +
                 "}\n";
-        assertEquals(expected, e1.toString(), "Expected EBM toString before marshalling");
+        assertEquals(expected, e1.toString(), "EBM toString should match before marshalling");
         Bytes<?> bytes = new HexDumpBytes();
         e1.writeMarshallable(bytes);
         assertEquals("00 80 04 08 00 80 04 08 1e 61 31 32 33 34 35 36\n" +
@@ -86,11 +86,11 @@ class EmbeddedBytesMarshallableTest extends WireTestCommon {
                 "37 38 39 30 31 32 33 34 35 36 37 38 39 61 62 63\n" +
                 "c4 5f 74 4c 00 00 00 00 0b 61 31 32 33 34 35 36\n" +
                 "37 38 39 30\n", bytes.toHexString(),
-                "Expected hex dump output for embedded bytes");
+                "Hex dump output should match embedded bytes");
         EBM e2 = new EBM();
         e2.readMarshallable(bytes);
-        assertEquals(expected, e2.toString(), "Expected EBM toString after unmarshalling");
-        assertEquals(e1.number, e2.number, "Expected number to round-trip for embedded bytes");
+        assertEquals(expected, e2.toString(), "EBM toString should match after unmarshalling");
+        assertEquals(e1.number, e2.number, "Number should round-trip for embedded bytes");
         bytes.releaseLast();
     }
 
@@ -174,7 +174,7 @@ class EmbeddedBytesMarshallableTest extends WireTestCommon {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
             EBM ebm = new EBM();
             ebm.readMarshallable(bytes);
-        }, "Expected buffer underflow for empty input");
+        }, "Empty input should trigger buffer underflow");
     }
 
     // Test deserialization with invalid description (even bit count = 0).
@@ -187,7 +187,7 @@ class EmbeddedBytesMarshallableTest extends WireTestCommon {
             bytes.readLimit(64); // even bit count i.e. 0
             EBM ebm = new EBM();
             ebm.readMarshallable(bytes);
-        }, "Expected invalid description with zero field count");
+        }, "Invalid description should be rejected for zero field count");
     }
 
     // Test deserialization with another invalid description scenario where it tries to read more data than available.
@@ -201,7 +201,7 @@ class EmbeddedBytesMarshallableTest extends WireTestCommon {
             bytes.readLimit(64);
             EBM ebm = new EBM();
             ebm.readMarshallable(bytes);
-        }, "Expected invalid description with insufficient data");
+        }, "Invalid description should be rejected when data is insufficient");
     }
 
     // Test deserialization with yet another invalid description, characterized by both an even bit count
@@ -215,7 +215,7 @@ class EmbeddedBytesMarshallableTest extends WireTestCommon {
             bytes.readLimit(64);
             EBM ebm = new EBM();
             ebm.readMarshallable(bytes);
-        }, "Expected invalid description with even bit count and insufficient data");
+        }, "Invalid description should be rejected for even bit count with insufficient data");
     }
 
     // Test deserialization with an even bit count description.
@@ -229,7 +229,7 @@ class EmbeddedBytesMarshallableTest extends WireTestCommon {
             bytes.readLimit(64);
             EBM ebm = new EBM();
             ebm.readMarshallable(bytes);
-        }, "Expected invalid description for even bit count marker");
+        }, "Invalid description should be rejected for even bit count marker");
     }
 
     // Test deserialization with field counts exceeding FIELD_COUNT_LIMIT (256).
@@ -247,7 +247,7 @@ class EmbeddedBytesMarshallableTest extends WireTestCommon {
             bytes.readLimit(bytes.writePosition());
             EBM1 ebm1 = new EBM1();
             ebm1.readMarshallable(bytes);
-        }, "Expected excessive field counts to be rejected");
+        }, "Excessive field counts should be rejected");
     }
 
     // A class representing a Marshallable object with fields grouped into embedded Bytes.

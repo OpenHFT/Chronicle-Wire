@@ -33,7 +33,7 @@ class ValueInSequenceBoundariesTest extends WireTestCommon {
                 }
                 return c;
             });
-            assertEquals(0, n0, "Expected empty sequence length for wireType=" + wt);
+            assertEquals(0, n0, "Empty sequence length should be 0 for wireType=" + wt);
 
             final long[] one = new long[1];
             int n1 = w.read("s").sequenceWithLength(one, (in, arr) -> {
@@ -43,8 +43,8 @@ class ValueInSequenceBoundariesTest extends WireTestCommon {
                 }
                 return c;
             });
-            assertEquals(1, n1, "Expected single-item sequence length for wireType=" + wt);
-            assertEquals(1L, one[0], "Expected single item value for wireType=" + wt);
+            assertEquals(1, n1, "Single-item sequence length should be 1 for wireType=" + wt);
+            assertEquals(1L, one[0], "Single item value should be 1 for wireType=" + wt);
         }
     }
 
@@ -60,9 +60,9 @@ class ValueInSequenceBoundariesTest extends WireTestCommon {
             });
             int[] arr = new int[65];
             int n = w.read("m").array(arr);
-            assertEquals(65, n, "Expected 65 sequence items for wireType=" + wt);
+            assertEquals(65, n, "Sequence length should be 65 for wireType=" + wt);
             for (int i = 0; i < 65; i++) {
-                assertEquals(i, arr[i], "Expected sequence value for wireType=" + wt + ", index=" + i);
+                assertEquals(i, arr[i], "Sequence value should match for wireType=" + wt + ", index=" + i);
             }
         }
     }

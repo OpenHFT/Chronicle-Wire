@@ -81,7 +81,7 @@ class BytesMarshallableTest extends WireTestCommon {
         }
         // Asserting that the expected string equals the debug string output of the wire bytes
         assertEquals(expected, wire.bytes().toDebugString(),
-                "Expected primitive DTO debug output for wireType=" + wireType);
+                "Primitive DTO debug output should match for wireType=" + wireType);
 
         // Creating two new DTOs and populating them by reading from the wire
         // Then, asserting that they equal the original written DTOs
@@ -93,10 +93,10 @@ class BytesMarshallableTest extends WireTestCommon {
             wire.bytes().readPosition(0);
 
             wire.read("prim").marshallable(dto2);
-            assertEquals(dto1, dto2, "Expected PrimDto round-trip on pass " + i);
+            assertEquals(dto1, dto2, "PrimDto should round-trip on pass " + i);
 
             wire.read("scalar").marshallable(sdto2);
-            assertEquals(sdto1, sdto2, "Expected ScalarDto round-trip on pass " + i);
+            assertEquals(sdto1, sdto2, "ScalarDto should round-trip on pass " + i);
         }
     }
 
@@ -134,7 +134,7 @@ class BytesMarshallableTest extends WireTestCommon {
         }
         // Asserting that the expected string equals the debug string output of the wire bytes
         assertEquals(expected, wire.bytes().toDebugString(),
-                "Expected primitive DTO2 debug output for wireType=" + wireType);
+                "Primitive DTO2 debug output should match for wireType=" + wireType);
 
         // Creating two new DTOs, reading values from the wire, and asserting they equal originals
         PrimDto2 dto2 = new PrimDto2();
@@ -144,10 +144,10 @@ class BytesMarshallableTest extends WireTestCommon {
             wire.bytes().readPosition(0);
 
             wire.read("prim").marshallable(dto2);
-            assertEquals(dto1, dto2, "Expected PrimDto2 round-trip on pass " + i);
+            assertEquals(dto1, dto2, "PrimDto2 should round-trip on pass " + i);
 
             wire.read("scalar").marshallable(sdto2);
-            assertEquals(sdto1, sdto2, "Expected ScalarDto2 round-trip on pass " + i);
+            assertEquals(sdto1, sdto2, "ScalarDto2 should round-trip on pass " + i);
         }
 
         ClassAliasPool.CLASS_ALIASES.addAlias(PrimDto2.class);
@@ -163,14 +163,14 @@ class BytesMarshallableTest extends WireTestCommon {
                 "  f32: 1.0,\n" +
                 "  f64: 1.0\n" +
                 "}\n", dto2.toString(),
-                "Expected PrimDto2 toString output");
+                "PrimDto2 toString should match expected output");
 
         assertEquals("!ScalarDto2 {\n" +
                 "  text: Hello1,\n" +
                 "  buffer: bye 1,\n" +
                 "  bytes: hi 1\n" +
                 "}\n", sdto2.toString(),
-                "Expected ScalarDto2 toString output");
+                "ScalarDto2 toString should match expected output");
     }
 
     // Class encapsulating various primitive data types and providing initialization logic.

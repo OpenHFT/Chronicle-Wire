@@ -3,6 +3,7 @@
  */
 package net.openhft.chronicle.wire.internal;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.openhft.chronicle.wire.BracketType;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.jupiter.api.DisplayName;
@@ -57,6 +58,7 @@ class VanillaFieldInfoTest extends WireTestCommon {
                 "Object fields should compare equal");
     }
 
+    @SuppressFBWarnings(value = "UUF_UNUSED_FIELD", justification = "Fields are accessed via reflection in tests")
     static class Sample {
         int number;
         char character;

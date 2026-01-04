@@ -28,10 +28,10 @@ class BinaryWireNestedDocumentTest extends WireTestCommon {
         try (DocumentContext dc = wire.readingDocument()) {
             Map<String, Object> outer = dc.wire().read("outer").marshallableAsMap(String.class, Object.class);
             assertTrue(outer.containsKey("inner"),
-                    "Expected outer map to contain inner entry");
+                    "Outer map should contain inner entry");
             @SuppressWarnings("unchecked")
             Map<String, Object> inner = (Map<String, Object>) outer.get("inner");
-            assertEquals("hi", inner.get("value"), "Expected inner value to round-trip");
+            assertEquals("hi", inner.get("value"), "Inner value should round-trip");
         }
     }
 }

@@ -181,5 +181,10 @@ class DefaultMarshallerTest extends WireTestCommon {
         public boolean equals(Object o) {
             return super.equals(o);
         }
+
+        @Override
+        public int hashCode() {
+            return super.hashCode();
+        }
     }
 }

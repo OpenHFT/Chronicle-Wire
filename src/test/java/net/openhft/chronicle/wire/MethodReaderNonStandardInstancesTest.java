@@ -75,7 +75,7 @@ class MethodReaderNonStandardInstancesTest extends WireTestCommon {
         AtomicBoolean b = new AtomicBoolean();
 
         // Create a MethodReader that uses a BooleanConsumer implementation
-        MethodReader reader = wire.methodReader((BooleanConsumer) value -> b.set(value));
+        MethodReader reader = wire.methodReader((BooleanConsumer) b::set);
 
         // Assertions to ensure the reader is of the expected type and it reads and processes the message correctly
         assertFalse(reader instanceof VanillaMethodReader,

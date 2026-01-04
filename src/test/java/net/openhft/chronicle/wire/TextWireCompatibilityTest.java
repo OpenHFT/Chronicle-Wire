@@ -45,7 +45,7 @@ class TextWireCompatibilityTest extends WireTestCommon {
             // Check if the "c" field is missing, and log an error if present
             @Nullable String missingValue = wire.read("c").text();
             if (missingValue != null) {
-                System.err.println("expected null, had: <" + missingValue + ">");
+                System.err.println("null was expected, had: <" + missingValue + ">");
             }
         }
 

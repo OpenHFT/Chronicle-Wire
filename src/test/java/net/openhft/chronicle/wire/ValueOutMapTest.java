@@ -27,6 +27,6 @@ class ValueOutMapTest extends WireTestCommon {
 
         bytes.readPositionRemaining(0, bytes.writePosition());
         Map<String, Object> read = wire.read("map").marshallableAsMap(String.class, Object.class);
-        assertEquals(map, read, "Expected map round-trip to preserve entries");
+        assertEquals(map, read, "Map round-trip should preserve entries");
     }
 }

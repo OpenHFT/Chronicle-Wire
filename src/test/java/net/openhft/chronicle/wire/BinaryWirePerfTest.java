@@ -124,7 +124,7 @@ class BinaryWirePerfTest extends WireTestCommon {
         }
         int lastX = b.x;
         if (lastX != 0) {
-            throw new AssertionError("Expected x to remain 0, got " + lastX);
+            throw new AssertionError("x should remain 0, got " + lastX);
         }
         long rate = (System.nanoTime() - start) / runs;
         System.out.printf("(ints) %,d : %,d ns avg, len= %,d%n", t, rate, wire.bytes().readPosition());

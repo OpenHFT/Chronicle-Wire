@@ -439,18 +439,7 @@ class WireEdgeCasesTest extends WireTestCommon {
 
             bytes.readPosition(0);
 
-            List<List<Integer>> result = new ArrayList<>();
-            wire.read("outer").sequence(result, (list, outer) -> {
-                while (outer.hasNextSequenceItem()) {
-                    List<Integer> inner = new ArrayList<>();
-                    outer.sequence(inner, (innerList, v) -> {
-                        while (v.hasNextSequenceItem()) {
-                            innerList.add(v.int32());
-                        }
-                    });
-                    list.add(inner);
-                }
-            });
+            List<List<Integer>> result = NestedSequenceSupport.readNestedIntSequences(wire, "outer");
 
             assertEquals(2, result.size(), "Nested sequences should have 2 inner in " + wireType);
             assertEquals(2, result.get(0).size(), "First inner should have 2 items in " + wireType);

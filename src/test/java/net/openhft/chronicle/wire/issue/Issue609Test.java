@@ -3,6 +3,7 @@
  */
 package net.openhft.chronicle.wire.issue;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.*;
@@ -126,6 +127,7 @@ class Issue609Test extends WireTestCommon {
     /**
      * Configuration class representing a single input of a service.
      */
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "Field is read by marshalling configuration")
     public static class InputCfg extends AbstractMarshallableCfg {
         String input;
 

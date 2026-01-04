@@ -164,7 +164,7 @@ class MethodReaderDelegationTest extends WireTestCommon {
 
         // Read and verify the first method from the wire
         assertTrue(reader.readOne(),
-                "Expected first call to be read (scanning=" + scanning + ", useMethodId=" + useMethodId + ")");
+                "Reader should read first call (scanning=" + scanning + ", useMethodId=" + useMethodId + ")");
         assertNull(delegatedMethodCall.get(),
                 "No delegated method should be recorded after first read (scanning=" + scanning
                         + ", useMethodId=" + useMethodId + ")");
@@ -262,22 +262,22 @@ class MethodReaderDelegationTest extends WireTestCommon {
 
             // Verify that the first method can be read
             assertTrue(reader.readOne(),
-                    "Expected first call to be read (proxy=" + proxy + ", scanning=" + scanning + ")");
+                    "Reader should read first call (proxy=" + proxy + ", scanning=" + scanning + ")");
 
             // Based on the scanning flag, handle the method reading logic accordingly
             if (scanning) {
                 assertTrue(reader.readOne(),
-                        "Expected unknown method to be skipped (proxy=" + proxy + ", scanning=true)");
+                        "Reader should skip unknown method (proxy=" + proxy + ", scanning=true)");
                 assertEquals(third, reader.readOne(),
-                        "Expected third read result to match third=" + third + " (proxy=" + proxy + ", scanning=true)");
+                        "Third read result should match third=" + third + " (proxy=" + proxy + ", scanning=true)");
                 assertFalse(reader.readOne(),
-                        "Expected no more calls after third read (proxy=" + proxy + ", scanning=true)");
+                        "Reader should report no more calls after third read (proxy=" + proxy + ", scanning=true)");
             } else {
                 reader.readOne();
                 assertTrue(reader.readOne(),
-                        "Expected trailing call after unknown method (proxy=" + proxy + ", scanning=false)");
+                        "Reader should read trailing call after unknown method (proxy=" + proxy + ", scanning=false)");
                 assertFalse(reader.readOne(),
-                        "Expected no more calls after trailing call (proxy=" + proxy + ", scanning=false)");
+                        "Reader should report no more calls after trailing call (proxy=" + proxy + ", scanning=false)");
             }
 
             return sb.toString();

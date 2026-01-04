@@ -32,7 +32,7 @@ class TriviallyCopyableJLBH implements JLBHTask {
     private final BaseHouse targetHouse;
     private final Wire wire = WireType.BINARY.apply(Bytes.allocateDirect(1024));
     // use -Dio.type=binary or trivial to set. Defaults to binary
-    private HouseType type = HouseType.UNKNOWN;
+    private HouseType type;
     private JLBH lth;
 
     private TriviallyCopyableJLBH() {

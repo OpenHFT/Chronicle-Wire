@@ -23,6 +23,6 @@ class BinaryToTextTest extends WireTestCommon {
         assertEquals("--- !!data #binary\n" +
                         "key: hello\n",
                 Wires.fromSizePrefixedBlobs(tw),
-                "Expected text output for binary wire document");
+                "Text output should match binary wire document");
     }
 }

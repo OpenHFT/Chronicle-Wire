@@ -388,18 +388,7 @@ class BinaryValueInEdgeCaseTest extends WireTestCommon {
 
         bytes.readPositionRemaining(0, bytes.writePosition());
 
-        List<List<Integer>> result = new ArrayList<>();
-        wire.read("outer").sequence(result, (list, outer) -> {
-            while (outer.hasNextSequenceItem()) {
-                List<Integer> inner = new ArrayList<>();
-                outer.sequence(inner, (innerList, v) -> {
-                    while (v.hasNextSequenceItem()) {
-                        innerList.add(v.int32());
-                    }
-                });
-                list.add(inner);
-            }
-        });
+        List<List<Integer>> result = NestedSequenceSupport.readNestedIntSequences(wire, "outer");
 
         assertEquals(2, result.size(), "Outer sequence should contain 2 inner sequences");
         assertEquals(2, result.get(0).size(), "First inner should have 2 items");

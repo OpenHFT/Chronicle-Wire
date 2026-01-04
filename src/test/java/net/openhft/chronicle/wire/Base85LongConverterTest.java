@@ -50,7 +50,7 @@ class Base85LongConverterTest extends WireTestCommon {
             StringBuilder sb = new StringBuilder();
             c.append(sb, v);
             assertEquals(s, sb.toString(),
-                    "Expected base85 round-trip for input=" + s);
+                    "base85 round-trip should hold for input=" + s);
         }
     }
 

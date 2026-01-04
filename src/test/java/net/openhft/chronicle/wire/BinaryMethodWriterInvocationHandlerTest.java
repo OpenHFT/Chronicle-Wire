@@ -40,7 +40,7 @@ class BinaryMethodWriterInvocationHandlerTest extends WireTestCommon {
 
         Class<?>[] interfaces = {Closeable.class};
         try (@NotNull Closeable close = (Closeable) Proxy.newProxyInstance(Closeable.class.getClassLoader(), interfaces, handler)) {
-            assertNotNull(close, "Expected proxy closeable instance");
+            assertNotNull(close, "Proxy closeable instance should be created");
             // and close it
         }
 

@@ -45,7 +45,7 @@ class AbstractFieldTest extends WireTestCommon {
         wire.getValueOut().object(MSDMHolder.class, holder);
 
         MSDMHolder result = wire.getValueIn().object(MSDMHolder.class);
-        assertEquals(holder, result, "Expected MSDMHolder to round-trip for wireType=" + wireType);
+        assertEquals(holder, result, "MSDMHolder should round-trip for wireType=" + wireType);
         assertNotNull(result.marshallable,
                 "MSDMHolder marshallable field should be present for wireType=" + wireType);
         assertEquals("Hello World",
@@ -68,7 +68,7 @@ class AbstractFieldTest extends WireTestCommon {
         wire.getValueOut().object(MSDMHolder2.class, holder);
 
         MSDMHolder2 result = wire.getValueIn().object(MSDMHolder2.class);
-        assertEquals(holder, result, "Expected MSDMHolder2 to round-trip for wireType=" + wireType);
+        assertEquals(holder, result, "MSDMHolder2 should round-trip for wireType=" + wireType);
         assertNotNull(result.marshallable,
                 "MSDMHolder2 marshallable field should be present for wireType=" + wireType);
         assertEquals("Hello World",

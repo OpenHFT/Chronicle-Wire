@@ -396,7 +396,7 @@ class MessageHistoryTest extends WireTestCommon {
 
     // Customized version of VanillaMessageHistory that simulates changing time.
     static class SetTimeMessageHistory extends VanillaMessageHistory {
-        {
+        SetTimeMessageHistory() {
             addSourceDetails(true);
         }
 

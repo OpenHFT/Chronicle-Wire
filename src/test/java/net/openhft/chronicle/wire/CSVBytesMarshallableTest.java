@@ -41,7 +41,7 @@ class CSVBytesMarshallableTest extends WireTestCommon {
         assertEquals("1.09029,1.090305,EURUSD,2,EBS\n" +
                 "1.50935,1.50936,GBPUSD,5,RTRS\n" +
                 "1.0906,1.09065,EURCHF,3,EBS\n", bytes2.toString(),
-                "Expected CSV bytes to round-trip without level field");
+                "CSV bytes should round-trip without level field");
         bytes2.releaseLast();
     }
 
@@ -49,38 +49,38 @@ class CSVBytesMarshallableTest extends WireTestCommon {
     @Test
     @DisplayName("Marshals CSV records through JSON wire")
     void marshallableJSON() {
-        assertEquals(2, doTest(WireType.JSON, false), "Expected CSV record count for JSON wire");
+        assertEquals(2, doTest(WireType.JSON, false), "CSV record count should be 2 for JSON wire");
     }
 
     @Test
     @DisplayName("Marshals CSV records through text wire")
     void marshallableTEXT() {
-        assertEquals(2, doTest(WireType.TEXT, false), "Expected CSV record count for text wire");
+        assertEquals(2, doTest(WireType.TEXT, false), "CSV record count should be 2 for text wire");
     }
 
     @Test
     @DisplayName("Marshals CSV records through YAML wire")
     void marshallableYAML_ONLY() {
-        assertEquals(2, doTest(WireType.YAML_ONLY, false), "Expected CSV record count for YAML wire");
+        assertEquals(2, doTest(WireType.YAML_ONLY, false), "CSV record count should be 2 for YAML wire");
     }
 
     @Test
     @DisplayName("Marshals CSV records through binary wire")
     void marshallableBINARY() {
-        assertEquals(2, doTest(WireType.BINARY, true), "Expected CSV record count for binary wire");
+        assertEquals(2, doTest(WireType.BINARY, true), "CSV record count should be 2 for binary wire");
     }
 
     @Test
     @DisplayName("Marshals CSV records through fieldless wire")
     void marshallableFIELDLESS() {
         assertEquals(2, doTest(WireType.FIELDLESS_BINARY, true),
-                "Expected CSV record count for fieldless binary wire");
+                "CSV record count should be 2 for fieldless binary wire");
     }
 
     @Test
     @DisplayName("Marshals CSV records through raw wire")
     void marshallableRAW() {
-        assertEquals(2, doTest(WireType.RAW, true), "Expected CSV record count for raw wire");
+        assertEquals(2, doTest(WireType.RAW, true), "CSV record count should be 2 for raw wire");
     }
 
     private int doTest(@NotNull WireType wt, boolean binary) {

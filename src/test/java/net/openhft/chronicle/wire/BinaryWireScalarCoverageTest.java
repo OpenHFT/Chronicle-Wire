@@ -46,12 +46,12 @@ class BinaryWireScalarCoverageTest extends WireTestCommon {
 
         bytes.readPositionRemaining(0, bytes.writePosition());
 
-        assertEquals(123, wire.read("i32").int32(), "Expected int32 round-trip");
-        assertEquals(Long.MIN_VALUE + 7, wire.read("i64").int64(), "Expected int64 round-trip");
-        assertTrue(wire.read("boolTrue").bool(), "Expected boolTrue to round-trip");
-        assertFalse(wire.read("boolFalse").bool(), "Expected boolFalse to round-trip");
-        assertEquals("hello", wire.read("text").text(), "Expected text to round-trip");
-        assertEquals(3.14159, wire.read("float").float64(), 0.0, "Expected float to round-trip");
+        assertEquals(123, wire.read("i32").int32(), "int32 should round-trip");
+        assertEquals(Long.MIN_VALUE + 7, wire.read("i64").int64(), "int64 should round-trip");
+        assertTrue(wire.read("boolTrue").bool(), "boolTrue should round-trip");
+        assertFalse(wire.read("boolFalse").bool(), "boolFalse should round-trip");
+        assertEquals("hello", wire.read("text").text(), "text should round-trip");
+        assertEquals(3.14159, wire.read("float").float64(), 0.0, "float should round-trip");
 
         Object[] holder = new Object[3];
         wire.read("seq").sequence(holder, (arr, in) -> {
@@ -59,9 +59,9 @@ class BinaryWireScalarCoverageTest extends WireTestCommon {
             arr[1] = in.text();
             arr[2] = in.int64();
         });
-        assertEquals((short) 1, holder[0], "Expected sequence int16 at index 0");
-        assertEquals("two", holder[1], "Expected sequence text at index 1");
-        assertEquals(3L, holder[2], "Expected sequence int64 at index 2");
+        assertEquals((short) 1, holder[0], "Sequence item 0 should be int16 value 1");
+        assertEquals("two", holder[1], "Sequence item 1 should be text value two");
+        assertEquals(3L, holder[2], "Sequence item 2 should be int64 value 3");
     }
 
     @Test

@@ -1259,7 +1259,7 @@ class YamlWireTest extends AbstractWireTest {
     @DisplayName("YAML marshallable enums read correctly from wire")
     @MethodSource("wireTypes")
     @ParameterizedTest(name = "YAML read Marshallable As Enum behaviour uses padding setting {0}")
-    public void readMarshallableAsEnum(boolean usePadding) {
+    void readMarshallableAsEnum(boolean usePadding) {
         initYamlWireTest(usePadding);
         Wire wire = createWire();
         ClassAliasPool.CLASS_ALIASES.addAlias(YWTSingleton.class);

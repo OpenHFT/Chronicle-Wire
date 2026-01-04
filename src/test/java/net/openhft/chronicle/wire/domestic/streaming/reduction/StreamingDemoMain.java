@@ -125,7 +125,7 @@ class StreamingDemoMain {
                     + ", maxIndex=" + maxIndex
                     + ", listingSize=" + listing.reduction().size()
                     + ", symbolsStartingWithS=" + symbolsStartingWithS.reduction().size()
-                    + ", latestAAPL=" + String.valueOf(latestAppleMarketData)
+                    + ", latestAAPL=" + latestAppleMarketData
                     + ", liveQueueBackedMapSize=" + liveQueueBackedMap.size()
                     + ", latestProtectedSize=" + latestProtected.reduction().size()
                     + ", statsSize=" + stats.reduction().size()

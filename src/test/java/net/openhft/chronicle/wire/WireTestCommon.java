@@ -65,6 +65,11 @@ public class WireTestCommon {
         threadDump = new ThreadDump();
     }
 
+    protected void ignoreThread(String threadName) {
+        if (threadDump != null)
+            threadDump.ignore(threadName);
+    }
+
     // Checks if any new threads have been created after test execution
     private void checkThreadDump() {
         if (threadDump != null)

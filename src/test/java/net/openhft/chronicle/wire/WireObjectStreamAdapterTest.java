@@ -55,7 +55,7 @@ class WireObjectStreamAdapterTest extends WireTestCommon {
         assertEquals(Arrays.asList("first", "second"), list, "wire object stream should preserve list collection contents");
         @SuppressWarnings("unchecked")
         Map<String, Integer> map = (Map<String, Integer>) input.readObject();
-        assertEquals(Integer.valueOf(42), map.get("key"), "wire object stream should preserve map collection contents");
+        assertEquals(42, map.get("key").intValue(), "wire object stream should preserve map collection contents");
 
         // Available() reports remaining bytes in the underlying wire, which may include framing.
         assertTrue(input.available() >= 4, "wire object stream should report available bytes for remaining raw data");

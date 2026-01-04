@@ -34,7 +34,7 @@ class BitSetTest extends WireTestCommon {
             wire.getValueOut().object(original);
 
             BitSet read = wire.getValueIn().object(BitSet.class);
-            Assertions.assertEquals(original, read, "Expected BitSet to round-trip with single bit");
+            Assertions.assertEquals(original, read, "BitSet should round-trip with single bit");
         } finally {
             b.releaseLast();
         }
@@ -54,7 +54,7 @@ class BitSetTest extends WireTestCommon {
             wire.getValueOut().object(original);
 
             BitSet read = wire.getValueIn().object(BitSet.class);
-            Assertions.assertEquals(original, read, "Expected BitSet to round-trip with multiple bits");
+            Assertions.assertEquals(original, read, "BitSet should round-trip with multiple bits");
         } finally {
             b.releaseLast();
         }
@@ -76,7 +76,7 @@ class BitSetTest extends WireTestCommon {
                     "  1024,\n" +
                     "  # 0000000000000000000000000000000000000000000000000000010000000000\n" +
                     "]\n", wire.toString(),
-                    "Expected BitSet text output for single bit");
+                    "BitSet text output should match single bit");
         } finally {
             b.releaseLast();
         }
@@ -100,7 +100,7 @@ class BitSetTest extends WireTestCommon {
                     "  33554432,\n" +
                     "  # 0000000000000000000000000000000000000010000000000000000000000000\n" +
                     "]\n", wire.toString(),
-                    "Expected BitSet text output for multiple bits");
+                    "BitSet text output should match multiple bits");
         } finally {
             b.releaseLast();
         }
@@ -124,7 +124,7 @@ class BitSetTest extends WireTestCommon {
             wire.getValueOut().object(original);
 
             BitSet read = wire.getValueIn().object(using, BitSet.class);
-            Assertions.assertEquals(original, read, "Expected BitSet to round-trip using provided instance");
+            Assertions.assertEquals(original, read, "BitSet should round-trip using provided instance");
         } finally {
             b.releaseLast();
         }

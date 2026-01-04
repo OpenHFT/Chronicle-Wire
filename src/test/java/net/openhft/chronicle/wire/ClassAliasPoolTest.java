@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 import static org.easymock.EasyMock.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ClassAliasPoolTest extends WireTestCommon {
+class ClassAliasPoolTest extends WireTestCommon {
 
     // Helper method to match char sequences in a mock setup
     private static CharSequence charSequence(String text) {
@@ -94,7 +94,7 @@ public class ClassAliasPoolTest extends WireTestCommon {
         // Create a method writer for the TestedMethods interface and write a handle event
         final TestedMethods writer = wire.methodWriter(TestedMethods.class);
         CAPTData data = new CAPTData();
-        assertEquals(0L, data.value, "Expected CAPTData default value to be zero");
+        assertEquals(0L, data.value, "CAPTData default value should be zero");
         writer.handle(data);
 
         // Validate the content of the wire using the wire checker

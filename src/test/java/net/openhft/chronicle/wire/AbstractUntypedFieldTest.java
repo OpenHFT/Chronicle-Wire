@@ -50,10 +50,10 @@ class AbstractUntypedFieldTest extends WireTestCommon {
         System.out.println("holder.a = " + holder.a);
 
         Holder expected = new Holder(new AImpl());
-        assertNotNull(expected.a, "Expected sample holder to set a field");
+        assertNotNull(expected.a, "Sample holder should set a field");
 
         // Assertion to check if the typed field is not null
-        assertNotNull(holder.a, "Expected typed field to be non-null for wire=" + wireName);
+        assertNotNull(holder.a, "Typed field should be non-null for wire=" + wireName);
     }
 
     // Parameterized test to verify untyped fields are null
@@ -72,7 +72,7 @@ class AbstractUntypedFieldTest extends WireTestCommon {
         final Holder holder = textWire.getValueIn().object(Holder.class);
 
         // Assertion to check if the untyped field is null
-        assertNull(holder.a, "Expected untyped field to be null for wire=" + wireName);
+        assertNull(holder.a, "Untyped field should be null for wire=" + wireName);
     }
 
     // Parameterized test to ensure that missing aliases result in warnings
@@ -94,7 +94,7 @@ class AbstractUntypedFieldTest extends WireTestCommon {
 
         // Assertion to check if the field with missing alias is null
         assertNull(valueIn.object(Holder.class).a,
-                "Expected missing alias field to be null for wire=" + wireName);
+                "Missing alias field should be null for wire=" + wireName);
     }
 
     // Abstract base class for testing

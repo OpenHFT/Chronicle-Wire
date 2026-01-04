@@ -49,20 +49,20 @@ class ChainedMethodsTest extends WireTestCommon {
                 "next2: word\n" +
                 "echo: echo-2\n" +
                 "...\n", wire.toString(),
-                "Expected chained textual output for disableProxyCodegen=" + disableProxyCodegen);
+                "Chained textual output should match for disableProxyCodegen=" + disableProxyCodegen);
 
         // Create a StringBuilder to collect method call representations.
         StringBuilder sb = new StringBuilder();
 
         // Create a method reader to read method calls.
         MethodReader reader = wire.methodReader(Mocker.intercepting(ITop.class, "*", sb::append));
-        assertTrue(reader.readOne(), "Expected reader to return first chained method call");
-        assertTrue(reader.readOne(), "Expected reader to return second chained method call");
+        assertTrue(reader.readOne(), "Reader should return first chained method call");
+        assertTrue(reader.readOne(), "Reader should return second chained method call");
 
         // Validate the string representation of method calls.
         assertEquals("*mid[mid]*next[1]*echo[echo-1]*mid2[mid2]*next2[word]*echo[echo-2]", sb.toString(),
-                "Expected method call trace from reader");
-        assertFalse(reader.readOne(), "Expected no additional method calls");
+                "Method call trace should match reader output");
+        assertFalse(reader.readOne(), "Reader should report no additional method calls");
     }
 
     // Test method for chained methods with TextWire.
@@ -108,7 +108,7 @@ class ChainedMethodsTest extends WireTestCommon {
                     .next(1)
                     .echo("echo-1");
             assertEquals(34, wire.bytes().writePosition(),
-                    "Expected write position after first chain");
+                    "Write position should match after first chain");
             top.mid2("mid2")
                     .next2("word")
                     .echo("echo-2");
@@ -123,20 +123,20 @@ class ChainedMethodsTest extends WireTestCommon {
                     "mid2: mid2\n" +
                     "next2: word\n" +
                     "echo: echo-2\n", WireDumper.of(wire).asString(),
-                    "Expected wire output for chained binary calls");
+                    "Wire output should match chained binary calls");
 
             // Create a StringBuilder to collect method call representations.
             StringBuilder sb = new StringBuilder();
 
             // Create a method reader to read method calls.
             MethodReader reader = wire.methodReader(Mocker.intercepting(ITop.class, "*", sb::append));
-            assertTrue(reader.readOne(), "Expected reader to return first binary method call");
-            assertTrue(reader.readOne(), "Expected reader to return second binary method call");
+            assertTrue(reader.readOne(), "Reader should return first binary method call");
+            assertTrue(reader.readOne(), "Reader should return second binary method call");
 
             // Validate the string representation of method calls.
             assertEquals("*mid[mid]*next[1]*echo[echo-1]*mid2[mid2]*next2[word]*echo[echo-2]", sb.toString(),
-                    "Expected binary method call trace");
-            assertFalse(reader.readOne(), "Expected no additional binary method calls");
+                    "Binary method call trace should match reader output");
+            assertFalse(reader.readOne(), "Reader should report no additional binary method calls");
         });
     }
 
@@ -175,10 +175,10 @@ class ChainedMethodsTest extends WireTestCommon {
                             "  5,\n" +
                             "  !byte -7\n" +
                             "]\n" +
-                            "next: 2\n" +
-                            "echo: echo-2\n",
+                    "next: 2\n" +
+                    "echo: echo-2\n",
                     WireDumper.of(wire).asString(),
-                    "Expected wire output for varying argument counts");
+                    "Wire output should match varying argument counts");
 
             // Create a StringBuilder to collect method call representations.
             StringBuilder sb = new StringBuilder();
@@ -207,13 +207,13 @@ class ChainedMethodsTest extends WireTestCommon {
 
             // Create a method reader to read method calls.
             MethodReader reader = wire.methodReader(implementingOnlyITop);
-            assertTrue(reader.readOne(), "Expected first varied-args call");
-            assertTrue(reader.readOne(), "Expected second varied-args call");
+            assertTrue(reader.readOne(), "Reader should return first varied-args call");
+            assertTrue(reader.readOne(), "Reader should return second varied-args call");
 
             // Validate the string representation of method calls.
             assertEquals("*next[1]*echo[echo-1]*next[2]*echo[echo-2]", sb.toString(),
-                    "Expected varied-args call trace");
-            assertFalse(reader.readOne(), "Expected no additional varied-args calls");
+                    "Varied-args call trace should match reader output");
+            assertFalse(reader.readOne(), "Reader should report no additional varied-args calls");
         });
     }
 
@@ -233,7 +233,7 @@ class ChainedMethodsTest extends WireTestCommon {
 
             // Check if the writer is a Proxy class, if the proxy codegen is disabled.
             assertEquals(disableProxyCodegen, Proxy.isProxyClass(writer.getClass()),
-                    "Expected proxy status to match disableProxyCodegen=" + disableProxyCodegen);
+                    "Proxy status should match disableProxyCodegen=" + disableProxyCodegen);
 
             // Chain method calls on the writer.
             writer.start().end();
@@ -242,7 +242,7 @@ class ChainedMethodsTest extends WireTestCommon {
             assertEquals("--- !!data #binary\n" +
                     "start: \"\"\n" +
                     "end: \"\"\n", WireDumper.of(wire).asString(),
-                    "Expected nested start/end call output");
+                    "Nested start/end call output should match");
         });
     }
 

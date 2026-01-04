@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public final class BytesMarshallableCompatibilityTest extends WireTestCommon {
+final class BytesMarshallableCompatibilityTest extends WireTestCommon {
 
     // Test the serialization and deserialization of the Container object using BytesMarshallable
     @Test
@@ -38,9 +38,9 @@ public final class BytesMarshallableCompatibilityTest extends WireTestCommon {
         copy.readMarshallable(bytes);
 
         // Validate that the original and copied containers have identical properties
-        assertEquals(container.number, copy.number, "Expected number to round-trip");
-        assertEquals(container.label, copy.label, "Expected label to round-trip");
-        assertEquals(container.truth, copy.truth, "Expected truth flag to round-trip");
+        assertEquals(container.number, copy.number, "Number should round-trip");
+        assertEquals(container.label, copy.label, "Label should round-trip");
+        assertEquals(container.truth, copy.truth, "Truth flag should round-trip");
     }
 
     // Private static class representing a container, extending the capabilities provided by BytesInBinaryMarshallable

@@ -1360,19 +1360,7 @@ class BinaryWireTest extends WireTestCommon {
         // Creating a wire instance
         @NotNull Wire wire = createWire();
 
-        Object[] a1 = new Object[0];
-        wire.write("empty").object(a1);
-        Object[] a2 = {1L};
-        wire.write("one").object(a2);
-        Object[] a3 = {"Hello", 123, 10.1};
-        wire.write("three").object(Object[].class, a3);
-
-        Object o1 = wire.read().object(Object[].class);
-        assertArrayEquals(a1, (Object[]) o1, "array 0 should round-trip empty value");
-        Object o2 = wire.read().object(Object[].class);
-        assertArrayEquals(a2, (Object[]) o2, "array 1 should round-trip single value");
-        Object o3 = wire.read().object(Object[].class);
-        assertArrayEquals(a3, (Object[]) o3, "array 2 should round-trip three values");
+        WireArrayTestSupport.assertMixedArraysRoundTrip(wire);
     }
 
     @DisplayName("Binary wire reads event names and typed DTOs")

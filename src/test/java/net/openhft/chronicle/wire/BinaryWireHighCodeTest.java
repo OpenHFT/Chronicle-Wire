@@ -21,7 +21,7 @@ class BinaryWireHighCodeTest extends WireTestCommon {
     void testUnique() throws IllegalAccessException {
         // Ensure there are no pre-defined values
         assertEquals(0, BinaryWireHighCode.values().length,
-                "Expected no enum values in BinaryWireHighCode");
+                "BinaryWireHighCode should have no enum values");
 
         // Create a set to store the values
         Set<Integer> values = new HashSet<>();
@@ -33,7 +33,7 @@ class BinaryWireHighCodeTest extends WireTestCommon {
 
             // Add the value to the set and ensure it's unique (not already present)
             assertTrue(values.add(value),
-                    "Expected unique BinaryWireHighCode value for field=" + field.getName() + ", value=" + value);
+                    "BinaryWireHighCode value should be unique for field=" + field.getName() + ", value=" + value);
         }
     }
 }

@@ -33,7 +33,7 @@ class ValueInApisNegativeTest extends WireTestCommon {
                 }
                 return c;
             });
-            assertEquals(0, len, "Expected empty sequence length for wireType=" + wt);
+            assertEquals(0, len, "Empty sequence length should be 0 for wireType=" + wt);
 
             // bytesMatch on binary only (text/yaml base64 specifics are covered elsewhere)
             if (wt == WireType.BINARY) {
@@ -41,7 +41,7 @@ class ValueInApisNegativeTest extends WireTestCommon {
                 w.write("b").bytes(content);
                 final boolean[] res = {false};
                 w.read("b").bytesMatch(Bytes.wrapForRead(content), b -> res[0] = b);
-                assertTrue(res[0], "Expected bytesMatch to succeed for wireType=" + wt);
+                assertTrue(res[0], "bytesMatch should succeed for wireType=" + wt);
             }
         }
     }

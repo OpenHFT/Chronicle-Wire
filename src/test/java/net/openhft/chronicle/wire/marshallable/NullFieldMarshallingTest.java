@@ -3,6 +3,7 @@
  */
 package net.openhft.chronicle.wire.marshallable;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
@@ -72,6 +73,7 @@ class NullFieldMarshallingTest extends WireTestCommon {
         wire.bytes().releaseLast();
     }
 
+    @SuppressFBWarnings(value = "UWF_NULL_FIELD", justification = "Null field is required for marshalling behaviour test")
     static class VO extends SelfDescribingMarshallable {
         ZoneId zoneId;
 

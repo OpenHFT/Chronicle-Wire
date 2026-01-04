@@ -45,7 +45,7 @@ class TriviallyCopyableTest extends WireTestCommon {
         // Execute the test using AA's marshallers
         AA expected = new AA((byte) 1, (byte) 2, true, false, 'Y', (short) 6, 7, 8, 9, 10);
         AA actual = roundTrip(expected, (b, a) -> a.readMarshallable(b), (b, a) -> a.writeMarshallable(b));
-        assertEquals(expected, actual, "expected trivially copyable AA to round-trip via unsafe marshaller");
+        assertEquals(expected, actual, "Trivially copyable AA should round-trip via unsafe marshaller");
     }
 
     // Inner class representing a binary-serializable data structure
@@ -81,18 +81,16 @@ class TriviallyCopyableTest extends WireTestCommon {
         @Override
         public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException {
             int id = (int) bytes.readStopBit();
-            switch (id) {
-                case FORMAT:
-                    if (OS.is64Bit())
-                        // Perform direct memory read if 64-bit OS
-                        bytes.unsafeReadObject(this, OFFSET, 32);
-                    else
-                        // Read individual fields if not 64-bit OS
-                        readMarshallable1(bytes);
-                    return;
-                default:
-                    throw new IORuntimeException("Unknown format " + id);
+            if (id == FORMAT) {
+                if (OS.is64Bit())
+                    // Perform direct memory read if 64-bit OS
+                    bytes.unsafeReadObject(this, OFFSET, 32);
+                else
+                    // Read individual fields if not 64-bit OS
+                    readMarshallable1(bytes);
+                return;
             }
+            throw new IORuntimeException("Unknown format " + id);
         }
 
         // Read individual fields from the bytes
@@ -122,7 +120,7 @@ class TriviallyCopyableTest extends WireTestCommon {
         }
 
         // Write individual fields into bytes
-       public void writeMarshallable1(BytesOut<?> bytes) {
+        public void writeMarshallable1(BytesOut<?> bytes) {
             bytes.writeInt(i);
             bytes.writeDouble(d);
             bytes.writeLong(l);

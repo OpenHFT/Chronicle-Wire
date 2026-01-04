@@ -279,7 +279,7 @@ class AbstractWireEdgeCaseTest extends WireTestCommon {
         assertEquals(0, bytes.readPosition(), "Read position should be 0");
 
         String value = wire.read().text();
-        assertEquals("value", value, "Expected value to read back for key");
+        assertEquals("value", value, "Value should read back for key");
         assertTrue(bytes.readPosition() > 0, "Read position should advance after reading");
     }
 
@@ -662,7 +662,7 @@ class AbstractWireEdgeCaseTest extends WireTestCommon {
         // Heap bytes are not shared memory by default
         assertFalse(bytes.sharedMemory(), "Heap bytes should not be shared memory");
         assertFalse(wire.notCompleteIsNotPresent(),
-                "Expected notCompleteIsNotPresent to be false for heap bytes");
+                "notCompleteIsNotPresent should be false for heap bytes");
     }
 
     // ========== Header Number Checker Tests ==========

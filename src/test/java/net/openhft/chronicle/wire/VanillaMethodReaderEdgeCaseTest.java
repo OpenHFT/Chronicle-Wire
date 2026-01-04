@@ -278,7 +278,7 @@ class VanillaMethodReaderEdgeCaseTest extends WireTestCommon {
 
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 1000; i++) {
-            sb.append("x");
+            sb.append('x');
         }
         String longString = sb.toString();
 

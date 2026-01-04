@@ -50,11 +50,11 @@ class BytesReferenceCountingTest extends WireTestCommon {
             ReferenceOwner leaky = ReferenceOwner.temporary("leaky-owner");
             bytes.reserve(leaky);
             long afterReserve = bytes.refCount();
-            assertTrue(afterReserve > 1, "Expected afterReserve > 1 but was " + afterReserve);
+            assertTrue(afterReserve > 1, "Reference count should exceed 1 after reserve, but was " + afterReserve);
             ((ReferenceCountedTracer) bytes).warnAndReleaseIfNotReleased();
             long afterRelease = bytes.refCount();
             assertTrue(afterRelease < afterReserve,
-                    "Expected refCount to drop below " + afterReserve + " but was " + afterRelease);
+                    "Reference count should drop below " + afterReserve + " but was " + afterRelease);
         } finally {
             if (bytes.refCount() > 0) {
                 bytes.releaseLast();

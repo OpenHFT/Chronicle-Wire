@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * This class tests the efficiency, correctness, and stability of BinaryWire string interning across concurrent readers.
  */
-public final class BinaryWireStringInternerTest extends WireTestCommon {
+final class BinaryWireStringInternerTest extends WireTestCommon {
 
     // Constants for test configuration
     private static final int DATA_SET_SIZE = 1_000;
@@ -54,6 +54,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
     @BeforeEach
     void threadDump() {
         super.threadDump();
+        ignoreThread("JNA Cleaner");
     }
 
     // Prepares test data before the test runs

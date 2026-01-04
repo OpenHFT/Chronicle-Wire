@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
@@ -56,11 +57,10 @@ class JSON322Test extends WireTestCommon {
         final Three parsedThree = (Three) parsed;
 
         assertEquals(One.class, parsedThree.one.getClass(), "Nested type one should be One");
-        assertEquals(Four.class, parsedThree.two.getClass(), "Nested type two should be Four");
         assertEquals("hello", parsedThree.one.text, "Nested type one text should match");
         Two parsedTwo = parsedThree.two;
         assertEquals("world", parsedTwo.text, "Nested type two base text should match");
-        Four parsedFour = (Four) parsedTwo;
+        Four parsedFour = assertInstanceOf(Four.class, parsedTwo, "Nested type two should be Four");
         assertEquals("world", parsedFour.text, "Nested type four (inherited) text should match");
         assertEquals(three, parsed, "Nested type parse result should equal original Three");
     }

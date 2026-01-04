@@ -25,6 +25,7 @@ class PassThroughTest extends WireTestCommon {
      * read and pass through the input text correctly.
      */
     @Test
+    @DisplayName("Pass-through preserves text wire documents")
     void testPassThroughputText() {
         String input = "to: dest1\n" +
                 "send: message\n" +
@@ -89,6 +90,7 @@ class PassThroughTest extends WireTestCommon {
      * read and pass through the input YAML text correctly.
      */
     @Test
+    @DisplayName("Pass-through preserves YAML wire documents")
     void testPassThroughputYaml() {
         String input = "to: dest1\n" +
                 "send: message\n" +
@@ -156,6 +158,7 @@ class PassThroughTest extends WireTestCommon {
      * read and pass through binary formatted messages correctly.
      */
     @Test
+    @DisplayName("Pass-through preserves binary wire documents")
     void testPassThroughputBinary() {
         String input = "to: dest1\n" +
                 "send: message\n" +

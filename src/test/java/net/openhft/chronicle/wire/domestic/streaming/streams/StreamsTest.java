@@ -141,11 +141,6 @@ final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
         );
     }
 
-    private Stream<Wire> wires() {
-        return wireTypes()
-                .map(this::wire);
-    }
-
     private Stream<WireType> wireTypes() {
         return Stream.of(
                         WireType.TEXT,

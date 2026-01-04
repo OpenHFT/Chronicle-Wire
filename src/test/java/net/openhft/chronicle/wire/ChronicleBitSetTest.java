@@ -169,7 +169,7 @@ class ChronicleBitSetTest extends WireTestCommon {
             int cardinality2 = 0;
             // Counting set bits
             for (int i = s.nextSetBit(0); i >= 0; i = s.nextSetBit(i + 1)) {
-                check(s.get(i), "expected bit set at index " + i);
+                check(s.get(i), "bit should be set at index " + i);
                 cardinality2++;
             }
             // Various validity checks
@@ -423,7 +423,7 @@ class ChronicleBitSetTest extends WireTestCommon {
         for (int i = 0; i < 100; i++) {
             ChronicleBitSet b1 = createBitSet(256);
             if (b1 instanceof LongValueBitSet)
-                assertEquals(4, b1.getWordsInUse(), "Expected four words in use for LongValueBitSet at iteration " + i);
+                assertEquals(4, b1.getWordsInUse(), "LongValueBitSet should use four words at iteration " + i);
 
             ChronicleBitSet b2 = createBitSet(256);
 

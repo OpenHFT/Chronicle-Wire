@@ -3,6 +3,7 @@
  */
 package net.openhft.chronicle.wire.marshallable;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -35,6 +36,7 @@ class CNFREOnMissingClassTest extends WireTestCommon {
         }, "Missing class alias should raise ClassNotFoundRuntimeException during TextWire parse");
     }
 
+    @SuppressFBWarnings(value = "UWF_UNWRITTEN_FIELD", justification = "Fields populated by wire marshalling")
     private static class TwoFields extends AbstractMarshallableCfg {
         private String name;
         private Object fieldOne;
@@ -56,6 +58,7 @@ class CNFREOnMissingClassTest extends WireTestCommon {
         }, "Missing field class should raise ClassNotFoundRuntimeException for TwoFields");
     }
 
+    @SuppressFBWarnings(value = "UWF_UNWRITTEN_FIELD", justification = "Fields populated by wire marshalling")
     private static class UsesTwoFields extends AbstractMarshallableCfg {
         private TwoFields bothFields;
         private String name;
@@ -93,6 +96,7 @@ class CNFREOnMissingClassTest extends WireTestCommon {
                 "Parsed object should match expected output");
     }
 
+    @SuppressFBWarnings(value = "UWF_UNWRITTEN_FIELD", justification = "Fields populated by wire marshalling")
     static class UsesInterfaceField extends AbstractMarshallableCfg {
         private TwoFields bothFields;
         private String name;

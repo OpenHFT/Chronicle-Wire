@@ -45,7 +45,7 @@ class AbstractMarshallableCfgTest extends WireTestCommon {
         assertEquals("!net.openhft.chronicle.wire.AbstractMarshallableCfgTest$MyAMC {\n" +
                         "}\n",
                 myAMC.toString(),
-                "Expected default toString output for MyAMC");
+                "MyAMC toString should show default output");
 
         // Modify values for nested configurations
         myAMC.nestedAMC.number = 0;
@@ -64,7 +64,7 @@ class AbstractMarshallableCfgTest extends WireTestCommon {
                         "  }\n" +
                         "}\n",
                 myAMC.toString(),
-                "Expected updated toString output for MyAMC");
+                "MyAMC toString should show updated output");
     }
 
     // Test the deep copy functionality
@@ -80,16 +80,16 @@ class AbstractMarshallableCfgTest extends WireTestCommon {
 
         // Ensure deep copied nested configurations are not the same references
         assertNotSame(myAMC.nestedAMC, myAMC2.nestedAMC,
-                "Expected nestedAMC to be a deep copy");
+                "nestedAMC should be a deep copy");
         assertNotSame(myAMC.nestedSDM, myAMC2.nestedSDM,
-                "Expected nestedSDM to be a deep copy");
+                "nestedSDM should be a deep copy");
         assertNotSame(myAMC.nestedSDM.bytes, myAMC2.nestedSDM.bytes,
-                "Expected nestedSDM bytes to be a deep copy");
+                "nestedSDM bytes should be a deep copy");
         assertEquals(myAMC.nestedAMC.number, myAMC2.nestedAMC.number,
-                "Expected nestedAMC.number to match after deep copy");
+                "nestedAMC.number should match after deep copy");
         assertEquals(myAMC.nestedAMC.flag, myAMC2.nestedAMC.flag,
-                "Expected nestedAMC.flag to match after deep copy");
+                "nestedAMC.flag should match after deep copy");
         assertEquals(myAMC.nestedSDM.amt, myAMC2.nestedSDM.amt, 0.0,
-                "Expected nestedSDM.amt to match after deep copy");
+                "nestedSDM.amt should match after deep copy");
     }
 }

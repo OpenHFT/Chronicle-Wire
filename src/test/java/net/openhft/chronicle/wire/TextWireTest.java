@@ -1331,7 +1331,7 @@ class TextWireTest extends AbstractWireTest {
 
     @Test
     @DisplayName("Text wire read Marshallable As Enum")
-    public void readMarshallableAsEnum() {
+    void readMarshallableAsEnum() {
         // Create a Wire instance and add alias for TWTSingleton class
         Wire wire = createWire();
         ClassAliasPool.CLASS_ALIASES.addAlias(TWTSingleton.class);

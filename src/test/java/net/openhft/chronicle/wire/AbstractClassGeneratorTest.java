@@ -32,7 +32,7 @@ class SimpleClassGenerator extends AbstractClassGenerator<SimpleMetaData> {
     @Override
     protected void generateMethod(Method method, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
         // Ensure the method's name is "call"
-        assertEquals("call", method.getName(), "Expected Callable method name");
+        assertEquals("call", method.getName(), "Callable method name should be call");
         // Add the generated source code line
         withLineNumber(mainCode)
                 .append("return \"").append(metaData().message).append("\";\n");
@@ -61,7 +61,7 @@ class UIClassGenerator extends AbstractClassGenerator<SimpleMetaData> {
     @Override
     protected void generateMethod(Method method, StringBuilder params, List<String> paramList, SourceCodeFormatter mainCode) {
         // Ensure the method's name is "accept"
-        assertEquals("accept", method.getName(), "Expected Consumer method name");
+        assertEquals("accept", method.getName(), "Consumer method name should be accept");
         // Add the generated source code line
         withLineNumber(mainCode)
                 .append("((").append(nameForClass(MyTypes.class)).append(')').append(params)
@@ -163,7 +163,7 @@ class AbstractClassGeneratorTest extends WireTestCommon {
                 "  l: 0\n" +
                 "}\n" +
                 "return: true\n" +
-                "\n", sw.toString(), "Expected interceptor output for three messages");
+                "\n", sw.toString(), "Interceptor output should match three messages");
     }
 
     // Helper method to test UIClassGenerator with a given message and update interceptor
@@ -183,6 +183,6 @@ class AbstractClassGeneratorTest extends WireTestCommon {
         // Define expected output based on input message and assert against the actual output
         String expected = message.equals("block") ? message : (message + '-' + message);
         assertEquals(expected, mt.text().toString(),
-                "Expected text update to match generator output for message=" + message);
+                "Text update should match generator output for message=" + message);
     }
 }

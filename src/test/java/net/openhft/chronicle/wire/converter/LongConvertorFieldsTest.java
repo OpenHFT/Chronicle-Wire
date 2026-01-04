@@ -3,6 +3,7 @@
  */
 package net.openhft.chronicle.wire.converter;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.openhft.chronicle.wire.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ class LongConvertorFieldsTest {
     /**
      * DTO class representing data fields to be serialized using Base16 encoding.
      */
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "Fields are read via wire marshalling")
     static class Base16DTO extends SelfDescribingMarshallable {
         @Base16
         final
@@ -80,6 +82,7 @@ class LongConvertorFieldsTest {
     /**
      * DTO class representing data fields to be serialized using Base64 encoding.
      */
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "Fields are read via wire marshalling")
     static class Base64DTO extends SelfDescribingMarshallable {
         @Base64
         final
@@ -143,6 +146,7 @@ class LongConvertorFieldsTest {
     /**
      * DTO class representing data fields to be serialized using Base85 encoding.
      */
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "Fields are read via wire marshalling")
     static class Base85DTO extends SelfDescribingMarshallable {
         @Base85
         final
@@ -220,6 +224,7 @@ class LongConvertorFieldsTest {
         }
     }
 
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "Fields are read via wire marshalling")
     static class ShortTextDTO extends SelfDescribingMarshallable {
         @ShortText
         final
@@ -284,6 +289,7 @@ class LongConvertorFieldsTest {
         }
     }
 
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "Fields are read via wire marshalling")
     static class WordsDTO extends SelfDescribingMarshallable {
         @Words
         final

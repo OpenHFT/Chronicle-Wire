@@ -21,9 +21,9 @@ class Base32LongConverterTest extends WireTestCommon {
         // in both original and lower case forms.
         for (String s : ",O,A,L,ZZ,QQ,ABCDEGHIJKLM,5OPQRSTVWXYZ,JZZZZZZZZZZZ".split(",")) {
             assertEquals(s, bic.asString(bic.parse(s)),
-                    "Expected Base32 round-trip for input=" + s);
+                    "Base32 round-trip should hold for input=" + s);
             assertEquals(s, bic.asString(bic.parse(s.toLowerCase())),
-                    "Expected Base32 case-insensitive round-trip for input=" + s);
+                    "Base32 case-insensitive round-trip should hold for input=" + s);
         }
     }
 
@@ -35,7 +35,7 @@ class Base32LongConverterTest extends WireTestCommon {
         String s = ",O,A,L,ZZ,QQ,ABCDEGHIJKLM,5OPQRSTVWXYZ,JZZZZZZZZZZZ,";
         int comparisons = 9;
         assertDoesNotThrow(() -> subStringParseLoop(s, c, comparisons),
-                "Expected substring parse loop to complete");
+                "Substring parse loop should complete");
     }
 
     @Test
@@ -43,7 +43,7 @@ class Base32LongConverterTest extends WireTestCommon {
     void parseLengthCheck() {
         assertThrows(IllegalArgumentException.class, () ->
                 Base32LongConverter.INSTANCE.parse(getClass().getCanonicalName()),
-                "Expected Base32 parse to reject long input");
+                "Base32 parse should reject long input");
     }
 
     @Test
@@ -51,14 +51,14 @@ class Base32LongConverterTest extends WireTestCommon {
     void parseSubstringLengthCheck() {
         assertThrows(IllegalArgumentException.class, () ->
                 Base32LongConverter.INSTANCE.parse("ABCD", 3, 0),
-                "Expected Base32 parse to reject invalid substring bounds");
+                "Base32 parse should reject invalid substring bounds");
     }
 
     @Test
     @DisplayName("Allows safe Base32 characters in TextWire")
     void allSafeCharsTextWire() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
-        assertInstanceOf(TextWire.class, wire, "Expected TextWire instance for safe character checks");
+        assertInstanceOf(TextWire.class, wire, "TextWire instance should be used for safe character checks");
         LongConverterTestSupport.allSafeChars(wire, Base32LongConverter.INSTANCE, 32 * 32L);
     }
 
@@ -67,7 +67,7 @@ class Base32LongConverterTest extends WireTestCommon {
     @DisplayName("Allows safe Base32 characters in YamlWire")
     void allSafeCharsYamlWire() {
         Wire wire = new YamlWire();
-        assertInstanceOf(YamlWire.class, wire, "Expected YamlWire instance for safe character checks");
+        assertInstanceOf(YamlWire.class, wire, "YamlWire instance should be used for safe character checks");
         LongConverterTestSupport.allSafeChars(wire, Base32LongConverter.INSTANCE, 32 * 32L);
     }
 }

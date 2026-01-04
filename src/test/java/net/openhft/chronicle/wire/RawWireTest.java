@@ -48,7 +48,7 @@ class RawWireTest extends WireTestCommon {
         wire.write();
         wire.write();
         wire.write();
-        assertEquals("", wire.toString(), "Expected empty wire output after write() calls");
+        assertEquals("", wire.toString(), "Wire output should be empty after write() calls");
     }
 
     // Helper method to create an instance of RawWire.
@@ -66,7 +66,7 @@ class RawWireTest extends WireTestCommon {
         wire.write(BWKey.field1);
         wire.write(BWKey.field2);
         wire.write(BWKey.field3);
-        assertEquals("", wire.toString(), "Expected empty wire output after write(BWKey) calls");
+        assertEquals("", wire.toString(), "Wire output should be empty after write(BWKey) calls");
     }
 
     // Test to verify the write operation on the wire with custom field names.
@@ -78,7 +78,7 @@ class RawWireTest extends WireTestCommon {
         wire.write(() -> "World");
         wire.write(() -> "Long field name which is more than 32 characters, Bye");
 
-        assertEquals("", wire.toString(), "Expected empty wire output after write(name) calls");
+        assertEquals("", wire.toString(), "Wire output should be empty after write(name) calls");
     }
 
     // Test to verify the read operation on the wire after writing some data.

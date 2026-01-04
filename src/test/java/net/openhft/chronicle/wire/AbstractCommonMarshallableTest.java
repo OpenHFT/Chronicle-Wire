@@ -25,6 +25,6 @@ class AbstractCommonMarshallableTest extends net.openhft.chronicle.wire.WireTest
         // doesn't use self-describing messages by default
         assertFalse(new AbstractCommonMarshallable() {
         }.usesSelfDescribingMessage(),
-                "Expected AbstractCommonMarshallable to disable self-describing messages by default");
+                "AbstractCommonMarshallable should disable self-describing messages by default");
     }
 }

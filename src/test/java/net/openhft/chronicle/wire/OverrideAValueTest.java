@@ -67,8 +67,7 @@ class OverrideAValueTest extends WireTestCommon {
     @SuppressWarnings({"deprecation", "removal"})
     static class NumberHolder extends SelfDescribingMarshallable {
         // Declaration and initialization of a static final Integer ONE
-        @SuppressWarnings("UnnecessaryBoxing")
-        static final Integer ONE = new Integer(1);
+        static final Integer ONE = 1;
         // Non-static Integer field num, initialized to ONE
         @NotNull
         final

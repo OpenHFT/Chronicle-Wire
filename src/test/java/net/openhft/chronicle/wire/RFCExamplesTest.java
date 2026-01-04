@@ -9,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static net.openhft.chronicle.wire.RFCExamplesTest.Fields.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
@@ -142,15 +141,15 @@ class RFCExamplesTest extends WireTestCommon {
     private void writeMessageOne(@NotNull Wire wire) {
         // Write meta-data with the given service lookup and transaction id.
         wire.writeDocument(true, out ->
-                out.write(csp).text("///service-lookup")
-                        .write(tid).int64(149873598325L));
+                out.write(Fields.csp).text("///service-lookup")
+                        .write(Fields.tid).int64(149873598325L));
 
         // Write actual data, containing a relative URI, view type, and key-value types.
         wire.writeDocument(false, out ->
-                out.write(lookup).marshallable(out2 ->
-                        out2.write(relativeUri).text("test")
-                                .write(view).typeLiteral("Map")
-                                .write(types).marshallable(m ->
+                out.write(Fields.lookup).marshallable(out2 ->
+                        out2.write(Fields.relativeUri).text("test")
+                                .write(Fields.view).typeLiteral("Map")
+                                .write(Fields.types).marshallable(m ->
                                         m.write(() -> "keyType").typeLiteral("Integer")
                                                 .write(() -> "valueType").typeLiteral("String"))));
 

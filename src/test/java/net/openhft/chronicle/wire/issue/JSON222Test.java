@@ -124,7 +124,7 @@ class JSON222Test extends WireTestCommon {
                 @NotNull String path = file.getPath();
                 @NotNull final File file2 = new File(path.replaceAll("\\b._", "e-").replaceAll("\\.json", ".yaml"));
                 if (!file2.exists())
-                    throw new AssertionError("Expected to fail\n" + bytes2);
+                    throw new AssertionError("Failure was expected\n" + bytes2);
                 @NotNull byte[] bytes4 = new byte[(int) file2.length()];
                 try (@NotNull InputStream in = Files.newInputStream(file2.toPath())) {
                     in.read(bytes4);
@@ -134,10 +134,8 @@ class JSON222Test extends WireTestCommon {
                     expected = expected.replaceAll("\r\n", "\n");
                 String actual = bytes2.toString();
                 assertEquals(expected, actual,
-                        "Expected YAML output should match for file=" + file.getName());
+                        "YAML output should match for file=" + file.getName());
             }
-            // if (fail)
-            // throw new AssertionError("Expected to fail, was " + list);
         } catch (Exception e) {
             if (!fail)
                 throw new AssertionError("JSON round-trip should not fail for file=" + file.getName(), e);

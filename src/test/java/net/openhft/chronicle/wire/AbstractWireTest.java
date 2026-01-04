@@ -275,19 +275,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
         // Create a wire instance
         @NotNull Wire wire = createWire();
 
-        Object[] a1 = new Object[0];
-        wire.write("empty").object(a1);
-        Object[] a2 = {1L};
-        wire.write("one").object(a2);
-        Object[] a3 = {"Hello", 123, 10.1};
-        wire.write("three").object(Object[].class, a3);
-
-        Object o1 = wire.read().object(Object[].class);
-        assertArrayEquals(a1, (Object[]) o1, "Expected empty array at index 0");
-        Object o2 = wire.read().object(Object[].class);
-        assertArrayEquals(a2, (Object[]) o2, "Expected single-item array at index 1");
-        Object o3 = wire.read().object(Object[].class);
-        assertArrayEquals(a3, (Object[]) o3, "Expected three-item array at index 2");
+        WireArrayTestSupport.assertMixedArraysRoundTrip(wire);
     }
 
     // Test GZIP compression of text strings written to a Wire.
@@ -359,7 +347,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
             // Attempt to read the value as a short, which should throw an exception
             wire.read(() -> "VALUE").int16();
-        }, "Expected int16 read to reject overflow");
+        }, "int16 read should reject overflow");
     }
 
     // Test to validate the behavior of writing and reading an integer value
@@ -395,7 +383,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
 
             // Attempt to read the value as a short, which should throw an exception
             wire.read(() -> "VALUE").int16();
-        }, "Expected int32 read to reject overflow");
+        }, "int32 read should reject overflow");
     }
 
     // Test to validate writing using keys from the BWKey enum
@@ -526,7 +514,7 @@ public abstract class AbstractWireTest extends WireTestCommon {
         expectWithSnakeYaml("{A={B_FLAG=true, S_NUM=12345, D_NUM=123.456, L_NUM=0, I_NUM=-12345789, TEXT=}}", wire);
 
         @NotNull ValueIn read = wire.read(() -> "A");
-        assertTrue(fieldLen > 0, "Expected positive field length but was " + fieldLen);
+        assertTrue(fieldLen > 0, "Field length should be positive but was " + fieldLen);
         long readLength = read.readLength();
         assertTrue(Math.abs(fieldLen - readLength) <= 1,
                 "wire field length should match read length within one byte fieldLen=" + fieldLen + ", readLength=" + readLength);

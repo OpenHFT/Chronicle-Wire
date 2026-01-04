@@ -89,7 +89,7 @@ class UnknownEnumTest extends WireTestCommon {
                                             .generateTuples(true);
             textWire.getValueIn().wireIn().read("enumField").object();
 
-            fail("expected exception for unknown enum type"); // This point should not be reached
+            fail("Unknown enum type should throw exception"); // This point should not be reached
         } catch (Exception e) {
             // Ensuring the error message is in the expected format
             String message = e.getMessage().replaceAll(" [a-z0-9.]+.Proxy\\d+", " ProxyXX");

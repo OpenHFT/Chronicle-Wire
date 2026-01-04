@@ -53,7 +53,7 @@ class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTestCommo
                         "a6 7c f4 b8 00                                  # 12121212\n" +
                         "a7 timestamp\n";
         String actualHex = wire.bytes().toHexString().replaceAll("\na7.*\n", "\na7 timestamp\n");
-        assertEquals(expectedHex, actualHex, "Expected hex dump for serialised VMH");
+        assertEquals(expectedHex, actualHex, "Hex dump should match serialised VMH");
 
         // Create two new VanillaMessageHistory objects for comparison
         VanillaMessageHistory vmh2 = new VanillaMessageHistory();
@@ -63,11 +63,11 @@ class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTestCommo
 
         // Check that the hash codes of the two new objects are equal
         assertEquals(vmh3.hashCode(), vmh2.hashCode(),
-                "Expected new instances to have matching hash codes");
+                "New instances should have matching hash codes");
 
         // Read back the VanillaMessageHistory object from the wire into vmh2
         Object o = wire.read("vmh").object(vmh2, VanillaMessageHistory.class);
-        assertNotNull(o, "Expected VMH object read from wire");
+        assertNotNull(o, "VMH object should be read from wire");
 
         // Add the last timing to the original VanillaMessageHistory (which gets added on read)
         vmh.addTiming(vmh2.timing(1));
@@ -75,11 +75,11 @@ class VanillaMessageHistoryTest extends net.openhft.chronicle.wire.WireTestCommo
 
         // Assert the two VanillaMessageHistory objects are equal in content and hash code
         assertEquals(vmh.toString(), vmh2.toString(),
-                "Expected VMH string form after read");
+                "VMH string form should match after read");
 
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory disabled; skip equality check");
-        assertEquals(vmh, vmh2, "Expected VMH equality after read and timing update");
+        assertEquals(vmh, vmh2, "VMH should be equal after read and timing update");
         assertEquals(vmh.hashCode(), vmh2.hashCode(),
-                "Expected VMH hash codes after read");
+                "VMH hash codes should match after read");
     }
 }

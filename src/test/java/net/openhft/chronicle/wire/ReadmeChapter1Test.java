@@ -136,7 +136,8 @@ class ReadmeChapter1Test extends WireTestCommon {
 
         @NotNull Data data2 = new Data();
         data2.readMarshallable(wire);
-        assertData(data2, "Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.5);
+        assertData(data2, "Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.5,
+                "text wire example 2");
 
         /*
         ```
@@ -159,7 +160,8 @@ class ReadmeChapter1Test extends WireTestCommon {
 
         @NotNull Data data3 = new Data();
         data3.readMarshallable(wire2);
-        assertData(data3, "Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.5);
+        assertData(data3, "Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.5,
+                "binary wire example 2");
         /*
         ```
         prints
@@ -192,7 +194,8 @@ class ReadmeChapter1Test extends WireTestCommon {
 
         @NotNull Data data2 = new Data();
         wire.read(() -> "mydata").marshallable(data2);
-        assertData(data2, "Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.5);
+        assertData(data2, "Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.5,
+                "text wire example 3");
 
         /*
         ```
@@ -216,7 +219,8 @@ class ReadmeChapter1Test extends WireTestCommon {
 
         @NotNull Data data3 = new Data();
         wire2.read(() -> "mydata").marshallable(data3);
-        assertData(data3, "Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.5);
+        assertData(data3, "Hello World", 1234567890L, TimeUnit.NANOSECONDS, 10.5,
+                "binary wire example 3");
         /*
         ```
         prints
@@ -540,11 +544,16 @@ class ReadmeChapter1Test extends WireTestCommon {
         bytes2.releaseLast();
     }
 
-    private static void assertData(Data data, String message, long number, TimeUnit timeUnit, double price) {
-        assertEquals(message, data.getMessage(), "message should match expected value");
-        assertEquals(number, data.getNumber(), "number should match expected value");
-        assertEquals(timeUnit, data.getTimeUnit(), "timeUnit should match expected value");
-        assertEquals(price, data.getPrice(), 0.0, "price should match expected value");
+    private static void assertData(Data data, String expectedMessage, long expectedNumber,
+                                   TimeUnit expectedTimeUnit, double expectedPrice, String context) {
+        assertEquals(expectedMessage, data.getMessage(),
+                context + ": message should match expected value");
+        assertEquals(expectedNumber, data.getNumber(),
+                context + ": number should match expected value");
+        assertEquals(expectedTimeUnit, data.getTimeUnit(),
+                context + ": timeUnit should match expected value");
+        assertEquals(expectedPrice, data.getPrice(), 0.0,
+                context + ": price should match expected value");
     }
 }
 /*

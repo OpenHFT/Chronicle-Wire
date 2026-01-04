@@ -24,7 +24,7 @@ class CharSequenceObjectMapTest extends WireTestCommon {
 
         // Verify that the added key-value pairs can be successfully retrieved from the map
         for (int i = 10; i < 20; i++) {
-            assertEquals("" + i, map.get("" + i), "Expected map value for key=" + i);
+            assertEquals("" + i, map.get("" + i), "Map value should match for key=" + i);
         }
     }
 }

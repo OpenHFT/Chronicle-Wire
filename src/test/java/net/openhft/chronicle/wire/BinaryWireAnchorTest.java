@@ -31,8 +31,8 @@ class BinaryWireAnchorTest extends WireTestCommon {
     void anchorMethodsThrowUnexpectedCode() {
         ExposedBinaryWire wire = new ExposedBinaryWire(Bytes.allocateElasticOnHeap());
         assertThrows(IORuntimeException.class, wire::callAnchor,
-                "Expected anchor() to reject unexpected call");
+                "anchor() should reject unexpected call");
         assertThrows(IORuntimeException.class, wire::callFieldAnchor,
-                "Expected fieldAnchor() to reject unexpected call");
+                "fieldAnchor() should reject unexpected call");
     }
 }

@@ -39,7 +39,7 @@ class ValueInArrayReadersTest extends WireTestCommon {
 
             double[] out = new double[3];
             int n = w.read("arr").array(out);
-            assertEquals(3, n, "Expected three doubles for wire type " + wt);
+            assertEquals(3, n, "Double array should read three elements for wire type " + wt);
             assertArrayEquals(new double[]{1.5, -2.25, 3.0}, out, 0.0,
                     "Double array should round trip for wire type " + wt);
         }
@@ -58,7 +58,7 @@ class ValueInArrayReadersTest extends WireTestCommon {
 
             int[] out = new int[3];
             int n = w.read("arr").array(out);
-            assertEquals(3, n, "Expected three ints for wire type " + wt);
+            assertEquals(3, n, "Int array should read three elements for wire type " + wt);
             assertArrayEquals(new int[]{-1, 0, 7}, out,
                     "Int array should round trip for wire type " + wt);
         }
@@ -78,7 +78,7 @@ class ValueInArrayReadersTest extends WireTestCommon {
 
         byte[] out = new byte[3];
         int n = w.read("arr").array(out);
-        assertEquals(3, n, "Expected three bytes from binary sequence");
+        assertEquals(3, n, "Binary byte array should read three elements");
         assertArrayEquals(in, out, "Binary byte array should round trip");
     }
 

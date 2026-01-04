@@ -127,7 +127,7 @@ class YamlWireUtilTest {
     @DisplayName("Yaml wire util: read Number Or Text From Octal Number")
     void testReadNumberOrTextFromOctalNumber() {
         StringBuilder s = new StringBuilder("0o70");
-        assertEquals((long) 070, readNumberOrTextFrom('\0', s),
+        assertEquals(56L, readNumberOrTextFrom('\0', s),
                 "Octal literal should parse to expected value");
     }
 

@@ -45,7 +45,7 @@ class UpdateInterceptorReturnTypeTest extends WireTestCommon {
             assertEquals("--- !!data #binary\n" +
                             "x: hello world\n",
                     Wires.fromSizePrefixedBlobs(wire),
-                    "Expected wire output for void return type, disableProxyCodegen=" + disableProxyCodegen);
+                    "Wire output should match for void return type, disableProxyCodegen=" + disableProxyCodegen);
         });
     }
 
@@ -61,11 +61,11 @@ class UpdateInterceptorReturnTypeTest extends WireTestCommon {
                     .updateInterceptor((methodName, t) -> true)
                     .build()
                     .x("hello world");
-            assertEquals(0, value, "Expected default int return for disableProxyCodegen=" + disableProxyCodegen);
+            assertEquals(0, value, "Default int return should be 0 for disableProxyCodegen=" + disableProxyCodegen);
             assertEquals("--- !!data #binary\n" +
                             "x: hello world\n",
                     Wires.fromSizePrefixedBlobs(wire),
-                    "Expected wire output for int return type, disableProxyCodegen=" + disableProxyCodegen);
+                    "Wire output should match for int return type, disableProxyCodegen=" + disableProxyCodegen);
         });
     }
 
@@ -81,9 +81,9 @@ class UpdateInterceptorReturnTypeTest extends WireTestCommon {
                     .updateInterceptor((methodName, t) -> true)
                     .build();
             Object value = mw.x("hello world");
-            assertSame(mw, value, "Expected object return to be the writer instance");
+            assertSame(mw, value, "Object return should be the writer instance");
             assertEquals(disableProxyCodegen, Proxy.isProxyClass(mw.getClass()),
-                    "Expected proxy status to match disableProxyCodegen=" + disableProxyCodegen);
+                    "Proxy status should match disableProxyCodegen=" + disableProxyCodegen);
             assumeFalse(disableProxyCodegen, "Proxy codegen disabled; skip not-ready-data assertion");
 
             // Here, data is written but is on hold until the end of the message is written.
@@ -92,14 +92,14 @@ class UpdateInterceptorReturnTypeTest extends WireTestCommon {
                             "...\n" +
                             "# 15 bytes remaining\n",
                     Wires.fromSizePrefixedBlobs(wire),
-                    "Expected not-ready-data marker before second call");
+                    "Not-ready-data marker should appear before second call");
 
             mw.y("good byte");
             assertEquals("--- !!data #binary\n" +
                             "x: hello world\n" +
                             "y: good byte\n",
                     Wires.fromSizePrefixedBlobs(wire),
-                    "Expected wire output after second call with x and y fields");
+                    "Wire output should match after second call with x and y fields");
         });
     }
 
@@ -118,7 +118,7 @@ class UpdateInterceptorReturnTypeTest extends WireTestCommon {
             assertEquals("--- !!data #binary\n" +
                             "ladderByQty: a ladder\n",
                     Wires.fromSizePrefixedBlobs(wire),
-                    "Expected wire output for ladderByQty, disableProxyCodegen=" + disableProxyCodegen);
+                    "Wire output should match ladderByQty, disableProxyCodegen=" + disableProxyCodegen);
         });
     }
 

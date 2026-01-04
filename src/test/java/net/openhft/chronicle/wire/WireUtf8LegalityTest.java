@@ -20,7 +20,7 @@ class WireUtf8LegalityTest extends WireTestCommon {
     // ========== Valid UTF-8 Boundary Tests ==========
 
     // TODO FIX: BinaryWire returns null for later reads in multi-key sequence
-    @Disabled("Multi-key sequential read returns null for later keys - needs investigation")
+    @Disabled("Multi-key sequential read returns null for minimum code points - needs investigation")
     @Test
     @DisplayName("BinaryWire should handle minimum code points for each byte length")
     void testMinimumCodePointsForByteLength() {
@@ -51,7 +51,7 @@ class WireUtf8LegalityTest extends WireTestCommon {
     }
 
     // TODO FIX: BinaryWire returns null for later reads in multi-key sequence
-    @Disabled("Multi-key sequential read returns null for later keys - needs investigation")
+    @Disabled("Multi-key sequential read returns null for maximum code points - needs investigation")
     @Test
     @DisplayName("BinaryWire should handle maximum code points for each byte length")
     void testMaximumCodePointsForByteLength() {
@@ -122,7 +122,7 @@ class WireUtf8LegalityTest extends WireTestCommon {
     // ========== Surrogate Pair Edge Cases ==========
 
     // TODO FIX: Wire returns null for later reads in multi-key sequence
-    @Disabled("Multi-key sequential read returns null for later keys - needs investigation")
+    @Disabled("Multi-key sequential read returns null for surrogate pairs - needs investigation")
     @Test
     @DisplayName("All wire types should handle valid surrogate pairs")
     void testValidSurrogatePairs() {
@@ -309,7 +309,7 @@ class WireUtf8LegalityTest extends WireTestCommon {
     // ========== Private Use Area Tests ==========
 
     // TODO FIX: Wire returns null for second read in multi-key sequence
-    @Disabled("Multi-key sequential read returns null for later keys - needs investigation")
+    @Disabled("Multi-key sequential read returns null for private use area - needs investigation")
     @Test
     @DisplayName("All wire types should handle Private Use Area characters")
     void testPrivateUseArea() {
@@ -380,7 +380,7 @@ class WireUtf8LegalityTest extends WireTestCommon {
     // ========== Zero-Width Characters Tests ==========
 
     // TODO FIX: BinaryWire returns null for later reads in multi-key sequence
-    @Disabled("Multi-key sequential read returns null for later keys - needs investigation")
+    @Disabled("Multi-key sequential read returns null for zero-width characters - needs investigation")
     @Test
     @DisplayName("BinaryWire should preserve zero-width characters")
     void testZeroWidthCharacters() {

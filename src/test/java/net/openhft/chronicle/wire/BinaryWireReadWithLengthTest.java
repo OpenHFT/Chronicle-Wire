@@ -35,7 +35,7 @@ class BinaryWireReadWithLengthTest extends WireTestCommon {
         source.readWithLength(target, len);
 
         String text = target.bytes().toString();
-        assertTrue(text.contains("key: 1"), "Expected map fragment to include key: 1, got: " + text);
+        assertTrue(text.contains("key: 1"), "Map fragment should include key: 1, got: " + text);
     }
 
     @Test
@@ -61,8 +61,8 @@ class BinaryWireReadWithLengthTest extends WireTestCommon {
         source.readWithLength(target, len);
 
         String dump = target.bytes().toString();
-        assertTrue(dump.contains("first"), "Expected sequence text to include first, got: " + dump);
-        assertTrue(dump.contains("2"), "Expected sequence text to include 2, got: " + dump);
+        assertTrue(dump.contains("first"), "Sequence text should include first, got: " + dump);
+        assertTrue(dump.contains("2"), "Sequence text should include 2, got: " + dump);
     }
 
     @Test
@@ -78,8 +78,8 @@ class BinaryWireReadWithLengthTest extends WireTestCommon {
         new BinaryWire(bytes).copyTo(textWire);
         String output = textWire.bytes().toString();
 
-        assertTrue(output.contains("say: hello"), "Expected output to include say: hello, got: " + output);
-        assertTrue(output.contains("number: 42"), "Expected output to include number: 42, got: " + output);
+        assertTrue(output.contains("say: hello"), "Output should include say: hello, got: " + output);
+        assertTrue(output.contains("number: 42"), "Output should include number: 42, got: " + output);
     }
 
     @Test
@@ -96,6 +96,6 @@ class BinaryWireReadWithLengthTest extends WireTestCommon {
 
         source.copyOne(textWire);
         String first = textWire.bytes().toString();
-        assertFalse(first.isEmpty(), "Expected copyOne to write first message into text wire, got empty output");
+        assertFalse(first.isEmpty(), "copyOne should write first message into text wire, got empty output");
     }
 }

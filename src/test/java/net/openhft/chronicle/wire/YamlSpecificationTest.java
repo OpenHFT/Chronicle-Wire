@@ -6,15 +6,12 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
@@ -85,19 +82,13 @@ class YamlSpecificationTest extends WireTestCommon {
     @DisplayName("YAML specification snippets round trip correctly")
     void decodeAs(String input) throws IOException {
         initYamlSpecificationTest(input);
-        String snippet = new String(getBytes(input + ".yaml"), StandardCharsets.UTF_8)
+        String snippet = new String(YamlSpecificationSupport.readSpecBytes(input + ".yaml"), StandardCharsets.UTF_8)
                 .replace("\r\n", "\n");
         String actual = parseWithYaml(snippet);
 
-        byte[] expectedBytes = getBytes(input + ".out.yaml");
-        String expected;
-        if (expectedBytes != null) {
-            assertEquals(actual, parseWithYaml(actual), "parsed YAML should be idempotent when re-parsed");
-
-            expected = new String(expectedBytes, StandardCharsets.UTF_8);
-        } else {
-            expected = snippet;
-        }
+        byte[] expectedBytes = YamlSpecificationSupport.readSpecBytes(input + ".out.yaml");
+        assertEquals(actual, parseWithYaml(actual), "parsed YAML should be idempotent when re-parsed");
+        String expected = new String(expectedBytes, StandardCharsets.UTF_8);
 
         final String expectedStr = Bytes.wrapForRead(expected.getBytes(StandardCharsets.UTF_8)).toString();
         assertEquals(expectedStr
@@ -117,22 +108,6 @@ class YamlSpecificationTest extends WireTestCommon {
         return tw.toString();
     }
 
-    // Helper method to get bytes from a given file
-    @Nullable
-    private byte[] getBytes(String file) throws IOException {
-        try (InputStream is = getClass().getResourceAsStream("/yaml/spec/" + file)) {
-            if (is == null) {
-                return null;
-            }
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] buffer = new byte[4096];
-            int read;
-            while ((read = is.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
-            }
-            return out.toByteArray();
-        }
-    }
 }
 
 // Commented-out example YAML and classes

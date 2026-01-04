@@ -21,7 +21,7 @@ import java.lang.reflect.Proxy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.easymock.EasyMock.*;
 
-public class MethodWriterTest extends WireTestCommon {
+class MethodWriterTest extends WireTestCommon {
     @Test
     @DisplayName("Method writer serialises subclass events correctly")
     void testSubclasses() {

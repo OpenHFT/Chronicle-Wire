@@ -24,9 +24,9 @@ class VanillaMessageHistoryRoundTripTest extends WireTestCommon {
 
         // write adds one timing for the write itself
         assertEquals(mh.timings() + 1, r.timings(),
-                "Expected round-trip timings to include write timing via wire");
+                "Round-trip timings should include write timing via wire");
         assertEquals(mh.timing(0), r.timing(0),
-                "Expected first timing to round-trip via wire");
+                "First timing should round-trip via wire");
     }
 
     @Test
@@ -38,13 +38,13 @@ class VanillaMessageHistoryRoundTripTest extends WireTestCommon {
 
         Bytes<?> b = Bytes.allocateElasticOnHeap(128);
         mh.writeMarshallable(b);
-        assertTrue(b.readRemaining() > 0, "Expected bytes after writing message history");
+        assertTrue(b.readRemaining() > 0, "Bytes should be present after writing message history");
 
         VanillaMessageHistory r = new VanillaMessageHistory();
         r.readMarshallable(b);
         assertEquals(mh.timings() + 1, r.timings(),
-                "Expected round-trip timings to include write timing via bytes");
+                "Round-trip timings should include write timing via bytes");
         assertEquals(mh.timing(0), r.timing(0),
-                "Expected first timing to round-trip via bytes");
+                "First timing should round-trip via bytes");
     }
 }
