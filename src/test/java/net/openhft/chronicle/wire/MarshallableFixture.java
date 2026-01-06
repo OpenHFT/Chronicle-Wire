@@ -5,7 +5,7 @@ package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
 
-// Defining a class named TestMarshallable, which extends SelfDescribingMarshallable
+// Defining a class named MarshallableFixture, which extends SelfDescribingMarshallable
 // to utilize its self-describing marshallable capabilities
 class MarshallableFixture extends SelfDescribingMarshallable {
 
@@ -47,7 +47,7 @@ class MarshallableFixture extends SelfDescribingMarshallable {
 
     // Defining a setter method for the 'name' field,
     // which clears the current content and appends the given CharSequence
-    void setName(CharSequence name) {
+    public void setName(CharSequence name) {
         this.name.setLength(0); // Clearing the current content of 'name'
         this.name.append(name); // Appending the new content to 'name'
     }
@@ -60,7 +60,7 @@ class MarshallableFixture extends SelfDescribingMarshallable {
 
     // Defining a setter method for the 'count' field,
     // which updates the 'count' field with the provided integer value
-    void setCount(int count) {
+    public void setCount(int count) {
         this.count = count;
     }
 }
