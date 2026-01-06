@@ -23,11 +23,11 @@
     <packaging>bundle</packaging>
     <properties>
         <!-- JVM args for Surefire - inherited from root-parent-pom profiles (java11/java17) -->
-        <surefireArgLine></surefireArgLine>
+        <surefireArgLine/>
         <!-- jvm.requiredArgs and jvm.extraArgs inherited from parent profiles -->
         <!-- Define the target coverage thresholds as properties -->
         <jacoco.line.coverage>0.72</jacoco.line.coverage>
-        <jacoco.branch.coverage>0.66</jacoco.branch.coverage>
+        <jacoco.branch.coverage>0.80</jacoco.branch.coverage>
     </properties>
 
     <!-- Use BOMs to keep dependency versions consistent across modules -->

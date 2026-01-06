@@ -305,7 +305,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
                 throw new StreamCorruptedException("Not ready header is found");
             int len = lengthOf(header);
             if (!isReadyMetaData(header) || len > 64 << 10)
-                throw new StreamCorruptedException("Unexpected magic number " + Integer.toHexString(header));
+                throw new StreamCorruptedException("Unexpected magic number after waiting for header " + Integer.toHexString(header));
             bytes.readPositionRemaining(SPB_HEADER_SIZE, len);
         } else {
             throw new DecoratedBufferUnderflowException("Not enough capacity to read from");
@@ -335,7 +335,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
 
         int len = lengthOf(header);
         if (!isReadyMetaData(header) || len > 64 << 10)
-            throw new StreamCorruptedException("Unexpected magic number after waiting for header " + Integer.toHexString(header));
+            throw new StreamCorruptedException("Unexpected magic number after timed header wait " + Integer.toHexString(header));
         bytes.readPositionRemaining(SPB_HEADER_SIZE, len);
     }
 
