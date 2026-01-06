@@ -6,6 +6,9 @@ package net.openhft.chronicle.wire.domestic.streaming.reduction;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
+import net.openhft.chronicle.wire.VanillaMethodWriterBuilder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -19,6 +22,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"deprecation", "removal"})
 class MethodWriterTest extends WireTestCommon {
+    private String previousDisableProxyCodegen;
+
+    @BeforeEach
+    void enableWriterProxyCodegen() {
+        previousDisableProxyCodegen = System.getProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN);
+        System.setProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN, "false");
+    }
+
+    @AfterEach
+    void restoreWriterProxyCodegenSetting() {
+        if (previousDisableProxyCodegen == null) {
+            System.clearProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN);
+        } else {
+            System.setProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN, previousDisableProxyCodegen);
+        }
+    }
 
     @Test
     @DisplayName("Reduction captures last market data via method writer")

@@ -9,6 +9,8 @@ import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.util.Mocker;
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -21,7 +23,26 @@ import java.util.function.Consumer;
 import static org.easymock.EasyMock.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class ClassAliasPoolTest extends WireTestCommon {
+// must be public for generated code to access it
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+public class ClassAliasPoolTest extends WireTestCommon {
+    private String previousDisableProxyCodegen;
+
+    @BeforeEach
+    void ignoreGeneratedMethodReaderFallback() {
+        previousDisableProxyCodegen = System.getProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN);
+        System.setProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN, "false");
+        ignoreException("Failed to compile generated method reader - falling back to proxy method reader.");
+    }
+
+    @AfterEach
+    void restoreWriterProxyCodegenSetting() {
+        if (previousDisableProxyCodegen == null) {
+            System.clearProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN);
+        } else {
+            System.setProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN, previousDisableProxyCodegen);
+        }
+    }
 
     // Helper method to match char sequences in a mock setup
     private static CharSequence charSequence(String text) {
@@ -132,7 +153,7 @@ class ClassAliasPoolTest extends WireTestCommon {
     }
 
     // Test data class representing a type of event with a single value
-    static class CAPTData extends SelfDescribingMarshallable {
+    public static class CAPTData extends SelfDescribingMarshallable {
         long value;
     }
 }

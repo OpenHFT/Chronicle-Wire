@@ -8,8 +8,10 @@ import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.wire.marshallable.TriviallyCopyableMarketData;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,10 +19,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // Extend WireTestCommon to inherit common utility and setup methods for wire tests
 class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTestCommon {
+    private String previousDisableProxyCodegen;
 
     // Define an interface representing a method with a single message parameter
     public interface MyMethod {
         void msg(String str);
+    }
+
+    @BeforeEach
+    void enableWriterProxyCodegen() {
+        previousDisableProxyCodegen = System.getProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN);
+        System.setProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN, "false");
+    }
+
+    @AfterEach
+    void restoreWriterProxyCodegenSetting() {
+        if (previousDisableProxyCodegen == null) {
+            System.clearProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN);
+        } else {
+            System.setProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN, previousDisableProxyCodegen);
+        }
     }
 
     // Test case to check the behavior of a predicate that always returns false
@@ -123,7 +141,7 @@ class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     // Define an interface representing a method to handle market data
-    interface ITCO {
+    public interface ITCO {
         void marketData(TriviallyCopyableMarketData tcmd);
     }
 }

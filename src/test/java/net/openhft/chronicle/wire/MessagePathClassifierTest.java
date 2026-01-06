@@ -69,4 +69,14 @@ class MessagePathClassifierTest extends WireTestCommon {
                         .addPathForSourcesEnding(444, 4),
                 "Duplicate source pattern should be rejected");
     }
+
+    @Test
+    @DisplayName("pathFor throws when no suffix matches")
+    void pathForRejectsMissingPattern() {
+        MessagePathClassifier classifier = new MessagePathClassifier()
+                .addPathForSourcesEnding(7, 1, 2);
+        assertThrows(IllegalStateException.class,
+                () -> classifier.pathFor(messageHistory("sources: [ 3, 0 ]")),
+                "pathFor fails when no source suffix matches");
+    }
 }

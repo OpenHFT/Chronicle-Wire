@@ -11,7 +11,7 @@ import java.util.List;
  * Interface defining a set of mock methods for testing purposes.
  * It includes methods with various argument types and one that returns another interface.
  */
-interface MockMethods {
+public interface MockMethods {
     // Method with a single MockDto argument
     void method1(MockDto dto);
 

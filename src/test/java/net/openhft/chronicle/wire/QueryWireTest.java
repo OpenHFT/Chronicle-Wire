@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.lang.reflect.Type;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
@@ -176,5 +177,126 @@ class QueryWireTest extends WireTestCommon {
             yamlBytes.releaseLast();
             bytes.releaseLast();
         }
+    }
+
+    @Test
+    @DisplayName("write without a field name is unsupported")
+    void writeWithoutNameIsUnsupported() {
+        @NotNull QueryWire wire = createWire();
+        assertThrows(UnsupportedOperationException.class, wire::write,
+                "Query wire does not support unnamed writes");
+        bytes.releaseLast();
+    }
+
+    @Test
+    @DisplayName("Field without equals sign stops parsing at ampersand")
+    void fieldWithoutEqualsStopsAtAmpersand() {
+        Bytes<?> storage = Bytes.from("flag&next=ok");
+        try {
+            QueryWire wire = new QueryWire(storage);
+            assertEquals("", wire.read("flag").text(),
+                    "Query wire returns empty text for a field without an equals sign");
+            assertEquals("ok", wire.read("next").text(),
+                    "Query wire continues parsing after ampersand delimiters");
+        } finally {
+            storage.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("typeLiteralAsText forwards the parsed type literal value")
+    void typeLiteralAsTextForwardsParsedValue() {
+        Bytes<?> storage = Bytes.from("type=java.lang.String");
+        try {
+            QueryWire wire = new QueryWire(storage);
+            StringBuilder captured = new StringBuilder();
+            wire.read("type").typeLiteralAsText(captured, StringBuilder::append);
+            assertEquals("java.lang.String", captured.toString(),
+                    "Query wire should forward the parsed type literal text");
+        } finally {
+            storage.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("typeLiteral resolves known class names from input")
+    void typeLiteralResolvesClassNames() {
+        Bytes<?> storage = Bytes.from("type=java.lang.String");
+        try {
+            QueryWire wire = new QueryWire(storage);
+            Type resolved = wire.read("type").typeLiteral((name, ex) -> {
+                throw new AssertionError("Unexpected resolution failure for " + name);
+            });
+            assertEquals(String.class, resolved, "Query wire should resolve known class names");
+        } finally {
+            storage.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("Null boolean values do not emit fields")
+    void nullBooleanValuesDoNotEmitFields() {
+        @NotNull QueryWire wire = createWire();
+        wire.write("flag").bool(null);
+        wire.write("next").text("ok");
+
+        assertEquals("next=ok", bytes.toString(), "Query wire skips null boolean values");
+        bytes.releaseLast();
+    }
+
+    @Test
+    @DisplayName("Sequence omits trailing comma when empty")
+    void sequenceOmitsTrailingCommaWhenEmpty() {
+        @NotNull QueryWire wire = createWire();
+        wire.write("list").sequence("unused", (t, out) -> {
+        });
+
+        assertEquals("list=[]", bytes.toString(), "Query wire writes empty sequences without trailing commas");
+        bytes.releaseLast();
+    }
+
+    @Test
+    @DisplayName("Sequence appends comma when writer adds content")
+    void sequenceAppendsCommaWhenWriterAddsContent() {
+        @NotNull QueryWire wire = createWire();
+        wire.write("list").sequence(wire, (w, out) -> w.bytes().appendUtf8("a"));
+
+        assertEquals("list=[a,]", bytes.toString(), "Query wire appends a comma when sequence content is present");
+        bytes.releaseLast();
+    }
+
+    @Test
+    @DisplayName("hasNextSequenceItem consumes comma and stops at closing bracket")
+    void hasNextSequenceItemConsumesCommaAndStopsAtClosingBracket() {
+        Bytes<?> bytes = Bytes.from(",]");
+        try {
+            QueryWire wire = new QueryWire(bytes);
+            ValueIn in = wire.getValueIn();
+
+            assertTrue(in.hasNextSequenceItem(), "Query wire detects comma separated sequence entries");
+            assertFalse(in.hasNextSequenceItem(), "Query wire stops at closing bracket");
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("Query stop char testers recognise delimiters")
+    void queryStopCharTestersRecogniseDelimiters() {
+        assertTrue(QueryWire.QueryStopCharTesters.QUERY_FIELD_NAME.isStopChar('&'),
+                "Field name stop tester stops on ampersand");
+        assertTrue(QueryWire.QueryStopCharTesters.QUERY_FIELD_NAME.isStopChar('='),
+                "Field name stop tester stops on equals");
+        assertTrue(QueryWire.QueryStopCharTesters.QUERY_FIELD_NAME.isStopChar(-1),
+                "Field name stop tester stops on end of input");
+        assertFalse(QueryWire.QueryStopCharTesters.QUERY_FIELD_NAME.isStopChar('a'),
+                "Field name stop tester allows normal characters");
+
+        assertTrue(QueryWire.QueryStopCharTesters.QUERY_VALUE.isStopChar('&'),
+                "Value stop tester stops on ampersand");
+        assertTrue(QueryWire.QueryStopCharTesters.QUERY_VALUE.isStopChar(-1),
+                "Value stop tester stops on end of input");
+        assertFalse(QueryWire.QueryStopCharTesters.QUERY_VALUE.isStopChar('='),
+                "Value stop tester allows equals inside values");
     }
 }

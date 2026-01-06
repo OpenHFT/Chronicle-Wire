@@ -39,6 +39,7 @@ public class WireTestCommon {
     private final Map<Predicate<ExceptionKey>, String> expectedExceptions = new LinkedHashMap<>();
 
     private boolean gt;
+    private String previousDisableProxyCodegen;
 
     // Default constructor initializes ignored exceptions
     protected WireTestCommon() {
@@ -52,6 +53,12 @@ public class WireTestCommon {
     @BeforeEach
     void enableReferenceTracing() {
         AbstractReferenceCounted.enableReferenceTracing();
+    }
+
+    @BeforeEach
+    void enableWriterCodegen() {
+        previousDisableProxyCodegen = System.getProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN);
+        System.setProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN, "false");
     }
 
     // Verifies if all references were released after the tests
@@ -177,6 +184,15 @@ public class WireTestCommon {
         checkThreadDump();
         checkExceptions();
         MessageHistory.clear();
+    }
+
+    @AfterEach
+    void restoreWriterCodegenSetting() {
+        if (previousDisableProxyCodegen == null) {
+            System.clearProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN);
+        } else {
+            System.setProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN, previousDisableProxyCodegen);
+        }
     }
 
     // Placeholder for subclasses to include additional operations before afterChecks

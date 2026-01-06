@@ -24,4 +24,19 @@ class JavaSourceCodeFormatterTest extends WireTestCommon {
                         .toString(),
                 "Formatter should indent the method body");
     }
+
+    @Test
+    @DisplayName("Appends L for long values outside int range")
+    void appendLongAddsSuffixForLargeValues() {
+        JavaSourceCodeFormatter small = new JavaSourceCodeFormatter();
+        small.append(42L);
+        Assertions.assertEquals("42", small.toString(),
+                "Small long values should not have a suffix");
+
+        JavaSourceCodeFormatter large = new JavaSourceCodeFormatter();
+        long big = (long) Integer.MAX_VALUE + 1;
+        large.append(big);
+        Assertions.assertEquals(big + "L", large.toString(),
+                "Values outside the int range should include the L suffix");
+    }
 }

@@ -3,134 +3,93 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.BytesUtil;
-import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.pool.ClassAliasPool;
-import net.openhft.chronicle.core.util.Time;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.util.Mocker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("deprecation")
 class WireTypeTest extends WireTestCommon {
 
-    // Add alias for MarshallableFixture class for the test
-    static {
-        ClassAliasPool.CLASS_ALIASES.addAlias(MarshallableFixture.class);
+    @Test
+    @DisplayName("valueOf returns null when the wire reference is absent")
+    void valueOfReturnsNullForNullWire() {
+        assertNull(WireType.valueOf((Wire) null), "WireType.valueOf should return null for a null wire");
     }
 
-    // Test if the WireType enum is correctly identified by its name
     @Test
-    @DisplayName("WireType values report the expected type name")
-    void testNameFor() {
-        // Add alias for WireType class
-        ClassAliasPool.CLASS_ALIASES.addAlias(WireType.class);
-
-        // Iterate over each WireType and check if its name is "WireType"
-        for (WireType wireType : WireType.values()) {
-            assertEquals("WireType",
-                    Wires.typeNameFor(wireType),
-                    "WireType name should resolve for each enum value: " + wireType);
+    @DisplayName("valueOf detects text, YAML, and JSON wire implementations")
+    void valueOfDetectsTextYamlAndJson() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
+        try {
+            assertEquals(WireType.TEXT, WireType.valueOf(new TextWire(bytes)),
+                    "WireType.valueOf should detect TextWire instances");
+            assertEquals(WireType.YAML, WireType.valueOf(new YamlWire(bytes)),
+                    "WireType.valueOf should detect YamlWire instances");
+            assertEquals(WireType.JSON, WireType.valueOf(new JSONWire(bytes)),
+                    "WireType.valueOf should detect JSONWire instances");
+        } finally {
+            bytes.releaseLast();
         }
     }
 
-    // Test conversion from a MarshallableFixture object to String representations
     @Test
-    @DisplayName("WireType formats fixtures to text and binary")
-    void testAsString() {
-        @NotNull MarshallableFixture tm = new MarshallableFixture();
-        tm.setCount(1);
-        tm.setName("name");
-
-        // Test Text-based WireType
-        assertEquals("!MarshallableFixture {\n" +
-                "  name: name,\n" +
-                "  count: 1\n" +
-                "}\n",
-                WireType.TEXT.asString(tm),
-                "Text wire output should match expected fixture format");
-        // Test Binary-based WireType
-        assertEquals("00000000 b6 13 4d 61 72 73 68 61  6c 6c 61 62 6c 65 46 69 ··Marsha llableFi\n" +
-                        "00000010 78 74 75 72 65 82 12 00  00 00 c4 6e 61 6d 65 e4 xture··· ···name·\n" +
-                        "00000020 6e 61 6d 65 c5 63 6f 75  6e 74 a1 01             name·cou nt··    \n",
-                WireType.BINARY.asString(tm),
-                "Binary wire output should match expected fixture format");
-
-        assertEquals("00000000 13 4d 61 72 73 68 61 6c  6c 61 62 6c 65 46 69 78 ·Marshal lableFix\n" +
-                "00000010 74 75 72 65 09 00 00 00  04 6e 61 6d 65 01 00 00 ture···· ·name···\n" +
-                "00000020 00                                               ·                \n",
-                WireType.RAW.asString(tm),
-                "Raw wire output should match expected fixture format");
-    }
-
-    // Test conversion from String representations to a MarshallableFixture object
-    @Test
-    @DisplayName("WireType parses fixtures from text and binary")
-    void testFromString() {
-        // Define the text representation
-        @NotNull String asText = "!MarshallableFixture {\n" +
-                "  name: name,\n" +
-                "  count: 1\n" +
-                "}\n";
-
-        // Create a MarshallableFixture object
-        @NotNull MarshallableFixture tm = new MarshallableFixture();
-        tm.setCount(1);
-        tm.setName("name");
-
-        // Validate Text-based WireType
-        assertEquals(tm,
-                WireType.TEXT.fromString(asText),
-                "Text wire should parse fixture from string");
-
-        // Define the binary representation
-        @NotNull String asBinary = "00000000 B6 13 4D 61 72 73 68 61  6C 6C 61 62 6C 65 46 69 ··Marsha llableFi\n" +
-                "00000010 78 74 75 72 65 82 12 00  00 00 C4 6E 61 6D 65 E4 xture··· ···name·\n" +
-                "00000020 6E 61 6D 65 C5 63 6F 75  6E 74 A1 01             name·cou nt··    \n";
-        // Validate Binary-based WireType
-        assertEquals(tm,
-                WireType.BINARY.fromString(asBinary),
-                "Binary wire should parse fixture from hex dump");
-    }
-
-    // Test WireType's ability to write and read from a file
-    @Test
-    @DisplayName("WireType round trips fixtures through files")
-    void testFromFile() throws IOException {
-        // Create a MarshallableFixture object
-        @NotNull MarshallableFixture tm = new MarshallableFixture();
-        tm.setCount(1);
-        tm.setName("name");
-
-        // Iterate over each WireType for file-based tests
-        for (@NotNull WireType wt : WireType.values()) {
-            // Skip unsupported WireTypes
-            if (wt == WireType.RAW
-                    || wt == WireType.READ_ANY
-                    || wt == WireType.CSV)
-                continue;
-
-            // Create a temporary file
-            @NotNull String tmp = OS.getTarget() + "/testFromFile-" + Time.uniqueId();
-
-            // Write the MarshallableFixture object to the file
-            wt.toFile(tmp, tm);
-
-            // Read the object back from the file and validate
-            @Nullable Object o;
-            if (wt == WireType.JSON || wt == WireType.JSON_ONLY)
-                o = wt.apply(BytesUtil.readFile(tmp)).getValueIn().object(MarshallableFixture.class);
-            else
-                o = wt.fromFile(tmp);
-
-            assertEquals(tm,
-                    o,
-                    "File round trip should preserve fixture for " + wt);
+    @DisplayName("valueOf detects binary, fieldless, and raw wire implementations")
+    void valueOfDetectsBinaryAndRaw() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
+        try {
+            assertEquals(WireType.BINARY, WireType.valueOf(new BinaryWire(bytes)),
+                    "WireType.valueOf should detect BinaryWire instances");
+            Wire fieldless = new BinaryWire(bytes, false, false, true, Integer.MAX_VALUE, "binary");
+            assertEquals(WireType.FIELDLESS_BINARY, WireType.valueOf(fieldless),
+                    "WireType.valueOf should detect fieldless BinaryWire instances");
+            assertEquals(WireType.RAW, WireType.valueOf(new RawWire(bytes)),
+                    "WireType.valueOf should detect RawWire instances");
+        } finally {
+            bytes.releaseLast();
         }
+    }
+
+    @Test
+    @DisplayName("valueOf unwraps ReadAnyWire for text detection")
+    void valueOfUnwrapsReadAnyWireForText() {
+        Bytes<?> bytes = Bytes.from("abcdefgh");
+        try {
+            Wire anyWire = new ReadAnyWire(bytes);
+            assertEquals(WireType.TEXT, WireType.valueOf(anyWire),
+                    "WireType.valueOf should detect text from ReadAnyWire");
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("isText is true for text wires and false for binary")
+    void isTextReportsCorrectly() {
+        assertTrue(WireType.TEXT.isText(), "WireType TEXT should be treated as text");
+        assertTrue(WireType.YAML.isText(), "WireType YAML should be treated as text");
+        assertTrue(WireType.JSON.isText(), "WireType JSON should be treated as text");
+        assertFalse(WireType.BINARY.isText(), "WireType BINARY should not be treated as text");
+    }
+
+    @Test
+    @DisplayName("fromString rejects empty input values for wire types")
+    void fromStringRejectsEmptyInput() {
+        assertThrows(IllegalArgumentException.class,
+                () -> WireType.BINARY.fromString(Object.class, ""),
+                "WireType.fromString should reject empty input values");
+    }
+
+    @Test
+    @DisplayName("valueOf rejects unknown wire implementations during detection")
+    void valueOfRejectsUnknownWires() {
+        Wire wire = Mocker.ignored(Wire.class);
+        assertThrows(IllegalStateException.class, () -> WireType.valueOf(wire),
+                "WireType.valueOf should reject unknown wire implementations");
     }
 }

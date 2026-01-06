@@ -7,6 +7,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.nio.ByteBuffer;
 
@@ -17,10 +19,26 @@ class BracketsOnJSONWireTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Variable to store the actual message from the wire
     private String actual;
+    private String previousDisableProxyCodegen;
 
     // Interface to define a Printer with a single method 'print'
-    interface Printer {
+    public interface Printer {
         void print(String msg);
+    }
+
+    @BeforeEach
+    void enableWriterProxyCodegen() {
+        previousDisableProxyCodegen = System.getProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN);
+        System.setProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN, "false");
+    }
+
+    @AfterEach
+    void restoreWriterProxyCodegenSetting() {
+        if (previousDisableProxyCodegen == null) {
+            System.clearProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN);
+        } else {
+            System.setProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN, previousDisableProxyCodegen);
+        }
     }
 
     // Test the JSON_ONLY wire type with a method writer and reader using the Printer interface

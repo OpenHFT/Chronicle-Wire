@@ -120,8 +120,8 @@ class TimestampLongConverterTest extends WireTestCommon {
                 "slash date should parse to expected value for " + name);
     }
 
-    @DisplayName("Returns zero when parsing null or empty timestamp input string")
     @ParameterizedTest(name = "{0}")
+    @DisplayName("Returns zero when parsing null or empty timestamp input string")
     @MethodSource("converters")
     void shouldReturnZeroForNullOrEmptyInput(String name, Function<String, LongConverter> factory, TimeUnit unit, long ts, String utcTsString, String melbourneTsString) {
         LongConverter converter = factory.apply("UTC");
@@ -129,6 +129,15 @@ class TimestampLongConverterTest extends WireTestCommon {
                 "null input should parse to zero for " + name);
         assertEquals(0, converter.parse(""),
                 "empty input should parse to zero for " + name);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @DisplayName("Parses numeric timestamp strings into epoch values")
+    @MethodSource("converters")
+    void shouldParseNumericTimestamp(String name, Function<String, LongConverter> factory, TimeUnit unit, long ts, String utcTsString, String melbourneTsString) {
+        LongConverter converter = factory.apply("UTC");
+        assertEquals(0L, converter.parse("0"),
+                "numeric timestamp values should parse for " + name);
     }
 
     @DisplayName("Should format 0 and negative values as plain numbers")

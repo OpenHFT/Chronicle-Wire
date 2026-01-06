@@ -12,7 +12,9 @@ import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -26,13 +28,31 @@ import java.util.concurrent.BlockingQueue;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-class VanillaMethodReaderTest extends WireTestCommon {
+// must be public for generated code to access it
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+public class VanillaMethodReaderTest extends WireTestCommon {
 
     private A instance;
+    private String previousDisableProxyCodegen;
 
     @NotNull
     private static String asString(StringWriter out) {
         return out.toString().replace("\r", "");
+    }
+
+    @BeforeEach
+    void enableWriterProxyCodegen() {
+        previousDisableProxyCodegen = System.getProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN);
+        System.setProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN, "false");
+    }
+
+    @AfterEach
+    void restoreWriterProxyCodegenSetting() {
+        if (previousDisableProxyCodegen == null) {
+            System.clearProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN);
+        } else {
+            System.setProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN, previousDisableProxyCodegen);
+        }
     }
 
     @Test
@@ -359,17 +379,27 @@ class VanillaMethodReaderTest extends WireTestCommon {
     @Test
     @DisplayName("Overloaded method names should be rejected by reader")
     void testOverloaded() {
-        assertThrows(IllegalStateException.class, () -> {
-            Jvm.recordExceptions();
-            try {
-                Wire wire2 = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(32));
-                Overloaded writer2 = wire2.methodWriter(Overloaded.class);
-                Wire wire = TextWire.from("method: [ ]\n");
-                wire.methodReader(writer2);
-            } finally {
-                Jvm.resetExceptionHandlers();
+        String previous = System.getProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN);
+        System.setProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN, "false");
+        try {
+            assertThrows(IllegalStateException.class, () -> {
+                Jvm.recordExceptions();
+                try {
+                    Wire wire2 = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(32));
+                    Overloaded writer2 = wire2.methodWriter(Overloaded.class);
+                    Wire wire = TextWire.from("method: [ ]\n");
+                    wire.methodReader(writer2);
+                } finally {
+                    Jvm.resetExceptionHandlers();
+                }
+            }, "Overloaded method definitions should fail reader creation");
+        } finally {
+            if (previous == null) {
+                System.clearProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN);
+            } else {
+                System.setProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN, previous);
             }
-        }, "Overloaded method definitions should fail reader creation");
+        }
     }
 
     @Test
@@ -467,7 +497,7 @@ class VanillaMethodReaderTest extends WireTestCommon {
         assertFalse(Proxy.isProxyClass(reader.getClass()), "method reader should be a generated class, not a dynamic proxy");
     }
 
-    interface IgnoredMetaData {
+    public interface IgnoredMetaData {
         void header(Marshallable marshallable);
 
         void index(Marshallable marshallable);
@@ -477,31 +507,36 @@ class VanillaMethodReaderTest extends WireTestCommon {
         void roll(Marshallable marshallable);
     }
 
-    interface Saying {
+    // must be public for generated code to access it
+    public interface Saying {
         void say(String say);
     }
 
-    interface Routed<T> {
+    // must be public for generated code to access it
+    public interface Routed<T> {
         T to(String target);
     }
 
-    interface RoutedSaying extends Routed<Saying> {
+    // must be public for generated code to access it
+    public interface RoutedSaying extends Routed<Saying> {
 
     }
 
-    // keep package local.
-    interface AListener {
+    // must be public for generated code to access it
+    public interface AListener {
         void a(A a);
 
         // this pretends to be system metadata
         void index2index(Marshallable a);
     }
 
-    interface MRTInterface {
+    // must be public for generated code to access it
+    public interface MRTInterface {
 
     }
 
-    interface MRTListener {
+    // must be public for generated code to access it
+    public interface MRTListener {
         void timed(long time);
 
         void top(MRTInterface mrti);
@@ -513,36 +548,41 @@ class VanillaMethodReaderTest extends WireTestCommon {
         void unknown(NestedUnknown unknown);
     }
 
-    interface Overloaded {
+    // must be public for generated code to access it
+    public interface Overloaded {
         void method();
 
         void method(MockDto dto);
     }
 
-    static class A extends SelfDescribingMarshallable {
+    // must be public for generated code to access it
+    public static class A extends SelfDescribingMarshallable {
         int x;
     }
 
+    // must be public for generated code to access it
     @SuppressFBWarnings(
             value = {"URF_UNREAD_FIELD", "UWF_UNWRITTEN_FIELD", "UUF_UNUSED_FIELD"},
             justification = "Fields are populated via Wire marshalling in tests.")
-    static class NestedUnknown extends SelfDescribingMarshallable {
+    public static class NestedUnknown extends SelfDescribingMarshallable {
         Marshallable u;
     }
 
-    static class MRT1 extends SelfDescribingMarshallable implements MRTInterface {
+    // must be public for generated code to access it
+    public static class MRT1 extends SelfDescribingMarshallable implements MRTInterface {
         final String field1;
         String value = "a";
 
-        MRT1(String field1) {
+        public MRT1(String field1) {
             this.field1 = field1;
         }
     }
 
-    static class MRT2 extends MRT1 {
+    // must be public for generated code to access it
+    public static class MRT2 extends MRT1 {
         final String field2;
 
-        MRT2(String field1, String field2) {
+        public MRT2(String field1, String field2) {
             super(field1);
             this.field2 = field2;
         }

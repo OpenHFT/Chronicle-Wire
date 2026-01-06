@@ -11,6 +11,8 @@ import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.*;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +23,27 @@ import java.lang.reflect.Proxy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.easymock.EasyMock.*;
 
-class MethodWriterTest extends WireTestCommon {
+// must be public for generated code to access it
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+public class MethodWriterTest extends WireTestCommon {
+    private String previousDisableProxyCodegen;
+
+    @BeforeEach
+    void ignoreGeneratedMethodReaderFallback() {
+        previousDisableProxyCodegen = System.getProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN);
+        System.setProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN, "false");
+        ignoreException("Failed to compile generated method reader - falling back to proxy method reader.");
+    }
+
+    @AfterEach
+    void restoreWriterProxyCodegenSetting() {
+        if (previousDisableProxyCodegen == null) {
+            System.clearProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN);
+        } else {
+            System.setProperty(VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN, previousDisableProxyCodegen);
+        }
+    }
+
     @Test
     @DisplayName("Method writer serialises subclass events correctly")
     void testSubclasses() {
@@ -335,6 +357,7 @@ class MethodWriterTest extends WireTestCommon {
         void method(String value);
     }
 
+    // must be public for generated code to access it
     public interface NoArgs {
         void methodOne();
 
@@ -380,19 +403,19 @@ class MethodWriterTest extends WireTestCommon {
         }
     }
 
-    interface InheritBoth extends IgnoreMethod1, IgnoreMethod2 {
+    public interface InheritBoth extends IgnoreMethod1, IgnoreMethod2 {
         @Override
         default boolean ignoreMethodBasedOnFirstArg(String methodName, String ladderDefinitionName) {
             return false;
         }
     }
 
-    interface ReturnValues {
+    public interface ReturnValues {
         IgnoreMethod1 ignoreMethod1();
         IgnoreMethod2 ignoreMethod2();
     }
 
-    interface ReturnValuesWorkAround extends ReturnValues, IgnoreMethod1, IgnoreMethod2 {
+    public interface ReturnValuesWorkAround extends ReturnValues, IgnoreMethod1, IgnoreMethod2 {
         @Override
         default boolean ignoreMethodBasedOnFirstArg(String methodName, String ladderDefinitionName) {
             return false;
