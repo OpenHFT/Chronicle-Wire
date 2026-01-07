@@ -1002,6 +1002,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      *
      * @param offset The number of bytes away from the start of the buffer that the byte should be peeked
      */
+//    private void parseDependencyAndSetObjectToInject(int offset, boolean skipToOffset) {
     private void parseDependencyAndSetObjectToInject(int offset) {
         offset += 2;    // skips past the ${
         StringBuilder sb2 = acquireStringBuilder2();
@@ -1016,8 +1017,13 @@ public class TextWire extends YamlWireOut<TextWire> {
         String key = sb2.toString().trim();
 //        System.out.println("CCC: key found: " + key);
 
+//        if (skipToOffset) {
+//            bytes.readSkip(offset);
+//        }
+
         // TODO: add a check here to see if the dependencyResolver is null and do the appropriate action
 
+        // TODO: return the key instead
         if (dependencyResolver.containsDependencyKey(key)) {
             this.objectToInject = dependencyResolver.resolve(key);
         } else {
@@ -2597,6 +2603,43 @@ public class TextWire extends YamlWireOut<TextWire> {
                 return object;
 
             } else if (code != '{') {
+                if (code == '$') {
+                    System.out.println("JJJ $ found for interface");
+//                    strategy.readUsing(null, object, this, BracketType.UNKNOWN);
+
+                    int offset = 0;
+                    // iterate until the end of this field's value
+                    System.out.println("GGG Start of loop!!");
+                    int peeked = peekCodeByOffset(offset);
+                    while (peeked != ',' && peeked != -1 && peeked != '{') { // will be -1 if reaches end of buffer
+                        System.out.println("1: " + (char)peeked);
+                        if (peeked == '$' && peekCodeByOffset(offset + 1) == '{') {
+                            parseDependencyAndSetObjectToInject(offset);
+                            break;
+                        }
+
+                        offset++;
+                        peeked = peekCodeByOffset(offset);
+                    }
+
+//                    Object object = vin.getObjectToInject();
+                    if (this.getObjectToInject().equals("DEPENDENCY_OBJECT_MISSING_FROM_DEPENDENCY_RESOLVER")) {
+                        // TODO: decide on whether to throw an exception here or not,
+                        //  similar to how byte's replaceTokensWithProperties does if the
+                        //  expected system property is missing
+                        System.out.println("Object was missing from the dependency resolver...");
+                    } else {
+                        System.out.println("Setting object manually...");
+                        object = this.getObjectToInject();
+//                        field.field.set(t, vin.getObjectToInject());
+                    }
+
+                    this.resetObjectToInject();
+
+                    // *** Need to skip ahead over the value here I think
+
+                    return object;
+                }
                 if ("[]?}&".indexOf(code) < 0 && ObjectUtils.canConvertText(object.getClass())) {
                     Object o = ObjectUtils.convertTo(object.getClass(), text());
                     consumePadding(1);
