@@ -45,10 +45,13 @@ int count;
 ## Build & test commands
 
 Agents must verify that the project still compiles and all unit tests pass before opening a PR. Running from a clean checkout avoids stale artifacts:
+Capture output with `-l` and keep logs under `logs/` for easier maintenance (do not commit logs).
 
 ```bash
 # From repo root
-mvn -q clean verify
+mkdir -p logs
+mvn clean verify -l logs/mvn-clean-verify.log
+rg -n '^\[(WARNING|ERROR)\]|SLF4J\(W\)|\bWARNING:|\bwarning:' logs/mvn-clean-verify.log
 ```
 The command should exit with code `0` to indicate success.
 
@@ -61,7 +64,7 @@ The command should exit with code `0` to indicate success.
 
 ### When to open a PR
 
-* Open a pull request once your branch builds and tests pass with `mvn -q clean verify`.
+* Open a pull request once your branch builds and tests pass with `mvn clean verify -l logs/mvn-clean-verify.log` and the log is clean.
 * Link the PR to the relevant issue or decision record.
 * Keep PRs focused: avoid bundling unrelated refactoring with new features.
 * Re-run the build after addressing review comments to ensure nothing broke.
