@@ -533,17 +533,6 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                         break outerSwitch;
 
-                    case FIELD_ANCHOR: { // Process field anchors.
-                        fieldAnchor(wire);
-                        break outerSwitch;
-                    }
-
-                    case ANCHOR:
-                    case UPDATED_ALIAS: { // Process anchors and updated aliases.
-                        anchor(wire);
-                        break outerSwitch;
-                    }
-
                     case HISTORY_MESSAGE: {
                         bytes.uncheckedReadSkipOne();
                         copyHistoryMessage(bytes(), wire);
@@ -4837,10 +4826,6 @@ public class BinaryWire extends AbstractWire implements Wire {
                             bytes.readSkip(length);
                             return toBytes;
                         }
-
-                        case ANCHOR:
-                        case UPDATED_ALIAS:
-                            return typedMarshallable();
 
                     }
                     break;

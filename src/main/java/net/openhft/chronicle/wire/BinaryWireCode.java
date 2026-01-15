@@ -38,24 +38,6 @@ public enum BinaryWireCode {
     public static final int HISTORY_MESSAGE = 0x86;
 
     /**
-     * Indicates a field anchor point within the serialized structure.
-     */
-    @Deprecated
-    public static final int FIELD_ANCHOR = 0x87;
-
-    /**
-     * Indicates a general anchor point within the serialized structure.
-     */
-    @Deprecated
-    public static final int ANCHOR = 0x88;
-
-    /**
-     * Denotes an updated alias value.
-     */
-    @Deprecated
-    public static final int UPDATED_ALIAS = 0x89;
-
-    /**
      * Array of unsigned bytes.
      */
     public static final int U8_ARRAY = 0x8A;

@@ -41,8 +41,6 @@ public class JSONWire extends TextWire {
 
     // The rest of null
     private static final @NotNull Bytes<byte[]> _ULL = Bytes.from("ull");
-    @Deprecated(/* to be removed in x.28 */)
-    public static final @NotNull Bytes<byte[]> ULL = _ULL;
     // the rest of true
     private static final @NotNull Bytes<byte[]> _RUE = Bytes.from("rue");
     // the rest of false
