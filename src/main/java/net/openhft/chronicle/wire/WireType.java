@@ -239,6 +239,30 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     },
     /**
+     * JSON Lines (JSONL) text wire format. Each document is a complete JSON
+     * object on a single line terminated by newline. Type prefixes are not
+     * included in the output.
+     *
+     * @see <a href="https://jsonlines.org/">JSON Lines specification</a>
+     */
+    JSONL {
+        @NotNull
+        @Override
+        public Wire apply(@NotNull Bytes<?> bytes) {
+            return new JSONWire(bytes).useJsonlDocuments();
+        }
+
+        @Override
+        public boolean isText() {
+            return true;
+        }
+
+        @Override
+        public String asString(Object marshallable) {
+            return asUtf8String(marshallable);
+        }
+    },
+    /**
      * YAML-compliant text wire format. Uses binary documents and padding by
      * default.
      */

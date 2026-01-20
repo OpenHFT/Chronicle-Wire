@@ -60,6 +60,8 @@ public class JSONWire extends TextWire {
 
     // Flag to determine whether to use types or not during parsing.
     boolean useTypes;
+    // Flag to determine whether to serialize enums in lowercase.
+    boolean useLowerCaseEnums;
     private JSONValueOutFromStart valueOutFromStart;
 
     /**
@@ -158,6 +160,27 @@ public class JSONWire extends TextWire {
      */
     public boolean useTypes() {
         return useTypes;
+    }
+
+    /**
+     * Sets the flag to determine whether to serialize enums in lowercase.
+     * When enabled, enum values like {@code ACTIVE} will be written as {@code "active"}.
+     *
+     * @param useLowerCaseEnums A boolean value indicating whether to use lowercase enums.
+     * @return The current instance of the {@code JSONWire} class.
+     */
+    public JSONWire useLowerCaseEnums(boolean useLowerCaseEnums) {
+        this.useLowerCaseEnums = useLowerCaseEnums;
+        return this;
+    }
+
+    /**
+     * Gets the current setting for lowercase enum serialization.
+     *
+     * @return {@code true} if enums are serialized in lowercase, otherwise {@code false}.
+     */
+    public boolean useLowerCaseEnums() {
+        return useLowerCaseEnums;
     }
 
     @Override
@@ -845,6 +868,55 @@ public class JSONWire extends TextWire {
             return "null";
         }
 
+        /**
+         * Writes a CharSequence as a JSON string in lowercase, without creating a new String object.
+         * This is optimized for enum names which are typically simple ASCII identifiers.
+         *
+         * @param s the CharSequence to write in lowercase
+         * @return the WireOut for chaining
+         */
+        @NotNull
+        private WireOut textLowerCase(@NotNull CharSequence s) {
+            prependSeparator();
+            bytes.writeUnsignedByte('"');
+            for (int i = 0; i < s.length(); i++) {
+                char ch = s.charAt(i);
+                bytes.writeUnsignedByte(Character.toLowerCase(ch));
+            }
+            bytes.writeUnsignedByte('"');
+            elementSeparator();
+            return wireOut();
+        }
+
+        @NotNull
+        @Override
+        public <E extends Enum<E>> WireOut asEnum(@Nullable E e) {
+            if (e == null) {
+                return text((String) null);
+            }
+            if (useLowerCaseEnums) {
+                return textLowerCase(e.name());
+            }
+            return text(e.name());
+        }
+
+        @SuppressWarnings("deprecation")
+        @NotNull
+        @Override
+        public WireOut untypedObject(@Nullable Object value) throws InvalidMarshallableException {
+            // Handle enum serialization with lowercase option
+            if (value != null && ValueOut.isAnEnum(value)) {
+                String name = value instanceof DynamicEnum
+                        ? ((DynamicEnum) value).name()
+                        : ((Enum) value).name();
+                if (useLowerCaseEnums) {
+                    return textLowerCase(name);
+                }
+                return text(name);
+            }
+            return super.untypedObject(value);
+        }
+
         @NotNull
         @Override
         public JSONWire typeLiteral(@Nullable CharSequence type) {
@@ -1300,6 +1372,57 @@ public class JSONWire extends TextWire {
          */
         public boolean useTypes() {
             return useTypes;
+        }
+    }
+
+    /**
+     * Configures this wire for JSONL (JSON Lines) output format.
+     * JSONL writes one JSON object per line with no type prefixes.
+     * Each document is terminated by a newline character.
+     *
+     * @return this wire configured for JSONL
+     * @see <a href="https://jsonlines.org/">JSON Lines specification</a>
+     */
+    public JSONWire useJsonlDocuments() {
+        useTypes(false);
+        useLowerCaseEnums(true);  // JSONL convention: lowercase enum values
+        trimFirstCurly(false);  // Keep object braces
+        readContext = new JSONReadDocumentContext(this);
+        writeContext = new JSONLWriteDocumentContext(this);
+        return this;
+    }
+
+    /**
+     * Document context for JSONL format that appends newline after each JSON object.
+     * This enables the JSON Lines format where each line is a complete JSON object.
+     * Unlike JSONWriteDocumentContext, this does not add outer braces around the document.
+     */
+    class JSONLWriteDocumentContext extends TextWriteDocumentContext {
+        private long startPosition;
+
+        public JSONLWriteDocumentContext(Wire wire) {
+            super(wire);
+        }
+
+        @Override
+        public void start(boolean metaData) {
+            super.start(metaData);
+            if (count == 1) {
+                startPosition = wire().bytes().writePosition();
+            }
+        }
+
+        @Override
+        public void close() {
+            if (count == 1) {
+                Bytes<?> bytes = wire().bytes();
+                long currentPos = bytes.writePosition();
+                // Only append newline if something was written and not rolling back
+                if (currentPos > startPosition) {
+                    bytes.append('\n');
+                }
+            }
+            super.close();
         }
     }
 
