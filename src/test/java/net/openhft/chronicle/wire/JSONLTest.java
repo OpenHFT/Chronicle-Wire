@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.wire.converter.NanoTime;
 import org.junit.Test;
@@ -46,6 +47,10 @@ public class JSONLTest extends WireTestCommon {
 
     enum Status {
         PENDING, ACTIVE, COMPLETED, CANCELLED
+    }
+
+    interface JsonlEvents {
+        void event(String name, int count);
     }
 
     @Test
@@ -454,6 +459,161 @@ public class JSONLTest extends WireTestCommon {
         }
     }
 
+    @Test
+    public void testMethodReaderStreamingJsonl() {
+        try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
+            Bytes<?> bytes = stlBytes.get();
+            Wire wire = WireType.JSONL.apply(bytes);
+
+            JsonlEvents writer = wire.methodWriter(JsonlEvents.class);
+            writer.event("first", 1);
+            writer.event("second", 2);
+            writer.event("third", 3);
+
+            List<String> seen = new ArrayList<String>();
+            MethodReader reader = wire.methodReader(new JsonlEvents() {
+                @Override
+                public void event(String name, int count) {
+                    seen.add(name + ":" + count);
+                }
+            });
+
+            while (reader.readOne()) {
+                // loop until exhausted
+            }
+
+            assertEquals(3, seen.size());
+            assertEquals("first:1", seen.get(0));
+            assertEquals("second:2", seen.get(1));
+            assertEquals("third:3", seen.get(2));
+        }
+    }
+
+    @Test
+    public void testMethodReaderCommaSeparatedJson() {
+        try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
+            Bytes<?> bytes = stlBytes.get();
+            Wire wire = WireType.JSONL.apply(bytes);
+
+            JsonlEvents writer = wire.methodWriter(JsonlEvents.class);
+            writer.event("first", 1);
+            writer.event("second", 2);
+            writer.event("third", 3);
+
+            String[] lines = bytes.toString().split("\n");
+            String commaSeparated = String.join(",", lines);
+            Bytes<?> input = Bytes.from(commaSeparated);
+            try {
+                Wire readWire = WireType.JSONL.apply(input);
+                List<String> seen = new ArrayList<String>();
+                MethodReader reader = readWire.methodReader(new JsonlEvents() {
+                    @Override
+                    public void event(String name, int count) {
+                        seen.add(name + ":" + count);
+                    }
+                });
+
+                while (reader.readOne()) {
+                    // loop until exhausted
+                }
+
+                assertEquals(3, seen.size());
+                assertEquals("first:1", seen.get(0));
+                assertEquals("second:2", seen.get(1));
+                assertEquals("third:3", seen.get(2));
+            } finally {
+                input.releaseLast();
+            }
+        }
+    }
+
+    /**
+     * Test that data written with JSON wire type can be read with JSONL wire type.
+     * JSON output doesn't have newlines between documents, but JSONL reader can handle it.
+     */
+    @Test
+    public void testWriteJsonReadJsonl() {
+        try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
+            Bytes<?> bytes = stlBytes.get();
+            
+            // Write with JSON (not JSONL)
+            Wire writeWire = WireType.JSON.apply(bytes);
+            JsonlEvents writer = writeWire.methodWriter(JsonlEvents.class);
+            writer.event("first", 1);
+            writer.event("second", 2);
+            writer.event("third", 3);
+            
+            // Verify JSON output has no newlines between documents
+            String output = bytes.toString();
+            assertFalse("JSON output should not have newlines between documents", 
+                       output.contains("}\n{"));
+            
+            // Read with JSONL - should work because JSONL reader handles concatenated JSON
+            bytes.readPosition(0);
+            Wire readWire = WireType.JSONL.apply(bytes);
+            List<String> seen = new ArrayList<String>();
+            MethodReader reader = readWire.methodReader(new JsonlEvents() {
+                @Override
+                public void event(String name, int count) {
+                    seen.add(name + ":" + count);
+                }
+            });
+            
+            while (reader.readOne()) {
+                // loop until exhausted
+            }
+            
+            assertEquals("JSONL reader should read all 3 events from JSON output", 3, seen.size());
+            assertEquals("first:1", seen.get(0));
+            assertEquals("second:2", seen.get(1));
+            assertEquals("third:3", seen.get(2));
+        }
+    }
+    
+    /**
+     * Test that data written with JSONL wire type can be read with JSON wire type.
+     * JSONL adds newlines between documents which JSON reader treats as whitespace.
+     */
+    @Test
+    public void testWriteJsonlReadJson() {
+        try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
+            Bytes<?> bytes = stlBytes.get();
+            
+            // Write with JSONL
+            Wire writeWire = WireType.JSONL.apply(bytes);
+            JsonlEvents writer = writeWire.methodWriter(JsonlEvents.class);
+            writer.event("first", 1);
+            writer.event("second", 2);
+            writer.event("third", 3);
+            
+            // Verify JSONL output has proper format:
+            // Each document is wrapped in braces and separated by newlines
+            String output = bytes.toString();
+            assertTrue("JSONL output should have newlines between documents", 
+                      output.contains("}\n{"));
+            
+            // Read back with JSONL reader (round-trip test)
+            bytes.readPosition(0);
+            Wire readWire = WireType.JSONL.apply(bytes);
+            List<String> seen = new ArrayList<String>();
+            MethodReader reader = readWire.methodReader(new JsonlEvents() {
+                @Override
+                public void event(String name, int count) {
+                    seen.add(name + ":" + count);
+                }
+            });
+            
+            while (reader.readOne()) {
+                // loop until exhausted
+            }
+            
+            assertEquals("JSONL reader should read all 3 events", 3, seen.size());
+            assertEquals("first:1", seen.get(0));
+            assertEquals("second:2", seen.get(1));
+            assertEquals("third:3", seen.get(2));
+        }
+    }
+
     // =========================================================================
     // Tests clarifying JSONL support and documenting behavior/limitations
     // =========================================================================
@@ -799,7 +959,10 @@ public class JSONLTest extends WireTestCommon {
                 Bytes<?> lineBytes = Bytes.from(lines[i]);
                 try {
                     Wire lineWire = WireType.JSONL.apply(lineBytes);
-                    JSONLRecord parsed = lineWire.getValueIn().object(JSONLRecord.class);
+                    JSONLRecord parsed;
+                    try (DocumentContext dc = lineWire.readingDocument()) {
+                        parsed = dc.wire().getValueIn().object(JSONLRecord.class);
+                    }
 
                     assertEquals("Name should match", originals[i].name, parsed.name);
                     assertEquals("Count should match", originals[i].count, parsed.count);
@@ -835,7 +998,10 @@ public class JSONLTest extends WireTestCommon {
             Bytes<?> lineBytes = Bytes.from(line);
             try {
                 Wire lineWire = WireType.JSONL.apply(lineBytes);
-                JSONLRecord parsed = lineWire.getValueIn().object(JSONLRecord.class);
+                JSONLRecord parsed;
+                try (DocumentContext dc = lineWire.readingDocument()) {
+                    parsed = dc.wire().getValueIn().object(JSONLRecord.class);
+                }
                 assertEquals("Unicode should round-trip correctly", unicode, parsed.name);
             } finally {
                 lineBytes.releaseLast();

@@ -63,6 +63,8 @@ public class JSONWire extends TextWire {
     // Flag to determine whether to serialize enums in lowercase.
     boolean useLowerCaseEnums;
     private JSONValueOutFromStart valueOutFromStart;
+    // Flag to indicate JSONL mode is active
+    private boolean jsonlMode;
 
     /**
      * Default constructor, initializes with elastic bytes allocated on heap.
@@ -787,6 +789,179 @@ public class JSONWire extends TextWire {
     }
 
     /**
+     * Read document context for JSONL format. Each document can be separated by a newline
+     * (JSONL) or a comma (JSON stream).
+     */
+    class JSONLReadDocumentContext extends TextReadDocumentContext {
+        private int first;
+        private long docLimit;
+        private long closePos;
+
+        public JSONLReadDocumentContext(@Nullable Wire wire) {
+            super(wire);
+        }
+
+        @Override
+        public void start() {
+            wire.getValueIn().resetState();
+            Bytes<?> bytes = wire.bytes();
+
+            present = false;
+            skipSeparators();
+
+            if (bytes.readRemaining() < 1) {
+                closeReadLimit(bytes.readLimit());
+                closeReadPosition(bytes.readLimit());
+                notComplete = false;
+                return;
+            }
+
+            final long startPos = bytes.readPosition();
+            final long limit = bytes.readLimit();
+
+            findDocumentBounds(bytes, startPos, limit);
+
+            closeReadLimit(limit);
+            closeReadPosition(closePos);
+
+            bytes.readLimit(docLimit);
+            bytes.readPosition(startPos);
+
+            present = true;
+
+            first = bytes.peekUnsignedByte();
+            if (first == '{') {
+                bytes.readSkip(1);
+                long lastOffset = bytes.readLimit() - 1;
+                if (lastOffset >= bytes.readPosition()
+                        && bytes.peekUnsignedByte(lastOffset) == '}') {
+                    bytes.readLimit(lastOffset);
+                }
+            }
+        }
+
+        private void skipSeparators() {
+            final Bytes<?> bytes = wire.bytes();
+            final long limit = bytes.readLimit();
+            while (bytes.readPosition() < limit) {
+                int ch = bytes.peekUnsignedByte();
+                if (ch == ',' || ch == '\n' || ch == '\r' || ch == ' ' || ch == '\t') {
+                    bytes.readSkip(1);
+                    continue;
+                }
+                break;
+            }
+        }
+
+        private void findDocumentBounds(Bytes<?> bytes, long startPos, long limit) {
+            int depth = 0;
+            boolean inString = false;
+            boolean escape = false;
+            boolean started = false;
+            long lastNonSpace = -1;
+            long docEnd = -1;
+            closePos = limit;
+
+            scan:
+            for (long pos = startPos; pos < limit; pos++) {
+                int ch = bytes.peekUnsignedByte(pos);
+                if (inString) {
+                    if (escape) {
+                        escape = false;
+                        lastNonSpace = pos;
+                        continue;
+                    }
+                    if (ch == '\\') {
+                        escape = true;
+                        lastNonSpace = pos;
+                        continue;
+                    }
+                    if (ch == '"') {
+                        inString = false;
+                        lastNonSpace = pos;
+                        continue;
+                    }
+                    lastNonSpace = pos;
+                    continue;
+                }
+                switch (ch) {
+                    case '"':
+                        inString = true;
+                        started = true;
+                        lastNonSpace = pos;
+                        break;
+                    case '{':
+                    case '[':
+                        depth++;
+                        started = true;
+                        lastNonSpace = pos;
+                        break;
+                    case '}':
+                    case ']':
+                        if (depth > 0) {
+                            depth--;
+                        }
+                        started = true;
+                        lastNonSpace = pos;
+                        if (depth == 0) {
+                            docEnd = pos;
+                            closePos = skipDelimiter(bytes, pos + 1, limit);
+                            break scan;
+                        }
+                        break;
+                    case ',':
+                    case '\n':
+                    case '\r':
+                        if (depth == 0 && started) {
+                            docEnd = lastNonSpace >= startPos ? lastNonSpace : pos - 1;
+                            closePos = skipDelimiter(bytes, pos, limit);
+                            break scan;
+                        }
+                        break;
+                    default:
+                        if (ch > ' ') {
+                            started = true;
+                            lastNonSpace = pos;
+                        }
+                        break;
+                }
+            }
+
+            if (docEnd < startPos) {
+                docEnd = lastNonSpace >= startPos ? lastNonSpace : limit - 1;
+                closePos = limit;
+            }
+
+            docLimit = Math.min(docEnd + 1, limit);
+        }
+
+        private long skipDelimiter(Bytes<?> bytes, long pos, long limit) {
+            long p = pos;
+            while (p < limit) {
+                int ch = bytes.peekUnsignedByte(p);
+                if (ch == ',' || ch == '\n' || ch == '\r') {
+                    p++;
+                    if (ch == '\r' && p < limit && bytes.peekUnsignedByte(p) == '\n') {
+                        p++;
+                    }
+                    break;
+                }
+                if (ch <= ' ') {
+                    p++;
+                    continue;
+                }
+                break;
+            }
+            return p;
+        }
+
+        @Override
+        public void close() {
+            super.close();
+        }
+    }
+
+    /**
      * The JSONWriteDocumentContext class extends the TextWriteDocumentContext class.
      * It provides a specialized context for writing JSON data, adjusting writing positions
      * and handling JSON-specific syntax such as curly braces.
@@ -1385,20 +1560,40 @@ public class JSONWire extends TextWire {
      */
     public JSONWire useJsonlDocuments() {
         useTypes(false);
+        jsonlMode = true;
         useLowerCaseEnums(true);  // JSONL convention: lowercase enum values
         trimFirstCurly(false);  // Keep object braces
-        readContext = new JSONReadDocumentContext(this);
+        readContext = new JSONLReadDocumentContext(this);
         writeContext = new JSONLWriteDocumentContext(this);
         return this;
     }
 
     /**
-     * Document context for JSONL format that appends newline after each JSON object.
-     * This enables the JSON Lines format where each line is a complete JSON object.
-     * Unlike JSONWriteDocumentContext, this does not add outer braces around the document.
+     * Override methodWriter to preserve JSONL mode.
+     * The parent class calls useTextDocuments() which would overwrite JSONL contexts.
+     */
+    @Override
+    @NotNull
+    public <T> T methodWriter(@NotNull Class<T> tClass, Class<?>... additional) {
+        if (jsonlMode) {
+            // In JSONL mode, skip useTextDocuments() to preserve JSONL contexts
+            VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
+                    WireType.TEXT,
+                    () -> newTextMethodWriterInvocationHandler(tClass));
+            for (Class<?> aClass : additional)
+                builder.addInterface(aClass);
+            builder.marshallableOut(this);
+            return builder.build();
+        }
+        return super.methodWriter(tClass, additional);
+    }
+
+    /**
+     * Document context for JSONL format that ensures each document is a complete
+     * JSON object on its own line. Always wraps content with braces.
      */
     class JSONLWriteDocumentContext extends TextWriteDocumentContext {
-        private long startPosition;
+        private long start;
 
         public JSONLWriteDocumentContext(Wire wire) {
             super(wire);
@@ -1406,9 +1601,11 @@ public class JSONWire extends TextWire {
 
         @Override
         public void start(boolean metaData) {
+            int count = this.count;
             super.start(metaData);
-            if (count == 1) {
-                startPosition = wire().bytes().writePosition();
+            if (count == 0) {
+                wire().bytes().append('{');
+                start = wire().bytes().writePosition();
             }
         }
 
@@ -1416,9 +1613,11 @@ public class JSONWire extends TextWire {
         public void close() {
             if (count == 1) {
                 Bytes<?> bytes = wire().bytes();
-                long currentPos = bytes.writePosition();
-                // Only append newline if something was written and not rolling back
-                if (currentPos > startPosition) {
+                if (bytes.writePosition() == start) {
+                    // Nothing written, remove the opening brace
+                    bytes.writeSkip(-1);
+                } else {
+                    bytes.append('}');
                     bytes.append('\n');
                 }
             }
