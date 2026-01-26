@@ -1313,9 +1313,6 @@ public class TextWire extends YamlWireOut<TextWire> {
          */
         final ValueInStack stack = new ValueInStack();
 
-        // Limit for sequence reading
-        int sequenceLimit = 0;
-
         // Flag to denote if any kind of reading should be consumed
         private boolean consumeAny;
 
@@ -2182,12 +2179,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 consumePadding();
                 code = (char) readCode();
             }
-            if (code == '[') {
-                bytes.readSkip(1);
-                sequenceLimit = Integer.MAX_VALUE;
-            } else {
-                sequenceLimit = 1;
-            }
+            checkSequenceLimit(code);
 
             tReader.accept(t, TextWire.this.valueIn);
 
@@ -2199,6 +2191,18 @@ public class TextWire extends YamlWireOut<TextWire> {
             }
             consumePadding(1);
             return true;
+        }
+
+        private void checkSequenceLimit(char code) {
+            final int sequenceLimit;
+            if (code == '[') {
+                bytes.readSkip(1);
+                sequenceLimit = Integer.MAX_VALUE;
+            } else {
+                sequenceLimit = 1;
+            }
+            // save the initial state of the current sequenceLimit
+            stack.curr().savedValue(sequenceLimit);
         }
 
         /**
@@ -2228,12 +2232,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 consumePadding();
                 code = (char) readCode();
             }
-            if (code == '[') {
-                bytes.readSkip(1);
-                sequenceLimit = Integer.MAX_VALUE;
-            } else {
-                sequenceLimit = 1;
-            }
+            checkSequenceLimit(code);
 
             reader0.accept(this, list, buffer, bufferAdd);
 
@@ -2254,12 +2253,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             consumePadding();
             char code = (char) peekCode();
 
-            if (code == '[') {
-                bytes.readSkip(1);
-                sequenceLimit = Integer.MAX_VALUE;
-            } else {
-                sequenceLimit = 1;
-            }
+            checkSequenceLimit(code);
 
             // this code was added to support empty sets
             consumePadding();
@@ -2289,8 +2283,13 @@ public class TextWire extends YamlWireOut<TextWire> {
 
         @Override
         public boolean hasNextSequenceItem() {
+            // set the sequence limit from the saved state in the case that we have nested sequences
+            int sequenceLimit = (int) stack.curr().savedValue();
             if (sequenceLimit-- <= 0)
                 return false;
+
+            // update the saved position with the decremented sequence limit
+            stack.curr().savedValue(sequenceLimit);
             consumePadding();
             int ch = peekCode();
             // don't test for next char as any comma still left here is to be consumed.
