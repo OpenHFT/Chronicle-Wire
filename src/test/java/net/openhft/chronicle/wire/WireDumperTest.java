@@ -171,6 +171,12 @@ public class WireDumperTest extends WireTestCommon {
                 "3.14\n" +
                 "...\n");
 
+        // JSONL wraps each document in braces and adds newline
+        expectedContentByType.put(WireType.JSONL, "" +
+                "{17}\n" +
+                "{\"bark\"}\n" +
+                "{3.14}\n");
+
         // Setting the expected partial serialized content for different WireTypes
         expectedPartialContent.put(WireType.TEXT, "" +
                 "--- !!data\n" +
@@ -231,6 +237,11 @@ public class WireDumperTest extends WireTestCommon {
                 "17\n" +
                 "...\n" +
                 "meow\n");
+
+        // JSONL partial content - second document not yet closed
+        expectedPartialContent.put(WireType.JSONL, "" +
+                "{17}\n" +
+                "{\"meow\"");
 
     }
 }
