@@ -208,14 +208,6 @@ final class SerializableObjectTest extends WireTestCommon {
                     .filter(Objects::nonNull)  // Filter out nulls.
                     .collect(Collectors.toList());
 
-            // Uncomment below to see the counts and details of the discovered classes.
-            /*
-            System.out.println("widgetClasses.size() = " + widgetClasses.size());
-            System.out.println("objects.size = " + objects.size());
-
-            objects.stream()
-                    .map(i -> i.getClass().getName() + " -> " + i)
-                    .forEach(System.out::println);*/
             return objects.stream();
 
         }
