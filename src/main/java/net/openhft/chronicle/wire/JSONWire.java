@@ -29,18 +29,21 @@ import java.util.function.Supplier;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 /**
- * Represents the JSON wire format.
+ * Represents the JSON wire format for text-based marshalling and parsing.
  * <p>
  * This class provides functionality for managing JSON data in a wire format.
  * It currently provides a subset of functionalities similar to the YAML wire format.
  * The core capability of this class is to handle JSON data structures as {@code Bytes}
  * objects, allowing for efficient manipulation and parsing.
  */
-@SuppressWarnings("this-escape")
+@SuppressWarnings({"this-escape", "deprecation"})
 public class JSONWire extends TextWire {
 
     // The rest of null
     private static final @NotNull Bytes<byte[]> _ULL = Bytes.from("ull");
+    /**
+     * Constant bytes for JSON literal {@code null} suffix.
+     */
     @Deprecated(/* to be removed in x.28 */)
     public static final @NotNull Bytes<byte[]> ULL = _ULL;
     // the rest of true
@@ -678,6 +681,7 @@ public class JSONWire extends TextWire {
      * @param quotes Specifies the type of quotes used in the CharSequence and guides escaping.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7159#section-7">RFC 7159, Section 7</a>
      */
+    @Override
     protected void escape0(@NotNull CharSequence s, @NotNull Quotes quotes) {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
@@ -972,7 +976,7 @@ public class JSONWire extends TextWire {
         private long start;
 
         /**
-         * Constructor for JSONWriteDocumentContext.
+         * Creates a JSON write document context for emitting JSON object syntax.
          *
          * @param wire The wire to be used for writing data
          */
@@ -1097,7 +1101,7 @@ public class JSONWire extends TextWire {
         public JSONWire typeLiteral(@Nullable CharSequence type) {
 
             startBlock('{');
-            bytes.append("\"@type\":\"" + type + "\"");
+            bytes.append("\"@type\":\"").append(String.valueOf(type)).append("\"");
             endBlock('}');
 
             return (JSONWire) wireOut();
@@ -1211,10 +1215,10 @@ public class JSONWire extends TextWire {
         }
 
         /**
-         * Write a special double value (e.g. NaN) as a string to the given bytes.
+         * Write a special float value (e.g. NaN) as a string to the given bytes.
          *
-         * @param bytes The bytes to append the stringified double value to
-         * @param value The double value to convert to a string
+         * @param bytes The bytes to append the stringified float value to
+         * @param value The float value to convert to a string
          */
         @Override
         protected void writeSpecialFloatValueToBytes(Bytes<?> bytes, float value) {
@@ -1264,6 +1268,7 @@ public class JSONWire extends TextWire {
             return (JSONWire) super.marshallable(map, (Class<K>) String.class, vClass, leaf);
         }
 
+        @Override
         public @NotNull JSONWire time(final LocalTime localTime) {
             // Todo: fix quoted text
             return (JSONWire) super.time(localTime);
@@ -1294,7 +1299,7 @@ public class JSONWire extends TextWire {
             int code = readCode();
             if (code != '{') {
                 bytes.readPosition(start);
-                return null;
+                return null; // Not a type literal: opening '{' expected but not found
             }
 
             consumePadding();
@@ -1304,14 +1309,14 @@ public class JSONWire extends TextWire {
 
             if (!"@type".contentEquals(sb)) {
                 bytes.readPosition(start);
-                return null;
+                return null; // Not a type literal: expected "@type" key but found different text
             }
 
             consumePadding();
 
             if (readCode() != ':') {
                 bytes.readPosition(start);
-                return null;
+                return null; // Malformed type literal: ':' separator missing after "@type"
             }
 
             consumePadding();
@@ -1322,13 +1327,13 @@ public class JSONWire extends TextWire {
             String clazz = sb.toString().trim();
             if (clazz.isEmpty()) {
                 bytes.readPosition(start);
-                return null;
+                return null; // Malformed type literal: class name value is blank
             }
 
             consumePadding();
             if (bytes.readRemaining() == 0 || bytes.readChar() != '}') {
                 bytes.readPosition(start);
-                return null;
+                return null; // Malformed type literal: closing '}' missing or premature end of input
             }
             consumePadding();
 
@@ -1531,12 +1536,12 @@ public class JSONWire extends TextWire {
         void readTypeDefinition(StringBuilder sb) {
             consumePadding();
             if (bytes.readChar() != '{')
-                throw new IORuntimeException("Expected { but got " + bytes);
+                throw new IORuntimeException("Type definition should start with '{' but got " + bytes);
             consumePadding();
             text(sb);
             consumePadding();
             final char colon = bytes.readChar();
-            assert colon == ':' : "Expected : but got " + colon;
+            assert colon == ':' : "Type definition should include ':' but got " + colon;
 
         }
 
