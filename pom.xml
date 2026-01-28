@@ -4,19 +4,18 @@
     Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
         <version>2026.0</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <artifactId>chronicle-wire</artifactId>
-    <version>2026.0-SNAPSHOT</version>
+    <version>2026.0</version>
     <name>OpenHFT/Chronicle-Wire</name>
     <!-- Core library for Chronicle's binary wire serialization -->
     <description>Chronicle-Wire</description>
@@ -25,7 +24,7 @@
         <!-- Define the target coverage thresholds as properties -->
         <jacoco.line.coverage>0.726</jacoco.line.coverage>
         <jacoco.branch.coverage>0.664</jacoco.branch.coverage>
-        <surefireArgLine/>
+        <surefireArgLine />
     </properties>
 
     <!-- Use BOMs to keep dependency versions consistent across modules -->
@@ -438,7 +437,7 @@
         <url>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</url>
         <connection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</connection>
         <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Wire.git</developerConnection>
-        <tag>ea</tag>
+        <tag>chronicle-wire-2026.0</tag>
     </scm>
 
     <profiles>
