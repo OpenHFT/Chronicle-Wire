@@ -198,25 +198,6 @@
                 </executions>
             </plugin>
 
-            <!-- Attach source jars to the build -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                            <goal>test-jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                    <!-- Disable the jar goal inherited from parent to avoid duplicate artifacts -->
-                    <execution>
-                        <id>default-jar</id>
-                        <phase>none</phase>
-                    </execution>
-                </executions>
-            </plugin>
             <!--
                 generate maven dependencies versions file that can be used later
                 to install the right bundle in test phase.
