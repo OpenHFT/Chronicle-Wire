@@ -114,7 +114,7 @@ This tight loop informs the AI accurately and creates immediate clarity for all 
 When using AI agents to assist with development, please adhere to the following guidelines:
 
 * **Respect the Language & Character-set Policy**: Ensure all AI-generated content follows the British English and ISO-8859-1 guidelines outlined above.
-  Focus on Clarity: AI-generated documentation should be clear and concise and add value beyond what is already present in the code or existing documentation.
+Focus on Clarity: AI-generated documentation should be clear and concise and add value beyond what is already present in the code or existing documentation.
 * **Avoid Redundancy**: Do not generate content that duplicates existing documentation or code comments unless it provides additional context or clarification.
 * **Review AI Outputs**: Always review AI-generated content for accuracy, relevance, and adherence to the project's documentation standards before committing it to the repository.
 
