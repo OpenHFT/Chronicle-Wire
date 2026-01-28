@@ -3,7 +3,8 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -16,14 +17,24 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests for YAML serialisation of null and empty container fields.
+ * Verifies that null collections, maps, and arrays round-trip correctly using
+ * the !!null YAML tag, and that empty containers remain empty after deserialisation.
+ */
+@DisplayName("YAML Wire Format: null and empty container serialisation")
+@SuppressWarnings({"checkstyle:MMOverusedWord", // "round-trip" is the standard serialisation term
+        "checkstyle:MMLacksPurpose"}) // file has Javadoc and assertion messages explaining purpose
 public class NullContainerYamlTest extends WireTestCommon {
 
     @Test
+    @DisplayName("null container fields round-trip as null with !!null tag")
+    @SuppressWarnings("deprecation") // testing deprecated WireType.fromString() intentionally
     public void nullFieldsRoundTripAsNull() {
         NullContainers expected = new NullContainers();
         expected.collection = null;
@@ -36,27 +47,37 @@ public class NullContainerYamlTest extends WireTestCommon {
         expected.strings = null;
 
         String yaml = WireType.YAML_ONLY.asString(expected);
-        assertTrue(yaml, yaml.contains("collection: !!null \"\""));
-        assertTrue(yaml, yaml.contains("set: !!null \"\""));
-        assertTrue(yaml, yaml.contains("sortedSet: !!null \"\""));
-        assertTrue(yaml, yaml.contains("map: !!null \"\""));
-        assertTrue(yaml, yaml.contains("sortedMap: !!null \"\""));
-        assertTrue(yaml, yaml.contains("bytes: !!null \"\""));
-        assertTrue(yaml, yaml.contains("ints: !!null \"\""));
-        assertTrue(yaml, yaml.contains("strings: !!null \"\""));
+        assertTrue(yaml.contains("collection: !!null \"\""),
+                "YAML should contain !!null tag for collection field; actual:\n" + yaml);
+        assertTrue(yaml.contains("set: !!null \"\""),
+                "YAML should contain !!null tag for set field; actual:\n" + yaml);
+        assertTrue(yaml.contains("sortedSet: !!null \"\""),
+                "YAML should contain !!null tag for sortedSet field; actual:\n" + yaml);
+        assertTrue(yaml.contains("map: !!null \"\""),
+                "YAML should contain !!null tag for map field; actual:\n" + yaml);
+        assertTrue(yaml.contains("sortedMap: !!null \"\""),
+                "YAML should contain !!null tag for sortedMap field; actual:\n" + yaml);
+        assertTrue(yaml.contains("bytes: !!null \"\""),
+                "YAML should contain !!null tag for bytes field; actual:\n" + yaml);
+        assertTrue(yaml.contains("ints: !!null \"\""),
+                "YAML should contain !!null tag for ints field; actual:\n" + yaml);
+        assertTrue(yaml.contains("strings: !!null \"\""),
+                "YAML should contain !!null tag for strings field; actual:\n" + yaml);
 
         NullContainers actual = WireType.YAML_ONLY.fromString(yaml);
-        assertNull(actual.collection);
-        assertNull(actual.set);
-        assertNull(actual.sortedSet);
-        assertNull(actual.map);
-        assertNull(actual.sortedMap);
-        assertNull(actual.bytes);
-        assertNull(actual.ints);
-        assertNull(actual.strings);
+        assertNull(actual.collection, "collection should be null after round-trip");
+        assertNull(actual.set, "set should be null after round-trip");
+        assertNull(actual.sortedSet, "sortedSet should be null after round-trip");
+        assertNull(actual.map, "map should be null after round-trip");
+        assertNull(actual.sortedMap, "sortedMap should be null after round-trip");
+        assertNull(actual.bytes, "bytes should be null after round-trip");
+        assertNull(actual.ints, "ints should be null after round-trip");
+        assertNull(actual.strings, "strings should be null after round-trip");
     }
 
     @Test
+    @DisplayName("empty container fields round-trip as empty, not null")
+    @SuppressWarnings("deprecation") // testing deprecated WireType.fromString() intentionally
     public void emptyFieldsRoundTripAsEmpty() {
         NullContainers expected = new NullContainers();
         expected.collection = new ArrayList<>();
@@ -70,21 +91,21 @@ public class NullContainerYamlTest extends WireTestCommon {
 
         String yaml = WireType.YAML_ONLY.asString(expected);
         NullContainers actual = WireType.YAML_ONLY.fromString(yaml);
-        assertNotNull(actual.collection);
-        assertTrue(actual.collection.isEmpty());
-        assertNotNull(actual.set);
-        assertTrue(actual.set.isEmpty());
-        assertNotNull(actual.sortedSet);
-        assertTrue(actual.sortedSet.isEmpty());
-        assertNotNull(actual.map);
-        assertTrue(actual.map.isEmpty());
-        assertNotNull(actual.sortedMap);
-        assertTrue(actual.sortedMap.isEmpty());
-        assertNull(actual.bytes);
-        assertNotNull(actual.ints);
-        assertEquals(0, actual.ints.length);
-        assertNotNull(actual.strings);
-        assertEquals(0, actual.strings.length);
+        assertNotNull(actual.collection, "collection should not be null after round-trip");
+        assertTrue(actual.collection.isEmpty(), "collection should be empty after round-trip");
+        assertNotNull(actual.set, "set should not be null after round-trip");
+        assertTrue(actual.set.isEmpty(), "set should be empty after round-trip");
+        assertNotNull(actual.sortedSet, "sortedSet should not be null after round-trip");
+        assertTrue(actual.sortedSet.isEmpty(), "sortedSet should be empty after round-trip");
+        assertNotNull(actual.map, "map should not be null after round-trip");
+        assertTrue(actual.map.isEmpty(), "map should be empty after round-trip");
+        assertNotNull(actual.sortedMap, "sortedMap should not be null after round-trip");
+        assertTrue(actual.sortedMap.isEmpty(), "sortedMap should be empty after round-trip");
+        assertNull(actual.bytes, "bytes should remain null (was set to null)");
+        assertNotNull(actual.ints, "ints array should not be null after round-trip");
+        assertEquals(0, actual.ints.length, "ints array should have zero length after round-trip");
+        assertNotNull(actual.strings, "strings array should not be null after round-trip");
+        assertEquals(0, actual.strings.length, "strings array should have zero length after round-trip");
     }
 
     static final class NullContainers extends SelfDescribingMarshallable {
