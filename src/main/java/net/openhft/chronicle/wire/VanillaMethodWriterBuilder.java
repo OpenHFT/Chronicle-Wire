@@ -37,7 +37,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
 
     // System property to disable proxy code generation
     public static final String DISABLE_WRITER_PROXY_CODEGEN = "disableProxyCodegen";
-    public static final String ENABLE_WRITER_PROXY_FALLBACK = "enableProxyFallback";
 
     // Marker inserted into {@link #classCache} when compilation fails
     private static final Class<?> COMPILE_FAILED = ClassNotFoundException.class;
@@ -64,7 +63,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
 
     // Flag to indicate if the proxy generation is disabled
     private final boolean disableProxyGen = Jvm.getBoolean(DISABLE_WRITER_PROXY_CODEGEN, false);
-    private final boolean enableProxyFallback = Jvm.getBoolean(ENABLE_WRITER_PROXY_FALLBACK, false);
     // A synchronized set of classes to represent interfaces
     private final Set<Class<?>> interfaces = Collections.synchronizedSet(new LinkedHashSet<>());
 
@@ -313,12 +311,9 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         } catch (Throwable e) {
             // Log the exception and fallback to proxy method writer
             classCache.put(fullClassName, COMPILE_FAILED);
-            if (enableProxyFallback)
-                Jvm.warn().on(getClass(), "Failed to compile generated method writer - " +
-                        "falling back to proxy method writer. Please report this failure as support for " +
-                        "proxy method writers will be dropped in future.", e);
-            throw new AssertionError("Failed to compile generated method writer - " +
-                    "Set enableProxyFallback=true to falling back to proxy method writer.", e);
+            Jvm.warn().on(getClass(), "Failed to compile generated method writer - " +
+                    "falling back to proxy method writer. Please report this failure as support for " +
+                    "proxy method writers will be dropped in future.", e);
         }
         return null;
     }
