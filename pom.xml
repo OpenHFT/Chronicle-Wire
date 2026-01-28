@@ -210,6 +210,11 @@
                             <goal>test-jar-no-fork</goal>
                         </goals>
                     </execution>
+                    <!-- Disable the jar goal inherited from parent to avoid duplicate artifacts -->
+                    <execution>
+                        <id>default-jar</id>
+                        <phase>none</phase>
+                    </execution>
                 </executions>
             </plugin>
             <!--

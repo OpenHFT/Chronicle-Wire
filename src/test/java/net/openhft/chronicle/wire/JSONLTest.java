@@ -7,21 +7,39 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.wire.converter.NanoTime;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for JSONL (JSON Lines) wire format support.
- * JSONL outputs one JSON object per line with newline separators.
+ * Tests for JSONL (JSON Lines) wire format support in Chronicle Wire.
+ * <p>
+ * JSONL outputs one JSON object per line with newline separators, enabling
+ * streaming processing and easy parsing of multi-record data. These tests
+ * verify correct line discipline, special value handling (NaN, Infinity),
+ * enum serialisation, control character escaping, and round-trip serialisation.
+ * <p>
+ * Thread-safety: Tests are single-threaded; Wire instances are not thread-safe.
+ * <p>
+ * Key verified behaviours:
+ * <ul>
+ *   <li>Each document produces exactly one line ending with newline</li>
+ *   <li>Embedded newlines in strings are escaped, not literal</li>
+ *   <li>Non-finite doubles serialised as quoted strings (Chronicle extension)</li>
+ *   <li>WireType.JSONL disables type metadata by default</li>
+ * </ul>
  */
+@DisplayName("JSONL Wire Format: serialisation, line discipline, and special value handling")
 public class JSONLTest extends WireTestCommon {
 
     /**
-     * Test DTO for JSONL serialization.
+     * Test DTO for JSONL serialisation, containing fields that exercise
+     * various serialisation edge cases including enums, timestamps, and special double values.
      */
     static class JSONLRecord extends SelfDescribingMarshallable {
         String name;
@@ -54,6 +72,7 @@ public class JSONLTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("should produce one JSON object per line with newline separators")
     public void testBasicJSONLRoundTrip() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -74,21 +93,22 @@ public class JSONLTest extends WireTestCommon {
 
             // Verify newline separation
             String[] lines = output.split("\n");
-            assertEquals("Expected 2 lines, got: " + output, 2, lines.length);
+            assertEquals(2, lines.length, "JSONL output line count should be 2 for two records, actual " + lines.length + ": " + output);
 
             // Verify each line is valid JSON
-            assertTrue("First line should start with {, got: " + lines[0], lines[0].startsWith("{"));
-            assertTrue("First line should end with }", lines[0].endsWith("}"));
-            assertTrue("Second line should start with {", lines[1].startsWith("{"));
-            assertTrue("Second line should end with }", lines[1].endsWith("}"));
+            assertTrue(lines[0].startsWith("{"), "JSONL line[0] should start with '{' to be valid JSON object, actual: " + lines[0]);
+            assertTrue(lines[0].endsWith("}"), "JSONL line[0] should end with '}' to be valid JSON object, actual: " + lines[0]);
+            assertTrue(lines[1].startsWith("{"), "JSONL line[1] should start with '{' to be valid JSON object, but was: " + lines[1]);
+            assertTrue(lines[1].endsWith("}"), "JSONL line[1] should end with '}' to be valid JSON object, but was: " + lines[1]);
 
             // Verify content
-            assertTrue("First line should contain record1", lines[0].contains("\"name\":\"record1\""));
-            assertTrue("Second line should contain record2", lines[1].contains("\"name\":\"record2\""));
+            assertTrue(lines[0].contains("\"name\":\"record1\""), "JSONL line[0] should contain '\"name\":\"record1\"' for first record, actual: " + lines[0]);
+            assertTrue(lines[1].contains("\"name\":\"record2\""), "JSONL line[1] should contain '\"name\":\"record2\"' for second record, but was: " + lines[1]);
         }
     }
 
     @Test
+    @DisplayName("should serialise NaN, +Infinity, and -Infinity as quoted strings")
     public void testSpecialDoubleValuesInJSONL() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -114,16 +134,17 @@ public class JSONLTest extends WireTestCommon {
 
             String output = bytes.toString();
             String[] lines = output.split("\n");
-            assertEquals(3, lines.length);
+            assertEquals(3, lines.length, "JSONL output line count should be 3 for three special double records, actual: " + lines.length);
 
             // Verify special values are quoted strings in JSON
-            assertTrue("NaN should be quoted", lines[0].contains("\"specialValue\":\"NaN\""));
-            assertTrue("Infinity should be quoted", lines[1].contains("\"specialValue\":\"Infinity\""));
-            assertTrue("-Infinity should be quoted", lines[2].contains("\"specialValue\":\"-Infinity\""));
+            assertTrue(lines[0].contains("\"specialValue\":\"NaN\""), "JSONL line[0] should contain '\"specialValue\":\"NaN\"' for NaN record, but was: " + lines[0]);
+            assertTrue(lines[1].contains("\"specialValue\":\"Infinity\""), "JSONL line[1] should contain '\"specialValue\":\"Infinity\"' for +Infinity record, received: " + lines[1]);
+            assertTrue(lines[2].contains("\"specialValue\":\"-Infinity\""), "JSONL line[2] should contain '\"specialValue\":\"-Infinity\"' for -Infinity record, actual: " + lines[2]);
         }
     }
 
     @Test
+    @DisplayName("should round-trip non-finite double values (NaN, +/-Infinity) through JSONL")
     public void testNonFiniteDoubleRoundTrip() {
         // Test round-trip for NaN
         String nanJson = "{\"name\":\"nan\",\"count\":0,\"price\":0.0,\"specialValue\":\"NaN\",\"status\":\"ACTIVE\",\"timestamp\":0}";
@@ -131,7 +152,7 @@ public class JSONLTest extends WireTestCommon {
         try {
             Wire wire = WireType.JSONL.apply(nanBytes);
             JSONLRecord record = wire.getValueIn().object(JSONLRecord.class);
-            assertTrue("NaN should round-trip", Double.isNaN(record.specialValue));
+            assertTrue(Double.isNaN(record.specialValue), "NaN should round-trip");
         } finally {
             nanBytes.releaseLast();
         }
@@ -142,7 +163,7 @@ public class JSONLTest extends WireTestCommon {
         try {
             Wire wire = WireType.JSONL.apply(posInfBytes);
             JSONLRecord record = wire.getValueIn().object(JSONLRecord.class);
-            assertEquals("Infinity should round-trip", Double.POSITIVE_INFINITY, record.specialValue, 0.0);
+            assertEquals(Double.POSITIVE_INFINITY, record.specialValue, 0.0, "Infinity should round-trip");
         } finally {
             posInfBytes.releaseLast();
         }
@@ -153,7 +174,7 @@ public class JSONLTest extends WireTestCommon {
         try {
             Wire wire = WireType.JSONL.apply(negInfBytes);
             JSONLRecord record = wire.getValueIn().object(JSONLRecord.class);
-            assertEquals("-Infinity should round-trip", Double.NEGATIVE_INFINITY, record.specialValue, 0.0);
+            assertEquals(Double.NEGATIVE_INFINITY, record.specialValue, 0.0, "-Infinity should round-trip");
         } finally {
             negInfBytes.releaseLast();
         }
@@ -176,6 +197,7 @@ public class JSONLTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("should serialise non-finite float values (NaN, +/-Infinity) as quoted strings")
     public void testNonFiniteFloatValues() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -201,16 +223,17 @@ public class JSONLTest extends WireTestCommon {
 
             String output = bytes.toString();
             String[] lines = output.split("\n");
-            assertEquals(3, lines.length);
+            assertEquals(3, lines.length, "JSONL output line count should be 3 for three special float records, but was: " + lines.length);
 
             // Verify special float values are quoted strings in JSON
-            assertTrue("Float NaN should be quoted", lines[0].contains("\"value\":\"NaN\""));
-            assertTrue("Float Infinity should be quoted", lines[1].contains("\"value\":\"Infinity\""));
-            assertTrue("Float -Infinity should be quoted", lines[2].contains("\"value\":\"-Infinity\""));
+            assertTrue(lines[0].contains("\"value\":\"NaN\""), "JSONL line[0] should contain '\"value\":\"NaN\"' for Float.NaN record, received: " + lines[0]);
+            assertTrue(lines[1].contains("\"value\":\"Infinity\""), "JSONL line[1] should contain '\"value\":\"Infinity\"' for Float.POSITIVE_INFINITY record, actual: " + lines[1]);
+            assertTrue(lines[2].contains("\"value\":\"-Infinity\""), "JSONL line[2] should contain '\"value\":\"-Infinity\"' for Float.NEGATIVE_INFINITY record, but was: " + lines[2]);
         }
     }
 
     @Test
+    @DisplayName("should round-trip non-finite float values (NaN, +/-Infinity) through JSONL")
     public void testNonFiniteFloatRoundTrip() {
         // Test round-trip for Float.NaN
         String nanJson = "{\"name\":\"nan\",\"value\":\"NaN\"}";
@@ -218,7 +241,7 @@ public class JSONLTest extends WireTestCommon {
         try {
             Wire wire = WireType.JSONL.apply(nanBytes);
             FloatRecord record = wire.getValueIn().object(FloatRecord.class);
-            assertTrue("Float NaN should round-trip", Float.isNaN(record.value));
+            assertTrue(Float.isNaN(record.value), "Float NaN should round-trip");
         } finally {
             nanBytes.releaseLast();
         }
@@ -229,7 +252,7 @@ public class JSONLTest extends WireTestCommon {
         try {
             Wire wire = WireType.JSONL.apply(posInfBytes);
             FloatRecord record = wire.getValueIn().object(FloatRecord.class);
-            assertEquals("Float Infinity should round-trip", Float.POSITIVE_INFINITY, record.value, 0.0f);
+            assertEquals(Float.POSITIVE_INFINITY, record.value, 0.0f, "Float Infinity should round-trip");
         } finally {
             posInfBytes.releaseLast();
         }
@@ -240,13 +263,14 @@ public class JSONLTest extends WireTestCommon {
         try {
             Wire wire = WireType.JSONL.apply(negInfBytes);
             FloatRecord record = wire.getValueIn().object(FloatRecord.class);
-            assertEquals("Float -Infinity should round-trip", Float.NEGATIVE_INFINITY, record.value, 0.0f);
+            assertEquals(Float.NEGATIVE_INFINITY, record.value, 0.0f, "Float -Infinity should round-trip");
         } finally {
             negInfBytes.releaseLast();
         }
     }
 
     @Test
+    @DisplayName("should format @NanoTime fields as ISO-8601 timestamp strings")
     public void testNanoTimeInJSONL() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -260,11 +284,13 @@ public class JSONLTest extends WireTestCommon {
             }
 
             String output = bytes.toString();
-            assertTrue("Timestamp should be formatted as ISO-8601", output.contains("\"timestamp\":\"2022-06-17T12:35:56\""));
+            assertTrue(output.contains("\"timestamp\":\"2022-06-17T12:35:56\""),
+                    "JSONL output should contain '\"timestamp\":\"2022-06-17T12:35:56\"' for @NanoTime field formatted as ISO-8601, actual: " + output);
         }
     }
 
     @Test
+    @DisplayName("should serialise enum values as lowercase quoted strings")
     public void testEnumInJSONL() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -280,17 +306,18 @@ public class JSONLTest extends WireTestCommon {
 
             String output = bytes.toString();
             String[] lines = output.split("\n");
-            assertEquals(Status.values().length, lines.length);
+            assertEquals(Status.values().length, lines.length, "JSONL output line count should match Status enum value count (" + Status.values().length + "), but was: " + lines.length);
 
             // Verify enum values are quoted strings (JSONL uses lowercase by default)
-            assertTrue(lines[0].contains("\"status\":\"pending\""));
-            assertTrue(lines[1].contains("\"status\":\"active\""));
-            assertTrue(lines[2].contains("\"status\":\"completed\""));
-            assertTrue(lines[3].contains("\"status\":\"cancelled\""));
+            assertTrue(lines[0].contains("\"status\":\"pending\""), "JSONL line[0] should contain '\"status\":\"pending\"' for PENDING enum, received: " + lines[0]);
+            assertTrue(lines[1].contains("\"status\":\"active\""), "JSONL line[1] should contain '\"status\":\"active\"' for ACTIVE enum, actual: " + lines[1]);
+            assertTrue(lines[2].contains("\"status\":\"completed\""), "JSONL line[2] should contain '\"status\":\"completed\"' for COMPLETED enum, but was: " + lines[2]);
+            assertTrue(lines[3].contains("\"status\":\"cancelled\""), "JSONL line[3] should contain '\"status\":\"cancelled\"' for CANCELLED enum, received: " + lines[3]);
         }
     }
 
     @Test
+    @DisplayName("should escape special characters (quotes, backslash, tab, newline) in strings")
     public void testSpecialCharactersInStrings() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -304,14 +331,15 @@ public class JSONLTest extends WireTestCommon {
 
             String output = bytes.toString();
             // Verify escaping - the output should have escaped versions
-            assertTrue("Should contain escaped quote", output.contains("\\\""));
-            assertTrue("Should contain escaped backslash", output.contains("\\\\"));
-            assertTrue("Should contain escaped tab", output.contains("\\t"));
-            assertTrue("Should contain escaped newline", output.contains("\\n"));
+            assertTrue(output.contains("\\\""), "JSONL output should contain '\\\"' for escaped quote, actual: " + output);
+            assertTrue(output.contains("\\\\"), "JSONL output should contain '\\\\' for escaped backslash, but was: " + output);
+            assertTrue(output.contains("\\t"), "JSONL output should contain '\\t' for escaped tab, received: " + output);
+            assertTrue(output.contains("\\n"), "JSONL output should contain '\\n' for escaped newline, actual output: " + output);
         }
     }
 
     @Test
+    @DisplayName("should handle null and empty string values correctly")
     public void testEmptyAndNullValues() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -339,16 +367,19 @@ public class JSONLTest extends WireTestCommon {
 
             String output = bytes.toString();
             String[] lines = output.split("\n");
-            assertEquals(2, lines.length);
+            assertEquals(2, lines.length, "JSONL output line count should be 2 for null and empty string records, actual: " + lines.length);
 
             // Verify null handling
-            assertTrue("Null should be represented", lines[0].contains("\"name\":null") || lines[0].contains("\"name\":\"\""));
+            assertTrue(lines[0].contains("\"name\":null") || lines[0].contains("\"name\":\"\""),
+                    "JSONL line[0] should contain '\"name\":null' or '\"name\":\"\"' for null field, but was: " + lines[0]);
             // Verify empty string
-            assertTrue("Empty string should be quoted", lines[1].contains("\"name\":\"\""));
+            assertTrue(lines[1].contains("\"name\":\"\""),
+                    "JSONL line[1] should contain '\"name\":\"\"' for empty string field, received: " + lines[1]);
         }
     }
 
     @Test
+    @DisplayName("should terminate single record with newline and be valid JSON")
     public void testSingleRecord() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -362,15 +393,18 @@ public class JSONLTest extends WireTestCommon {
             String output = bytes.toString();
 
             // Single record should still have newline
-            assertTrue("Single record should end with newline", output.endsWith("\n"));
+            assertTrue(output.endsWith("\n"),
+                    "JSONL single record output should end with '\\n' for JSONL compliance, actual: [" + output + "]");
 
             // Should be valid JSON object
             String line = output.trim();
-            assertTrue("Should be a JSON object", line.startsWith("{") && line.endsWith("}"));
+            assertTrue(line.startsWith("{") && line.endsWith("}"),
+                    "JSONL record should start with '{' and end with '}' to be valid JSON object, but was: " + line);
         }
     }
 
     @Test
+    @DisplayName("should omit type metadata (@type, @ClassName) in JSONL output")
     public void testNoTypePrefix() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -384,33 +418,38 @@ public class JSONLTest extends WireTestCommon {
             String output = bytes.toString();
 
             // Verify no type prefix
-            assertFalse("Should not contain @type", output.contains("@type"));
-            assertFalse("Should not contain @JSONLRecord", output.contains("@JSONLRecord"));
+            assertFalse(output.contains("@type"),
+                    "JSONL output should not contain '@type' metadata since WireType.JSONL disables type tags, but found in: " + output);
+            assertFalse(output.contains("@JSONLRecord"),
+                    "JSONL output should not contain '@JSONLRecord' type prefix since WireType.JSONL disables type tags, but found in: " + output);
         }
     }
 
     @Test
+    @DisplayName("should create text-based JSONWire with types disabled")
+    @SuppressWarnings("deprecation") // testing deprecated useTypes() intentionally
     public void testWireTypeJSONL() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
             Wire wire = WireType.JSONL.apply(bytes);
 
             // Verify wire type properties
-            assertTrue("JSONL should be text format", WireType.JSONL.isText());
-            assertTrue("Wire should be JSONWire", wire instanceof JSONWire);
+            assertTrue(WireType.JSONL.isText(), "JSONL should be text format");
+            assertInstanceOf(JSONWire.class, wire, "Wire should be JSONWire");
 
             JSONWire jsonWire = (JSONWire) wire;
-            assertFalse("JSONL should not use types", jsonWire.useTypes());
+            assertFalse(jsonWire.useTypes(), "JSONL should not use types");
         }
     }
 
     @Test
+    @DisplayName("should deserialise JSONL input line by line into objects")
     public void testReadJSONL() {
         // Test reading JSONL format
         String jsonl = "{\"name\":\"read1\",\"count\":10,\"price\":1.5,\"specialValue\":0.0,\"status\":\"ACTIVE\",\"timestamp\":0}\n" +
-                       "{\"name\":\"read2\",\"count\":20,\"price\":2.5,\"specialValue\":0.0,\"status\":\"PENDING\",\"timestamp\":0}\n";
+                "{\"name\":\"read2\",\"count\":20,\"price\":2.5,\"specialValue\":0.0,\"status\":\"PENDING\",\"timestamp\":0}\n";
 
-        List<JSONLRecord> records = new ArrayList<JSONLRecord>();
+        List<JSONLRecord> records = new ArrayList<>();
 
         // Read line by line
         String[] lines = jsonl.split("\n");
@@ -426,14 +465,15 @@ public class JSONLTest extends WireTestCommon {
             }
         }
 
-        assertEquals(2, records.size());
-        assertEquals("read1", records.get(0).name);
-        assertEquals(10, records.get(0).count);
-        assertEquals("read2", records.get(1).name);
-        assertEquals(20, records.get(1).count);
+        assertEquals(2, records.size(), "Deserialised record count should be 2 from two JSONL lines, actual: " + records.size());
+        assertEquals("read1", records.get(0).name, "First deserialised record name should be 'read1', but was: " + records.get(0).name);
+        assertEquals(10, records.get(0).count, "First deserialised record count should be 10, received: " + records.get(0).count);
+        assertEquals("read2", records.get(1).name, "Second deserialised record name should be 'read2', actual: " + records.get(1).name);
+        assertEquals(20, records.get(1).count, "Second deserialised record count should be 20, but was: " + records.get(1).count);
     }
 
     @Test
+    @DisplayName("should write multiple documents with one JSON object per line")
     public void testMultipleDocumentsWithValueOut() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -450,16 +490,19 @@ public class JSONLTest extends WireTestCommon {
             String output = bytes.toString();
             String[] lines = output.split("\n");
 
-            assertEquals("Should have 3 lines", 3, lines.length);
+            assertEquals(3, lines.length, "JSONL output line count should be 3 for three documents, received: " + lines.length);
 
             for (int i = 0; i < 3; i++) {
-                assertTrue("Line " + i + " should contain record" + i, lines[i].contains("\"name\":\"record" + i + "\""));
-                assertTrue("Line " + i + " should be valid JSON", lines[i].startsWith("{") && lines[i].endsWith("}"));
+                assertTrue(lines[i].contains("\"name\":\"record" + i + "\""),
+                        "JSONL line[" + i + "] should contain '\"name\":\"record" + i + "\"', actual: " + lines[i]);
+                assertTrue(lines[i].startsWith("{") && lines[i].endsWith("}"),
+                        "JSONL line[" + i + "] should start with '{' and end with '}' to be valid JSON, but was: " + lines[i]);
             }
         }
     }
 
     @Test
+    @DisplayName("should stream method calls as JSONL and read them back via MethodReader")
     public void testMethodReaderStreamingJsonl() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -470,7 +513,7 @@ public class JSONLTest extends WireTestCommon {
             writer.event("second", 2);
             writer.event("third", 3);
 
-            List<String> seen = new ArrayList<String>();
+            List<String> seen = new ArrayList<>();
             MethodReader reader = wire.methodReader(new JsonlEvents() {
                 @Override
                 public void event(String name, int count) {
@@ -479,17 +522,18 @@ public class JSONLTest extends WireTestCommon {
             });
 
             while (reader.readOne()) {
-                // loop until exhausted
+                continue; // consume all events
             }
 
-            assertEquals(3, seen.size());
-            assertEquals("first:1", seen.get(0));
-            assertEquals("second:2", seen.get(1));
-            assertEquals("third:3", seen.get(2));
+            assertEquals(3, seen.size(), "MethodReader should read 3 events from JSONL stream, actual: " + seen.size());
+            assertEquals("first:1", seen.get(0), "First event should be 'first:1', but was: " + seen.get(0));
+            assertEquals("second:2", seen.get(1), "Second event should be 'second:2', received: " + seen.get(1));
+            assertEquals("third:3", seen.get(2), "Third event should be 'third:3', actual: " + seen.get(2));
         }
     }
 
     @Test
+    @DisplayName("should handle comma-separated JSON as well as newline-separated")
     public void testMethodReaderCommaSeparatedJson() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -505,7 +549,7 @@ public class JSONLTest extends WireTestCommon {
             Bytes<?> input = Bytes.from(commaSeparated);
             try {
                 Wire readWire = WireType.JSONL.apply(input);
-                List<String> seen = new ArrayList<String>();
+                List<String> seen = new ArrayList<>();
                 MethodReader reader = readWire.methodReader(new JsonlEvents() {
                     @Override
                     public void event(String name, int count) {
@@ -514,13 +558,13 @@ public class JSONLTest extends WireTestCommon {
                 });
 
                 while (reader.readOne()) {
-                    // loop until exhausted
+                    continue; // consume all events
                 }
 
-                assertEquals(3, seen.size());
-                assertEquals("first:1", seen.get(0));
-                assertEquals("second:2", seen.get(1));
-                assertEquals("third:3", seen.get(2));
+                assertEquals(3, seen.size(), "MethodReader should read 3 events from comma-separated JSON, but was: " + seen.size());
+                assertEquals("first:1", seen.get(0), "First event from comma-separated input should be 'first:1', received: " + seen.get(0));
+                assertEquals("second:2", seen.get(1), "Second event from comma-separated input should be 'second:2', actual: " + seen.get(1));
+                assertEquals("third:3", seen.get(2), "Third event from comma-separated input should be 'third:3', but was: " + seen.get(2));
             } finally {
                 input.releaseLast();
             }
@@ -532,85 +576,87 @@ public class JSONLTest extends WireTestCommon {
      * JSON output doesn't have newlines between documents, but JSONL reader can handle it.
      */
     @Test
+    @DisplayName("should read JSON output (no newlines) with JSONL reader")
     public void testWriteJsonReadJsonl() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
-            
+
             // Write with JSON (not JSONL)
             Wire writeWire = WireType.JSON.apply(bytes);
             JsonlEvents writer = writeWire.methodWriter(JsonlEvents.class);
             writer.event("first", 1);
             writer.event("second", 2);
             writer.event("third", 3);
-            
+
             // Verify JSON output has no newlines between documents
             String output = bytes.toString();
-            assertFalse("JSON output should not have newlines between documents", 
-                       output.contains("}\n{"));
-            
+            assertFalse(output.contains("}\n{"),
+                    "JSON output should not contain '}\\n{' (newlines between documents) since WireType.JSON concatenates objects, but found in: " + output);
+
             // Read with JSONL - should work because JSONL reader handles concatenated JSON
             bytes.readPosition(0);
             Wire readWire = WireType.JSONL.apply(bytes);
-            List<String> seen = new ArrayList<String>();
+            List<String> seen = new ArrayList<>();
             MethodReader reader = readWire.methodReader(new JsonlEvents() {
                 @Override
                 public void event(String name, int count) {
                     seen.add(name + ":" + count);
                 }
             });
-            
+
             while (reader.readOne()) {
-                // loop until exhausted
+                continue; // consume all events
             }
-            
-            assertEquals("JSONL reader should read all 3 events from JSON output", 3, seen.size());
-            assertEquals("first:1", seen.get(0));
-            assertEquals("second:2", seen.get(1));
-            assertEquals("third:3", seen.get(2));
+
+            assertEquals(3, seen.size(), "JSONL reader should read all 3 events from JSON output, actual: " + seen.size());
+            assertEquals("first:1", seen.get(0), "First event from JSON output should be 'first:1', received: " + seen.get(0));
+            assertEquals("second:2", seen.get(1), "Second event from JSON output should be 'second:2', but was: " + seen.get(1));
+            assertEquals("third:3", seen.get(2), "Third event from JSON output should be 'third:3', actual: " + seen.get(2));
         }
     }
-    
+
     /**
      * Test that data written with JSONL wire type can be read with JSON wire type.
      * JSONL adds newlines between documents which JSON reader treats as whitespace.
      */
     @Test
+    @DisplayName("should round-trip JSONL output with JSONL reader")
     public void testWriteJsonlReadJson() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
-            
+
             // Write with JSONL
             Wire writeWire = WireType.JSONL.apply(bytes);
             JsonlEvents writer = writeWire.methodWriter(JsonlEvents.class);
             writer.event("first", 1);
             writer.event("second", 2);
             writer.event("third", 3);
-            
+
             // Verify JSONL output has proper format:
             // Each document is wrapped in braces and separated by newlines
             String output = bytes.toString();
-            assertTrue("JSONL output should have newlines between documents", 
-                      output.contains("}\n{"));
-            
+            assertTrue(output.contains("}\n{"),
+                    "JSONL output should contain '}\\n{' (newlines between documents) for proper JSONL format, but was: " + output);
+
             // Read back with JSONL reader (round-trip test)
             bytes.readPosition(0);
             Wire readWire = WireType.JSONL.apply(bytes);
-            List<String> seen = new ArrayList<String>();
+            List<String> seen = new ArrayList<>();
             MethodReader reader = readWire.methodReader(new JsonlEvents() {
                 @Override
                 public void event(String name, int count) {
                     seen.add(name + ":" + count);
                 }
             });
-            
+
             while (reader.readOne()) {
-                // loop until exhausted
+                continue; // consume all events
             }
-            
-            assertEquals("JSONL reader should read all 3 events", 3, seen.size());
-            assertEquals("first:1", seen.get(0));
-            assertEquals("second:2", seen.get(1));
-            assertEquals("third:3", seen.get(2));
+
+            assertEquals(3, seen.size(), "JSONL reader should read all 3 events from round-trip, received: " + seen.size());
+            assertEquals("first:1", seen.get(0), "First event from round-trip should be 'first:1', actual: " + seen.get(0));
+            assertEquals("second:2", seen.get(1), "Second event from round-trip should be 'second:2', but was: " + seen.get(1));
+            assertEquals("third:3", seen.get(2), "Third event from round-trip should be 'third:3', received: " + seen.get(2));
         }
     }
 
@@ -623,6 +669,7 @@ public class JSONLTest extends WireTestCommon {
      * Splitting on \n yields exactly 1 non-empty JSON object.
      */
     @Test
+    @DisplayName("should produce exactly one line for single record")
     public void testLineDiscipline_singleRecordProducesOneLine() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -641,11 +688,11 @@ public class JSONLTest extends WireTestCommon {
             for (String line : lines) {
                 if (!line.isEmpty()) nonEmptyLines++;
             }
-            assertEquals("Single record should produce exactly 1 line", 1, nonEmptyLines);
+            assertEquals(1, nonEmptyLines, "Single record should produce exactly 1 line");
 
             // The non-empty line should be valid JSON
             String jsonLine = lines[0];
-            assertTrue("Line should be a JSON object", jsonLine.startsWith("{") && jsonLine.endsWith("}"));
+            assertTrue(jsonLine.startsWith("{") && jsonLine.endsWith("}"), "Line should be a JSON object");
         }
     }
 
@@ -654,6 +701,7 @@ public class JSONLTest extends WireTestCommon {
      * Output remains single line per record.
      */
     @Test
+    @DisplayName("should escape embedded newlines in strings to maintain one JSON object per line")
     public void testLineDiscipline_embeddedNewlinesAreEscaped() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -672,11 +720,11 @@ public class JSONLTest extends WireTestCommon {
             for (char c : output.toCharArray()) {
                 if (c == '\n') newlineCount++;
             }
-            assertEquals("Should have exactly 1 newline (the line terminator)", 1, newlineCount);
+            assertEquals(1, newlineCount, "JSONL output newline count should be 1 (only the line terminator), actual " + newlineCount + " for output: " + output);
 
             // Verify escaped sequences are present
-            assertTrue("Should contain escaped \\n", output.contains("\\n"));
-            assertTrue("Should contain escaped \\r", output.contains("\\r"));
+            assertTrue(output.contains("\\n"), "JSONL output should contain '\\n' escape sequence for embedded newlines, actual: " + output);
+            assertTrue(output.contains("\\r"), "JSONL output should contain '\\r' escape sequence for embedded carriage returns, but was: " + output);
         }
     }
 
@@ -685,6 +733,7 @@ public class JSONLTest extends WireTestCommon {
      * This ensures JSON parsers can handle the output.
      */
     @Test
+    @DisplayName("should escape control characters (NUL, TAB, LF, CR) to maintain valid JSON")
     public void testControlCharacterEscaping() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -701,13 +750,14 @@ public class JSONLTest extends WireTestCommon {
             String jsonLine = output.split("\n")[0];
 
             // Verify it's still a single valid JSON line
-            assertTrue("Should be a JSON object", jsonLine.startsWith("{") && jsonLine.endsWith("}"));
+            assertTrue(jsonLine.startsWith("{") && jsonLine.endsWith("}"),
+                    "JSONL line should start with '{' and end with '}' to be valid JSON after control character escaping, received: " + jsonLine);
 
             // Verify control characters are escaped (not literal)
-            assertFalse("Should not contain literal NUL", jsonLine.contains("\u0000"));
-            assertFalse("Should not contain literal TAB", jsonLine.contains("\t"));
-            assertFalse("Should not contain literal LF", jsonLine.contains("\n"));
-            assertFalse("Should not contain literal CR", jsonLine.contains("\r"));
+            assertFalse(jsonLine.contains("\u0000"), "JSONL line should not contain literal NUL (\\u0000) character, but found in: " + jsonLine);
+            assertFalse(jsonLine.contains("\t"), "JSONL line should not contain literal TAB (\\t) character, actual: " + jsonLine);
+            assertFalse(jsonLine.contains("\n"), "JSONL line should not contain literal LF (\\n) character, but was: " + jsonLine);
+            assertFalse(jsonLine.contains("\r"), "JSONL line should not contain literal CR (\\r) character, received: " + jsonLine);
         }
     }
 
@@ -716,6 +766,7 @@ public class JSONLTest extends WireTestCommon {
      * Exact case match is required; different case will fail.
      */
     @Test
+    @DisplayName("should parse enum with exact case match")
     public void testEnumCaseSensitivity_exactCaseSucceeds() {
         // Exact case - should succeed
         String json = "{\"name\":\"test\",\"count\":0,\"price\":0.0,\"specialValue\":0.0,\"status\":\"ACTIVE\",\"timestamp\":0}";
@@ -723,7 +774,7 @@ public class JSONLTest extends WireTestCommon {
         try {
             Wire wire = WireType.JSONL.apply(bytes);
             JSONLRecord record = wire.getValueIn().object(JSONLRecord.class);
-            assertEquals("Exact case should parse correctly", Status.ACTIVE, record.status);
+            assertEquals(Status.ACTIVE, record.status, "Exact case should parse correctly");
         } finally {
             bytes.releaseLast();
         }
@@ -734,6 +785,7 @@ public class JSONLTest extends WireTestCommon {
      * Both exact case and different case values parse successfully.
      */
     @Test
+    @DisplayName("should parse enum case-insensitively (lowercase, mixed case)")
     public void testEnumCaseSensitivity_caseInsensitiveSupported() {
         // Lowercase - Chronicle Wire supports case-insensitive enum parsing
         String json = "{\"name\":\"test\",\"count\":0,\"price\":0.0,\"specialValue\":0.0,\"status\":\"active\",\"timestamp\":0}";
@@ -742,7 +794,7 @@ public class JSONLTest extends WireTestCommon {
             Wire wire = WireType.JSONL.apply(bytes);
             JSONLRecord record = wire.getValueIn().object(JSONLRecord.class);
             // Chronicle Wire supports case-insensitive enum parsing
-            assertEquals("Lowercase enum parses correctly (case-insensitive)", Status.ACTIVE, record.status);
+            assertEquals(Status.ACTIVE, record.status, "Lowercase enum parses correctly (case-insensitive)");
         } finally {
             bytes.releaseLast();
         }
@@ -753,7 +805,7 @@ public class JSONLTest extends WireTestCommon {
         try {
             Wire wire = WireType.JSONL.apply(mixedBytes);
             JSONLRecord record = wire.getValueIn().object(JSONLRecord.class);
-            assertEquals("Mixed case enum parses correctly", Status.ACTIVE, record.status);
+            assertEquals(Status.ACTIVE, record.status, "Mixed case enum parses correctly");
         } finally {
             mixedBytes.releaseLast();
         }
@@ -764,8 +816,9 @@ public class JSONLTest extends WireTestCommon {
      * Chronicle Wire's case-insensitive parsing is more lenient than standard Java enum handling.
      * This may be desirable for user-friendly input, but differs from Enum.valueOf("active") which throws.
      */
-    @org.junit.Ignore("Chronicle Wire uses case-insensitive enum parsing - documents difference from Enum.valueOf() behavior")
     @Test
+    @DisplayName("documents difference from Enum.valueOf() case-sensitive behaviour")
+    @Disabled("Chronicle Wire uses case-insensitive enum parsing - documents difference from Enum.valueOf() behavior")
     public void testEnumCaseSensitivity_differsFromEnumValueOf() {
         // Java's Enum.valueOf(Status.class, "active") would throw IllegalArgumentException
         // Chronicle Wire accepts it - this test documents the difference
@@ -775,7 +828,7 @@ public class JSONLTest extends WireTestCommon {
             Wire wire = WireType.JSONL.apply(bytes);
             JSONLRecord record = wire.getValueIn().object(JSONLRecord.class);
             // If matching Enum.valueOf() behavior, lowercase "active" should fail
-            assertNull("Would be null if matching Enum.valueOf() case-sensitive behavior", record.status);
+            assertNull(record.status, "Would be null if matching Enum.valueOf() case-sensitive behavior");
         } finally {
             bytes.releaseLast();
         }
@@ -787,6 +840,7 @@ public class JSONLTest extends WireTestCommon {
      * Chronicle Wire uses quoted strings: "NaN", "Infinity", "-Infinity"
      */
     @Test
+    @DisplayName("should serialise non-finite doubles as quoted strings (Chronicle extension)")
     public void testNonFiniteDoubles_serializedAsStrings() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -800,8 +854,10 @@ public class JSONLTest extends WireTestCommon {
             String output = bytes.toString();
 
             // Document the exact format used
-            assertTrue("NaN serialized as string \"NaN\"", output.contains("\"price\":\"NaN\""));
-            assertTrue("Infinity serialized as string \"Infinity\"", output.contains("\"specialValue\":\"Infinity\""));
+            assertTrue(output.contains("\"price\":\"NaN\""),
+                    "JSONL output should contain '\"price\":\"NaN\"' for non-finite double NaN as quoted string, actual: " + output);
+            assertTrue(output.contains("\"specialValue\":\"Infinity\""),
+                    "JSONL output should contain '\"specialValue\":\"Infinity\"' for non-finite double +Infinity as quoted string, but was: " + output);
 
             // Note: This is Chronicle Wire's extension - standard JSON parsers may not handle this
         }
@@ -811,6 +867,7 @@ public class JSONLTest extends WireTestCommon {
      * CLARIFICATION: Finite double values are serialized as JSON numbers (not strings).
      */
     @Test
+    @DisplayName("should serialise finite doubles as unquoted JSON numbers")
     public void testFiniteDoubles_serializedAsNumbers() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -824,8 +881,10 @@ public class JSONLTest extends WireTestCommon {
             String output = bytes.toString();
 
             // Finite values should be unquoted numbers
-            assertTrue("Finite double should be unquoted number", output.contains("\"price\":123.456"));
-            assertTrue("Negative finite double should be unquoted number", output.contains("\"specialValue\":-789.012"));
+            assertTrue(output.contains("\"price\":123.456"),
+                    "JSONL output should contain '\"price\":123.456' for finite double as unquoted number, received: " + output);
+            assertTrue(output.contains("\"specialValue\":-789.012"),
+                    "JSONL output should contain '\"specialValue\":-789.012' for negative finite double as unquoted number, actual: " + output);
         }
     }
 
@@ -834,6 +893,7 @@ public class JSONLTest extends WireTestCommon {
      * When field is typed as concrete class, no type tag appears.
      */
     @Test
+    @DisplayName("should omit @type metadata when concrete type is specified")
     public void testTypeMetadata_concreteTypeNoTag() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -847,8 +907,10 @@ public class JSONLTest extends WireTestCommon {
             String output = bytes.toString();
 
             // No type metadata when concrete type is specified
-            assertFalse("No @type when concrete type specified", output.contains("@type"));
-            assertFalse("No !type when concrete type specified", output.contains("!"));
+            assertFalse(output.contains("@type"),
+                    "JSONL output should not contain '@type' when concrete type is specified at serialisation, but found in: " + output);
+            assertFalse(output.contains("!"),
+                    "JSONL output should not contain '!' type prefix when concrete type is specified at serialisation, actual: " + output);
         }
     }
 
@@ -873,6 +935,7 @@ public class JSONLTest extends WireTestCommon {
      * This test documents the behavior when types are explicitly enabled.
      */
     @Test
+    @DisplayName("should output valid JSON object when useTypes(true) is explicitly set")
     public void testTypeMetadata_withUseTypesEnabled() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -886,7 +949,8 @@ public class JSONLTest extends WireTestCommon {
 
             // With useTypes(true), type information may appear for polymorphic fields
             // This documents when @type tags are expected
-            assertTrue("Output should be JSON object", output.startsWith("{"));
+            assertTrue(output.startsWith("{"),
+                    "JSONWire output with useTypes(true) should start with '{' to be valid JSON object, received: " + output);
         }
     }
 
@@ -895,6 +959,7 @@ public class JSONLTest extends WireTestCommon {
      * Line count equals record count, and every line is valid JSON.
      */
     @Test
+    @DisplayName("should handle 1000 records with correct line count and valid JSON per line")
     public void testLargeRecordCount() {
         final int recordCount = 1000;
 
@@ -915,16 +980,17 @@ public class JSONLTest extends WireTestCommon {
 
             // Filter empty lines
             int nonEmptyLines = 0;
-            for (String line : lines) {
+            for (int i = 0; i < lines.length; i++) {
+                String line = lines[i];
                 if (!line.isEmpty()) {
                     nonEmptyLines++;
                     // Verify each line is valid JSON structure
-                    assertTrue("Line should start with {", line.startsWith("{"));
-                    assertTrue("Line should end with }", line.endsWith("}"));
+                    assertTrue(line.startsWith("{"), "JSONL line[" + i + "] should start with '{' to be valid JSON, actual: " + line);
+                    assertTrue(line.endsWith("}"), "JSONL line[" + i + "] should end with '}' to be valid JSON, but was: " + line);
                 }
             }
 
-            assertEquals("Line count should equal record count", recordCount, nonEmptyLines);
+            assertEquals(recordCount, nonEmptyLines, "JSONL output non-empty line count should equal record count (" + recordCount + "), received: " + nonEmptyLines);
         }
     }
 
@@ -933,6 +999,7 @@ public class JSONLTest extends WireTestCommon {
      * This verifies round-trip for multiple records.
      */
     @Test
+    @DisplayName("should allow each JSONL line to be independently deserialised")
     public void testEachLineIndependentlyParseable() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -964,9 +1031,12 @@ public class JSONLTest extends WireTestCommon {
                         parsed = dc.wire().getValueIn().object(JSONLRecord.class);
                     }
 
-                    assertEquals("Name should match", originals[i].name, parsed.name);
-                    assertEquals("Count should match", originals[i].count, parsed.count);
-                    assertEquals("Status should match", originals[i].status, parsed.status);
+                    assertEquals(originals[i].name, parsed.name,
+                            "Deserialised record[" + i + "] name should match original '" + originals[i].name + "', actual: " + parsed.name);
+                    assertEquals(originals[i].count, parsed.count,
+                            "Deserialised record[" + i + "] count should match original " + originals[i].count + ", but was: " + parsed.count);
+                    assertEquals(originals[i].status, parsed.status,
+                            "Deserialised record[" + i + "] status should match original " + originals[i].status + ", received: " + parsed.status);
                 } finally {
                     lineBytes.releaseLast();
                 }
@@ -979,6 +1049,7 @@ public class JSONLTest extends WireTestCommon {
      * High Unicode and emoji are properly serialized.
      */
     @Test
+    @DisplayName("should preserve Unicode characters (Chinese, Cyrillic) through round-trip")
     public void testUnicodeSupport() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -1002,7 +1073,7 @@ public class JSONLTest extends WireTestCommon {
                 try (DocumentContext dc = lineWire.readingDocument()) {
                     parsed = dc.wire().getValueIn().object(JSONLRecord.class);
                 }
-                assertEquals("Unicode should round-trip correctly", unicode, parsed.name);
+                assertEquals(unicode, parsed.name, "Unicode should round-trip correctly");
             } finally {
                 lineBytes.releaseLast();
             }
@@ -1029,6 +1100,7 @@ public class JSONLTest extends WireTestCommon {
      * This documents why WireType.JSONL was created.
      */
     @Test
+    @DisplayName("should demonstrate that default JSON wire uses comma separation, not newlines")
     public void testDefaultJSONWire_notJSONLCompatible() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -1046,7 +1118,8 @@ public class JSONLTest extends WireTestCommon {
 
             // Default JSON uses comma separation, not newlines
             // This documents that regular JSONWire is NOT JSONL
-            assertTrue("Default JSON uses comma separation", output.contains(","));
+            assertTrue(output.contains(","),
+                    "Default WireType.JSON output should contain ',' for comma-separated objects, actual: " + output);
 
             // Count newlines - should NOT be JSONL format
             int newlineCount = 0;
@@ -1054,7 +1127,8 @@ public class JSONLTest extends WireTestCommon {
                 if (c == '\n') newlineCount++;
             }
             // Regular JSON may have 0 or few newlines, but not 1 per record
-            assertTrue("Default JSON is not newline-per-record", newlineCount < 2);
+            assertTrue(newlineCount < 2,
+                    "Default WireType.JSON newline count should be less than 2 (not one-per-record like JSONL), but was " + newlineCount + " for output: " + output);
         }
     }
 
@@ -1063,6 +1137,7 @@ public class JSONLTest extends WireTestCommon {
      * Each writingDocument() produces one complete JSON line.
      */
     @Test
+    @DisplayName("should require DocumentContext pattern to produce proper JSONL line separation")
     public void testJSONL_requiresDocumentContext() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
@@ -1087,7 +1162,8 @@ public class JSONLTest extends WireTestCommon {
             for (String line : lines) {
                 if (!line.isEmpty()) nonEmptyLines++;
             }
-            assertEquals("Should have 2 lines with document context pattern", 2, nonEmptyLines);
+            assertEquals(2, nonEmptyLines,
+                    "JSONL output with DocumentContext pattern should have 2 non-empty lines for 2 records, actual: " + nonEmptyLines);
         }
     }
 }
