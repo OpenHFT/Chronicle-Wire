@@ -172,7 +172,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @param compression Type of compression (e.g., "binary")
      * @param supportDelta must be false
      */
-    @Deprecated(/* to be removed in x.29 */)
+    @Deprecated(/* to be removed in 2028.x */)
     public BinaryWire(@NotNull Bytes<?> bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression, boolean supportDelta) {
         this(bytes, fixed, numericFields, fieldLess, compressedSize, compression);
         assert !supportDelta;

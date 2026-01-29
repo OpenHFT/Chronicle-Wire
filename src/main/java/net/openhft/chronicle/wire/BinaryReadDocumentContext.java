@@ -49,7 +49,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
      * @param wire           The wire used for reading the document.
      * @param ensureFullRead Flag to determine if full reading is required.
      */
-    @Deprecated(/* to be removed in x.29 */)
+    @Deprecated(/* to be removed in 2028.x */)
     public BinaryReadDocumentContext(@Nullable Wire wire, boolean ensureFullRead) {
         this.wire = wire;
         assert !ensureFullRead : "DeltaWire not supported";
