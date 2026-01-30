@@ -956,7 +956,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * @param name          The name of the key (same as keyName, possibly added for clarity in some cases).
      * @return              The value associated with the key or the default value if the key is not found.
      */
-    @Deprecated(/* to be removed in x.29 */)
+    @Deprecated(/* to be removed in 2028.x */)
     protected ValueIn read2(CharSequence keyName, int keyCode, Object defaultValue, @NotNull ValueInState currentState, @NotNull StringBuilder tempNameBuilder, @NotNull CharSequence name) {
         return read2(defaultValue, currentState, tempNameBuilder, name);
     }
