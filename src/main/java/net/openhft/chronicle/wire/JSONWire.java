@@ -36,7 +36,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
  * The core capability of this class is to handle JSON data structures as {@code Bytes}
  * objects, allowing for efficient manipulation and parsing.
  */
-@SuppressWarnings({"this-escape", "deprecation"})
+@SuppressWarnings("this-escape")
 public class JSONWire extends TextWire {
 
     // The rest of null
@@ -958,11 +958,6 @@ public class JSONWire extends TextWire {
             }
             return p;
         }
-
-        @Override
-        public void close() {
-            super.close();
-        }
     }
 
     /**
@@ -1618,15 +1613,44 @@ public class JSONWire extends TextWire {
         public void close() {
             if (count == 1) {
                 Bytes<?> bytes = wire().bytes();
-                if (bytes.writePosition() == start) {
+                long writePosition = bytes.writePosition();
+                if (writePosition == start) {
                     // Nothing written, remove the opening brace
                     bytes.writeSkip(-1);
+                } else if (shouldUnwrapObject(bytes, writePosition)) {
+                    long length = writePosition - start;
+                    bytes.move(start, start - 1, length);
+                    bytes.writePosition(writePosition - 1);
+                    bytes.append('\n');
                 } else {
                     bytes.append('}');
                     bytes.append('\n');
                 }
             }
             super.close();
+        }
+
+        private boolean shouldUnwrapObject(Bytes<?> bytes, long writePosition) {
+            long first = start;
+            while (first < writePosition) {
+                int ch = bytes.peekUnsignedByte(first);
+                if (ch > ' ') {
+                    break;
+                }
+                first++;
+            }
+            if (first >= writePosition || bytes.peekUnsignedByte(first) != '{') {
+                return false;
+            }
+            long last = writePosition - 1;
+            while (last >= start) {
+                int ch = bytes.peekUnsignedByte(last);
+                if (ch > ' ') {
+                    break;
+                }
+                last--;
+            }
+            return last > first && bytes.peekUnsignedByte(last) == '}';
         }
     }
 
