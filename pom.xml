@@ -15,7 +15,7 @@
     </parent>
 
     <artifactId>chronicle-wire</artifactId>
-    <version>2026.1-SNAPSHOT</version>
+    <version>2026.4-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Wire</name>
     <!-- Core library for Chronicle's binary wire serialization -->
     <description>Chronicle-Wire</description>
@@ -190,9 +190,9 @@
                             <goal>enforcer</goal>
                         </goals>
                         <configuration>
-                            <referenceVersion>2.27ea0</referenceVersion>
+                            <referenceVersion>2026.0</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
-                            <binaryCompatibilityPercentageRequired>91.6</binaryCompatibilityPercentageRequired>
+                            <binaryCompatibilityPercentageRequired>100.0</binaryCompatibilityPercentageRequired>
                             <extraOptions>
                                 <!--This skips "internal" but checks "impl"-->
                                 <extraOption>
