@@ -108,6 +108,37 @@ public class JSONLTest extends WireTestCommon {
     }
 
     @Test
+    @DisplayName("should avoid double braces when writing marshallables in JSONL documents")
+    public void testJSONLNoDoubleBracesForMarshallable() {
+        try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
+            Bytes<?> bytes = stlBytes.get();
+            Wire wire = WireType.JSONL.apply(bytes);
+
+            JSONLRecord record = new JSONLRecord("single", 1, 1.0, 0.0, Status.ACTIVE, 0);
+            try (DocumentContext dc = wire.writingDocument()) {
+                dc.wire().getValueOut().object(JSONLRecord.class, record);
+            }
+
+            String output = bytes.toString();
+            String[] lines = output.split("\n");
+            int nonEmptyLines = 0;
+            String line = null;
+            for (String candidate : lines) {
+                if (!candidate.isEmpty()) {
+                    nonEmptyLines++;
+                    line = candidate;
+                }
+            }
+            assertEquals(1, nonEmptyLines,
+                    "JSONL output should contain exactly one non-empty line, actual " + nonEmptyLines + ": " + output);
+            assertTrue(line.startsWith("{"), "JSONL line should start with '{', actual: " + line);
+            assertTrue(line.endsWith("}"), "JSONL line should end with '}', actual: " + line);
+            assertFalse(line.startsWith("{{"), "JSONL line should not start with double braces, actual: " + line);
+            assertFalse(line.endsWith("}}"), "JSONL line should not end with double braces, actual: " + line);
+        }
+    }
+
+    @Test
     @DisplayName("should serialise NaN, +Infinity, and -Infinity as quoted strings")
     public void testSpecialDoubleValuesInJSONL() {
         try (ScopedResource<Bytes<Void>> stlBytes = Wires.acquireBytesScoped()) {
