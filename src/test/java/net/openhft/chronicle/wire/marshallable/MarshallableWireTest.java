@@ -16,10 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
@@ -62,7 +59,9 @@ public class MarshallableWireTest extends WireTestCommon {
                 new Nested(new ScalarValues(), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap(), new String[0]),
                 new ScalarValues(),
                 new ScalarValues(1),
-                new ScalarValues(10)
+                new ScalarValues(10),
+                new NestedList(Arrays.asList(new NestedList.Item("item1", 100, Collections.singletonList(new NestedList.SubItem("subItem1", 10)), "other1"),
+                        new NestedList.Item("item2", 200, Arrays.asList(new NestedList.SubItem("subItem2", 20), new NestedList.SubItem("subItem3", 30)), "other2")))
         };
 
         // Populate the test combinations list using each WireType with each Marshallable object

@@ -20,6 +20,9 @@ class ValueInState {
     // Size of the unexpected values
     private int unexpectedSize;
 
+    // A saved value for reuse
+    private long savedValue;
+
     // An array to hold unexpected values
     @NotNull
     private long[] unexpected = EMPTY_ARRAY;
@@ -31,6 +34,7 @@ class ValueInState {
     public void reset() {
         savedPosition = 0;
         unexpectedSize = 0;
+        savedValue = Long.MIN_VALUE;
     }
 
     /**
@@ -86,6 +90,23 @@ class ValueInState {
         return unexpected[index];
     }
 
+    /**
+     * Stores the given value for later retrieval.
+     *
+     * @param savedValue value to save
+     */
+    public void savedValue(long savedValue) {
+        this.savedValue = savedValue;
+    }
+
+    /**
+     * Retrieves the saved value for the current state.
+     *
+     * @return The saved value
+     */
+    public long savedValue() {
+        return savedValue;
+    }
     /**
      * Removes an unexpected position from the list based on its index.
      *
