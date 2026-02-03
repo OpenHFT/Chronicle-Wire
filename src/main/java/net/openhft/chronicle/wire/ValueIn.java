@@ -41,7 +41,7 @@ public interface ValueIn {
      * A {@link Consumer} that ignores the supplied {@code ValueIn}.  Useful as a
      * no-op placeholder.
      */
-    @Deprecated(/* remove in x.29 as unused */)
+    @Deprecated(/* remove in 2028.x as unused */)
     Consumer<ValueIn> DISCARD = v -> {};
 
     // ---- Text / Strings section ----

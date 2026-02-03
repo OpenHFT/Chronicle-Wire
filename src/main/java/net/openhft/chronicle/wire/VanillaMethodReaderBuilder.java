@@ -83,7 +83,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
      * @param exceptionHandlerOnUnknownMethod The exception handler to use when a method is not recognized.
      * @return A {@link WireParselet} that logs or handles unrecognized methods.
      */
-    @Deprecated(/* to be removed in x.29 */)
+    @Deprecated(/* to be removed in 2028.x */)
     @NotNull
     public static WireParselet createDefaultParselet(ExceptionHandler exceptionHandlerOnUnknownMethod) {
         return createDefaultParselet(exceptionHandlerOnUnknownMethod, null);

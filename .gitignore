@@ -53,3 +53,4 @@ local.properties
 *.cq4
 
 .DS_Store
+logs/

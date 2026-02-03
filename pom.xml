@@ -4,19 +4,18 @@
     Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
-        <version>1.27ea1</version>
-        <relativePath/>
+        <version>2026.0</version>
+        <relativePath />
     </parent>
 
     <artifactId>chronicle-wire</artifactId>
-    <version>2.27ea14-SNAPSHOT</version>
+    <version>2026.4-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Wire</name>
     <!-- Core library for Chronicle's binary wire serialization -->
     <description>Chronicle-Wire</description>
@@ -25,7 +24,7 @@
         <!-- Define the target coverage thresholds as properties -->
         <jacoco.line.coverage>0.726</jacoco.line.coverage>
         <jacoco.branch.coverage>0.664</jacoco.branch.coverage>
-        <surefireArgLine/>
+        <surefireArgLine />
     </properties>
 
     <!-- Use BOMs to keep dependency versions consistent across modules -->
@@ -34,14 +33,14 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>third-party-bom</artifactId>
-                <version>3.27ea5</version>
+                <version>2026.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>2.27ea-SNAPSHOT</version>
+                <version>2026.0-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -191,9 +190,9 @@
                             <goal>enforcer</goal>
                         </goals>
                         <configuration>
-                            <referenceVersion>2.27ea0</referenceVersion>
+                            <referenceVersion>2026.0</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
-                            <binaryCompatibilityPercentageRequired>91.6</binaryCompatibilityPercentageRequired>
+                            <binaryCompatibilityPercentageRequired>100.0</binaryCompatibilityPercentageRequired>
                             <extraOptions>
                                 <!--This skips "internal" but checks "impl"-->
                                 <extraOption>
@@ -209,20 +208,6 @@
                 </executions>
             </plugin>
 
-            <!-- Attach source jars to the build -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <!--
                 generate maven dependencies versions file that can be used later
                 to install the right bundle in test phase.
