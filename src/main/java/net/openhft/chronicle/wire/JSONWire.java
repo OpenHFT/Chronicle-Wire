@@ -52,7 +52,6 @@ public class JSONWire extends TextWire {
     private static final @NotNull Bytes<byte[]> _ALSE = Bytes.from("alse");
 
     // Bytes for comma, commonly used as JSON separator.
-    @SuppressWarnings("rawtypes")
     static final BytesStore<?, ?> COMMA = BytesStore.from(",");
 
     // A thread-local variable to store a reference to the stop characters tester for JSON parsing.
@@ -72,7 +71,6 @@ public class JSONWire extends TextWire {
     /**
      * Default constructor, initializes with elastic bytes allocated on heap.
      */
-    @SuppressWarnings("rawtypes")
     public JSONWire() {
         this(Bytes.allocateElasticOnHeap());
     }
@@ -93,7 +91,6 @@ public class JSONWire extends TextWire {
      *
      * @param bytes The bytes to be used for initializing.
      */
-    @SuppressWarnings("rawtypes")
     public JSONWire(@NotNull Bytes<?> bytes) {
         this(bytes, false);
     }
@@ -225,7 +222,7 @@ public class JSONWire extends TextWire {
                 if (ch == ':' || ch == '}' || ch == ']')
                     bytes.readSkip(-1);
 
-                    // !='l' to handle 'null' in JSON wire
+                // !='l' to handle 'null' in JSON wire
                 else if (ch != 'l' && (ch > 'F' && (ch < 'a' || ch > 'f'))) {
                     throw new IllegalArgumentException("Unexpected character in number '" + (char) ch + '\'');
                 }
@@ -725,7 +722,6 @@ public class JSONWire extends TextWire {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public ValueOut writeEvent(Class<?> expectedType, Object eventKey) throws InvalidMarshallableException {
         return super.writeEvent(String.class, "" + eventKey);
@@ -796,7 +792,7 @@ public class JSONWire extends TextWire {
      * Read document context for JSONL format. Each document can be separated by a newline
      * (JSONL) or a comma (JSON stream).
      */
-    class JSONLReadDocumentContext extends TextReadDocumentContext {
+    static class JSONLReadDocumentContext extends TextReadDocumentContext {
         private int first;
         private long docLimit;
         private long closePos;
@@ -1079,7 +1075,7 @@ public class JSONWire extends TextWire {
         @Override
         public WireOut untypedObject(@Nullable Object value) throws InvalidMarshallableException {
             // Handle enum serialization with lowercase option
-            if (value != null && ValueOut.isAnEnum(value)) {
+            if (ValueOut.isAnEnum(value)) {
                 String name = value instanceof DynamicEnum
                         ? ((DynamicEnum) value).name()
                         : ((Enum) value).name();
@@ -1592,7 +1588,7 @@ public class JSONWire extends TextWire {
      * Document context for JSONL format that ensures each document is a complete
      * JSON object on its own line. Always wraps content with braces.
      */
-    class JSONLWriteDocumentContext extends TextWriteDocumentContext {
+    static class JSONLWriteDocumentContext extends TextWriteDocumentContext {
         private long start;
 
         public JSONLWriteDocumentContext(Wire wire) {
