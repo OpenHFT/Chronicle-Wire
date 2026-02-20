@@ -1057,10 +1057,7 @@ public class JSONLTest extends WireTestCommon {
                 Bytes<?> lineBytes = Bytes.from(lines[i]);
                 try {
                     Wire lineWire = WireType.JSONL.apply(lineBytes);
-                    JSONLRecord parsed;
-                    try (DocumentContext dc = lineWire.readingDocument()) {
-                        parsed = dc.wire().getValueIn().object(JSONLRecord.class);
-                    }
+                    JSONLRecord parsed = lineWire.getValueIn().object(JSONLRecord.class);
 
                     assertEquals(originals[i].name, parsed.name,
                             "Deserialised record[" + i + "] name should match original '" + originals[i].name + "', actual: " + parsed.name);
@@ -1100,10 +1097,7 @@ public class JSONLTest extends WireTestCommon {
             Bytes<?> lineBytes = Bytes.from(line);
             try {
                 Wire lineWire = WireType.JSONL.apply(lineBytes);
-                JSONLRecord parsed;
-                try (DocumentContext dc = lineWire.readingDocument()) {
-                    parsed = dc.wire().getValueIn().object(JSONLRecord.class);
-                }
+                JSONLRecord parsed = lineWire.getValueIn().object(JSONLRecord.class);
                 assertEquals(unicode, parsed.name, "Unicode should round-trip correctly");
             } finally {
                 lineBytes.releaseLast();
