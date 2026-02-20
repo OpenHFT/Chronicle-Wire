@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
 /**
- * Represents the JSON wire format.
+ * Represents the JSON wire format for text-based marshalling and parsing.
  * <p>
  * This class provides functionality for managing JSON data in a wire format.
  * It currently provides a subset of functionalities similar to the YAML wire format.
@@ -41,6 +41,9 @@ public class JSONWire extends TextWire {
 
     // The rest of null
     private static final @NotNull Bytes<byte[]> _ULL = Bytes.from("ull");
+    /**
+     * Constant bytes for JSON literal {@code null} suffix.
+     */
     @Deprecated(/* to be removed in 2027.x */)
     public static final @NotNull Bytes<byte[]> ULL = _ULL;
     // the rest of true
@@ -49,7 +52,6 @@ public class JSONWire extends TextWire {
     private static final @NotNull Bytes<byte[]> _ALSE = Bytes.from("alse");
 
     // Bytes for comma, commonly used as JSON separator.
-    @SuppressWarnings("rawtypes")
     static final BytesStore<?, ?> COMMA = BytesStore.from(",");
 
     // A thread-local variable to store a reference to the stop characters tester for JSON parsing.
@@ -60,12 +62,15 @@ public class JSONWire extends TextWire {
 
     // Flag to determine whether to use types or not during parsing.
     boolean useTypes;
+    // Flag to determine whether to serialize enums in lowercase.
+    boolean useLowerCaseEnums;
     private JSONValueOutFromStart valueOutFromStart;
+    // Flag to indicate JSONL mode is active
+    private boolean jsonlMode;
 
     /**
      * Default constructor, initializes with elastic bytes allocated on heap.
      */
-    @SuppressWarnings("rawtypes")
     public JSONWire() {
         this(Bytes.allocateElasticOnHeap());
     }
@@ -86,7 +91,6 @@ public class JSONWire extends TextWire {
      *
      * @param bytes The bytes to be used for initializing.
      */
-    @SuppressWarnings("rawtypes")
     public JSONWire(@NotNull Bytes<?> bytes) {
         this(bytes, false);
     }
@@ -160,6 +164,27 @@ public class JSONWire extends TextWire {
         return useTypes;
     }
 
+    /**
+     * Sets the flag to determine whether to serialize enums in lowercase.
+     * When enabled, enum values like {@code ACTIVE} will be written as {@code "active"}.
+     *
+     * @param useLowerCaseEnums A boolean value indicating whether to use lowercase enums.
+     * @return The current instance of the {@code JSONWire} class.
+     */
+    public JSONWire useLowerCaseEnums(boolean useLowerCaseEnums) {
+        this.useLowerCaseEnums = useLowerCaseEnums;
+        return this;
+    }
+
+    /**
+     * Gets the current setting for lowercase enum serialization.
+     *
+     * @return {@code true} if enums are serialized in lowercase, otherwise {@code false}.
+     */
+    public boolean useLowerCaseEnums() {
+        return useLowerCaseEnums;
+    }
+
     @Override
     public @NotNull TextWire useTextDocuments() {
         readContext = new JSONReadDocumentContext(this);
@@ -197,7 +222,7 @@ public class JSONWire extends TextWire {
                 if (ch == ':' || ch == '}' || ch == ']')
                     bytes.readSkip(-1);
 
-                    // !='l' to handle 'null' in JSON wire
+                // !='l' to handle 'null' in JSON wire
                 else if (ch != 'l' && (ch > 'F' && (ch < 'a' || ch > 'f'))) {
                     throw new IllegalArgumentException("Unexpected character in number '" + (char) ch + '\'');
                 }
@@ -653,6 +678,7 @@ public class JSONWire extends TextWire {
      * @param quotes Specifies the type of quotes used in the CharSequence and guides escaping.
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7159#section-7">RFC 7159, Section 7</a>
      */
+    @Override
     protected void escape0(@NotNull CharSequence s, @NotNull Quotes quotes) {
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
@@ -696,7 +722,6 @@ public class JSONWire extends TextWire {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public ValueOut writeEvent(Class<?> expectedType, Object eventKey) throws InvalidMarshallableException {
         return super.writeEvent(String.class, "" + eventKey);
@@ -764,6 +789,174 @@ public class JSONWire extends TextWire {
     }
 
     /**
+     * Read document context for JSONL format. Each document can be separated by a newline
+     * (JSONL) or a comma (JSON stream).
+     */
+    static class JSONLReadDocumentContext extends TextReadDocumentContext {
+        private int first;
+        private long docLimit;
+        private long closePos;
+
+        public JSONLReadDocumentContext(@Nullable Wire wire) {
+            super(wire);
+        }
+
+        @Override
+        public void start() {
+            wire.getValueIn().resetState();
+            Bytes<?> bytes = wire.bytes();
+
+            present = false;
+            skipSeparators();
+
+            if (bytes.readRemaining() < 1) {
+                closeReadLimit(bytes.readLimit());
+                closeReadPosition(bytes.readLimit());
+                notComplete = false;
+                return;
+            }
+
+            final long startPos = bytes.readPosition();
+            final long limit = bytes.readLimit();
+
+            findDocumentBounds(bytes, startPos, limit);
+
+            closeReadLimit(limit);
+            closeReadPosition(closePos);
+
+            bytes.readLimit(docLimit);
+            bytes.readPosition(startPos);
+
+            present = true;
+
+            first = bytes.peekUnsignedByte();
+            if (first == '{') {
+                bytes.readSkip(1);
+                long lastOffset = bytes.readLimit() - 1;
+                if (lastOffset >= bytes.readPosition()
+                        && bytes.peekUnsignedByte(lastOffset) == '}') {
+                    bytes.readLimit(lastOffset);
+                }
+            }
+        }
+
+        private void skipSeparators() {
+            final Bytes<?> bytes = wire.bytes();
+            final long limit = bytes.readLimit();
+            while (bytes.readPosition() < limit) {
+                int ch = bytes.peekUnsignedByte();
+                if (ch == ',' || ch == '\n' || ch == '\r' || ch == ' ' || ch == '\t') {
+                    bytes.readSkip(1);
+                    continue;
+                }
+                break;
+            }
+        }
+
+        private void findDocumentBounds(Bytes<?> bytes, long startPos, long limit) {
+            int depth = 0;
+            boolean inString = false;
+            boolean escape = false;
+            boolean started = false;
+            long lastNonSpace = -1;
+            long docEnd = -1;
+            closePos = limit;
+
+            scan:
+            for (long pos = startPos; pos < limit; pos++) {
+                int ch = bytes.peekUnsignedByte(pos);
+                if (inString) {
+                    if (escape) {
+                        escape = false;
+                        lastNonSpace = pos;
+                        continue;
+                    }
+                    if (ch == '\\') {
+                        escape = true;
+                        lastNonSpace = pos;
+                        continue;
+                    }
+                    if (ch == '"') {
+                        inString = false;
+                        lastNonSpace = pos;
+                        continue;
+                    }
+                    lastNonSpace = pos;
+                    continue;
+                }
+                switch (ch) {
+                    case '"':
+                        inString = true;
+                        started = true;
+                        lastNonSpace = pos;
+                        break;
+                    case '{':
+                    case '[':
+                        depth++;
+                        started = true;
+                        lastNonSpace = pos;
+                        break;
+                    case '}':
+                    case ']':
+                        if (depth > 0) {
+                            depth--;
+                        }
+                        started = true;
+                        lastNonSpace = pos;
+                        if (depth == 0) {
+                            docEnd = pos;
+                            closePos = skipDelimiter(bytes, pos + 1, limit);
+                            break scan;
+                        }
+                        break;
+                    case ',':
+                    case '\n':
+                    case '\r':
+                        if (depth == 0 && started) {
+                            docEnd = lastNonSpace >= startPos ? lastNonSpace : pos - 1;
+                            closePos = skipDelimiter(bytes, pos, limit);
+                            break scan;
+                        }
+                        break;
+                    default:
+                        if (ch > ' ') {
+                            started = true;
+                            lastNonSpace = pos;
+                        }
+                        break;
+                }
+            }
+
+            if (docEnd < startPos) {
+                docEnd = lastNonSpace >= startPos ? lastNonSpace : limit - 1;
+                closePos = limit;
+            }
+
+            docLimit = Math.min(docEnd + 1, limit);
+        }
+
+        private long skipDelimiter(Bytes<?> bytes, long pos, long limit) {
+            long p = pos;
+            while (p < limit) {
+                int ch = bytes.peekUnsignedByte(p);
+                if (ch == ',' || ch == '\n' || ch == '\r') {
+                    p++;
+                    if (ch == '\r' && p < limit && bytes.peekUnsignedByte(p) == '\n') {
+                        p++;
+                    }
+                    break;
+                }
+                if (ch <= ' ') {
+                    p++;
+                    continue;
+                }
+                break;
+            }
+            return p;
+        }
+    }
+
+    /**
      * The JSONWriteDocumentContext class extends the TextWriteDocumentContext class.
      * It provides a specialized context for writing JSON data, adjusting writing positions
      * and handling JSON-specific syntax such as curly braces.
@@ -774,7 +967,7 @@ public class JSONWire extends TextWire {
         private long start;
 
         /**
-         * Constructor for JSONWriteDocumentContext.
+         * Creates a JSON write document context for emitting JSON object syntax.
          *
          * @param wire The wire to be used for writing data
          */
@@ -845,12 +1038,61 @@ public class JSONWire extends TextWire {
             return "null";
         }
 
+        /**
+         * Writes a CharSequence as a JSON string in lowercase, without creating a new String object.
+         * This is optimized for enum names which are typically simple ASCII identifiers.
+         *
+         * @param s the CharSequence to write in lowercase
+         * @return the WireOut for chaining
+         */
+        @NotNull
+        private WireOut textLowerCase(@NotNull CharSequence s) {
+            prependSeparator();
+            bytes.writeUnsignedByte('"');
+            for (int i = 0; i < s.length(); i++) {
+                char ch = s.charAt(i);
+                bytes.writeUnsignedByte(Character.toLowerCase(ch));
+            }
+            bytes.writeUnsignedByte('"');
+            elementSeparator();
+            return wireOut();
+        }
+
+        @NotNull
+        @Override
+        public <E extends Enum<E>> WireOut asEnum(@Nullable E e) {
+            if (e == null) {
+                return text((String) null);
+            }
+            if (useLowerCaseEnums) {
+                return textLowerCase(e.name());
+            }
+            return text(e.name());
+        }
+
+        @SuppressWarnings("deprecation")
+        @NotNull
+        @Override
+        public WireOut untypedObject(@Nullable Object value) throws InvalidMarshallableException {
+            // Handle enum serialization with lowercase option
+            if (ValueOut.isAnEnum(value)) {
+                String name = value instanceof DynamicEnum
+                        ? ((DynamicEnum) value).name()
+                        : ((Enum) value).name();
+                if (useLowerCaseEnums) {
+                    return textLowerCase(name);
+                }
+                return text(name);
+            }
+            return super.untypedObject(value);
+        }
+
         @NotNull
         @Override
         public JSONWire typeLiteral(@Nullable CharSequence type) {
 
             startBlock('{');
-            bytes.append("\"@type\":\"" + type + "\"");
+            bytes.append("\"@type\":\"").append(String.valueOf(type)).append("\"");
             endBlock('}');
 
             return (JSONWire) wireOut();
@@ -964,10 +1206,10 @@ public class JSONWire extends TextWire {
         }
 
         /**
-         * Write a special double value (e.g. NaN) as a string to the given bytes.
+         * Write a special float value (e.g. NaN) as a string to the given bytes.
          *
-         * @param bytes The bytes to append the stringified double value to
-         * @param value The double value to convert to a string
+         * @param bytes The bytes to append the stringified float value to
+         * @param value The float value to convert to a string
          */
         @Override
         protected void writeSpecialFloatValueToBytes(Bytes<?> bytes, float value) {
@@ -1017,6 +1259,7 @@ public class JSONWire extends TextWire {
             return (JSONWire) super.marshallable(map, (Class<K>) String.class, vClass, leaf);
         }
 
+        @Override
         public @NotNull JSONWire time(final LocalTime localTime) {
             // Todo: fix quoted text
             return (JSONWire) super.time(localTime);
@@ -1047,7 +1290,7 @@ public class JSONWire extends TextWire {
             int code = readCode();
             if (code != '{') {
                 bytes.readPosition(start);
-                return null;
+                return null; // Not a type literal: opening '{' expected but not found
             }
 
             consumePadding();
@@ -1057,14 +1300,14 @@ public class JSONWire extends TextWire {
 
             if (!"@type".contentEquals(sb)) {
                 bytes.readPosition(start);
-                return null;
+                return null; // Not a type literal: expected "@type" key but found different text
             }
 
             consumePadding();
 
             if (readCode() != ':') {
                 bytes.readPosition(start);
-                return null;
+                return null; // Malformed type literal: ':' separator missing after "@type"
             }
 
             consumePadding();
@@ -1075,13 +1318,13 @@ public class JSONWire extends TextWire {
             String clazz = sb.toString().trim();
             if (clazz.isEmpty()) {
                 bytes.readPosition(start);
-                return null;
+                return null; // Malformed type literal: class name value is blank
             }
 
             consumePadding();
             if (bytes.readRemaining() == 0 || bytes.readChar() != '}') {
                 bytes.readPosition(start);
-                return null;
+                return null; // Malformed type literal: closing '}' missing or premature end of input
             }
             consumePadding();
 
@@ -1284,12 +1527,12 @@ public class JSONWire extends TextWire {
         void readTypeDefinition(StringBuilder sb) {
             consumePadding();
             if (bytes.readChar() != '{')
-                throw new IORuntimeException("Expected { but got " + bytes);
+                throw new IORuntimeException("Type definition should start with '{' but got " + bytes);
             consumePadding();
             text(sb);
             consumePadding();
             final char colon = bytes.readChar();
-            assert colon == ':' : "Expected : but got " + colon;
+            assert colon == ':' : "Type definition should include ':' but got " + colon;
 
         }
 
@@ -1300,6 +1543,110 @@ public class JSONWire extends TextWire {
          */
         public boolean useTypes() {
             return useTypes;
+        }
+    }
+
+    /**
+     * Configures this wire for JSONL (JSON Lines) output format.
+     * JSONL writes one JSON object per line with no type prefixes.
+     * Each document is terminated by a newline character.
+     *
+     * @return this wire configured for JSONL
+     * @see <a href="https://jsonlines.org/">JSON Lines specification</a>
+     */
+    public JSONWire useJsonlDocuments() {
+        useTypes(false);
+        jsonlMode = true;
+        useLowerCaseEnums(true);  // JSONL convention: lowercase enum values
+        trimFirstCurly(false);  // Keep object braces
+        readContext = new JSONLReadDocumentContext(this);
+        writeContext = new JSONLWriteDocumentContext(this);
+        return this;
+    }
+
+    /**
+     * Override methodWriter to preserve JSONL mode.
+     * The parent class calls useTextDocuments() which would overwrite JSONL contexts.
+     */
+    @Override
+    @NotNull
+    public <T> T methodWriter(@NotNull Class<T> tClass, Class<?>... additional) {
+        if (jsonlMode) {
+            // In JSONL mode, skip useTextDocuments() to preserve JSONL contexts
+            VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
+                    WireType.TEXT,
+                    () -> newTextMethodWriterInvocationHandler(tClass));
+            for (Class<?> aClass : additional)
+                builder.addInterface(aClass);
+            builder.marshallableOut(this);
+            return builder.build();
+        }
+        return super.methodWriter(tClass, additional);
+    }
+
+    /**
+     * Document context for JSONL format that ensures each document is a complete
+     * JSON object on its own line. Always wraps content with braces.
+     */
+    static class JSONLWriteDocumentContext extends TextWriteDocumentContext {
+        private long start;
+
+        public JSONLWriteDocumentContext(Wire wire) {
+            super(wire);
+        }
+
+        @Override
+        public void start(boolean metaData) {
+            int count = this.count;
+            super.start(metaData);
+            if (count == 0) {
+                wire().bytes().append('{');
+                start = wire().bytes().writePosition();
+            }
+        }
+
+        @Override
+        public void close() {
+            if (count == 1) {
+                Bytes<?> bytes = wire().bytes();
+                long writePosition = bytes.writePosition();
+                if (writePosition == start) {
+                    // Nothing written, remove the opening brace
+                    bytes.writeSkip(-1);
+                } else if (shouldUnwrapObject(bytes, writePosition)) {
+                    long length = writePosition - start;
+                    bytes.move(start, start - 1, length);
+                    bytes.writePosition(writePosition - 1);
+                    bytes.append('\n');
+                } else {
+                    bytes.append('}');
+                    bytes.append('\n');
+                }
+            }
+            super.close();
+        }
+
+        private boolean shouldUnwrapObject(Bytes<?> bytes, long writePosition) {
+            long first = start;
+            while (first < writePosition) {
+                int ch = bytes.peekUnsignedByte(first);
+                if (ch > ' ') {
+                    break;
+                }
+                first++;
+            }
+            if (first >= writePosition || bytes.peekUnsignedByte(first) != '{') {
+                return false;
+            }
+            long last = writePosition - 1;
+            while (last >= start) {
+                int ch = bytes.peekUnsignedByte(last);
+                if (ch > ' ') {
+                    break;
+                }
+                last--;
+            }
+            return last > first && bytes.peekUnsignedByte(last) == '}';
         }
     }
 

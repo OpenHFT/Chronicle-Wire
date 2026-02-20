@@ -69,10 +69,12 @@ public class GenerateJsonSchemaMain {
      * @throws ClassNotFoundException if any of the provided class names is not found.
      */
     static String main0(String... args) throws ClassNotFoundException {
+        // Validate class-name input early so typos fail fast during startup.
         Set<Class<?>> interfaces = new LinkedHashSet<>();
         for (String arg : args) {
             interfaces.add(Class.forName(arg));
         }
+        // Keep generator state isolated to avoid accidental reuse across invocations.
         GenerateJsonSchemaMain g = new GenerateJsonSchemaMain();
         for (Class<?> aClass : interfaces) {
             g.generateEventSchemaFor(aClass);
@@ -88,6 +90,7 @@ public class GenerateJsonSchemaMain {
      * @return A string representation of the JSON schema.
      */
     String asJson() {
+        // Build text incrementally so sections remain easy to inspect in diffs.
         SourceCodeFormatter sb = new JsonSourceCodeFormatter();
         String str = "{\n" +
                 "\"$schema\": \"http://json-schema.org/draft-07/schema#\",\n" +
@@ -167,7 +170,7 @@ public class GenerateJsonSchemaMain {
         String sep = "\n";
         for (Map.Entry<String, String> entry : properties.entrySet()) {
             sb.append(sep);
-            sb.append("\"" + entry.getKey() + "\": {\n");
+            sb.append("\"").append(entry.getKey()).append("\": {\n");
             sb.append(entry.getValue());
             sb.append("}");
             sep = ",\n";
@@ -186,12 +189,14 @@ public class GenerateJsonSchemaMain {
      * @param type The class type for which the object schema is to be generated.
      */
     void generateObjectSchemaFor(Class<?> type) {
+        // Ignore array wrappers here because element handling belongs to field-level typing.
         if (type.isArray())
             return;
         if (aliases.containsKey(type))
             return;
         aliases.put(type, "#/definitions/" + type.getSimpleName());
         Set<String> required = new LinkedHashSet<>();
+        // Collect field descriptions first, then emit text in one pass.
         Map<String, String> properties = new LinkedHashMap<>();
         StringBuilder sb = new StringBuilder();
         Map<String, Field> fieldMap = new LinkedHashMap<>();
@@ -218,7 +223,7 @@ public class GenerateJsonSchemaMain {
         }
         Comment comment = Jvm.findAnnotation(type, Comment.class);
         if (comment != null)
-            sb.append("\"description\": \"" + comment.value() + "\",\n");
+            sb.append("\"description\": \"").append(comment.value()).append("\",\n");
 
         addProperties(properties, sb);
         definitions.put(type, sb.toString());
@@ -296,6 +301,7 @@ public class GenerateJsonSchemaMain {
             if (aClass.isAssignableFrom(annotation.annotationType()))
                 return Jvm.uncheckedCast(annotation);
         }
+        // Null marks absence and keeps callers branch-light.
         return null;
     }
 }

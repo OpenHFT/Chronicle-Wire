@@ -113,7 +113,7 @@ public class WireTypeTest extends WireTestCommon {
 
             // Read the object back from the file and validate
             @Nullable Object o;
-            if (wt == WireType.JSON || wt == WireType.JSON_ONLY)
+            if (wt == WireType.JSON || wt == WireType.JSON_ONLY || wt == WireType.JSONL)
                 o = wt.apply(BytesUtil.readFile(tmp)).getValueIn().object(TestMarshallable.class);
             else
                 o = wt.fromFile(tmp);
