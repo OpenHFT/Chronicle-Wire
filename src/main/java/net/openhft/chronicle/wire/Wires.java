@@ -1523,13 +1523,11 @@ public enum Wires {
 
                 case "java.lang.StringBuilder":
                     return ScalarStrategy.of(StringBuilder.class, (o, in) -> {
-                        StringBuilder builder;
-                        try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
-                             builder = (o == null)
-                                    ? stlSb.get()
-                                    : o;
-                            in.textTo(builder);
-                        }
+                        StringBuilder builder = (o == null)
+                                ? new StringBuilder()
+                                : o;
+                        if (in.textTo(builder) == null)
+                            return null;
                         return builder;
                     });
 
