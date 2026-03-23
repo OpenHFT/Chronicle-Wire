@@ -100,7 +100,7 @@ public class EscapeCharsTest extends WireTestCommon {
      */
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testEscaped(String chs, Future<?> future) {
+    public void testEscaped(String chs, Future<?> future) throws ExecutionException, InterruptedException {
         this.chs = chs;
         this.future = future;
         assertNull(future.get());
