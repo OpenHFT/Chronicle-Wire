@@ -3,7 +3,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 // Utility class for JSON-related functions.
 public final class JsonUtil {
@@ -34,9 +34,9 @@ public final class JsonUtil {
         final int closingCount = count(input, closing); // Count of closing brackets.
 
         // Assert equality of counts of opening and closing brackets.
-        assertEquals("The number of opening brackets '" + opening + "' is " + openingCount + " but the number of closing brackets '" + closing + "' is " + closingCount,
-                openingCount,
-                closingCount);
+        assertEquals(openingCount,
+                closingCount,
+                "The number of opening brackets '" + opening + "' is " + openingCount + " but the number of closing brackets '" + closing + "' is " + closingCount);
 
     }
 }

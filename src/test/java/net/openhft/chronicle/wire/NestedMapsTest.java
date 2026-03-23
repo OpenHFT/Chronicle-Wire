@@ -5,29 +5,21 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.*;
 
 import static java.util.Collections.addAll;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(value = Parameterized.class)
 public class NestedMapsTest extends WireTestCommon {
 
     // Instance variable to store the type of wire for this test
-    private final WireType wireType;
-
-    // Constructor that sets the wire type
-    public NestedMapsTest(WireType wireType) {
-        this.wireType = wireType;
-    }
+    private WireType wireType;
 
     // Provides a collection of wire types to be tested
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
                 new Object[]{WireType.JSON},
@@ -40,8 +32,10 @@ public class NestedMapsTest extends WireTestCommon {
 
     // Test case for nested maps serialization and deserialization
     @SuppressWarnings("incomplete-switch")
-    @Test
-    public void testMapped() {
+    @ParameterizedTest
+    @MethodSource("wireTypes")
+    public void testMapped(WireType wireType) {
+        this.wireType = wireType;
         // Initialize the Mapped object with words, numbers, and maps
         @NotNull Mapped m = new Mapped();
         addAll(m.words, "A quick brown fox jumps over the lazy dog".split(" "));
@@ -181,8 +175,10 @@ public class NestedMapsTest extends WireTestCommon {
 
     // This test method verifies the behavior of mapping with top-level entities
     @SuppressWarnings("incomplete-switch")
-    @Test
-    public void testMappedTopLevel() {
+    @ParameterizedTest
+    @MethodSource("wireTypes")
+    public void testMappedTopLevel(WireType wireType) {
+        this.wireType = wireType;
         // Initialize Mapped object with given data
         @NotNull Mapped m = new Mapped();
         addAll(m.words, "A quick brown fox jumps over the lazy dog".split(" "));
@@ -249,8 +245,10 @@ public class NestedMapsTest extends WireTestCommon {
     }
 
     // This test method ensures maps can be read and written correctly
-    @Test
-    public void testMapReadAndWrite() {
+    @ParameterizedTest
+    @MethodSource("wireTypes")
+    public void testMapReadAndWrite(WireType wireType) {
+        this.wireType = wireType;
         // Create a byte buffer and initialize the wire
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);

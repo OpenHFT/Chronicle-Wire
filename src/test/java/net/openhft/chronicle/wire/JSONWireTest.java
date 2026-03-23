@@ -10,8 +10,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
@@ -22,11 +21,9 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.IntStream;
 
-import static junit.framework.TestCase.assertNull;
 import static net.openhft.chronicle.wire.WireType.JSON;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class JSONWireTest extends WireTestCommon {
 
@@ -49,16 +46,12 @@ public class JSONWireTest extends WireTestCommon {
         binary.copyTo(json2);
 
         // Assertions to make sure the copying was successful
-        assertEquals(
-                str.toString()
-                        .replaceAll("\\.0(\\D)", "$1")
+        assertEquals(str.toString()
+                .replaceAll("\\.0(\\D)", "$1")
+                .replaceAll(" ?\\[ ?", "[")
+                .replaceAll(" ?\\] ?", "]"), json2.toString()
                         .replaceAll(" ?\\[ ?", "[")
-                        .replaceAll(" ?\\] ?", "]")
-                ,
-                json2.toString()
-                        .replaceAll(" ?\\[ ?", "[")
-                        .replaceAll(" ?\\] ?", "]")
-        );
+                        .replaceAll(" ?\\] ?", "]"));
         hexDump.releaseLast();
     }
 
@@ -80,16 +73,12 @@ public class JSONWireTest extends WireTestCommon {
         yaml.copyTo(json2);
 
         // Assertions to make sure the copying was successful
-        assertEquals(
-                str.toString()
-                        .replaceAll("\\.0(\\D)", "$1")
+        assertEquals(str.toString()
+                .replaceAll("\\.0(\\D)", "$1")
+                .replaceAll(" ?\\[ ?", "[")
+                .replaceAll(" ?\\] ?", "]"), json2.toString()
                         .replaceAll(" ?\\[ ?", "[")
-                        .replaceAll(" ?\\] ?", "]")
-                ,
-                json2.toString()
-                        .replaceAll(" ?\\[ ?", "[")
-                        .replaceAll(" ?\\] ?", "]")
-        );
+                        .replaceAll(" ?\\] ?", "]"));
     }
 
     // Utility function to create a JSONWire from a string
@@ -460,8 +449,7 @@ public class JSONWireTest extends WireTestCommon {
         final String str = JSON.asString(mh); // Convert the populated object to its JSON string representation
         // Assert the generated JSON string matches the expected JSON string
         assertEquals("" +
-                        "{\"intMap\":{\"1111\":\"ones\",\"2222\":\"twos\"},\"longMap\":{\"888888888888\":\"eights\",\"999999999999\":\"nines\"},\"doubleMap\":{\"1.28\":\"number\",\"2.56\":\"number\"}}",
-                str);
+                        "{\"intMap\":{\"1111\":\"ones\",\"2222\":\"twos\"},\"longMap\":{\"888888888888\":\"eights\",\"999999999999\":\"nines\"},\"doubleMap\":{\"1.28\":\"number\",\"2.56\":\"number\"}}", str);
         // Convert the JSON string back to a new instance of MapWithIntegerKeysHolder
         MapWithIntegerKeysHolder mh2 = JSON.fromString(MapWithIntegerKeysHolder.class, str);
         assertEquals(mh, mh2); // Assert that the original and reconverted objects are the same
@@ -660,7 +648,7 @@ public class JSONWireTest extends WireTestCommon {
         String expected = "{\"@net.openhft.chronicle.wire.JSONWireTest$DtoWithClassReference\":{\"implClass\":{\"@type\":\"net.openhft.chronicle.wire.JSONWireTest\"},\"bool\":false}}";
         Object o = WireType.JSON_ONLY.fromString(expected);
         String json = WireType.JSON_ONLY.asString(o);
-        Assert.assertEquals(expected, json);
+        assertEquals(expected, json);
     }
 
     @Test
@@ -671,8 +659,7 @@ public class JSONWireTest extends WireTestCommon {
         dtoWithClassReference.implClass = this.getClass();
         String json = WireType.JSON_ONLY.asString(dtoWithClassReference);
         assertEquals("{\"@net.openhft.chronicle.wire.JSONWireTest$DtoWithClassReference\"" +
-                        ":{\"implClass\":{\"@type\":\"net.openhft.chronicle.wire.JSONWireTest\"},\"bool\":false}}",
-                json);
+                        ":{\"implClass\":{\"@type\":\"net.openhft.chronicle.wire.JSONWireTest\"},\"bool\":false}}", json);
         assertEquals(dtoWithClassReference, WireType.JSON_ONLY.fromString(json));
     }
 
@@ -688,8 +675,8 @@ public class JSONWireTest extends WireTestCommon {
         ClassAliasPool.CLASS_ALIASES.addAlias(CollectionContainer.class);
         CollectionContainer container = WireType.JSON_ONLY.fromString("{ \"@CollectionContainer\": { \"collection\": [null, \"testValue\"] } }");
         Object[] array = container.collection.toArray();
-        Assert.assertNull(array[0]);
-        Assert.assertEquals("testValue", array[1]);
+        assertNull(array[0]);
+        assertEquals("testValue", array[1]);
     }
 
     private static class CollectionContainer {

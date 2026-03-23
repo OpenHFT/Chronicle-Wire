@@ -4,8 +4,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONNanTest extends WireTestCommon {
 
@@ -27,7 +27,7 @@ public class JSONNanTest extends WireTestCommon {
             wire.write().marshallable(value);
 
             // Assert that the wire content represents the Double.NaN as quoted "NaN" in JSON format
-            Assert.assertEquals("\"\":{\"value\":0.0,\"value1\":\"NaN\",\"value2\":0,\"field\":\"text\"}", wire.toString());
+            assertEquals("\"\":{\"value\":0.0,\"value1\":\"NaN\",\"value2\":0,\"field\":\"text\"}", wire.toString());
         } finally {
             // Release the byte buffer resources
             b.releaseLast();
@@ -40,7 +40,7 @@ public class JSONNanTest extends WireTestCommon {
         Bytes<?> b = Bytes.from("\"\":{\"value\":null,\"value1\": null, \"value2\":\n0 ,\"field\": \"text\"}");
         Wire wire = WireType.JSON.apply(b);
         Dto value = wire.read().object(Dto.class);
-        Assert.assertTrue(Double.isNaN(value.value));
+        assertTrue(Double.isNaN(value.value));
     }
 
     // Test to verify that a leading space before the JSON formatted null is handled correctly
@@ -49,10 +49,10 @@ public class JSONNanTest extends WireTestCommon {
         Bytes<?> b = Bytes.from("\"\":{\"value\": null , \"field\" : \"text\" , \"value1\": 1\n,\n\"value2\": \"1\" \n}");
         Wire wire = WireType.JSON.apply(b);
         Dto value = wire.read().object(Dto.class);
-        Assert.assertTrue(Double.isNaN(value.value));
-        Assert.assertEquals("text", value.field);
-        Assert.assertEquals(1.0, value.value1, 0.01);
-        Assert.assertEquals(1L, value.value2);
+        assertTrue(Double.isNaN(value.value));
+        assertEquals("text", value.field);
+        assertEquals(1.0, value.value1, 0.01);
+        assertEquals(1L, value.value2);
     }
 
     // Test to verify that reading a JSON formatted quoted "NaN" into a Dto object sets its value to Double.NaN
@@ -61,8 +61,8 @@ public class JSONNanTest extends WireTestCommon {
         Bytes<?> b = Bytes.from("\"\":{\"value\":\"NaN\",\"value1\": \"NaN\" , \"value2\":\n0 ,\"field\": \"text\"}");
         Wire wire = WireType.JSON.apply(b);
         Dto value = wire.read().object(Dto.class);
-        Assert.assertTrue(Double.isNaN(value.value));
-        Assert.assertTrue(Double.isNaN(value.value1));
+        assertTrue(Double.isNaN(value.value));
+        assertTrue(Double.isNaN(value.value1));
     }
 
     // Class Dto extending SelfDescribingMarshallable with a single double field

@@ -5,14 +5,14 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.annotation.RequiredForClient;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.util.Scanner;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.wire.WireType.YAML;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RequiredForClient
 public class KubernetesYamlTest extends WireTestCommon {

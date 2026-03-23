@@ -13,9 +13,9 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.jlbh.JLBH;
 import net.openhft.chronicle.jlbh.JLBHOptions;
 import net.openhft.chronicle.jlbh.JLBHTask;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,15 +26,14 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Before each test case, obtain a thread dump
     @Override
-    @Before
+    @BeforeEach
     public void threadDump() {
         super.threadDump();
     }
@@ -98,7 +97,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     }
 
     // Test writing messages to an HTTP endpoint and validate the response
-    @Ignore("long running test")
+    @Disabled("long running test")
     @Test
     public void http() throws IOException, InterruptedException {
         InetSocketAddress address = new InetSocketAddress(0);
@@ -111,12 +110,8 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
             @SuppressWarnings("deprecation")
             final URL url = new URL("http://localhost:" + port + "/echo");
             writeMessages(url);
-            assertEquals(
-                    "{\"mid\":\"mid\",\"next\":1,\"echo\":\"echo-1\"}\n",
-                    queue.poll(1, TimeUnit.SECONDS));
-            assertEquals(
-                    "{\"mid2\":\"mid2\",\"next2\":\"word\",\"echo\":\"echo-2\"}\n",
-                    queue.poll(1, TimeUnit.SECONDS));
+            assertEquals("{\"mid\":\"mid\",\"next\":1,\"echo\":\"echo-1\"}\n", queue.poll(1, TimeUnit.SECONDS));
+            assertEquals("{\"mid2\":\"mid2\",\"next2\":\"word\",\"echo\":\"echo-2\"}\n", queue.poll(1, TimeUnit.SECONDS));
             assertNull(queue.poll(1, TimeUnit.MILLISECONDS));
         } finally {
             server.stop(1);
@@ -124,7 +119,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     }
 
     // Another HTTP test that might be used in conjunction with queue-web-gateway. This is a work in progress.
-    @Ignore("test was added to work with queue-web-gateway, so work in progress")
+    @Disabled("test was added to work with queue-web-gateway, so work in progress")
     @Test
     public void http2() throws IOException, InterruptedException {
         InetSocketAddress address = new InetSocketAddress(0);
@@ -137,12 +132,8 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
             @SuppressWarnings("deprecation")
             final URL url = new URL("http://localhost:" + port + "/echo/append");
             writeMessages(url);
-            assertEquals(
-                    "{\"mid\":\"mid\",\"next\":1,\"echo\":\"echo-1\"}\n",
-                    queue.poll(1, TimeUnit.SECONDS));
-            assertEquals(
-                    "{\"mid2\":\"mid2\",\"next2\":\"word\",\"echo\":\"echo-2\"}\n",
-                    queue.poll(1, TimeUnit.SECONDS));
+            assertEquals("{\"mid\":\"mid\",\"next\":1,\"echo\":\"echo-1\"}\n", queue.poll(1, TimeUnit.SECONDS));
+            assertEquals("{\"mid2\":\"mid2\",\"next2\":\"word\",\"echo\":\"echo-2\"}\n", queue.poll(1, TimeUnit.SECONDS));
             assertNull(queue.poll(1, TimeUnit.MILLISECONDS));
         } finally {
             server.stop(1);
@@ -150,21 +141,23 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     }
 
     // Test to ensure only JSON Wire is supported and if BINARY_LIGHT is used, an IllegalArgumentException is thrown.
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void httpBinary() throws IOException, InterruptedException {
-        InetSocketAddress address = new InetSocketAddress(0);
-        HttpServer server = HttpServer.create(address, 0);
-        int port = server.getAddress().getPort();
-        BlockingQueue<String> queue = new LinkedBlockingQueue<>();
-        server.createContext("/echo", new Handler(queue));
-        server.start();
-        try {
-            @SuppressWarnings("deprecation")
-            final URL url = new URL("http://localhost:" + port + "/echo");
-            writeMessages(url, WireType.BINARY_LIGHT);
-        } finally {
-            server.stop(1);
-        }
+        assertThrows(IllegalArgumentException.class, () -> {
+            InetSocketAddress address = new InetSocketAddress(0);
+            HttpServer server = HttpServer.create(address, 0);
+            int port = server.getAddress().getPort();
+            BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+            server.createContext("/echo", new Handler(queue));
+            server.start();
+            try {
+                @SuppressWarnings("deprecation")
+                final URL url = new URL("http://localhost:" + port + "/echo");
+                writeMessages(url, WireType.BINARY_LIGHT);
+            } finally {
+                server.stop(1);
+            }
+        });
     }
 
     // Interface representing a timed event.

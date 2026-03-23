@@ -10,11 +10,11 @@ import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import net.openhft.chronicle.core.util.IgnoresEverything;
 import net.openhft.chronicle.core.util.Mocker;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 // Testing the behavior of the MethodReaderBuilder exception handler with various scenarios.
 public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {

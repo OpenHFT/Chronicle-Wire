@@ -3,10 +3,10 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.wire.MilliTimestampLongConverter.INSTANCE;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MilliTimestampLongConverterTest extends WireTestCommon {
 
@@ -35,19 +35,15 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
     // Test different date format parsing
     @Test
     public void parse2() {
-        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"),
-                INSTANCE.parse("2020-09-18T01:02:03.456"));
-        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"),
-                INSTANCE.parse("2020-09-18T01:02:03.456789"));
-        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"),
-                INSTANCE.parse("2020-09-18T01:02:03.456789012"));
+        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"), INSTANCE.parse("2020-09-18T01:02:03.456"));
+        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"), INSTANCE.parse("2020-09-18T01:02:03.456789"));
+        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"), INSTANCE.parse("2020-09-18T01:02:03.456789012"));
     }
 
     // Test if trailing 'Z' in the timestamp does not affect parsing
     @Test
     public void parse3() {
-        assertEquals(INSTANCE.parse("202020/09/18T01:02:03.456", 2, 25),
-                INSTANCE.parse("2020-09-18T01:02:03.4567890", 0, 23));
+        assertEquals(INSTANCE.parse("202020/09/18T01:02:03.456", 2, 25), INSTANCE.parse("2020-09-18T01:02:03.4567890", 0, 23));
     }
 
     @Test
@@ -60,8 +56,7 @@ public class MilliTimestampLongConverterTest extends WireTestCommon {
     @Test
     public void datesWithNoTimezoneAreAssumedToBeLocal() {
         MilliTimestampLongConverter mtlc = new MilliTimestampLongConverter("America/New_York");
-        assertEquals(mtlc.parse("2020-09-17T21:02:03.456-04:00"),
-                mtlc.parse("2020-09-17T21:02:03.456"));
+        assertEquals(mtlc.parse("2020-09-17T21:02:03.456-04:00"), mtlc.parse("2020-09-17T21:02:03.456"));
     }
 
     // Test if timestamps are correctly appended for Melbourne timezone

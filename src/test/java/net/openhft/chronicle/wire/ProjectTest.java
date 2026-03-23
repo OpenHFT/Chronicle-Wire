@@ -5,30 +5,21 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 // This class tests the functionalities related to the projection of wire data.
 public class ProjectTest extends WireTestCommon {
 
-    // Rule to retrieve the name of the currently-running test
-    @NotNull
-    @Rule
-    public TestName name = new TestName();
-
     // Provide the parameters for parameterized tests - in this case, the wire type.
     @NotNull
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         Object[][] list = {
                 {WireType.BINARY},
@@ -55,9 +46,9 @@ public class ProjectTest extends WireTestCommon {
         Dto2 dto2 = Wires.project(Dto2.class, dto1);
 
         // Assert that the data has been correctly projected
-        Assert.assertEquals(dto2.someValue, dto1.someValue);
-        Assert.assertEquals(dto2.anotherField, dto1.anotherField);
-        Assert.assertEquals(dto2.m, dto1.m);
+        assertEquals(dto2.someValue, dto1.someValue);
+        assertEquals(dto2.anotherField, dto1.anotherField);
+        assertEquals(dto2.m, dto1.m);
 
     }
 
@@ -76,7 +67,7 @@ public class ProjectTest extends WireTestCommon {
 
         // Project the data from the simple object to an outer object
         final Outer project = Wires.project(Outer.class, simple);
-        Assert.assertEquals("some data", project.inner().name());
+        assertEquals("some data", project.inner().name());
     }
 
     // Data Transfer Object 1 - holds sample data for projection tests

@@ -5,11 +5,11 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * This class tests the behavior of MethodWriter when handling Bytes as input.
@@ -44,7 +44,7 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
         // Fetch the read message from the blocking queue with a timeout
         Bytes result = q.poll(10, TimeUnit.SECONDS);
         // Verify that the fetched message matches the expected content
-        Assert.assertEquals("hello", result.toString());
+        assertEquals("hello", result.toString());
     }
 
     /**

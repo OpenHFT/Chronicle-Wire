@@ -5,10 +5,9 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,35 +15,28 @@ import java.util.Collection;
 import java.util.List;
 
 import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Smoke test that toggles codegen/proxy path via system property and verifies
  * events still round-trip through MethodWriter/Reader.
  */
-@RunWith(Parameterized.class)
 public class MethodWriterCodegenToggleTest extends WireTestCommon {
 
     interface API { void a(int x); void b(String s); }
 
-    @Parameterized.Parameters(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[]{Boolean.TRUE}, new Object[]{Boolean.FALSE});
     }
 
-    private final boolean disable;
-
-    public MethodWriterCodegenToggleTest(boolean disable) {
-        this.disable = disable;
-    }
-
-    @After
+    @AfterEach
     public void clearProp() {
         System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
     }
 
-    @Test
-    public void roundTrip() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void roundTrip(boolean disable) {
         System.setProperty(DISABLE_WRITER_PROXY_CODEGEN, String.valueOf(disable));
         // Some environments may fall back to proxy; ignore the warning.
         ignoreException("Falling back to proxy method writer");
@@ -65,4 +57,3 @@ public class MethodWriterCodegenToggleTest extends WireTestCommon {
         assertTrue(seen.get(1).startsWith("b:"));
     }
 }
-

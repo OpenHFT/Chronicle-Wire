@@ -5,11 +5,11 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
 
 // This test class is for validating JSON sequences.
 public class JSONEmptySequencesTest extends net.openhft.chronicle.wire.WireTestCommon {
@@ -38,7 +38,7 @@ public class JSONEmptySequencesTest extends net.openhft.chronicle.wire.WireTestC
         wire.getValueIn().object(f, Foo.class);
 
         // Assert to check if the populated Foo instance matches the expected string representation.
-        Assert.assertEquals("!Foo {\n" +
+        assertEquals("!Foo {\n" +
                 "  field1: 1234,\n" +
                 "  field2: 456,\n" +
                 "  field3: [ ],\n" +

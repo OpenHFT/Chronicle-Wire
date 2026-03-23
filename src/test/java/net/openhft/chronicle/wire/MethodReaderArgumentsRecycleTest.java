@@ -5,14 +5,13 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
@@ -27,7 +26,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
     // This method sets up the test environment before each test case.
     @SuppressWarnings("deprecation")
-    @Before
+    @BeforeEach
     public void setUp() {
         // Create a new BinaryWire backed by a dynamically expanding Bytes object.
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
@@ -202,7 +201,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
         verifyRecycled(first, second, writer::configDtoCall);
 
         ConfigDTO dto = (ConfigDTO) lastArgumentRef;
-        Assert.assertFalse(dto.b);
+        assertFalse(dto.b);
     }
 
     // Test to ascertain that a DTO object's list field gets recycled between calls.

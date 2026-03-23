@@ -5,9 +5,9 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Created by Rob Austin
@@ -65,20 +65,22 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
         assertEquals(expected, actual);
     }
 
-    @Test(expected = ClassNotFoundRuntimeException.class)
+    @Test
     public void testAssumeTheTypeMissingTypeThrows() {
-        Wires.GENERATE_TUPLES = false;
+        assertThrows(ClassNotFoundRuntimeException.class, () -> {
+            Wires.GENERATE_TUPLES = false;
 
-        final String cs = "!Xyz " +
-                "{\n" +
-                "  y: hello8\n" +
-                "}\n";
-        String s = Marshallable.fromString(Dto.class, cs).toString();
-        assertEquals("" +
-                "!net.openhft.chronicle.wire.InvalidYamWithCommonMistakesTest$Dto {\n" +
-                "  y: hello8,\n" +
-                "  x: !!null \"\"\n" +
-                "}\n", s);
+            final String cs = "!Xyz " +
+                    "{\n" +
+                    "  y: hello8\n" +
+                    "}\n";
+            String s = Marshallable.fromString(Dto.class, cs).toString();
+            assertEquals("" +
+                    "!net.openhft.chronicle.wire.InvalidYamWithCommonMistakesTest$Dto {\n" +
+                    "  y: hello8,\n" +
+                    "  x: !!null \"\"\n" +
+                    "}\n", s);
+        });
     }
 
     // Test to parse a DTO with nested types

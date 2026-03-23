@@ -6,13 +6,13 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 // Test class for testing JSON wire DTO functionalities.
 public class JSONWireDTOTest extends WireTestCommon {
@@ -40,8 +40,7 @@ public class JSONWireDTOTest extends WireTestCommon {
         wire.getValueOut().marshallable(dto);
 
         // Check the serialized output.
-        assertEquals("{\"text\":\"hi\",\"nested\":[ {\"str\":\"there\",\"num\":1} ],\"b\":false,\"bb\":0,\"s\":0,\"f\":0.0,\"d\":3.1415,\"l\":0,\"i\":0}",
-                bytes.toString());
+        assertEquals("{\"text\":\"hi\",\"nested\":[ {\"str\":\"there\",\"num\":1} ],\"b\":false,\"bb\":0,\"s\":0,\"f\":0.0,\"d\":3.1415,\"l\":0,\"i\":0}", bytes.toString());
 
         // Create another DTO instance for deserialization.
         JSOuterClass dto2 = new JSOuterClass();

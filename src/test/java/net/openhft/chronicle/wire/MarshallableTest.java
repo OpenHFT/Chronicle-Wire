@@ -5,8 +5,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.lang.annotation.RetentionPolicy;
@@ -16,14 +16,16 @@ import java.util.Arrays;
 import java.util.List;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MarshallableTest extends WireTestCommon {
 
     // Test to check if the fromFile() method of Marshallable throws an IOException for an empty file.
-    @Test(expected = IOException.class)
+    @Test
     public void fromFile() throws IOException {
-        fail("Got " + Marshallable.fromFile("empty-file.yaml"));
+        assertThrows(IOException.class, () -> {
+            fail("Got " + Marshallable.fromFile("empty-file.yaml"));
+        });
     }
 
     // Test to check if Marshallable.fromString() method returns an empty string when an empty string is provided.
@@ -33,19 +35,23 @@ public class MarshallableTest extends WireTestCommon {
     }
 
     // Test for undefined behavior when a string with a single double-quote is passed.
-    @Ignore("Undefined behaviour")
-    @Test(expected = IllegalArgumentException.class)
+    @Disabled("Undefined behaviour")
+    @Test
     public void testFromString2() {
-        Object o = Marshallable.fromString("\"");
-        assertNotNull(o);
+        assertThrows(IllegalArgumentException.class, () -> {
+            Object o = Marshallable.fromString("\"");
+            assertNotNull(o);
+        });
     }
 
     // Test for undefined behavior when a string with a single single-quote is passed.
-    @Ignore("Undefined behaviour")
-    @Test(expected = IllegalArgumentException.class)
+    @Disabled("Undefined behaviour")
+    @Test
     public void testFromString3() {
-        Object o = Marshallable.fromString("'");
-        assertNotNull(o);
+        assertThrows(IllegalArgumentException.class, () -> {
+            Object o = Marshallable.fromString("'");
+            assertNotNull(o);
+        });
     }
 
     // Test for verifying the marshallable operation on bytes.
@@ -112,7 +118,7 @@ public class MarshallableTest extends WireTestCommon {
     }
 
     // TODO: This test is currently ignored. The copy process using WireType.YAML_ONLY needs to be fixed.
-    @Ignore(/* TODO FIX */)
+    @Disabled(/* TODO FIX */)
     @Test
     public void testCopyYaml() {
         doTestCopy(WireType.YAML_ONLY);

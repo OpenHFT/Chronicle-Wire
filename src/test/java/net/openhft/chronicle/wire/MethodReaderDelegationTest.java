@@ -9,9 +9,9 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.core.util.Mocker;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
@@ -20,21 +20,12 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static junit.framework.TestCase.assertFalse;
 import static net.openhft.chronicle.wire.VanillaMethodReaderBuilder.DISABLE_READER_PROXY_CODEGEN;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(Parameterized.class)
 public class MethodReaderDelegationTest extends WireTestCommon {
-    private final boolean useMethodId;
-
-    // Constructor to set parameter
-    public MethodReaderDelegationTest(boolean useMethodId) {
-        this.useMethodId = useMethodId;
-    }
 
     // Define parameters for this parameterized test
-    @Parameterized.Parameters(name = "useMethodId={0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(
                 new Object[]{false},
@@ -43,52 +34,58 @@ public class MethodReaderDelegationTest extends WireTestCommon {
     }
 
     // Testing unsuccessful call delegation with BinaryWire type
-    @Test
-    public void testUnsuccessfulCallIsDelegatedBinaryWire() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testUnsuccessfulCallIsDelegatedBinaryWire(boolean useMethodId) {
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfulCallIsDelegated(wire, false);
+        doTestUnsuccessfulCallIsDelegated(useMethodId, wire, false);
     }
 
-    @Test
-    public void testUnsuccessfulCallIsDelegatedBinaryWireScanning() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testUnsuccessfulCallIsDelegatedBinaryWireScanning(boolean useMethodId) {
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfulCallIsDelegated(wire, true);
+        doTestUnsuccessfulCallIsDelegated(useMethodId, wire, true);
     }
 
     // Testing unsuccessful call delegation with TextWire type
-    @Test
-    public void testUnsuccessfulCallIsDelegatedTextWire() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testUnsuccessfulCallIsDelegatedTextWire(boolean useMethodId) {
         final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfulCallIsDelegated(wire, false);
+        doTestUnsuccessfulCallIsDelegated(useMethodId, wire, false);
     }
 
-    @Test
-    public void testUnsuccessfulCallIsDelegatedTextWireScanning() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testUnsuccessfulCallIsDelegatedTextWireScanning(boolean useMethodId) {
         final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfulCallIsDelegated(wire, true);
+        doTestUnsuccessfulCallIsDelegated(useMethodId, wire, true);
     }
 
     // Testing unsuccessful call delegation with YamlWire type
-    @Test
-    public void testUnsuccessfulCallIsDelegatedYamlWire() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testUnsuccessfulCallIsDelegatedYamlWire(boolean useMethodId) {
         final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfulCallIsDelegated(wire, false);
+        doTestUnsuccessfulCallIsDelegated(useMethodId, wire, false);
     }
 
-    @Test
-    public void testUnsuccessfulCallIsDelegatedYamlWireScanning() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testUnsuccessfulCallIsDelegatedYamlWireScanning(boolean useMethodId) {
         final Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
-        doTestUnsuccessfulCallIsDelegated(wire, true);
+        doTestUnsuccessfulCallIsDelegated(useMethodId, wire, true);
     }
 
     // A helper method to test if unsuccessful method calls are properly delegated
-    private void doTestUnsuccessfulCallIsDelegated(Wire wire, boolean scanning) {
+    private void doTestUnsuccessfulCallIsDelegated(boolean useMethodId, Wire wire, boolean scanning) {
         ignoreException("Unknown method-name='myFall' called on class");
         // Reset the wire and enable padding
         wire.reset();
@@ -157,32 +154,36 @@ public class MethodReaderDelegationTest extends WireTestCommon {
     }
 
     // Test case to ensure that unsuccessful calls are not delegated when certain conditions are met
-    @Test
-    public void testUnsuccessfulCallNoDelegate() {
-        testUnsuccessfulCallNoDelegate(false, false, false);
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testUnsuccessfulCallNoDelegate(boolean useMethodId) {
+        testUnsuccessfulCallNoDelegate(useMethodId, false, false, false);
     }
 
     // Test case (with scanning) to ensure that unsuccessful calls are not delegated when certain conditions are met
-    @Test
-    public void testUnsuccessfulCallNoDelegateScanning() {
-        testUnsuccessfulCallNoDelegate(false, false, true);
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testUnsuccessfulCallNoDelegateScanning(boolean useMethodId) {
+        testUnsuccessfulCallNoDelegate(useMethodId, false, false, true);
     }
 
     // Test case (with proxy) to ensure that unsuccessful calls are not delegated when certain conditions are met
-    @Test
-    public void testUnsuccessfulCallNoDelegateProxy() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testUnsuccessfulCallNoDelegateProxy(boolean useMethodId) {
 
-        testUnsuccessfulCallNoDelegate(true, true, false);
+        testUnsuccessfulCallNoDelegate(useMethodId, true, true, false);
     }
 
     // Test case (with proxy and scanning) to ensure that unsuccessful calls are not delegated when certain conditions are met
-    @Test
-    public void testUnsuccessfulCallNoDelegateProxyScanning() {
-        testUnsuccessfulCallNoDelegate(true, true, true);
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testUnsuccessfulCallNoDelegateProxyScanning(boolean useMethodId) {
+        testUnsuccessfulCallNoDelegate(useMethodId, true, true, true);
     }
 
     // Helper method to test that unsuccessful calls are not delegated under various configurations
-    private void testUnsuccessfulCallNoDelegate(boolean proxy, boolean third, boolean scanning) {
+    private void testUnsuccessfulCallNoDelegate(boolean useMethodId, boolean proxy, boolean third, boolean scanning) {
         // If proxy is enabled, set the system property to disable reader proxy code generation
         if (proxy)
             System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
@@ -237,8 +238,9 @@ public class MethodReaderDelegationTest extends WireTestCommon {
 
     // Test to ensure that user exceptions are not delegated during method calls
     @SuppressWarnings("deprecation")
-    @Test
-    public void testUserExceptionsAreNotDelegated() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testUserExceptionsAreNotDelegated(boolean useMethodId) {
         // Initialize a wire with BINARY type and allocate space on the heap
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
@@ -293,19 +295,21 @@ public class MethodReaderDelegationTest extends WireTestCommon {
     }
 
     // Test that an exception is thrown from user code under standard conditions
-    @Test
-    public void testExceptionThrownFromUserCode() {
-        testExceptionThrownFromUserCode(false);
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testExceptionThrownFromUserCode(boolean useMethodId) {
+        testExceptionThrownFromUserCode(useMethodId, false);
     }
 
     // Test that an exception is thrown from user code when a proxy is used
-    @Test
-    public void testExceptionThrownFromUserCodeProxy() {
-        testExceptionThrownFromUserCode(true);
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testExceptionThrownFromUserCodeProxy(boolean useMethodId) {
+        testExceptionThrownFromUserCode(useMethodId, true);
     }
 
     // Helper method to test that an exception is thrown from user code
-    private void testExceptionThrownFromUserCode(boolean proxy) throws InvocationTargetRuntimeException {
+    private void testExceptionThrownFromUserCode(boolean useMethodId, boolean proxy) throws InvocationTargetRuntimeException {
         // If proxy is enabled, set the system property to disable reader proxy code generation
         if (proxy)
             System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
@@ -341,19 +345,21 @@ public class MethodReaderDelegationTest extends WireTestCommon {
     }
 
     // Test to verify exception handling in user code with long parameters
-    @Test
-    public void testExceptionThrownFromUserCodeLong() {
-        testExceptionThrownFromUserCodeLong(false);
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testExceptionThrownFromUserCodeLong(boolean useMethodId) {
+        testExceptionThrownFromUserCodeLong(useMethodId, false);
     }
 
     // Test to verify exception handling in user code with long parameters when a proxy is used
-    @Test
-    public void testExceptionThrownFromUserCodeLongProxy() {
-        testExceptionThrownFromUserCodeLong(true);
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testExceptionThrownFromUserCodeLongProxy(boolean useMethodId) {
+        testExceptionThrownFromUserCodeLong(useMethodId, true);
     }
 
     // Helper method to test exception thrown from user code with long parameters
-    private void testExceptionThrownFromUserCodeLong(boolean proxy) {
+    private void testExceptionThrownFromUserCodeLong(boolean useMethodId, boolean proxy) {
         // If proxy is enabled, set the system property to disable reader proxy code generation
         if (proxy)
             System.setProperty(DISABLE_READER_PROXY_CODEGEN, "true");
