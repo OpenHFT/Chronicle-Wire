@@ -35,12 +35,6 @@ public class YamlTextWireTest extends WireTestCommon {
     private String s;     // YAML formatted text to be tested
 
     /**
-     * Constructor for parameterized test instances.
-     *
-     * @param name Name of the test scenario.
-     * @param text YAML formatted text to be used in the test.
-     */
-    /**
      * Provides the parameters for the parameterized test.
      * Each parameter set includes a scenario name and corresponding YAML formatted text.
      *

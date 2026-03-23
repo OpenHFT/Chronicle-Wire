@@ -35,12 +35,6 @@ public class EscapeCharsTest extends WireTestCommon {
     }
 
     /**
-     * Constructor for parameterized test.
-     *
-     * @param chs   Characters to test
-     * @param future Represents the result of an asynchronous computation
-     */
-    /**
      * Combinations of data to be used for testing.
      *
      * @return Collection of test data

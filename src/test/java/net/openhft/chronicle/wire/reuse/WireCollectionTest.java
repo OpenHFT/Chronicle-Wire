@@ -35,11 +35,6 @@ public class WireCollectionTest extends WireTestCommon {
     private WireCollection collection;// = new WireModel();
 
     /**
-     * Constructor for WireCollectionTest.
-     *
-     * @param wireType A function that defines the type of Wire to be tested.
-     */
-    /**
      * Parameterized test data generator.
      *
      * @return A collection of wire type configurations to be tested.

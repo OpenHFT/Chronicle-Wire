@@ -29,12 +29,6 @@ public class MapWireTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     private Map m;
 
-    /**
-     * Constructs a new MapWireTest instance with the specified wire type and map.
-     *
-     * @param wireType The wire type for serialization and deserialization.
-     * @param m The map to be tested.
-     */
     @SuppressWarnings("rawtypes")
     /**
      * Provides a collection of test parameters including wire types and maps with various content.
