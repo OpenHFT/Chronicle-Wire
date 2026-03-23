@@ -6,14 +6,14 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DefaultValueInCoverageTest extends WireTestCommon {
 
@@ -31,7 +31,7 @@ public class DefaultValueInCoverageTest extends WireTestCommon {
         direct.write("hi".getBytes(StandardCharsets.ISO_8859_1));
         valueIn.defaultValue = direct.bytesStore();
         valueIn.bytesSet(pointer);
-        assertTrue("pointer should point at direct store", pointer.safeLimit() >= 2);
+        assertTrue(pointer.safeLimit() >= 2, "pointer should point at direct store");
         direct.releaseLast();
     }
 

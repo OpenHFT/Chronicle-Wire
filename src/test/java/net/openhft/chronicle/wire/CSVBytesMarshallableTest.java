@@ -9,10 +9,10 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.wire.Wires.acquireStringBuilderScoped;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CSVBytesMarshallableTest extends WireTestCommon {
 

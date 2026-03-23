@@ -53,32 +53,31 @@ BinaryWire, fixed=true, numericField=false, fieldLess=true
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(value = Parameterized.class)
 public class FIX42Test extends WireTestCommon {
     // Test ID for identification
-    private final int testId;
+    private int testId;
 
     // Flag to determine if the test is fixed
-    private final boolean fixed;
+    private boolean fixed;
 
     // Flag to determine if the field is numeric
-    private final boolean numericField;
+    private boolean numericField;
 
     // Flag to determine if the field is absent
-    private final boolean fieldLess;
+    private boolean fieldLess;
 
     // Dump string for storing binary representations
-    private final String dump;
+    private String dump;
 
     // Elastic byte buffer for writing and reading data
     @SuppressWarnings("rawtypes")
@@ -86,17 +85,7 @@ public class FIX42Test extends WireTestCommon {
     private
     Bytes<?> bytes = allocateElasticOnHeap();
 
-    // Constructor to initialize the test parameters
-    public FIX42Test(int testId, boolean fixed, boolean numericField, boolean fieldLess, String dump) {
-        this.testId = testId;
-        this.fixed = fixed;
-        this.numericField = numericField;
-        this.fieldLess = fieldLess;
-        this.dump = dump;
-    }
-
     // Provides various combinations of parameters to run the test with
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         // Various dump strings representing different binary data scenarios
         String dump_1 = "" +
@@ -165,8 +154,14 @@ public class FIX42Test extends WireTestCommon {
     }
 
     // Test method to dump the wire representation of a MarketDataSnapshot instance
-    @Test
-    public void dump() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    public void dump(int testId, boolean fixed, boolean numericField, boolean fieldLess, String dump) {
+        this.testId = testId;
+        this.fixed = fixed;
+        this.numericField = numericField;
+        this.fieldLess = fieldLess;
+        this.dump = dump;
         // Create a Wire instance
         @NotNull Wire wire = createWire();
 

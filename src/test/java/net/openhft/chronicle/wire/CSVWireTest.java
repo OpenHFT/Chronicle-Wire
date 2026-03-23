@@ -4,10 +4,10 @@
 package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 // CSVWireTest class extends from WireTestCommon and tests functionality related to CSV-based wire processing.
 public class CSVWireTest extends WireTestCommon {
@@ -64,7 +64,7 @@ public class CSVWireTest extends WireTestCommon {
         assertTrue(wire.hasMore());
         wire.readEventName(row).marshallable(w -> {
             assertEquals("III", row.toString());
-            wire.read(() -> "company").text("3i Group", Assert::assertEquals)
+            wire.read(() -> "company").text("3i Group", Assertions::assertEquals)
                     .read(() -> "price").float64(this, (o, d) -> assertEquals(479.4, d, 0.0))
                     .read(() -> "change").float64(this, (o, d) -> assertEquals(12, d, 0.0))
                     .read(() -> "changePercent").float64(this, (o, d) -> assertEquals(2.44, d, 0.0))
@@ -74,7 +74,7 @@ public class CSVWireTest extends WireTestCommon {
         assertTrue(wire.hasMore());
         wire.readEventName(row).marshallable(w -> {
             assertEquals("3IN", row.toString());
-            wire.read(() -> "company").text("3i Infrastructure", Assert::assertEquals)
+            wire.read(() -> "company").text("3i Infrastructure", Assertions::assertEquals)
                     .read(() -> "price").float64(this, (o, d) -> assertEquals(164.7, d, 0.0))
                     .read(() -> "change").float64(this, (o, d) -> assertEquals(0.1, d, 0.0))
                     .read(() -> "changePercent").float64(this, (o, d) -> assertEquals(0.06, d, 0.0))
@@ -85,7 +85,7 @@ public class CSVWireTest extends WireTestCommon {
         assertTrue(wire.hasMore());
         wire.readEventName(row).marshallable(w -> {
             assertEquals("AA", row.toString());
-            wire.read(() -> "company").text("AA", Assert::assertEquals)
+            wire.read(() -> "company").text("AA", Assertions::assertEquals)
                     .read(() -> "price").float64(this, (o, d) -> assertEquals(325.9, d, 0.0))
                     .read(() -> "change").float64(this, (o, d) -> assertEquals(5.7, d, 0.0))
                     .read(() -> "changePercent").float64(this, (o, d) -> assertEquals(1.72, d, 0.0))

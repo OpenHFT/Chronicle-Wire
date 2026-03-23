@@ -6,7 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.UpdateInterceptor;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.lang.reflect.Method;
@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 // Generator for simple classes based on SimpleMetaData
 class SimpleClassGenerator extends AbstractClassGenerator<SimpleMetaData> {

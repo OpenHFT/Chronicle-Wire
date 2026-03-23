@@ -4,12 +4,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
 
-import static junit.framework.TestCase.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 interface MyInterface<I extends MyInterface<I>> {
     I hello(String hello);
@@ -34,7 +33,7 @@ public class GenericMethodsTest extends WireTestCommon {
         top.hello("hello world").hello("hello world 2").terminator();
 
         // Assert the expected output from the wire after the method calls
-        Assert.assertEquals("hello: hello world\n" +
+        assertEquals("hello: hello world\n" +
                 "hello: hello world 2\n" +
                 "terminator: \"\"\n" +
                 "...\n", wire.toString());

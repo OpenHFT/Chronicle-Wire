@@ -5,40 +5,30 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-@Ignore("Long running test")
-@RunWith(value = Parameterized.class)
+@Disabled("Long running test")
 public class BinaryWirePerfTest extends WireTestCommon {
 
     // Define test parameters
-    private final int testId;
-    private final boolean fixed;
-    private final boolean numericField;
-    private final boolean fieldLess;
+    private int testId;
+    private boolean fixed;
+    private boolean numericField;
+    private boolean fieldLess;
     @NotNull
     private
     Bytes<?> bytes = allocateElasticOnHeap();
 
-    // Constructor for parameterized test
-    public BinaryWirePerfTest(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
-        this.testId = testId;
-        this.fixed = fixed;
-        this.numericField = numericField;
-        this.fieldLess = fieldLess;
-    }
-
     // Provide combinations of parameters for the test
-    @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         return Arrays.asList(
                 new Object[]{0, false, false, false},
@@ -63,8 +53,13 @@ public class BinaryWirePerfTest extends WireTestCommon {
 
     // Test Cases
     // Performance test for Wire serialization and deserialization
-    @Test
-    public void wirePerf() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    public void wirePerf(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
+        this.testId = testId;
+        this.fixed = fixed;
+        this.numericField = numericField;
+        this.fieldLess = fieldLess;
         @NotNull Wire wire = createBytes();
 
         // Custom type serialization and deserialization test
@@ -99,8 +94,13 @@ public class BinaryWirePerfTest extends WireTestCommon {
     }
 
     // Performance test for serializing and deserializing integers with Wire
-    @Test
-    public void wirePerfInts() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    public void wirePerfInts(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
+        this.testId = testId;
+        this.fixed = fixed;
+        this.numericField = numericField;
+        this.fieldLess = fieldLess;
         @NotNull Wire wire = createBytes();
         @NotNull MyType2 a = new MyType2();
         for (int t = 0; t < 3; t++) {

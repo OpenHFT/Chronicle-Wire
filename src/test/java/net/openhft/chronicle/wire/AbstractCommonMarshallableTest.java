@@ -5,7 +5,7 @@ package net.openhft.chronicle.wire;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * A test class for validating the behavior of AbstractCommonMarshallable.

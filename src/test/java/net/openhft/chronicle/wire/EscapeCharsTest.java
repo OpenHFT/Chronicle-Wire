@@ -7,31 +7,29 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for handling escaped characters in various Wire formats.
  */
-@RunWith(value = Parameterized.class)
 public class EscapeCharsTest extends WireTestCommon {
     @NotNull
-    private final String chs;
-    private final Future<?> future;
+    private String chs;
+    private Future<?> future;
 
     // Override the threadDump from WireTestCommon to use the parent implementation
     @Override
-    @Before
+    @BeforeEach
     public void threadDump() {
         super.threadDump();
     }
@@ -42,18 +40,12 @@ public class EscapeCharsTest extends WireTestCommon {
      * @param chs   Characters to test
      * @param future Represents the result of an asynchronous computation
      */
-    public EscapeCharsTest(@NotNull String chs, Future<?> future) {
-        this.chs = chs;
-        this.future = future;
-    }
-
     /**
      * Combinations of data to be used for testing.
      *
      * @return Collection of test data
      */
     @NotNull
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
 
@@ -112,8 +104,11 @@ public class EscapeCharsTest extends WireTestCommon {
     /**
      * Test to ensure escaped characters are handled properly.
      */
-    @Test
-    public void testEscaped() throws ExecutionException, InterruptedException {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    public void testEscaped(String chs, Future<?> future) {
+        this.chs = chs;
+        this.future = future;
         assertNull(future.get());
     }
 }

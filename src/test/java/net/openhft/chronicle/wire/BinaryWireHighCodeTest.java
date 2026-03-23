@@ -3,14 +3,13 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BinaryWireHighCodeTest extends WireTestCommon {
 

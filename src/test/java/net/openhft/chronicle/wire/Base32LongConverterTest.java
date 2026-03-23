@@ -4,10 +4,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Base32LongConverterTest extends WireTestCommon {
 
@@ -34,14 +33,18 @@ public class Base32LongConverterTest extends WireTestCommon {
         assertTrue(true);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseLengthCheck() {
-        Base32LongConverter.INSTANCE.parse(getClass().getCanonicalName());
+        assertThrows(IllegalArgumentException.class, () -> {
+            Base32LongConverter.INSTANCE.parse(getClass().getCanonicalName());
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseSubstringLengthCheck() {
-        Base32LongConverter.INSTANCE.parse("ABCD", 3, 0);
+        assertThrows(IllegalArgumentException.class, () -> {
+            Base32LongConverter.INSTANCE.parse("ABCD", 3, 0);
+        });
     }
 
     @Test
@@ -73,8 +76,7 @@ public class Base32LongConverterTest extends WireTestCommon {
                 v.writeLong(converter, i2);
             });
             // Validate that the read value matches the written value.
-            assertEquals(wire.toString(),
-                    i, wire.read("a").readLong(converter));
+            assertEquals(i, wire.read("a").readLong(converter), wire.toString());
             wire.read("b").sequence(i, (i2, v) -> {
                 // Validate that the sequence read values match the written values.
                 assertEquals((long) i2, v.readLong(converter));

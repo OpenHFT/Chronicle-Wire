@@ -7,30 +7,23 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
+import static org.junit.jupiter.api.Assertions.*;
 
 // Using the Parameterized runner for JUnit tests to enable parameter-driven tests
-@RunWith(value = Parameterized.class)
 public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
 
     // Holds the WireType for this test instance
-    private final WireType wireType;
-
-    // Constructor that sets the WireType
-    public ForwardAndBackwardCompatibilityTest(WireType wireType) {
-        this.wireType = wireType;
-    }
+    private WireType wireType;
 
     // Provides the set of WireTypes to be used as parameters for the tests
-    @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 // {WireType.TEXT},
@@ -39,13 +32,15 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     }
 
     // Test for checking backward compatibility of DTO classes
-    @Test
-    public void backwardsCompatibility() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void backwardsCompatibility(WireType wireType) {
+        this.wireType = wireType;
         // Expecting an exception due to class replacement
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2");
 
         // Creating a Wire instance based on the provided WireType
-        final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
+        Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(wire.isBinary());
         CLASS_ALIASES.addAlias(DTO1.class, "DTO");
 
@@ -61,11 +56,11 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         // Reading the written document and expecting to get DTO2 instance
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
-                Assert.fail();
+                fail();
             @Nullable DTO2 dto2 = dc.wire().getValueIn().typedMarshallable();
-            Assert.assertEquals(1, dto2.one);
-            Assert.assertEquals(0, dto2.two);
-            Assert.assertNull(dto2.three);
+            assertEquals(1, dto2.one);
+            assertEquals(0, dto2.two);
+            assertNull(dto2.three);
         }
 
         // Releasing memory
@@ -73,13 +68,15 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     }
 
     // Test for checking forward compatibility of DTO classes
-    @Test
-    public void forwardCompatibility() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void forwardCompatibility(WireType wireType) {
+        this.wireType = wireType;
         // Expecting an exception due to class replacement
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1");
 
         // Creating a Wire instance based on the provided WireType
-        final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
+        Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(wire.isBinary());
         CLASS_ALIASES.addAlias(DTO2.class, "DTO");
 
@@ -95,9 +92,9 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
         // Reading the written document and expecting to get DTO1 instance
         try (DocumentContext dc = wire.readingDocument()) {
             if (!dc.isPresent())
-                Assert.fail();
+                fail();
             @Nullable DTO1 dto1 = dc.wire().getValueIn().typedMarshallable();
-            Assert.assertEquals(1, dto1.one);
+            assertEquals(1, dto1.one);
         }
 
         // Releasing memory
@@ -105,8 +102,10 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     }
 
     // Test to ensure that new data added to a document doesn't affect old reads
-    @Test
-    public void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads(WireType wireType) {
+        this.wireType = wireType;
 
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
@@ -126,11 +125,11 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
 
             // Reading back the documents and verifying the data
             try (DocumentContext dc = w.readingDocument()) {
-                Assert.assertEquals("hello world", dc.wire().read("hello").text());
+                assertEquals("hello world", dc.wire().read("hello").text());
             }
 
             try (DocumentContext dc = w.readingDocument()) {
-                Assert.assertEquals("other data", dc.wire().read("other data").text());
+                assertEquals("other data", dc.wire().read("other data").text());
             }
         } finally {
             // Releasing memory

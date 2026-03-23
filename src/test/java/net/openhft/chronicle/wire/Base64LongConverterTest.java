@@ -4,13 +4,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Base64LongConverterTest extends WireTestCommon {
 
@@ -37,14 +35,18 @@ public class Base64LongConverterTest extends WireTestCommon {
         assertTrue(true);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseLengthCheck() {
-        Base64LongConverter.INSTANCE.parse(getClass().getCanonicalName());
+        assertThrows(IllegalArgumentException.class, () -> {
+            Base64LongConverter.INSTANCE.parse(getClass().getCanonicalName());
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseSubstringLengthCheck() {
-        Base64LongConverter.INSTANCE.parse("abcd", 0, 5);
+        assertThrows(IllegalArgumentException.class, () -> {
+            Base64LongConverter.INSTANCE.parse("abcd", 0, 5);
+        });
     }
 
     @Test
@@ -62,7 +64,7 @@ public class Base64LongConverterTest extends WireTestCommon {
             // Convert the long number to a Base64 encoded string
             String s = c.asString(l);
             // Assert conversion consistency by parsing it back and comparing with the original long number
-            Assert.assertEquals("i: " + i + ", s: " + s, l, c.parse(s));
+            assertEquals(l, c.parse(s), "i: " + i + ", s: " + s);
         }
     }
 
@@ -100,8 +102,7 @@ public class Base64LongConverterTest extends WireTestCommon {
                 v.writeLong(converter, i2);
             });
             // Validate that the wire representation is accurate
-            assertEquals(wire.toString(),
-                    i, wire.read("a").readLong(converter));
+            assertEquals(i, wire.read("a").readLong(converter), wire.toString());
             // Check the sequence integrity and correctness in the wire
             wire.read("b").sequence(i, (i2, v) -> {
                 assertEquals((long) i2, v.readLong(converter));

@@ -5,13 +5,12 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class AbstractMarshallableCfgTest extends WireTestCommon{
     static class MyAMC extends AbstractMarshallableCfg {
@@ -42,8 +41,7 @@ public class AbstractMarshallableCfgTest extends WireTestCommon{
         // Verify default string representation
         assertEquals("" +
                         "!net.openhft.chronicle.wire.AbstractMarshallableCfgTest$MyAMC {\n" +
-                        "}\n",
-                myAMC.toString());
+                        "}\n", myAMC.toString());
 
         // Modify values for nested configurations
         myAMC.nestedAMC.number = 0;
@@ -61,8 +59,7 @@ public class AbstractMarshallableCfgTest extends WireTestCommon{
                         "    bytes: Hi,\n" +
                         "    amt: 1.0\n" +
                         "  }\n" +
-                        "}\n",
-                myAMC.toString());
+                        "}\n", myAMC.toString());
     }
 
     // Test the deep copy functionality

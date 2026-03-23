@@ -4,12 +4,12 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Base85LongConverterTest extends WireTestCommon {
 
@@ -58,14 +58,18 @@ public class Base85LongConverterTest extends WireTestCommon {
         assertTrue(true);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseLengthCheck() {
-        Base85LongConverter.INSTANCE.parse(getClass().getCanonicalName());
+        assertThrows(IllegalArgumentException.class, () -> {
+            Base85LongConverter.INSTANCE.parse(getClass().getCanonicalName());
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseSubstringLengthCheck() {
-        Base85LongConverter.INSTANCE.parse("ABCD", -1, 3);
+        assertThrows(IllegalArgumentException.class, () -> {
+            Base85LongConverter.INSTANCE.parse("ABCD", -1, 3);
+        });
     }
 
     @Test
@@ -77,7 +81,7 @@ public class Base85LongConverterTest extends WireTestCommon {
                 .mapToLong(i -> ThreadLocalRandom.current().nextLong())
                 .forEach(l -> {
                     String s = c.asString(l);
-                    assertEquals(s, l, c.parse(s));
+                    assertEquals(l, c.parse(s), s);
                 });
     }
 
@@ -155,8 +159,7 @@ public class Base85LongConverterTest extends WireTestCommon {
                 v.writeLong(converter, i2);
             });
             // Validate that the wire representation is accurate
-            assertEquals(wire.toString(),
-                    i, wire.read("a").readLong(converter));
+            assertEquals(i, wire.read("a").readLong(converter), wire.toString());
             // Check the sequence integrity and correctness in the wire
             wire.read("b").sequence(i, (i2, v) -> {
                 assertEquals((long) i2, v.readLong(converter));

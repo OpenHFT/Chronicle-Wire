@@ -5,9 +5,9 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BinaryToTextTest extends WireTestCommon {
 
@@ -20,7 +20,6 @@ public class BinaryToTextTest extends WireTestCommon {
         tw.writeDocument(false, w -> w.write(() -> "key").text("hello"));
         assertEquals("" +
                         "--- !!data #binary\n" +
-                        "key: hello\n",
-                Wires.fromSizePrefixedBlobs(tw));
+                        "key: hello\n", Wires.fromSizePrefixedBlobs(tw));
     }
 }

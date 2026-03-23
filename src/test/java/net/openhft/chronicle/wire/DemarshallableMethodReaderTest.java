@@ -7,9 +7,8 @@ import net.openhft.chronicle.bytes.MethodReader;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsSame;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,17 +19,8 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@RunWith(Parameterized.class)
 public class DemarshallableMethodReaderTest {
 
-    private final Wire wire;
-
-    public DemarshallableMethodReaderTest(Wire wire) {
-        this.wire = wire;
-        System.out.println("Using wire: " + wire.getClass().getSimpleName());
-    }
-
-    @Parameterized.Parameters()
     public static Collection<Wire> combinations() {
         return Arrays.asList(
                 new BinaryWire(allocateElasticOnHeap()),
@@ -52,8 +42,11 @@ public class DemarshallableMethodReaderTest {
         void onMessage(Object value);
     }
 
-    @Test
-    public void writesAndReadsMultipleMessages() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    public void writesAndReadsMultipleMessages(Wire wire) {
+        System.out.println("Using wire: " + wire.getClass().getSimpleName());
+
         MessageListener writer = wire.methodWriter(MessageListener.class);
         writer.onMessage(new SelfDescribingDemarshallableObject("msg1", 1.5));
         writer.onMessage(new SelfDescribingDemarshallableObject("msg2", 2.3));

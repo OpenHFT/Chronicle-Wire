@@ -3,9 +3,9 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 // Class to test JSON schema generation
 public class GenerateJsonSchemaMainTest extends WireTestCommon {

@@ -6,51 +6,49 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.util.Mocker;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
 
 import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
-@RunWith(Parameterized.class)
 public class ChainedMethodsTest extends WireTestCommon {
 
-    // Parameter that will be injected by the Parameterized runner.
-    @Parameterized.Parameter
-    public boolean disableProxyCodegen;
+    // Parameter that will be set per test invocation.
+    private boolean disableProxyCodegen;
 
     // Specifies the parameters to be used for the test runs.
-    @Parameterized.Parameters(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     public static Collection<Object[]> data() {
         // Two sets of parameters: 'false' and 'true'
         return Arrays.asList(new Object[]{false}, new Object[]{true});
     }
 
     // Set up method that runs before each test execution.
-    @Before
     public void setUp() {
         // Set a system property based on the current parameter value.
         System.setProperty(DISABLE_WRITER_PROXY_CODEGEN, String.valueOf(disableProxyCodegen));
     }
 
     // Clean up method that runs after each test execution.
-    @After
+    @AfterEach
     public void cleanUp() {
         // Clear the system property that was set in the setup method.
         System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
     }
 
     // Test method for chained methods with TextWire.
-    @Test
-    public void chainedText() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void chainedText(boolean disableProxyCodegen) {
+        this.disableProxyCodegen = disableProxyCodegen;
+        setUp();
+
         if (disableProxyCodegen)
             expectException("Falling back to proxy method writer");
 
@@ -91,8 +89,12 @@ public class ChainedMethodsTest extends WireTestCommon {
     }
 
     // Test method for chained methods with YAML Wire.
-    @Test
-    public void chainedYaml() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void chainedYaml(boolean disableProxyCodegen) {
+        this.disableProxyCodegen = disableProxyCodegen;
+        setUp();
+
         if (disableProxyCodegen)
             expectException("Falling back to proxy method writer");
 
@@ -132,10 +134,14 @@ public class ChainedMethodsTest extends WireTestCommon {
     }
 
     // Test for chained methods with BinaryWire
-    @Test
-    public void chainedBinary() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void chainedBinary(boolean disableProxyCodegen) {
+        this.disableProxyCodegen = disableProxyCodegen;
+        setUp();
+
         // Assume the test should not run if the condition is true.
-        assumeFalse("https://github.com/OpenHFT/Chronicle-Wire/issues/460", disableProxyCodegen);
+        assumeFalse(disableProxyCodegen, "https://github.com/OpenHFT/Chronicle-Wire/issues/460");
 
         // Create an instance of BinaryWire.
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
@@ -177,10 +183,14 @@ public class ChainedMethodsTest extends WireTestCommon {
     }
 
     // Test for chained methods with BinaryWire and varying argument numbers
-    @Test
-    public void chainedBinaryVariousArgsNumber() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void chainedBinaryVariousArgsNumber(boolean disableProxyCodegen) {
+        this.disableProxyCodegen = disableProxyCodegen;
+        setUp();
+
         // Assume the test should not run if the condition is true.
-        assumeFalse("https://github.com/OpenHFT/Chronicle-Wire/issues/460", disableProxyCodegen);
+        assumeFalse(disableProxyCodegen, "https://github.com/OpenHFT/Chronicle-Wire/issues/460");
 
         // Create an instance of BinaryWire.
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
@@ -248,8 +258,12 @@ public class ChainedMethodsTest extends WireTestCommon {
     }
 
     // Test for nested return type in BinaryWire
-    @Test
-    public void testNestedReturnType() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testNestedReturnType(boolean disableProxyCodegen) {
+        this.disableProxyCodegen = disableProxyCodegen;
+        setUp();
+
         if (disableProxyCodegen)
             expectException("Falling back to proxy method writer");
 

@@ -5,15 +5,15 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.Mocker;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 // Two base interfaces with some methods
 interface GMBA {
@@ -117,7 +117,6 @@ public class GenerateMethodBridgeTest extends WireTestCommon {
                         "}\n" +
                         "]\n" +
                         "gmbb.method3[method3]\n" +
-                        "gmbz.method3[method3]\n",
-                sw.toString().replace("\r", ""));
+                        "gmbz.method3[method3]\n", sw.toString().replace("\r", ""));
     }
 }

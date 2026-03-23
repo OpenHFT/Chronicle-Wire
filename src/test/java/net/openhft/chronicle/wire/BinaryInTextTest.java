@@ -6,30 +6,22 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
-@RunWith(value = Parameterized.class)
 public class BinaryInTextTest extends WireTestCommon {
 
     // Holds the wire type for each test iteration
-    private final WireType wireType;
-
-    // Constructor to initialize the wire type
-    public BinaryInTextTest(WireType wireType) {
-        this.wireType = wireType;
-    }
+    private WireType wireType;
 
     // Specifies the set of wire types that will be passed to the test constructor
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
                 new Object[]{WireType.TEXT},
@@ -38,8 +30,10 @@ public class BinaryInTextTest extends WireTestCommon {
 
     // Test for converting binary content from text representation to Bytes
     @SuppressWarnings("rawtypes")
-    @Test
-    public void testBytesFromText() {
+    @ParameterizedTest
+    @MethodSource("wireTypes")
+    public void testBytesFromText(WireType wireType) {
+        this.wireType = wireType;
         Bytes<?> a = wireType.fromString(Bytes.class, "A==");
         assertEquals("A==", a.toString());
 
@@ -54,8 +48,10 @@ public class BinaryInTextTest extends WireTestCommon {
     }
 
     // Test to validate reserialization of binary content from text
-    @Test
-    public void testReserialize() {
+    @ParameterizedTest
+    @MethodSource("wireTypes")
+    public void testReserialize(WireType wireType) {
+        this.wireType = wireType;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         BIT bit = wireType.fromString(BIT.class, "{\n" +
