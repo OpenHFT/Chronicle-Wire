@@ -29,12 +29,12 @@ public class MapWireTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     private Map m;
 
-    @SuppressWarnings("rawtypes")
     /**
      * Provides a collection of test parameters including wire types and maps with various content.
      *
      * @return Collection of object arrays with wire types and maps.
      */
+    @SuppressWarnings("rawtypes")
     @NotNull
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
