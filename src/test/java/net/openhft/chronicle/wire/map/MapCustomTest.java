@@ -6,14 +6,14 @@ package net.openhft.chronicle.wire.map;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.Wires;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.Closeable;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test suite for custom map implementations and their serialization.

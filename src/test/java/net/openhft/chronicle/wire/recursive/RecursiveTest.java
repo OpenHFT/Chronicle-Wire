@@ -5,11 +5,10 @@ package net.openhft.chronicle.wire.recursive;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.WireMarshaller;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assume.assumeFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * Test for recursion in the marshaller and fields. WIRE_MARSHALLER_CL.get should not recurse while

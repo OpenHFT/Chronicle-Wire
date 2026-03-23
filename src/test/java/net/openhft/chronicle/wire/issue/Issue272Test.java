@@ -9,11 +9,11 @@ import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.YamlWire;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class to validate the behavior and serialization of Wire objects with arrays.
@@ -71,8 +71,7 @@ public class Issue272Test {
                         "a1 66                                           # 102\n" +
                         "a1 67                                           # 103\n" +
                         "a1 68                                           # 104\n" +
-                        "a1 69                                           # 105\n",
-                bytes.toHexString());
+                        "a1 69                                           # 105\n", bytes.toHexString());
 
         // Create a fresh YamlWire, copy data from the BinaryWire, and verify the result
         Wire copyWire = new YamlWire(Bytes.allocateElasticOnHeap());
@@ -93,8 +92,7 @@ public class Issue272Test {
                         "  103,\n" +
                         "  104,\n" +
                         "  105\n" +
-                        "]\n",
-                copyWire.toString());
+                        "]\n", copyWire.toString());
         doTest(copyWire);
     }
 
@@ -140,8 +138,7 @@ public class Issue272Test {
                         "c3 6f 6e 65                                     # one:\n" +
                         "a1 01                                           # 1\n" +
                         "c3 74 77 6f                                     # two:\n" +
-                        "a1 02                                           # 2\n",
-                bytes.toHexString());
+                        "a1 02                                           # 2\n", bytes.toHexString());
 
         // Convert the BinaryWire back into a YamlWire and verify its string representation
         Wire wire2 = new YamlWire();
@@ -156,8 +153,7 @@ public class Issue272Test {
                         "    two: 2\n" +
                         "  }\n" +
                         "}\n" +
-                        "...\n",
-                wire2.toString());
+                        "...\n", wire2.toString());
     }
 
     /**

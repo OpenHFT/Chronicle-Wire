@@ -6,25 +6,19 @@ package net.openhft.chronicle.wire.issue;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(value = Parameterized.class)
 public class Issue886Test {
-    private final WireType wireType;
+    private WireType wireType;
 
-    public Issue886Test(WireType wireType) {
-        this.wireType = wireType;
-    }
-
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         return Arrays.asList(new Object[][]{
                 {WireType.YAML_ONLY},
@@ -32,8 +26,10 @@ public class Issue886Test {
         });
     }
 
-    @Test
-    public void test() throws IOException {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    public void test(WireType wireType) {
+        this.wireType = wireType;
         String data = "{\n" +
                 "  \"a\": 1.234,\n" +
                 "  \"a1\": '1.234'\n" +

@@ -13,13 +13,13 @@ import net.openhft.chronicle.core.io.Syncable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.YamlWire;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
 

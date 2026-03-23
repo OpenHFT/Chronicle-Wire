@@ -9,24 +9,22 @@ import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * Test class extending WireTestCommon to validate serialization and deserialization behaviors
  * using different wire types in Chronicle Wire. This class uses parameterized tests to
  * execute the same set of tests with various wire formats.
  */
-@RunWith(value = Parameterized.class)
 public class ReorderedTest extends WireTestCommon {
     // Static instances of OuterClass for test setup
     private static final OuterClass outerClass1 = new OuterClass();
@@ -59,27 +57,19 @@ public class ReorderedTest extends WireTestCommon {
                 new NestedReadSubset().setTextNumber("two", 2.2));
     }
 
-    // Function to dynamically select the wire type for each test iteration
-    @SuppressWarnings("rawtypes")
-    private final Function<Bytes<?>, Wire> wireType;
     private static final Collection<NestedReadSubset> nestedReadSubsets;
 
     // Constructor accepting the wire type function
     @SuppressWarnings("rawtypes")
-    public ReorderedTest(Function<Bytes<?>, Wire> wireType) {
-        this.wireType = wireType;
-    }
-
     // Parameterized test configurations
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> combinations() {
-        return Arrays.asList(new Object[][]{
-                {WireType.JSON},
-                {WireType.TEXT},
+    public static Collection<Function<Bytes<?>, Wire>> combinations() {
+        return Arrays.asList(
+                WireType.JSON,
+                WireType.TEXT,
                 // https://github.com/OpenHFT/Chronicle-Wire/issues/665
                 //{WireType.YAML_ONLY},
-                {WireType.BINARY}
-        });
+                WireType.BINARY
+        );
     }
 
     /**
@@ -88,8 +78,9 @@ public class ReorderedTest extends WireTestCommon {
      * across these operations.
      */
     @SuppressWarnings("rawtypes")
-    @Test
-    public void testWithReorderedFields() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    public void testWithReorderedFields(Function<Bytes<?>, Wire> wireType) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Bytes<?> bytes = Bytes.elasticByteBuffer();
@@ -123,8 +114,9 @@ public class ReorderedTest extends WireTestCommon {
      * Test to verify serialization and deserialization of a collection of objects.
      * It writes a collection of `NestedReadSubset` objects and then reads them back.
      */
-    @Test
-    public void testWithSubsetFields() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    public void testWithSubsetFields(Function<Bytes<?>, Wire> wireType) {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
 
@@ -144,8 +136,9 @@ public class ReorderedTest extends WireTestCommon {
      * multiple iterations with different values.
      */
     @SuppressWarnings("rawtypes")
-    @Test
-    public void testTopLevel() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    public void testTopLevel(Function<Bytes<?>, Wire> wireType) {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
         for (int i = 1; i < 5; i++) {

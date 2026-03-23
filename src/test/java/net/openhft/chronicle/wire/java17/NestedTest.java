@@ -5,9 +5,9 @@ package net.openhft.chronicle.wire.java17;
 
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.WireTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * NestedTest class extending from the common wire test base.
@@ -31,14 +31,12 @@ public class NestedTest extends WireTestCommon {
         field.required("parent", Required.NO);
 
         // Assert the structure and formatting of the Group object
-        assertEquals(
-            "!Group {\n" +
-            "  field: {\n" +
-            "    required: {\n" +
-            "      parent: NO\n" +
-            "    }\n" +
-            "  }\n" +
-            "}\n", g.toString()
-        );
+        assertEquals("!Group {\n" +
+        "  field: {\n" +
+        "    required: {\n" +
+        "      parent: NO\n" +
+        "    }\n" +
+        "  }\n" +
+        "}\n", g.toString());
     }
 }

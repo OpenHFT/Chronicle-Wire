@@ -5,9 +5,9 @@ package net.openhft.chronicle.wire.issue;
 
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Issue844Test extends WireTestCommon {
 
@@ -26,21 +26,16 @@ public class Issue844Test extends WireTestCommon {
                 "    \"collection\": \"ladder\"\n" +
                 "  }\n" +
                 "}");
-        assertEquals(
-                "serviceConfig: {\n" +
-                        "  db: {\n" +
-                        "    a: {\n" +
-                        "      Hello: World\n" +
-                        "    },\n" +
-                        "    mongodb: !net.openhft.chronicle.wire.issue.Issue844Test$Enum INSTANCE,\n" +
-                        "    collection: ladder\n" +
-                        "  }\n" +
-                        "}\n",
-                WireType.YAML_ONLY.asString(o2));
-        assertEquals(
-                "{\"serviceConfig\":{\"db\":{\"a\":{\"Hello\":\"World\"},\"mongodb\":{\"@net.openhft.chronicle.wire.issue.Issue844Test$Enum\":\"INSTANCE\"},\"collection\":\"ladder\"}}}",
-                WireType.JSON_ONLY.asString(o2)
-        );
+        assertEquals("serviceConfig: {\n" +
+                "  db: {\n" +
+                "    a: {\n" +
+                "      Hello: World\n" +
+                "    },\n" +
+                "    mongodb: !net.openhft.chronicle.wire.issue.Issue844Test$Enum INSTANCE,\n" +
+                "    collection: ladder\n" +
+                "  }\n" +
+                "}\n", WireType.YAML_ONLY.asString(o2));
+        assertEquals("{\"serviceConfig\":{\"db\":{\"a\":{\"Hello\":\"World\"},\"mongodb\":{\"@net.openhft.chronicle.wire.issue.Issue844Test$Enum\":\"INSTANCE\"},\"collection\":\"ladder\"}}}", WireType.JSON_ONLY.asString(o2));
     }
 
     public enum Enum {

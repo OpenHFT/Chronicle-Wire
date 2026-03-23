@@ -7,9 +7,9 @@ import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class extending `WireTestCommon` to validate the reading and writing of bytes using FIELDLESS_BINARY wire type.
@@ -34,8 +34,7 @@ public class Issue620Test extends net.openhft.chronicle.wire.WireTestCommon {
         assertEquals("" +
                         "03 00 00 00 66 6f 6f                            # msg-length\n" +
                         "03 00 00 00 62 61 7a                            # msg-length\n" +
-                        "03 00 00 00 62 61 72                            # msg-length\n",
-                wire.bytes().toHexString());
+                        "03 00 00 00 62 61 72                            # msg-length\n", wire.bytes().toHexString());
 
         // Reads the bytes back from the wire and asserts they match the strings "foo", "baz", and "bar"
         for (String s : "foo,baz,bar".split(",")) {
