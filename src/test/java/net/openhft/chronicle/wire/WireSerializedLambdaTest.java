@@ -11,8 +11,8 @@ import net.openhft.chronicle.core.util.SerializableFunction;
 import net.openhft.chronicle.core.util.SerializableUpdater;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,8 +20,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 @SuppressWarnings("unchecked")
 public class WireSerializedLambdaTest extends WireTestCommon {
@@ -33,7 +33,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
     }
 
     // Ensure that the test is not executed for Java versions 21 and above
-    @Before
+    @BeforeEach
     public void notSupportedInJava21() {
         assumeFalse(Jvm.majorVersion() >= 21);
     }
@@ -148,8 +148,7 @@ public class WireSerializedLambdaTest extends WireTestCommon {
                         "e5 41 44 44 5f 41                               # ADD_A\n" +
                         "c5 74 68 72 65 65                               # three:\n" +
                         "b6 06 55 70 64 61 74 65                         # Update\n" +
-                        "e4 44 45 43 52                                  # DECR\n",
-                wire.bytes().toHexString());
+                        "e4 44 45 43 52                                  # DECR\n", wire.bytes().toHexString());
 
         @Nullable Function<String, String> function = wire.read().object(Function.class);
         assertEquals("HELLO", function.apply("hello"));

@@ -4,11 +4,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.wire.internal.StringConsumerMarshallableOut;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 // Unit test class extending from WireTestCommon to get basic setup for the Chronicle Wire tests.
 public class StringConsumerMarshallableOutTest extends net.openhft.chronicle.wire.WireTestCommon {

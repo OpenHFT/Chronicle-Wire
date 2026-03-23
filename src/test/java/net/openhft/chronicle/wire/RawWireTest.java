@@ -8,9 +8,9 @@ import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.internal.NoBytesStore;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.time.*;
 import java.util.UUID;
@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RawWireTest extends WireTestCommon {
 
@@ -436,9 +436,9 @@ public class RawWireTest extends WireTestCommon {
                 .write().bool(null);
 
         // Reading and validating boolean values from the wire
-        wire.read().bool(false, Assert::assertEquals)
-                .read().bool(true, Assert::assertEquals)
-                .read().bool(null, Assert::assertEquals);
+        wire.read().bool(false, Assertions::assertEquals)
+                .read().bool(true, Assertions::assertEquals)
+                .read().bool(null, Assertions::assertEquals);
     }
 
     // Test case for writing and reading 32-bit floating-point numbers using a Wire
@@ -473,9 +473,9 @@ public class RawWireTest extends WireTestCommon {
                 .write().time(LocalTime.MIN);
 
         // Reading and validating LocalTime objects from the wire
-        wire.read().time(now, Assert::assertEquals)
-                .read().time(LocalTime.MAX, Assert::assertEquals)
-                .read().time(LocalTime.MIN, Assert::assertEquals);
+        wire.read().time(now, Assertions::assertEquals)
+                .read().time(LocalTime.MAX, Assertions::assertEquals)
+                .read().time(LocalTime.MIN, Assertions::assertEquals);
     }
 
     // Test case for writing and reading ZonedDateTime objects using a Wire
@@ -490,9 +490,9 @@ public class RawWireTest extends WireTestCommon {
                 .write().zonedDateTime(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()));
 
         // Reading and validating ZonedDateTime objects from the wire
-        wire.read().zonedDateTime(now, Assert::assertEquals)
-                .read().zonedDateTime(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()), Assert::assertEquals)
-                .read().zonedDateTime(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()), Assert::assertEquals);
+        wire.read().zonedDateTime(now, Assertions::assertEquals)
+                .read().zonedDateTime(ZonedDateTime.of(LocalDateTime.MAX, ZoneId.systemDefault()), Assertions::assertEquals)
+                .read().zonedDateTime(ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()), Assertions::assertEquals);
     }
 
     // Test case for writing and reading LocalDate objects using a Wire
@@ -507,9 +507,9 @@ public class RawWireTest extends WireTestCommon {
                 .write().date(LocalDate.MIN);
 
         // Reading and validating LocalDate objects from the wire
-        wire.read().date(now, Assert::assertEquals)
-                .read().date(LocalDate.MAX, Assert::assertEquals)
-                .read().date(LocalDate.MIN, Assert::assertEquals);
+        wire.read().date(now, Assertions::assertEquals)
+                .read().date(LocalDate.MAX, Assertions::assertEquals)
+                .read().date(LocalDate.MIN, Assertions::assertEquals);
     }
 
     // Test case for writing and reading UUID objects using a Wire
@@ -524,14 +524,14 @@ public class RawWireTest extends WireTestCommon {
                 .write().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE));
 
         // Reading and validating UUID objects from the wire
-        wire.read().uuid(uuid, Assert::assertEquals)
-                .read().uuid(new UUID(0, 0), Assert::assertEquals)
-                .read().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), Assert::assertEquals);
+        wire.read().uuid(uuid, Assertions::assertEquals)
+                .read().uuid(new UUID(0, 0), Assertions::assertEquals)
+                .read().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), Assertions::assertEquals);
     }
 
     // Test case for writing and reading byte arrays using a Wire
     // Currently, this test is ignored due to an UnsupportedOperationException
-    @Ignore("todo fix :currently using NoBytesStore so will fail with UnsupportedOperationException")
+    @Disabled("todo fix :currently using NoBytesStore so will fail with UnsupportedOperationException")
     @SuppressWarnings("rawtypes")
     @Test
     public void testBytes() {
@@ -580,8 +580,7 @@ public class RawWireTest extends WireTestCommon {
         // Validate the debug representation of the written data
         assertEquals("[pos: 0, rlim: 78, wlim: 8EiB, cap: 8EiB ] ǁ" +
                         "⒈A#٠٠٠±90w¾\\u009F\\u001A/Ý^@٠٠٠٠٠٠٠٠C\\u009ECÿ⒒Hello World" +
-                        "⒈B\\u001F٠٠٠٠Ò⒋S⒌£\\u0092:Ý^@٠٠٠٠٠٠٠٠\\u009E.¤ø⒎Bye now‡٠٠٠٠٠٠٠٠",
-                wire.bytes().toDebugString());
+                        "⒈B\\u001F٠٠٠٠Ò⒋S⒌£\\u0092:Ý^@٠٠٠٠٠٠٠٠\\u009E.¤ø⒎Bye now‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
 
         @NotNull MyTypesCustom mt2 = new MyTypesCustom();
         @NotNull StringBuilder key = new StringBuilder();

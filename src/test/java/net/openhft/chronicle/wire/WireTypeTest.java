@@ -9,11 +9,11 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.Time;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("deprecation")
 public class WireTypeTest extends WireTestCommon {
@@ -51,8 +51,7 @@ public class WireTypeTest extends WireTestCommon {
         assertEquals("" +
                         "00000000 b6 10 54 65 73 74 4d 61  72 73 68 61 6c 6c 61 62 ··TestMa rshallab\n" +
                         "00000010 6c 65 82 12 00 00 00 c4  6e 61 6d 65 e4 6e 61 6d le······ name·nam\n" +
-                        "00000020 65 c5 63 6f 75 6e 74 a1  01                      e·count· ·       \n",
-                WireType.BINARY.asString(tm));
+                        "00000020 65 c5 63 6f 75 6e 74 a1  01                      e·count· ·       \n", WireType.BINARY.asString(tm));
 
         assertEquals("00000000 10 54 65 73 74 4d 61 72  73 68 61 6c 6c 61 62 6c ·TestMar shallabl\n" +
                 "00000010 65 09 00 00 00 04 6e 61  6d 65 01 00 00 00       e·····na me····  \n", WireType.RAW.asString(tm));

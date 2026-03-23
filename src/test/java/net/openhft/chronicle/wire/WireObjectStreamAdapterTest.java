@@ -4,7 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class WireObjectStreamAdapterTest extends WireTestCommon {
 
@@ -68,10 +68,12 @@ public class WireObjectStreamAdapterTest extends WireTestCommon {
         buffer.releaseLast();
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void readFullyIsUnsupported() throws IOException {
-        Wire wire = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
-        WireObjectInput input = new WireObjectInput(wire);
-        input.readFully(new byte[1], 0, 1);
+        assertThrows(UnsupportedOperationException.class, () -> {
+            Wire wire = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
+            WireObjectInput input = new WireObjectInput(wire);
+            input.readFully(new byte[1], 0, 1);
+        });
     }
 }

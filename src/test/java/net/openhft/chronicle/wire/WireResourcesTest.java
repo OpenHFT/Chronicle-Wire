@@ -10,19 +10,19 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.nio.file.Files;
 
 import static net.openhft.chronicle.core.io.ReferenceOwner.INIT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class WireResourcesTest extends WireTestCommon {
 
-    @Before
+    @BeforeEach
     public void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }

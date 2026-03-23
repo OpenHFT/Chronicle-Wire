@@ -6,7 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -14,8 +14,8 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 // Class to test behavior of Wire in the context of Enums, especially unknown Enums
 public class UnknownEnumTest extends WireTestCommon {
@@ -65,15 +65,17 @@ public class UnknownEnumTest extends WireTestCommon {
     /*
     Documents the behaviour of BinaryWire when an enum type is unknown
      */
-    @Test(expected = ClassNotFoundRuntimeException.class)
+    @Test
     public void shouldConvertEnumValueToStringWhenTypeIsNotKnownInBinaryWireThrows() {
-        final Bytes<ByteBuffer> bytes = Bytes.wrapForRead(ByteBuffer.wrap(SERIALISED_MAP_DATA));
+        assertThrows(ClassNotFoundRuntimeException.class, () -> {
+            final Bytes<ByteBuffer> bytes = Bytes.wrapForRead(ByteBuffer.wrap(SERIALISED_MAP_DATA));
 
-        final Wire wire = WireType.BINARY.apply(bytes);
+            final Wire wire = WireType.BINARY.apply(bytes);
 
-        // Reading the serialized map data and ensuring the unknown Enum value is read as a String
-        final Map<String, Object> enumField = wire.read("event").marshallableAsMap(String.class, Object.class);
-        assertEquals("FIRST", enumField.get("key"));
+            // Reading the serialized map data and ensuring the unknown Enum value is read as a String
+            final Map<String, Object> enumField = wire.read("event").marshallableAsMap(String.class, Object.class);
+            assertEquals("FIRST", enumField.get("key"));
+        });
     }
 
     // This test ensures that TextWire produces a friendly error message for unknown Enum types

@@ -5,10 +5,10 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,22 +19,15 @@ import java.util.Collection;
 import java.util.List;
 
 import static net.openhft.chronicle.wire.WireType.TEXT;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(value = Parameterized.class)
-@Ignore("TODO FIX")
+@Disabled("TODO FIX")
 public class TextCompatibilityTest extends WireTestCommon {
 
     // File name for the current test run.
-    private final String filename;
+    private String filename;
     // Expected content for the current test run.
-    private final String expected;
-
-    // Constructor to initialize the test with a specific file and its expected content.
-    public TextCompatibilityTest(String filename, String expected) {
-        this.filename = filename;
-        this.expected = expected;
-    }
+    private String expected;
 
     // Main method that demonstrates how to find YAML files in a directory and run the test on them.
     public static void main(String[] args) throws IOException {
@@ -44,7 +37,6 @@ public class TextCompatibilityTest extends WireTestCommon {
     }
 
     // Provide the combinations of files and their expected content for the tests.
-    @Parameterized.Parameters
     public static Collection<Object[]> combinations() throws IOException {
         List<Object[]> list = new ArrayList<>();
         String dir = "src/test/resources/compat";
@@ -101,8 +93,11 @@ public class TextCompatibilityTest extends WireTestCommon {
     }
 
     // Perform the compatibility test for the current combination of file and expected content.
-    @Test
-    public void test() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    public void test(String filename, String expected) {
+        this.filename = filename;
+        this.expected = expected;
         runTest(filename, expected, false);
     }
 }

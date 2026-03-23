@@ -6,10 +6,10 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class WireMarshallerTest extends WireTestCommon {
 

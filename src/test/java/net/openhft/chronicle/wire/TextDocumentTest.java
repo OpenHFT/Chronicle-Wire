@@ -9,15 +9,14 @@ import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class TextDocumentTest extends WireTestCommon {
 
@@ -37,9 +36,9 @@ public class TextDocumentTest extends WireTestCommon {
         // Check that the written bytes contain the expected serialized atomic values.
         @NotNull Bytes<?> bytes = wire.bytes();
         String actual = Wires.fromSizePrefixedBlobs(bytes);
-        Assert.assertTrue(actual.contains(
+        assertTrue(actual.contains(
                 "  writeByte: !!atomic {  locked: false, value: 00000000000000000512 }"));
-        Assert.assertTrue(actual.contains(
+        assertTrue(actual.contains(
                 "  readByte: !!atomic {  locked: false, value: 00000000000000001024 }"));
 
         // Read the header from the wire and populate rheader.
@@ -63,7 +62,7 @@ public class TextDocumentTest extends WireTestCommon {
     }
 
     // An ignored test for YAML_ONLY wireType. Needs to be fixed before running.
-    @Ignore(/* TODO FIX */)
+    @Disabled(/* TODO FIX */)
     @Test
     public void testDocumentYaml() {
         doTestDocument(WireType.YAML_ONLY);

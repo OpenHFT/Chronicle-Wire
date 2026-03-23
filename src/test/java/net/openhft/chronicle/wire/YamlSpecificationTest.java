@@ -7,9 +7,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,9 +17,8 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static net.openhft.chronicle.wire.WireType.YAML;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(Parameterized.class)
 public class YamlSpecificationTest extends WireTestCommon {
 
     // Register class aliases for String, Circle, Shape, Line, and Label
@@ -32,16 +30,7 @@ public class YamlSpecificationTest extends WireTestCommon {
         ClassAliasPool.CLASS_ALIASES.addAlias(Label.class, "label");*/
     }
 
-    // Input string used for tests
-    private final String input;
-
-    // Parameterized constructor
-    public YamlSpecificationTest(String input) {
-        this.input = input;
-    }
-
     // Defining parameterized test cases
-    @Parameterized.Parameters(name = "case={0}")
     public static Collection<Object[]> tests() {
         return Arrays.asList((Object[][]) new String[][]{
                 {"2_1_SequenceOfScalars"},
@@ -76,8 +65,9 @@ public class YamlSpecificationTest extends WireTestCommon {
     }
 
     // Test to decode YAML snippets based on various specifications
-    @Test
-    public void decodeAs() throws IOException {
+    @ParameterizedTest
+    @MethodSource("tests")
+    public void decodeAs(String input) throws IOException {
         String snippet = new String(getBytes(input + ".yaml"), StandardCharsets.UTF_8)
                 .replace("\r\n", "\n");
         String actual = parseWithYaml(snippet);

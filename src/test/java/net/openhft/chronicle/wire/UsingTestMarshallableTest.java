@@ -6,13 +6,12 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTestCommon {
 
@@ -47,10 +46,9 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
                 "any-key: {\n" +
                 "  name: hello world,\n" +
                 "  count: 0\n" +
-                "}\n",
-                value);
+                "}\n", value);
 
-         // Assert.assertTrue(replace.length() > 1);
+         // assertTrue(replace.length() > 1);
         // Release the ByteBuffer's resources
         byteBufferBytes.releaseLast();
     }
@@ -100,7 +98,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
             @NotNull SortedFilter sortedFilter = new SortedFilter();
 
             boolean add = sortedFilter.marshableFilters.add(expected);
-            Assert.assertTrue(add);
+            assertTrue(add);
             wire.write().marshallable(sortedFilter);
         }
 

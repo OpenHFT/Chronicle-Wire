@@ -3,16 +3,16 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 // This test class evaluates how different timestamp converters behave with timezone configurations.
 public class TimestampLongConverterZonedIdsConfigTest extends WireTestCommon {
 
     // Cleanup the system properties after each test execution
-    @After
+    @AfterEach
     public void tearDown() {
         System.clearProperty(AbstractTimestampLongConverter.TIMESTAMP_LONG_CONVERTERS_ZONE_ID_SYSTEM_PROPERTY);
         System.clearProperty("mtlc.zoneId");

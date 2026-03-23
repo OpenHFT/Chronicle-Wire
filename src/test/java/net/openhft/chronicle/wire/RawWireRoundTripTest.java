@@ -4,15 +4,12 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesOut;
-import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
-import net.openhft.chronicle.core.values.LongArrayValues;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RawWireRoundTripTest extends WireTestCommon {
 
@@ -73,9 +70,11 @@ public class RawWireRoundTripTest extends WireTestCommon {
         }
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void rawBytesUnsupported() {
-        RawWire wire = new RawWire(Bytes.allocateElasticOnHeap());
-        wire.getValueOut().rawBytes(new byte[]{1});
+        assertThrows(UnsupportedOperationException.class, () -> {
+            RawWire wire = new RawWire(Bytes.allocateElasticOnHeap());
+            wire.getValueOut().rawBytes(new byte[]{1});
+        });
     }
 }

@@ -4,8 +4,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Checks that exception raised by {@link ReadMarshallable#unexpectedField(Object, ValueIn)}
@@ -30,10 +30,10 @@ public class UnknownFieldsTest extends WireTestCommon {
                             "        unknown: true" +
                             "    }\n" +
                             "}\n");
-            Assert.fail();  // If no exception is thrown, the test should fail
+            fail();  // If no exception is thrown, the test should fail
         } catch (UnexpectedFieldHandlingException e) {
             // Verify that the cause of the exception is as expected
-            Assert.assertEquals(NumberFormatException.class, e.getCause().getClass());
+            assertSame(NumberFormatException.class, e.getCause().getClass());
         }
     }
 
@@ -47,10 +47,10 @@ public class UnknownFieldsTest extends WireTestCommon {
                             "        unknown: true\n" +
                             "    }\n" +
                             "}\n");
-            Assert.fail();  // If no exception is thrown, the test should fail
+            fail();  // If no exception is thrown, the test should fail
         } catch (UnexpectedFieldHandlingException e) {
             // Verify that the cause of the exception is as expected
-            Assert.assertEquals(NumberFormatException.class, e.getCause().getClass());
+            assertSame(NumberFormatException.class, e.getCause().getClass());
         }
     }
 

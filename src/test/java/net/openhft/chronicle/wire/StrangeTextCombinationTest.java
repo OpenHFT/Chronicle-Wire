@@ -6,27 +6,21 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 // A parameterized test class that tests various string serialization behaviors for different WireTypes.
-@RunWith(value = Parameterized.class)
 public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireTestCommon {
     private WireType wireType;
     private Bytes<?> bytes;
 
-    // Constructor initializes the WireType for this instance of the test.
-    public StrangeTextCombinationTest(WireType wireType) {
-        this.wireType = wireType;
-    }
-
     // Parameterized test data. Each WireType will be tested.
-    @Parameterized.Parameters
     public static Collection<Object[]> data() {
         Object[][] list = {
                 {WireType.BINARY},
@@ -38,42 +32,50 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     }
 
     // Tests that a string with a leading space is serialized and deserialized correctly.
-    @Test
-    public void testPrependedSpace() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testPrependedSpace(WireType wireType) {
+        this.wireType = wireType;
         @NotNull final String prependedSpace = " hello world";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(prependedSpace);
 
-        Assert.assertEquals(prependedSpace, wire.read().text());
+        assertEquals(prependedSpace, wire.read().text());
 
     }
 
     // Tests that a string with a trailing space is serialized and deserialized correctly.
-    @Test
-    public void testPostpendedSpace() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testPostpendedSpace(WireType wireType) {
+        this.wireType = wireType;
         @NotNull final String postpendedSpace = "hello world ";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(postpendedSpace);
 
-        Assert.assertEquals(postpendedSpace, wire.read().text());
+        assertEquals(postpendedSpace, wire.read().text());
     }
 
     // Tests that a string with escape characters is serialized and deserialized correctly.
-    @Test
-    public void testSlashQuoteTest() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testSlashQuoteTest(WireType wireType) {
+        this.wireType = wireType;
         @NotNull final String expected = "\\\" ";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assert.assertEquals(expected, wire.read().text());
+        assertEquals(expected, wire.read().text());
     }
 
     // Tests that a string with specific YAML syntax is serialized and deserialized correctly.
-    @Test
-    public void testYaml() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testYaml(WireType wireType) {
+        this.wireType = wireType;
         @NotNull final String expected = "!String{chars:hello world}";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assert.assertEquals(expected, wire.read().text());
+        assertEquals(expected, wire.read().text());
     }
 
     // Test class to ensure various string values are correctly serialized and deserialized using
@@ -81,75 +83,91 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     // or format.
 
     // Tests that a string "!String" is serialized and deserialized correctly.
-    @Test
-    public void testString() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testString(WireType wireType) {
+        this.wireType = wireType;
         @NotNull final String expected = "!String";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assert.assertEquals(expected, wire.read().text());
+        assertEquals(expected, wire.read().text());
     }
 
     // Tests that a string "!binary" is serialized and deserialized correctly.
-    @Test
-    public void testBinary() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testBinary(WireType wireType) {
+        this.wireType = wireType;
         @NotNull final String expected = "!binary";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assert.assertEquals(expected, wire.read().text());
+        assertEquals(expected, wire.read().text());
     }
 
     // Tests that a string " !binary" with a leading space is serialized and deserialized correctly.
-    @Test
-    public void testBinaryWithSpace() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testBinaryWithSpace(WireType wireType) {
+        this.wireType = wireType;
         @NotNull final String expected = " !binary";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assert.assertEquals(expected, wire.read().text());
+        assertEquals(expected, wire.read().text());
     }
 
     // Tests that an empty string is serialized and deserialized correctly.
-    @Test
-    public void testEmpty() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testEmpty(WireType wireType) {
+        this.wireType = wireType;
         @NotNull final String expected = "";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assert.assertEquals(expected, wire.read().text());
+        assertEquals(expected, wire.read().text());
     }
 
     // Tests that a null string value is serialized and deserialized correctly.
-    @Test
-    public void testNull() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testNull(WireType wireType) {
+        this.wireType = wireType;
         @Nullable final String expected = null;
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assert.assertEquals(expected, wire.read().text());
+        assertEquals(expected, wire.read().text());
     }
 
     // Tests that a string with a newline character is serialized and deserialized correctly.
-    @Test
-    public void testNewLine() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testNewLine(WireType wireType) {
+        this.wireType = wireType;
         @NotNull final String expected = "\n";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assert.assertEquals(expected, wire.read().text());
+        assertEquals(expected, wire.read().text());
     }
 
     // Tests that a string with a Unicode null character is serialized and deserialized correctly.
-    @Test
-    public void testUnicode() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testUnicode(WireType wireType) {
+        this.wireType = wireType;
         @NotNull final String expected = "\u0000";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assert.assertEquals(expected, wire.read().text());
+        assertEquals(expected, wire.read().text());
     }
 
     // Tests that an XML formatted string is serialized and deserialized correctly.
-    @Test
-    public void testXML() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testXML(WireType wireType) {
+        this.wireType = wireType;
         @NotNull final String expected = "<name>rob austin</name>";
         @NotNull final Wire wire = wireFactory();
         wire.write().text(expected);
-        Assert.assertEquals(expected, wire.read().text());
+        assertEquals(expected, wire.read().text());
     }
 
     // Helper method to create a new Wire instance using the given WireType.

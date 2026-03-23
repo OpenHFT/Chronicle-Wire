@@ -4,9 +4,9 @@
 package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -18,23 +18,16 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 // Running the test class in a parameterized manner.
-@RunWith(value = Parameterized.class)
 public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
 
-    private final Future<?> future;
-
-    public TimestampLongConverterZoneIdsTest(String zoneId, ConverterType converterType, Future<?> future) {
-        this.future = future;
-    }
+    private Future<?> future;
 
     // This method defines the parameters to be injected into the test class.
     @NotNull
-    @Parameterized.Parameters(name = "zoneId={0}, converterType={1}")
     public static Collection<Object[]> combinations() {
         ExecutorService es = ForkJoinPool.commonPool();
         Random random = new Random(-1);
@@ -57,8 +50,10 @@ public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
     }
 
     // This test method checks the result of the future from the asynchronous operation.
-    @Test
-    public void testManyZones() throws ExecutionException, InterruptedException {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    public void testManyZones(String zoneId, ConverterType converterType, Future<?> future) {
+        this.future = future;
         assertNull(future.get());
     }
 

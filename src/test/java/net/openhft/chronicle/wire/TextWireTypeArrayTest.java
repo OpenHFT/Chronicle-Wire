@@ -4,9 +4,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 // This test class is designed to validate the behavior of TextWire when dealing with arrays of types.
 public class TextWireTypeArrayTest extends WireTestCommon {

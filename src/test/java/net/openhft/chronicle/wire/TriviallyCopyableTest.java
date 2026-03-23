@@ -7,11 +7,11 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.BiConsumer;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 // Test class for validating the Trivially Copyable features with Chronicle Wire
 public class TriviallyCopyableTest extends WireTestCommon {

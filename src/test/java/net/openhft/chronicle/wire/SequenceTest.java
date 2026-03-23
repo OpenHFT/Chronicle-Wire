@@ -7,29 +7,22 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.nio.ByteBuffer;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
-@RunWith(value = Parameterized.class)
 public class SequenceTest extends WireTestCommon {
 
     // Instance variable to hold the WireType.
-    private final WireType wireType;
-
-    // Constructor to initialize the WireType.
-    public SequenceTest(WireType wireType) {
-        this.wireType = wireType;
-    }
+    private WireType wireType;
 
     // Parameterized test setup to use different WireTypes.
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> wireTypes() {
         Object[][] list = {
                 {WireType.BINARY},
@@ -40,8 +33,10 @@ public class SequenceTest extends WireTestCommon {
     }
 
     // Test method to check serialization and deserialization functionality.
-    @Test
-    public void test() {
+    @ParameterizedTest
+    @MethodSource("wireTypes")
+    public void test(WireType wireType) {
+        this.wireType = wireType;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Create a new My object.
@@ -112,8 +107,10 @@ public class SequenceTest extends WireTestCommon {
     }
 
     // Test to read a Set as an object.
-    @Test
-    public void readSetAsObject() {
+    @ParameterizedTest
+    @MethodSource("wireTypes")
+    public void readSetAsObject(WireType wireType) {
+        this.wireType = wireType;
         // Allocate an elastic buffer on heap.
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
@@ -141,8 +138,10 @@ public class SequenceTest extends WireTestCommon {
     }
 
     // Test to read a List as an object.
-    @Test
-    public void readListAsObject() {
+    @ParameterizedTest
+    @MethodSource("wireTypes")
+    public void readListAsObject(WireType wireType) {
+        this.wireType = wireType;
         // Allocate an elastic buffer on heap.
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
@@ -168,8 +167,10 @@ public class SequenceTest extends WireTestCommon {
     }
 
     // Test to read a Map as an object.
-    @Test
-    public void readMapAsObject() {
+    @ParameterizedTest
+    @MethodSource("wireTypes")
+    public void readMapAsObject(WireType wireType) {
+        this.wireType = wireType;
         // Ensure that the wire type isn't RAW.
         assumeFalse(wireType == WireType.RAW);
 

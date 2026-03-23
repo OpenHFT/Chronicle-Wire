@@ -7,15 +7,13 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MappedBytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class ReadDocumentContextTest extends WireTestCommon {
 
@@ -47,7 +45,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
             assertTrue(dc.isPresent());
             assertTrue(dc.isNotComplete());
             assertFalse(dc.isMetaData());
-            Assert.assertEquals("someText", wire.read(() -> "key").text());
+            assertEquals("someText", wire.read(() -> "key").text());
         }
 
         // Write a complete document to the wire
@@ -58,7 +56,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
             assertTrue(dc.isPresent());
             assertFalse(dc.isNotComplete());
             assertFalse(dc.isMetaData());
-            Assert.assertEquals("someText2", wire.read(() -> "key2").text());
+            assertEquals("someText2", wire.read(() -> "key2").text());
         }
 
         // Release the byte buffer's resources
@@ -110,7 +108,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
             assertTrue(dc.isPresent());
             assertFalse(dc.isNotComplete());
             assertFalse(dc.isMetaData());
-            Assert.assertEquals("someText", wire.read(() -> "key").text());
+            assertEquals("someText", wire.read(() -> "key").text());
         }
 
         // Read the subsequent complete document and verify its content
@@ -118,7 +116,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
             assertTrue(dc.isPresent());
             assertFalse(dc.isNotComplete());
             assertFalse(dc.isMetaData());
-            Assert.assertEquals("someText2", wire.read(() -> "key2").text());
+            assertEquals("someText2", wire.read(() -> "key2").text());
         }
 
         // Release the MappedBytes' resources
@@ -150,7 +148,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
         try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertFalse(dc.isMetaData());
-            Assert.assertEquals("someText2", textWire.read(() -> "key2").text());
+            assertEquals("someText2", textWire.read(() -> "key2").text());
         }
 
         // Release the byte buffer's resources
@@ -174,7 +172,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
         try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertTrue(dc.isMetaData());
-            Assert.assertEquals("someText", textWire.read(() -> "key").text());
+            assertEquals("someText", textWire.read(() -> "key").text());
         }
 
         // Store the current read limit of the buffer
@@ -190,7 +188,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
         }
 
         // Assert that the new read limit has been applied
-        Assert.assertEquals(newReadPosition, b.readLimit());
+        assertEquals(newReadPosition, b.readLimit());
 
         // Reset the read limit to its original value
         b.readLimit(limit);
@@ -199,14 +197,14 @@ public class ReadDocumentContextTest extends WireTestCommon {
         try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertTrue(dc.isMetaData());
-            Assert.assertEquals("someText", textWire.read(() -> "key").text());
+            assertEquals("someText", textWire.read(() -> "key").text());
         }
 
         // Read the data document and verify its content
         try (@NotNull DocumentContext dc = textWire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertFalse(dc.isMetaData());
-            Assert.assertEquals("someText2", textWire.read(() -> "key2").text());
+            assertEquals("someText2", textWire.read(() -> "key2").text());
         }
 
         // Release the byte buffer's resources
@@ -230,7 +228,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
         try (@NotNull DocumentContext dc = wire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertTrue(dc.isMetaData());
-            Assert.assertEquals("someText", wire.read(() -> "key").text());
+            assertEquals("someText", wire.read(() -> "key").text());
         }
 
         // Store the current read limit of the buffer
@@ -246,7 +244,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
         }
 
         // Assert that the new read limit has been applied
-        Assert.assertEquals(newReadPosition, b.readLimit());
+        assertEquals(newReadPosition, b.readLimit());
 
         // Reset the read limit to its original value
         b.readLimit(limit);
@@ -255,14 +253,14 @@ public class ReadDocumentContextTest extends WireTestCommon {
         try (@NotNull DocumentContext dc = wire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertTrue(dc.isMetaData());
-            Assert.assertEquals("someText", wire.read(() -> "key").text());
+            assertEquals("someText", wire.read(() -> "key").text());
         }
 
         // Read the data document and verify its content
         try (@NotNull DocumentContext dc = wire.readingDocument()) {
             assertTrue(dc.isPresent());
             assertFalse(dc.isMetaData());
-            Assert.assertEquals("someText2", wire.read(() -> "key2").text());
+            assertEquals("someText2", wire.read(() -> "key2").text());
         }
 
         // Release the byte buffer's resources

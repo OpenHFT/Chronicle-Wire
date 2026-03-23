@@ -4,42 +4,22 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(Parameterized.class)
 public class WireDumperTest extends WireTestCommon {
 
-    // Instance variables for the test setup and expected outputs
-    private final Bytes<?> bytes;
-    private final Wire wire;
-    private final WireType wireType;
-    private final Map<WireType, String> expectedContentByType = new HashMap<>();
-    private final Map<WireType, String> expectedPartialContent = new HashMap<>();
-
-    // Constructor to set up the test environment based on a WireType
-    public WireDumperTest(final String name, final WireType wireType) {
-        bytes = Bytes.allocateElasticOnHeap(); // Allocate elastic bytes
-        wire = wireType.apply(bytes);          // Create a wire based on the given WireType
-        wire.usePadding(true);
-
-        this.wireType = wireType;
-        initTestData();  // Populate the expected outputs
-    }
-
-    @Parameterized.Parameters(name = "{0}")
+    // Helper method to filter and format WireType values for parameterized testing
     public static Object[][] parameters() {
         return toParams(WireType.values());
     }
 
-    // Helper method to filter and format WireType values for parameterized testing
     private static Object[][] toParams(final WireType[] values) {
         return Arrays.stream(values).filter(WireType::isAvailable)
                 .filter(wt -> wt != WireType.CSV)
@@ -50,16 +30,36 @@ public class WireDumperTest extends WireTestCommon {
                 .toArray(Object[][]::new);
     }
 
-    // Test case for verifying serialization of content to a wire
-    @Test
-    public void shouldSerialiseContent() {
-        // Writing values to the wire
-        wire.writeDocument(17L, ValueOut::int64);
-        wire.writeDocument("bark", ValueOut::text);
-        wire.writeDocument(3.14D, ValueOut::float64);
+    private Bytes<?> bytes;
+    private Wire wire;
+    private WireType wireType;
+    private final Map<WireType, String> expectedContentByType = new HashMap<>();
+    private final Map<WireType, String> expectedPartialContent = new HashMap<>();
 
-        final String actual = isText(wire.bytes()) ? wire.toString() : WireDumper.of(wire).asString();
-        assertEquals(expectedContentByType.get(wireType), actual);  // Asserting expected vs actual content
+    private void initTest(String name, WireType wireType) {
+        bytes = Bytes.allocateElasticOnHeap();
+        wire = wireType.apply(bytes);
+        wire.usePadding(true);
+        this.wireType = wireType;
+        initTestData();
+    }
+
+    // Test case for verifying serialization of content to a wire
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("parameters")
+    public void shouldSerialiseContent(String name, WireType wireType) {
+        initTest(name, wireType);
+        try {
+            // Writing values to the wire
+            wire.writeDocument(17L, ValueOut::int64);
+            wire.writeDocument("bark", ValueOut::text);
+            wire.writeDocument(3.14D, ValueOut::float64);
+
+            final String actual = isText(wire.bytes()) ? wire.toString() : WireDumper.of(wire).asString();
+            assertEquals(expectedContentByType.get(wireType), actual);  // Asserting expected vs actual content
+        } finally {
+            bytes.releaseLast();
+        }
     }
 
     // Helper method to check if the given bytes represent text
@@ -74,21 +74,21 @@ public class WireDumperTest extends WireTestCommon {
     }
 
     // Test case for verifying serialization of partial content to a wire
-    @Test
-    public void shouldSerialisePartialContent() {
-        // Writing partial content to the wire
-        wire.writeDocument(17L, ValueOut::int64);
-        final DocumentContext context = wire.writingDocument();
-        context.wire().getValueOut().text("meow");
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("parameters")
+    public void shouldSerialisePartialContent(String name, WireType wireType) {
+        initTest(name, wireType);
+        try {
+            // Writing partial content to the wire
+            wire.writeDocument(17L, ValueOut::int64);
+            final DocumentContext context = wire.writingDocument();
+            context.wire().getValueOut().text("meow");
 
-        final String actual = isText(wire.bytes()) ? wire.toString() : WireDumper.of(wire).asString();
-        assertEquals(expectedPartialContent.get(wireType), actual);  // Asserting expected vs actual partial content
-    }
-
-    // Overridden method to perform clean up after each test case
-    @Override
-    public void preAfter() {
-        bytes.releaseLast();  // Releasing the last bytes used
+            final String actual = isText(wire.bytes()) ? wire.toString() : WireDumper.of(wire).asString();
+            assertEquals(expectedPartialContent.get(wireType), actual);  // Asserting expected vs actual partial content
+        } finally {
+            bytes.releaseLast();
+        }
     }
 
     @SuppressWarnings("deprecation")

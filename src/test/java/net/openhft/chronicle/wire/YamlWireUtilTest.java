@@ -3,7 +3,7 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -11,7 +11,7 @@ import java.time.ZonedDateTime;
 
 import static net.openhft.chronicle.wire.YamlWire.readNumberOrTextFrom;
 import static net.openhft.chronicle.wire.YamlWire.removeUnderscore;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class YamlWireUtilTest {
 

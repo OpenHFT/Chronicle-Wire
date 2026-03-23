@@ -4,11 +4,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
@@ -16,19 +14,15 @@ import java.util.Collection;
 
 import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN;
 import static net.openhft.chronicle.wire.WireType.BINARY;
-import static org.junit.Assume.assumeFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
-@RunWith(Parameterized.class)
 public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
 
     // Parameterized value to determine if proxy code generation is disabled
-    @Parameterized.Parameter
-    public boolean disableProxyCodegen;
+    private boolean disableProxyCodegen;
 
     // Data set for parameterized tests, providing true and false values for 'disableProxyCodegen'
-    @Parameterized.Parameters(name = DISABLE_WRITER_PROXY_CODEGEN + "={0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[]{false}, new Object[]{true});
     }
@@ -41,7 +35,6 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
 
     // Before each test execution, set the appropriate system property and
     // expect a specific exception if proxy code generation is disabled
-    @Before
     public void setUp() {
         System.setProperty(DISABLE_WRITER_PROXY_CODEGEN, String.valueOf(disableProxyCodegen));
         if (disableProxyCodegen)
@@ -49,14 +42,17 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
     }
 
     // After each test execution, clean up by clearing the system property
-    @After
+    @AfterEach
     public void cleanUp() {
         System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
     }
 
     // Test to verify behavior with an interceptor on a method that has no return type
-    @Test
-    public void testUpdateInterceptorNoReturnType() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testUpdateInterceptorNoReturnType(boolean disableProxyCodegen) {
+        this.disableProxyCodegen = disableProxyCodegen;
+        setUp();
 
         final Wire wire = createWire();
         wire
@@ -71,8 +67,12 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
     }
 
     // Test to verify behavior with an interceptor on a method that has an integer return type
-    @Test
-    public void testUpdateInterceptorWithIntReturnType() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testUpdateInterceptorWithIntReturnType(boolean disableProxyCodegen) {
+        this.disableProxyCodegen = disableProxyCodegen;
+        setUp();
+
         final Wire wire = createWire();
         int value = wire
                 .methodWriterBuilder(WithIntReturnType.class)
@@ -87,8 +87,12 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
     }
 
     // Test to verify behavior with an interceptor on a method that has an object return type
-    @Test
-    public void testUpdateInterceptorWithObjectReturnType() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testUpdateInterceptorWithObjectReturnType(boolean disableProxyCodegen) {
+        this.disableProxyCodegen = disableProxyCodegen;
+        setUp();
+
         final Wire wire = createWire();
         final WithObjectReturnType mw = wire
                 .methodWriterBuilder(WithObjectReturnType.class)
@@ -116,8 +120,12 @@ public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
     }
 
     // Test to verify the behavior of an interceptor on a method from the LadderByQtyListener interface
-    @Test
-    public void testUpdateInterceptorWithLadderByQtyListener() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void testUpdateInterceptorWithLadderByQtyListener(boolean disableProxyCodegen) {
+        this.disableProxyCodegen = disableProxyCodegen;
+        setUp();
+
         final Wire wire = createWire();
         wire
                 .methodWriterBuilder(LadderByQtyListener.class)

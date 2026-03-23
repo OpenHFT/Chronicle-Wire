@@ -4,9 +4,9 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class QueryWireRoundTripTest extends WireTestCommon {
 
@@ -20,7 +20,7 @@ public class QueryWireRoundTripTest extends WireTestCommon {
         wire.write("flag").bool(true);
 
         String query = bytes.toString();
-        assertTrue("query should contain key/value pairs", query.contains("name=bob"));
+        assertTrue(query.contains("name=bob"), "query should contain key/value pairs");
 
         QueryWire reader = new QueryWire(Bytes.from(query));
         assertEquals("bob", reader.read("name").text());

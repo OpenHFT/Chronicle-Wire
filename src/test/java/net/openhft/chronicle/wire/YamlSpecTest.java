@@ -4,10 +4,10 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Deprecated(/* Should be fully covered by YamlSpecificationTest */)
 public class YamlSpecTest extends WireTestCommon {
@@ -20,9 +20,9 @@ public class YamlSpecTest extends WireTestCommon {
                     (DIR + file);
 
             Object o = Marshallable.fromString(is);
-            Assert.assertNotNull(o);
+            assertNotNull(o);
             String actual = o.toString();
-            Assert.assertEquals(expected, actual);
+            assertEquals(expected, actual);
 
         } finally {
             b.releaseLast();
@@ -37,9 +37,9 @@ public class YamlSpecTest extends WireTestCommon {
                     (DIR + "2_18Multi_lineFlowScalarsFixed.yaml");
 
             Object o = Marshallable.fromString(is);
-            Assert.assertNotNull(o);
+            assertNotNull(o);
             String actual = o.toString();
-            Assert.assertEquals("{plain=\n" +
+            assertEquals("{plain=\n" +
                     "  This unquoted scalar\n" +
                     "  spans many lines., quoted=So does this\n" +
                     "  quoted scalar.\n" +

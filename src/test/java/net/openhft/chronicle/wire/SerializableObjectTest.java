@@ -6,9 +6,7 @@ package net.openhft.chronicle.wire;
 import io.github.classgraph.*;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.*;
 
 import javax.sql.rowset.serial.SerialClob;
 import javax.swing.*;
@@ -34,8 +32,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 // Test class to verify serializable objects with Wire.
 final class SerializableObjectTest extends WireTestCommon {
@@ -321,7 +319,7 @@ final class SerializableObjectTest extends WireTestCommon {
         if (a.getClass() != b.getClass())
             assertEquals(a, b);
         if (a instanceof Throwable) {
-            assertEquals(a.getClass(), b.getClass());
+            assertSame(a.getClass(), b.getClass());
             assertEquals(((Throwable) a).getMessage(), ((Throwable) b).getMessage());
         } else if (a instanceof Queue) {
             assertEquals(a.toString(), b.toString());

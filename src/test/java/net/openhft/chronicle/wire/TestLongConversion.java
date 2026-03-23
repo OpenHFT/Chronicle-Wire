@@ -3,39 +3,35 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(value = Parameterized.class)
 public class TestLongConversion {
     private static char SEPARATOR = '/';
-    private final LongConverter longConverter;
+    private LongConverter longConverter;
 
-    @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[]{Base32LongConverter.INSTANCE},
                 new Object[]{Base64LongConverter.INSTANCE},
                 new Object[]{Base85LongConverter.INSTANCE});
     }
 
-    public TestLongConversion(LongConverter longConverter) {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void parseRawIntsV1(LongConverter longConverter) {
         this.longConverter = longConverter;
-    }
-
-    @Test
-    public void parseRawIntsV1() {
 
         final StringBuilder builder = new StringBuilder();
 
-        final long value1 = longConverter.parse("VAL2");
-        final long value2 = longConverter.parse("VAL3");
-        final long value3 = longConverter.parse("VAL4");
+        long value1 = longConverter.parse("VAL2");
+        long value2 = longConverter.parse("VAL3");
+        long value3 = longConverter.parse("VAL4");
 
         longConverter.append(builder, value1);
         builder.append(SEPARATOR);
@@ -46,14 +42,16 @@ public class TestLongConversion {
         assertEquals("VAL2/VAL3/VAL4", builder.toString());
     }
 
-    @Test
-    public void parseRawIntsV2() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void parseRawIntsV2(LongConverter longConverter) {
+        this.longConverter = longConverter;
 
         final StringBuilder builder = new StringBuilder();
 
-        final long value1 = longConverter.parse("VAL2");
-        final long value2 = longConverter.parse("VVAL3", 1, 5);
-        final long value3 = longConverter.parse("VAL45", 0, 4);
+        long value1 = longConverter.parse("VAL2");
+        long value2 = longConverter.parse("VVAL3", 1, 5);
+        long value3 = longConverter.parse("VAL45", 0, 4);
 
         final StringBuilder buffer = new StringBuilder();
 

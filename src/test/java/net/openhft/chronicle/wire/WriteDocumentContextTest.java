@@ -4,11 +4,10 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class WriteDocumentContextTest extends WireTestCommon {
 
@@ -47,8 +46,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
                         "key: 0\n" +
                         "key: 1\n" +
                         "key: 2\n" +
-                        "...\n",
-                wire.bytes().toString());
+                        "...\n", wire.bytes().toString());
     }
 
     // Test writing chained key-value pairs in plain text format
@@ -60,8 +58,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
                         "key: 0\n" +
                         "key: 1\n" +
                         "key: 2\n" +
-                        "...\n",
-                wire.bytes().toString());
+                        "...\n", wire.bytes().toString());
     }
 
     // Test writing nested key-value pairs in TextWire format
@@ -74,8 +71,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
         assertEquals("" +
                         "key: 0\n" +
                         "key: 1\n" +
-                        "key: 2\n",
-                wire.bytes().toString());
+                        "key: 2\n", wire.bytes().toString());
     }
 
     // Test writing chained key-value pairs in TextWire format
@@ -88,12 +84,11 @@ public class WriteDocumentContextTest extends WireTestCommon {
         assertEquals("" +
                         "key: 0\n" +
                         "key: 1\n" +
-                        "key: 2\n",
-                wire.bytes().toString());
+                        "key: 2\n", wire.bytes().toString());
     }
 
     // Test writing nested key-value pairs in YAML format (Currently Ignored)
-    @Ignore(/* TODO FIX */)
+    @Disabled(/* TODO FIX */)
     @Test
     public void nestedYaml() {
         Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
@@ -103,12 +98,11 @@ public class WriteDocumentContextTest extends WireTestCommon {
         assertEquals("" +
                         "key: 0\n" +
                         "key: 1\n" +
-                        "key: 2\n",
-                wire.bytes().toString());
+                        "key: 2\n", wire.bytes().toString());
     }
 
     // Test writing chained key-value pairs in YAML format (Currently Ignored)
-    @Ignore(/* TODO FIX */)
+    @Disabled(/* TODO FIX */)
     @Test
     public void chainedYaml() {
         Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
@@ -118,8 +112,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
         assertEquals("" +
                         "key: 0\n" +
                         "key: 1\n" +
-                        "key: 2\n",
-                wire.bytes().toString());
+                        "key: 2\n", wire.bytes().toString());
     }
 
     // Test writing nested key-value pairs in BinaryWire format

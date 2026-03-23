@@ -8,11 +8,10 @@ import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.wire.marshallable.TriviallyCopyableMarketData;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 // Extend WireTestCommon to inherit common utility and setup methods for wire tests
 public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTestCommon {
@@ -43,8 +42,8 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
                 .build((MyMethod) str -> value[0] = str);
 
         // Assert that no message was read and the value remains null
-        Assert.assertFalse(reader.readOne());
-        Assert.assertNull(value[0]);
+        assertFalse(reader.readOne());
+        assertNull(value[0]);
     }
 
     // Test case to check the behavior of a predicate that always returns true
@@ -70,8 +69,8 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
         // Build the method reader and assert that the message was read correctly
         MethodReader reader = builder.build((MyMethod) str -> value[0] = str);
 
-        Assert.assertTrue(reader.readOne());
-        Assert.assertEquals("hi", value[0]);
+        assertTrue(reader.readOne());
+        assertEquals("hi", value[0]);
     }
 
     // Test case to log a binary message and validate its content
@@ -79,7 +78,7 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
     public void logMessage0() {
 
         // do not check Mac as it lays it memory out differently
-        Assume.assumeTrue(!OS.isMacOSX());
+        assumeTrue(!OS.isMacOSX());
 
         TriviallyCopyableMarketData data = new TriviallyCopyableMarketData();
         data.securityId(0x828282828282L);
@@ -101,8 +100,7 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
                         "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
                         "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
                         "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
-                        "00 00\n",
-                wire.bytes().toHexString());
+                        "00 00\n", wire.bytes().toHexString());
 
         // Read the written message and validate its content
         try (DocumentContext dc = wire.readingDocument()) {
@@ -112,8 +110,7 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
                             "read md - 00000010 80 90 82 82 82 82 82 82  00 00 00 00 00 00 00 00 ········ ········\n" +
                             "00000020 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                             "........\n" +
-                            "000000a0 00 00                                            ··               ",
-                    VanillaMethodReader.logMessage0("md", marketData));
+                            "000000a0 00 00                                            ··               ", VanillaMethodReader.logMessage0("md", marketData));
         }
     }
 

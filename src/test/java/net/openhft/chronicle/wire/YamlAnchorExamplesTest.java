@@ -4,12 +4,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * Examples of YAML anchor usage in Chronicle Wire.
@@ -63,7 +62,7 @@ public class YamlAnchorExamplesTest extends WireTestCommon {
     }
     // end::server-config-classes[]
 
-    @Before
+    @BeforeEach
     public void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
@@ -120,9 +119,9 @@ public class YamlAnchorExamplesTest extends WireTestCommon {
         ServerSystemConfig config = WireType.YAML.fromString(ServerSystemConfig.class, yaml);
 
         // Verify object references work - they should be the same object instance
-        assertSame("primary should be same object as defaults", config.defaults, config.primary);
-        assertSame("secondary should be same object as defaults", config.defaults, config.secondary);
-        assertSame("monitoring.server should be same object as defaults", config.defaults, config.monitoring.server);
+        assertSame(config.defaults, config.primary, "primary should be same object as defaults");
+        assertSame(config.defaults, config.secondary, "secondary should be same object as defaults");
+        assertSame(config.defaults, config.monitoring.server, "monitoring.server should be same object as defaults");
 
         // Verify the values
         assertEquals(30, config.defaults.timeout);

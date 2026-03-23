@@ -4,12 +4,10 @@
 package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import java.io.StreamCorruptedException;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RawWirePerfMain extends WireTestCommon {
 

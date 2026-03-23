@@ -4,11 +4,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.wire.converter.Words;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class WordsLongConverterTest extends WireTestCommon {
 
@@ -65,8 +65,7 @@ public class WordsLongConverterTest extends WireTestCommon {
                         "582622237229761: scroll.others.ease.climb.eye\n" +
                         "9904578032905937: unit.grass.hints.day.moon\n" +
                         "168377826559400929: adjust.ancient.weekly.fifth.layout.all\n" +
-                        "2862423051509815793: knock.blocks.pose.expert.walk.sky\n",
-                sb.toString());
+                        "2862423051509815793: knock.blocks.pose.expert.walk.sky\n", sb.toString());
     }
 
     // Test the parsing capabilities of WordsLongConverter

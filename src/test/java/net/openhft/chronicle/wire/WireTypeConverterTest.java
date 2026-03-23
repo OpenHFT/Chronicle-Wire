@@ -3,10 +3,9 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class WireTypeConverterTest extends net.openhft.chronicle.wire.WireTestCommon {
 
@@ -27,26 +26,26 @@ public class WireTypeConverterTest extends net.openhft.chronicle.wire.WireTestCo
 
     @Test
     public void testYamlToJson() {
-        Assert.assertEquals(json, new WireTypeConverter().yamlToJson(yaml).toString());
-        Assert.assertEquals(yaml, new WireTypeConverter().jsonToYaml(json).toString());
+        assertEquals(json, new WireTypeConverter().yamlToJson(yaml).toString());
+        assertEquals(yaml, new WireTypeConverter().jsonToYaml(json).toString());
     }
 
     @Test
     public void testJsonToYaml() {
-        Assert.assertEquals(yaml, new WireTypeConverter().jsonToYaml(json).toString());
-        Assert.assertEquals(json, new WireTypeConverter().yamlToJson(yaml).toString());
+        assertEquals(yaml, new WireTypeConverter().jsonToYaml(json).toString());
+        assertEquals(json, new WireTypeConverter().yamlToJson(yaml).toString());
     }
 
     @Test
     public void testYamlToJsonUnknownClass() throws Exception {
-        Assert.assertEquals(jsonUnknownClass, new WireTypeConverter().yamlToJson(yamlUnknownClass).toString());
-        Assert.assertEquals(yamlUnknownClass, new WireTypeConverter().jsonToYaml(jsonUnknownClass).toString());
+        assertEquals(jsonUnknownClass, new WireTypeConverter().yamlToJson(yamlUnknownClass).toString());
+        assertEquals(yamlUnknownClass, new WireTypeConverter().jsonToYaml(jsonUnknownClass).toString());
     }
 
     @Test
     public void testJsonToYamlUnknownClass() {
-        Assert.assertEquals(yamlUnknownClass, new WireTypeConverter().jsonToYaml(jsonUnknownClass).toString());
-        Assert.assertEquals(jsonUnknownClass, new WireTypeConverter().yamlToJson(yamlUnknownClass).toString());
+        assertEquals(yamlUnknownClass, new WireTypeConverter().jsonToYaml(jsonUnknownClass).toString());
+        assertEquals(jsonUnknownClass, new WireTypeConverter().yamlToJson(yamlUnknownClass).toString());
     }
 
     @Test
@@ -56,8 +55,7 @@ public class WireTypeConverterTest extends net.openhft.chronicle.wire.WireTestCo
                         "  myClass: !net.openhft.chronicle.wire.MyClass2 { x: aa }\n" +
                         "}\n");
         assertEquals("" +
-                        "{\"@net.openhft.chronicle.wire.MyClass2\":{\"myClass\":{\"@net.openhft.chronicle.wire.MyClass2\":{\"x\":\"aa\"}}}}",
-                yamlToJson.toString());
+                        "{\"@net.openhft.chronicle.wire.MyClass2\":{\"myClass\":{\"@net.openhft.chronicle.wire.MyClass2\":{\"x\":\"aa\"}}}}", yamlToJson.toString());
 
     }
 
@@ -69,8 +67,7 @@ public class WireTypeConverterTest extends net.openhft.chronicle.wire.WireTestCo
                 "!net.openhft.chronicle.wire.MyClass2 {\n" +
                         "  myClass: !net.openhft.chronicle.wire.MyOldClass { x: abc }\n" +
                         "}\n");
-        assertEquals("{\"@net.openhft.chronicle.wire.MyClass2\":{\"myClass\":{\"@MyOldClass\":{\"x\":\"abc\"}}}}",
-                json.toString());
+        assertEquals("{\"@net.openhft.chronicle.wire.MyClass2\":{\"myClass\":{\"@MyOldClass\":{\"x\":\"abc\"}}}}", json.toString());
     }
 
     @Test
@@ -84,8 +81,7 @@ public class WireTypeConverterTest extends net.openhft.chronicle.wire.WireTestCo
                         "  myClass: !net.openhft.chronicle.wire.MyClass2 {\n" +
                         "    x: bb\n" +
                         "  }\n" +
-                        "}\n",
-                jsonToYaml.toString());
+                        "}\n", jsonToYaml.toString());
     }
 
     @Test
