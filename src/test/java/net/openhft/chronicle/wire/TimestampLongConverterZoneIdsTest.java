@@ -46,13 +46,13 @@ public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
         assumeFalse(zoneId.equals("GMT0"));
         AbstractTimestampLongConverter mtlc = converterType.createConverter(zoneId);
         final String str = mtlc.asString(converterType.sampleTimeInUTC);
-        assertEquals(zoneId, converterType.sampleTimeInUTC, mtlc.parse(str));
+        assertEquals(converterType.sampleTimeInUTC, mtlc.parse(str), zoneId);
     }
 
     // This test method checks the result of the future from the asynchronous operation.
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testManyZones(String zoneId, ConverterType converterType, Future<?> future) {
+    public void testManyZones(String zoneId, ConverterType converterType, Future<?> future) throws ExecutionException, InterruptedException {
         this.future = future;
         assertNull(future.get());
     }

@@ -8,9 +8,9 @@ import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test suite for the TwoArrays class.
@@ -51,8 +51,7 @@ public class TwoArraysTest extends WireTestCommon {
                         "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 # values\n" +
                         "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
                         "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
-                        "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n",
-                bytes.toHexString());
+                        "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n", bytes.toHexString());
 
         TwoArrays ta2 = new TwoArrays(0, 0);
 
@@ -84,8 +83,7 @@ public class TwoArraysTest extends WireTestCommon {
                         "   6f 00 00 00 00 00 00 00 de 00 00 00 00 00 00 00\n" +
                         "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
                         "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
-                        "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n",
-                bytes2.toHexString());
+                        "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n", bytes2.toHexString());
 
         bytes.readPosition(0);
 

@@ -8,9 +8,9 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests to demonstrate the serialization of inner classes that might have 'this$0' fields.
@@ -27,8 +27,7 @@ public class This0AsTransientTest extends WireTestCommon {
         assertEquals("" +
                         "!net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass1 {\n" +
                         "  value: 128\n" +
-                        "}\n",
-                new MyClass1(128).toString());
+                        "}\n", new MyClass1(128).toString());
     }
 
     /**
@@ -43,8 +42,7 @@ public class This0AsTransientTest extends WireTestCommon {
                         "test: !net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass1 {\n" +
                         "  value: 1111\n" +
                         "}\n" +
-                        "...\n",
-                wire.bytes().toString());
+                        "...\n", wire.bytes().toString());
     }
 
     /**
@@ -55,8 +53,7 @@ public class This0AsTransientTest extends WireTestCommon {
         assertEquals("" +
                         "!net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass2 {\n" +
                         "  value: 128\n" +
-                        "}\n",
-                new MyClass2(128).toString());
+                        "}\n", new MyClass2(128).toString());
     }
 
     /**
@@ -73,8 +70,7 @@ public class This0AsTransientTest extends WireTestCommon {
                         "test: !net.openhft.chronicle.wire.marshallable.This0AsTransientTest$MyClass2 {\n" +
                         "  value: 2222\n" +
                         "}\n" +
-                        "...\n",
-                wire.bytes().toString());
+                        "...\n", wire.bytes().toString());
     }
 
     /**

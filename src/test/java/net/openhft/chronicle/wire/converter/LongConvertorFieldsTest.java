@@ -3,11 +3,10 @@
  */
 package net.openhft.chronicle.wire.converter;
 
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.wire.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for validating the behavior of field converters with long data types.

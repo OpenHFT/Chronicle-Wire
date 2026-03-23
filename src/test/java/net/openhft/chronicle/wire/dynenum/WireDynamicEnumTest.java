@@ -10,13 +10,13 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumCache;
 import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 // The WireDynamicEnumTest class extends WireTestCommon to inherit its common functionalities.
 // This class is intended to test dynamic enumeration functionalities in the context of wiring.
@@ -25,7 +25,7 @@ public class WireDynamicEnumTest extends WireTestCommon {
 
     // This setup method is executed before each test.
     // It adds the required class aliases to the ClassAliasPool to facilitate serialization and deserialization.
-    @Before
+    @BeforeEach
     public void addClassAlias() {
         ClassAliasPool.CLASS_ALIASES.addAlias(HoldsWDENum.class);
         ClassAliasPool.CLASS_ALIASES.addAlias(UnwrapsWDENum.class);

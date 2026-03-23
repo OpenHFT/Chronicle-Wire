@@ -6,9 +6,9 @@ package net.openhft.chronicle.wire.converter;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * The Base64Test class tests the Base64 encoding and decoding functionalities

@@ -10,10 +10,10 @@ import net.openhft.chronicle.threads.Pauser;
 import net.openhft.chronicle.threads.PauserMode;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assume.assumeFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * Test class to validate the behavior of the marshalling process within an EventGroup context.

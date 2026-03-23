@@ -10,11 +10,9 @@ import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MarshallingJSONStringTest implements Marshallable {
 
@@ -70,7 +68,7 @@ public class MarshallingJSONStringTest implements Marshallable {
                 "}\n";
 
         NestedList read = Marshallable.fromString(NestedList.class, jsonText);
-        Assert.assertNotNull(read);
+        assertNotNull(read);
         String actualJson = read.toString();
         assertEquals(expectedJson, actualJson);
     }
@@ -93,7 +91,7 @@ public class MarshallingJSONStringTest implements Marshallable {
                 "}\n";
 
         NestedList read = Marshallable.fromString(NestedList.class, jsonText);
-        Assert.assertNotNull(read);
+        assertNotNull(read);
         String actualJson = read.toString();
         assertEquals(expectedJson, actualJson);
     }

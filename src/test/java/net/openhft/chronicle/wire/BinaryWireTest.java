@@ -1914,7 +1914,7 @@ public class BinaryWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("combinations")
-    public void writeEndOfWireDoesNotUpdateModifiedTimeOnNoOpWhenUnderlyingBytesIsFile(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    public void writeEndOfWireDoesNotUpdateModifiedTimeOnNoOpWhenUnderlyingBytesIsFile(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) throws IOException {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;

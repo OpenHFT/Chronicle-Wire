@@ -10,10 +10,10 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONWithAMapTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
@@ -91,10 +91,10 @@ public class JSONWithAMapTest extends net.openhft.chronicle.wire.WireTestCommon 
         }
 
         // check the number of '{' match the number of '}'
-        Assert.assertTrue("openBracket=" + openBracket + ",closeBracket=" + closeBracket, openBracket == closeBracket);
+        assertTrue(openBracket == closeBracket, "openBracket=" + openBracket + ",closeBracket=" + closeBracket);
 
         // DON'T CHANGE THE EXPECTED JSON IT IS CORRECT ! - please use this website to validate the json - https://jsonformatter.org
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     private static class ResponseItem extends SelfDescribingMarshallable {

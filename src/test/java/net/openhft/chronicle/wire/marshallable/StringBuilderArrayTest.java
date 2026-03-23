@@ -9,30 +9,24 @@ import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests that deserialising StringBuilder[] produces distinct StringBuilder instances
  * with correct values, rather than reusing the same instance across array elements.
  */
-@RunWith(value = Parameterized.class)
 public class StringBuilderArrayTest extends WireTestCommon {
 
-    private final WireType wireType;
-
-    public StringBuilderArrayTest(WireType wireType) {
-        this.wireType = wireType;
-    }
+    private WireType wireType;
 
     @NotNull
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
                 new Object[]{WireType.TEXT},
@@ -51,8 +45,10 @@ public class StringBuilderArrayTest extends WireTestCommon {
      * Tests that each element in a deserialised StringBuilder[] is a distinct instance
      * with the correct content, both within and across arrays.
      */
-    @Test
-    public void testStringBuilderArrayDistinctElements() {
+    @ParameterizedTest
+    @MethodSource("wireTypes")
+    public void testStringBuilderArrayDistinctElements(WireType wireType) {
+        this.wireType = wireType;
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
 
@@ -70,12 +66,12 @@ public class StringBuilderArrayTest extends WireTestCommon {
         assertEquals("bar", read.b[1].toString());
 
         // Elements should be distinct StringBuilder instances, not the same object
-        assertNotSame("Elements within array 'a' should be distinct instances",
-                read.a[0], read.a[1]);
-        assertNotSame("Elements within array 'b' should be distinct instances",
-                read.b[0], read.b[1]);
-        assertNotSame("Elements across arrays 'a' and 'b' should be distinct instances",
-                read.a[0], read.b[0]);
+        assertNotSame(read.a[0], read.a[1],
+                "Elements within array 'a' should be distinct instances");
+        assertNotSame(read.b[0], read.b[1],
+                "Elements within array 'b' should be distinct instances");
+        assertNotSame(read.a[0], read.b[0],
+                "Elements across arrays 'a' and 'b' should be distinct instances");
 
         bytes.releaseLast();
     }
@@ -84,8 +80,10 @@ public class StringBuilderArrayTest extends WireTestCommon {
      * Tests that null elements within a StringBuilder[] are deserialised as null
      * rather than as empty or stale StringBuilder instances.
      */
-    @Test
-    public void testStringBuilderArrayWithNullElements() {
+    @ParameterizedTest
+    @MethodSource("wireTypes")
+    public void testStringBuilderArrayWithNullElements(WireType wireType) {
+        this.wireType = wireType;
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
 
@@ -97,10 +95,10 @@ public class StringBuilderArrayTest extends WireTestCommon {
         StringBuilderArrayDto read = wire.read("data").object(StringBuilderArrayDto.class);
 
         assertEquals("hello", read.a[0].toString());
-        assertNull("Null element should deserialise as null", read.a[1]);
+        assertNull(read.a[1], "Null element should deserialise as null");
         assertEquals("world", read.a[2].toString());
         assertNotSame(read.a[0], read.a[2]);
-        assertNull("Null array should deserialise as null", read.b);
+        assertNull(read.b, "Null array should deserialise as null");
 
         bytes.releaseLast();
     }
@@ -108,8 +106,10 @@ public class StringBuilderArrayTest extends WireTestCommon {
     /**
      * Tests that an empty StringBuilder[] round-trips correctly.
      */
-    @Test
-    public void testEmptyStringBuilderArray() {
+    @ParameterizedTest
+    @MethodSource("wireTypes")
+    public void testEmptyStringBuilderArray(WireType wireType) {
+        this.wireType = wireType;
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
 
@@ -132,8 +132,10 @@ public class StringBuilderArrayTest extends WireTestCommon {
      * Tests that the reuse path (o != null) still works correctly when an existing
      * StringBuilder instance is provided.
      */
-    @Test
-    public void testStringBuilderFieldReuse() {
+    @ParameterizedTest
+    @MethodSource("wireTypes")
+    public void testStringBuilderFieldReuse(WireType wireType) {
+        this.wireType = wireType;
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
 
@@ -143,7 +145,7 @@ public class StringBuilderArrayTest extends WireTestCommon {
         StringBuilder existing = new StringBuilder("old");
         StringBuilder result = wire.read("value").object(existing, StringBuilder.class);
 
-        assertSame("Should reuse the provided StringBuilder instance", existing, result);
+        assertSame(existing, result, "Should reuse the provided StringBuilder instance");
         assertEquals("hello", result.toString());
 
         bytes.releaseLast();
