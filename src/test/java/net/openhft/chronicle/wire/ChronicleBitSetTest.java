@@ -28,11 +28,6 @@ public class ChronicleBitSetTest extends WireTestCommon {
     private Class<?> clazz;
     @SuppressWarnings("rawtypes")
     private final List closeables = new ArrayList<>();
-    private final ChronicleBitSet emptyBS0;
-    private final ChronicleBitSet emptyBS1;
-    private final ChronicleBitSet emptyBS127;
-    private final ChronicleBitSet emptyBS128;
-
     // Capture a snapshot of all threads before test execution
     @Override
     @BeforeEach
@@ -118,6 +113,10 @@ public class ChronicleBitSetTest extends WireTestCommon {
 
     // Check if the ChronicleBitSet is empty
     private void checkEmpty(ChronicleBitSet s) {
+        ChronicleBitSet emptyBS0 = createBitSet(0);
+        ChronicleBitSet emptyBS1 = createBitSet(1);
+        ChronicleBitSet emptyBS127 = createBitSet(127);
+        ChronicleBitSet emptyBS128 = createBitSet(128);
         check(s.isEmpty(), "isEmpty");
         check(s.length() == 0, "length");
         check(s.cardinality() == 0, "cardinality");
@@ -982,7 +981,7 @@ public class ChronicleBitSetTest extends WireTestCommon {
         }
 
         // Check emptiness for multiple scenarios
-        checkEmpty(emptyBS0); // Presumably a predefined empty ChronicleBitSet
+        checkEmpty(createBitSet(0));
         checkEmpty(createBitSet(342));
         ChronicleBitSet s = createBitSet(128);
         checkEmpty(s);

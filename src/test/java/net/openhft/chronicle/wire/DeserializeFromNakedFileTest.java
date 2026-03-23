@@ -34,7 +34,7 @@ public class DeserializeFromNakedFileTest extends WireTestCommon {
     // Test to verify the deserialization of a POJO from the "naked.yaml" file.
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testPOJO(WireType wireType) {
+    public void testPOJO(WireType wireType) throws IOException {
         this.wireType = wireType;
         assumeFalse(Jvm.maxDirectMemory() == 0);
         PlainOldJavaClass res = wireType.fromFile(PlainOldJavaClass.class, "naked.yaml");
@@ -46,7 +46,7 @@ public class DeserializeFromNakedFileTest extends WireTestCommon {
     // Test to verify the deserialization of a self-describing class from the "naked.yaml" file.
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testSelfDescribing(WireType wireType) {
+    public void testSelfDescribing(WireType wireType) throws IOException {
         this.wireType = wireType;
         assumeFalse(Jvm.maxDirectMemory() == 0);
         SelfDescribingClass res = wireType.fromFile(SelfDescribingClass.class, "naked.yaml");
@@ -58,7 +58,7 @@ public class DeserializeFromNakedFileTest extends WireTestCommon {
     // Test to verify the deserialization of a bytes class from the "naked.yaml" file.
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testBytes(WireType wireType) {
+    public void testBytes(WireType wireType) throws IOException {
         this.wireType = wireType;
         assumeFalse(Jvm.maxDirectMemory() == 0);
         // Skip the test if the WireType is YAML.
