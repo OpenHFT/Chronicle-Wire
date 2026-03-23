@@ -13,10 +13,10 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
@@ -44,8 +44,8 @@ import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 @SuppressWarnings({"rawtypes", "unchecked", "try", "serial", "deprecation"})
 public class TextWireTest extends WireTestCommon {
@@ -54,7 +54,7 @@ public class TextWireTest extends WireTestCommon {
     private static Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
     private Bytes<?> bytes;
 
-    @Before
+    @BeforeEach
     public void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
@@ -76,17 +76,10 @@ public class TextWireTest extends WireTestCommon {
 
     @Test
     public void testWhiteSpaceInType() {
-        try {
-            // Deserialize from string and check if the object is correctly formed
-            Object o = Marshallable.fromString("key: !" + DTO.class.getName() + " {\n" +
-                    "  type:            !type               String\n" +
-                    "}\n");
-
-            assertNotNull(o);
-
-        } catch (Exception e) {
-            Assert.fail();
-        }
+        Object o = assertDoesNotThrow(() -> Marshallable.fromString("key: !" + DTO.class.getName() + " {\n" +
+                "  type:            !type               String\n" +
+                "}\n"));
+        assertNotNull(o);
     }
 
     // Test handling of Bytes data type in TextWire.
@@ -136,7 +129,7 @@ public class TextWireTest extends WireTestCommon {
     public void testFieldWithComment() {
         FieldWithComment f = new FieldWithComment();
         f.field = "hello world";
-        Assert.assertEquals("!net.openhft.chronicle.wire.TextWireTest$FieldWithComment {\n" +
+        assertEquals("!net.openhft.chronicle.wire.TextWireTest$FieldWithComment {\n" +
                 "  field: hello world, \t\t# a comment where the value=hello world\n" +
                 "}\n", Marshallable.$toString(f));
     }
@@ -146,7 +139,7 @@ public class TextWireTest extends WireTestCommon {
     public void testFieldWithComment2() {
         FieldWithComment2 f = new FieldWithComment2();
         f.field = "hello world";
-        Assert.assertEquals("!net.openhft.chronicle.wire.TextWireTest$FieldWithComment2 {\n" +
+        assertEquals("!net.openhft.chronicle.wire.TextWireTest$FieldWithComment2 {\n" +
                 "  field: hello world, \t\t# a comment where the value=hello world\n" +
                 "  field2: !!null \"\"\n" +
                 "}\n", Marshallable.$toString(f));
@@ -183,8 +176,7 @@ public class TextWireTest extends WireTestCommon {
         assertEquals("a=1\n" +
                         "c=three\n" +
                         "e=also\n" +
-                        "f=at the end",
-                asProperties(tf.others));
+                        "f=at the end", asProperties(tf.others));
 
         // Repeat the above steps with different unexpected fields.
         TwoFields tf2 = Marshallable.fromString("!" + TwoFields.class.getName() + " {" +
@@ -196,8 +188,7 @@ public class TextWireTest extends WireTestCommon {
                 "}");
         assertEquals("a=1\n" +
                         "c=three\n" +
-                        "e=also",
-                asProperties(tf2.others));
+                        "e=also", asProperties(tf2.others));
 
         // Check case sensitivity of field names
         TwoFields tf3 = Marshallable.fromString("!" + TwoFields.class.getName() + " {" +
@@ -209,8 +200,7 @@ public class TextWireTest extends WireTestCommon {
                 "}");
         assertEquals("a=1\n" +
                         "c=three\n" +
-                        "e=also",
-                asProperties(tf3.others));
+                        "e=also", asProperties(tf3.others));
     }
 
     // Utility method to convert a map to a string representation in properties format.
@@ -223,7 +213,7 @@ public class TextWireTest extends WireTestCommon {
     public void licenseCheck() {
         // Verify that TEXT WireType doesn't require any license check.
         WireType.TEXT.licenceCheck();
-        assertTrue(WireType.TEXT.isAvailable());
+        assertTrue(TEXT.isAvailable());
     }
 
     // Test to ensure that objects with TreeMap fields are correctly serialized and deserialized.
@@ -270,7 +260,7 @@ public class TextWireTest extends WireTestCommon {
                 "  }\n" +
                 "}");
         // Ensure the deserialized object is an instance of Map.
-        Assert.assertTrue(w instanceof Map);
+        assertTrue(w instanceof Map);
     }
 
     // Test to verify deserialization of integer values presented in hexadecimal format.
@@ -313,7 +303,7 @@ public class TextWireTest extends WireTestCommon {
         // System.out.println(textYaml);
         // Deserialize the TEXT into an object and verify its structure.
         @Nullable Object o = WireType.TEXT.fromString(textYaml);
-        Assert.assertEquals("{map={some={key=value}, some-other={key=value}}}", o.toString());
+        assertEquals("{map={some={key=value}, some-other={key=value}}}", o.toString());
 
         b.releaseLast();
     }
@@ -460,15 +450,17 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Test to ensure that reading a value too large for a short throws an exception
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testInt16TooLarge() {
-        @NotNull Wire wire = createWire();
+        assertThrows(IllegalStateException.class, () -> {
+            @NotNull Wire wire = createWire();
 
-        // Write the maximum long value with the key "VALUE"
-        wire.write(() -> "VALUE").int64(Long.MAX_VALUE);
+            // Write the maximum long value with the key "VALUE"
+            wire.write(() -> "VALUE").int64(Long.MAX_VALUE);
 
-        // Attempt to read the value as a short, which should throw an exception
-        wire.read(() -> "VALUE").int16();
+            // Attempt to read the value as a short, which should throw an exception
+            wire.read(() -> "VALUE").int16();
+        });
     }
 
     // Test to validate the behavior of writing and reading an integer value
@@ -490,15 +482,17 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Test to ensure that reading a value too large for an integer throws an exception
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testInt32TooLarge() {
-        @NotNull Wire wire = createWire();
+        assertThrows(IllegalStateException.class, () -> {
+            @NotNull Wire wire = createWire();
 
-        // Write the maximum integer value with the key "VALUE"
-        wire.write(() -> "VALUE").int64(Integer.MAX_VALUE);
+            // Write the maximum integer value with the key "VALUE"
+            wire.write(() -> "VALUE").int64(Integer.MAX_VALUE);
 
-        // Attempt to read the value as a short, which should throw an exception
-        wire.read(() -> "VALUE").int16();
+            // Attempt to read the value as a short, which should throw an exception
+            wire.read(() -> "VALUE").int16();
+        });
     }
 
     // Test to validate writing using keys from the BWKey enum
@@ -903,7 +897,7 @@ public class TextWireTest extends WireTestCommon {
 
         // Read the types back and validate
         Stream.of("MyType", "AlsoMyType", name1).forEach(e -> {
-            wire.read().typePrefix(e, Assert::assertEquals);
+            wire.read().typePrefix(e, Assertions::assertEquals);
         });
 
         assertEquals(0, bytes.readRemaining());
@@ -964,9 +958,9 @@ public class TextWireTest extends WireTestCommon {
                 .write().bool(null);
 
         // Read back the boolean values and validate
-        wire.read().bool(false, Assert::assertEquals)
-                .read().bool(true, Assert::assertEquals)
-                .read().bool(null, Assert::assertEquals);
+        wire.read().bool(false, Assertions::assertEquals)
+                .read().bool(true, Assertions::assertEquals)
+                .read().bool(null, Assertions::assertEquals);
     }
 
     // Test case for writing and reading 32-bit floating point numbers
@@ -1004,13 +998,12 @@ public class TextWireTest extends WireTestCommon {
         // Validate the string format of the wire content
         assertEquals("\"\": " + now + "\n" +
                         "\"\": 23:59:59.999999999\n" +
-                        "\"\": 00:00\n",
-                bytes.toString());
+                        "\"\": 00:00\n", bytes.toString());
 
         // Read back the LocalTime values and validate
-        wire.read().time(now, Assert::assertEquals)
-                .read().time(LocalTime.MAX, Assert::assertEquals)
-                .read().time(LocalTime.MIN, Assert::assertEquals);
+        wire.read().time(now, Assertions::assertEquals)
+                .read().time(LocalTime.MAX, Assertions::assertEquals)
+                .read().time(LocalTime.MIN, Assertions::assertEquals);
     }
 
     // Test case for working with ZonedDateTime values
@@ -1036,9 +1029,9 @@ public class TextWireTest extends WireTestCommon {
                 "\"\": \"-999999999-01-01T00:00-00:01:15[Europe/London]\"\n", wire.toString());
 
         // Read back the ZonedDateTime values and validate
-        wire.read().zonedDateTime(now, Assert::assertEquals)
-                .read().zonedDateTime(max, Assert::assertEquals)
-                .read().zonedDateTime(min, Assert::assertEquals);
+        wire.read().zonedDateTime(now, Assertions::assertEquals)
+                .read().zonedDateTime(max, Assertions::assertEquals)
+                .read().zonedDateTime(min, Assertions::assertEquals);
 
         // Repeat the process but write as a generic object
         wire.clear();
@@ -1048,9 +1041,9 @@ public class TextWireTest extends WireTestCommon {
         assertEquals("\"\": !ZonedDateTime \"" + now + "\"\n" +
                 "\"\": !ZonedDateTime \"+999999999-12-31T23:59:59.999999999Z[Europe/London]\"\n" +
                 "\"\": !ZonedDateTime \"-999999999-01-01T00:00-00:01:15[Europe/London]\"\n", wire.toString());
-        wire.read().object(Object.class, now, Assert::assertEquals)
-                .read().object(Object.class, max, Assert::assertEquals)
-                .read().object(Object.class, min, Assert::assertEquals);
+        wire.read().object(Object.class, now, Assertions::assertEquals)
+                .read().object(Object.class, max, Assertions::assertEquals)
+                .read().object(Object.class, min, Assertions::assertEquals);
 
         // Write as a ZonedDateTime object
         wire.clear();
@@ -1060,9 +1053,9 @@ public class TextWireTest extends WireTestCommon {
         assertEquals("\"\": \"" + now + "\"\n" +
                 "\"\": \"+999999999-12-31T23:59:59.999999999Z[Europe/London]\"\n" +
                 "\"\": \"-999999999-01-01T00:00-00:01:15[Europe/London]\"\n", wire.toString());
-        wire.read().object(ZonedDateTime.class, now, Assert::assertEquals)
-                .read().object(ZonedDateTime.class, max, Assert::assertEquals)
-                .read().object(ZonedDateTime.class, min, Assert::assertEquals);
+        wire.read().object(ZonedDateTime.class, now, Assertions::assertEquals)
+                .read().object(ZonedDateTime.class, max, Assertions::assertEquals)
+                .read().object(ZonedDateTime.class, min, Assertions::assertEquals);
     }
 
     // Test case for working with LocalDate values
@@ -1079,9 +1072,9 @@ public class TextWireTest extends WireTestCommon {
                 .write().date(LocalDate.MIN);
 
         // Read back the LocalDate values and validate
-        wire.read().date(now, Assert::assertEquals)
-                .read().date(LocalDate.MAX, Assert::assertEquals)
-                .read().date(LocalDate.MIN, Assert::assertEquals);
+        wire.read().date(now, Assertions::assertEquals)
+                .read().date(LocalDate.MAX, Assertions::assertEquals)
+                .read().date(LocalDate.MIN, Assertions::assertEquals);
     }
 
     // Test case for working with UUID values
@@ -1098,9 +1091,9 @@ public class TextWireTest extends WireTestCommon {
                 .write().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE));
 
         // Read back the UUID values and validate
-        wire.read().uuid(uuid, Assert::assertEquals)
-                .read().uuid(new UUID(0, 0), Assert::assertEquals)
-                .read().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), Assert::assertEquals);
+        wire.read().uuid(uuid, Assertions::assertEquals)
+                .read().uuid(new UUID(0, 0), Assertions::assertEquals)
+                .read().uuid(new UUID(Long.MAX_VALUE, Long.MAX_VALUE), Assertions::assertEquals);
     }
 
     @Test
@@ -1203,17 +1196,14 @@ public class TextWireTest extends WireTestCommon {
         for (String input : new String[] { A + B + C, B + A + C, C + A + B, A + C + B, B + C + A, C + B + A }) {
             wire.reset();
             wire.bytes().append(input);
-            assertEquals(input, "!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
+            assertEquals("!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
                     "  A: hi,\n" +
                     "  B: hi,\n" +
                     "  C: hi\n" +
                     "}\n", wire.getValueIn()
                     .object(abc, ABC.class)
-                    .toString());
-            assertEquals(sb.toString(),
-                    // legacy behavior: "C" comment is ignored as it's after the last field
-                    Arrays.asList("This is an A", "This is a B"),
-                    Arrays.stream(sb.toString().split("\n")).sorted(Collections.reverseOrder()).collect(toList()));
+                    .toString(), input);
+            assertEquals(Arrays.asList("This is an A", "This is a B"), Arrays.stream(sb.toString().split("\n")).sorted(Collections.reverseOrder()).collect(toList()), sb.toString());
             sb.setLength(0);
         }
     }
@@ -1247,8 +1237,7 @@ public class TextWireTest extends WireTestCommon {
                         "  hello: world,\n" +
                         "  hello1: world1,\n" +
                         "  hello2: world2\n" +
-                        "}\n",
-                Wires.fromSizePrefixedBlobs(bytes));
+                        "}\n", Wires.fromSizePrefixedBlobs(bytes));
 
         // Read the map from wire and assert equality with the original
         @NotNull final Map<String, String> actual = new LinkedHashMap<>();
@@ -1259,7 +1248,7 @@ public class TextWireTest extends WireTestCommon {
     // Test behavior when using fields of type Bytes.
     // Note: This test is ignored due to unreleased bytes.
     @Test
-    @Ignore("unreleased bytes")
+    @Disabled("unreleased bytes")
     public void testBytesField() {
         DtoWithBytesField dto = new DtoWithBytesField(), dto2 = null;
         byte[] binaryData = new byte[]{1, 2, 3, 4};
@@ -1413,8 +1402,7 @@ public class TextWireTest extends WireTestCommon {
                 "  },\n" +
                 "}";
         Map<String, Object> fromString = Marshallable.fromString(pos);
-        assertEquals("{WithMap={innerMap={AUDUSD=AUDUSD1, USDPLN=USDPLN1}}}",
-                fromString.toString());
+        assertEquals("{WithMap={innerMap={AUDUSD=AUDUSD1, USDPLN=USDPLN1}}}", fromString.toString());
     }
 
     // Test parsing a map with question marks (indicating explicit keys) within another map from a string
@@ -1427,8 +1415,7 @@ public class TextWireTest extends WireTestCommon {
                 "  },\n" +
                 "}";
         Map<String, Object> fromString = Marshallable.fromString(pos);
-        assertEquals("{WithMap={innerMap={AUDUSD=AUDUSD1, USDPLN=USDPLN1}}}",
-                fromString.toString());
+        assertEquals("{WithMap={innerMap={AUDUSD=AUDUSD1, USDPLN=USDPLN1}}}", fromString.toString());
     }
 
     // Test reading and writing a map with Marshallable keys and values to/from a Wire.
@@ -1452,8 +1439,7 @@ public class TextWireTest extends WireTestCommon {
                         "example: {\n" +
                         "  ? { MyField: aKey }: { MyField: aValue },\n" +
                         "  ? { MyField: aKey2 }: { MyField: aValue2 }\n" +
-                        "}\n",
-                Wires.fromSizePrefixedBlobs(bytes));
+                        "}\n", Wires.fromSizePrefixedBlobs(bytes));
 
         // Read the map from wire and assert it matches the expected map
         @NotNull final Map<MyMarshallable, MyMarshallable> actual = new LinkedHashMap<>();
@@ -1714,10 +1700,9 @@ public class TextWireTest extends WireTestCommon {
         assertEquals("[abc, def, ghi]", list2.toString());
     }
 
-    // This test is for writing a Map<String, String> to the Wire and reading it back.
-    // Currently, it's marked as ignored using the @Ignore annotation.
+    // This test is currently disabled while TextWire map round-tripping is investigated.
     @Test
-    @Ignore
+    @Disabled("TextWire Map<String, String> round-trip behaviour needs investigation")
     public void testStringMap() {
         // Create a wire instance
         @NotNull Wire wire = createWire();
@@ -1825,7 +1810,7 @@ public class TextWireTest extends WireTestCommon {
             @NotNull String s = new String(chars);
             wire.writeDocument(false, w -> w.write(() -> "message").text(s));
 
-            wire.readDocument(null, w -> w.read(() -> "message").text(s, Assert::assertEquals));
+            wire.readDocument(null, w -> w.read(() -> "message").text(s, Assertions::assertEquals));
         }
     }
 
@@ -1875,8 +1860,8 @@ public class TextWireTest extends WireTestCommon {
                 "put: { key: \"1\", value: !byte[] !!binary //79/Pv6+Q== }\n", (Wires.fromSizePrefixedBlobs(wire.bytes())));
 
         wire.readDocument(null, wir -> wire.read(() -> "put")
-                .marshallable(w -> w.read(() -> "key").object(Object.class, "1", Assert::assertEquals)
-                        .read(() -> "value").object(byte[].class, expected, Assert::assertArrayEquals)));
+                .marshallable(w -> w.read(() -> "key").object(Object.class, "1", Assertions::assertEquals)
+                        .read(() -> "value").object(byte[].class, expected, Assertions::assertArrayEquals)));
     }
 
     // Test that ensures execution of 'testByteArrayValueWithRealBytesNegative' and then resets the wire and runs 'uint16'
@@ -1916,8 +1901,7 @@ public class TextWireTest extends WireTestCommon {
                         "one: !byte[] !!binary AQ==\n" +
                         "# position: 64, header: 2\n" +
                         "--- !!data\n" +
-                        "four: !byte[] !!binary AQIDBA==\n"
-                , Wires.fromSizePrefixedBlobs(wire.bytes()));
+                        "four: !byte[] !!binary AQIDBA==\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         // Read back each byte array from the Wire and verify its contents.
         wire.readDocument(null, w -> assertArrayEquals(new byte[0], (byte[]) w.read(() -> "nothing").object()));
@@ -1950,8 +1934,7 @@ public class TextWireTest extends WireTestCommon {
                         "? { MyField: parent }: {\n" +
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key1 }: value1,\n" +
                         "  ? !net.openhft.chronicle.wire.MyMarshallable { MyField: key2 }: value2\n" +
-                        "}\n"
-                , Wires.fromSizePrefixedBlobs(wire.bytes()));
+                        "}\n", Wires.fromSizePrefixedBlobs(wire.bytes()));
 
         // Read back the map from the Wire and verify its contents.
         wire.readDocument(null, w -> {
@@ -1966,23 +1949,29 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // Test for attempting to serialize a non-serializable object (current thread).
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void writeUnserializable1() throws IOException {
-        System.out.println(TEXT.asString(Thread.currentThread()));
+        assertThrows(IllegalArgumentException.class, () -> {
+            System.out.println(TEXT.asString(Thread.currentThread()));
+        });
     }
 
     // Test for attempting to serialize a non-serializable object (socket instance).
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void writeUnserializable2() throws IOException {
-        @NotNull Socket s = new Socket();
-        System.out.println(TEXT.asString(s));
+        assertThrows(IllegalArgumentException.class, () -> {
+            @NotNull Socket s = new Socket();
+            System.out.println(TEXT.asString(s));
+        });
     }
 
     // Test for attempting to serialize a non-serializable object (socket channel instance).
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void writeUnserializable3() throws IOException {
-        SocketChannel sc = SocketChannel.open();
-        System.out.println(TEXT.asString(sc));
+        assertThrows(IllegalArgumentException.class, () -> {
+            SocketChannel sc = SocketChannel.open();
+            System.out.println(TEXT.asString(sc));
+        });
     }
 
     // Test to ensure characters are correctly written to and read back from the Wire.
@@ -2239,10 +2228,10 @@ public class TextWireTest extends WireTestCommon {
         wire.bytes().append("a: !type byte[], b: !type String[], c: hi");
 
         // Check that the deserialized type of "b" is String[].class.
-        assertEquals(String[].class, wire.read("b").typeLiteral());
+        assertSame(String[].class, wire.read("b").typeLiteral());
 
         // Check that the deserialized type of "a" is byte[].class.
-        assertEquals(byte[].class, wire.read("a").typeLiteral());
+        assertSame(byte[].class, wire.read("a").typeLiteral());
 
         // Check that the deserialized text of "c" is "hi".
         assertEquals("hi", wire.read("c").text());
@@ -2255,8 +2244,8 @@ public class TextWireTest extends WireTestCommon {
         wire.bytes().append("a: !type [B;, b: !type String[], c: hi");
 
         // Verify the data types and content retrieved from the wire
-        assertEquals(String[].class, wire.read("b").typeLiteral());
-        assertEquals(byte[].class, wire.read("a").typeLiteral());
+        assertSame(String[].class, wire.read("b").typeLiteral());
+        assertSame(byte[].class, wire.read("a").typeLiteral());
         assertEquals("hi", wire.read("c").text());
     }
 
@@ -2270,7 +2259,7 @@ public class TextWireTest extends WireTestCommon {
             wire.bytes().append("a: [ !type ").append(clz.getName()).append("[] ], b: !type String[], c: hi");
 
             // Verify the data types and content retrieved from the wire for the current class type
-            assertEquals(String[].class, wire.read("b").typeLiteral());
+            assertSame(String[].class, wire.read("b").typeLiteral());
             Collection<Class> classes = wire.read("a").typedMarshallable();
             assertArrayEquals(new Class[]{Array.newInstance(clz, 0).getClass()}, classes.toArray());
             assertEquals("hi", wire.read("c").text());
@@ -2368,7 +2357,7 @@ public class TextWireTest extends WireTestCommon {
         final double d2 = textWire.getValueIn().float64();
 
         // Validate the double value remains consistent after the transfer
-        Assert.assertEquals(d2, d, 0);
+        assertEquals(d2, d, 0);
     }
 
     @Test
@@ -2406,8 +2395,7 @@ public class TextWireTest extends WireTestCommon {
                         "  map: {\n" +
                         "    CLASS: 0.1\n" +
                         "  }\n" +
-                        "}\n",
-                TEXT.asString(mh));
+                        "}\n", TEXT.asString(mh));
     }
 
     @Test
@@ -2521,7 +2509,7 @@ public class TextWireTest extends WireTestCommon {
                 final boolean metaData = i % 2 == 0;
 
                 // Assert if the section is identified correctly
-                assertEquals("i: " + i, metaData, dc.isMetaData());
+                assertEquals(metaData, dc.isMetaData(), "i: " + i);
             }
         }
     }
