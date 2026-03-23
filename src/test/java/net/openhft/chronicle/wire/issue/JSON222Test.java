@@ -53,7 +53,7 @@ public class JSON222Test extends WireTestCommon {
     // Test the JSON content using TextWire type
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testJSONAsTextWire(String fileName, File file) {
+    public void testJSONAsTextWire(String fileName, File file) throws IOException {
         this.file = file;
         testJSON(WireType.TEXT);
     }
@@ -62,7 +62,7 @@ public class JSON222Test extends WireTestCommon {
     @Disabled(/* TODO FIX */)
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testJSONAsYamlWire(String fileName, File file) {
+    public void testJSONAsYamlWire(String fileName, File file) throws IOException {
         this.file = file;
         testJSON(WireType.YAML_ONLY);
     }

@@ -85,7 +85,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testSingle(Boolean multipleNonMarshallableParamTypes) {
+    public void testSingle(Boolean multipleNonMarshallableParamTypes) throws Exception {
         this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
         // Initialization of the wire
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap());
@@ -107,7 +107,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testDouble(Boolean multipleNonMarshallableParamTypes) {
+    public void testDouble(Boolean multipleNonMarshallableParamTypes) throws Exception {
         this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
         // Initialization of the wire
         Wire w = new TextWire(Bytes.allocateElasticOnHeap());
@@ -132,7 +132,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testDoubleFinal(Boolean multipleNonMarshallableParamTypes) {
+    public void testDoubleFinal(Boolean multipleNonMarshallableParamTypes) throws Exception {
         this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
         // Initialization of the wire
         Wire w = new TextWire(Bytes.allocateElasticOnHeap());
@@ -152,7 +152,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testPrimitive(Boolean multipleNonMarshallableParamTypes) {
+    public void testPrimitive(Boolean multipleNonMarshallableParamTypes) throws Exception {
         this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
         // Initialization of the wire
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap());
