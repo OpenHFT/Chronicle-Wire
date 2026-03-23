@@ -8,13 +8,12 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.util.IgnoresEverything;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class extending WireTestCommon to verify selective reading behavior in Chronicle Wire.

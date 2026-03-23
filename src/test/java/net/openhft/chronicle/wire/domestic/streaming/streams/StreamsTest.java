@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
@@ -33,7 +33,7 @@ final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
     Stream<DynamicTest> test() {
         return Product.of(
                         // All the wire types we'd like to test
-                        wireTypes().map(this::wire),
+                        wireTypes(),
                         // All the various sequences of possible stream operations
                         Combination.of(operations())
                                 .flatMap(Permutation::of)
@@ -43,22 +43,24 @@ final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
                         WireOperationsRecord::new
                 )
                 .map(tuple -> DynamicTest.dynamicTest(tuple.toString(), () -> {
+                    final Wire wire = wire(tuple.wireType());
+                    try {
+                        // As we reuse the wire, we need to clear it between each use
+                        wire.bytes().readPosition(0);
 
-                    // As we reuse the wire, we need to clear it between each use
-                    tuple.wire().bytes().readPosition(0);
-
-                    // Apply all the operations on a reference stream using vanilla Stream operators
-                    final Stream<MarketData> expected = tuple.operations.stream()
-                            .reduce(marketDataStream(), (s, op) -> op.getPayload().apply(s), (a, b) -> a);
-
-                    // Apply all the operations on a reference stream using the custom Stream operators
-                    final Stream<MarketData> initialStream = Streams.of(
-                            tuple.wire(),
-                            DocumentExtractor.builder(MarketData.class).build());
-                    final Stream<MarketData> actual = tuple.operations.stream()
-                            .reduce(initialStream, (s, op) -> op.getPayload().apply(s), (a, b) -> a);
-
-                    assertStreamEquals(expected, actual);
+                        // Apply all the operations on a reference stream using vanilla Stream operators
+                        try (Stream<MarketData> expected = tuple.operations.stream()
+                                .reduce(marketDataStream(), (s, op) -> op.getPayload().apply(s), (a, b) -> a);
+                             Stream<MarketData> actual = tuple.operations.stream()
+                                     .reduce(Streams.of(
+                                                     wire,
+                                                     DocumentExtractor.builder(MarketData.class).build()),
+                                             (s, op) -> op.getPayload().apply(s), (a, b) -> a)) {
+                            assertStreamEquals(expected, actual);
+                        }
+                    } finally {
+                        wire.bytes().releaseLast();
+                    }
                 }));
     }
 
@@ -76,16 +78,16 @@ final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
     }
 
     static final class WireOperationsRecord {
-        private final Wire wire;
+        private final WireType wireType;
         private final NamedOperations operations;
 
-        WireOperationsRecord(Wire wire, NamedOperations operations) {
-            this.wire = wire;
+        WireOperationsRecord(WireType wireType, NamedOperations operations) {
+            this.wireType = wireType;
             this.operations = operations;
         }
 
-        Wire wire() {
-            return wire;
+        WireType wireType() {
+            return wireType;
         }
 
         NamedOperations operations() {
@@ -94,7 +96,7 @@ final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
         @Override
         public String toString() {
-            return wire.getClass().getSimpleName() + " ops: " + operations().toString();
+            return wireType + " ops: " + operations().toString();
         }
     }
 
@@ -123,11 +125,6 @@ final class StreamsTest extends net.openhft.chronicle.wire.WireTestCommon {
                 new MarketData("AAPL", 201, 210, 190),
                 new MarketData("AAPL", 202, 210, 190)
         );
-    }
-
-    private Stream<Wire> wires() {
-        return wireTypes()
-                .map(this::wire);
     }
 
     private Stream<WireType> wireTypes() {

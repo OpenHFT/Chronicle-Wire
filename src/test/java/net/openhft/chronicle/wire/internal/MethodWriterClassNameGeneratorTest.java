@@ -5,14 +5,13 @@ package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 // Testing the generation of class names for MethodWriter
 public class MethodWriterClassNameGeneratorTest extends net.openhft.chronicle.wire.WireTestCommon {

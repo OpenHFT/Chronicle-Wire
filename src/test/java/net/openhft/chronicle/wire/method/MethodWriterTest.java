@@ -11,17 +11,14 @@ import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.*;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.lang.reflect.Proxy;
 
-import static junit.framework.TestCase.assertFalse;
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MethodWriterTest extends WireTestCommon {
     @Test
@@ -100,7 +97,7 @@ public class MethodWriterTest extends WireTestCommon {
         checkWriterType(writer);
         writer.callToDefaultMethod("hello world");
 
-        Assert.assertTrue(wire.toString().startsWith("callToDefaultMethod: hello world"));
+        assertTrue(wire.toString().startsWith("callToDefaultMethod: hello world"));
     }
 
     @SuppressWarnings("deprecation")
@@ -125,8 +122,7 @@ public class MethodWriterTest extends WireTestCommon {
                         "b9 05 65 76 65 6e 74                            # event: (event)\n" +
                         "82 08 00 00 00                                  # sequence\n" +
                         "e3 74 77 6f                                     # two\n" +
-                        "e3 74 77 6f                                     # two\n",
-                wire2.bytes().toHexString());
+                        "e3 74 77 6f                                     # two\n", wire2.bytes().toHexString());
         wire2.bytes().releaseLast();
     }
 
@@ -178,9 +174,9 @@ public class MethodWriterTest extends WireTestCommon {
 
         String expected = "hello world";
         instance.method(expected);
-        Assert.assertEquals(expected, value.toString());
+        assertEquals(expected, value.toString());
 
-        Assert.assertTrue(wire.toString().startsWith("method: hello world\n" +
+        assertTrue(wire.toString().startsWith("method: hello world\n" +
                 "...\n"));
     }
 
@@ -192,7 +188,7 @@ public class MethodWriterTest extends WireTestCommon {
         checkWriterType(instance);
         instance.method(" this should not be written because the return value above is false");
 
-        Assert.assertEquals("", wire.toString());
+        assertEquals("", wire.toString());
     }
 
     @Test
@@ -263,7 +259,7 @@ public class MethodWriterTest extends WireTestCommon {
         } catch (NullPointerException npe) {
             // ignore
         }
-        Assert.assertEquals("half message should not be written", "", wire.toString());
+        assertEquals("", wire.toString(), "half message should not be written");
     }
 
     @Test
@@ -274,7 +270,7 @@ public class MethodWriterTest extends WireTestCommon {
         checkWriterType(instance);
     }
 
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/274")
+    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/274")
     @Test
     public void testMultipleImplsReturnValues() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();

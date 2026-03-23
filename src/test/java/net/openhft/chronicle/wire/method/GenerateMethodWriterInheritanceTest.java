@@ -8,16 +8,14 @@ import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static net.openhft.chronicle.wire.WireType.BINARY;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * Test class for verifying method writer generation and inheritance behaviors in the Chronicle Wire system.
@@ -87,23 +85,27 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
 
     // TODO: same names but different MethodIds should barf
 
-    @Test(expected = MethodWriterValidationException.class)
+    @Test
     public void testDuplicateMethodIds() {
-        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
+        assertThrows(MethodWriterValidationException.class, () -> {
+            final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
-        // Attempt to build a method writer with duplicate method IDs, expecting an exception
-        final VanillaMethodWriterBuilder<AnInterfaceMethodId> builder =
-            (VanillaMethodWriterBuilder<AnInterfaceMethodId>) wire.methodWriterBuilder(AnInterfaceMethodId.class);
-        builder.addInterface(AnInterfaceSameMethodId.class).build();
+            // Attempt to build a method writer with duplicate method IDs, expecting an exception
+            final VanillaMethodWriterBuilder<AnInterfaceMethodId> builder =
+                (VanillaMethodWriterBuilder<AnInterfaceMethodId>) wire.methodWriterBuilder(AnInterfaceMethodId.class);
+            builder.addInterface(AnInterfaceSameMethodId.class).build();
+        });
     }
 
     // This test is expected to throw a MethodWriterValidationException when trying to generate a method writer for a class
-    @Test(expected = MethodWriterValidationException.class)
+    @Test
     public void testGenerateForClass() {
-        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
+        assertThrows(MethodWriterValidationException.class, () -> {
+            final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
-        // Attempt to generate a method writer for a non-interface class, expecting an exception
-        wire.methodWriter(GenerateMethodWriterInheritanceTest.class);
+            // Attempt to generate a method writer for a non-interface class, expecting an exception
+            wire.methodWriter(GenerateMethodWriterInheritanceTest.class);
+        });
     }
 
     /**

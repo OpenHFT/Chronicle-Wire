@@ -9,10 +9,9 @@ import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import net.openhft.chronicle.wire.utils.RecordHistory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 // Test class extending WireTestCommon to test MethodReader functionality with history recording
 public class MethodReaderWithHistoryTest extends WireTestCommon {

@@ -9,11 +9,11 @@ import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Interface defining default behavior for an object that can perform operations

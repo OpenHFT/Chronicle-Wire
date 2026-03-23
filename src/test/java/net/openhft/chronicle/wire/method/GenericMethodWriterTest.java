@@ -5,11 +5,9 @@ package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.Wire;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class for verifying the behavior of generic method writers in Chronicle Wire.

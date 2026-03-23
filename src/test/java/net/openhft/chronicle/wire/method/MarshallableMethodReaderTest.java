@@ -10,12 +10,12 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 // Extends WireTestCommon to inherit thread dump and exception monitoring features
 public class MarshallableMethodReaderTest extends net.openhft.chronicle.wire.WireTestCommon {

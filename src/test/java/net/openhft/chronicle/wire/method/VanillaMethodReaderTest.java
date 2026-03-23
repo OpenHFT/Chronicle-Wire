@@ -12,8 +12,7 @@ import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -21,9 +20,8 @@ import java.lang.reflect.Proxy;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class VanillaMethodReaderTest extends WireTestCommon {
 
@@ -268,41 +266,43 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         assertEquals(text, wire2.toString());
     }
 
-    @Test(expected = ClassNotFoundRuntimeException.class)
+    @Test
     public void testUnknownClassThrow() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
-                .useTextDocuments()
-                .generateTuples(false);
-        MRTListener writer2 = wire2.methodWriter(MRTListener.class);
+        assertThrows(ClassNotFoundRuntimeException.class, () -> {
+            Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
+                    .useTextDocuments()
+                    .generateTuples(false);
+            MRTListener writer2 = wire2.methodWriter(MRTListener.class);
 
-        String text = "top: !UnknownClass {\n" +
-                "  one: 1,\n" +
-                "  two: 2.2,\n" +
-                "  three: words\n" +
-                "}\n" +
-                "...\n" +
-                "top: {\n" +
-                "  one: 11,\n" +
-                "  two: 22.2,\n" +
-                "  three: many words\n" +
-                "}\n" +
-                "...\n";
-        Wire wire = TextWire.from(text)
-                .useTextDocuments()
-                .generateTuples(false);
-        MethodReader reader = wire.methodReader(writer2);
-        checkReaderType(reader);
-        assertTrue(reader.readOne());
-        assertTrue(reader.readOne());
-        assertFalse(reader.readOne());
-        assertEquals(text, wire2.toString());
+            String text = "top: !UnknownClass {\n" +
+                    "  one: 1,\n" +
+                    "  two: 2.2,\n" +
+                    "  three: words\n" +
+                    "}\n" +
+                    "...\n" +
+                    "top: {\n" +
+                    "  one: 11,\n" +
+                    "  two: 22.2,\n" +
+                    "  three: many words\n" +
+                    "}\n" +
+                    "...\n";
+            Wire wire = TextWire.from(text)
+                    .useTextDocuments()
+                    .generateTuples(false);
+            MethodReader reader = wire.methodReader(writer2);
+            checkReaderType(reader);
+            assertTrue(reader.readOne());
+            assertTrue(reader.readOne());
+            assertFalse(reader.readOne());
+            assertEquals(text, wire2.toString());
+        });
     }
 
     @Test
     public void testMessageHistoryCleared() {
-        Assume.assumeFalse(Boolean.getBoolean("history.as.bytes"));
+        assumeFalse(Boolean.getBoolean("history.as.bytes"));
         try {
             Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
             final long sourceIndex = 2L;
@@ -326,17 +326,19 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         }
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testOverloaded() {
-        Jvm.recordExceptions();
-        try {
-            Wire wire2 = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(32));
-            Overloaded writer2 = wire2.methodWriter(Overloaded.class);
-            Wire wire = TextWire.from("method: [ ]\n");
-            wire.methodReader(writer2);
-        } finally {
-            Jvm.resetExceptionHandlers();
-        }
+        assertThrows(IllegalStateException.class, () -> {
+            Jvm.recordExceptions();
+            try {
+                Wire wire2 = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(32));
+                Overloaded writer2 = wire2.methodWriter(Overloaded.class);
+                Wire wire = TextWire.from("method: [ ]\n");
+                wire.methodReader(writer2);
+            } finally {
+                Jvm.resetExceptionHandlers();
+            }
+        });
     }
 
     @Test
@@ -376,8 +378,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                         "b9 02 74 6f                                     # to: (event)\n" +
                         "e3 74 77 6f                                     # two\n" +
                         "b9 03 73 61 79                                  # say: (event)\n" +
-                        "e6 68 69 20 32 32 32                            # hi 222\n",
-                wire.bytes().toHexString());
+                        "e6 68 69 20 32 32 32                            # hi 222\n", wire.bytes().toHexString());
         StringWriter out = new StringWriter();
         final MethodReader reader = wire.methodReaderBuilder()
                 .scanning(scanning)
@@ -387,17 +388,14 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         if (!scanning) {
             assertTrue(reader.readOne());
             assertEquals("meta: to[aye]\n" +
-                            "meta: say[hi AAA]\n",
-                    asString(out));
+                            "meta: say[hi AAA]\n", asString(out));
         }
 
         assertTrue(reader.readOne());
         assertEquals("meta: to[aye]\n" +
                         "meta: say[hi AAA]\n" +
                         "data: to[one]\n" +
-                        "data: say[hi 111]\n",
-
-                asString(out));
+                        "data: say[hi 111]\n", asString(out));
         if (!scanning) {
             assertTrue(reader.readOne());
             assertEquals("meta: to[aye]\n" +
@@ -405,8 +403,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                             "data: to[one]\n" +
                             "data: say[hi 111]\n" +
                             "meta: to[bee]\n" +
-                            "meta: say[hi BBB]\n",
-                    asString(out));
+                            "meta: say[hi BBB]\n", asString(out));
         }
 
         assertTrue(reader.readOne());
@@ -417,8 +414,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
                         "meta: to[bee]\n" +
                         "meta: say[hi BBB]\n" +
                         "data: to[two]\n" +
-                        "data: say[hi 222]\n",
-                asString(out));
+                        "data: say[hi 222]\n", asString(out));
 
         assertFalse(reader.readOne());
         wire.bytes().releaseLast();

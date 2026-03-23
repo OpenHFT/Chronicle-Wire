@@ -8,12 +8,12 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BrokenChainTest extends WireTestCommon {
     interface First {

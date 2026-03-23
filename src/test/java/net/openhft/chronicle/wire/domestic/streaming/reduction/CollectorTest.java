@@ -9,9 +9,9 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
 import net.openhft.chronicle.wire.domestic.streaming.CreateUtil;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -21,7 +21,7 @@ import java.util.stream.Collector;
 import static java.util.stream.Collectors.*;
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.reducingConcurrent;
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.replacingMerger;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CollectorTest extends WireTestCommon {
 
@@ -33,12 +33,12 @@ public class CollectorTest extends WireTestCommon {
             new MarketData("AAPL", 200, 220, 180)
     );
 
-    @Before
+    @BeforeEach
     public void clearBefore() {
         IOTools.deleteDirWithFiles(Q_NAME);
     }
 
-    @After
+    @AfterEach
     public void clearAfter() {
         IOTools.deleteDirWithFiles(Q_NAME);
     }

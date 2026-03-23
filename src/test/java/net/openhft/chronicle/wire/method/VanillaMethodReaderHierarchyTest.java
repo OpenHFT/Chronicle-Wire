@@ -9,13 +9,12 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class extending WireTestCommon to validate the behavior of method readers

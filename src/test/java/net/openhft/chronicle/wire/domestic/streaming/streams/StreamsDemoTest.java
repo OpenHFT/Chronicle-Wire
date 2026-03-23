@@ -28,9 +28,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor.builder;
 import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.*;
-import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
 

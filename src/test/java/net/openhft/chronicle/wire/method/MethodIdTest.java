@@ -9,10 +9,9 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 // Test class extending WireTestCommon to test method identification in binary wire format
 public class MethodIdTest extends WireTestCommon {

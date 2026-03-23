@@ -3,14 +3,14 @@
  */
 package net.openhft.chronicle.wire.method;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 // Test class extending MethodWriter2Test to evaluate behavior of method writers with enforced proxy generation
 public class MethodWriterProxy2Test extends MethodWriter2Test {
 
     // Set up the environment before each test
-    @Before
+    @BeforeEach
     public void before() {
         // Enforce proxy generation by disabling proxy code generation
         System.setProperty("disableProxyCodegen", "true");
@@ -20,7 +20,7 @@ public class MethodWriterProxy2Test extends MethodWriter2Test {
     }
 
     // Clean up and reset the environment after each test
-    @After
+    @AfterEach
     public void after() {
         // Clear the property to revert to the default method writer generation behavior
         System.clearProperty("disableProxyCodegen");

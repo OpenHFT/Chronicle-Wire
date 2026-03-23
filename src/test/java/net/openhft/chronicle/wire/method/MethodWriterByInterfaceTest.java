@@ -8,26 +8,26 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.wire.*;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.lang.reflect.Proxy;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 // Test class extending WireTestCommon to test method writing and reading via interface implementations
 public class MethodWriterByInterfaceTest extends WireTestCommon {
 
     // Setup method to configure default object creation for interfaces before each test
-    @Before
+    @BeforeEach
     public void setup() {
         ObjectUtils.defaultObjectForInterface(c -> Class.forName(c.getName() + "mpl"));
     }
 
     // Teardown method to reset default object creation for interfaces after each test
-    @After
+    @AfterEach
     public void teardown() {
         ObjectUtils.defaultObjectForInterface(c -> c);
     }

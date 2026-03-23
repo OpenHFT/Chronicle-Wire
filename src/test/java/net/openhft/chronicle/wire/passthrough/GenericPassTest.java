@@ -7,9 +7,9 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class extending WireTestCommon to validate the behavior of method readers and writers
@@ -32,8 +32,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
         assertEquals("" +
                         "via: queue1\n" +
                         "say: hello\n" +
-                        "...\n",
-                wire1.toString());
+                        "...\n", wire1.toString());
 
         // Setup wire2 for reading the message
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
@@ -46,8 +45,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
         assertEquals("" +
                         "via: queue1\n" +
                         "say: hello\n" +
-                        "...\n",
-                wire2.toString());
+                        "...\n", wire2.toString());
     }
 
     /**
@@ -86,8 +84,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
         assertEquals("" +
                         "via: pass\n" +
                         "\u0082\n" +
-                        "...\n",
-                wire2.toString());
+                        "...\n", wire2.toString());
     }
 
     /**
@@ -123,8 +120,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
                         "0b 00 00 00                                     # msg-length\n" +
                         "b9 03 76 69 61                                  # via: (event)\n" +
                         "e4 70 61 73 73                                  # pass\n" +
-                        "82                                              # opaque message\n",
-                wire1.bytes().toHexString());
+                        "82                                              # opaque message\n", wire1.bytes().toHexString());
 
         // Setup wire2 for reading the message
         Wire wire2 = new BinaryWire(new HexDumpBytes());
@@ -138,8 +134,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
                         "0b 00 00 00                                     # msg-length\n" +
                         "b9 03 76 69 61                                  # via: (event)\n" +
                         "e4 70 61 73 73                                  # pass\n" +
-                        "82                                              # passed-through\n",
-                wire2.bytes().toHexString());
+                        "82                                              # passed-through\n", wire2.bytes().toHexString());
     }
 
     /**

@@ -4,8 +4,8 @@
 package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.wire.WireTypeConverter;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class WireTypeConverterTest {
 
@@ -54,12 +54,11 @@ public class WireTypeConverterTest {
 
     @Test
     public void testYamlToJson() {
-        Assert.assertEquals(json,
-                new WireTypeConverter().yamlToJson(yaml).toString().replaceAll(",", ",\n"));
+        assertEquals(json, new WireTypeConverter().yamlToJson(yaml).toString().replaceAll(",", ",\n"));
     }
 
     @Test
     public void testJsonToYaml() {
-        Assert.assertEquals(yaml, new WireTypeConverter().jsonToYaml(json).toString());
+        assertEquals(yaml, new WireTypeConverter().jsonToYaml(json).toString());
     }
 }
