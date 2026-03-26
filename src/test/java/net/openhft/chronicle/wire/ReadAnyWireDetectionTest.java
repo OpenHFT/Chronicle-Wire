@@ -12,10 +12,10 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ReadAnyWireDetectionTest extends WireTestCommon {
+class ReadAnyWireDetectionTest extends WireTestCommon {
 
     @Test
-    public void detectsWireTypeAndReadsPayload() {
+    void detectsWireTypeAndReadsPayload() {
         for (TestCase testCase : cases()) {
             Bytes<?> encoded = encode(testCase.type, wire -> {
                 try (DocumentContext dc = wire.writingDocument(false)) {

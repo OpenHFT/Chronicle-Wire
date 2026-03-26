@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assumptions.*;
  *
  * @author greg allen
  */
-public class EnumWireTest extends WireTestCommon {
+class EnumWireTest extends WireTestCommon {
 
     // Parameterized test setup: Returns a list of wire creation strategies to be used for the test iterations.
     public static Iterable<Function<Bytes<?>, Wire>> wires() {
@@ -41,7 +41,7 @@ public class EnumWireTest extends WireTestCommon {
     // Test case that checks the correct deserialization of an enum that implements Marshallable.
     @ParameterizedTest
     @MethodSource("wires")
-    public void testEnumImplementingMarshallable(Function<Bytes<?>, Wire> createWire) {
+    void testEnumImplementingMarshallable(Function<Bytes<?>, Wire> createWire) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         assertSame(Marsh.MARSH, roundTrip(createWire, Person1::new).field);
@@ -50,7 +50,7 @@ public class EnumWireTest extends WireTestCommon {
     // Test case that checks the correct deserialization of an enum that does NOT implement Marshallable.
     @ParameterizedTest
     @MethodSource("wires")
-    public void testEnumNotImplementingMarshallable(Function<Bytes<?>, Wire> createWire) {
+    void testEnumNotImplementingMarshallable(Function<Bytes<?>, Wire> createWire) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         assertSame(NoMarsh.NO_MARSH, roundTrip(createWire, Person2::new).field);
@@ -60,7 +60,7 @@ public class EnumWireTest extends WireTestCommon {
     // and implements both Marshallable and ReadResolvable.
     @ParameterizedTest
     @MethodSource("wires")
-    public void testEnumImplementingMarshallableAndReadResolve(Function<Bytes<?>, Wire> createWire) {
+    void testEnumImplementingMarshallableAndReadResolve(Function<Bytes<?>, Wire> createWire) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         assertSame(MarshAndResolve.MARSH_AND_RESOLVE, roundTrip(createWire, Person3::new).field);

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BinaryWireAnchorTest extends WireTestCommon {
+class BinaryWireAnchorTest extends WireTestCommon {
 
     static class ExposedBinaryWire extends BinaryWire {
         public ExposedBinaryWire(Bytes<?> bytes) {
@@ -26,7 +26,7 @@ public class BinaryWireAnchorTest extends WireTestCommon {
     }
 
     @Test
-    public void anchorMethodsThrowUnexpectedCode() {
+    void anchorMethodsThrowUnexpectedCode() {
         ExposedBinaryWire wire = new ExposedBinaryWire(Bytes.allocateElasticOnHeap());
         assertThrows(IORuntimeException.class, wire::callAnchor);
         assertThrows(IORuntimeException.class, wire::callFieldAnchor);

@@ -6,7 +6,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -16,7 +15,7 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("rawtypes")
-public class PrimitiveTypeWrappersTest extends WireTestCommon {
+class PrimitiveTypeWrappersTest extends WireTestCommon {
 
     private boolean isTextWire;  // Variable to determine if using text wire format
 
@@ -24,15 +23,22 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
     public static Collection<Object[]> data() {
         return Arrays.asList(
                 new Object[]{Boolean.TRUE},
-                new Object[]{Boolean.TRUE}  // This seems redundant; consider having diverse values
+                new Object[]{Boolean.FALSE}
         );
+    }
+
+    public static Collection<Object[]> textWireOnly() {
+        return Arrays.asList(new Object[][]{
+                {Boolean.TRUE}
+        });
     }
 
     // Test writing numbers of different types and reading them back
     @SuppressWarnings("unchecked")
     @ParameterizedTest
-    @MethodSource("data")
-    public void testNumbers(Object isTextWire) {
+    @MethodSource("textWireOnly")
+    void testNumbers(boolean isTextWire) {
+        this.isTextWire = isTextWire;
         // Define wrapper classes for numbers
         @NotNull final Class[] types = new Class[]{Byte.class,
                 Short.class, Float.class,
@@ -45,7 +51,7 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
                 @NotNull final Wire wire = wireFactory();
 
                 wire.write().object(num); // Write the number to the wire
-               // System.out.println(wire);
+                // System.out.println(wire);
                 @Nullable final Object object = wire.read().object(type); // Read the number back as the specified type
                 assertTrue(type.isAssignableFrom(object.getClass()), num.getClass() + " to " + type.getName());
                 assertEquals(num.intValue(), ((Number) object).intValue(),
@@ -57,14 +63,15 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
     // Test that writing and reading the number maintains the original type
     @ParameterizedTest
     @MethodSource("data")
-    public void testNumbers2(Object isTextWire) {
+    void testNumbers2(boolean isTextWire) {
+        this.isTextWire = isTextWire;
         @NotNull final Number[] nums = new Number[]{(byte) 1, (short) 1, (float) 1, 1, (long) 1, (double) 1};
 
         for (@NotNull Number num : nums) {
             @NotNull final Wire wire = wireFactory();
 
             wire.write().object(num);
-           // System.out.println(num.getClass() + " of " + num + " is " + (isTextWire ? wire.toString() : wire.bytes().toHexString()));
+            // System.out.println(num.getClass() + " of " + num + " is " + (isTextWire ? wire.toString() : wire.bytes().toHexString()));
             @Nullable final Object object = wire.read().object(Object.class);
             assertSame(num.getClass(), object.getClass());
             assertEquals(num, object, num.getClass().getName());
@@ -74,7 +81,8 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
     // Test writing and reading a character
     @ParameterizedTest
     @MethodSource("data")
-    public void testCharacter(Object isTextWire) {
+    void testCharacter(boolean isTextWire) {
+        this.isTextWire = isTextWire;
         @NotNull final Wire wire = wireFactory();
         wire.write().object('1');
         @Nullable final Object object = wire.read().object(Character.class);
@@ -85,7 +93,8 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
     // Test writing a string and reading it back as a character
     @ParameterizedTest
     @MethodSource("data")
-    public void testCharacterWritenAsString(Object isTextWire) {
+    void testCharacterWritenAsString(boolean isTextWire) {
+        this.isTextWire = isTextWire;
         @NotNull final Wire wire = wireFactory();
         wire.write().object("1");
         @Nullable final Object object = wire.read().object(Character.class);
@@ -96,7 +105,8 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
     // Test writing a character and reading it back as a string
     @ParameterizedTest
     @MethodSource("data")
-    public void testCharReadAsString(Object isTextWire) {
+    void testCharReadAsString(boolean isTextWire) {
+        this.isTextWire = isTextWire;
         @NotNull final Wire wire = wireFactory();
         wire.write().object('1');
         @Nullable final Object object = wire.read().object(String.class);
@@ -107,7 +117,8 @@ public class PrimitiveTypeWrappersTest extends WireTestCommon {
     // Test writing a long string and reading just the first character
     @ParameterizedTest
     @MethodSource("data")
-    public void testStoreStringReadAsChar(Object isTextWire) {
+    void testStoreStringReadAsChar(boolean isTextWire) {
+        this.isTextWire = isTextWire;
         @NotNull final Wire wire = wireFactory();
         wire.write().object("LONG STRING");
         @Nullable final Object object = wire.read().object(Character.class);

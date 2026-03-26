@@ -227,7 +227,7 @@ final class SerializableObjectTest extends WireTestCommon {
      * back to an object that is equal to the original.
      *
      * @param aClass The class to check.
-     * @param o An optional instance of the class to check. If null, a new instance will be created.
+     * @param o      An optional instance of the class to check. If null, a new instance will be created.
      * @return true if the class is serializable and deserializable, and the original and deserialized objects are equal; false otherwise.
      */
     private static boolean isSerializableEquals(Class<?> aClass, Object o) {

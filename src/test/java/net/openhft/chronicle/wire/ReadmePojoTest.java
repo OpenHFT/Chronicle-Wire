@@ -14,21 +14,21 @@ import java.util.*;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ReadmePojoTest extends WireTestCommon {
+class ReadmePojoTest extends WireTestCommon {
     static {
         // Registering 'MyPojos' class for aliasing purposes
         ClassAliasPool.CLASS_ALIASES.addAlias(MyPojos.class);
     }
 
     @Test
-    public void testFromString() throws IOException {
+    void testFromString() throws IOException {
         // Initialize a MyPojos instance with two MyPojo entries
         @NotNull MyPojos mps = new MyPojos("test-list");
         mps.myPojos.add(new MyPojo("text1", 1, 1.1));
         mps.myPojos.add(new MyPojo("text2", 2, 2.2));
 
-       // System.out.println(mps);
-       // Convert MyPojos instance to string and back, then validate equality
+        // System.out.println(mps);
+        // Convert MyPojos instance to string and back, then validate equality
         @Nullable MyPojos mps2 = Marshallable.fromString(mps.toString());
         assertEquals(mps, mps2);
 
@@ -49,7 +49,7 @@ public class ReadmePojoTest extends WireTestCommon {
     }
 
     @Test
-    public void testMapDump() throws IOException {
+    void testMapDump() throws IOException {
         // Creating a LinkedHashMap with various key-value pairs
         @NotNull Map<String, Object> map = new LinkedHashMap<>();
         map.put("text", "words");

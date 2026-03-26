@@ -19,9 +19,9 @@ import static org.junit.jupiter.api.Assumptions.*;
 /**
  * Tests for marshalling and unmarshalling of Enum using Wire.
  */
-public class EnumTest extends WireTestCommon {
+class EnumTest extends WireTestCommon {
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
@@ -29,7 +29,7 @@ public class EnumTest extends WireTestCommon {
      * Tests serialization and deserialization of the TestEnum enumeration.
      */
     @Test
-    public void testEnum() {
+    void testEnum() {
         // Expecting an exception regarding enum handling
         expectException("Treating class net.openhft.chronicle.wire.EnumTest$TestEnum as enum not WriteMarshallable");
 
@@ -41,7 +41,7 @@ public class EnumTest extends WireTestCommon {
 
             // Write the TestEnum.INSTANCE to the wire
             wire.write("test")
-                .object(TestEnum.INSTANCE);
+                    .object(TestEnum.INSTANCE);
 
             // Validate the serialized form of the TestEnum
             assertEquals("test: !net.openhft.chronicle.wire.EnumTest$TestEnum INSTANCE\n", wire.toString());
@@ -53,7 +53,7 @@ public class EnumTest extends WireTestCommon {
 
             // Deserialize the TestEnum back from the wire
             @Nullable Object enumObject = wire2.read(() -> "test")
-                .object();
+                    .object();
 
             // Ensure original and read enum are the same
             assertSame(TestEnum.INSTANCE, enumObject);

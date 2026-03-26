@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 @SuppressWarnings("unchecked")
-public class WireSerializedLambdaTest extends WireTestCommon {
+class WireSerializedLambdaTest extends WireTestCommon {
 
     // Static initializer block for class alias configurations
     static {
@@ -34,13 +34,13 @@ public class WireSerializedLambdaTest extends WireTestCommon {
 
     // Ensure that the test is not executed for Java versions 21 and above
     @BeforeEach
-    public void notSupportedInJava21() {
+    void notSupportedInJava21() {
         assumeFalse(Jvm.majorVersion() >= 21);
     }
 
     // Test to check if various lambda functions are serializable
     @Test
-    public void testIsLambda() {
+    void testIsLambda() {
         @NotNull Function<String, String> fun = (Function<String, String> & Serializable) String::toUpperCase;
         assertTrue(WireSerializedLambda.isSerializableLambda(fun.getClass()));
         int a = 5;
@@ -93,19 +93,19 @@ public class WireSerializedLambdaTest extends WireTestCommon {
 
     // Test the serialization and deserialization using TextWire
     @Test
-    public void testTextWire() {
+    void testTextWire() {
         doTestText(WireType.TEXT);
     }
 
     // Test the serialization and deserialization using YamlWire
     @Test
-    public void testYamlWire() {
+    void testYamlWire() {
         doTestText(WireType.YAML_ONLY);
     }
 
     // Test the serialization and deserialization using BinaryWire
     @Test
-    public void testBinaryWire() {
+    void testBinaryWire() {
         @NotNull Wire wire = new BinaryWire(new HexDumpBytes());
 
         SerializableFunction<String, String> fun = String::toUpperCase;
@@ -115,40 +115,40 @@ public class WireSerializedLambdaTest extends WireTestCommon {
 
         // Verify the serialized binary content of the wire object
         assertEquals("c3 6f 6e 65                                     # one:\n" +
-                        "b6 10 53 65 72 69 61 6c 69 7a 65 64 4c 61 6d 62 # SerializedLambda\n" +
-                        "64 61 82 21 01 00 00                            # Marshallable\n" +
-                        "c2 63 63                                        # cc:\n" +
-                        "bc 33 6e 65 74 2e 6f 70 65 6e 68 66 74 2e 63 68 # net.openhft.chronicle.wire.WireSerializedLambdaTest\n" +
-                        "72 6f 6e 69 63 6c 65 2e 77 69 72 65 2e 57 69 72\n" +
-                        "65 53 65 72 69 61 6c 69 7a 65 64 4c 61 6d 62 64\n" +
-                        "61 54 65 73 74 c3 66 69 63                      # fic:\n" +
-                        "b8 34 6e 65 74 2f 6f 70 65 6e 68 66 74 2f 63 68 # net/openhft/chronicle/core/util/SerializableFunction\n" +
-                        "72 6f 6e 69 63 6c 65 2f 63 6f 72 65 2f 75 74 69\n" +
-                        "6c 2f 53 65 72 69 61 6c 69 7a 61 62 6c 65 46 75\n" +
-                        "6e 63 74 69 6f 6e c4 66 69 6d 6e                # fimn:\n" +
-                        "e5 61 70 70 6c 79                               # apply\n" +
-                        "c4 66 69 6d 73                                  # fims:\n" +
-                        "b8 26 28 4c 6a 61 76 61 2f 6c 61 6e 67 2f 4f 62 # (Ljava/lang/Object;)Ljava/lang/Object;\n" +
-                        "6a 65 63 74 3b 29 4c 6a 61 76 61 2f 6c 61 6e 67\n" +
-                        "2f 4f 62 6a 65 63 74 3b c3 69 6d 6b             # imk:\n" +
-                        "a1 05                                           # 5\n" +
-                        "c2 69 63                                        # ic:\n" +
-                        "f0 6a 61 76 61 2f 6c 61 6e 67 2f 53 74 72 69 6e # java/lang/String\n" +
-                        "67 c3 69 6d 6e                                  # imn:\n" +
-                        "eb 74 6f 55 70 70 65 72 43 61 73 65             # toUpperCase\n" +
-                        "c3 69 6d 73                                     # ims:\n" +
-                        "f4 28 29 4c 6a 61 76 61 2f 6c 61 6e 67 2f 53 74 # ()Ljava/lang/String;\n" +
-                        "72 69 6e 67 3b c3 69 6d 74                      # imt:\n" +
-                        "b8 26 28 4c 6a 61 76 61 2f 6c 61 6e 67 2f 53 74 # (Ljava/lang/String;)Ljava/lang/String;\n" +
-                        "72 69 6e 67 3b 29 4c 6a 61 76 61 2f 6c 61 6e 67\n" +
-                        "2f 53 74 72 69 6e 67 3b c2 63 61                # ca:\n" +
-                        "82 00 00 00 00                                  # sequence\n" +
-                        "c3 74 77 6f                                     # two:\n" +
-                        "b6 03 46 75 6e                                  # Fun\n" +
-                        "e5 41 44 44 5f 41                               # ADD_A\n" +
-                        "c5 74 68 72 65 65                               # three:\n" +
-                        "b6 06 55 70 64 61 74 65                         # Update\n" +
-                        "e4 44 45 43 52                                  # DECR\n", wire.bytes().toHexString());
+                "b6 10 53 65 72 69 61 6c 69 7a 65 64 4c 61 6d 62 # SerializedLambda\n" +
+                "64 61 82 21 01 00 00                            # Marshallable\n" +
+                "c2 63 63                                        # cc:\n" +
+                "bc 33 6e 65 74 2e 6f 70 65 6e 68 66 74 2e 63 68 # net.openhft.chronicle.wire.WireSerializedLambdaTest\n" +
+                "72 6f 6e 69 63 6c 65 2e 77 69 72 65 2e 57 69 72\n" +
+                "65 53 65 72 69 61 6c 69 7a 65 64 4c 61 6d 62 64\n" +
+                "61 54 65 73 74 c3 66 69 63                      # fic:\n" +
+                "b8 34 6e 65 74 2f 6f 70 65 6e 68 66 74 2f 63 68 # net/openhft/chronicle/core/util/SerializableFunction\n" +
+                "72 6f 6e 69 63 6c 65 2f 63 6f 72 65 2f 75 74 69\n" +
+                "6c 2f 53 65 72 69 61 6c 69 7a 61 62 6c 65 46 75\n" +
+                "6e 63 74 69 6f 6e c4 66 69 6d 6e                # fimn:\n" +
+                "e5 61 70 70 6c 79                               # apply\n" +
+                "c4 66 69 6d 73                                  # fims:\n" +
+                "b8 26 28 4c 6a 61 76 61 2f 6c 61 6e 67 2f 4f 62 # (Ljava/lang/Object;)Ljava/lang/Object;\n" +
+                "6a 65 63 74 3b 29 4c 6a 61 76 61 2f 6c 61 6e 67\n" +
+                "2f 4f 62 6a 65 63 74 3b c3 69 6d 6b             # imk:\n" +
+                "a1 05                                           # 5\n" +
+                "c2 69 63                                        # ic:\n" +
+                "f0 6a 61 76 61 2f 6c 61 6e 67 2f 53 74 72 69 6e # java/lang/String\n" +
+                "67 c3 69 6d 6e                                  # imn:\n" +
+                "eb 74 6f 55 70 70 65 72 43 61 73 65             # toUpperCase\n" +
+                "c3 69 6d 73                                     # ims:\n" +
+                "f4 28 29 4c 6a 61 76 61 2f 6c 61 6e 67 2f 53 74 # ()Ljava/lang/String;\n" +
+                "72 69 6e 67 3b c3 69 6d 74                      # imt:\n" +
+                "b8 26 28 4c 6a 61 76 61 2f 6c 61 6e 67 2f 53 74 # (Ljava/lang/String;)Ljava/lang/String;\n" +
+                "72 69 6e 67 3b 29 4c 6a 61 76 61 2f 6c 61 6e 67\n" +
+                "2f 53 74 72 69 6e 67 3b c2 63 61                # ca:\n" +
+                "82 00 00 00 00                                  # sequence\n" +
+                "c3 74 77 6f                                     # two:\n" +
+                "b6 03 46 75 6e                                  # Fun\n" +
+                "e5 41 44 44 5f 41                               # ADD_A\n" +
+                "c5 74 68 72 65 65                               # three:\n" +
+                "b6 06 55 70 64 61 74 65                         # Update\n" +
+                "e4 44 45 43 52                                  # DECR\n", wire.bytes().toHexString());
 
         @Nullable Function<String, String> function = wire.read().object(Function.class);
         assertEquals("HELLO", function.apply("hello"));

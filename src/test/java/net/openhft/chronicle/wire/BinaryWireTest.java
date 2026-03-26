@@ -33,11 +33,13 @@ import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
+
 import org.junit.jupiter.api.Assertions;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class BinaryWireTest extends WireTestCommon {
+class BinaryWireTest extends WireTestCommon {
 
     private int testId;
     private boolean fixed;
@@ -71,7 +73,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Test case to verify the write operation of the Wire
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testWrite(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testWrite(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -113,7 +115,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Test case to verify the reading and writing of a String with special characters
     @ParameterizedTest
     @MethodSource("combinations")
-    public void readWriteString(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void readWriteString(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -144,22 +146,22 @@ public class BinaryWireTest extends WireTestCommon {
         if (expected[0].startsWith("["))
             System.out.println("\"\" +\n\"" + (wire.bytes().toHexString().replaceAll("\n", "\\\\n\" +\n\"") + "\",").replace(" +\n\"\",", ","));
         else
-            assertEquals("id: " + testId,
-                    expected[testId],
-                    wire.bytes().toHexString());
+            assertEquals(expected[testId],
+                    wire.bytes().toHexString(),
+                    "id: " + testId);
     }
 
     // A variation of checkWire to compare the wire's debug string output
     private void checkWire2(@NotNull Wire wire, String... expected) {
-        assertEquals("id: " + testId,
-                expected[testId].replaceAll("٠+$", ""),
-                wire.bytes().toDebugString(9999).replaceAll("٠+$", ""));
+        assertEquals(expected[testId].replaceAll("٠+$", ""),
+                wire.bytes().toDebugString(9999).replaceAll("٠+$", ""),
+                "id: " + testId);
     }
 
     // Test case to verify writing fields to the wire and checking their representation
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testWrite1(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testWrite1(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -215,7 +217,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Test writing data to a Wire
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testWrite2(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testWrite2(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -269,7 +271,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Test reading data from a Wire
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testRead(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testRead(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -303,7 +305,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Testing a basic reading scenario
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testRead1(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testRead1(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -336,7 +338,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Testing reading into a StringBuilder
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testRead2(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testRead2(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -372,7 +374,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Testing the writing and reading of 8-bit integers
     @ParameterizedTest
     @MethodSource("combinations")
-    public void int8(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void int8(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -495,7 +497,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Test for writing and reading 16-bit integers to/from Wire.
     @ParameterizedTest
     @MethodSource("combinations")
-    public void int16(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void int16(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -572,7 +574,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Test for writing and reading 8-bit unsigned integers to/from Wire.
     @ParameterizedTest
     @MethodSource("combinations")
-    public void uint8(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void uint8(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -650,7 +652,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Test case to validate writing and reading of unsigned 16-bit integers using Wire
     @ParameterizedTest
     @MethodSource("combinations")
-    public void uint16(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void uint16(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -730,7 +732,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Test case to validate writing and reading of unsigned 32-bit integers using Wire
     @ParameterizedTest
     @MethodSource("combinations")
-    public void uint32(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void uint32(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -810,7 +812,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Test the writing and reading of 32-bit integers using the Wire API
     @ParameterizedTest
     @MethodSource("combinations")
-    public void int32(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void int32(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -884,7 +886,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Test the writing and reading of 64-bit integers using the Wire API
     @ParameterizedTest
     @MethodSource("combinations")
-    public void int64(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void int64(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -958,7 +960,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Test for ensuring correct storage and retrieval of float64 values in Wire
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testFloat64s(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testFloat64s(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -991,7 +993,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Test for checking various float64 serialization scenarios in Wire
     @ParameterizedTest
     @MethodSource("combinations")
-    public void float64(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void float64(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1091,7 +1093,7 @@ public class BinaryWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("combinations")
-    public void text(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void text(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1142,7 +1144,7 @@ public class BinaryWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("combinations")
-    public void type(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void type(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1189,7 +1191,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Testing the boolean write and read functionality of the wire
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testBool(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testBool(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1212,7 +1214,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Testing the float32 (i.e., single precision float) write and read functionality of the wire
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testFloat32(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testFloat32(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1238,7 +1240,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Testing the LocalTime write and read functionality of the wire
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testTime(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testTime(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1280,7 +1282,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Testing the ZonedDateTime write and read functionality of the wire
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testZonedDateTime(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testZonedDateTime(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1315,7 +1317,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Testing the LocalDate write and read functionality of the wire
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testDate(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testDate(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1338,7 +1340,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Testing the UUID write and read functionality of the wire
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testUuid(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testUuid(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1361,7 +1363,7 @@ public class BinaryWireTest extends WireTestCommon {
     // Testing the byte array write and read functionality of the wire
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testBytes(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testBytes(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1400,7 +1402,7 @@ public class BinaryWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testWriteMarshallable(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testWriteMarshallable(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1633,7 +1635,7 @@ public class BinaryWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("combinations")
-    public void writeNull(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void writeNull(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1661,7 +1663,7 @@ public class BinaryWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testLongString(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testLongString(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1691,7 +1693,7 @@ public class BinaryWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testArrays(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testArrays(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1724,7 +1726,7 @@ public class BinaryWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testArrays2(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testArrays2(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1756,7 +1758,7 @@ public class BinaryWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testUsingEvents(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testUsingEvents(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1800,7 +1802,7 @@ public class BinaryWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testSortedSet(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testSortedSet(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1824,7 +1826,7 @@ public class BinaryWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testSortedMap(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testSortedMap(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1848,7 +1850,7 @@ public class BinaryWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testSkipPadding(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void testSkipPadding(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1878,7 +1880,7 @@ public class BinaryWireTest extends WireTestCommon {
     @SuppressWarnings("try")
     @ParameterizedTest
     @MethodSource("combinations")
-    public void readsComment(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
+    void readsComment(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -1914,7 +1916,7 @@ public class BinaryWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("combinations")
-    public void writeEndOfWireDoesNotUpdateModifiedTimeOnNoOpWhenUnderlyingBytesIsFile(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) throws IOException {
+    void writeEndOfWireDoesNotUpdateModifiedTimeOnNoOpWhenUnderlyingBytesIsFile(int testId, boolean fixed, boolean numericField, boolean fieldLess, int compressedSize) throws IOException {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;

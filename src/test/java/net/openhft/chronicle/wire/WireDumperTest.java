@@ -13,7 +13,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class WireDumperTest extends WireTestCommon {
+class WireDumperTest extends WireTestCommon {
 
     // Helper method to filter and format WireType values for parameterized testing
     public static Object[][] parameters() {
@@ -47,7 +47,7 @@ public class WireDumperTest extends WireTestCommon {
     // Test case for verifying serialization of content to a wire
     @ParameterizedTest(name = "{0}")
     @MethodSource("parameters")
-    public void shouldSerialiseContent(String name, WireType wireType) {
+    void shouldSerialiseContent(String name, WireType wireType) {
         initTest(name, wireType);
         try {
             // Writing values to the wire
@@ -76,7 +76,7 @@ public class WireDumperTest extends WireTestCommon {
     // Test case for verifying serialization of partial content to a wire
     @ParameterizedTest(name = "{0}")
     @MethodSource("parameters")
-    public void shouldSerialisePartialContent(String name, WireType wireType) {
+    void shouldSerialisePartialContent(String name, WireType wireType) {
         initTest(name, wireType);
         try {
             // Writing partial content to the wire

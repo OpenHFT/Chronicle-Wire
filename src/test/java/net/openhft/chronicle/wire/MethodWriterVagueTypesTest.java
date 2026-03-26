@@ -22,7 +22,7 @@ import java.util.function.BiConsumer;
  * This class tests the behavior of MethodWriter when handling vague/interfaced messages.
  * It extends the WireTestCommon from the `net.openhft.chronicle.wire` package for common test setup and utilities.
  */
-public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
+class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
     private ArrayBlockingQueue<Object> singleQ = new ArrayBlockingQueue<>(1);
     private ArrayBlockingQueue<Object> doubleQ = new ArrayBlockingQueue<>(2);
     private final List<Map<Class<?>, Object>> usedObjects = Arrays.asList(new HashMap<>(), new HashMap<>());
@@ -36,6 +36,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
                 new Object[]{false}
         );
     }
+
     /**
      * An interface defining a single method that accepts a String message.
      */
@@ -55,8 +56,11 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         void msg(FinalMarshallableContainer m, FinalNonMarshallableContainer nm);
     }
 
-    static final class FinalMarshallableContainer extends NonMarshallableTestContainer implements Marshallable{}
-    static final class FinalNonMarshallableContainer extends NonMarshallableTestContainer{}
+    static final class FinalMarshallableContainer extends NonMarshallableTestContainer implements Marshallable {
+    }
+
+    static final class FinalNonMarshallableContainer extends NonMarshallableTestContainer {
+    }
 
     static class MarshallableTestContainer extends NonMarshallableTestContainer implements Marshallable {
     }
@@ -72,7 +76,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
 
         @Override
         public boolean equals(Object obj) {
-            return obj instanceof NonMarshallableTestContainer && randomInt.equals(((NonMarshallableTestContainer)obj).randomInt);
+            return obj instanceof NonMarshallableTestContainer && randomInt.equals(((NonMarshallableTestContainer) obj).randomInt);
         }
 
         @Override
@@ -81,11 +85,12 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         }
     }
 
-    interface Container{}
+    interface Container {
+    }
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testSingle(Boolean multipleNonMarshallableParamTypes) throws Exception {
+    void testSingle(Boolean multipleNonMarshallableParamTypes) throws Exception {
         this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
         // Initialization of the wire
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap());
@@ -107,7 +112,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testDouble(Boolean multipleNonMarshallableParamTypes) throws Exception {
+    void testDouble(Boolean multipleNonMarshallableParamTypes) throws Exception {
         this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
         // Initialization of the wire
         Wire w = new TextWire(Bytes.allocateElasticOnHeap());
@@ -132,7 +137,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testDoubleFinal(Boolean multipleNonMarshallableParamTypes) throws Exception {
+    void testDoubleFinal(Boolean multipleNonMarshallableParamTypes) throws Exception {
         this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
         // Initialization of the wire
         Wire w = new TextWire(Bytes.allocateElasticOnHeap());
@@ -152,7 +157,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testPrimitive(Boolean multipleNonMarshallableParamTypes) throws Exception {
+    void testPrimitive(Boolean multipleNonMarshallableParamTypes) throws Exception {
         this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
         // Initialization of the wire
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap());
@@ -184,11 +189,11 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         test(() -> printer.msg(key, obj), reader, doubleQ, key, obj);
     }
 
-    private void test(Runnable methodCall, MethodReader reader, ArrayBlockingQueue<Object> queue, Object ... objs) throws Exception {
+    private void test(Runnable methodCall, MethodReader reader, ArrayBlockingQueue<Object> queue, Object... objs) throws Exception {
         methodCall.run();
         boolean marshallableToNonMarshallable = false;
         if (prevObjClasses[0] != null) {
-            for (int i=0; i < objs.length; i++) {
+            for (int i = 0; i < objs.length; i++) {
                 marshallableToNonMarshallable |= Marshallable.class.isAssignableFrom(prevObjClasses[i]) && !(objs[i] instanceof Marshallable) && !(objs[i] instanceof Number);
             }
         }
@@ -201,7 +206,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         assertTrue(queue.isEmpty(), "Reception Queue should be empty");
     }
 
-    private void assertWrite(MethodReader reader, ArrayBlockingQueue<Object> queue, Object ... objs) throws Exception {
+    private void assertWrite(MethodReader reader, ArrayBlockingQueue<Object> queue, Object... objs) throws Exception {
         reader.readOne();
 
         String classMismatchString = "";

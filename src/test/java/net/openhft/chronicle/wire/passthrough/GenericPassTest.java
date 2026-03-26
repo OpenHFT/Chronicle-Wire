@@ -22,7 +22,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
      * It verifies that messages are correctly passed and received via a broker.
      */
     @Test
-    public void sayingBroker() {
+    void sayingBroker() {
         // Create a wire for writing a message
         Wire wire1 = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
         final SayingBroker sayingBroker = wire1.methodWriter(SayingBroker.class);
@@ -30,9 +30,9 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
 
         // Assert the contents written to wire1
         assertEquals("" +
-                        "via: queue1\n" +
-                        "say: hello\n" +
-                        "...\n", wire1.toString());
+                "via: queue1\n" +
+                "say: hello\n" +
+                "...\n", wire1.toString());
 
         // Setup wire2 for reading the message
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
@@ -43,9 +43,9 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
         assertTrue(reader.readOne()); // Read one message
         assertFalse(reader.readOne()); // Assert no more messages
         assertEquals("" +
-                        "via: queue1\n" +
-                        "say: hello\n" +
-                        "...\n", wire2.toString());
+                "via: queue1\n" +
+                "say: hello\n" +
+                "...\n", wire2.toString());
     }
 
     /**
@@ -53,7 +53,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
      * It verifies that such messages can be passed through the wire without interpretation or modification.
      */
     @Test
-    public void passingOpaqueMessage() {
+    void passingOpaqueMessage() {
         // Create a wire with an invalid byte sequence to simulate an opaque message
         Bytes<?> bytes0 = Bytes.allocateElasticOnHeap(1);
         bytes0.writeUnsignedByte(0x82);  // Invalid byte in every wire type
@@ -82,9 +82,9 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
         assertFalse(reader.readOne()); // Assert no more messages
         // the ... is added by the wire format.
         assertEquals("" +
-                        "via: pass\n" +
-                        "\u0082\n" +
-                        "...\n", wire2.toString());
+                "via: pass\n" +
+                "\u0082\n" +
+                "...\n", wire2.toString());
     }
 
     /**
@@ -92,7 +92,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
      * It verifies that such messages can be passed through the wire without interpretation or modification.
      */
     @Test
-    public void passingOpaqueMessageBinary() {
+    void passingOpaqueMessageBinary() {
         // Create a wire with an invalid byte sequence to simulate an opaque message
         Bytes<?> bytes0 = Bytes.allocateElasticOnHeap(1);
         bytes0.writeUnsignedByte(0x82); // Invalid byte in binary wire format
@@ -117,10 +117,10 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
 
         // Assert the written data in wire1
         assertEquals("" +
-                        "0b 00 00 00                                     # msg-length\n" +
-                        "b9 03 76 69 61                                  # via: (event)\n" +
-                        "e4 70 61 73 73                                  # pass\n" +
-                        "82                                              # opaque message\n", wire1.bytes().toHexString());
+                "0b 00 00 00                                     # msg-length\n" +
+                "b9 03 76 69 61                                  # via: (event)\n" +
+                "e4 70 61 73 73                                  # pass\n" +
+                "82                                              # opaque message\n", wire1.bytes().toHexString());
 
         // Setup wire2 for reading the message
         Wire wire2 = new BinaryWire(new HexDumpBytes());
@@ -131,14 +131,15 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
         assertTrue(reader.readOne()); // Read one message
         assertFalse(reader.readOne()); // Assert no more messages
         assertEquals("" +
-                        "0b 00 00 00                                     # msg-length\n" +
-                        "b9 03 76 69 61                                  # via: (event)\n" +
-                        "e4 70 61 73 73                                  # pass\n" +
-                        "82                                              # passed-through\n", wire2.bytes().toHexString());
+                "0b 00 00 00                                     # msg-length\n" +
+                "b9 03 76 69 61                                  # via: (event)\n" +
+                "e4 70 61 73 73                                  # pass\n" +
+                "82                                              # passed-through\n", wire2.bytes().toHexString());
     }
 
     /**
      * Interface representing a broker with a method to route actions via a named path.
+     *
      * @param <T> The type of action or behavior being routed.
      */
     interface Broker<T> {
@@ -147,6 +148,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     /**
      * Interface for routing actions using an alternative method.
+     *
      * @param <T> The type of action or behavior being routed.
      */
     interface Another<T> {

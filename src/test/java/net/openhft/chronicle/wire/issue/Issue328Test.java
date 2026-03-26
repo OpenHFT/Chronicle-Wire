@@ -22,13 +22,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * This test is designed to ensure the keys are correctly serialized as strings.
  * It extends WireTestCommon for utility behaviors related to Wire tests.
  */
-public class Issue328Test extends WireTestCommon {
+class Issue328Test extends WireTestCommon {
 
     /**
      * Tests the serialization of a map where the keys are integers and values are their string representations.
      */
     @Test
-    public void map() {
+    void map() {
         // Initializes a wire with JSON format and types set to true.
         final Wire wire = new JSONWire().useTypes(true);
         final int size = 3;

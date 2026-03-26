@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Test class extending `WireTestCommon` to verify the deserialization of `ChronicleServicesCfg` from YAML.
  */
-public class Issue609Test extends WireTestCommon {
+class Issue609Test extends WireTestCommon {
 
     /**
      * Tests the deserialization of services from a YAML file and ensures that the deserialized object
@@ -27,7 +27,7 @@ public class Issue609Test extends WireTestCommon {
      * @throws IOException if there's an error reading the file.
      */
     @Test
-    public void testServices() throws IOException {
+    void testServices() throws IOException {
         // Deserializes the ChronicleServicesCfg from a YAML file
         ChronicleServicesCfg obj = WireType.YAML.fromString(ChronicleServicesCfg.class, BytesUtil.readFile("yaml/services.yaml"));
 
@@ -48,7 +48,7 @@ public class Issue609Test extends WireTestCommon {
     }
 
     @Test
-    public void toYamlAndBackIssue824() {
+    void toYamlAndBackIssue824() {
         ChronicleServicesCfg expected = new ChronicleServicesCfg();
 
         ServiceCfg scfg = new ServiceCfg();
@@ -116,7 +116,7 @@ public class Issue609Test extends WireTestCommon {
     /**
      * Configuration class representing a single input of a service.
      */
-    public static class InputCfg extends AbstractMarshallableCfg {
+    static class InputCfg extends AbstractMarshallableCfg {
         String input;
 
         InputCfg() {

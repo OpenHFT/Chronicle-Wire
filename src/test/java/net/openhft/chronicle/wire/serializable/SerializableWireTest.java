@@ -20,7 +20,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SerializableWireTest extends WireTestCommon {
+class SerializableWireTest extends WireTestCommon {
     // Wire type for the test
     private WireType wireType;
 
@@ -38,14 +38,14 @@ public class SerializableWireTest extends WireTestCommon {
         @NotNull WireType[] wireTypes = {WireType.TEXT /*, WireType.YAML_ONLY, WireType.BINARY*/};
         // Serializable objects for testing
         @NotNull Serializable[] objects = {
-            // Various serializable objects to test
-            new Nested(),
-            new ScalarValues(),
-            new Nested(new ScalarValues(), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap()),
-            new Nested(new ScalarValues(1), null, Collections.emptySet(), Collections.emptyMap()),
-            new Nested(new ScalarValues(1), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap()),
-            new ScalarValues(1),
-            new ScalarValues(10)
+                // Various serializable objects to test
+                new Nested(),
+                new ScalarValues(),
+                new Nested(new ScalarValues(), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap()),
+                new Nested(new ScalarValues(1), null, Collections.emptySet(), Collections.emptyMap()),
+                new Nested(new ScalarValues(1), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap()),
+                new ScalarValues(1),
+                new ScalarValues(10)
         };
         // Generate combinations of wire types and serializable objects
         for (WireType wt : wireTypes) {
@@ -61,7 +61,7 @@ public class SerializableWireTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @ParameterizedTest
     @MethodSource("combinations")
-    public void writeMarshallable(WireType wireType, Serializable m, boolean ime) {
+    void writeMarshallable(WireType wireType, Serializable m, boolean ime) {
         this.wireType = wireType;
         this.m = m;
         this.ime = ime;
@@ -96,7 +96,7 @@ public class SerializableWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testStringBuilderSerialization(WireType wireType, Serializable m, boolean ime) {
+    void testStringBuilderSerialization(WireType wireType, Serializable m, boolean ime) {
         this.wireType = wireType;
         this.m = m;
         this.ime = ime;
@@ -104,7 +104,7 @@ public class SerializableWireTest extends WireTestCommon {
         try {
             Wire wire = new BinaryWire(bytes);
             TextContainer outerContainer = new TextContainer();
-            outerContainer.innerBuilders = new StringBuilder[] { new StringBuilder("innerText") };
+            outerContainer.innerBuilders = new StringBuilder[]{new StringBuilder("innerText")};
             wire.write("data").object(outerContainer);
 
             TextContainer deserializedContainer = wire.read("data").object(TextContainer.class);

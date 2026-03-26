@@ -45,13 +45,15 @@ import static net.openhft.chronicle.wire.TextWireTest.WithEnumSet;
 import static net.openhft.chronicle.wire.YamlTokeniserTest.doTest;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+
 import org.junit.jupiter.api.Assertions;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings({"rawtypes", "unchecked", "try", "serial"})
-public class YamlWireTest extends WireTestCommon {
+class YamlWireTest extends WireTestCommon {
     private static Wire wire = Wire.newYamlWireOnHeap(); // Initialize a static YAML wire
     private boolean usePadding; // Flag to indicate if padding should be used
 
@@ -66,7 +68,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for adding a comment to a wire
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void comment(boolean usePadding) {
+    void comment(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire(); // Create a new Wire object
         wire.writeComment("\thi: omg"); // Write a comment to the wire
@@ -80,7 +82,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for reading a null value
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testTypeInsteadOfField(boolean usePadding) {
+    void testTypeInsteadOfField(boolean usePadding) {
         this.usePadding = usePadding;
         Wire wire = YamlWire.from("!!null \"\"");
         StringBuilder sb = new StringBuilder();
@@ -92,7 +94,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for writing and reading an object with TreeMap
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void writeObjectWithTreeMap(boolean usePadding) {
+    void writeObjectWithTreeMap(boolean usePadding) {
         this.usePadding = usePadding;
         Wire wire = createWire(); // Create a new Wire object
         // Initialize and populate an ObjectWithTreeMap
@@ -122,7 +124,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for hexadecimal integer values
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testFromString2(boolean usePadding) {
+    void testFromString2(boolean usePadding) {
         this.usePadding = usePadding;
         // Loop over integer values and assert their deserialization
         for (int i = 0; i <= 256; i++) {
@@ -137,7 +139,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for a large hexadecimal value
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testLargeHex(boolean usePadding) {
+    void testLargeHex(boolean usePadding) {
         this.usePadding = usePadding;
         Wire w = YamlWire.from(
                 "magic: 0xCAFEBABE\n");
@@ -147,7 +149,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for C-style octal integers
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testCStyleOctal(boolean usePadding) {
+    void testCStyleOctal(boolean usePadding) {
         this.usePadding = usePadding;
         // Do we need it?
         Wire w = YamlWire.from("perms: 0644\n");
@@ -157,7 +159,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for YAML-style octal integers
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testYamlStyleOctal(boolean usePadding) {
+    void testYamlStyleOctal(boolean usePadding) {
         this.usePadding = usePadding;
         Wire w = YamlWire.from("perms: 0o750\n");
         assertEquals(488, w.read("perms").int64());
@@ -166,7 +168,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for parsing a complex YAML string to an Object
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testFromString(boolean usePadding) {
+    void testFromString(boolean usePadding) {
         this.usePadding = usePadding;
         @Nullable Object w = WireType.YAML.fromString("changedRow: {\n" +
                 "  row: [\n" +
@@ -187,7 +189,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for writing multiple empty fields
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testWrite(boolean usePadding) {
+    void testWrite(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire(); // Create a new Wire object
         wire.write(); // Write a few empty fields
@@ -200,7 +202,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for writing data in binary and reading it back in text
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testWriteToBinaryAndTriesToConvertToText(boolean usePadding) {
+    void testWriteToBinaryAndTriesToConvertToText(boolean usePadding) {
         this.usePadding = usePadding;
         Wire wire = WireType.BINARY.apply(Bytes.allocateElasticOnHeap()); // Create a binary wire
         wire.usePadding(usePadding); // Set padding
@@ -236,7 +238,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for simple boolean values
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testSimpleBool(boolean usePadding) {
+    void testSimpleBool(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire(); // Create a new Wire object
 
@@ -256,7 +258,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for failing boolean conversion from text
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testFailingBool(boolean usePadding) {
+    void testFailingBool(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire(); // Create a new Wire object
         // Write non-boolean text values
@@ -275,7 +277,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for failing boolean conversion from Object
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testFailingBoolean(boolean usePadding) {
+    void testFailingBoolean(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire(); // Create a new Wire object
         // Write non-boolean text values
@@ -296,7 +298,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for reading text with leading spaces
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testLeadingSpace(boolean usePadding) {
+    void testLeadingSpace(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire(); // Create a new Wire object
         wire.write().text(" leadingspace"); // Write text with leading space
@@ -319,7 +321,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for handling 64-bit integers
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testInt64(boolean usePadding) {
+    void testInt64(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();  // Create a new Wire object
         long expected = 1234567890123456789L;
@@ -331,7 +333,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for handling 16-bit integers
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testInt16(boolean usePadding) {
+    void testInt16(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();  // Create a new Wire object
         short expected = 12345;
@@ -343,7 +345,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for reading 16-bit integers, expecting an exception when value is too large
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testInt16TooLarge(boolean usePadding) {
+    void testInt16TooLarge(boolean usePadding) {
         this.usePadding = usePadding;
         assertThrows(IllegalStateException.class, () -> {
             @NotNull Wire wire = createWire();  // Create a new Wire object
@@ -355,7 +357,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for handling 32-bit integers
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testInt32(boolean usePadding) {
+    void testInt32(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();  // Create a new Wire object
         int expected = 1;
@@ -369,7 +371,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for reading 32-bit integers, expecting an exception when value is too large
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testInt32TooLarge(boolean usePadding) {
+    void testInt32TooLarge(boolean usePadding) {
         this.usePadding = usePadding;
         assertThrows(IllegalStateException.class, () -> {
             @NotNull Wire wire = createWire();  // Create a new Wire object
@@ -381,7 +383,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for writing fields with predefined keys (BWKey)
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testWrite1(boolean usePadding) {
+    void testWrite1(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write(BWKey.field1);  // Write a few fields with predefined keys
@@ -393,7 +395,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for writing fields with different length names
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testWrite2(boolean usePadding) {
+    void testWrite2(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write(() -> "Hello");  // Write a field with short name
@@ -406,7 +408,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for reading fields
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testRead(boolean usePadding) {
+    void testRead(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write();  // Write an empty field
@@ -426,7 +428,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case to demonstrate reading values with specific keys
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testRead1(boolean usePadding) {
+    void testRead1(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write().text("1");
@@ -449,7 +451,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case to demonstrate reading with dynamically built names
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testRead2(boolean usePadding) {
+    void testRead2(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write().text("");
@@ -477,7 +479,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for 8-bit integers
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void int8(boolean usePadding) {
+    void int8(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();  // Create a new Wire object
         // Write 8-bit integers
@@ -507,7 +509,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for 16-bit integers
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void int16(boolean usePadding) {
+    void int16(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();  // Create a new Wire object
         // Write 16-bit integers
@@ -537,7 +539,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for handling 8-bit unsigned integers
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void uint8(boolean usePadding) {
+    void uint8(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire(); // Create a new Wire object
         wire.write().uint8(1); // Write a few 8-bit unsigned integers
@@ -566,7 +568,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for handling 16-bit unsigned integers
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void uint16(boolean usePadding) {
+    void uint16(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire(); // Create a new Wire object
         wire.write().uint16(1); // Write a few 16-bit unsigned integers
@@ -594,7 +596,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for handling 32-bit unsigned integers
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void uint32(boolean usePadding) {
+    void uint32(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire(); // Create a new Wire object
         wire.write().uint32(1);
@@ -622,7 +624,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for handling 32-bit signed integers
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void int32(boolean usePadding) {
+    void int32(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire(); // Create a new Wire object
         wire.write().int32(1); // Write a few 32-bit signed integers
@@ -650,7 +652,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for handling 64-bit signed integers
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void int64(boolean usePadding) {
+    void int64(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write().int64(1); // Write a few 64-bit integers
@@ -677,7 +679,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for handling 64-bit floating-point numbers
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void float64(boolean usePadding) {
+    void float64(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write().float64(1);  // Write a few 64-bit floats
@@ -693,7 +695,10 @@ public class YamlWireTest extends WireTestCommon {
         // Custom object to hold floating-point value for verification
         class Floater {
             double f;
-            void set(double d) { f = d; }
+
+            void set(double d) {
+                f = d;
+            }
         }
         @NotNull Floater n = new Floater();
         IntStream.rangeClosed(1, 3).forEach(e -> {
@@ -708,7 +713,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for handling text data types
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void text(boolean usePadding) {
+    void text(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write().text("Hello");  // Write a type text
@@ -739,7 +744,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for handling type prefix data types
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void type(boolean usePadding) {
+    void type(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();  // Create a new Wire object
         wire.write().typePrefix("MyType").text("");  // Write a type prefix
@@ -768,7 +773,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for boolean types
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testBool(boolean usePadding) {
+    void testBool(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire(); // Create a new Wire object
         // Write different boolean values
@@ -784,7 +789,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for 32-bit floating point types
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testFloat32(boolean usePadding) {
+    void testFloat32(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire(); // Create a new Wire object
         // Write float values including edge cases
@@ -804,7 +809,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for time representation
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testTime(boolean usePadding) {
+    void testTime(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire(); // Create a new Wire object
         LocalTime now = LocalTime.now(); // Get current time
@@ -826,7 +831,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test case for ZonedDateTime types
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testZonedDateTime(boolean usePadding) {
+    void testZonedDateTime(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire(); // Create a new Wire object
         ZonedDateTime now = ZonedDateTime.now(); // Get current ZonedDateTime
@@ -873,7 +878,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testDate(boolean usePadding) {
+    void testDate(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         LocalDate now = LocalDate.now();
@@ -887,7 +892,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testUuid(boolean usePadding) {
+    void testUuid(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         UUID uuid = UUID.randomUUID();
@@ -901,7 +906,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testTypeWithoutSpace(boolean usePadding) {
+    void testTypeWithoutSpace(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         wire.bytes().append("A: !").append(MyTypes.class.getName()).append("{}");
@@ -923,7 +928,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testNANValue(boolean usePadding) {
+    void testNANValue(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         wire.bytes().append(
@@ -943,7 +948,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testQuoting(boolean usePadding) {
+    void testQuoting(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         wire.bytes().append(
@@ -969,7 +974,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testBinary(boolean usePadding) {
+    void testBinary(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         wire.bytes().append("b: !byte[] !!binary AAAAAAA=\n" +
@@ -981,7 +986,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testABCDBytes(boolean usePadding) {
+    void testABCDBytes(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -1015,7 +1020,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test the string building behavior for ABC objects with Wire.
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testABCStringBuilder(boolean usePadding) {
+    void testABCStringBuilder(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -1030,16 +1035,16 @@ public class YamlWireTest extends WireTestCommon {
         ABC abc = new ABC();
 
         // Read from wire and assert its value for all permutations
-        for (String input : new String[] { A + B + C, B + A + C, C + A + B, A + C + B, B + C + A, C + B + A }) {
+        for (String input : new String[]{A + B + C, B + A + C, C + A + B, A + C + B, B + C + A, C + B + A}) {
             wire.reset();
             wire.bytes().append(input);
-            assertEquals(input, "!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
+            assertEquals("!net.openhft.chronicle.wire.TextWireTest$ABC {\n" +
                     "  A: hi,\n" +
                     "  B: hi,\n" +
                     "  C: hi\n" +
                     "}\n", wire.getValueIn()
                     .object(abc, ABC.class)
-                    .toString());
+                    .toString(), input);
             assertEquals(Arrays.asList("This is an A", "This is a B", "And that's a C"),
                     Arrays.stream(sb.toString().split("\n")).sorted(Collections.reverseOrder()).collect(toList()),
                     sb.toString());
@@ -1049,7 +1054,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testBytes(boolean usePadding) {
+    void testBytes(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         @NotNull byte[] allBytes = new byte[256];
@@ -1070,7 +1075,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testWriteMarshallable(boolean usePadding) {
+    void testWriteMarshallable(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();
@@ -1119,7 +1124,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testWriteMarshallableAndFieldLength(boolean usePadding) {
+    void testWriteMarshallableAndFieldLength(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();
@@ -1145,7 +1150,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testContextDump(boolean usePadding) {
+    void testContextDump(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -1180,7 +1185,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testContextDump2(boolean usePadding) {
+    void testContextDump2(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -1205,7 +1210,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testConsumeAny(boolean usePadding) {
+    void testConsumeAny(boolean usePadding) {
         this.usePadding = usePadding;
         Bytes<?> from = Bytes.from("A: \n" +
                 "  b: 1234\n" +
@@ -1230,7 +1235,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testMapReadAndWriteStrings(boolean usePadding) {
+    void testMapReadAndWriteStrings(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
@@ -1260,7 +1265,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testMapInMap(boolean usePadding) {
+    void testMapInMap(boolean usePadding) {
         this.usePadding = usePadding;
         String pos = "WithMap: {\n" +
                 "  innerMap: {\n" +
@@ -1275,7 +1280,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testMapInMapWithQuestionMarks(boolean usePadding) {
+    void testMapInMapWithQuestionMarks(boolean usePadding) {
         this.usePadding = usePadding;
         String pos = "WithMap: {\n" +
                 "  innerMap: {\n" +
@@ -1290,7 +1295,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testMapReadAndWriteIntegers(boolean usePadding) {
+    void testMapReadAndWriteIntegers(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final YamlWire wire = new YamlWire(bytes);
@@ -1322,7 +1327,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testMapReadAndWriteMarshable(boolean usePadding) {
+    void testMapReadAndWriteMarshable(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         @NotNull final Wire wire = new YamlWire(bytes);
@@ -1355,7 +1360,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testException(boolean usePadding) {
+    void testException(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -1395,7 +1400,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testEnum(boolean usePadding) {
+    void testEnum(boolean usePadding) {
         this.usePadding = usePadding;
         ClassAliasPool.CLASS_ALIASES.addAlias(WireType.class, "WireType");
 
@@ -1415,7 +1420,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testArrays(boolean usePadding) {
+    void testArrays(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
 
@@ -1446,7 +1451,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testArrays2(boolean usePadding) {
+    void testArrays2(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         @NotNull Object[] a1 = new Object[0];
@@ -1467,7 +1472,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testGZIPCompressionAsText(boolean usePadding) {
+    void testGZIPCompressionAsText(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         @NotNull final String s = "xxxxxxxxxxx1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
@@ -1483,7 +1488,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testLZWCompressionAsText(boolean usePadding) {
+    void testLZWCompressionAsText(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         @NotNull final String s = "xxxxxxxxxxxxxxxxxxx2xxxxxxxxxxxxxxxxxxxxxxx";
@@ -1499,7 +1504,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testStringArrays(boolean usePadding) {
+    void testStringArrays(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
 
@@ -1522,7 +1527,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testStringList(boolean usePadding) {
+    void testStringList(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
 
@@ -1546,7 +1551,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void fromList(boolean usePadding) {
+    void fromList(boolean usePadding) {
         this.usePadding = usePadding;
         for (String text : new String[]{
                 "[a, b, c]",
@@ -1562,7 +1567,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testStringSet(boolean usePadding) {
+    void testStringSet(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
 
@@ -1586,7 +1591,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testStringMap(boolean usePadding) {
+    void testStringMap(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
 
@@ -1609,7 +1614,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testYNestedDecode(boolean usePadding) {
+    void testYNestedDecode(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull String s = "cluster: {\n" +
                 "  host1: {\n" +
@@ -1698,7 +1703,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void writeNull(boolean usePadding) {
+    void writeNull(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         for (int i = 0; i < 4; i++)
@@ -1720,7 +1725,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testAllChars(boolean usePadding) {
+    void testAllChars(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         @NotNull char[] chars = new char[256];
@@ -1736,7 +1741,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void readDemarshallable(boolean usePadding) {
+    void readDemarshallable(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = new YamlWire(allocateElasticOnHeap())
                 .useBinaryDocuments();
@@ -1760,7 +1765,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testByteArrayValueWithRealBytesNegative(boolean usePadding) {
+    void testByteArrayValueWithRealBytesNegative(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
 
@@ -1784,7 +1789,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testByteArray(boolean usePadding) {
+    void testByteArray(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("nothing").object(new byte[0]));
@@ -1818,7 +1823,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testObjectKeys(boolean usePadding) {
+    void testObjectKeys(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Map<MyMarshallable, String> map = new LinkedHashMap<>();
         map.put(new MyMarshallable("key1"), "value1");
@@ -1848,7 +1853,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void writeUnserializable(boolean usePadding) {
+    void writeUnserializable(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -1857,7 +1862,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void writeUnserializable2(boolean usePadding) {
+    void writeUnserializable2(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -1869,7 +1874,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void writeUnserializable3(boolean usePadding) {
+    void writeUnserializable3(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -1881,7 +1886,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void writeCharacter(boolean usePadding) {
+    void writeCharacter(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         for (char ch : new char[]{0, '!', 'a', Character.MAX_VALUE}) {
@@ -1894,7 +1899,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testSortedSet(boolean usePadding) {
+    void testSortedSet(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         @NotNull SortedSet<String> set = new TreeSet<>();
@@ -1914,7 +1919,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testSortedMap(boolean usePadding) {
+    void testSortedMap(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         @NotNull SortedMap<String, Long> set = new TreeMap<>();
@@ -1934,7 +1939,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testStringArray(boolean usePadding) {
+    void testStringArray(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -1953,7 +1958,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testSetBytesAfterDeserialization(boolean usePadding) {
+    void testSetBytesAfterDeserialization(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -1971,7 +1976,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testArrayTypes(boolean usePadding) {
+    void testArrayTypes(boolean usePadding) {
         this.usePadding = usePadding;
         Wire wire = createWire();
         wire.bytes().append("a: !type byte[]\n" +
@@ -1985,7 +1990,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testArrayTypes1(boolean usePadding) {
+    void testArrayTypes1(boolean usePadding) {
         this.usePadding = usePadding;
         Wire wire = createWire();
         wire.bytes().append("a: !type \"[B\", b: !type \"String[]\", c: hi");
@@ -1997,7 +2002,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testArrayTypes2(boolean usePadding) {
+    void testArrayTypes2(boolean usePadding) {
         this.usePadding = usePadding;
         Wire wire = createWire();
         wire.bytes().append("a: [ !type byte[] ], b: !type String[], c: hi");
@@ -2010,7 +2015,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void readMarshallableAsEnum(boolean usePadding) {
+    void readMarshallableAsEnum(boolean usePadding) {
         this.usePadding = usePadding;
         Wire wire = createWire();
         ClassAliasPool.CLASS_ALIASES.addAlias(YWTSingleton.class);
@@ -2024,7 +2029,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void nestedWithEnumSet(boolean usePadding) {
+    void nestedWithEnumSet(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -2051,7 +2056,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testDoublePrecisionOverYamlWire(boolean usePadding) {
+    void testDoublePrecisionOverYamlWire(boolean usePadding) {
         this.usePadding = usePadding;
         final Bytes<?> bytes = allocateElasticOnHeap();
 
@@ -2068,7 +2073,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void readsComment(boolean usePadding) {
+    void readsComment(boolean usePadding) {
         this.usePadding = usePadding;
         StringBuilder sb = new StringBuilder();
         Wire wire = createWire();
@@ -2095,7 +2100,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void readMetaData(boolean usePadding) {
+    void readMetaData(boolean usePadding) {
         this.usePadding = usePadding;
         wire.bytes().append("---\n" +
                 "!!meta-data\n" +
@@ -2127,7 +2132,7 @@ public class YamlWireTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testNestedListInterleavedComments(boolean usePadding) {
+    void testNestedListInterleavedComments(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -2146,30 +2151,30 @@ public class YamlWireTest extends WireTestCommon {
                         "}\n" +
                         "     # fin\n");
 
-        assertArrayEquals(new String[] { "bar", "quux" }, obj.strings);
+        assertArrayEquals(new String[]{"bar", "quux"}, obj.strings);
     }
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testListInterleavedComments(boolean usePadding) {
+    void testListInterleavedComments(boolean usePadding) {
         this.usePadding = usePadding;
         List<String> obj = WireType.YAML.fromString(
-            "     # first\n" +
-                "[\n" +
-                "     # foo\n" +
-                "     'bar',\n" +
-                "     # baz\n" +
-                "     'quux'\n" +
-                "     # thud\n" +
-                "]\n" +
-                "     # fin\n");
+                "     # first\n" +
+                        "[\n" +
+                        "     # foo\n" +
+                        "     'bar',\n" +
+                        "     # baz\n" +
+                        "     'quux'\n" +
+                        "     # thud\n" +
+                        "]\n" +
+                        "     # fin\n");
 
         assertEquals(Arrays.asList("bar", "quux"), obj);
     }
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void putData(boolean usePadding) {
+    void putData(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -2198,7 +2203,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test for Empty YAML Document
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testEmptyYamlDocument(boolean usePadding) {
+    void testEmptyYamlDocument(boolean usePadding) {
         this.usePadding = usePadding;
         Wire wire = createWire();
         wire.bytes().append("");
@@ -2208,7 +2213,7 @@ public class YamlWireTest extends WireTestCommon {
     // Test for Large YAML Documents
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testLargeYamlDocument(boolean usePadding) {
+    void testLargeYamlDocument(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -2227,7 +2232,7 @@ public class YamlWireTest extends WireTestCommon {
     @SuppressWarnings("UnnecessaryUnicodeEscape")
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testSpecialCharactersInStrings(boolean usePadding) {
+    void testSpecialCharactersInStrings(boolean usePadding) {
         this.usePadding = usePadding;
         Wire wire = createWire();
         wire.bytes().append("text: \"Line1\\nLine2\\tTabbed\\u263A\"");

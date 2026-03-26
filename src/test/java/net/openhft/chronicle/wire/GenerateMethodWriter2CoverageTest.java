@@ -14,10 +14,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class GenerateMethodWriter2CoverageTest extends WireTestCommon {
+class GenerateMethodWriter2CoverageTest extends WireTestCommon {
 
     @Test
-    public void generatesNestedWritersWithMethodIds() {
+    void generatesNestedWritersWithMethodIds() {
         String previous = System.getProperty("wire.generator.v2");
         System.setProperty("wire.generator.v2", "true");
         try {

@@ -18,7 +18,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 // Use the Parameterized runner for JUnit to execute tests with different combinations of parameters
-public class PrimArraysTest extends WireTestCommon {
+class PrimArraysTest extends WireTestCommon {
 
     // Class variables to hold the parameters
     private WireType wireType;
@@ -75,7 +75,7 @@ public class PrimArraysTest extends WireTestCommon {
     // The test method that will be executed for each combination of parameters
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testPrimArray(WireType wireType, Object array, String asText) {
+    void testPrimArray(WireType wireType, Object array, String asText) {
         this.wireType = wireType;
         this.array = array;
         this.asText = asText;
@@ -84,7 +84,7 @@ public class PrimArraysTest extends WireTestCommon {
             // Write the test array to the wire
             wire.write("test")
                     .object(array);
-           // System.out.println(wire);
+            // System.out.println(wire);
             // Assert that the textual representation matches when using WireType.TEXT
             if (wireType == WireType.TEXT)
                 assertEquals(asText.trim(), wire.toString().trim());

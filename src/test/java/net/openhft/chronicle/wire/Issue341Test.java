@@ -19,7 +19,7 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class Issue341Test extends WireTestCommon {
+class Issue341Test extends WireTestCommon {
 
     // Instance variable to store the current WireType that the test is running for.
     private WireType wireType;
@@ -40,7 +40,7 @@ public class Issue341Test extends WireTestCommon {
     // Test for serializing and deserializing an instance of MyClass using different WireTypes.
     @ParameterizedTest
     @MethodSource("data")
-    public void instant(WireType wireType) {
+    void instant(WireType wireType) {
         this.wireType = wireType;
         final MyClass source = new MyClass();
         source.instant = Instant.ofEpochMilli(1_000_000_000_000L);
@@ -65,7 +65,7 @@ public class Issue341Test extends WireTestCommon {
     // Test for serializing and deserializing an instance of MyComparableSerializable using different WireTypes.
     @ParameterizedTest
     @MethodSource("data")
-    public void testComparableSerializable(WireType wireType) {
+    void testComparableSerializable(WireType wireType) {
         this.wireType = wireType;
         // for backward compatibility, this doesn't support types
         assumeFalse(wireType == WireType.JSON);

@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assumptions.*;
  * It tests the serialization and deserialization of OuterClass instances
  * with different Wire formats.
  */
-public class NestedClassTest extends WireTestCommon {
+class NestedClassTest extends WireTestCommon {
     // Static instances of OuterClass for testing.
     private static final OuterClass outerClass1 = new OuterClass();
     private static final OuterClass outerClass2 = new OuterClass();
@@ -71,7 +71,7 @@ public class NestedClassTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testMultipleReads(Function<Bytes<?>, Wire> wireType) {
+    void testMultipleReads(Function<Bytes<?>, Wire> wireType) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Bytes<?> bytes = Bytes.elasticByteBuffer();
@@ -83,8 +83,8 @@ public class NestedClassTest extends WireTestCommon {
             wire.bytes().writeUnsignedByte('\n');
         wire.writeEventName(() -> "test2").marshallable(outerClass2);
 
-       // System.out.println(bytes.readByte(0) < 0 ? bytes.toHexString() : bytes.toString());
-       // StringBuilder to capture event names during reading.
+        // System.out.println(bytes.readByte(0) < 0 ? bytes.toHexString() : bytes.toString());
+        // StringBuilder to capture event names during reading.
         @NotNull StringBuilder sb = new StringBuilder();
         @NotNull OuterClass outerClass0 = new OuterClass();
 

@@ -15,13 +15,13 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Test suite for the TwoArrays class.
  */
-public class TwoArraysTest extends WireTestCommon {
+class TwoArraysTest extends WireTestCommon {
 
     /**
      * Tests serialization and deserialization of TwoArrays using the Chronicle Wire library.
      */
     @Test
-    public void testTwoArrays() {
+    void testTwoArrays() {
         // Ignore exceptions with specific error message
         ignoreException("BytesMarshallable found in field which is not matching exactly");
 
@@ -37,21 +37,21 @@ public class TwoArraysTest extends WireTestCommon {
         // Serialize the TwoArrays object
         ta.writeMarshallable(wire);
         assertEquals("" +
-                        "   c2 69 61                                        # ia:\n" +
-                        "   82 20 00 00 00                                  # BinaryIntArrayReference\n" +
-                        "                                                # BinaryIntArrayReference\n" +
-                        "   04 00 00 00 00 00 00 00                         # capacity\n" +
-                        "   00 00 00 00 00 00 00 00                         # used\n" +
-                        "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 # values\n" +
-                        "   c2 6c 61                                        # la:\n" +
-                        "   82 50 00 00 00                                  # BinaryLongArrayReference\n" +
-                        "                                                # BinaryLongArrayReference\n" +
-                        "   08 00 00 00 00 00 00 00                         # capacity\n" +
-                        "   00 00 00 00 00 00 00 00                         # used\n" +
-                        "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 # values\n" +
-                        "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
-                        "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
-                        "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n", bytes.toHexString());
+                "   c2 69 61                                        # ia:\n" +
+                "   82 20 00 00 00                                  # BinaryIntArrayReference\n" +
+                "                                                # BinaryIntArrayReference\n" +
+                "   04 00 00 00 00 00 00 00                         # capacity\n" +
+                "   00 00 00 00 00 00 00 00                         # used\n" +
+                "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 # values\n" +
+                "   c2 6c 61                                        # la:\n" +
+                "   82 50 00 00 00                                  # BinaryLongArrayReference\n" +
+                "                                                # BinaryLongArrayReference\n" +
+                "   08 00 00 00 00 00 00 00                         # capacity\n" +
+                "   00 00 00 00 00 00 00 00                         # used\n" +
+                "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 # values\n" +
+                "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
+                "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
+                "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n", bytes.toHexString());
 
         TwoArrays ta2 = new TwoArrays(0, 0);
 
@@ -74,16 +74,16 @@ public class TwoArraysTest extends WireTestCommon {
         Wire wire2 = new BinaryWire(bytes2);
         ta2.writeMarshallable(wire2);
         assertEquals("" +
-                        "   c2 69 61                                        # ia:\n" +
-                        "   82 20 00 00 00                                  # BinaryIntArrayReference\n" +
-                        "   04 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 # BinaryIntArrayReference\n" +
-                        "   0b 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 # la:\n" +
-                        "   c2 6c 61 82 50 00 00 00                         # BinaryLongArrayReference\n" +
-                        "   08 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 # BinaryLongArrayReference\n" +
-                        "   6f 00 00 00 00 00 00 00 de 00 00 00 00 00 00 00\n" +
-                        "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
-                        "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
-                        "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n", bytes2.toHexString());
+                "   c2 69 61                                        # ia:\n" +
+                "   82 20 00 00 00                                  # BinaryIntArrayReference\n" +
+                "   04 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 # BinaryIntArrayReference\n" +
+                "   0b 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 # la:\n" +
+                "   c2 6c 61 82 50 00 00 00                         # BinaryLongArrayReference\n" +
+                "   08 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 # BinaryLongArrayReference\n" +
+                "   6f 00 00 00 00 00 00 00 de 00 00 00 00 00 00 00\n" +
+                "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
+                "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
+                "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n", bytes2.toHexString());
 
         bytes.readPosition(0);
 

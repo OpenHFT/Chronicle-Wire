@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MarshallableCfgResetTest extends net.openhft.chronicle.wire.WireTestCommon {
+class MarshallableCfgResetTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Represents an engine with a configuration whether it's electric or not
-    public static class Engine extends AbstractMarshallableCfg {
+    static class Engine extends AbstractMarshallableCfg {
         boolean isItElectric;
 
         // Constructs an Engine instance with a given electric configuration
@@ -36,7 +36,7 @@ public class MarshallableCfgResetTest extends net.openhft.chronicle.wire.WireTes
      * Tests that objects that extend AbstractMarshallableCfg are reset when calling {@link ValueIn#object(Object, Class)}
      */
     @Test
-    public void test() {
+    void test() {
         // Create a boat instance with an engine that is not electric
         Boat k9f = new Boat(new Engine(false));
 

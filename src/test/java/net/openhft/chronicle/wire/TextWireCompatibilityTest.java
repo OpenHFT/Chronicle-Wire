@@ -8,16 +8,17 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 // This test suite is designed to verify compatibility behaviors of the TextWire class,
 // especially when fields are added or modified.
-public class TextWireCompatibilityTest extends WireTestCommon {
+class TextWireCompatibilityTest extends WireTestCommon {
 
     // Test to check the behavior when fields are added in the middle of a marshallable object.
     // The main purpose is to ensure that compatibility is maintained during such changes.
     @Test
-    public void testAddFieldsInTheMiddle() {
+    void testAddFieldsInTheMiddle() {
         // Create a new TextWire instance with an elastic heap allocated buffer
         @NotNull Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(100));
 
@@ -55,7 +56,7 @@ public class TextWireCompatibilityTest extends WireTestCommon {
 
     // A subclass extending the SuperIncompatibleObject class.
     // It checks and writes additional fields to the wire to test compatibility.
-    public static class SubIncompatibleObject extends SuperIncompatibleObject {
+    static class SubIncompatibleObject extends SuperIncompatibleObject {
         @Override
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
             super.readMarshallable(wire);

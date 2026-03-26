@@ -25,7 +25,7 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class BytesMarshallableTest extends WireTestCommon {
+class BytesMarshallableTest extends WireTestCommon {
     private WireType wireType;
 
     // This method provides different WireType parameters to be used in the tests
@@ -47,7 +47,7 @@ public class BytesMarshallableTest extends WireTestCommon {
     @SuppressWarnings("incomplete-switch")
     @ParameterizedTest
     @MethodSource("combinations")
-    public void primitiveDto(WireType wireType) {
+    void primitiveDto(WireType wireType) {
         this.wireType = wireType;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -98,7 +98,7 @@ public class BytesMarshallableTest extends WireTestCommon {
     @SuppressWarnings("incomplete-switch")
     @ParameterizedTest
     @MethodSource("combinations")
-    public void primitiveDto2(WireType wireType) {
+    void primitiveDto2(WireType wireType) {
         this.wireType = wireType;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 

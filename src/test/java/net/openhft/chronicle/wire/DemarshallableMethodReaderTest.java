@@ -19,7 +19,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class DemarshallableMethodReaderTest {
+ class DemarshallableMethodReaderTest {
 
     public static Collection<Wire> combinations() {
         return Arrays.asList(
@@ -44,7 +44,7 @@ public class DemarshallableMethodReaderTest {
 
     @ParameterizedTest
     @MethodSource("combinations")
-    public void writesAndReadsMultipleMessages(Wire wire) {
+    void writesAndReadsMultipleMessages(Wire wire) {
         System.out.println("Using wire: " + wire.getClass().getSimpleName());
 
         MessageListener writer = wire.methodWriter(MessageListener.class);

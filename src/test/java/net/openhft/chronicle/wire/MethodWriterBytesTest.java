@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * It extends the WireTestCommon from the `net.openhft.chronicle.wire` package for common test setup and utilities.
  */
 @SuppressWarnings("rawtypes")
-public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCommon {
+class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCommon {
     // A blocking queue to hold Bytes instances, used for synchronization between writer and reader.
     private ArrayBlockingQueue<Bytes> q = new ArrayBlockingQueue<>(1);
 
@@ -31,7 +32,7 @@ public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCo
      * This test verifies that a Bytes message can be written and read using MethodWriter and MethodReader respectively.
      */
     @Test
-    public void test() throws InterruptedException {
+    void test() throws InterruptedException {
         // Initialization of the wire
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap());
         Print printer = w.methodWriter(Print.class);

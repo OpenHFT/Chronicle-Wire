@@ -19,7 +19,7 @@ import java.util.Collection;
 import static net.openhft.chronicle.wire.WireType.YAML;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class YamlSpecificationTest extends WireTestCommon {
+class YamlSpecificationTest extends WireTestCommon {
 
     // Register class aliases for String, Circle, Shape, Line, and Label
     static {
@@ -67,7 +67,7 @@ public class YamlSpecificationTest extends WireTestCommon {
     // Test to decode YAML snippets based on various specifications
     @ParameterizedTest
     @MethodSource("tests")
-    public void decodeAs(String input) throws IOException {
+    void decodeAs(String input) throws IOException {
         String snippet = new String(getBytes(input + ".yaml"), StandardCharsets.UTF_8)
                 .replace("\r\n", "\n");
         String actual = parseWithYaml(snippet);
@@ -83,10 +83,10 @@ public class YamlSpecificationTest extends WireTestCommon {
         }
 
         final String expectedStr = Bytes.wrapForRead(expected.getBytes(StandardCharsets.UTF_8)).toString();
-        assertEquals(input,
-                expectedStr
+        assertEquals(expectedStr
                         .replace("\r\n", "\n"),
-                actual);
+                actual,
+                input);
     }
 
     // Helper method to parse input string using YamlWire

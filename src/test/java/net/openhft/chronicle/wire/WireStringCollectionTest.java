@@ -17,14 +17,14 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class WireStringCollectionTest extends net.openhft.chronicle.wire.WireTestCommon {
+class WireStringCollectionTest extends net.openhft.chronicle.wire.WireTestCommon {
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     @Test
-    public void readAndWrite() {
+    void readAndWrite() {
         // Add an alias for ContainsList class
         ClassAliasPool.CLASS_ALIASES.addAlias(ContainsList.class);
 

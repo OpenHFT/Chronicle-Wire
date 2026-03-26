@@ -13,10 +13,10 @@ import static org.junit.jupiter.api.Assumptions.*;
 
 // This test suite is designed to test behaviors of the TextWire class
 // based on random character changes, a method called "agitator testing".
-public class TextWireAgitatorTest extends WireTestCommon {
+class TextWireAgitatorTest extends WireTestCommon {
 
     @Test
-    public void lowerCaseClassThrows() {
+    void lowerCaseClassThrows() {
         assertThrows(ClassNotFoundRuntimeException.class, () -> {
             Wires.GENERATE_TUPLES = false;
             Object o = Marshallable.fromString("!" + TextWireTest.MyDto.class.getName().toLowerCase() + " { }");
@@ -25,7 +25,7 @@ public class TextWireAgitatorTest extends WireTestCommon {
     }
 
     @Test
-    public void colonInList() {
+    void colonInList() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         assertThrows(IORuntimeException.class, () -> {
@@ -41,7 +41,7 @@ public class TextWireAgitatorTest extends WireTestCommon {
     // Test to validate if an unexpected string value (i.e., not a boolean) assigned to a boolean field
     // will still be parsed without throwing an exception. The test is designed to produce a warning.
     @Test
-    public void notBoolean() {
+    void notBoolean() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // produces a warning.

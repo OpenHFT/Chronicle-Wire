@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class QueryWireRoundTripTest extends WireTestCommon {
+class QueryWireRoundTripTest extends WireTestCommon {
 
     @Test
-    public void writesAndReadsQueryParameters() {
+    void writesAndReadsQueryParameters() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         QueryWire wire = new QueryWire(bytes);
 

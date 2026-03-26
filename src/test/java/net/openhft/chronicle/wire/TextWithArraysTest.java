@@ -10,11 +10,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 // This test class focuses on TextWire's ability to handle arrays of various primitive and object types.
-public class TextWithArraysTest extends WireTestCommon {
+class TextWithArraysTest extends WireTestCommon {
 
     // Test the behavior of TextWire with arrays of different types.
     @Test
-    public void testWithArrays() {
+    void testWithArrays() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Check the string representation of an uninitialized WithArrays object

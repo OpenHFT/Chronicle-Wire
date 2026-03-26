@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assumptions.*;
  * Examples of YAML anchor usage in Chronicle Wire.
  * These examples are referenced in the README.adoc documentation.
  */
-public class YamlAnchorExamplesTest extends WireTestCommon {
+class YamlAnchorExamplesTest extends WireTestCommon {
 
     // tag::database-config-classes[]
     static class DatabaseConfig extends SelfDescribingMarshallable {
@@ -63,12 +63,12 @@ public class YamlAnchorExamplesTest extends WireTestCommon {
     // end::server-config-classes[]
 
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     @Test
-    public void testBasicYamlFieldAnchors() {
+    void testBasicYamlFieldAnchors() {
         // tag::basic-yaml-example[]
         String yaml = "" +
                 "database: {\n" +
@@ -100,7 +100,7 @@ public class YamlAnchorExamplesTest extends WireTestCommon {
     }
 
     @Test
-    public void testObjectAnchors() {
+    void testObjectAnchors() {
         // tag::object-anchor-example[]
         String yaml = "" +
                 "defaults: &defaultServer !net.openhft.chronicle.wire.YamlAnchorExamplesTest$ServerConfig {\n" +

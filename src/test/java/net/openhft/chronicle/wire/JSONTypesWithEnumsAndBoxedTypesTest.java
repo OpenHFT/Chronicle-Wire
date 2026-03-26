@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assumptions.*;
  * This test class corresponds to an issue raised in the Chronicle-Wire repository.
  * See: https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
-public class JSONTypesWithEnumsAndBoxedTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
+class JSONTypesWithEnumsAndBoxedTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Instance variable to determine if types are to be used in the JSON Wire representation.
     private boolean useTypes;
@@ -57,7 +57,7 @@ public class JSONTypesWithEnumsAndBoxedTypesTest extends net.openhft.chronicle.w
     // Test method to verify the JSON Wire representation.
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void test(boolean useTypes) {
+    void test(boolean useTypes) {
         this.useTypes = useTypes;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 

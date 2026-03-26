@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 // Extend WireTestCommon to inherit common utility and setup methods for wire tests
-public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTestCommon {
+class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Define an interface representing a method with a single message parameter
     public interface MyMethod {
@@ -23,7 +23,7 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
 
     // Test case to check the behavior of a predicate that always returns false
     @Test
-    public void testPredicateFalse() {
+    void testPredicateFalse() {
 
         // Allocate elastic bytes on heap and create a TextWire instance
         Bytes<byte[]> b = Bytes.allocateElasticOnHeap();
@@ -48,7 +48,7 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
 
     // Test case to check the behavior of a predicate that always returns true
     @Test
-    public void testPredicateTrue() {
+    void testPredicateTrue() {
 
         // Allocate elastic bytes on heap and create a TextWire instance
         Bytes<byte[]> b = Bytes.allocateElasticOnHeap();
@@ -75,7 +75,7 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
 
     // Test case to log a binary message and validate its content
     @Test
-    public void logMessage0() {
+    void logMessage0() {
 
         // do not check Mac as it lays it memory out differently
         assumeTrue(!OS.isMacOSX());
@@ -89,28 +89,28 @@ public class VanillaMethodReaderTest extends net.openhft.chronicle.wire.WireTest
 
         // Assert that the binary representation of the message matches the expected output
         assertEquals("" +
-                        "9e 00 00 00                                     # msg-length\n" +
-                        "b9 0a 6d 61 72 6b 65 74 44 61 74 61             # marketData: (event)\n" +
-                        "80 90 82 82 82 82 82 82 00 00 00 00 00 00 00 00 # TriviallyCopyableMarketData\n" +
-                        "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
-                        "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
-                        "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
-                        "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
-                        "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
-                        "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
-                        "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
-                        "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
-                        "00 00\n", wire.bytes().toHexString());
+                "9e 00 00 00                                     # msg-length\n" +
+                "b9 0a 6d 61 72 6b 65 74 44 61 74 61             # marketData: (event)\n" +
+                "80 90 82 82 82 82 82 82 00 00 00 00 00 00 00 00 # TriviallyCopyableMarketData\n" +
+                "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
+                "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
+                "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
+                "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
+                "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
+                "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
+                "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
+                "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
+                "00 00\n", wire.bytes().toHexString());
 
         // Read the written message and validate its content
         try (DocumentContext dc = wire.readingDocument()) {
             final ValueIn marketData = dc.wire().read("marketData");
 
             assertEquals("" +
-                            "read md - 00000010 80 90 82 82 82 82 82 82  00 00 00 00 00 00 00 00 ········ ········\n" +
-                            "00000020 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
-                            "........\n" +
-                            "000000a0 00 00                                            ··               ", VanillaMethodReader.logMessage0("md", marketData));
+                    "read md - 00000010 80 90 82 82 82 82 82 82  00 00 00 00 00 00 00 00 ········ ········\n" +
+                    "00000020 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
+                    "........\n" +
+                    "000000a0 00 00                                            ··               ", VanillaMethodReader.logMessage0("md", marketData));
         }
     }
 

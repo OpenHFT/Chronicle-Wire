@@ -9,13 +9,14 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * This class tests the behavior of MethodWriter when handling String messages.
  * It extends the WireTestCommon from the `net.openhft.chronicle.wire` package for common test setup and utilities.
  */
-public class MethodWriterStringTest extends net.openhft.chronicle.wire.WireTestCommon {
+class MethodWriterStringTest extends net.openhft.chronicle.wire.WireTestCommon {
     // A blocking queue to hold String messages, used for synchronization between writer and reader.
     private ArrayBlockingQueue<String> q = new ArrayBlockingQueue<>(1);
 
@@ -30,7 +31,7 @@ public class MethodWriterStringTest extends net.openhft.chronicle.wire.WireTestC
      * This test verifies that a String message can be written and read using MethodWriter and MethodReader respectively.
      */
     @Test
-    public void test() throws InterruptedException {
+    void test() throws InterruptedException {
         // Initialization of the wire
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap());
         Print printer = w.methodWriter(Print.class);

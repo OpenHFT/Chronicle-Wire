@@ -18,7 +18,7 @@ import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 import static org.junit.jupiter.api.Assertions.*;
 
 // Using the Parameterized runner for JUnit tests to enable parameter-driven tests
-public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
+class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
 
     // Holds the WireType for this test instance
     private WireType wireType;
@@ -34,7 +34,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     // Test for checking backward compatibility of DTO classes
     @ParameterizedTest
     @MethodSource("data")
-    public void backwardsCompatibility(WireType wireType) {
+    void backwardsCompatibility(WireType wireType) {
         this.wireType = wireType;
         // Expecting an exception due to class replacement
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2");
@@ -70,7 +70,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     // Test for checking forward compatibility of DTO classes
     @ParameterizedTest
     @MethodSource("data")
-    public void forwardCompatibility(WireType wireType) {
+    void forwardCompatibility(WireType wireType) {
         this.wireType = wireType;
         // Expecting an exception due to class replacement
         expectException("Replaced class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO2 with class net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityTest$DTO1");
@@ -104,7 +104,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     // Test to ensure that new data added to a document doesn't affect old reads
     @ParameterizedTest
     @MethodSource("data")
-    public void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads(WireType wireType) {
+    void testCheckThatNewDataAddedToADocumentDoesNotEffectOldReads(WireType wireType) {
         this.wireType = wireType;
 
         Bytes<?> b = Bytes.allocateElasticOnHeap();
@@ -138,7 +138,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     }
 
     @SuppressWarnings("this-escape")
-    public static class DTO1 extends SelfDescribingMarshallable implements Demarshallable {
+    static class DTO1 extends SelfDescribingMarshallable implements Demarshallable {
 
         // Field to hold an integer value
         int one;
@@ -168,7 +168,7 @@ public class ForwardAndBackwardCompatibilityTest extends WireTestCommon {
     }
 
     @SuppressWarnings("this-escape")
-    public static class DTO2 extends SelfDescribingMarshallable implements Demarshallable {
+    static class DTO2 extends SelfDescribingMarshallable implements Demarshallable {
         // Field to hold an Object
         Object three;
         // Field to hold an integer value

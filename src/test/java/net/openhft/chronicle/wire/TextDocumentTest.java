@@ -18,7 +18,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class TextDocumentTest extends WireTestCommon {
+class TextDocumentTest extends WireTestCommon {
 
     // A helper function that performs the test on documents given a wireType.
     private static void doTestDocument(WireType wireType) {
@@ -55,7 +55,7 @@ public class TextDocumentTest extends WireTestCommon {
 
     // Test the document writing and reading for TEXT wireType.
     @Test
-    public void testDocument() {
+    void testDocument() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         doTestDocument(WireType.TEXT);
@@ -64,7 +64,7 @@ public class TextDocumentTest extends WireTestCommon {
     // An ignored test for YAML_ONLY wireType. Needs to be fixed before running.
     @Disabled(/* TODO FIX */)
     @Test
-    public void testDocumentYaml() {
+    void testDocumentYaml() {
         doTestDocument(WireType.YAML_ONLY);
     }
 

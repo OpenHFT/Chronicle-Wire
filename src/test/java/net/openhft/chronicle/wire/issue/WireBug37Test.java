@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test class to validate handling of newline characters in string values
  * when working with wires, extending common wire tests.
  */
-public class WireBug37Test extends WireTestCommon {
+class WireBug37Test extends WireTestCommon {
 
     /**
      * Validates that newline characters within a string value are correctly serialized
@@ -25,7 +25,7 @@ public class WireBug37Test extends WireTestCommon {
      * and deserialization.
      */
     @Test
-    public void testNewlineInString() {
+    void testNewlineInString() {
         // Define the TEXT WireType and a test string containing a newline
         @NotNull final WireType wireType = WireType.TEXT;
         @NotNull final String exampleString = "hello\nworld";
@@ -48,7 +48,7 @@ public class WireBug37Test extends WireTestCommon {
 
         // Convert the bytes back to string
         final String output = bytes.toString();
-       // System.out.println("output: [" + output + "]");
+        // System.out.println("output: [" + output + "]");
 
         // Deserialize the string back into obj3 and ensure it matches obj2
         obj3.readMarshallable(wireType.apply(Bytes.from(output)));

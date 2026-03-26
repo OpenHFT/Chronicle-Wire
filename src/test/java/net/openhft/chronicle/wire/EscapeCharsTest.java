@@ -8,7 +8,6 @@ import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -22,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests for handling escaped characters in various Wire formats.
  */
-public class EscapeCharsTest extends WireTestCommon {
+class EscapeCharsTest extends WireTestCommon {
     @NotNull
     private String chs;
     private Future<?> future;
@@ -30,7 +29,7 @@ public class EscapeCharsTest extends WireTestCommon {
     // Override the threadDump from WireTestCommon to use the parent implementation
     @Override
     @BeforeEach
-    public void threadDump() {
+    void threadDump() {
         super.threadDump();
     }
 
@@ -88,11 +87,11 @@ public class EscapeCharsTest extends WireTestCommon {
 
         // Read from wire and validate
         @Nullable String s = wire.read(sb).text();
-        assertEquals("key " + str, str, sb.toString());
-        assertEquals("value " + str, str, s);
+        assertEquals(str, sb.toString(), "key " + str);
+        assertEquals(str, s, "value " + str);
         @Nullable String ss = wire.read(sb).text();
-        assertEquals("key " + str2, str2, sb.toString());
-        assertEquals("value " + str2, str2, ss);
+        assertEquals(str2, sb.toString(), "key " + str2);
+        assertEquals(str2, ss, "value " + str2);
     }
 
     /**
@@ -100,7 +99,7 @@ public class EscapeCharsTest extends WireTestCommon {
      */
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testEscaped(String chs, Future<?> future) throws ExecutionException, InterruptedException {
+    void testEscaped(String chs, Future<?> future) throws ExecutionException, InterruptedException {
         this.chs = chs;
         this.future = future;
         assertNull(future.get());

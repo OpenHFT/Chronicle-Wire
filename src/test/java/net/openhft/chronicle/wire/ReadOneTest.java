@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assumptions.*;
  * This class is used to test the functionality related to reading individual messages and snapshots
  * from a Wire-based data structure, ensuring they can be read in the correct sequence.
  */
-public class ReadOneTest extends WireTestCommon {
+class ReadOneTest extends WireTestCommon {
 
     // Definition for MyDto class, used for testing reading data from the Wire
     static class MyDto extends SelfDescribingMarshallable {
@@ -48,7 +48,7 @@ public class ReadOneTest extends WireTestCommon {
 
     // Basic test for reading without scanning the wire
     @Test
-    public void test() throws InterruptedException {
+    void test() throws InterruptedException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         doTest(false);
@@ -56,7 +56,7 @@ public class ReadOneTest extends WireTestCommon {
 
     // Test for reading the wire using scanning
     @Test
-    public void testScanning() throws InterruptedException {
+    void testScanning() throws InterruptedException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         doTest(true);

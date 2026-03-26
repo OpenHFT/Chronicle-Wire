@@ -15,28 +15,28 @@ import static org.junit.jupiter.api.Assumptions.*;
  * looking up fields of the class. At time of writing this occurs when checking if the component class
  * of a subfield is a leaf and is only a problem when the component class is the same as the parent class.
  */
-public class RecursiveTest {
+class RecursiveTest {
 
     @Test
-    public void referToBaseClass() {
+    void referToBaseClass() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         test(new ReferToBaseClass("hello"), new ReferToBaseClass(null));
     }
 
     @Test
-    public void referToSameClass() {
+    void referToSameClass() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         test(new ReferToSameClass("test"), new ReferToSameClass(null));
     }
 
     @Test
-    public void marshallerReferToSameClass() {
-        WireMarshaller<?> marshaller= WireMarshaller.WIRE_MARSHALLER_CL.get(ReferToSameClass.class);
+    void marshallerReferToSameClass() {
+        WireMarshaller<?> marshaller = WireMarshaller.WIRE_MARSHALLER_CL.get(ReferToSameClass.class);
         assertNotNull(marshaller);
     }
 
     @Test
-    public void marshallerReferToBaseClass() {
+    void marshallerReferToBaseClass() {
         WireMarshaller<?> marshaller = WireMarshaller.WIRE_MARSHALLER_CL.get(ReferToBaseClass.class);
         assertNotNull(marshaller);
     }

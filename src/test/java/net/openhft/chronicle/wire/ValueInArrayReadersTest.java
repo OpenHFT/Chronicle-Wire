@@ -11,10 +11,10 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Exercises ValueIn array readers using sequences for common wire types.
  */
-public class ValueInArrayReadersTest extends WireTestCommon {
+class ValueInArrayReadersTest extends WireTestCommon {
 
     @Test
-    public void readDoubleArrayFromSequence() {
+    void readDoubleArrayFromSequence() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
             w.write("arr").sequence(v -> {
@@ -31,7 +31,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
     }
 
     @Test
-    public void readIntArrayFromSequence() {
+    void readIntArrayFromSequence() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
             w.write("arr").sequence(v -> {
@@ -48,7 +48,7 @@ public class ValueInArrayReadersTest extends WireTestCommon {
     }
 
     @Test
-    public void readBytesArrayBinaryOnly() {
+    void readBytesArrayBinaryOnly() {
         // Text/YAML use base64 and may compress; validate binary where exact bytes round‑trip is expected.
         Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap(256));
         byte[] in = new byte[]{10, 20, 30};

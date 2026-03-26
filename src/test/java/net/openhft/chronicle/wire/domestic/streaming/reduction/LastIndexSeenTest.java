@@ -15,10 +15,10 @@ import static net.openhft.chronicle.wire.domestic.reduction.Reductions.reducingL
 import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.createThenValueOuts;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LastIndexSeenTest extends WireTestCommon {
+class LastIndexSeenTest extends WireTestCommon {
 
     @Test
-    public void lastIndexSeen() {
+    void lastIndexSeen() {
         Reduction<LongSupplier> listener = reducingLong(extractingIndex(), 0, (a, b) -> b);
 
         test(listener);
@@ -28,7 +28,7 @@ public class LastIndexSeenTest extends WireTestCommon {
     }
 
     @Test
-    public void minAndMaxIndexSeen() {
+    void minAndMaxIndexSeen() {
         Reduction<LongSupplier> minListener = reducingLong(extractingIndex(), Long.MAX_VALUE, Math::min);
         Reduction<LongSupplier> maxListener = reducingLong(extractingIndex(), Long.MIN_VALUE, Math::max);
 

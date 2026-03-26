@@ -14,16 +14,16 @@ import static net.openhft.chronicle.wire.WireType.JSON_ONLY;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class JSONWireTypesTest extends WireTestCommon {
+class JSONWireTypesTest extends WireTestCommon {
     @SuppressWarnings("unchecked")
     @Test
-    public void nestedSets() {
+    void nestedSets() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         DtoWithNestedSets dto = new DtoWithNestedSets()
-            .setOfSets(
-                of(of(new Dto().field("123")), of(new Dto().field("234")))
-            );
+                .setOfSets(
+                        of(of(new Dto().field("123")), of(new Dto().field("234")))
+                );
 
         String dtoAsJson = JSON_ONLY.asString(dto);
         assertEquals("{\"@net.openhft.chronicle.wire.JSONWireTypesTest$DtoWithNestedSets\":{" +
@@ -40,7 +40,7 @@ public class JSONWireTypesTest extends WireTestCommon {
         return new HashSet<>(Arrays.asList(ts));
     }
 
-    public static class Dto extends SelfDescribingMarshallable {
+    static class Dto extends SelfDescribingMarshallable {
         private String field;
 
         public String field() {
@@ -53,7 +53,7 @@ public class JSONWireTypesTest extends WireTestCommon {
         }
     }
 
-    public static class DtoWithNestedSets extends SelfDescribingMarshallable {
+    static class DtoWithNestedSets extends SelfDescribingMarshallable {
         Set<Set<Dto>> setOfSets;
 
         public Set<Set<Dto>> setOfSets() {

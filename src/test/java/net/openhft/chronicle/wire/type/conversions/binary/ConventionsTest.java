@@ -17,11 +17,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 @SuppressWarnings("unchecked")
-public class ConventionsTest extends WireTestCommon {
+class ConventionsTest extends WireTestCommon {
 
     @SuppressWarnings("rawtypes")
     @Test
-    public void testTypeConversionsMaxValue() throws NoSuchFieldException, IllegalAccessException {
+    void testTypeConversionsMaxValue() throws NoSuchFieldException, IllegalAccessException {
 
         for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short
                 .class, Byte
@@ -29,7 +29,7 @@ public class ConventionsTest extends WireTestCommon {
             Object extected;
             // Check if type is a subclass of Number
             if (Number.class.isAssignableFrom(type)) {
-               // System.out.println("" + type + "");
+                // System.out.println("" + type + "");
                 // Retrieve the MAX_VALUE field from the type class
                 final Field max_value = type.getField("MAX_VALUE");
                 extected = max_value.get(type);
@@ -45,7 +45,7 @@ public class ConventionsTest extends WireTestCommon {
 
     @SuppressWarnings("rawtypes")
     @Test
-    public void testTypeConversionsMinValue() throws IllegalAccessException, NoSuchFieldException {
+    void testTypeConversionsMinValue() throws IllegalAccessException, NoSuchFieldException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
@@ -69,7 +69,7 @@ public class ConventionsTest extends WireTestCommon {
 
     @SuppressWarnings("rawtypes")
     @Test
-    public void testTypeConversionsSmallNumber() {
+    void testTypeConversionsSmallNumber() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short
@@ -88,7 +88,7 @@ public class ConventionsTest extends WireTestCommon {
 
     @SuppressWarnings("rawtypes")
     @Test
-    public void testTypeConversionsConvertViaString() throws NoSuchFieldException, IllegalAccessException {
+    void testTypeConversionsConvertViaString() throws NoSuchFieldException, IllegalAccessException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         for (@NotNull Class<?> type : new Class[]{Integer.class, Long.class, Short.class, Byte
@@ -113,7 +113,7 @@ public class ConventionsTest extends WireTestCommon {
     }
 
     @Test
-    public void testTypeConversionsMaxUnsigned() {
+    void testTypeConversionsMaxUnsigned() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Test conversions for maximum unsigned long value

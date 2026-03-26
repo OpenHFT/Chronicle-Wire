@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.api.Assertions;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import java.util.List;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
-public class UnicodeStringTest extends WireTestCommon {
+class UnicodeStringTest extends WireTestCommon {
 
     // Suppressing unchecked warnings as Bytes class may handle various types
     @SuppressWarnings("rawtypes")
@@ -69,14 +70,14 @@ public class UnicodeStringTest extends WireTestCommon {
 
     // Release the byte buffer after all tests have been executed
     @AfterAll
-    public static void release() {
+    static void release() {
         bytes.releaseLast();
     }
 
     // Test case to validate serialization and deserialization of long strings
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testLongString(char ch) {
+    void testLongString(char ch) {
         this.ch = ch;
         wire.clear(); // Clear the wire for a fresh start
 

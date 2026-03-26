@@ -11,11 +11,11 @@ import java.nio.ByteOrder;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class HexDumpTest extends WireTestCommon {
+class HexDumpTest extends WireTestCommon {
 
     // Test the endian behavior of HexDumpBytes
     @Test
-    public void testEndian() {
+    void testEndian() {
 
         // If the native byte order isn't LITTLE_ENDIAN, we exit the test
         if (ByteOrder.nativeOrder() != ByteOrder.LITTLE_ENDIAN)

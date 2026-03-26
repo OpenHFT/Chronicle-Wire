@@ -21,7 +21,7 @@ import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.throwingMerger;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MethodWriterTest extends WireTestCommon {
+class MethodWriterTest extends WireTestCommon {
 
     private static final List<MarketData> MARKET_DATA_SET = Arrays.asList(
             new MarketData("MSFT", 10, 11, 9),
@@ -30,7 +30,7 @@ public class MethodWriterTest extends WireTestCommon {
     );
 
     @Test
-    public void lastSeen() {
+    void lastSeen() {
 
         final Reduction<AtomicReference<MarketData>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class)
@@ -47,7 +47,7 @@ public class MethodWriterTest extends WireTestCommon {
     }
 
     @Test
-    public void map() {
+    void map() {
 
         final Reduction<Map<String, MarketData>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class).withMethod(ServiceOut.class, ServiceOut::marketData).build())

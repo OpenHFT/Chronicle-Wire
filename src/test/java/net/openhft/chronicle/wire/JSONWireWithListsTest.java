@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test for JSON wire handling of lists.
  * Related issue: https://github.com/OpenHFT/Chronicle-Wire/issues/324
  */
-public class JSONWireWithListsTest extends net.openhft.chronicle.wire.WireTestCommon {
+class JSONWireWithListsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Determines whether to use types during serialization
     private boolean useTypes;
@@ -55,7 +55,7 @@ public class JSONWireWithListsTest extends net.openhft.chronicle.wire.WireTestCo
     // Test case for validating the serialization and deserialization of a list of drivers
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void test(boolean useTypes) {
+    void test(boolean useTypes) {
         this.useTypes = useTypes;
         // Instantiating a JSON wire with or without types based on test parameter
         final JSONWire jsonWire = new JSONWire()

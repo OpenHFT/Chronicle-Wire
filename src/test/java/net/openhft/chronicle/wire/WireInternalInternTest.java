@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 // This class tests the internal interning behavior of the Wire component.
-public class WireInternalInternTest extends WireTestCommon {
+class WireInternalInternTest extends WireTestCommon {
 
     // Static initializer block to add aliases to the WireInternal component upon class loading.
     static {
@@ -31,15 +31,15 @@ public class WireInternalInternTest extends WireTestCommon {
     @NotNull
     public static Collection<Object[]> combinations() {
         return Stream.of(
-                // A list of date/time related objects for testing.
+                        // A list of date/time related objects for testing.
 //                new Date(),
 //                TimeZone.getTimeZone("GMT"),
 //                UUID.randomUUID(),
-                DayOfWeek.of(1),
-                LocalDate.now(),
-                LocalDateTime.now(),
-                LocalTime.now(),
-                Month.of(1)
+                        DayOfWeek.of(1),
+                        LocalDate.now(),
+                        LocalDateTime.now(),
+                        LocalTime.now(),
+                        Month.of(1)
 //                MonthDay.of(1, 2),
 //                OffsetDateTime.now(),
 //                OffsetTime.now(),
@@ -49,9 +49,9 @@ public class WireInternalInternTest extends WireTestCommon {
 //                ZonedDateTime.now()
 //                ZoneId.of("GMT")
 //                ZoneOffset.ofHoursMinutes(5, 30)
-        )
-        // Mapping each object to a new Object array with a formatted string.
-        .map(s -> new Object[]{"!" + ClassAliasPool.CLASS_ALIASES.nameFor(s.getClass()) + " " + s + " "})
+                )
+                // Mapping each object to a new Object array with a formatted string.
+                .map(s -> new Object[]{"!" + ClassAliasPool.CLASS_ALIASES.nameFor(s.getClass()) + " " + s + " "})
                 .collect(Collectors.toList());
     }
 
@@ -75,7 +75,7 @@ public class WireInternalInternTest extends WireTestCommon {
     // This test ensures that the marshallable component behaves as expected.
     @ParameterizedTest
     @MethodSource("combinations")
-    public void marshallable(String typeValue) {
+    void marshallable(String typeValue) {
         this.typeValue = typeValue;
         // Creating a Marshallable object from the test input value.
         Object o = Marshallable.fromString(typeValue);

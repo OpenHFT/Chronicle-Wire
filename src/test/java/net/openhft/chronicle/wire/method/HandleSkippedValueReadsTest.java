@@ -33,13 +33,13 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
 
     @ParameterizedTest
     @MethodSource("data")
-    public void test(WireType wireType) {
+    void test(WireType wireType) {
         doTest(wireType, false);
     }
 
     @ParameterizedTest
     @MethodSource("data")
-    public void testScanning(WireType wireType) {
+    void testScanning(WireType wireType) {
         doTest(wireType, true);
     }
 
@@ -156,13 +156,13 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
 
     @ParameterizedTest
     @MethodSource("data")
-    public void index2index(WireType wireType) {
+    void index2index(WireType wireType) {
         doIndex2index(wireType, false);
     }
 
     @ParameterizedTest
     @MethodSource("data")
-    public void index2indexScanning(WireType wireType) {
+    void index2indexScanning(WireType wireType) {
         doIndex2index(wireType, true);
     }
 

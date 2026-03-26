@@ -22,31 +22,31 @@ public class MethodWriterByInterfaceTest extends WireTestCommon {
 
     // Setup method to configure default object creation for interfaces before each test
     @BeforeEach
-    public void setup() {
+    void setup() {
         ObjectUtils.defaultObjectForInterface(c -> Class.forName(c.getName() + "mpl"));
     }
 
     // Teardown method to reset default object creation for interfaces after each test
     @AfterEach
-    public void teardown() {
+    void teardown() {
         ObjectUtils.defaultObjectForInterface(c -> c);
     }
 
     // Test method writing and reading via implementation with text wire type
     @Test
-    public void writeReadViaImplementation() {
+    void writeReadViaImplementation() {
         checkWriteReadViaImplementation(WireType.TEXT, false);
     }
 
     // Test method writing and reading with text wire type and tuple generation enabled
     @Test
-    public void writeReadViaImplementationGenerateTuples() {
+    void writeReadViaImplementationGenerateTuples() {
         checkWriteReadViaImplementation(WireType.TEXT, true);
     }
 
     // Test method writing and reading via implementation with YAML wire type
     @Test
-    public void writeReadViaImplementationYaml() {
+    void writeReadViaImplementationYaml() {
         checkWriteReadViaImplementation(WireType.YAML_ONLY, false);
     }
 

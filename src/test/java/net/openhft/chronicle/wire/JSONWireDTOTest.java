@@ -15,11 +15,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 // Test class for testing JSON wire DTO functionalities.
-public class JSONWireDTOTest extends WireTestCommon {
+class JSONWireDTOTest extends WireTestCommon {
 
     // Test to verify serialization and deserialization of DTO using JSONWire.
     @Test
-    public void dto() {
+    void dto() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         expectException("Found this$0, in class");

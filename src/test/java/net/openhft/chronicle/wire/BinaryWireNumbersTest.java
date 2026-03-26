@@ -15,7 +15,7 @@ import java.util.Collection;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BinaryWireNumbersTest extends WireTestCommon {
+class BinaryWireNumbersTest extends WireTestCommon {
     private static final float VAL1 = 12345678901234567.0f;
     private static int counter = 0;
     private int len;
@@ -70,7 +70,7 @@ public class BinaryWireNumbersTest extends WireTestCommon {
     // Test the BinaryWire number serialization using the given parameters
     @ParameterizedTest
     @MethodSource("data")
-    public void doTest(int len, WriteValue expected, WriteValue perform) {
+    void doTest(int len, WriteValue expected, WriteValue perform) {
         this.len = len;
         this.expected = expected;
         this.perform = perform;

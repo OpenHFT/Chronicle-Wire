@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class WireTypeConverterWithTuplesTest extends WireTestCommon {
+class WireTypeConverterWithTuplesTest extends WireTestCommon {
     @Test
-    public void fromYamlToJsonAndBackToYaml() {
+    void fromYamlToJsonAndBackToYaml() {
         WireTypeConverter wireTypeConverter = new WireTypeConverter();
         String originalYaml = "" +
                 "!ChronicleServicesCfg {\n" +

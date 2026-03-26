@@ -6,7 +6,6 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -24,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 @SuppressWarnings("rawtypes")
-public class WireTests {
+class WireTests {
 
     // Member variables for parameterized tests
     private WireType wireType;
@@ -46,7 +45,7 @@ public class WireTests {
     // Test to verify that hex representations of negative long values are handled correctly
     @ParameterizedTest
     @MethodSource("data")
-    public void testHexLongNegativeTest(WireType wireType, boolean usePadding) {
+    void testHexLongNegativeTest(WireType wireType, boolean usePadding) {
         this.wireType = wireType;
         this.usePadding = usePadding;
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
@@ -79,7 +78,7 @@ public class WireTests {
     // Test to verify that non-existent type literals are handled leniently
     @ParameterizedTest
     @MethodSource("data")
-    public void testLenientTypeLiteral(WireType wireType, boolean usePadding) {
+    void testLenientTypeLiteral(WireType wireType, boolean usePadding) {
         this.wireType = wireType;
         this.usePadding = usePadding;
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
@@ -102,7 +101,7 @@ public class WireTests {
     // Test to verify that Date objects are correctly written and read
     @ParameterizedTest
     @MethodSource("data")
-    public void testDate(WireType wireType, boolean usePadding) {
+    void testDate(WireType wireType, boolean usePadding) {
         this.wireType = wireType;
         this.usePadding = usePadding;
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
@@ -132,7 +131,7 @@ public class WireTests {
     // Test to verify that LocalDateTime objects are correctly written and read
     @ParameterizedTest
     @MethodSource("data")
-    public void testLocalDateTime(WireType wireType, boolean usePadding) {
+    void testLocalDateTime(WireType wireType, boolean usePadding) {
         this.wireType = wireType;
         this.usePadding = usePadding;
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
@@ -151,7 +150,7 @@ public class WireTests {
     // Test to verify that ZonedDateTime objects are correctly written and read
     @ParameterizedTest
     @MethodSource("data")
-    public void testZonedDateTime(WireType wireType, boolean usePadding) {
+    void testZonedDateTime(WireType wireType, boolean usePadding) {
         this.wireType = wireType;
         this.usePadding = usePadding;
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
@@ -168,7 +167,7 @@ public class WireTests {
     // Test to verify skipping values while reading both numbers and text
     @ParameterizedTest
     @MethodSource("data")
-    public void testSkipValueWithNumbersAndStrings(WireType wireType, boolean usePadding) {
+    void testSkipValueWithNumbersAndStrings(WireType wireType, boolean usePadding) {
         this.wireType = wireType;
         this.usePadding = usePadding;
 
@@ -194,7 +193,7 @@ public class WireTests {
     // Test to verify that null values are correctly written and read
     @ParameterizedTest
     @MethodSource("data")
-    public void testWriteNull(WireType wireType, boolean usePadding) {
+    void testWriteNull(WireType wireType, boolean usePadding) {
         this.wireType = wireType;
         this.usePadding = usePadding;
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
@@ -220,7 +219,7 @@ public class WireTests {
     // Test to verify that a TestClass object with Class type is correctly marshalled and unmarshalled
     @ParameterizedTest
     @MethodSource("data")
-    public void testClassTypedMarshallableObject(WireType wireType, boolean usePadding) {
+    void testClassTypedMarshallableObject(WireType wireType, boolean usePadding) {
         this.wireType = wireType;
         this.usePadding = usePadding;
         assumeFalse(wireType == WireType.JSON);
@@ -240,7 +239,7 @@ public class WireTests {
     // Test to verify that unknown fields are cleared between read contexts
     @ParameterizedTest
     @MethodSource("data")
-    public void unknownFieldsAreClearedBetweenReadContexts(WireType wireType, boolean usePadding) {
+    void unknownFieldsAreClearedBetweenReadContexts(WireType wireType, boolean usePadding) {
         this.wireType = wireType;
         this.usePadding = usePadding;
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
@@ -266,7 +265,7 @@ public class WireTests {
     // Test to verify peeking at YAML in the reading context, specific to BINARY wire type and padding
     @ParameterizedTest
     @MethodSource("data")
-    public void testReadingPeekYaml(WireType wireType, boolean usePadding) {
+    void testReadingPeekYaml(WireType wireType, boolean usePadding) {
         this.wireType = wireType;
         this.usePadding = usePadding;
         assumeTrue(usePadding);
@@ -336,18 +335,24 @@ public class WireTests {
         b.releaseLast();
     }
 
-    @Test
     // Test to ensure that isPresent() returns true when the value is actually present
-    public void isPresentReturnsTrueWhenValueIsPresent() {
+    @ParameterizedTest
+    @MethodSource("data")
+    void isPresentReturnsTrueWhenValueIsPresent(WireType wireType, boolean usePadding) {
+        this.wireType = wireType;
+        this.usePadding = usePadding;
         Bytes<?> b = Bytes.allocateElasticOnHeap();  // Create an elastic byte buffer
         final Wire wire = createWire(b);         // Create a Wire object
         wire.write("value").int32(12345);        // Write an integer value to the wire with the key "value"
         assertTrue(wire.read("value").isPresent()); // Assert that reading the key "value" from the wire is present
     }
 
-    @Test
     // Test to ensure that isPresent() returns false when the value is not present
-    public void isPresentReturnsFalseWhenValueIsNotPresent() {
+    @ParameterizedTest
+    @MethodSource("data")
+    void isPresentReturnsFalseWhenValueIsNotPresent(WireType wireType, boolean usePadding) {
+        this.wireType = wireType;
+        this.usePadding = usePadding;
         Bytes<?> b = Bytes.allocateElasticOnHeap();  // Create an elastic byte buffer
         final Wire wire = createWire(b);         // Create a Wire object
         wire.write("value").int32(12345);        // Write an integer value to the wire with the key "value"

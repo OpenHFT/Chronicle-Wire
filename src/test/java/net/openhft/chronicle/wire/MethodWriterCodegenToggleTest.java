@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Smoke test that toggles codegen/proxy path via system property and verifies
  * events still round-trip through MethodWriter/Reader.
  */
-public class MethodWriterCodegenToggleTest extends WireTestCommon {
+ class MethodWriterCodegenToggleTest extends WireTestCommon {
 
     interface API { void a(int x); void b(String s); }
 
@@ -30,13 +30,13 @@ public class MethodWriterCodegenToggleTest extends WireTestCommon {
     }
 
     @AfterEach
-    public void clearProp() {
+    void clearProp() {
         System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
     }
 
     @ParameterizedTest
     @MethodSource("data")
-    public void roundTrip(boolean disable) {
+    void roundTrip(boolean disable) {
         System.setProperty(DISABLE_WRITER_PROXY_CODEGEN, String.valueOf(disable));
         // Some environments may fall back to proxy; ignore the warning.
         ignoreException("Falling back to proxy method writer");

@@ -11,11 +11,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static net.openhft.chronicle.wire.WireType.BINARY;
 
 // Test class to ensure proper method writing for interfaces with similar inner interfaces but different outer classes
-public class GenerateMethodWriterSameInterfaceDifferentOuterClassTest extends WireTestCommon {
+class GenerateMethodWriterSameInterfaceDifferentOuterClassTest extends WireTestCommon {
 
     // Test the method writing capability for two different interfaces
     @Test
-    public void test() {
+    void test() {
 
         // Create a new Wire object with elastic byte buffer and BINARY settings
         final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());

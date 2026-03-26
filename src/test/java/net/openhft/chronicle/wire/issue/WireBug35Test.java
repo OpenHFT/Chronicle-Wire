@@ -17,10 +17,10 @@ import static org.junit.jupiter.api.Assumptions.*;
 /**
  * @author ryanlea
  */
-public class WireBug35Test extends WireTestCommon {
+class WireBug35Test extends WireTestCommon {
 
     @Test
-    public void objectsInSequence() {
+    void objectsInSequence() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -40,7 +40,7 @@ public class WireBug35Test extends WireTestCommon {
     }
 
     @Test
-    public void objectsInSequenceBinaryWire() {
+    void objectsInSequenceBinaryWire() {
         final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         final Wire wire = WireType.BINARY.apply(bytes);
         wire.write(() -> "seq").sequence(seq -> {

@@ -14,10 +14,10 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests for URL validation when creating file based MarshallableOut instances.
  */
-public class FileMarshallableOutValidationTest extends WireTestCommon {
+class FileMarshallableOutValidationTest extends WireTestCommon {
 
     @Test
-    public void rejectsParentTraversal() throws Exception {
+    void rejectsParentTraversal() throws Exception {
         assertThrows(IllegalArgumentException.class, () -> {
             File dir = new File(OS.getTarget(), "valtest");
             dir.mkdirs();

@@ -16,11 +16,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Test suite for validating Map serialization and deserialization using different wire types.
  * Inherits from WireTestCommon for common test setup and teardown functionalities.
  */
-public class MapWireTest extends WireTestCommon {
+class MapWireTest extends WireTestCommon {
 
     // The wire type for serialization and deserialization (TEXT or BINARY)
     private WireType wireType;
@@ -64,7 +65,7 @@ public class MapWireTest extends WireTestCommon {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @ParameterizedTest
     @MethodSource("combinations")
-    public void writeMap(WireType wireType, Map m) {
+    void writeMap(WireType wireType, Map m) {
         this.wireType = wireType;
         this.m = m;
         // Create an elastic buffer to hold serialized data

@@ -25,14 +25,14 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RawWireTest extends WireTestCommon {
+class RawWireTest extends WireTestCommon {
 
     // Suppressing raw type warnings for the Bytes<?> object.
     @SuppressWarnings("rawtypes")
     @NotNull
     private
     // Bytes object used to simulate wire data storage.
-    Bytes<?> bytes = nativeBytes();
+            Bytes<?> bytes = nativeBytes();
 
     // Override the method from WireTestCommon to ensure byte references are released.
     @Override
@@ -46,7 +46,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test to verify the write operation on the wire without any specific data.
     @Test
-    public void testWrite() {
+    void testWrite() {
         @NotNull Wire wire = createWire();
         wire.write();
         wire.write();
@@ -63,7 +63,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test to verify the write operation on the wire using BWKey fields.
     @Test
-    public void testWrite1() {
+    void testWrite1() {
         @NotNull Wire wire = createWire();
         wire.write(BWKey.field1);
         wire.write(BWKey.field2);
@@ -73,7 +73,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test to verify the write operation on the wire with custom field names.
     @Test
-    public void testWrite2() {
+    void testWrite2() {
         @NotNull Wire wire = createWire();
         wire.write(() -> "Hello");
         wire.write(() -> "World");
@@ -84,7 +84,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test to verify the read operation on the wire after writing some data.
     @Test
-    public void testRead() {
+    void testRead() {
         @NotNull Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
@@ -100,7 +100,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test to verify reading specific fields from the wire after writing some data.
     @Test
-    public void testRead1() {
+    void testRead1() {
         @NotNull Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
@@ -117,7 +117,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test to verify reading specific fields from the wire after writing some data with a long name.
     @Test
-    public void testRead2() {
+    void testRead2() {
         @NotNull Wire wire = createWire();
         wire.write();
         wire.write(BWKey.field1);
@@ -142,7 +142,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test for writing and reading 8-bit integers to and from the wire.
     @Test
-    public void int8() {
+    void int8() {
         @NotNull Wire wire = createWire();
         wire.write().int8(1);
         wire.write(BWKey.field1).int8(2);
@@ -164,7 +164,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test for writing and reading 16-bit integers to and from the wire.
     @Test
-    public void int16() {
+    void int16() {
         @NotNull Wire wire = createWire();
         wire.write().int16(1);
         wire.write(BWKey.field1).int16(2);
@@ -186,7 +186,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test for writing and reading 8-bit unsigned integers to and from the wire.
     @Test
-    public void uint8() {
+    void uint8() {
         @NotNull Wire wire = createWire();
         wire.write().uint8(1);
         wire.write(BWKey.field1).uint8(2);
@@ -208,7 +208,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test case for writing and reading unsigned 16-bit integers using a Wire
     @Test
-    public void uint16() {
+    void uint16() {
         // Create a new Wire instance
         @NotNull Wire wire = createWire();
 
@@ -238,7 +238,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test case for writing and reading unsigned 32-bit integers using a Wire
     @Test
-    public void uint32() {
+    void uint32() {
         // Create a new Wire instance
         @NotNull Wire wire = createWire();
 
@@ -267,7 +267,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test case for writing and reading signed 32-bit integers using a Wire
     @Test
-    public void int32() {
+    void int32() {
         // Create a new Wire instance
         @NotNull Wire wire = createWire();
 
@@ -296,7 +296,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test case for writing and reading signed 64-bit integers using a Wire
     @Test
-    public void int64() {
+    void int64() {
         // Create a new Wire instance
         @NotNull Wire wire = createWire();
 
@@ -327,7 +327,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test case for writing and reading 64-bit floating-point numbers using a Wire
     @Test
-    public void float64() {
+    void float64() {
         // Create a new Wire instance
         @NotNull Wire wire = createWire();
 
@@ -365,7 +365,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test case for writing and reading textual data using a Wire
     @Test
-    public void text() {
+    void text() {
         // Create a new Wire instance
         @NotNull Wire wire = createWire();
 
@@ -397,7 +397,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test case for writing and reading type prefixes using a Wire
     @Test
-    public void type() {
+    void type() {
         @NotNull Wire wire = createWire();
 
         // Writing type prefixes to the wire
@@ -427,7 +427,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test case for writing and reading boolean values using a Wire
     @Test
-    public void testBool() {
+    void testBool() {
         @NotNull Wire wire = createWire();
 
         // Writing boolean values to the wire
@@ -443,7 +443,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test case for writing and reading 32-bit floating-point numbers using a Wire
     @Test
-    public void testFloat32() {
+    void testFloat32() {
         @NotNull Wire wire = createWire();
 
         // Writing 32-bit floating-point numbers to the wire
@@ -463,7 +463,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test case for writing and reading LocalTime objects using a Wire
     @Test
-    public void testTime() {
+    void testTime() {
         @NotNull Wire wire = createWire();
         LocalTime now = LocalTime.now();
 
@@ -480,7 +480,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test case for writing and reading ZonedDateTime objects using a Wire
     @Test
-    public void testZonedDateTime() {
+    void testZonedDateTime() {
         @NotNull Wire wire = createWire();
         ZonedDateTime now = ZonedDateTime.now();
 
@@ -497,7 +497,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test case for writing and reading LocalDate objects using a Wire
     @Test
-    public void testDate() {
+    void testDate() {
         @NotNull Wire wire = createWire();
         LocalDate now = LocalDate.now();
 
@@ -514,7 +514,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test case for writing and reading UUID objects using a Wire
     @Test
-    public void testUuid() {
+    void testUuid() {
         @NotNull Wire wire = createWire();
         UUID uuid = UUID.randomUUID();
 
@@ -534,7 +534,7 @@ public class RawWireTest extends WireTestCommon {
     @Disabled("todo fix :currently using NoBytesStore so will fail with UnsupportedOperationException")
     @SuppressWarnings("rawtypes")
     @Test
-    public void testBytes() {
+    void testBytes() {
         @NotNull Wire wire = createWire();
         @NotNull byte[] allBytes = new byte[256];
         for (int i = 0; i < 256; i++)
@@ -545,7 +545,7 @@ public class RawWireTest extends WireTestCommon {
                 .write().bytes(Bytes.wrapForRead("Hello".getBytes(ISO_8859_1)))
                 .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
                 .write().bytes(allBytes);
-       // System.out.println(bytes.toDebugString());
+        // System.out.println(bytes.toDebugString());
         @NotNull NativeBytes allBytes2 = nativeBytes();
         // Reading and validating byte arrays from the wire
         wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
@@ -557,7 +557,7 @@ public class RawWireTest extends WireTestCommon {
 
     // Test case for writing and reading custom Marshallable objects using a Wire
     @Test
-    public void testWriteMarshallable() {
+    void testWriteMarshallable() {
         @NotNull Wire wire = createWire();
         @NotNull MyTypesCustom mtA = new MyTypesCustom();
         mtA.flag = (true);
@@ -579,8 +579,8 @@ public class RawWireTest extends WireTestCommon {
 
         // Validate the debug representation of the written data
         assertEquals("[pos: 0, rlim: 78, wlim: 8EiB, cap: 8EiB ] ǁ" +
-                        "⒈A#٠٠٠±90w¾\\u009F\\u001A/Ý^@٠٠٠٠٠٠٠٠C\\u009ECÿ⒒Hello World" +
-                        "⒈B\\u001F٠٠٠٠Ò⒋S⒌£\\u0092:Ý^@٠٠٠٠٠٠٠٠\\u009E.¤ø⒎Bye now‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
+                "⒈A#٠٠٠±90w¾\\u009F\\u001A/Ý^@٠٠٠٠٠٠٠٠C\\u009ECÿ⒒Hello World" +
+                "⒈B\\u001F٠٠٠٠Ò⒋S⒌£\\u0092:Ý^@٠٠٠٠٠٠٠٠\\u009E.¤ø⒎Bye now‡٠٠٠٠٠٠٠٠", wire.bytes().toDebugString());
 
         @NotNull MyTypesCustom mt2 = new MyTypesCustom();
         @NotNull StringBuilder key = new StringBuilder();

@@ -5,9 +5,10 @@ package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.wire.WireTypeConverter;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-public class WireTypeConverterTest {
+class WireTypeConverterTest {
 
     private final String json = "" +
             "{\"@FixEngineCfg\":{\"SERVER-CLIENT\":{\"connectionType\":\"initiator\",\n" +
@@ -53,12 +54,12 @@ public class WireTypeConverterTest {
             "}\n";
 
     @Test
-    public void testYamlToJson() {
+    void testYamlToJson() {
         assertEquals(json, new WireTypeConverter().yamlToJson(yaml).toString().replaceAll(",", ",\n"));
     }
 
     @Test
-    public void testJsonToYaml() {
+    void testJsonToYaml() {
         assertEquals(yaml, new WireTypeConverter().jsonToYaml(json).toString());
     }
 }

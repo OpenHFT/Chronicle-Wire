@@ -17,7 +17,7 @@ import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Disabled("Long running test")
-public class BinaryWirePerfTest extends WireTestCommon {
+class BinaryWirePerfTest extends WireTestCommon {
 
     // Define test parameters
     private int testId;
@@ -55,7 +55,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
     // Performance test for Wire serialization and deserialization
     @ParameterizedTest
     @MethodSource("combinations")
-    public void wirePerf(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
+    void wirePerf(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;
@@ -96,7 +96,7 @@ public class BinaryWirePerfTest extends WireTestCommon {
     // Performance test for serializing and deserializing integers with Wire
     @ParameterizedTest
     @MethodSource("combinations")
-    public void wirePerfInts(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
+    void wirePerfInts(int testId, boolean fixed, boolean numericField, boolean fieldLess) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;

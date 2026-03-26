@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class VanillaMessageHistoryRoundTripTest extends WireTestCommon {
+class VanillaMessageHistoryRoundTripTest extends WireTestCommon {
 
     @Test
-    public void roundTripViaWire() {
+    void roundTripViaWire() {
         VanillaMessageHistory mh = new VanillaMessageHistory();
         mh.addSource(1, 11L);
         mh.addTiming(123L);
@@ -26,7 +26,7 @@ public class VanillaMessageHistoryRoundTripTest extends WireTestCommon {
     }
 
     @Test
-    public void roundTripViaBytes() {
+    void roundTripViaBytes() {
         VanillaMessageHistory mh = new VanillaMessageHistory();
         mh.addSource(2, 22L);
         mh.addTiming(456L);

@@ -16,11 +16,11 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class InnerMapTest extends WireTestCommon {
+class InnerMapTest extends WireTestCommon {
 
     // A test case to verify the marshaling and demarshaling of the `MyMarshable` class
     @Test
-    public void testMyInnnerMap() {
+    void testMyInnnerMap() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Create a new instance of MyMarshable and set its properties

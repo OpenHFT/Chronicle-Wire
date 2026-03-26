@@ -16,11 +16,11 @@ import static org.junit.jupiter.api.Assumptions.*;
 /**
  * @author Rob Austin
  */
-public class WireTextBugTest extends WireTestCommon {
+class WireTextBugTest extends WireTestCommon {
 
     @Test
-    // Test for handling text within the Wire framework
-    public void testText() {
+        // Test for handling text within the Wire framework
+    void testText() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Adding alias for the Bug class

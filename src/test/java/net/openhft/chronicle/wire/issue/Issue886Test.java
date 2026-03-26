@@ -16,7 +16,7 @@ import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Issue886Test {
+class Issue886Test {
     private WireType wireType;
 
     public static Collection<Object[]> combinations() {
@@ -28,7 +28,7 @@ public class Issue886Test {
 
     @ParameterizedTest
     @MethodSource("combinations")
-    public void test(WireType wireType) {
+    void test(WireType wireType) {
         this.wireType = wireType;
         String data = "{\n" +
                 "  \"a\": 1.234,\n" +

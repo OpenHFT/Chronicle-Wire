@@ -7,14 +7,14 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ValueInObjectFallbackTest extends WireTestCommon {
+class ValueInObjectFallbackTest extends WireTestCommon {
 
-    public static class Holder extends SelfDescribingMarshallable {
+    static class Holder extends SelfDescribingMarshallable {
         String name;
     }
 
     @Test
-    public void readsMarshallableAsObject() {
+    void readsMarshallableAsObject() {
         String yaml = "value: { name: bob }";
         TextWire wire = TextWire.from(yaml);
         Holder holder = wire.read("value").object(null, Holder.class, false);

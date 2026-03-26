@@ -25,7 +25,7 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class WiresTest extends WireTestCommon {
+class WiresTest extends WireTestCommon {
 
     private final BytesContainer container1 = new BytesContainer();
     private final BytesContainer container2 = new BytesContainer();
@@ -37,7 +37,7 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
-    public void defaultCompilerOptions() throws Exception {
+    void defaultCompilerOptions() throws Exception {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Field compiler = Jvm.getField(Wires.class, "CACHED_COMPILER");
@@ -51,7 +51,7 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
-    public void customCompilerOptions() throws Exception {
+    void customCompilerOptions() throws Exception {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Field compiler = Jvm.getField(Wires.class, "CACHED_COMPILER");
@@ -68,7 +68,7 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
-    public void textWireNumberTest() {
+    void textWireNumberTest() {
         assertTrue(Double.isNaN(TEXT.apply(Bytes.from("NaN")).getValueIn().float64()));
         assertTrue(Double.isInfinite(TEXT.apply(Bytes.from("Infinity")).getValueIn().float64()));
         assertTrue(Double.isInfinite(TEXT.apply(Bytes.from("-Infinity")).getValueIn().float64()));
@@ -84,7 +84,7 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
-    public void resetShouldClearBytes() {
+    void resetShouldClearBytes() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         container1.bytesField.clear().append("value1");
@@ -98,7 +98,7 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
-    public void resetShouldClearArbitraryMutableFields() {
+    void resetShouldClearArbitraryMutableFields() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         StringBuilderContainer container1 = new StringBuilderContainer();
@@ -118,7 +118,7 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
-    public void copyToShouldMutateBytes() {
+    void copyToShouldMutateBytes() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         BytesContainerMarshallable container1 = new BytesContainerMarshallable();
@@ -132,7 +132,7 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
-    public void unknownType() throws NoSuchFieldException {
+    void unknownType() throws NoSuchFieldException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Marshallable marshallable = Wires.tupleFor(Marshallable.class, "UnknownType");
@@ -153,7 +153,7 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
-    public void unknownType2Throws2() {
+    void unknownType2Throws2() {
         assertThrows(ClassNotFoundRuntimeException.class, () -> {
             Wires.GENERATE_TUPLES = false;
 
@@ -187,7 +187,7 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
-    public void recordAsYaml() {
+    void recordAsYaml() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(baos);
         Says says = Wires.recordAsYaml(Says.class, ps);
@@ -206,8 +206,9 @@ public class WiresTest extends WireTestCommon {
                 "say: Three\n" +
                 "...\n", new String(baos.toByteArray(), StandardCharsets.ISO_8859_1));
     }
+
     @Test
-    public void replay() throws IOException {
+    void replay() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(baos);
         Says says = Wires.recordAsYaml(Says.class, ps);
@@ -221,7 +222,7 @@ public class WiresTest extends WireTestCommon {
                 "...\n" +
                 "---\n" +
                 "say: Three\n" +
-                "...\n",says);
+                "...\n", says);
 
         assertEquals("" +
                 "---\n" +
@@ -239,7 +240,7 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
-    public void deepCopyNotBoundToThread() {
+    void deepCopyNotBoundToThread() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         BytesContainerMarshallable bcm = new BytesContainerMarshallable();
         bcm.bytesField.append("Hello");
@@ -275,7 +276,7 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
-    public void copyTo() {
+    void copyTo() {
         OneTwoFour o124 = new OneTwoFour(11, 222, 44444);
         TwoFourThree o243 = new TwoFourThree(2, 4, 3);
         Wires.copyTo(o124, o243);
@@ -289,7 +290,7 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
-    public void copyToIncompleteValidation() {
+    void copyToIncompleteValidation() {
         OneTwoFour o124 = new OneTwoFour(11, 222, 44444);
         TwoFourThreeValidatable o243 = new TwoFourThreeValidatable(2, 4, 3);
         assertEquals("" +
@@ -309,7 +310,7 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
-    public void copyToContainsBytesMarshallable() {
+    void copyToContainsBytesMarshallable() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         ContainsBM containsBM = new ContainsBM(new BasicBytesMarshallable("Harold"));
@@ -319,10 +320,10 @@ public class WiresTest extends WireTestCommon {
     }
 
     @Test
-    public void deepCopyWillWorkWhenDynamicEnumIsAnnotatedAsMarshallable() {
+    void deepCopyWillWorkWhenDynamicEnumIsAnnotatedAsMarshallable() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-         ClassAliasPool.CLASS_ALIASES.addAlias(Thing.class, EnumThing.class);
+        ClassAliasPool.CLASS_ALIASES.addAlias(Thing.class, EnumThing.class);
 
         Thing thing2 = Marshallable.fromString(
                 "!Thing {" +

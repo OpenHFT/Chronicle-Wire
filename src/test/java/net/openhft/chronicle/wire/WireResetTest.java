@@ -18,15 +18,15 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class WireResetTest extends WireTestCommon {
+class WireResetTest extends WireTestCommon {
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     @Test
-    //https://github.com/OpenHFT/Chronicle-Wire/issues/225
-    public void test() {
+        //https://github.com/OpenHFT/Chronicle-Wire/issues/225
+    void test() {
         Event event = new Event();
         assertFalse(event.isClosed());
 
@@ -35,8 +35,8 @@ public class WireResetTest extends WireTestCommon {
     }
 
     @Test
-    //https://github.com/OpenHFT/Chronicle-Wire/issues/225
-    public void testEventAbstractCloseable() {
+        //https://github.com/OpenHFT/Chronicle-Wire/issues/225
+    void testEventAbstractCloseable() {
         try (EventAbstractCloseable event = new EventAbstractCloseable()) {
             assertFalse(event.isClosed());
 
@@ -46,8 +46,8 @@ public class WireResetTest extends WireTestCommon {
     }
 
     @Test
-    //https://github.com/OpenHFT/Chronicle-Wire/issues/732
-    public void testDeepReset() {
+        //https://github.com/OpenHFT/Chronicle-Wire/issues/732
+    void testDeepReset() {
         Event event1 = new Event();
         Identifier identifier1 = event1.identifier;
         event1.identifier.id = "id";
@@ -95,14 +95,14 @@ public class WireResetTest extends WireTestCommon {
      * Reproduction of <a href="https://github.com/OpenHFT/Chronicle-Wire/issues/745">this issue</a>
      */
     @Test
-    public void canDeepResetOnDtosContainingLocalDates() {
+    void canDeepResetOnDtosContainingLocalDates() {
         Event e = new Event();
         e.someDate = LocalDate.now();
         e.reset();
         assertNull(e.someDate);
     }
 
-    public static class Event extends SelfDescribingMarshallable implements Closeable {
+    static class Event extends SelfDescribingMarshallable implements Closeable {
 
         private boolean isClosed;
 
@@ -115,6 +115,7 @@ public class WireResetTest extends WireTestCommon {
         public void close() {
             isClosed = true;
         }
+
         @Override
         public boolean isClosed() {
             return isClosed;

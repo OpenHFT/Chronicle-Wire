@@ -26,7 +26,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Issue327Test extends WireTestCommon {
+class Issue327Test extends WireTestCommon {
 
     private boolean useTypes;
 
@@ -39,42 +39,42 @@ public class Issue327Test extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void localTime(boolean useTypes) {
+    void localTime(boolean useTypes) {
         this.useTypes = useTypes;
         test(() -> LocalTime.of(17, 01), "{\"@Time\":\"17:01\"}", "\"17:01\"");
     }
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void localDateTime(boolean useTypes) {
+    void localDateTime(boolean useTypes) {
         this.useTypes = useTypes;
         test(() -> LocalDateTime.of(1969, 7, 20, 20, 17, 01), "{\"@DateTime\":\"1969-07-20T20:17:01\"}", "\"1969-07-20T20:17:01\"");
     }
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void zonedDateTime(boolean useTypes) {
+    void zonedDateTime(boolean useTypes) {
         this.useTypes = useTypes;
         test(() -> ZonedDateTime.of(LocalDateTime.of(1969, 7, 20, 20, 17, 01), ZoneId.of("UTC")), "{\"@ZonedDateTime\":\"1969-07-20T20:17:01Z[UTC]\"}", "\"1969-07-20T20:17:01Z[UTC]\"");
     }
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void uIID(boolean useTypes) {
+    void uIID(boolean useTypes) {
         this.useTypes = useTypes;
         test(() -> UUID.fromString("b2f78c98-b07d-42ab-86d5-4b0d48550761"), "{\"@UUID\":\"b2f78c98-b07d-42ab-86d5-4b0d48550761\"}", "\"b2f78c98-b07d-42ab-86d5-4b0d48550761\"");
     }
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void date(boolean useTypes) {
+    void date(boolean useTypes) {
         this.useTypes = useTypes;
         test(() -> java.sql.Date.valueOf("1969-07-20"), "{\"@java.sql.Date\":\"1969-07-20T00:00:00.000 GMT\"}", "\"1969-07-20T00:00:00.000 GMT\"");
     }
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void byteArray(boolean useTypes) {
+    void byteArray(boolean useTypes) {
         this.useTypes = useTypes;
         //test(() -> "Buzz".getBytes(StandardCharsets.UTF_8), "{\"@byte[]\":{\"@!binary\":\"QnV6eg==\"}}", "QnV6eg==");
         // not sure what the expected typed output should be
@@ -83,21 +83,21 @@ public class Issue327Test extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void intArray(boolean useTypes) {
+    void intArray(boolean useTypes) {
         this.useTypes = useTypes;
         test(() -> IntStream.range(0, 4).toArray(), "{\"@int[]\":[0,1,2,3 ]}", "[0,1,2,3 ]");
     }
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void file(boolean useTypes) {
+    void file(boolean useTypes) {
         this.useTypes = useTypes;
         test(() -> new File("info.txt"), "{\"@java.io.File\":\"info.txt\"}", "\"info.txt\"");
     }
 
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void bigDecimal(boolean useTypes) {
+    void bigDecimal(boolean useTypes) {
         this.useTypes = useTypes;
         test(() -> BigDecimal.TEN, "{\"@java.math.BigDecimal\":\"10\"}", "\"10\"");
     }

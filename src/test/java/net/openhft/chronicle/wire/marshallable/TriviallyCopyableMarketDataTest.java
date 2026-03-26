@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TriviallyCopyableMarketDataTest extends net.openhft.chronicle.wire.WireTestCommon {
+class TriviallyCopyableMarketDataTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
-    public void test() {
+    void test() {
         ClassAliasPool.CLASS_ALIASES.addAlias(TriviallyCopyableMarketData.class, "MarketData");
         final String str = "" +
                 "!MarketData {\n" +

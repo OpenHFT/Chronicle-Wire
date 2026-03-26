@@ -11,13 +11,13 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Base85LongConverterTest extends WireTestCommon {
+class Base85LongConverterTest extends WireTestCommon {
 
     // A sample string to test the parsing functionality.
     private static final CharSequence TEST_STRING = "world";
 
     @Test
-    public void parseLeadingZero() {
+    void parseLeadingZero() {
         LongConverter c = Base85LongConverter.INSTANCE;
         assertEquals(0L, c.parse("0"));
         assertEquals(0L, c.parse("00"));
@@ -34,7 +34,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     }
 
     @Test
-    public void parse() {
+    void parse() {
         // Obtain the singleton instance of Base85LongConverter
         LongConverter c = Base85LongConverter.INSTANCE;
         // System.out.println(c.asString(-1L));
@@ -50,7 +50,7 @@ public class Base85LongConverterTest extends WireTestCommon {
     }
 
     @Test
-    public void parseSubsequence() {
+    void parseSubsequence() {
         LongConverter c = Base85LongConverter.INSTANCE;
         String s = ",a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0,";
         int comparisons = 11;
@@ -59,21 +59,21 @@ public class Base85LongConverterTest extends WireTestCommon {
     }
 
     @Test
-    public void parseLengthCheck() {
+    void parseLengthCheck() {
         assertThrows(IllegalArgumentException.class, () -> {
             Base85LongConverter.INSTANCE.parse(getClass().getCanonicalName());
         });
     }
 
     @Test
-    public void parseSubstringLengthCheck() {
+    void parseSubstringLengthCheck() {
         assertThrows(IllegalArgumentException.class, () -> {
             Base85LongConverter.INSTANCE.parse("ABCD", -1, 3);
         });
     }
 
     @Test
-    public void asString() {
+    void asString() {
         // Obtain the singleton instance of Base85LongConverter
         LongConverter c = Base85LongConverter.INSTANCE;
         IntStream.range(0, 10_000_000)
@@ -87,7 +87,7 @@ public class Base85LongConverterTest extends WireTestCommon {
 
     // Validate the append operation for a known input string
     @Test
-    public void testAppend() {
+    void testAppend() {
         // Create an elastic byte buffer
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
@@ -107,7 +107,7 @@ public class Base85LongConverterTest extends WireTestCommon {
 
     // Validate appending data with pre-existing content in the buffer
     @Test
-    public void testAppendWithExistingData() {
+    void testAppendWithExistingData() {
         // Create an elastic byte buffer and append "hello" to it
         final Bytes<?> b = Bytes.allocateElasticOnHeap().append("hello");
         try {
@@ -127,7 +127,7 @@ public class Base85LongConverterTest extends WireTestCommon {
 
     // Ensure safe character conversion using TextWire
     @Test
-    public void allSafeCharsTextWire() {
+    void allSafeCharsTextWire() {
         // Create a TextWire instance with elastic on heap bytes and configure it to use text documents
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         // Execute the generic safe character check
@@ -136,7 +136,7 @@ public class Base85LongConverterTest extends WireTestCommon {
 
     // Ensure safe character conversion using YamlWire
     @Test
-    public void allSafeCharsYamlWire() {
+    void allSafeCharsYamlWire() {
         // Create a YamlWire instance with elastic on heap bytes and configure it to use text documents
         Wire wire = new YamlWire();
         // Execute the generic safe character check

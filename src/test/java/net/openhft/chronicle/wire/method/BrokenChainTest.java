@@ -25,17 +25,17 @@ public class BrokenChainTest extends WireTestCommon {
     }
 
     @Test
-    public void brokenChainYaml() {
+    void brokenChainYaml() {
         doBrokenChain(WireType.YAML_ONLY);
     }
 
     @Test
-    public void brokenChainText() {
+    void brokenChainText() {
         doBrokenChain(WireType.TEXT);
     }
 
     @Test
-    public void brokenChainBinary() {
+    void brokenChainBinary() {
         doBrokenChain(WireType.BINARY_LIGHT);
     }
 

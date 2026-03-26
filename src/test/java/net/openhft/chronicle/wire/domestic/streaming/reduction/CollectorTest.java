@@ -23,7 +23,7 @@ import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.replacingMerger;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CollectorTest extends WireTestCommon {
+class CollectorTest extends WireTestCommon {
 
     private static final String Q_NAME = CollectorTest.class.getSimpleName();
 
@@ -34,17 +34,17 @@ public class CollectorTest extends WireTestCommon {
     );
 
     @BeforeEach
-    public void clearBefore() {
+    void clearBefore() {
         IOTools.deleteDirWithFiles(Q_NAME);
     }
 
     @AfterEach
-    public void clearAfter() {
+    void clearAfter() {
         IOTools.deleteDirWithFiles(Q_NAME);
     }
 
     @Test
-    public void lastSeenManual() {
+    void lastSeenManual() {
 
         Collector<MarketData, AtomicReference<MarketData>, MarketData> lastSeen = Collector.of(
                 AtomicReference::new,
@@ -66,7 +66,7 @@ public class CollectorTest extends WireTestCommon {
     }
 
     @Test
-    public void lastSeen() {
+    void lastSeen() {
 
         Reduction<Optional<MarketData>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class).withMethod(ServiceOut.class, ServiceOut::marketData).build())
@@ -80,7 +80,7 @@ public class CollectorTest extends WireTestCommon {
     }
 
     @Test
-    public void map() {
+    void map() {
 
         Reduction<Map<String, MarketData>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class).withMethod(ServiceOut.class, ServiceOut::marketData).build()
@@ -98,7 +98,7 @@ public class CollectorTest extends WireTestCommon {
     }
 
     @Test
-    public void composite() {
+    void composite() {
 
         final Reduction<Map<String, List<Double>>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class).withMethod(ServiceOut.class, ServiceOut::marketData).build())

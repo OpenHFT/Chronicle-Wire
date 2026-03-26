@@ -14,7 +14,7 @@ import java.util.*;
 import static java.util.Collections.addAll;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class NestedMapsTest extends WireTestCommon {
+class NestedMapsTest extends WireTestCommon {
 
     // Instance variable to store the type of wire for this test
     private WireType wireType;
@@ -34,7 +34,7 @@ public class NestedMapsTest extends WireTestCommon {
     @SuppressWarnings("incomplete-switch")
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testMapped(WireType wireType) {
+    void testMapped(WireType wireType) {
         this.wireType = wireType;
         // Initialize the Mapped object with words, numbers, and maps
         @NotNull Mapped m = new Mapped();
@@ -177,7 +177,7 @@ public class NestedMapsTest extends WireTestCommon {
     @SuppressWarnings("incomplete-switch")
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testMappedTopLevel(WireType wireType) {
+    void testMappedTopLevel(WireType wireType) {
         this.wireType = wireType;
         // Initialize Mapped object with given data
         @NotNull Mapped m = new Mapped();
@@ -247,7 +247,7 @@ public class NestedMapsTest extends WireTestCommon {
     // This test method ensures maps can be read and written correctly
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testMapReadAndWrite(WireType wireType) {
+    void testMapReadAndWrite(WireType wireType) {
         this.wireType = wireType;
         // Create a byte buffer and initialize the wire
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();

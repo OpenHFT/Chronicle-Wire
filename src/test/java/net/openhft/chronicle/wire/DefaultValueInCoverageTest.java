@@ -15,10 +15,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DefaultValueInCoverageTest extends WireTestCommon {
+class DefaultValueInCoverageTest extends WireTestCommon {
 
     @Test
-    public void handlesBytesPointerAndBooleanBranches() {
+    void handlesBytesPointerAndBooleanBranches() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         DefaultValueIn valueIn = new DefaultValueIn(wire);
         PointerBytesStore pointer = new PointerBytesStore();
@@ -36,7 +36,7 @@ public class DefaultValueInCoverageTest extends WireTestCommon {
     }
 
     @Test
-    public void suppliesDefaultValuesAcrossReaders() throws InvalidMarshallableException {
+    void suppliesDefaultValuesAcrossReaders() throws InvalidMarshallableException {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         DefaultValueIn valueIn = new DefaultValueIn(wire);
 
@@ -67,7 +67,7 @@ public class DefaultValueInCoverageTest extends WireTestCommon {
     }
 
     @Test
-    public void sequenceAndMarshallableDelegatesInvocations() {
+    void sequenceAndMarshallableDelegatesInvocations() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         DefaultValueIn valueIn = new DefaultValueIn(wire);
         valueIn.defaultValue = null;
@@ -84,7 +84,7 @@ public class DefaultValueInCoverageTest extends WireTestCommon {
     }
 
     @Test
-    public void objectConversionFollowsClassLookup() {
+    void objectConversionFollowsClassLookup() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         DefaultValueIn valueIn = new DefaultValueIn(wire);
 

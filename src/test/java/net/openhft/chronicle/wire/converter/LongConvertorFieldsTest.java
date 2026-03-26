@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests for validating the behavior of field converters with long data types.
  */
-public class LongConvertorFieldsTest {
+class LongConvertorFieldsTest {
 
     /**
      * DTO class representing data fields to be serialized using Base16 encoding.
@@ -50,7 +50,7 @@ public class LongConvertorFieldsTest {
      * Test for verifying the Base16 encoding functionality.
      */
     @Test
-    public void base16() {
+    void base16() {
         // Validate Base16 encoding with a range of positive values
         doTest(new Base16DTO((byte) 1, '2', (short) 3, 4, 5), "" +
                 "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base16DTO {\n" +
@@ -109,7 +109,7 @@ public class LongConvertorFieldsTest {
      * Test for verifying the Base64 encoding functionality.
      */
     @Test
-    public void base64() {
+    void base64() {
         // Validate Base64 encoding with a range of positive values
         doTest(new Base64DTO((byte) 1, '2', (short) 3, 4, 5), "" +
                 "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base64DTO {\n" +
@@ -168,7 +168,7 @@ public class LongConvertorFieldsTest {
      * Test for verifying the Base85 encoding functionality.
      */
     @Test
-    public void base85() {
+    void base85() {
         // Validate Base85 encoding with a range of positive values
         doTest(new Base85DTO((byte) 1, '2', (short) 3, 4, 5), "" +
                 "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$Base85DTO {\n" +
@@ -191,7 +191,7 @@ public class LongConvertorFieldsTest {
     }
 
     @Test
-    public void detectSpecialCharBase85() {
+    void detectSpecialCharBase85() {
         final String CHARS = "" +
                 "0123456789" +
                 ":;<=>?@" +
@@ -228,7 +228,7 @@ public class LongConvertorFieldsTest {
     }
 
     @Test
-    public void shortText() {
+    void shortText() {
         doTest(new ShortTextDTO((byte) 1, '2', (short) 3, 4, 5), "" +
                 "!net.openhft.chronicle.wire.converter.LongConvertorFieldsTest$ShortTextDTO {\n" +
                 "  b: 1,\n" +
@@ -249,7 +249,7 @@ public class LongConvertorFieldsTest {
     }
 
     @Test
-    public void detectSpecialChar() {
+    void detectSpecialChar() {
         final String CHARS = " " +
                 "123456789" +
                 ":;<=>?@" +
@@ -298,7 +298,7 @@ public class LongConvertorFieldsTest {
      * Test method for verifying the Words encoding functionality.
      */
     @Test
-    public void words() {
+    void words() {
         // Validate Words encoding with a range of positive values.
         // The expected results are arbitrary word mappings for demonstration.
         doTest(new WordsDTO((byte) 1, '2', (short) 3, 4, 5), "" +

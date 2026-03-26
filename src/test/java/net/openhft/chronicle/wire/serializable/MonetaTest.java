@@ -19,10 +19,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 @SuppressWarnings("unchecked")
-public class MonetaTest extends net.openhft.chronicle.wire.WireTestCommon {
+class MonetaTest extends net.openhft.chronicle.wire.WireTestCommon {
     // Test method for serialization and deserialization of a SortedSet with custom Comparable objects
     @Test
-    public void monetary() {
+    void monetary() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Create a sorted set of NonScalarComparable objects

@@ -19,7 +19,7 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
+class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Static initialization block to alias two classes
     static {
@@ -33,7 +33,7 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
     private String expects;
 
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
@@ -83,7 +83,7 @@ public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chro
     // Test case to validate the output of the method writer based on the verbose types setting
     @ParameterizedTest
     @MethodSource("combinations")
-    public void test(boolean verboseTypes, String expects) {
+    void test(boolean verboseTypes, String expects) {
         this.verboseTypes = verboseTypes;
         this.expects = expects;
         // Allocate elastic bytes on heap and create a TextWire instance

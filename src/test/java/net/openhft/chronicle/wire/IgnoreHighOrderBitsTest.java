@@ -12,14 +12,14 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class IgnoreHighOrderBitsTest extends WireTestCommon {
+class IgnoreHighOrderBitsTest extends WireTestCommon {
 
     /**
      * Writes to the output stream the eight low-order bits of the argument b. The 24 high-order bits of b are ignored.
      * see https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/DataOutput.html#write(int)
      */
     @Test
-    public void testWriteByte() throws IOException {
+    void testWriteByte() throws IOException {
         // Create a new HexDumpBytes object to represent byte sequences in a human-readable format
         @SuppressWarnings("rawtypes") final Bytes<?> bytes = new HexDumpBytes();
         try {
@@ -38,7 +38,7 @@ public class IgnoreHighOrderBitsTest extends WireTestCommon {
 
             // Assert that the byte representation matches the expected output
             assertEquals("" +
-                            "a1 00                                           # 0\n", bytes.toHexString());
+                    "a1 00                                           # 0\n", bytes.toHexString());
         } finally {
             bytes.releaseLast();
         }

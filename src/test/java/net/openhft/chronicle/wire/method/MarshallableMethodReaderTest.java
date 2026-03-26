@@ -22,7 +22,7 @@ public class MarshallableMethodReaderTest extends net.openhft.chronicle.wire.Wir
 
     // Test method to verify the functionality of MethodReader with 'say' method
     @Test
-    public void test() {
+    void test() {
         // Creates a Wire instance with predefined input
         Wire wire = new TextWire(Bytes.from("say: hi")).useTextDocuments();
 
@@ -38,13 +38,13 @@ public class MarshallableMethodReaderTest extends net.openhft.chronicle.wire.Wir
 
     // Test for ignoring methods without scanning
     @Test
-    public void ignoredMethods() {
+    void ignoredMethods() {
         doIgnoredMethods(false);
     }
 
     // Test for ignoring methods with scanning
     @Test
-    public void ignoredMethodsScanning() {
+    void ignoredMethodsScanning() {
         doIgnoredMethods(true);
     }
 

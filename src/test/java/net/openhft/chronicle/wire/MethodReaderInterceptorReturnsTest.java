@@ -20,12 +20,12 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
+class MethodReaderInterceptorReturnsTest extends WireTestCommon {
 
     // Setting up before the tests
     @Override
     @BeforeEach
-    public void threadDump() {
+    void threadDump() {
         super.threadDump();
     }
 
@@ -34,7 +34,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      * the generated method reader.
      */
     @Test
-    public void testInterceptorSupportedInGeneratedCode() {
+    void testInterceptorSupportedInGeneratedCode() {
         doTestInterceptorSupportedInGeneratedCode(new CountDownLatch(1), false);
     }
 
@@ -43,7 +43,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      * are created at the same time.
      */
     @Test
-    public void testInterceptingReaderConcurrentCreation() throws ExecutionException, InterruptedException, TimeoutException {
+    void testInterceptingReaderConcurrentCreation() throws ExecutionException, InterruptedException, TimeoutException {
         int concurrencyLevel = 5;
 
         // Creating a fixed-size thread pool to simulate concurrency
@@ -140,7 +140,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      */
     @SuppressWarnings("deprecation")
     @Test
-    public void testGeneratingAggregatingInfoInterceptor() {
+    void testGeneratingAggregatingInfoInterceptor() {
         // Create a wire with a buffer of size 128 and padding enabled
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
@@ -182,7 +182,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      */
     @SuppressWarnings("deprecation")
     @Test
-    public void testGeneratingSkippingInterceptor() {
+    void testGeneratingSkippingInterceptor() {
         // Create a wire with a buffer of size 128 and padding enabled
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);

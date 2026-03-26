@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 @SuppressWarnings("this-escape")
-public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCommon {
+class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCommon {
 
     private WireType wireType;
     private Bytes<?> bytes = Bytes.allocateElasticOnHeap();
@@ -44,7 +44,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
     // Test to check the compatibility of a marshallable StringBuilder
     @ParameterizedTest
     @MethodSource("data")
-    public void marshableStringBuilderTest(WireType wireType) {
+    void marshableStringBuilderTest(WireType wireType) {
         this.wireType = wireType;
         Wire wire = wireType.apply(bytes);
         wire.usePadding(wire.isBinary());
@@ -69,7 +69,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
     // Test for checking backward compatibility of the Wire
     @ParameterizedTest
     @MethodSource("data")
-    public void backwardsCompatibility(WireType wireType) {
+    void backwardsCompatibility(WireType wireType) {
         this.wireType = wireType;
         Wire wire = wireType.apply(bytes);
         wire.usePadding(wire.isBinary());
@@ -98,7 +98,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
 
     @ParameterizedTest
     @MethodSource("data")
-    public void forwardCompatibility(WireType wireType) {
+    void forwardCompatibility(WireType wireType) {
         this.wireType = wireType;
         // Apply the given wireType to bytes to get a Wire instance
         Wire wire = wireType.apply(bytes);
@@ -143,7 +143,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
     }
 
     // Class representing a data transfer object with a single integer field "one"
-    public static class MDTO1 extends SelfDescribingMarshallable implements Demarshallable {
+    static class MDTO1 extends SelfDescribingMarshallable implements Demarshallable {
 
         int one;
 
@@ -177,7 +177,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
     }
 
     // Class representing a data transfer object with fields "one", "two", and "three"
-    public static class MDTO2 extends SelfDescribingMarshallable implements Demarshallable {
+    static class MDTO2 extends SelfDescribingMarshallable implements Demarshallable {
 
         // Using StringBuilder for "three" to easily modify its content
         final StringBuilder three = new StringBuilder();

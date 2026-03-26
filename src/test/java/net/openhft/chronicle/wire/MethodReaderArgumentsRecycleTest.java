@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
+class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
     // Interface that represents the different method signatures we want to test.
     private MyInterface writer;
@@ -27,7 +27,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     // This method sets up the test environment before each test case.
     @SuppressWarnings("deprecation")
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         // Create a new BinaryWire backed by a dynamically expanding Bytes object.
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
@@ -133,7 +133,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     }
 
     @Test
-    public void testIntArrayNotRecycled() {
+    void testIntArrayNotRecycled() {
         // Two different int arrays to pass to the method.
         int[] first = {1, 2, 3};
         int[] second = {5, 6, 7, 8};
@@ -143,7 +143,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
     // Test to ensure that an Object array argument is not recycled between calls.
     @Test
-    public void testObjectArrayNotRecycled() {
+    void testObjectArrayNotRecycled() {
         String[] first = {"a", "b", "c"};
         String[] second = {"d", ""};
 
@@ -152,7 +152,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
     // Test to verify that a MyMarshallable object argument gets recycled between calls.
     @Test
-    public void testMarshallableRecycled() {
+    void testMarshallableRecycled() {
         MyMarshallable first = new MyMarshallable();
         first.l = 5L;
 
@@ -164,7 +164,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
     // Test to confirm that a MyBytesMarshallable object argument gets recycled between calls.
     @Test
-    public void testBytesMarshallableRecycled() {
+    void testBytesMarshallableRecycled() {
         MyBytesMarshallable first = new MyBytesMarshallable();
         first.d = 8.5;
 
@@ -176,7 +176,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
     // Test to ascertain that a RegularDTO object argument gets recycled between calls.
     @Test
-    public void testDtoRecycled() {
+    void testDtoRecycled() {
         RegularDTO first = new RegularDTO();
         first.i = 6;
         first.s = "f";
@@ -189,7 +189,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
     }
 
     @Test
-    public void testConfigDtoRecycled() {
+    void testConfigDtoRecycled() {
         ConfigDTO first = new ConfigDTO();
         first.s = "f";
         first.b = true;
@@ -206,7 +206,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
     // Test to ascertain that a DTO object's list field gets recycled between calls.
     @Test
-    public void testWrappedListRecycled() {
+    void testWrappedListRecycled() {
         ListContainingDto first = new ListContainingDto();
         first.list = new ArrayList<>(Arrays.asList(6, "f"));
 
@@ -218,7 +218,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
     // Test to ascertain that a DTO object's list field gets recycled between calls.
     @Test
-    public void testWrappedListAsObjectRecycled() {
+    void testWrappedListAsObjectRecycled() {
         ObjectContainingDto first = new ObjectContainingDto();
         first.list = new ArrayList<>(Arrays.asList(6, "f"));
 
@@ -230,7 +230,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
     // Test to ascertain that a DTO object's list field gets recycled between calls.
     @Test
-    public void testWrappedListAsObjectRecycledDTO() {
+    void testWrappedListAsObjectRecycledDTO() {
         ObjectContainingDto first = new ObjectContainingDto();
         first.list = new ArrayList<>(Arrays.asList(new MyDto(1, 2), new MyDto(3, 4), new MyDto(5, 6)));
 
@@ -274,7 +274,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
     // Test to ensure that a List argument gets recycled between calls.
     @Test
-    public void testListRecycled() {
+    void testListRecycled() {
         List<String> first = new ArrayList<>();
         first.add("a");
         first.add("b");
@@ -289,7 +289,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
     // Test to confirm that a Map argument gets recycled between calls.
     @Test
-    public void testMapRecycled() {
+    void testMapRecycled() {
         Map<String, String> first = new HashMap<>();
         first.put("a", "A");
         first.put("b", "B");
@@ -304,7 +304,7 @@ public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
     // Test to confirm that a Set argument gets recycled between calls.
     @Test
-    public void testSetRecycled() {
+    void testSetRecycled() {
         Set<String> first = new HashSet<>();
         first.add("a");
         first.add("b");

@@ -29,18 +29,18 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireTestCommon {
+class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Before each test case, obtain a thread dump
     @Override
     @BeforeEach
-    public void threadDump() {
+    void threadDump() {
         super.threadDump();
     }
 
     // Test appending data to a file
     @Test
-    public void fileAppend() throws IOException {
+    void fileAppend() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         final String expected = "" +
                 "mid: mid\n" +
@@ -56,7 +56,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
 
     // Test writing data to a file without append mode
     @Test
-    public void file() throws IOException {
+    void file() throws IOException {
         final String expected = "" +
                 "mid2: mid2\n" +
                 "next2: word\n" +
@@ -68,8 +68,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     // Write expected messages to the file specified in the URL and verify its content
     private void file(String query, String expected) throws IOException {
         final File file = new File(OS.getTarget(), "tmp-" + System.nanoTime());
-        @SuppressWarnings("deprecation")
-        final URL url = new URL("file://" + file.getAbsolutePath() + query);
+        @SuppressWarnings("deprecation") final URL url = new URL("file://" + file.getAbsolutePath() + query);
         writeMessages(url);
         final Bytes<?> bytes = BytesUtil.readFile(file.getAbsolutePath());
         assertEquals(expected, bytes.toString());
@@ -99,7 +98,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     // Test writing messages to an HTTP endpoint and validate the response
     @Disabled("long running test")
     @Test
-    public void http() throws IOException, InterruptedException {
+    void http() throws IOException, InterruptedException {
         InetSocketAddress address = new InetSocketAddress(0);
         HttpServer server = HttpServer.create(address, 0);
         int port = server.getAddress().getPort();
@@ -107,8 +106,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         server.createContext("/echo", new Handler(queue));
         server.start();
         try {
-            @SuppressWarnings("deprecation")
-            final URL url = new URL("http://localhost:" + port + "/echo");
+            @SuppressWarnings("deprecation") final URL url = new URL("http://localhost:" + port + "/echo");
             writeMessages(url);
             assertEquals("{\"mid\":\"mid\",\"next\":1,\"echo\":\"echo-1\"}\n", queue.poll(1, TimeUnit.SECONDS));
             assertEquals("{\"mid2\":\"mid2\",\"next2\":\"word\",\"echo\":\"echo-2\"}\n", queue.poll(1, TimeUnit.SECONDS));
@@ -121,7 +119,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
     // Another HTTP test that might be used in conjunction with queue-web-gateway. This is a work in progress.
     @Disabled("test was added to work with queue-web-gateway, so work in progress")
     @Test
-    public void http2() throws IOException, InterruptedException {
+    void http2() throws IOException, InterruptedException {
         InetSocketAddress address = new InetSocketAddress(0);
         HttpServer server = HttpServer.create(address, 0);
         int port = server.getAddress().getPort();
@@ -129,8 +127,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
         server.createContext("/echo", new Handler(queue));
         server.start();
         try {
-            @SuppressWarnings("deprecation")
-            final URL url = new URL("http://localhost:" + port + "/echo/append");
+            @SuppressWarnings("deprecation") final URL url = new URL("http://localhost:" + port + "/echo/append");
             writeMessages(url);
             assertEquals("{\"mid\":\"mid\",\"next\":1,\"echo\":\"echo-1\"}\n", queue.poll(1, TimeUnit.SECONDS));
             assertEquals("{\"mid2\":\"mid2\",\"next2\":\"word\",\"echo\":\"echo-2\"}\n", queue.poll(1, TimeUnit.SECONDS));
@@ -142,7 +139,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
 
     // Test to ensure only JSON Wire is supported and if BINARY_LIGHT is used, an IllegalArgumentException is thrown.
     @Test
-    public void httpBinary() throws IOException, InterruptedException {
+    void httpBinary() throws IOException, InterruptedException {
         assertThrows(IllegalArgumentException.class, () -> {
             InetSocketAddress address = new InetSocketAddress(0);
             HttpServer server = HttpServer.create(address, 0);
@@ -151,8 +148,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
             server.createContext("/echo", new Handler(queue));
             server.start();
             try {
-                @SuppressWarnings("deprecation")
-                final URL url = new URL("http://localhost:" + port + "/echo");
+                @SuppressWarnings("deprecation") final URL url = new URL("http://localhost:" + port + "/echo");
                 writeMessages(url, WireType.BINARY_LIGHT);
             } finally {
                 server.stop(1);
@@ -216,8 +212,7 @@ public class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireT
                 server = HttpServer.create(new InetSocketAddress(PORT), 50);
                 server.createContext("/bench", new BenchHandler());
                 server.start();
-                @SuppressWarnings("deprecation")
-                final URL url = new URL("http://localhost:" + PORT + "/bench");
+                @SuppressWarnings("deprecation") final URL url = new URL("http://localhost:" + PORT + "/bench");
                 MarshallableOut out = MarshallableOut.builder(url)
                         .wireType(WireType.JSON_ONLY)
                         .get();

@@ -10,11 +10,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 // CSVWireTest class extends from WireTestCommon and tests functionality related to CSV-based wire processing.
-public class CSVWireTest extends WireTestCommon {
+class CSVWireTest extends WireTestCommon {
 
     // Test parsing a CSV string into a wire and reading its contents.
     @Test
-    public void testFrom() {
+    void testFrom() {
         // Create a Wire object from the given CSV string.
         @NotNull Wire wire = CSVWire.from(
                 "heading1, heading2,heading3\n" +
@@ -46,7 +46,7 @@ public class CSVWireTest extends WireTestCommon {
 
     // Test reading from another CSV formatted string.
     @Test
-    public void tstFrom2() {
+    void tstFrom2() {
         // Create a Wire object from another CSV string.
         @NotNull Wire wire = CSVWire.from(
                 "Symbol,Company,Price,Change,ChangePercent,Day's Volume\n" +

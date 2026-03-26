@@ -11,17 +11,24 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Drives less common ValueIn APIs and empty sequence paths.
  */
-public class ValueInApisNegativeTest extends WireTestCommon {
+class ValueInApisNegativeTest extends WireTestCommon {
 
     @Test
-    public void emptySequenceAndBytesMatch() {
+    void emptySequenceAndBytesMatch() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT, WireType.YAML}) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 
             // empty sequence
-            w.write("s").sequence(v -> {});
+            w.write("s").sequence(v -> {
+            });
             int len = w.read("s").sequenceWithLength(new Object[0], (in, o) -> {
-                int c = 0; while (in.hasNextSequenceItem()) { in.skipValue(); c++; } return c; });
+                int c = 0;
+                while (in.hasNextSequenceItem()) {
+                    in.skipValue();
+                    c++;
+                }
+                return c;
+            });
             assertEquals(0, len);
 
             // bytesMatch on binary only (text/yaml base64 specifics are covered elsewhere)

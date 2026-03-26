@@ -15,7 +15,7 @@ import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.jupiter.api.Assertions.*;
 
 // This class tests the functionalities related to the QueryWire's read and write operations.
-public class QueryWireTest extends WireTestCommon {
+class QueryWireTest extends WireTestCommon {
 
     // Byte storage to hold serialized data
     private Bytes<?> bytes;
@@ -30,7 +30,7 @@ public class QueryWireTest extends WireTestCommon {
 
     // Test case to verify both write and read operations of the QueryWire
     @Test
-    public void readWriteQuery() {
+    void readWriteQuery() {
 
         // Create a wire and write various data types to it
         @NotNull QueryWire wire = createWire();
@@ -66,7 +66,7 @@ public class QueryWireTest extends WireTestCommon {
     }
 
     @Test
-    public void writesAndReadsQueryFragments() {
+    void writesAndReadsQueryFragments() {
         Bytes<?> bytes = allocateElasticOnHeap();
         QueryWire writer = new QueryWire(bytes);
 

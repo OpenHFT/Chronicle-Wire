@@ -20,16 +20,16 @@ import static net.openhft.chronicle.core.io.ReferenceOwner.INIT;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class WireResourcesTest extends WireTestCommon {
+class WireResourcesTest extends WireTestCommon {
 
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     // Test the process of closing mapped bytes and ensuring their resources are properly released.
     @Test
-    public void testMappedBytesClose() throws Exception {
+    void testMappedBytesClose() throws Exception {
         // Create a temporary file for the test and ensure it's deleted afterwards.
         File tmp = Files.createTempFile("chronicle-", ".wire").toFile();
         tmp.deleteOnExit();
@@ -67,7 +67,7 @@ public class WireResourcesTest extends WireTestCommon {
 
     // Test the process of releasing mapped bytes via wire and ensuring their resources are properly released.
     @Test
-    public void testMappedBytesWireRelease() throws Exception {
+    void testMappedBytesWireRelease() throws Exception {
         // Create a temporary file for the test and ensure it's deleted afterwards.
         File tmp = Files.createTempFile("chronicle-", ".wire").toFile();
         tmp.deleteOnExit();
@@ -103,8 +103,8 @@ public class WireResourcesTest extends WireTestCommon {
     }
 
     @Test
-    // Test the process of releasing mapped bytes with multiple message writings and ensuring their resources are properly released.
-    public void testMappedBytesWireRelease2() throws Exception {
+        // Test the process of releasing mapped bytes with multiple message writings and ensuring their resources are properly released.
+    void testMappedBytesWireRelease2() throws Exception {
         // Create a temporary file for the test and ensure it's deleted afterwards.
         File tmp = Files.createTempFile("chronicle-", ".wire").toFile();
         tmp.deleteOnExit();

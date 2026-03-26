@@ -26,8 +26,8 @@ import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-@SuppressWarnings({"rawtypes","try"})
-public class BinaryWire2Test extends WireTestCommon {
+@SuppressWarnings({"rawtypes", "try"})
+class BinaryWire2Test extends WireTestCommon {
     private boolean usePadding;
     @NotNull
     private
@@ -54,7 +54,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test writing an object that is not marshallable and expecting an IllegalArgumentException
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void unmarshallableObject(boolean usePadding) {
+    void unmarshallableObject(boolean usePadding) {
         this.usePadding = usePadding;
         assertThrows(IllegalArgumentException.class, () -> {
             BinaryWire wire = createWire();
@@ -65,7 +65,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test various reading length scenarios for different BinaryWireCode values
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testReadLength(boolean usePadding) {
+    void testReadLength(boolean usePadding) {
         this.usePadding = usePadding;
         Map<Integer, String> wireCodes = new TreeMap<>();
         for (Field field : BinaryWireCode.class.getDeclaredFields()) {
@@ -158,7 +158,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the reading and writing of boolean values including null
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testBool(boolean usePadding) {
+    void testBool(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         wire.write().bool(false)
@@ -173,7 +173,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test writing and reading a BytesStore
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testBytesStore(boolean usePadding) {
+    void testBytesStore(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         wire.write().object(Bytes.from("Hello"));
@@ -187,7 +187,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the serialization and deserialization of an object containing a TreeMap
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void writeObjectWithTreeMap(boolean usePadding) {
+    void writeObjectWithTreeMap(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         ObjectWithTreeMap value = new ObjectWithTreeMap();
@@ -211,7 +211,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test reading and writing of 32-bit float values
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testFloat32(boolean usePadding) {
+    void testFloat32(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         wire.write().float32(0.0F)
@@ -226,7 +226,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test writing and reading of a NaN double value
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testNaN(boolean usePadding) {
+    void testNaN(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         wire.getValueOut()
@@ -238,7 +238,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test reading and writing of LocalTime values
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testTime(boolean usePadding) {
+    void testTime(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         LocalTime now = LocalTime.now();
@@ -254,7 +254,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test reading and writing of ZonedDateTime values
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testZonedDateTime(boolean usePadding) {
+    void testZonedDateTime(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         ZonedDateTime now = ZonedDateTime.now();
@@ -272,7 +272,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test reading and writing of LocalDate values
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testLocalDate(boolean usePadding) {
+    void testLocalDate(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         LocalDate now = LocalDate.now();
@@ -288,7 +288,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test reading and writing of java.util.Date values
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testDate(boolean usePadding) {
+    void testDate(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
 
@@ -304,7 +304,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test reading java.util.Date from a given string representation
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testDateExisting(boolean usePadding) {
+    void testDateExisting(boolean usePadding) {
         this.usePadding = usePadding;
         final String dateString = "1999-12-31";
         final java.util.Date expected = java.sql.Date.valueOf(dateString);
@@ -321,7 +321,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test reading and writing UUID values
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testUuid(boolean usePadding) {
+    void testUuid(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         UUID uuid = UUID.randomUUID();
@@ -337,7 +337,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test writing sequences in both binary and text format with Chronicle Wire
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testSequence(boolean usePadding) {
+    void testSequence(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -404,7 +404,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test writing messages with padding and validate their binary and text representations
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testSequenceContext(boolean usePadding) {
+    void testSequenceContext(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -473,7 +473,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the behavior of enums within the Wire system
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testEnum(boolean usePadding) {
+    void testEnum(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         wire.write().object(WireType.BINARY)
@@ -490,7 +490,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the serialization behavior when there's text data followed by field data
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void fieldAfterText(boolean usePadding) {
+    void fieldAfterText(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(usePadding);  // Ensure padding is not used for this test
 
@@ -522,7 +522,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the serialization behavior when there's a null field followed by another field
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void fieldAfterNull(boolean usePadding) {
+    void fieldAfterNull(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("data").typedMarshallable("!UpdateEvent",
@@ -551,7 +551,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the serialization behavior when there's a null field in the context of other metadata and data fields
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void fieldAfterNullContext(boolean usePadding) {
+    void fieldAfterNullContext(boolean usePadding) {
         this.usePadding = usePadding;
         // Ignore a specific exception that might occur during this test
         ignoreException("Unable to copy object safely, message will not be repeated: " +
@@ -613,7 +613,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the behavior of reading and writing a demarshallable object
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void readDemarshallable(boolean usePadding) {
+    void readDemarshallable(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
 
@@ -640,7 +640,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the behavior of Gzip compression within the Wire system
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testCompressWithGzip(boolean usePadding) {
+    void testCompressWithGzip(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
 
@@ -673,7 +673,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the behavior when data is compressed using the "binary" scheme (likely no compression)
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testBinaryCompression(boolean usePadding) {
+    void testBinaryCompression(boolean usePadding) {
         this.usePadding = usePadding;
         testCompression("binary");
     }
@@ -681,7 +681,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the behavior when data is compressed using the Gzip scheme
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testGzipCompression(boolean usePadding) {
+    void testGzipCompression(boolean usePadding) {
         this.usePadding = usePadding;
         testCompression("gzip");
     }
@@ -689,7 +689,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the behavior when data is compressed using the LZW scheme
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testLzwCompression(boolean usePadding) {
+    void testLzwCompression(boolean usePadding) {
         this.usePadding = usePadding;
         testCompression("lzw");
     }
@@ -725,7 +725,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the behavior of storing and retrieving a byte array containing negative values
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testByteArrayValueWithRealBytesNegative(boolean usePadding) {
+    void testByteArrayValueWithRealBytesNegative(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
 
@@ -750,7 +750,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the behavior of writing and reading from a wire using byte arrays of varying sizes
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testBytesArray(boolean usePadding) {
+    void testBytesArray(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         @NotNull Random rand = new Random();
@@ -768,7 +768,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the writing and reading of a small array on the wire
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testSmallArray(boolean usePadding) {
+    void testSmallArray(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = createWire();
         wire.writeDocument(false, w -> w.write("index")
@@ -783,7 +783,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the writing and reading of different type literals on the wire
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testTypeLiteral(boolean usePadding) {
+    void testTypeLiteral(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(usePadding);
 
@@ -804,7 +804,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the behavior of writing and reading byte arrays of specific sizes and values
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testByteArray(boolean usePadding) {
+    void testByteArray(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(usePadding);
         @NotNull Wire wire = createWire();
@@ -843,7 +843,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // and writing and reading this map from a wire
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testObjectKeys(boolean usePadding) {
+    void testObjectKeys(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Map<MyMarshallable, String> map = new LinkedHashMap<>();
         map.put(new MyMarshallable("key1"), "value1");
@@ -876,7 +876,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test the writing and reading of literal byte sequences in a wire
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testBytesLiteral(boolean usePadding) {
+    void testBytesLiteral(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(usePadding);  // Skip this test if padding is used
 
@@ -905,7 +905,7 @@ public class BinaryWire2Test extends WireTestCommon {
     @Disabled("TODO FIX")
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testUnicodeReadAndWriteHex(boolean usePadding) {
+    void testUnicodeReadAndWriteHex(boolean usePadding) {
         this.usePadding = usePadding;
         bytes.releaseLast();
         bytes = new HexDumpBytes();
@@ -915,7 +915,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test reading and writing Unicode characters directly (not on heap)
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testUnicodeReadAndWriteDirect(boolean usePadding) {
+    void testUnicodeReadAndWriteDirect(boolean usePadding) {
         this.usePadding = usePadding;
         assumeFalse(usePadding);  // Skip this test if padding is used
 
@@ -928,7 +928,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Note: This test has been marked to be ignored due to some issues
     @Test
     @Disabled("TODO FIX")
-    public void testUnicodeReadAndWriteOnHeap() {
+    void testUnicodeReadAndWriteOnHeap() {
         bytes.releaseLast();
         bytes = allocateElasticOnHeap();  // Allocate memory for the bytes on the heap
         doTestUnicodeReadAndWrite();  // Use the helper method to conduct the test
@@ -965,7 +965,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // Test writing a map with diverse types to a wire and then reading it back
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testWriteMap(boolean usePadding) {
+    void testWriteMap(boolean usePadding) {
         this.usePadding = usePadding;
         @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
 
@@ -985,10 +985,10 @@ public class BinaryWire2Test extends WireTestCommon {
         wire.bytes().releaseLast(); // Release the resources
     }
 
-// This test is designed to check if the wire correctly reads a Bytes object from a marshallable representation.
+    // This test is designed to check if the wire correctly reads a Bytes object from a marshallable representation.
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testreadBytes(boolean usePadding) {
+    void testreadBytes(boolean usePadding) {
         this.usePadding = usePadding;
         // Create a new BinaryWire with heap allocated storage
         @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
@@ -1009,7 +1009,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // and that they use a minimal amount of space.
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testWritingDecimals(boolean usePadding) {
+    void testWritingDecimals(boolean usePadding) {
         this.usePadding = usePadding;
         // Create a new BinaryWire with heap allocated storage
         @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
@@ -1079,7 +1079,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // the numbers are written and read back correctly.
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testWritingDecimals2(boolean usePadding) {
+    void testWritingDecimals2(boolean usePadding) {
         this.usePadding = usePadding;
         // Create a new BinaryWire with heap allocated storage
         @NotNull Wire wire = new BinaryWire(allocateElasticOnHeap());
@@ -1103,7 +1103,7 @@ public class BinaryWire2Test extends WireTestCommon {
     // This test checks the capability of the Wire to read a CharSequence correctly.
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void readCharSequence(boolean usePadding) {
+    void readCharSequence(boolean usePadding) {
         this.usePadding = usePadding;
         // Create a wire and write "hello world" as an object
         Wire wire = createWire();

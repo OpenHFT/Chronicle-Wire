@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assumptions.*;
  * using different wire types in Chronicle Wire. This class uses parameterized tests to
  * execute the same set of tests with various wire formats.
  */
-public class ReorderedTest extends WireTestCommon {
+class ReorderedTest extends WireTestCommon {
     // Static instances of OuterClass for test setup
     private static final OuterClass outerClass1 = new OuterClass();
     private static final OuterClass outerClass2 = new OuterClass();
@@ -80,7 +80,7 @@ public class ReorderedTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testWithReorderedFields(Function<Bytes<?>, Wire> wireType) {
+    void testWithReorderedFields(Function<Bytes<?>, Wire> wireType) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Bytes<?> bytes = Bytes.elasticByteBuffer();
@@ -93,7 +93,7 @@ public class ReorderedTest extends WireTestCommon {
             wire.bytes().writeUnsignedByte('\n');
         wire.writeEventName(() -> "test2").marshallable(outerClass2);
 
-       // System.out.println(bytes.readByte(0) < 0 ? bytes.toHexString() : bytes.toString());
+        // System.out.println(bytes.readByte(0) < 0 ? bytes.toHexString() : bytes.toString());
         @NotNull StringBuilder sb = new StringBuilder();
         @NotNull OuterClass outerClass0 = new OuterClass();
 
@@ -116,7 +116,7 @@ public class ReorderedTest extends WireTestCommon {
      */
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testWithSubsetFields(Function<Bytes<?>, Wire> wireType) {
+    void testWithSubsetFields(Function<Bytes<?>, Wire> wireType) {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
 
@@ -138,7 +138,7 @@ public class ReorderedTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testTopLevel(Function<Bytes<?>, Wire> wireType) {
+    void testTopLevel(Function<Bytes<?>, Wire> wireType) {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
         for (int i = 1; i < 5; i++) {
@@ -148,8 +148,8 @@ public class ReorderedTest extends WireTestCommon {
             wire.write("b").int32(i * 11);
             wire.write("c").int32(i * 111);
 
-           // System.out.println(wire);
-           // Reading back the fields in a different order and asserting
+            // System.out.println(wire);
+            // Reading back the fields in a different order and asserting
             assertEquals(i * 111, wire.read(() -> "c").int32());
             assertEquals(i, wire.read(() -> "a").int32());
             assertEquals(i * 11, wire.read(() -> "b").int32());

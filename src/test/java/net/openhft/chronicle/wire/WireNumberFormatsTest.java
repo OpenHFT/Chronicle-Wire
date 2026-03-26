@@ -11,10 +11,10 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Exercises number formats and booleans across wire types.
  */
-public class WireNumberFormatsTest extends WireTestCommon {
+class WireNumberFormatsTest extends WireTestCommon {
 
     @Test
-    public void textFormats() {
+    void textFormats() {
         String s = "i: +5\n" +
                 "j: 00\n" +
                 "d: 1e3\n" +
@@ -29,7 +29,7 @@ public class WireNumberFormatsTest extends WireTestCommon {
     }
 
     @Test
-    public void yamlFormats() {
+    void yamlFormats() {
         String s = "i: +7\n" +
                 "j: 000\n" +
                 "d: 2.5e2\n" +
@@ -44,7 +44,7 @@ public class WireNumberFormatsTest extends WireTestCommon {
     }
 
     @Test
-    public void binaryExtremesRoundTrip() {
+    void binaryExtremesRoundTrip() {
         Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap(256));
         w.write("i32min").int32(Integer.MIN_VALUE);
         w.write("i32max").int32(Integer.MAX_VALUE);

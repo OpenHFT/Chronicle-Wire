@@ -21,15 +21,16 @@ import java.util.function.Supplier;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class GenerateMethodDelegateTest extends WireTestCommon {
+class GenerateMethodDelegateTest extends WireTestCommon {
 
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
+
     // Test the validity of class naming conventions
     @Test
-    public void testInvalidName() {
+    void testInvalidName() {
         assertThrows(IllegalArgumentException.class, () -> {
             // Initialize a new GenerateMethodDelegate
             GenerateMethodDelegate gmd = new GenerateMethodDelegate();
@@ -42,7 +43,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
-    public void testAcquireClass() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    void testAcquireClass() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         // Initialize a new GenerateMethodDelegate
         GenerateMethodDelegate gmd = new GenerateMethodDelegate();
 
@@ -78,7 +79,7 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
-    public void chainedDelegate() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    void chainedDelegate() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         // Create a custom GenerateMethodDelegate with overridden methods for chaining
         GenerateMethodDelegate gmd = new GenerateMethodDelegate() {
 

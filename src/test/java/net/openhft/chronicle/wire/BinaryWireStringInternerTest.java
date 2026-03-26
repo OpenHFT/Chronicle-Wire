@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * This class tests the efficiency and correctness of the `BinaryWire` when interning strings.
  */
-public final class BinaryWireStringInternerTest extends WireTestCommon {
+final class BinaryWireStringInternerTest extends WireTestCommon {
 
     // Constants for test configuration
     private static final int DATA_SET_SIZE = 1_000;
@@ -56,7 +56,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
 
     // Thread dump for debugging and logging purposes, from WireTestCommon
     @BeforeEach
-    public void beforeEachBinaryWireStringInternerTest() throws Exception {
+    void beforeEachBinaryWireStringInternerTest() throws Exception {
         threadDump();
         createTestData();
     }
@@ -83,7 +83,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
 
     // Test to ensure the interning of existing strings works correctly
     @Test
-    public void shouldInternExistingStringsAlright() throws Exception {
+    void shouldInternExistingStringsAlright() throws Exception {
         // List to capture exceptions during the execution of concurrent tasks
         final List<RuntimeException> capturedExceptions = new CopyOnWriteArrayList<>();
 
@@ -118,7 +118,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
      * there should be no concurrency issues.
      */
     @Test
-    public void multipleThreadsUsingBinaryWiresShouldNotCauseProblems() throws Exception {
+    void multipleThreadsUsingBinaryWiresShouldNotCauseProblems() throws Exception {
         // List to capture exceptions during the execution of concurrent tasks
         final List<RuntimeException> capturedExceptions = new CopyOnWriteArrayList<>();
 
@@ -141,7 +141,7 @@ public final class BinaryWireStringInternerTest extends WireTestCommon {
      */
     @Disabled("used to demonstrate errors that can occur when buffers are shared between threads")
     @Test
-    public void multipleThreadsSharingBinaryWireShouldCauseProblems() throws Exception {
+    void multipleThreadsSharingBinaryWireShouldCauseProblems() throws Exception {
         // List to capture exceptions during the execution of concurrent tasks
         final List<RuntimeException> capturedExceptions = new CopyOnWriteArrayList<>();
 

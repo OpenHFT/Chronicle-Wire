@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SizeLongConverterTest {
+class SizeLongConverterTest {
 
     private SizeLongConverter converter = SizeLongConverter.INSTANCE;
 
     @Test
-    public void testParse() {
+    void testParse() {
         // Test parsing without suffix
         assertEquals(123, converter.parse("123"));
 
@@ -30,22 +30,22 @@ public class SizeLongConverterTest {
     }
 
     @Test
-    public void testParseInvalidNumber() {
+    void testParseInvalidNumber() {
         assertThrows(NumberFormatException.class, () -> converter.parse("invalid"));
     }
 
     @Test
-    public void testParseEmptyString() {
+    void testParseEmptyString() {
         assertThrows(NumberFormatException.class, () -> converter.parse(""));
     }
 
     @Test
-    public void testParseNoDigit() {
+    void testParseNoDigit() {
         assertThrows(NumberFormatException.class, () -> converter.parse("g"));
     }
 
     @Test
-    public void testAppend() {
+    void testAppend() {
         assertEquals("0", converter.asString(0));
 
         // Test appending without needing a suffix
@@ -62,7 +62,7 @@ public class SizeLongConverterTest {
     }
 
     @Test
-    public void testAppendNonExactPowersOf1024() {
+    void testAppendNonExactPowersOf1024() {
         // Values that are not exact multiples of 1024^x should not have a suffix
         assertEquals("1025", converter.asString(1025)); // Just above 1K
         assertEquals("1048577", converter.asString(1 << 20 | 1)); // Just above 1M
@@ -70,7 +70,7 @@ public class SizeLongConverterTest {
     }
 
     @Test
-    public void testAppendWithNegativeValues() {
+    void testAppendWithNegativeValues() {
         // Testing negative values
         assertEquals("-1K", converter.asString(-1024)); // -1K
         assertEquals("-1M", converter.asString(-(1 << 20))); // -1M

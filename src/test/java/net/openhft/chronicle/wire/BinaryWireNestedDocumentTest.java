@@ -10,10 +10,10 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BinaryWireNestedDocumentTest extends WireTestCommon {
+class BinaryWireNestedDocumentTest extends WireTestCommon {
 
     @Test
-    public void roundTripsNestedMarshallable() {
+    void roundTripsNestedMarshallable() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 

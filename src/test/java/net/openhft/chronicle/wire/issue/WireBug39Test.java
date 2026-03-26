@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assumptions.*;
  * Test class that examines the BINARY WireType's ability to serialize
  * and deserialize a string containing a Unicode character (emoji followed by text).
  */
-public class WireBug39Test extends WireTestCommon {
+class WireBug39Test extends WireTestCommon {
 
     /**
      * Test the serialization and deserialization of a string
@@ -28,7 +28,7 @@ public class WireBug39Test extends WireTestCommon {
      * The test checks for consistent serialization and deserialization results.
      */
     @Test
-    public void testBinaryEncoding() {
+    void testBinaryEncoding() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Define the BINARY WireType and a test string (an emoji followed by text)
@@ -53,7 +53,7 @@ public class WireBug39Test extends WireTestCommon {
 
         // Convert the bytes back to string
         final String output = bytes.toString();
-       // System.out.println("output: [" + output + "]");
+        // System.out.println("output: [" + output + "]");
 
         // Deserialize the string back into obj3 and ensure it matches obj1 and obj2
         obj3.readMarshallable(wireType.apply(Bytes.from(output)));

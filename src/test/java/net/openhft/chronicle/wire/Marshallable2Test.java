@@ -17,7 +17,7 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class Marshallable2Test extends WireTestCommon {
+class Marshallable2Test extends WireTestCommon {
 
     // Instance variable for the WireType being tested in this instance of the test
     private WireType wireType;
@@ -38,7 +38,7 @@ public class Marshallable2Test extends WireTestCommon {
     // Test case to verify if the Wire's WriteDocumentContext behaves correctly in terms of being empty or not
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void writeDocumentIsEmpty(WireType wireType) {
+    void writeDocumentIsEmpty(WireType wireType) {
         this.wireType = wireType;
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(16);
         Wire wire = wireType.apply(bytes);
@@ -60,7 +60,7 @@ public class Marshallable2Test extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testObject(WireType wireType) {
+    void testObject(WireType wireType) {
         this.wireType = wireType;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -79,7 +79,7 @@ public class Marshallable2Test extends WireTestCommon {
     // Test case to verify if writing to the Wire is complete under various conditions
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void writingIsComplete(WireType wireType) {
+    void writingIsComplete(WireType wireType) {
         this.wireType = wireType;
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         Wire wire = wireType.apply(bytes);

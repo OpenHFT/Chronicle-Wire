@@ -11,11 +11,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 // This test class focuses on handling Throwable objects with different WireTypes.
-public class ThrowableTest extends WireTestCommon {
+class ThrowableTest extends WireTestCommon {
 
     // Tests the writing and reading capabilities of a Throwable object with TEXT and BINARY_LIGHT WireTypes.
     @Test
-    public void writeReadThrowable() {
+    void writeReadThrowable() {
         // Loop through TEXT and BINARY_LIGHT WireTypes for testing
         for (WireType wireType : new WireType[]{WireType.TEXT, WireType.BINARY_LIGHT}) {
 

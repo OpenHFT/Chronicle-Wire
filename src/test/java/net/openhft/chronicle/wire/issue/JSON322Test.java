@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assumptions.*;
 /**
  * see https://github.com/OpenHFT/Chronicle-Wire/issues/322
  */
-public class JSON322Test extends WireTestCommon {
+class JSON322Test extends WireTestCommon {
 
     static class One extends SelfDescribingMarshallable {
         String text;
@@ -56,7 +56,7 @@ public class JSON322Test extends WireTestCommon {
     }
 
     @Test
-    public void supportNestedTypes() {
+    void supportNestedTypes() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final Three three = new Three();
@@ -94,7 +94,7 @@ public class JSON322Test extends WireTestCommon {
     }
 
     @Test
-    public void supportTypes() {
+    void supportTypes() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         ClassAliasPool.CLASS_ALIASES.addAlias(Combined322.class, TypeOne322.class, TypeTwo322.class);
@@ -112,10 +112,10 @@ public class JSON322Test extends WireTestCommon {
                 .object(c);
 
         assertEquals("" +
-                        "{\"@Combined322\":{" +
-                        "\"t1\":{\"@TypeOne322\":{\"text\":\"one-one\"}}," +
-                        "\"t2\":{\"@TypeTwo322\":{\"id\":222,\"value\":2020}}," +
-                        "\"list\":[ {\"@TypeOne322\":{\"text\":\"one\"}},{\"@TypeTwo322\":{\"id\":2,\"value\":22}} ]}}", wire.bytes().toString());
+                "{\"@Combined322\":{" +
+                "\"t1\":{\"@TypeOne322\":{\"text\":\"one-one\"}}," +
+                "\"t2\":{\"@TypeTwo322\":{\"id\":222,\"value\":2020}}," +
+                "\"list\":[ {\"@TypeOne322\":{\"text\":\"one\"}},{\"@TypeTwo322\":{\"id\":2,\"value\":22}} ]}}", wire.bytes().toString());
 
         // Now try reading it back again
         final JSONWire parserWire = new JSONWire(bytes)
@@ -126,7 +126,7 @@ public class JSON322Test extends WireTestCommon {
         assertNotNull(parsed);
         assertSame(Combined322.class, parsed.getClass());
 
-        final Combined322 combined322 = (Combined322)parsed;
+        final Combined322 combined322 = (Combined322) parsed;
 
         assertSame(TypeOne322.class, combined322.t1.getClass());
         assertSame(TypeTwo322.class, combined322.t2.getClass());

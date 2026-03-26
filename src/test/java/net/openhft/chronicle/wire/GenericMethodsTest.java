@@ -17,11 +17,11 @@ interface MyInterface<I extends MyInterface<I>> {
 }
 
 // Test class to validate the behavior of generic methods in the context of Wire operations
-public class GenericMethodsTest extends WireTestCommon {
+class GenericMethodsTest extends WireTestCommon {
 
     // Test for chained method calls with TextWire
     @Test
-    public void chainedText() {
+    void chainedText() {
 
         // Create a new TextWire instance with elastic byte allocation
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap(128))

@@ -9,7 +9,7 @@ import java.io.StreamCorruptedException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RawWirePerfMain extends WireTestCommon {
+class RawWirePerfMain extends WireTestCommon {
 
     public static void main(String[] args) throws StreamCorruptedException {
         // Create an instance of BinaryWirePerfTest with specific parameters.

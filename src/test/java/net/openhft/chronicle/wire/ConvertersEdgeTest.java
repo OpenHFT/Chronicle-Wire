@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Round-trip tests for milli/micro/nano timestamp converters using append/parse.
  */
-public class ConvertersEdgeTest extends WireTestCommon {
+class ConvertersEdgeTest extends WireTestCommon {
 
     private static long roundTrip(LongConverter c, long v) {
         StringBuilder sb = new StringBuilder();
@@ -28,7 +28,7 @@ public class ConvertersEdgeTest extends WireTestCommon {
     }
 
     @Test
-    public void milliMicroNanoRoundTrips() {
+    void milliMicroNanoRoundTrips() {
         // choose values across ranges
         long nowMs = System.currentTimeMillis();
         long nowUs = nowMs * 1000L + 321;

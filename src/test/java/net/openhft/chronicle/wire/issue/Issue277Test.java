@@ -18,14 +18,14 @@ import static org.junit.jupiter.api.Assumptions.*;
  * Test class to validate behaviors associated with class aliases in the context of Wire.
  * This test extends the WireTestCommon for utility behaviors related to Wire tests.
  */
-public class Issue277Test extends WireTestCommon {
+class Issue277Test extends WireTestCommon {
 
     /**
      * Sets up the testing environment before executing the test methods.
      * It specifically adds class aliases to the ClassAliasPool.
      */
     @BeforeEach
-    public void setup() {
+    void setup() {
         // Add class aliases for Data1 and Data2 to the ClassAliasPool
         ClassAliasPool.CLASS_ALIASES.addAlias(Data1.class);
         ClassAliasPool.CLASS_ALIASES.addAlias(Data2.class);
@@ -44,7 +44,7 @@ public class Issue277Test extends WireTestCommon {
      * This test does not expect a RuntimeException because a correct class alias is provided.
      */
     @Test
-    public void isOk() {
+    void isOk() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Deserialize the sample data into a Data2 object without throwing an exception
@@ -63,7 +63,7 @@ public class Issue277Test extends WireTestCommon {
      * as if it was a Data2 serialized data without providing the class alias.
      */
     @Test
-    public void reproduce() {
+    void reproduce() {
         assertThrows(ClassCastException.class, () -> {
             assumeFalse(Jvm.maxDirectMemory() == 0);
 

@@ -9,10 +9,10 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class YamlAnchorCoverageTest extends WireTestCommon {
+class YamlAnchorCoverageTest extends WireTestCommon {
 
     @Test
-    public void readsAnchorsAndAliases() {
+    void readsAnchorsAndAliases() {
         assertThrows(UnsupportedOperationException.class, () -> {
             String yaml = "common: &base { num: 7, text: 'hello' }\nfirst: *base\n";
             YamlWire wire = YamlWire.from(yaml);

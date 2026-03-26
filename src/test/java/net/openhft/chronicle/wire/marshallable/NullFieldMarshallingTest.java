@@ -15,16 +15,16 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class NullFieldMarshallingTest extends WireTestCommon {
+class NullFieldMarshallingTest extends WireTestCommon {
     private Map<ExceptionKey, Integer> exceptions;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         exceptions = Jvm.recordExceptions();
     }
 
     @AfterEach
-    public void checkExceptions() {
+    protected void checkExceptions() {
         // find any discarded resources.
         System.gc();
         Jvm.pause(Jvm.isAzulZing() ? 100 : 10);
@@ -37,7 +37,7 @@ public class NullFieldMarshallingTest extends WireTestCommon {
     }
 
     @Test
-    public void testAbstractNullFieldUnmarshalledCorrectlyText() {
+    void testAbstractNullFieldUnmarshalledCorrectlyText() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         VO object = new VO();
@@ -50,7 +50,7 @@ public class NullFieldMarshallingTest extends WireTestCommon {
     }
 
     @Test
-    public void testAbstractNullFieldUnmarshalledCorrectlyBinary() {
+    void testAbstractNullFieldUnmarshalledCorrectlyBinary() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         VO object = new VO();

@@ -17,13 +17,13 @@ import static org.junit.jupiter.api.Assumptions.*;
  * It specifically tests the serialization and deserialization of characters '\uFFFF' and '\uFFFE'.
  * It extends WireTestCommon for utility behaviors related to Wire tests.
  */
-public class Issue344Test extends WireTestCommon {
+class Issue344Test extends WireTestCommon {
 
     /**
      * Tests the serialization and deserialization of the character '\uFFFF'.
      */
     @Test
-    public void testFFFF() {
+    void testFFFF() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         runWith('\uFFFF');
@@ -33,7 +33,7 @@ public class Issue344Test extends WireTestCommon {
      * Tests the serialization and deserialization of the character '\uFFFE'.
      */
     @Test
-    public void testFFFE() {
+    void testFFFE() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         runWith('\uFFFE');

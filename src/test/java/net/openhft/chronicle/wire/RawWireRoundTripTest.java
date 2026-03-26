@@ -11,10 +11,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RawWireRoundTripTest extends WireTestCommon {
+class RawWireRoundTripTest extends WireTestCommon {
 
     @Test
-    public void roundTripPrimitiveSequenceAndReset() {
+    void roundTripPrimitiveSequenceAndReset() {
         // Use direct bytes to satisfy BinaryLongArrayReference.lazyWrite preconditions
         Bytes<?> bytes = Bytes.allocateElasticDirect();
         RawWire wire = new RawWire(bytes);
@@ -59,7 +59,7 @@ public class RawWireRoundTripTest extends WireTestCommon {
     }
 
     @Test
-    public void copyToRequiresRawWire() {
+    void copyToRequiresRawWire() {
         RawWire source = new RawWire(Bytes.allocateElasticOnHeap());
         BinaryWire target = new BinaryWire(Bytes.allocateElasticOnHeap());
         try {
@@ -71,7 +71,7 @@ public class RawWireRoundTripTest extends WireTestCommon {
     }
 
     @Test
-    public void rawBytesUnsupported() {
+    void rawBytesUnsupported() {
         assertThrows(UnsupportedOperationException.class, () -> {
             RawWire wire = new RawWire(Bytes.allocateElasticOnHeap());
             wire.getValueOut().rawBytes(new byte[]{1});

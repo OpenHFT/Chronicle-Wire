@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class WireTypeConverterTest extends net.openhft.chronicle.wire.WireTestCommon {
+class WireTypeConverterTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     private final String json =
             "{\"@net.openhft.chronicle.wire.MyClass\":{\"msg\":\"msg:\\\"hello\\\"\"}}";
@@ -25,42 +25,42 @@ public class WireTypeConverterTest extends net.openhft.chronicle.wire.WireTestCo
                     "}\n";
 
     @Test
-    public void testYamlToJson() {
+    void testYamlToJson() {
         assertEquals(json, new WireTypeConverter().yamlToJson(yaml).toString());
         assertEquals(yaml, new WireTypeConverter().jsonToYaml(json).toString());
     }
 
     @Test
-    public void testJsonToYaml() {
+    void testJsonToYaml() {
         assertEquals(yaml, new WireTypeConverter().jsonToYaml(json).toString());
         assertEquals(json, new WireTypeConverter().yamlToJson(yaml).toString());
     }
 
     @Test
-    public void testYamlToJsonUnknownClass() throws Exception {
+    void testYamlToJsonUnknownClass() throws Exception {
         assertEquals(jsonUnknownClass, new WireTypeConverter().yamlToJson(yamlUnknownClass).toString());
         assertEquals(yamlUnknownClass, new WireTypeConverter().jsonToYaml(jsonUnknownClass).toString());
     }
 
     @Test
-    public void testJsonToYamlUnknownClass() {
+    void testJsonToYamlUnknownClass() {
         assertEquals(yamlUnknownClass, new WireTypeConverter().jsonToYaml(jsonUnknownClass).toString());
         assertEquals(jsonUnknownClass, new WireTypeConverter().yamlToJson(yamlUnknownClass).toString());
     }
 
     @Test
-    public void testYamlClassCastException() {
+    void testYamlClassCastException() {
         CharSequence yamlToJson = new WireTypeConverter().yamlToJson(
                 "!net.openhft.chronicle.wire.MyClass2 {\n" +
                         "  myClass: !net.openhft.chronicle.wire.MyClass2 { x: aa }\n" +
                         "}\n");
         assertEquals("" +
-                        "{\"@net.openhft.chronicle.wire.MyClass2\":{\"myClass\":{\"@net.openhft.chronicle.wire.MyClass2\":{\"x\":\"aa\"}}}}", yamlToJson.toString());
+                "{\"@net.openhft.chronicle.wire.MyClass2\":{\"myClass\":{\"@net.openhft.chronicle.wire.MyClass2\":{\"x\":\"aa\"}}}}", yamlToJson.toString());
 
     }
 
     @Test
-    public void testYamlNoClassCastException() {
+    void testYamlNoClassCastException() {
         final WireTypeConverter converter = new WireTypeConverter();
         converter.addAlias(MyClass3.class, "net.openhft.chronicle.wire.MyOldClass");
         final CharSequence json = converter.yamlToJson(
@@ -71,21 +71,21 @@ public class WireTypeConverterTest extends net.openhft.chronicle.wire.WireTestCo
     }
 
     @Test
-    public void testJsonClassCastException() {
+    void testJsonClassCastException() {
         CharSequence jsonToYaml = new WireTypeConverter().jsonToYaml(
                 "{\"@net.openhft.chronicle.wire.MyClass2\": {\n" +
                         " \"myClass\": {\"@net.openhft.chronicle.wire.MyClass2\": { \"x\": \"bb\" } }\n" +
                         "} }\n");
         assertEquals("" +
-                        "!net.openhft.chronicle.wire.MyClass2 {\n" +
-                        "  myClass: !net.openhft.chronicle.wire.MyClass2 {\n" +
-                        "    x: bb\n" +
-                        "  }\n" +
-                        "}\n", jsonToYaml.toString());
+                "!net.openhft.chronicle.wire.MyClass2 {\n" +
+                "  myClass: !net.openhft.chronicle.wire.MyClass2 {\n" +
+                "    x: bb\n" +
+                "  }\n" +
+                "}\n", jsonToYaml.toString());
     }
 
     @Test
-    public void testJsonNoClassCastException() {
+    void testJsonNoClassCastException() {
         final WireTypeConverter converter = new WireTypeConverter();
         converter.addAlias(MyClass3.class, "MyOldClass");
         final CharSequence yaml = converter.jsonToYaml("" +

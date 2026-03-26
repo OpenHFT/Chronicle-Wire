@@ -25,7 +25,7 @@ import static net.openhft.chronicle.wire.WireType.JSON;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class JSONWireTest extends WireTestCommon {
+class JSONWireTest extends WireTestCommon {
 
     // Utility function to test copying from a JSONWire to a binary wire and back to a JSONWire.
     private static void testCopyToBinaryAndBack(CharSequence str) {
@@ -50,8 +50,8 @@ public class JSONWireTest extends WireTestCommon {
                 .replaceAll("\\.0(\\D)", "$1")
                 .replaceAll(" ?\\[ ?", "[")
                 .replaceAll(" ?\\] ?", "]"), json2.toString()
-                        .replaceAll(" ?\\[ ?", "[")
-                        .replaceAll(" ?\\] ?", "]"));
+                .replaceAll(" ?\\[ ?", "[")
+                .replaceAll(" ?\\] ?", "]"));
         hexDump.releaseLast();
     }
 
@@ -77,8 +77,8 @@ public class JSONWireTest extends WireTestCommon {
                 .replaceAll("\\.0(\\D)", "$1")
                 .replaceAll(" ?\\[ ?", "[")
                 .replaceAll(" ?\\] ?", "]"), json2.toString()
-                        .replaceAll(" ?\\[ ?", "[")
-                        .replaceAll(" ?\\] ?", "]"));
+                .replaceAll(" ?\\[ ?", "[")
+                .replaceAll(" ?\\] ?", "]"));
     }
 
     // Utility function to create a JSONWire from a string
@@ -95,7 +95,7 @@ public class JSONWireTest extends WireTestCommon {
 
     // Test to verify that opening brackets in the JSON are correctly processed
     @Test
-    public void testOpenBracket() {
+    void testOpenBracket() {
         @NotNull StringBuilder sb = new StringBuilder();
 
         @NotNull Wire wire1 = createWire("\"echo\":\"Hello\"\n\"echo2\":\"Hello2\"\n");
@@ -128,7 +128,7 @@ public class JSONWireTest extends WireTestCommon {
 
     // Test to check if the JSONWire can process JSON strings without spaces correctly
     @Test
-    public void testNoSpaces() {
+    void testNoSpaces() {
         @NotNull Wire wire = createWire("\"echo\":\"\"");
         @NotNull VanillaWireParser parser = new VanillaWireParser(soutWireParselet(), VanillaWireParser.SKIP_READABLE_BYTES);
         parser.parseOne(wire);
@@ -143,7 +143,7 @@ public class JSONWireTest extends WireTestCommon {
 
     // Test for verifying how lists are formatted in JSONWire
     @Test
-    public void testListFormatting() {
+    void testListFormatting() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         @NotNull Wire wire = createWire();
@@ -167,7 +167,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testNullString() {
+    void testNullString() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Create a new wire instance
@@ -191,7 +191,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testBytes() {
+    void testBytes() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Create a new wire instance
@@ -219,7 +219,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testFloatFromJson() {
+    void testFloatFromJson() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Create a new FooEvent and set its foo value
@@ -235,7 +235,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testMarshallableWithTwoLists() {
+    void testMarshallableWithTwoLists() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Create a new wire instance
@@ -284,7 +284,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testMapOfNamedKeys() {
+    void testMapOfNamedKeys() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         MapHolder mh = new MapHolder(); // Create a new MapHolder object
@@ -300,7 +300,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testMapOfNamedKeys2() {
+    void testMapOfNamedKeys2() {
         String str = "{\"map\":{\"CLASS\":0.1}}";
         testCopyToBinaryAndBack(str); // Test binary and back with the specified string
         testCopyToYAMLAndBack(str);
@@ -312,7 +312,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testDate() {
+    void testDate() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Dates dates = new Dates(); // Create a new Dates object
@@ -333,7 +333,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void commaIsNotInAValue() {
+    void commaIsNotInAValue() {
         String text = "[1,2,3]"; // Define a string representation of a list
         Wire wire = createWire(); // Create a new wire
         wire.bytes().append(text); // Append the list string to the wire
@@ -347,7 +347,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testArrayInDictionary() {
+    void testArrayInDictionary() {
         String text = "[320 , {\"as\":[1 ,\n2\n, 3]}]"; // Define a string with a list that contains an integer and a dictionary
         final JSONWire jsonWire = new JSONWire(Bytes.from(text)); // Create a new JSONWire with the given text
         final Object list = jsonWire.getValueIn().object(); // Extract the object from the JSONWire
@@ -355,7 +355,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testDateNull() {
+    void testDateNull() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Dates dates = new Dates(); // Create a new Dates object with presumably null fields
@@ -367,7 +367,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testArrayInDictionary2() {
+    void testArrayInDictionary2() {
         // Define a complex JSON string containing nested arrays and dictionaries
         String str = "[320,{\"as\":[[\"32905.50000\",\"1.60291699\",\"1625822573.857656\"],[\"32905.60000\",\"0.10415889\",\"1625822573.194909\"]],\"bs\":[[\"32893.60000\",\"0.15042948\",\"1625822574.220475\"]]},\"book-10\"]";
         final JSONWire jsonWire = new JSONWire(Bytes.from(str)); // Create a JSONWire object from the str
@@ -375,11 +375,11 @@ public class JSONWireTest extends WireTestCommon {
         // Assert that the extracted content matches the expected format
         assertEquals("[320, {as=[[32905.50000, 1.60291699, 1625822573.857656], [32905.60000, 0.10415889, 1625822573.194909]], bs=[[32893.60000, 0.15042948, 1625822574.220475]]}, book-10]", "" + list);
         testCopyToBinaryAndBack(str); // Test binary conversion and back with the provided JSON string
-        testCopyToYAMLAndBack('{'+str+'}');
+        testCopyToYAMLAndBack('{' + str + '}');
     }
 
     @Test
-    public void testArrayDelimiterNoSpace() {
+    void testArrayDelimiterNoSpace() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // A complex JSON string causing some parsing issues
@@ -399,12 +399,12 @@ public class JSONWireTest extends WireTestCommon {
         final List<Object> list = jsonWire.getValueIn().list(Object.class); // Extract the content of the wire into a list
         assertNotNull(list); // Assert that the extracted list is not null
         testCopyToBinaryAndBack(str); // Test binary conversion and back with the JSON string
-        testCopyToYAMLAndBack('{'+str+'}');
+        testCopyToYAMLAndBack('{' + str + '}');
         byteBufferBytes.releaseLast(); // Release the last buffer to free up resources
     }
 
     @Test
-    public void testQuotedFieldsEmptySequence() {
+    void testQuotedFieldsEmptySequence() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Create a JSON string with different field types
@@ -435,7 +435,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void nestedMapWithIntegerKeys() {
+    void nestedMapWithIntegerKeys() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         MapWithIntegerKeysHolder mh = new MapWithIntegerKeysHolder(); // Create an instance of MapWithIntegerKeysHolder
@@ -449,7 +449,7 @@ public class JSONWireTest extends WireTestCommon {
         final String str = JSON.asString(mh); // Convert the populated object to its JSON string representation
         // Assert the generated JSON string matches the expected JSON string
         assertEquals("" +
-                        "{\"intMap\":{\"1111\":\"ones\",\"2222\":\"twos\"},\"longMap\":{\"888888888888\":\"eights\",\"999999999999\":\"nines\"},\"doubleMap\":{\"1.28\":\"number\",\"2.56\":\"number\"}}", str);
+                "{\"intMap\":{\"1111\":\"ones\",\"2222\":\"twos\"},\"longMap\":{\"888888888888\":\"eights\",\"999999999999\":\"nines\"},\"doubleMap\":{\"1.28\":\"number\",\"2.56\":\"number\"}}", str);
         // Convert the JSON string back to a new instance of MapWithIntegerKeysHolder
         MapWithIntegerKeysHolder mh2 = JSON.fromString(MapWithIntegerKeysHolder.class, str);
         assertEquals(mh, mh2); // Assert that the original and reconverted objects are the same
@@ -458,7 +458,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testWritingLayout() {
+    void testWritingLayout() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(1024); // Create an elastic byte buffer
@@ -473,7 +473,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void escapeUnicodeValues() {
+    void escapeUnicodeValues() {
         Map<Object, Object> map = new HashMap<>(); // Create a new HashMap
         // Stream over a range of Unicode code points
         IntStream.rangeClosed(0x0000, 0x0020)
@@ -512,7 +512,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void copyTypedDataToBinaryAndBack() {
+    void copyTypedDataToBinaryAndBack() {
         ignoreException("Unable to copy object safely, message will not be repeated");
         String str = "{\"a\":{\"@Mapped\":{\"b\":\"c\",\"d\":123.4}},\"e\":{\"@Scalar\":\"Value\"},\"f\":{\"@Mapped2\":{\"b\":\"c\"}},\"g\":{\"@Scalar2\":12345.6}}";
         testCopyToBinaryAndBack(str);
@@ -642,7 +642,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void typeLiteral1() {
+    void typeLiteral1() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         String expected = "{\"@net.openhft.chronicle.wire.JSONWireTest$DtoWithClassReference\":{\"implClass\":{\"@type\":\"net.openhft.chronicle.wire.JSONWireTest\"},\"bool\":false}}";
@@ -652,14 +652,14 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void typeLiteralTest2() {
+    void typeLiteralTest2() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         DtoWithClassReference dtoWithClassReference = new DtoWithClassReference();
         dtoWithClassReference.implClass = this.getClass();
         String json = WireType.JSON_ONLY.asString(dtoWithClassReference);
         assertEquals("{\"@net.openhft.chronicle.wire.JSONWireTest$DtoWithClassReference\"" +
-                        ":{\"implClass\":{\"@type\":\"net.openhft.chronicle.wire.JSONWireTest\"},\"bool\":false}}", json);
+                ":{\"implClass\":{\"@type\":\"net.openhft.chronicle.wire.JSONWireTest\"},\"bool\":false}}", json);
         assertEquals(dtoWithClassReference, WireType.JSON_ONLY.fromString(json));
     }
 
@@ -669,7 +669,7 @@ public class JSONWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testNullListCollectionWithMultipleFieldsJson() {
+    void testNullListCollectionWithMultipleFieldsJson() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         ClassAliasPool.CLASS_ALIASES.addAlias(CollectionContainer.class);

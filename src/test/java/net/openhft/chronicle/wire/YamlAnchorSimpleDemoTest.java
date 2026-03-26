@@ -10,9 +10,9 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Demonstrates YAML anchor functionality in Chronicle Wire
  */
-public class YamlAnchorSimpleDemoTest extends WireTestCommon {
+class YamlAnchorSimpleDemoTest extends WireTestCommon {
 
-    public static class Config extends SelfDescribingMarshallable {
+    static class Config extends SelfDescribingMarshallable {
         String text;
         int value;
     }
@@ -24,7 +24,7 @@ public class YamlAnchorSimpleDemoTest extends WireTestCommon {
     }
 
     @Test
-    public void shouldShareFieldValuesUsingAnchors() {
+    void shouldShareFieldValuesUsingAnchors() {
         String yaml = "" +
                 "!net.openhft.chronicle.wire.YamlAnchorSimpleDemoTest$MultiConfig {\n" +
                 "  first: {\n" +
@@ -55,7 +55,7 @@ public class YamlAnchorSimpleDemoTest extends WireTestCommon {
     }
 
     @Test
-    public void shouldShareObjectInstancesUsingAnchors() {
+    void shouldShareObjectInstancesUsingAnchors() {
         String yaml = "" +
                 "first: &shared !net.openhft.chronicle.wire.YamlAnchorSimpleDemoTest$Config {\n" +
                 "  text: shared config,\n" +

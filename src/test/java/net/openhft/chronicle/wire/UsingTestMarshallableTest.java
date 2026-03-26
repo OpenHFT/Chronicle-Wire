@@ -13,11 +13,11 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTestCommon {
+class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Test case to verify the conversion of a Marshallable object to its text representation
     @Test
-    public void testConverMarshallableToTextName() {
+    void testConverMarshallableToTextName() {
 
         // Initialize a TestMarshallable object and set its name
         @NotNull TestMarshallable testMarshallable = new TestMarshallable();
@@ -38,7 +38,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
 
         //String replace = value.replace("\n", "\\n");
 
-       // System.out.println(byteBufferBytes.toHexString());
+        // System.out.println(byteBufferBytes.toHexString());
 
         // Ensure the serialized output matches the expected format
         assertEquals("" +
@@ -48,7 +48,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
                 "  count: 0\n" +
                 "}\n", value);
 
-         // assertTrue(replace.length() > 1);
+        // assertTrue(replace.length() > 1);
         // Release the ByteBuffer's resources
         byteBufferBytes.releaseLast();
     }
@@ -56,7 +56,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
     // Test case to check the marshalling functionality using numbers as keys in binary wire
     // This test addresses the WIRE-37 issue
     @Test
-    public void testMarshall() {
+    void testMarshall() {
 
         // Create a ByteBuffer to hold the serialized data
         @SuppressWarnings("rawtypes")
@@ -76,7 +76,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
         @NotNull final ValueIn read = wire.read(() -> "key");
         @Nullable final MyMarshallable result = read.typedMarshallable();
 
-       // System.out.println(result.toString());
+        // System.out.println(result.toString());
 
         // Ensure the read value matches the written one
         assertEquals("text", result.text.toString());
@@ -87,7 +87,7 @@ public class UsingTestMarshallableTest extends net.openhft.chronicle.wire.WireTe
 
     // Test case to check the write and read functionality for a Marshallable object
     @Test
-    public void test() {
+    void test() {
 
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(bytes);

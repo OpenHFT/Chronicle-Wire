@@ -12,13 +12,13 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Test class for verifying the behavior of generic method writers in Chronicle Wire.
  */
-public class GenericMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
+class GenericMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     /**
      * Test the functionality of method writers with generic parameters.
      */
     @Test
-    public void genericParameter() {
+    void genericParameter() {
         // Create a new YAML wire in memory
         Wire wire = Wire.newYamlWireOnHeap();
 

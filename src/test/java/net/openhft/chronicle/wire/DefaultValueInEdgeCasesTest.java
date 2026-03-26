@@ -10,15 +10,15 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Verifies behaviour when fields are absent vs explicitly null.
  */
-public class DefaultValueInEdgeCasesTest extends WireTestCommon {
+class DefaultValueInEdgeCasesTest extends WireTestCommon {
 
-    public static class WithDefaults extends SelfDescribingMarshallable {
+    static class WithDefaults extends SelfDescribingMarshallable {
         int i = 7;
         String s = "d";
     }
 
     @Test
-    public void absentFieldsPreserveDefaults() {
+    void absentFieldsPreserveDefaults() {
         String doc = "!" + WithDefaults.class.getName() + " { i: 10 }";
         WithDefaults wd = WireType.TEXT.fromString(WithDefaults.class, doc);
         assertEquals(10, wd.i);
@@ -26,7 +26,7 @@ public class DefaultValueInEdgeCasesTest extends WireTestCommon {
     }
 
     @Test
-    public void explicitNullOverridesWrapper() {
+    void explicitNullOverridesWrapper() {
         // Use YAML null literal to ensure a true null is parsed.
         String doc = "!" + WithDefaults.class.getName() + " { s: !!null }";
         WithDefaults wd = WireType.TEXT.fromString(WithDefaults.class, doc);

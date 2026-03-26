@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class WiresFromFileTest extends WireTestCommon {
+class WiresFromFileTest extends WireTestCommon {
     @Test
-    public void testFromFile() throws IOException {
+    void testFromFile() throws IOException {
         // Add an alias for MDU class
         ClassAliasPool.CLASS_ALIASES.addAlias(MDU.class);
 
@@ -36,7 +36,7 @@ public class WiresFromFileTest extends WireTestCommon {
     }
 
     @Test
-    public void testStreamFromFile() throws IOException {
+    void testStreamFromFile() throws IOException {
         // Add an alias for MDU class
         ClassAliasPool.CLASS_ALIASES.addAlias(MDU.class);
 

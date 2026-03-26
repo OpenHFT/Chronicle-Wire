@@ -14,7 +14,7 @@ import java.util.function.BiConsumer;
 import static org.junit.jupiter.api.Assertions.*;
 
 // Test class for validating the Trivially Copyable features with Chronicle Wire
-public class TriviallyCopyableTest extends WireTestCommon {
+class TriviallyCopyableTest extends WireTestCommon {
 
     // Test utility to perform read and write operations on byte buffers
     // with AA instances, and then check if the original and the result are equal
@@ -43,7 +43,7 @@ public class TriviallyCopyableTest extends WireTestCommon {
 
     // Test case using the unsafe marshaller (only for non-Azul Zing JVMs)
     @Test
-    public void unsafe2() {
+    void unsafe2() {
         // Execute the test using AA's marshallers
         doTest((b, a) -> a.readMarshallable(b), (b, a) -> a.writeMarshallable(b));
     }

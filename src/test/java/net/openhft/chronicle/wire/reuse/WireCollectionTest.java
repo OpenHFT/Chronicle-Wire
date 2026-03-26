@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test class for WireCollection, using various wire types.
  */
 @Disabled("TODO FIX")
-public class WireCollectionTest extends WireTestCommon {
+class WireCollectionTest extends WireTestCommon {
 
     // Registering WireProperty class with the ClassAliasPool for serialization/deserialization
     static {
@@ -56,7 +56,7 @@ public class WireCollectionTest extends WireTestCommon {
      * Sets up the test environment before each test.
      */
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         collection = WireUtils.randomWireCollection();
     }
 
@@ -65,13 +65,13 @@ public class WireCollectionTest extends WireTestCommon {
      */
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testMultipleReads(Function<Bytes<?>, Wire> wireType) {
+    void testMultipleReads(Function<Bytes<?>, Wire> wireType) {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
 
         // Writing the collection to the wire
         wire.writeDocument(true, collection);
-       // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
+        // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
 
         @NotNull WireCollection results = new WireCollection();
         // Reading the collection from the wire

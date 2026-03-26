@@ -11,15 +11,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 // Tests for handling unsupported changes in the wire format.
-public class UnsupportedChangesTest extends WireTestCommon {
+class UnsupportedChangesTest extends WireTestCommon {
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     // Test the behavior when trying to parse a scalar value as a Marshallable object
     @Test
-    public void scalarToMarshallable() {
+    void scalarToMarshallable() {
         Nested nested = Marshallable.fromString(Nested.class, "{\n" +
                 "inner: 128\n" +
                 "}\n");
@@ -35,7 +35,7 @@ public class UnsupportedChangesTest extends WireTestCommon {
 
     // Method testing the scenario where a Marshallable object is being parsed as a scalar value.
     @Test
-    public void marshallableToScalar() {
+    void marshallableToScalar() {
         // Skip this test if it's running on an ARM architecture.
         assumeFalse(Jvm.isArm());
 
@@ -58,7 +58,7 @@ public class UnsupportedChangesTest extends WireTestCommon {
 
     // Method testing the scenario where a Marshallable object is being parsed as a scalar long value.
     @Test
-    public void marshallableToScala2r() {
+    void marshallableToScala2r() {
         // Deserialize an IntWrapper object, providing a Marshallable instead of a scalar long for 'pnl'.
         IntWrapper wrapper = Marshallable.fromString(IntWrapper.class, "{\n" +
                 "pnl: { a: 128, b: 1.0 },\n" +
@@ -78,7 +78,7 @@ public class UnsupportedChangesTest extends WireTestCommon {
 
     // Method testing the scenario where a Marshallable object is being parsed as a scalar boolean value.
     @Test
-    public void marshallableToScalar3() {
+    void marshallableToScalar3() {
         // Deserialize a BooleanWrapper object, providing a Marshallable instead of a scalar boolean for 'flag'.
         BooleanWrapper wrapper = Marshallable.fromString(BooleanWrapper.class, "{\n" +
                 "flag: { a: 128, b: 1.0 },\n" +

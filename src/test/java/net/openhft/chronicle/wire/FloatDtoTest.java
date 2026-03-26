@@ -9,11 +9,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FloatDtoTest extends WireTestCommon {
+class FloatDtoTest extends WireTestCommon {
 
     // Test method to serialize and deserialize a 'Value' object using a wire
     @Test
-    public void test() {
+    void test() {
         // Creating a 'Value' instance with specific values
         @NotNull final Value value = new Value(99, 2000f);
         final Bytes<?> bytes = Bytes.allocateElasticOnHeap();

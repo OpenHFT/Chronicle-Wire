@@ -22,9 +22,9 @@ import static org.junit.jupiter.api.Assumptions.*;
  * Test suite for validating the marshalling capabilities of maps.
  * Inherits from WireTestCommon for common test setup and teardown functionalities.
  */
-public class MapMarshallableTest extends WireTestCommon {
+class MapMarshallableTest extends WireTestCommon {
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
@@ -36,7 +36,7 @@ public class MapMarshallableTest extends WireTestCommon {
      * - Copying values between maps with different implementations.
      */
     @Test
-    public void test() {
+    void test() {
         // Initialize a LinkedHashMap and populate it with sample data
         @NotNull final Map<String, Object> map = new LinkedHashMap<>();
         map.put("one", 10);

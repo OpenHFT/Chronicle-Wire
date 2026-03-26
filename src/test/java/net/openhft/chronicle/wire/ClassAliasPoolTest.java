@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 import static org.easymock.EasyMock.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ClassAliasPoolTest extends WireTestCommon {
+ class ClassAliasPoolTest extends WireTestCommon {
 
     // Helper method to match char sequences in a mock setup
     private static CharSequence charSequence(String text) {
@@ -69,7 +69,7 @@ public class ClassAliasPoolTest extends WireTestCommon {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @ParameterizedTest
     @MethodSource("data")
-    public void testUsesClassLookup(WireType wireType, Consumer<Wire> wireChecker) {
+    void testUsesClassLookup(WireType wireType, Consumer<Wire> wireChecker) {
         // Create a mock for the ClassLookup interface
         final ClassLookup mock = createMock(ClassLookup.class);
 

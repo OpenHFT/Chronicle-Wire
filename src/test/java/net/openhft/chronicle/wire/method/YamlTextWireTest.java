@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assumptions.*;
  * Parameterized test class extending WireTestCommon to validate the consistency
  * between YamlWire and TextWire in processing YAML formatted text.
  */
-public class YamlTextWireTest extends WireTestCommon {
+class YamlTextWireTest extends WireTestCommon {
 
     // Static block to register class alias for Fields
     static {
@@ -43,43 +43,43 @@ public class YamlTextWireTest extends WireTestCommon {
     public static Collection<Object[]> data() {
         // Stream of various YAML formatted texts to be tested
         return Stream.of(
-                "{}",
-                "a: hi",
-                "b: {}",
-                "c: hi",
-                "d: {}",
-                "a: hi,\n" +
+                        "{}",
+                        "a: hi",
                         "b: {}",
-                "a: hi,\n" +
                         "c: hi",
-                "a: hi,\n" +
-                        "b: {},\n" +
-                        "c: hi,",
-                "a: hi,\n" +
-                        "c: hi,\n" +
-                        "d: {},",
-                "b: {},\n" +
                         "d: {}",
-                "b: {},\n" +
-                        "c: hi,\n",
-                "a: hi,\n" +
-                        "d: {},\n" +
-                        "c: hi,\n" +
-                        "b: {}",
-                "c: hi,\n" +
-                        "b: {},\n" +
                         "a: hi,\n" +
-                        "d: {}",
-                "a: hi,\n" +
+                                "b: {}",
+                        "a: hi,\n" +
+                                "c: hi",
+                        "a: hi,\n" +
+                                "b: {},\n" +
+                                "c: hi,",
+                        "a: hi,\n" +
+                                "c: hi,\n" +
+                                "d: {},",
                         "b: {},\n" +
+                                "d: {}",
+                        "b: {},\n" +
+                                "c: hi,\n",
+                        "a: hi,\n" +
+                                "d: {},\n" +
+                                "c: hi,\n" +
+                                "b: {}",
                         "c: hi,\n" +
-                        "d: {}",
-                "e: [ hi ],\n" +
-                        "f: { hi: there },\n" +
-                        "b: { a: hi },\n" +
-                        "c: hi,\n" +
-                        "d: { c: bye }"
-        )
+                                "b: {},\n" +
+                                "a: hi,\n" +
+                                "d: {}",
+                        "a: hi,\n" +
+                                "b: {},\n" +
+                                "c: hi,\n" +
+                                "d: {}",
+                        "e: [ hi ],\n" +
+                                "f: { hi: there },\n" +
+                                "b: { a: hi },\n" +
+                                "c: hi,\n" +
+                                "d: { c: bye }"
+                )
                 .map(o -> new Object[]{o.replaceAll("\n", " "), o})
                 .collect(Collectors.toList());
     }
@@ -90,7 +90,7 @@ public class YamlTextWireTest extends WireTestCommon {
      */
     @ParameterizedTest
     @MethodSource("data")
-    public void orderTest(String name, String text) {
+    void orderTest(String name, String text) {
         this.name = name;
         this.s = text;
         assumeFalse(Jvm.maxDirectMemory() == 0);

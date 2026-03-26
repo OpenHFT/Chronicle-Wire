@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 // Running the test class in a parameterized manner.
-public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
+class TimestampLongConverterZoneIdsTest extends WireTestCommon {
 
     private Future<?> future;
 
@@ -52,7 +52,7 @@ public class TimestampLongConverterZoneIdsTest extends WireTestCommon {
     // This test method checks the result of the future from the asynchronous operation.
     @ParameterizedTest
     @MethodSource("combinations")
-    public void testManyZones(String zoneId, ConverterType converterType, Future<?> future) throws ExecutionException, InterruptedException {
+    void testManyZones(String zoneId, ConverterType converterType, Future<?> future) throws ExecutionException, InterruptedException {
         this.future = future;
         assertNull(future.get());
     }

@@ -63,7 +63,7 @@ import java.util.Collection;
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FIX42Test extends WireTestCommon {
+class FIX42Test extends WireTestCommon {
     // Test ID for identification
     private int testId;
 
@@ -156,7 +156,7 @@ public class FIX42Test extends WireTestCommon {
     // Test method to dump the wire representation of a MarketDataSnapshot instance
     @ParameterizedTest
     @MethodSource("combinations")
-    public void dump(int testId, boolean fixed, boolean numericField, boolean fieldLess, String dump) {
+    void dump(int testId, boolean fixed, boolean numericField, boolean fieldLess, String dump) {
         this.testId = testId;
         this.fixed = fixed;
         this.numericField = numericField;

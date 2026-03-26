@@ -49,7 +49,7 @@ public class WireTestCommon {
 
     // Activates the reference tracing before executing tests
     @BeforeEach
-    public void beforeEachWireTestCommon() {
+    void beforeEachWireTestCommon() {
         enableReferenceTracing();
         recordExceptions();
         rememberGenerateTuples();
@@ -161,7 +161,7 @@ public class WireTestCommon {
     }
 
     @AfterEach
-    public void afterEachWireTestCommon() {
+    void afterEachWireTestCommon() {
         afterChecks();
         restoreGenerateTuples();
     }

@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assumptions.*;
  * ByteArrayReuseTest extends WireTestCommon to test the reuse of byte arrays during
  * serialization and deserialization in Chronicle Wire.
  */
-public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestCommon {
+class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     /**
      * Test method to verify the serialization and deserialization of byte arrays using
@@ -26,7 +26,7 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
      * with the expected hexadecimal string.
      */
     @Test
-    public void writeReadBytesArray() {
+    void writeReadBytesArray() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         SELF_DESCRIBING = true;
@@ -51,7 +51,7 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
      * hexadecimal string.
      */
     @Test
-    public void writeReadBytesArrayBinary() {
+    void writeReadBytesArrayBinary() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         SELF_DESCRIBING = false;

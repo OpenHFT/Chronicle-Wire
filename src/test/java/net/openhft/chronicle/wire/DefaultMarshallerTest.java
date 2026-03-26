@@ -14,11 +14,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 // This class provides tests for default marshaller functionalities.
-public class DefaultMarshallerTest extends WireTestCommon {
+class DefaultMarshallerTest extends WireTestCommon {
 
     // Test the deserialization process with nested arrays.
     @Test
-    public void testDeserializeWithNestedArray() {
+    void testDeserializeWithNestedArray() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Adding class alias for NestedEnum
@@ -55,7 +55,7 @@ public class DefaultMarshallerTest extends WireTestCommon {
 
     // Test the deserialization process.
     @Test
-    public void testDeserialize() {
+    void testDeserialize() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Adding class alias for DMNestedClass

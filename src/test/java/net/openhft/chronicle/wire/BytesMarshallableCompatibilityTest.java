@@ -12,11 +12,11 @@ import java.nio.ByteBuffer;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public final class BytesMarshallableCompatibilityTest extends WireTestCommon {
+final class BytesMarshallableCompatibilityTest extends WireTestCommon {
 
     // Test the serialization and deserialization of the Container object using BytesMarshallable
     @Test
-    public void shouldSerialiseToBytes() {
+    void shouldSerialiseToBytes() {
 
         // Instantiate and initialize a Container object
         final Container container = new Container();

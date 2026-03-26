@@ -5,13 +5,14 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Checks that exception raised by {@link ReadMarshallable#unexpectedField(Object, ValueIn)}
  * is thrown back to the user call.
  */
-public class UnknownFieldsTest extends WireTestCommon {
+class UnknownFieldsTest extends WireTestCommon {
 
     // Static initialization block to add class aliases to ClassAliasPool for the test variations
     static {
@@ -22,7 +23,7 @@ public class UnknownFieldsTest extends WireTestCommon {
 
     // Test to verify if the expected exception is thrown and not suppressed
     @Test
-    public void testExceptionIsNotSwallowed() {
+    void testExceptionIsNotSwallowed() {
         try {
             WireType.TEXT.fromString
                     ("!Variation1 {\n" +
@@ -39,7 +40,7 @@ public class UnknownFieldsTest extends WireTestCommon {
 
     // Test to verify if the expected exception's transformation is correctly handled
     @Test
-    public void testExceptionIsNotTransformed() {
+    void testExceptionIsNotTransformed() {
         try {
             WireType.TEXT.fromString
                     ("!Variation2 {\n" +

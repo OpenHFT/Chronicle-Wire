@@ -12,7 +12,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class OutOfOrderTest extends WireTestCommon {
+class OutOfOrderTest extends WireTestCommon {
     // Define JSON snippets to be used in tests
     private static final String start = "{ \"a\": 1, ";
     private static final String records = "\"records\":[{\"id\":1}], ";
@@ -20,7 +20,7 @@ public class OutOfOrderTest extends WireTestCommon {
     private static final String end = "\"z\": 99 }";
 
     @Test
-    public void outOfOrder() {
+    void outOfOrder() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Test JSON with just the start and end

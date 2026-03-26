@@ -15,7 +15,7 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class AbstractFieldTest extends WireTestCommon {
+class AbstractFieldTest extends WireTestCommon {
 
     // The specific WireType configuration to be used for each test.
     private WireType wireType;
@@ -35,7 +35,7 @@ public class AbstractFieldTest extends WireTestCommon {
     // Test serialization and deserialization of the abstract field in MSDMHolder class.
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void abstractField(WireType wireType) {
+    void abstractField(WireType wireType) {
         this.wireType = wireType;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -52,7 +52,7 @@ public class AbstractFieldTest extends WireTestCommon {
     // Test serialization and deserialization of the abstract field in MSDMHolder2 class.
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void abstractField2(WireType wireType) {
+    void abstractField2(WireType wireType) {
         this.wireType = wireType;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 

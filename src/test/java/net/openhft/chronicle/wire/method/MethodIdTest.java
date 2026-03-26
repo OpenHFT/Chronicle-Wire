@@ -18,7 +18,7 @@ public class MethodIdTest extends WireTestCommon {
 
     // Test method to verify serialization and deserialization of methods with various IDs
     @Test
-    public void methodIdInBinary() {
+    void methodIdInBinary() {
         // Create a new BinaryWire instance with specified configurations
         Wire wire = new BinaryWire(new HexDumpBytes(), true, true, false, 128, "");
 
@@ -104,6 +104,7 @@ public class MethodIdTest extends WireTestCommon {
 
         @MethodId('@')
         void methodAt(char at);
+
         @MethodId('z')
         void method_z(char z);
 

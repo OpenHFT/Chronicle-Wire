@@ -18,19 +18,19 @@ public class MethodReaderWithHistoryTest extends WireTestCommon {
 
     // Test with text wire type
     @Test
-    public void text() {
+    void text() {
         doTest(WireType.TEXT);
     }
 
     // Test with YAML-only wire type
     @Test
-    public void yaml() {
+    void yaml() {
         doTest(WireType.YAML_ONLY);
     }
 
     // Test with binary wire type
     @Test
-    public void binary() {
+    void binary() {
         doTest(WireType.BINARY);
     }
 

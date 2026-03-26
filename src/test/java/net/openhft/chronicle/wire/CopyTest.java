@@ -15,7 +15,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CopyTest extends WireTestCommon {
+class CopyTest extends WireTestCommon {
 
     // Initial source and destination wire types for the copy test
     private WireType from, to;
@@ -54,7 +54,7 @@ public class CopyTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testCopy(WireType from, WireType to, boolean withType) {
+    void testCopy(WireType from, WireType to, boolean withType) {
         this.from = from;
         this.to = to;
         this.withType = withType;

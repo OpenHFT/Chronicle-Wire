@@ -18,7 +18,7 @@ import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRIT
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class ChainedMethodsTest extends WireTestCommon {
+class ChainedMethodsTest extends WireTestCommon {
 
     // Parameter that will be set per test invocation.
     private boolean disableProxyCodegen;
@@ -37,7 +37,7 @@ public class ChainedMethodsTest extends WireTestCommon {
 
     // Clean up method that runs after each test execution.
     @AfterEach
-    public void cleanUp() {
+    void cleanUp() {
         // Clear the system property that was set in the setup method.
         System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
     }
@@ -45,7 +45,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     // Test method for chained methods with TextWire.
     @ParameterizedTest
     @MethodSource("data")
-    public void chainedText(boolean disableProxyCodegen) {
+    void chainedText(boolean disableProxyCodegen) {
         this.disableProxyCodegen = disableProxyCodegen;
         setUp();
 
@@ -91,7 +91,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     // Test method for chained methods with YAML Wire.
     @ParameterizedTest
     @MethodSource("data")
-    public void chainedYaml(boolean disableProxyCodegen) {
+    void chainedYaml(boolean disableProxyCodegen) {
         this.disableProxyCodegen = disableProxyCodegen;
         setUp();
 
@@ -136,7 +136,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     // Test for chained methods with BinaryWire
     @ParameterizedTest
     @MethodSource("data")
-    public void chainedBinary(boolean disableProxyCodegen) {
+    void chainedBinary(boolean disableProxyCodegen) {
         this.disableProxyCodegen = disableProxyCodegen;
         setUp();
 
@@ -185,7 +185,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     // Test for chained methods with BinaryWire and varying argument numbers
     @ParameterizedTest
     @MethodSource("data")
-    public void chainedBinaryVariousArgsNumber(boolean disableProxyCodegen) {
+    void chainedBinaryVariousArgsNumber(boolean disableProxyCodegen) {
         this.disableProxyCodegen = disableProxyCodegen;
         setUp();
 
@@ -260,7 +260,7 @@ public class ChainedMethodsTest extends WireTestCommon {
     // Test for nested return type in BinaryWire
     @ParameterizedTest
     @MethodSource("data")
-    public void testNestedReturnType(boolean disableProxyCodegen) {
+    void testNestedReturnType(boolean disableProxyCodegen) {
         this.disableProxyCodegen = disableProxyCodegen;
         setUp();
 

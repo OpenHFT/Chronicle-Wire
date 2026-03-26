@@ -16,7 +16,7 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class BinaryInTextTest extends WireTestCommon {
+class BinaryInTextTest extends WireTestCommon {
 
     // Holds the wire type for each test iteration
     private WireType wireType;
@@ -32,7 +32,7 @@ public class BinaryInTextTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testBytesFromText(WireType wireType) {
+    void testBytesFromText(WireType wireType) {
         this.wireType = wireType;
         Bytes<?> a = wireType.fromString(Bytes.class, "A==");
         assertEquals("A==", a.toString());
@@ -50,7 +50,7 @@ public class BinaryInTextTest extends WireTestCommon {
     // Test to validate reserialization of binary content from text
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testReserialize(WireType wireType) {
+    void testReserialize(WireType wireType) {
         this.wireType = wireType;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 

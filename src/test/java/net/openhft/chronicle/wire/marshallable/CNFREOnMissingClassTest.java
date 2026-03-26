@@ -13,14 +13,14 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class CNFREOnMissingClassTest extends WireTestCommon {
+class CNFREOnMissingClassTest extends WireTestCommon {
 
     /**
      * Validates that a ClassNotFoundRuntimeException is correctly thrown when attempting
      * to deserialize data with a class alias that is not registered in the system.
      */
     @Test
-    public void throwClassNotFoundRuntimeExceptionOnMissingClassAlias() {
+    void throwClassNotFoundRuntimeExceptionOnMissingClassAlias() {
         assertThrows(ClassNotFoundRuntimeException.class, () -> {
             Wires.GENERATE_TUPLES = false;
             Wire wire = new TextWire(Bytes.from("" +
@@ -40,7 +40,7 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
      * Tests if a ClassNotFoundRuntimeException is thrown when a class for a field is missing.
      */
     @Test
-    public void throwClassNotFoundRuntimeExceptionOnMissingClassForField() {
+    void throwClassNotFoundRuntimeExceptionOnMissingClassForField() {
         assertThrows(ClassNotFoundRuntimeException.class, () -> {
             Wires.GENERATE_TUPLES = false;
             ClassAliasPool.CLASS_ALIASES.addAlias(TwoFields.class);
@@ -61,14 +61,14 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
      * an unexpected code path (the check for a classloader at TextWire#typeOrPrefixObject - line 1913
      */
     @Test
-    public void throwClassNotFoundRuntimeExceptionOnMissingClassForField2() {
+    void throwClassNotFoundRuntimeExceptionOnMissingClassForField2() {
         assertThrows(ClassNotFoundRuntimeException.class, () -> {
             testFieldNotObject0(false, null);
         });
     }
 
     @Test
-    public void throwClassNotFoundRuntimeExceptionOnMissingClassForFieldNotATuple() {
+    void throwClassNotFoundRuntimeExceptionOnMissingClassForFieldNotATuple() {
         assertThrows(ClassNotFoundRuntimeException.class, () -> {
             testFieldNotObject0(true, null);
         });
@@ -88,14 +88,15 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
 
         private TestEngineListener engineListener;
 
-        public interface TestEngineListener { }
+        public interface TestEngineListener {
+        }
     }
 
     /**
      * Tests if a ClassNotFoundRuntimeException is thrown for a missing class for an interface field.
      */
     @Test
-    public void throwClassNotFoundRuntimeExceptionOnMissingClassForInterfaceField() {
+    void throwClassNotFoundRuntimeExceptionOnMissingClassForInterfaceField() {
         assertThrows(ClassNotFoundRuntimeException.class, () -> {
             testInterfaceFieldTest0(false, null);
         });
@@ -106,7 +107,7 @@ public class CNFREOnMissingClassTest extends WireTestCommon {
      * when its corresponding class is not found.
      */
     @Test
-    public void useTupleOnMissingClassForInterfaceField() {
+    void useTupleOnMissingClassForInterfaceField() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         testInterfaceFieldTest0(true, "" +

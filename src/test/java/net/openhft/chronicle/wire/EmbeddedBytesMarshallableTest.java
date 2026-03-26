@@ -18,17 +18,17 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 // Test class focusing on the serialization and deserialization of Marshallables with embedded bytes.
-public class EmbeddedBytesMarshallableTest extends WireTestCommon {
+class EmbeddedBytesMarshallableTest extends WireTestCommon {
 
     // Before each test, check the current architecture and skip if it's ARM or Azul Zing.
     @BeforeEach
-    public void checkArch() {
+    void checkArch() {
         assumeFalse(Jvm.isArm() || Jvm.isAzulZing());
     }
 
     // Test clearing and appending new data to the embedded bytes.
     @Test
-    public void testClear() {
+    void testClear() {
         // Register the alias for the class.
         ClassAliasPool.CLASS_ALIASES.addAlias(EBM.class);
 
@@ -53,7 +53,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
 
     // Test serialization and deserialization with certain expected output.
     @Test
-    public void ebm() {
+    void ebm() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Register the alias for the class.
@@ -88,7 +88,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
 
     // Test deserialization with no data. Expected to throw a DecoratedBufferUnderflowException.
     @Test
-    public void noData() {
+    void noData() {
         assertThrows(DecoratedBufferUnderflowException.class, () -> {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
             EBM ebm = new EBM();
@@ -99,7 +99,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     // Test deserialization with invalid description (even bit count = 0).
     // Expected to throw an IllegalStateException.
     @Test
-    public void invalidDescription() {
+    void invalidDescription() {
         assertThrows(IllegalStateException.class, () -> {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
             bytes.readLimit(64); // even bit count i.e. 0
@@ -111,7 +111,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     // Test deserialization with another invalid description scenario where it tries to read more data than available.
     // Expected to throw an IllegalStateException.
     @Test
-    public void invalidDescription2() {
+    void invalidDescription2() {
         assertThrows(IllegalStateException.class, () -> {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
             bytes.append("abcd"); // tries to read too much data.
@@ -124,7 +124,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     // Test deserialization with yet another invalid description, characterized by both an even bit count
     // and an attempt to read more data than available. Expected to throw an IllegalStateException.
     @Test
-    public void invalidDescription3() {
+    void invalidDescription3() {
         assertThrows(IllegalStateException.class, () -> {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
             bytes.append("abce"); // even bit count &&  tries to read too much data.
@@ -137,7 +137,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     // Test deserialization with an even bit count description.
     // Expected to throw an IllegalStateException.
     @Test
-    public void invalidDescription4() {
+    void invalidDescription4() {
         assertThrows(IllegalStateException.class, () -> {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
             bytes.append("3\0\0\0"); // even bit count
@@ -150,7 +150,7 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
     // Test deserialization with field counts exceeding FIELD_COUNT_LIMIT (256).
     // Expected to throw an IllegalStateException.
     @Test
-    public void excessiveFieldCounts() {
+    void excessiveFieldCounts() {
         assertThrows(IllegalStateException.class, () -> {
             int desc = (200 << 24) | (200 << 16) | 1;
             int length = 200 * 8 + 200 * 4 + 1;

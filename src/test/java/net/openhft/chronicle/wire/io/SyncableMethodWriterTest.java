@@ -21,7 +21,7 @@ import java.io.FileNotFoundException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
+class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // A custom interface combining message sending (say) and synchronization capabilities (sync)
     interface SayAndSync extends Syncable {
@@ -45,7 +45,7 @@ public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTes
 
     // Test the ability to use the custom method writer to write a message and then synchronize the wire
     @Test
-    public void sayAndSync() {
+    void sayAndSync() {
         final OnHeapBytes bytes = Bytes.allocateElasticOnHeap();
         doTest(bytes);
     }
@@ -73,7 +73,7 @@ public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTes
 
     // Test the say and sync operations but this time with a MappedBytes instance which maps bytes to a file
     @Test
-    public void sayAndSyncMappedBytes() throws FileNotFoundException {
+    void sayAndSyncMappedBytes() throws FileNotFoundException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         final File file = IOTools.createTempFile("sayAndSyncMappedBytes");
         file.deleteOnExit();

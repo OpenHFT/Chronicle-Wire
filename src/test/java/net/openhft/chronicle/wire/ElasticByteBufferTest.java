@@ -15,10 +15,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 // Test class focusing on the functionality of elastic byte buffers with wire operations.
-public class ElasticByteBufferTest extends WireTestCommon {
+class ElasticByteBufferTest extends WireTestCommon {
 
     @Test
-    public void testElasticByteBufferWithWire() {
+    void testElasticByteBufferWithWire() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Initialize an elastic byte buffer with initial size of 10.

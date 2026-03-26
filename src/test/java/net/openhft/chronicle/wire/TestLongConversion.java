@@ -12,7 +12,7 @@ import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TestLongConversion {
+class TestLongConversion {
     private static char SEPARATOR = '/';
     private LongConverter longConverter;
 
@@ -24,7 +24,7 @@ public class TestLongConversion {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void parseRawIntsV1(LongConverter longConverter) {
+    void parseRawIntsV1(LongConverter longConverter) {
         this.longConverter = longConverter;
 
         final StringBuilder builder = new StringBuilder();
@@ -44,7 +44,7 @@ public class TestLongConversion {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void parseRawIntsV2(LongConverter longConverter) {
+    void parseRawIntsV2(LongConverter longConverter) {
         this.longConverter = longConverter;
 
         final StringBuilder builder = new StringBuilder();

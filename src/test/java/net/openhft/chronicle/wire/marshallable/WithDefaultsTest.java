@@ -15,13 +15,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test class for the WithDefaults functionality.
  * Extends the WireTestCommon to leverage utilities related to wire tests.
  */
-public class WithDefaultsTest extends WireTestCommon {
+class WithDefaultsTest extends WireTestCommon {
 
     /**
      * Tests the writeMarshallable functionality of WithDefaults under various scenarios.
      */
     @Test
-    public void writeMarshallable() {
+    void writeMarshallable() {
         // Default test without any modification
         doTest(w -> {
         });

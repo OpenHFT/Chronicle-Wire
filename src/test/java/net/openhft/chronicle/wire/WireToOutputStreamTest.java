@@ -20,10 +20,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class WireToOutputStreamTest extends WireTestCommon {
+class WireToOutputStreamTest extends WireTestCommon {
 
     // Serializable class for testing
-    public static class AnObject implements Serializable {
+    static class AnObject implements Serializable {
         private static final long serialVersionUID = 0L;
         long value;
         String text;
@@ -60,12 +60,12 @@ public class WireToOutputStreamTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    // Test to ensure the Timestamp object can be serialized and deserialized correctly
-    public void testTimestamp(WireType currentWireType) {
+        // Test to ensure the Timestamp object can be serialized and deserialized correctly
+    void testTimestamp(WireType currentWireType) {
         Wire wire = currentWireType.apply(Bytes.allocateElasticOnHeap(128));
         Timestamp ts = new Timestamp(1234567890000L);
         wire.write().object(ts);
-       // System.out.println(wire);
+        // System.out.println(wire);
 
         Timestamp ts2 = wire.read()
                 .object(Timestamp.class);
@@ -74,11 +74,11 @@ public class WireToOutputStreamTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    // Test serialization and deserialization without a socket
-    public void testNoSocket(WireType currentWireType) {
+        // Test serialization and deserialization without a socket
+    void testNoSocket(WireType currentWireType) {
         Wire wire = currentWireType.apply(Bytes.allocateElasticOnHeap(128));
         AnObject ao = writeAnObject(wire);
-       // System.out.println(wire);
+        // System.out.println(wire);
 
         Object ao2 = readAnObject(wire);
         assertEquals(ao.toString(), ao2.toString());
@@ -86,8 +86,8 @@ public class WireToOutputStreamTest extends WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    // Test serialization and deserialization using a socket
-    public void testVisSocket(WireType currentWireType) throws IOException {
+        // Test serialization and deserialization using a socket
+    void testVisSocket(WireType currentWireType) throws IOException {
         try (ServerSocket ss = new ServerSocket(0);
              Socket s = new Socket("localhost", ss.getLocalPort());
              Socket s2 = ss.accept()) {
@@ -100,7 +100,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
             InputStreamToWire istw = new InputStreamToWire(currentWireType, s2.getInputStream());
             Wire wire2 = istw.readOne();
             Object ao2 = readAnObject(wire2);
-           // System.out.println(ao2);
+            // System.out.println(ao2);
             assertEquals(ao.toString(), ao2.toString());
         }
     }

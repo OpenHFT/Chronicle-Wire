@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BinaryWireScalarCoverageTest extends WireTestCommon {
+class BinaryWireScalarCoverageTest extends WireTestCommon {
 
     @Test
-    public void roundTripsCommonScalarTypes() {
+    void roundTripsCommonScalarTypes() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 

@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assumptions.*;
  * Test class for functionality related to substitutions in wire operations.
  * Extends WireTestCommon to utilize utilities related to wire tests.
  */
-public class WithSubstitutionTest extends WireTestCommon {
+class WithSubstitutionTest extends WireTestCommon {
 
     /**
      * Tests the behavior of substitutions in wire deserialization.
@@ -27,7 +27,7 @@ public class WithSubstitutionTest extends WireTestCommon {
      * when substitutions are present.
      */
     @Test
-    public void subs() {
+    void subs() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Expect exceptions related to invalid number substitutions

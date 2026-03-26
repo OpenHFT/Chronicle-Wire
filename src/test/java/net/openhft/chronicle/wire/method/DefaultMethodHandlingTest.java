@@ -28,11 +28,12 @@ interface WithDefault {
         throw new UnsupportedOperationException();
     }
 }
+
 /**
  * Test class for validating the handling of default methods in the WithDefault interface.
  * Extends WireTestCommon for common wire testing utilities.
  */
-public class DefaultMethodHandlingTest extends WireTestCommon {
+class DefaultMethodHandlingTest extends WireTestCommon {
 
     /**
      * Executes tests for method writers and readers with the specified WireType.
@@ -74,7 +75,7 @@ public class DefaultMethodHandlingTest extends WireTestCommon {
      * Tests the method writers and readers using TEXT wire format.
      */
     @Test
-    public void withDefault() {
+    void withDefault() {
         doTest(WireType.TEXT);
     }
 
@@ -82,7 +83,7 @@ public class DefaultMethodHandlingTest extends WireTestCommon {
      * Tests the method writers and readers using YAML_ONLY wire format.
      */
     @Test
-    public void withDefaultYaml() {
+    void withDefaultYaml() {
         doTest(WireType.YAML_ONLY);
     }
 }

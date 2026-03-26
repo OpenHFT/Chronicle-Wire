@@ -26,7 +26,7 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
      * Tests that method writer generation works for the same class in the hierarchy.
      */
     @Test
-    public void testSameClassInHierarchy() {
+    void testSameClassInHierarchy() {
         // Create a new binary wire that uses padding
         final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
@@ -59,7 +59,7 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
      * Tests that method writer generation handles methods with the same name properly.
      */
     @Test
-    public void testSameNamedMethod() {
+    void testSameNamedMethod() {
         // Similar setup as the previous test
         final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
@@ -86,20 +86,20 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
     // TODO: same names but different MethodIds should barf
 
     @Test
-    public void testDuplicateMethodIds() {
+    void testDuplicateMethodIds() {
         assertThrows(MethodWriterValidationException.class, () -> {
             final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
             // Attempt to build a method writer with duplicate method IDs, expecting an exception
             final VanillaMethodWriterBuilder<AnInterfaceMethodId> builder =
-                (VanillaMethodWriterBuilder<AnInterfaceMethodId>) wire.methodWriterBuilder(AnInterfaceMethodId.class);
+                    (VanillaMethodWriterBuilder<AnInterfaceMethodId>) wire.methodWriterBuilder(AnInterfaceMethodId.class);
             builder.addInterface(AnInterfaceSameMethodId.class).build();
         });
     }
 
     // This test is expected to throw a MethodWriterValidationException when trying to generate a method writer for a class
     @Test
-    public void testGenerateForClass() {
+    void testGenerateForClass() {
         assertThrows(MethodWriterValidationException.class, () -> {
             final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
@@ -114,7 +114,7 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
      * in certain dynamic proxy or code generation scenarios.
      */
     @Test
-    public void testGenerateForLongGeneratedClassName() {
+    void testGenerateForLongGeneratedClassName() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Allocate a new binary wire buffer

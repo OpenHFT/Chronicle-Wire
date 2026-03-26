@@ -17,7 +17,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class SequenceTest extends WireTestCommon {
+class SequenceTest extends WireTestCommon {
 
     // Instance variable to hold the WireType.
     private WireType wireType;
@@ -35,7 +35,7 @@ public class SequenceTest extends WireTestCommon {
     // Test method to check serialization and deserialization functionality.
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void test(WireType wireType) {
+    void test(WireType wireType) {
         this.wireType = wireType;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -109,7 +109,7 @@ public class SequenceTest extends WireTestCommon {
     // Test to read a Set as an object.
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void readSetAsObject(WireType wireType) {
+    void readSetAsObject(WireType wireType) {
         this.wireType = wireType;
         // Allocate an elastic buffer on heap.
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
@@ -140,7 +140,7 @@ public class SequenceTest extends WireTestCommon {
     // Test to read a List as an object.
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void readListAsObject(WireType wireType) {
+    void readListAsObject(WireType wireType) {
         this.wireType = wireType;
         // Allocate an elastic buffer on heap.
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
@@ -169,7 +169,7 @@ public class SequenceTest extends WireTestCommon {
     // Test to read a Map as an object.
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void readMapAsObject(WireType wireType) {
+    void readMapAsObject(WireType wireType) {
         this.wireType = wireType;
         // Ensure that the wire type isn't RAW.
         assumeFalse(wireType == WireType.RAW);

@@ -16,11 +16,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 // This class is for testing different wire formats
-public class ReadAnyWireTest extends WireTestCommon {
+class ReadAnyWireTest extends WireTestCommon {
 
     // A test case to test the TEXT wire format
     @Test
-    public void testReadAny() {
+    void testReadAny() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Create a buffer to hold wire data
@@ -39,7 +39,7 @@ public class ReadAnyWireTest extends WireTestCommon {
 
     // Another test for the TEXT wire format
     @Test
-    public void testCreateReadAnyFirstTextWire() {
+    void testCreateReadAnyFirstTextWire() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -51,7 +51,7 @@ public class ReadAnyWireTest extends WireTestCommon {
 
     // Test the BINARY wire format
     @Test
-    public void testCreateReadAnyFirstBinaryWire() {
+    void testCreateReadAnyFirstBinaryWire() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -63,7 +63,7 @@ public class ReadAnyWireTest extends WireTestCommon {
 
     // Test the JSON wire format
     @Test
-    public void testCreateReadAnyFirstJSONWire() {
+    void testCreateReadAnyFirstJSONWire() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -76,7 +76,7 @@ public class ReadAnyWireTest extends WireTestCommon {
     // Test the FIELDLESS_BINARY wire format, but it's currently ignored due to some issues that need to be resolved
     @Test
     @Disabled("TODO FIX")
-    public void testCreateReadAnyFirstFIELDLESS_BINARYWire() {
+    void testCreateReadAnyFirstFIELDLESS_BINARYWire() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();

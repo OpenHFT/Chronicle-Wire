@@ -7,10 +7,11 @@ import net.openhft.chronicle.bytes.Bytes;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @Deprecated(/* Should be fully covered by YamlSpecificationTest */)
-public class YamlSpecTest extends WireTestCommon {
+class YamlSpecTest extends WireTestCommon {
     private static String DIR = "/yaml/spec/";
 
     private static void doTest(String file, String expected) {
@@ -30,7 +31,7 @@ public class YamlSpecTest extends WireTestCommon {
     }
 
     @Test
-    public void test2_18Multi_lineFlowScalarsFixed() {
+    void test2_18Multi_lineFlowScalarsFixed() {
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             InputStream is = YamlSpecTest.class.getResourceAsStream
@@ -51,7 +52,7 @@ public class YamlSpecTest extends WireTestCommon {
     }
 
     @Test
-    public void test2_21MiscellaneousFixed() {
+    void test2_21MiscellaneousFixed() {
         doTest("2_21MiscellaneousFixed.yaml", "{null=, booleans=[true, false], string=012345}");
     }
 }

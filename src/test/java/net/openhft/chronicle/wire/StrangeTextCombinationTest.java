@@ -16,7 +16,7 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.*;
 
 // A parameterized test class that tests various string serialization behaviors for different WireTypes.
-public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireTestCommon {
+class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireTestCommon {
     private WireType wireType;
     private Bytes<?> bytes;
 
@@ -34,7 +34,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     // Tests that a string with a leading space is serialized and deserialized correctly.
     @ParameterizedTest
     @MethodSource("data")
-    public void testPrependedSpace(WireType wireType) {
+    void testPrependedSpace(WireType wireType) {
         this.wireType = wireType;
         @NotNull final String prependedSpace = " hello world";
         @NotNull final Wire wire = wireFactory();
@@ -47,7 +47,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     // Tests that a string with a trailing space is serialized and deserialized correctly.
     @ParameterizedTest
     @MethodSource("data")
-    public void testPostpendedSpace(WireType wireType) {
+    void testPostpendedSpace(WireType wireType) {
         this.wireType = wireType;
         @NotNull final String postpendedSpace = "hello world ";
         @NotNull final Wire wire = wireFactory();
@@ -59,7 +59,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     // Tests that a string with escape characters is serialized and deserialized correctly.
     @ParameterizedTest
     @MethodSource("data")
-    public void testSlashQuoteTest(WireType wireType) {
+    void testSlashQuoteTest(WireType wireType) {
         this.wireType = wireType;
         @NotNull final String expected = "\\\" ";
         @NotNull final Wire wire = wireFactory();
@@ -70,7 +70,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     // Tests that a string with specific YAML syntax is serialized and deserialized correctly.
     @ParameterizedTest
     @MethodSource("data")
-    public void testYaml(WireType wireType) {
+    void testYaml(WireType wireType) {
         this.wireType = wireType;
         @NotNull final String expected = "!String{chars:hello world}";
         @NotNull final Wire wire = wireFactory();
@@ -85,7 +85,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     // Tests that a string "!String" is serialized and deserialized correctly.
     @ParameterizedTest
     @MethodSource("data")
-    public void testString(WireType wireType) {
+    void testString(WireType wireType) {
         this.wireType = wireType;
         @NotNull final String expected = "!String";
         @NotNull final Wire wire = wireFactory();
@@ -96,7 +96,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     // Tests that a string "!binary" is serialized and deserialized correctly.
     @ParameterizedTest
     @MethodSource("data")
-    public void testBinary(WireType wireType) {
+    void testBinary(WireType wireType) {
         this.wireType = wireType;
         @NotNull final String expected = "!binary";
         @NotNull final Wire wire = wireFactory();
@@ -107,7 +107,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     // Tests that a string " !binary" with a leading space is serialized and deserialized correctly.
     @ParameterizedTest
     @MethodSource("data")
-    public void testBinaryWithSpace(WireType wireType) {
+    void testBinaryWithSpace(WireType wireType) {
         this.wireType = wireType;
         @NotNull final String expected = " !binary";
         @NotNull final Wire wire = wireFactory();
@@ -118,7 +118,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     // Tests that an empty string is serialized and deserialized correctly.
     @ParameterizedTest
     @MethodSource("data")
-    public void testEmpty(WireType wireType) {
+    void testEmpty(WireType wireType) {
         this.wireType = wireType;
         @NotNull final String expected = "";
         @NotNull final Wire wire = wireFactory();
@@ -129,7 +129,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     // Tests that a null string value is serialized and deserialized correctly.
     @ParameterizedTest
     @MethodSource("data")
-    public void testNull(WireType wireType) {
+    void testNull(WireType wireType) {
         this.wireType = wireType;
         @Nullable final String expected = null;
         @NotNull final Wire wire = wireFactory();
@@ -140,7 +140,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     // Tests that a string with a newline character is serialized and deserialized correctly.
     @ParameterizedTest
     @MethodSource("data")
-    public void testNewLine(WireType wireType) {
+    void testNewLine(WireType wireType) {
         this.wireType = wireType;
         @NotNull final String expected = "\n";
         @NotNull final Wire wire = wireFactory();
@@ -151,7 +151,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     // Tests that a string with a Unicode null character is serialized and deserialized correctly.
     @ParameterizedTest
     @MethodSource("data")
-    public void testUnicode(WireType wireType) {
+    void testUnicode(WireType wireType) {
         this.wireType = wireType;
         @NotNull final String expected = "\u0000";
         @NotNull final Wire wire = wireFactory();
@@ -162,7 +162,7 @@ public class StrangeTextCombinationTest extends net.openhft.chronicle.wire.WireT
     // Tests that an XML formatted string is serialized and deserialized correctly.
     @ParameterizedTest
     @MethodSource("data")
-    public void testXML(WireType wireType) {
+    void testXML(WireType wireType) {
         this.wireType = wireType;
         @NotNull final String expected = "<name>rob austin</name>";
         @NotNull final Wire wire = wireFactory();

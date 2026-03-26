@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class WriteDocumentContextTest extends WireTestCommon {
+class WriteDocumentContextTest extends WireTestCommon {
 
     // Writes three key-value pairs to the given Wire using nested DocumentContexts
     private static void writeThreeKeys(Wire wire) {
@@ -39,85 +39,85 @@ public class WriteDocumentContextTest extends WireTestCommon {
 
     // Test writing nested key-value pairs in plain text format
     @Test
-    public void nestedPlainText() {
+    void nestedPlainText() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         writeThreeKeys(wire);
         assertEquals("" +
-                        "key: 0\n" +
-                        "key: 1\n" +
-                        "key: 2\n" +
-                        "...\n", wire.bytes().toString());
+                "key: 0\n" +
+                "key: 1\n" +
+                "key: 2\n" +
+                "...\n", wire.bytes().toString());
     }
 
     // Test writing chained key-value pairs in plain text format
     @Test
-    public void chainedPlainText() {
+    void chainedPlainText() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         writeThreeChainedKeys(wire);
         assertEquals("" +
-                        "key: 0\n" +
-                        "key: 1\n" +
-                        "key: 2\n" +
-                        "...\n", wire.bytes().toString());
+                "key: 0\n" +
+                "key: 1\n" +
+                "key: 2\n" +
+                "...\n", wire.bytes().toString());
     }
 
     // Test writing nested key-value pairs in TextWire format
     @Test
-    public void nestedText() {
+    void nestedText() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
         writeThreeKeys(wire);
         assertEquals(21, wire.bytes().readInt());
         assertEquals("" +
-                        "key: 0\n" +
-                        "key: 1\n" +
-                        "key: 2\n", wire.bytes().toString());
+                "key: 0\n" +
+                "key: 1\n" +
+                "key: 2\n", wire.bytes().toString());
     }
 
     // Test writing chained key-value pairs in TextWire format
     @Test
-    public void chainedText() {
+    void chainedText() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
         writeThreeChainedKeys(wire);
         assertEquals(21, wire.bytes().readInt());
         assertEquals("" +
-                        "key: 0\n" +
-                        "key: 1\n" +
-                        "key: 2\n", wire.bytes().toString());
+                "key: 0\n" +
+                "key: 1\n" +
+                "key: 2\n", wire.bytes().toString());
     }
 
     // Test writing nested key-value pairs in YAML format (Currently Ignored)
     @Disabled(/* TODO FIX */)
     @Test
-    public void nestedYaml() {
+    void nestedYaml() {
         Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
 
         writeThreeKeys(wire);
         assertEquals(21, wire.bytes().readInt());
         assertEquals("" +
-                        "key: 0\n" +
-                        "key: 1\n" +
-                        "key: 2\n", wire.bytes().toString());
+                "key: 0\n" +
+                "key: 1\n" +
+                "key: 2\n", wire.bytes().toString());
     }
 
     // Test writing chained key-value pairs in YAML format (Currently Ignored)
     @Disabled(/* TODO FIX */)
     @Test
-    public void chainedYaml() {
+    void chainedYaml() {
         Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
 
         writeThreeChainedKeys(wire);
         assertEquals(21, wire.bytes().readInt());
         assertEquals("" +
-                        "key: 0\n" +
-                        "key: 1\n" +
-                        "key: 2\n", wire.bytes().toString());
+                "key: 0\n" +
+                "key: 1\n" +
+                "key: 2\n", wire.bytes().toString());
     }
 
     // Test writing nested key-value pairs in BinaryWire format
     @Test
-    public void nestedBinary() {
+    void nestedBinary() {
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
 
@@ -132,7 +132,7 @@ public class WriteDocumentContextTest extends WireTestCommon {
 
     // Test writing chained key-value pairs in BinaryWire format
     @Test
-    public void chainedBinary() {
+    void chainedBinary() {
         Wire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
 

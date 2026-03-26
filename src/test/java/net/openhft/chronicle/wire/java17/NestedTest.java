@@ -12,11 +12,11 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * NestedTest class extending from the common wire test base.
  */
-public class NestedTest extends WireTestCommon {
+class NestedTest extends WireTestCommon {
 
     // Test for adding an alias for the Group class and asserting its structure
     @Test
-    public void mini() {
+    void mini() {
 
         // Add an alias for the Group class to the ClassAliasPool
         ClassAliasPool.CLASS_ALIASES.addAlias(Group.class);
@@ -32,11 +32,11 @@ public class NestedTest extends WireTestCommon {
 
         // Assert the structure and formatting of the Group object
         assertEquals("!Group {\n" +
-        "  field: {\n" +
-        "    required: {\n" +
-        "      parent: NO\n" +
-        "    }\n" +
-        "  }\n" +
-        "}\n", g.toString());
+                "  field: {\n" +
+                "    required: {\n" +
+                "      parent: NO\n" +
+                "    }\n" +
+                "  }\n" +
+                "}\n", g.toString());
     }
 }

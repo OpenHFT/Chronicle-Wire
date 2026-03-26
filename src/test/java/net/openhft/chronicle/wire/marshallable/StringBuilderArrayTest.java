@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests that deserialising StringBuilder[] produces distinct StringBuilder instances
  * with correct values, rather than reusing the same instance across array elements.
  */
-public class StringBuilderArrayTest extends WireTestCommon {
+class StringBuilderArrayTest extends WireTestCommon {
 
     private WireType wireType;
 
@@ -36,7 +36,7 @@ public class StringBuilderArrayTest extends WireTestCommon {
         );
     }
 
-    public static class StringBuilderArrayDto extends SelfDescribingMarshallable {
+    static class StringBuilderArrayDto extends SelfDescribingMarshallable {
         StringBuilder[] a;
         StringBuilder[] b;
     }
@@ -47,7 +47,7 @@ public class StringBuilderArrayTest extends WireTestCommon {
      */
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testStringBuilderArrayDistinctElements(WireType wireType) {
+    void testStringBuilderArrayDistinctElements(WireType wireType) {
         this.wireType = wireType;
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
@@ -82,7 +82,7 @@ public class StringBuilderArrayTest extends WireTestCommon {
      */
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testStringBuilderArrayWithNullElements(WireType wireType) {
+    void testStringBuilderArrayWithNullElements(WireType wireType) {
         this.wireType = wireType;
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
@@ -108,7 +108,7 @@ public class StringBuilderArrayTest extends WireTestCommon {
      */
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testEmptyStringBuilderArray(WireType wireType) {
+    void testEmptyStringBuilderArray(WireType wireType) {
         this.wireType = wireType;
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);
@@ -134,7 +134,7 @@ public class StringBuilderArrayTest extends WireTestCommon {
      */
     @ParameterizedTest
     @MethodSource("wireTypes")
-    public void testStringBuilderFieldReuse(WireType wireType) {
+    void testStringBuilderFieldReuse(WireType wireType) {
         this.wireType = wireType;
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire wire = wireType.apply(bytes);

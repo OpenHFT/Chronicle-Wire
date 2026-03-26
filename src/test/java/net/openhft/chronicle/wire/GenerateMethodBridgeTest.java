@@ -33,10 +33,10 @@ interface GMBZ extends GMBA, GMBB {
 }
 
 // A JUnit test class
-public class GenerateMethodBridgeTest extends WireTestCommon {
+class GenerateMethodBridgeTest extends WireTestCommon {
 
     @Test
-    public void createBridge() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    void createBridge() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Instantiating an object to generate method bridges
@@ -79,44 +79,44 @@ public class GenerateMethodBridgeTest extends WireTestCommon {
 
         // Validating that the calls were made correctly based on the logs captured in the StringWriter
         assertEquals("gmba.method1[method1]\n" +
-                        "gmbz.method1[method1]\n" +
-                        "gmba.method2[!net.openhft.chronicle.wire.MyTypes {\n" +
-                        "  text: \"\",\n" +
-                        "  flag: false,\n" +
-                        "  b: 0,\n" +
-                        "  s: 0,\n" +
-                        "  ch: \"\\0\",\n" +
-                        "  i: 0,\n" +
-                        "  f: 0.0,\n" +
-                        "  d: 0.0,\n" +
-                        "  l: 0\n" +
-                        "}\n" +
-                        "]\n" +
-                        "gmbb.method2[!net.openhft.chronicle.wire.MyTypes {\n" +
-                        "  text: \"\",\n" +
-                        "  flag: false,\n" +
-                        "  b: 0,\n" +
-                        "  s: 0,\n" +
-                        "  ch: \"\\0\",\n" +
-                        "  i: 0,\n" +
-                        "  f: 0.0,\n" +
-                        "  d: 0.0,\n" +
-                        "  l: 0\n" +
-                        "}\n" +
-                        "]\n" +
-                        "gmbz.method2[!net.openhft.chronicle.wire.MyTypes {\n" +
-                        "  text: \"\",\n" +
-                        "  flag: false,\n" +
-                        "  b: 0,\n" +
-                        "  s: 0,\n" +
-                        "  ch: \"\\0\",\n" +
-                        "  i: 0,\n" +
-                        "  f: 0.0,\n" +
-                        "  d: 0.0,\n" +
-                        "  l: 0\n" +
-                        "}\n" +
-                        "]\n" +
-                        "gmbb.method3[method3]\n" +
-                        "gmbz.method3[method3]\n", sw.toString().replace("\r", ""));
+                "gmbz.method1[method1]\n" +
+                "gmba.method2[!net.openhft.chronicle.wire.MyTypes {\n" +
+                "  text: \"\",\n" +
+                "  flag: false,\n" +
+                "  b: 0,\n" +
+                "  s: 0,\n" +
+                "  ch: \"\\0\",\n" +
+                "  i: 0,\n" +
+                "  f: 0.0,\n" +
+                "  d: 0.0,\n" +
+                "  l: 0\n" +
+                "}\n" +
+                "]\n" +
+                "gmbb.method2[!net.openhft.chronicle.wire.MyTypes {\n" +
+                "  text: \"\",\n" +
+                "  flag: false,\n" +
+                "  b: 0,\n" +
+                "  s: 0,\n" +
+                "  ch: \"\\0\",\n" +
+                "  i: 0,\n" +
+                "  f: 0.0,\n" +
+                "  d: 0.0,\n" +
+                "  l: 0\n" +
+                "}\n" +
+                "]\n" +
+                "gmbz.method2[!net.openhft.chronicle.wire.MyTypes {\n" +
+                "  text: \"\",\n" +
+                "  flag: false,\n" +
+                "  b: 0,\n" +
+                "  s: 0,\n" +
+                "  ch: \"\\0\",\n" +
+                "  i: 0,\n" +
+                "  f: 0.0,\n" +
+                "  d: 0.0,\n" +
+                "  l: 0\n" +
+                "}\n" +
+                "]\n" +
+                "gmbb.method3[method3]\n" +
+                "gmbz.method3[method3]\n", sw.toString().replace("\r", ""));
     }
 }

@@ -22,7 +22,7 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Disabled("TODO FIX")
-public class TextCompatibilityTest extends WireTestCommon {
+class TextCompatibilityTest extends WireTestCommon {
 
     // File name for the current test run.
     private String filename;
@@ -76,9 +76,9 @@ public class TextCompatibilityTest extends WireTestCommon {
                 if (s.trim().equals(expected.trim()))
                     return;
                 if (print) {
-                   // System.out.println("Comparison failure in " + filename);
-                   // System.out.println("Expected:\n" + expected);
-                   // System.out.println("Actual:\n" + s);
+                    // System.out.println("Comparison failure in " + filename);
+                    // System.out.println("Expected:\n" + expected);
+                    // System.out.println("Actual:\n" + s);
                 } else {
                     assertEquals(expected, s);
                 }
@@ -87,7 +87,7 @@ public class TextCompatibilityTest extends WireTestCommon {
             }
             Object o = TEXT.fromFile(Object.class, filename);
         } catch (Exception e) {
-           // System.out.println("Expected:\n" + expected);
+            // System.out.println("Expected:\n" + expected);
             throw new AssertionError(filename, e);
         }
     }
@@ -95,7 +95,7 @@ public class TextCompatibilityTest extends WireTestCommon {
     // Perform the compatibility test for the current combination of file and expected content.
     @ParameterizedTest
     @MethodSource("combinations")
-    public void test(String filename, String expected) {
+    void test(String filename, String expected) {
         this.filename = filename;
         this.expected = expected;
         runTest(filename, expected, false);

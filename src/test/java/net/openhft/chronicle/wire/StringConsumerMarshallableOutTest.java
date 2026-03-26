@@ -11,11 +11,11 @@ import java.io.StringWriter;
 import static org.junit.jupiter.api.Assertions.*;
 
 // Unit test class extending from WireTestCommon to get basic setup for the Chronicle Wire tests.
-public class StringConsumerMarshallableOutTest extends net.openhft.chronicle.wire.WireTestCommon {
+class StringConsumerMarshallableOutTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Test case to check if serialization to the YAML format works correctly.
     @Test
-    public void saysYaml() {
+    void saysYaml() {
         final WireType wireType = WireType.YAML_ONLY; // Specify the wire type as YAML.
         final String expected = "" + // Expected serialized output.
                 "say: One\n" +
@@ -29,7 +29,7 @@ public class StringConsumerMarshallableOutTest extends net.openhft.chronicle.wir
 
     // Test case to check if serialization to the JSON format works correctly.
     @Test
-    public void saysJson() {
+    void saysJson() {
         final WireType wireType = WireType.JSON_ONLY; // Specify the wire type as JSON.
         final String expected = "" + // Expected serialized output.
                 "{\"say\":\"One\"}\n" +

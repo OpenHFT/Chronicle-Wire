@@ -11,10 +11,10 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Exercises {@link LongArrayValueBitSet} operations across multiple words.
  */
-public class LongArrayValueBitSetOperationsTest extends WireTestCommon {
+class LongArrayValueBitSetOperationsTest extends WireTestCommon {
 
     @Test
-    public void basicOps() {
+    void basicOps() {
         LongArrayValueBitSet bs = new LongArrayValueBitSet(192, new BinaryWire(Bytes.allocateElasticOnHeap(256)));
         try {
             bs.set(0);

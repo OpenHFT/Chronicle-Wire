@@ -19,7 +19,7 @@ import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.toConcurrentSet;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LastMarketDataPerSymbolTest extends WireTestCommon {
+class LastMarketDataPerSymbolTest extends WireTestCommon {
 
     private static final List<MarketData> MARKET_DATA_SET = Arrays.asList(
             new MarketData("MSFT", 100, 110, 90),
@@ -28,7 +28,7 @@ public class LastMarketDataPerSymbolTest extends WireTestCommon {
     );
 
     @Test
-    public void lastMarketDataPerSymbol() {
+    void lastMarketDataPerSymbol() {
 
         final Reduction<Map<String, MarketData>> listener = Reduction.of(
                         builder(MarketData.class).build())
@@ -43,7 +43,7 @@ public class LastMarketDataPerSymbolTest extends WireTestCommon {
     }
 
     @Test
-    public void symbolSet() {
+    void symbolSet() {
 
         Reduction<Set<String>> listener = Reduction.of(
                         builder(MarketData.class).build().map(MarketData::symbol))

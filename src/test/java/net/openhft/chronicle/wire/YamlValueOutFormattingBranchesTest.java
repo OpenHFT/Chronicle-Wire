@@ -15,17 +15,20 @@ import static org.junit.jupiter.api.Assertions.*;
  * Drives YamlValueOut formatting paths (strings needing quoting, multi-line, sequences, maps)
  * and validates via round-trip parsing.
  */
-public class YamlValueOutFormattingBranchesTest extends WireTestCommon {
+class YamlValueOutFormattingBranchesTest extends WireTestCommon {
 
     @Test
-    public void writeAndReadComplexYaml() {
+    void writeAndReadComplexYaml() {
         Wire w = WireType.YAML.apply(Bytes.allocateElasticOnHeap(512));
 
         // Values likely to exercise quoting and multi-line formatting branches
         w.write("quoted").text("needs: quoting [brackets]");
         w.write("multiline").text("line1\nline2");
         w.write("empty").text("");
-        w.write("seq").sequence(v -> { v.text("x"); v.text("y"); });
+        w.write("seq").sequence(v -> {
+            v.text("x");
+            v.text("y");
+        });
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("k1", "v1");
         m.put("k2", 2L);
@@ -39,14 +42,17 @@ public class YamlValueOutFormattingBranchesTest extends WireTestCommon {
         assertEquals("line1\nline2", r.read("multiline").text());
         assertEquals("", r.read("empty").text());
         final Object[] seq = new Object[2];
-        r.read("seq").sequence(seq, (arr, in) -> { arr[0] = in.text(); arr[1] = in.text(); });
+        r.read("seq").sequence(seq, (arr, in) -> {
+            arr[0] = in.text();
+            arr[1] = in.text();
+        });
         assertArrayEquals(new Object[]{"x", "y"}, seq);
         Map<?, ?> out = r.read("map").marshallableAsMap(String.class, Object.class);
         assertEquals(m, out);
     }
 
     @Test
-    public void writesQuotedAndMultilineValues() {
+    void writesQuotedAndMultilineValues() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         YamlWire wire = new YamlWire(bytes);
 

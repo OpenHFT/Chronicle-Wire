@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class WireMarshallerTest extends WireTestCommon {
+class WireMarshallerTest extends WireTestCommon {
 
     @Test
-    public void usesBinary() {
+    void usesBinary() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Add an alias for the WMTwoFields class.

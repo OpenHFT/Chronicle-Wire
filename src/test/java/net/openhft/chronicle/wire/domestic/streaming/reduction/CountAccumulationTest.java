@@ -17,10 +17,10 @@ import java.util.stream.Collector;
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.throwingMerger;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CountAccumulationTest extends WireTestCommon {
+class CountAccumulationTest extends WireTestCommon {
 
     @Test
-    public void countCustom() {
+    void countCustom() {
         // Define a reduction that counts occurrences using a custom collector with AtomicLong
         Reduction<AtomicLong> listener = Reduction.of((wire, index) -> 1L)
                 .collecting(Collector.of(AtomicLong::new, AtomicLong::addAndGet, throwingMerger(), Collector.Characteristics.CONCURRENT));
@@ -33,7 +33,7 @@ public class CountAccumulationTest extends WireTestCommon {
     }
 
     @Test
-    public void countBuiltIn() {
+    void countBuiltIn() {
         // Define a reduction that counts occurrences using a built-in counting method
         Reduction<LongSupplier> listener = Reductions.counting();
 

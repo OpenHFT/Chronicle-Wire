@@ -12,7 +12,7 @@ import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 import static org.junit.jupiter.api.Assertions.*;
 
 // relates to https://github.com/OpenHFT/Chronicle-Wire/issues/467
-public class TestJsonIssue467 {
+class TestJsonIssue467 {
 
     static class ResponseItem467 extends SelfDescribingMarshallable {
         @NotNull
@@ -22,7 +22,7 @@ public class TestJsonIssue467 {
     }
 
     @Test
-    public void test() {
+    void test() {
         CLASS_ALIASES.addAlias(ResponseItem467.class);
 
         ResponseItem467 responseItem467 = Marshallable.fromString(ResponseItem467.class, "!ResponseItem467 {\n" +
@@ -71,7 +71,7 @@ public class TestJsonIssue467 {
     }
 
     @Test
-    public void test2() {
+    void test2() {
         CLASS_ALIASES.addAlias(ResponseItem467.class);
 
         ResponseItem467 responseItem467 = Marshallable.fromString(ResponseItem467.class, "!ResponseItem467 {\n" +
@@ -127,7 +127,7 @@ public class TestJsonIssue467 {
     }
 
     @Test
-    public void testWireObject() {
+    void testWireObject() {
         final Wire jsonWire = jsonResponseItem();
         ResponseItem467 responseItem467 = jsonWire.getValueIn().object(ResponseItem467.class);
 
@@ -139,7 +139,7 @@ public class TestJsonIssue467 {
     }
 
     @Test
-    public void testWireReusingObject() {
+    void testWireReusingObject() {
         final Wire jsonWire = jsonResponseItem();
         ResponseItem467 responseItem4671 = new ResponseItem467();
         ResponseItem467 responseItem467 = jsonWire.getValueIn().object(responseItem4671, ResponseItem467.class);

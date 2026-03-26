@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 // This class tests the functionalities related to the projection of wire data.
-public class ProjectTest extends WireTestCommon {
+class ProjectTest extends WireTestCommon {
 
     // Provide the parameters for parameterized tests - in this case, the wire type.
     @NotNull
@@ -33,7 +33,7 @@ public class ProjectTest extends WireTestCommon {
     // Test case to verify the projection functionality between two data transfer objects.
     @SuppressWarnings("unchecked")
     @Test
-    public void testProject() throws Exception {
+    void testProject() throws Exception {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Initialize the first DTO with sample data
@@ -54,7 +54,7 @@ public class ProjectTest extends WireTestCommon {
 
     // Test case to verify the projection functionality with nested marshallable objects.
     @Test
-    public void testProjectWithNestedMarshallable() {
+    void testProjectWithNestedMarshallable() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Initialize the simple object with a nested inner object and sample data
@@ -89,7 +89,7 @@ public class ProjectTest extends WireTestCommon {
     }
 
     // Inner class representing a nested marshallable object
-    public static class Inner extends SelfDescribingMarshallable {
+    static class Inner extends SelfDescribingMarshallable {
         private String name;
 
         String name() {
@@ -103,7 +103,7 @@ public class ProjectTest extends WireTestCommon {
     }
 
     // Outer class which can potentially contain an instance of the Inner class
-    public static class Outer extends SelfDescribingMarshallable {
+    static class Outer extends SelfDescribingMarshallable {
         private Inner inner;
 
         Inner inner() {
@@ -117,7 +117,7 @@ public class ProjectTest extends WireTestCommon {
     }
 
     // Simple class extending the Outer class to demonstrate nested projections
-    public static class Simple extends Outer {
+    static class Simple extends Outer {
         private String name2;
 
         public String name2() {

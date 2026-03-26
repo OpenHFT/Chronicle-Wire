@@ -28,7 +28,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     private A instance;
 
     @Test
-    public void testMethodReaderWriterMetadata() {
+    void testMethodReaderWriterMetadata() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Bytes<?> b = Bytes.allocateElasticOnHeap();
@@ -76,7 +76,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     }
 
     @Test
-    public void readMethods() throws IOException {
+    void readMethods() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Wire wire = new TextWire(BytesUtil.readFile("methods/in.yaml"))
@@ -97,7 +97,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
 
     @SuppressWarnings("unused")
     @Test
-    public void readMethodsCollections() throws IOException, InterruptedException {
+    void readMethodsCollections() throws IOException, InterruptedException {
         Wire wire = new TextWire(BytesUtil.readFile("methods-collections-in.yaml"))
                 .useTextDocuments();
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
@@ -116,7 +116,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     }
 
     @Test
-    public void testSubclasses() {
+    void testSubclasses() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap())
                 .useTextDocuments();
         MRTListener writer = wire.methodWriter(MRTListener.class);
@@ -173,7 +173,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     }
 
     @Test
-    public void methodInterceptorNull() {
+    void methodInterceptorNull() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap())
                 .useTextDocuments();
         MRTListener writer = wire.methodWriterBuilder(MRTListener.class)
@@ -208,7 +208,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     }
 
     @Test
-    public void testNestedUnknownClass() {
+    void testNestedUnknownClass() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
@@ -235,7 +235,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     }
 
     @Test
-    public void testUnknownClassDoesntThrow() {
+    void testUnknownClassDoesntThrow() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap())
@@ -267,7 +267,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     }
 
     @Test
-    public void testUnknownClassThrow() {
+    void testUnknownClassThrow() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         assertThrows(ClassNotFoundRuntimeException.class, () -> {
@@ -301,7 +301,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     }
 
     @Test
-    public void testMessageHistoryCleared() {
+    void testMessageHistoryCleared() {
         assumeFalse(Boolean.getBoolean("history.as.bytes"));
         try {
             Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
@@ -327,7 +327,7 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     }
 
     @Test
-    public void testOverloaded() {
+    void testOverloaded() {
         assertThrows(IllegalStateException.class, () -> {
             Jvm.recordExceptions();
             try {
@@ -342,12 +342,12 @@ public class VanillaMethodReaderTest extends WireTestCommon {
     }
 
     @Test
-    public void parseMetaData() {
+    void parseMetaData() {
         doParseMetaData(false);
     }
 
     @Test
-    public void parseMetaDataScanning() {
+    void parseMetaDataScanning() {
         doParseMetaData(true);
     }
 
@@ -360,25 +360,25 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         metaRoutedSaying.to("bee").say("hi BBB");
         routedSaying.to("two").say("hi 222");
         assertEquals("14 00 00 40                                     # msg-length\n" +
-                        "b9 02 74 6f                                     # to: (event)\n" +
-                        "e3 61 79 65                                     # aye\n" +
-                        "b9 03 73 61 79                                  # say: (event)\n" +
-                        "e6 68 69 20 41 41 41                            # hi AAA\n" +
-                        "14 00 00 00                                     # msg-length\n" +
-                        "b9 02 74 6f                                     # to: (event)\n" +
-                        "e3 6f 6e 65                                     # one\n" +
-                        "b9 03 73 61 79                                  # say: (event)\n" +
-                        "e6 68 69 20 31 31 31                            # hi 111\n" +
-                        "14 00 00 40                                     # msg-length\n" +
-                        "b9 02 74 6f                                     # to: (event)\n" +
-                        "e3 62 65 65                                     # bee\n" +
-                        "b9 03 73 61 79                                  # say: (event)\n" +
-                        "e6 68 69 20 42 42 42                            # hi BBB\n" +
-                        "14 00 00 00                                     # msg-length\n" +
-                        "b9 02 74 6f                                     # to: (event)\n" +
-                        "e3 74 77 6f                                     # two\n" +
-                        "b9 03 73 61 79                                  # say: (event)\n" +
-                        "e6 68 69 20 32 32 32                            # hi 222\n", wire.bytes().toHexString());
+                "b9 02 74 6f                                     # to: (event)\n" +
+                "e3 61 79 65                                     # aye\n" +
+                "b9 03 73 61 79                                  # say: (event)\n" +
+                "e6 68 69 20 41 41 41                            # hi AAA\n" +
+                "14 00 00 00                                     # msg-length\n" +
+                "b9 02 74 6f                                     # to: (event)\n" +
+                "e3 6f 6e 65                                     # one\n" +
+                "b9 03 73 61 79                                  # say: (event)\n" +
+                "e6 68 69 20 31 31 31                            # hi 111\n" +
+                "14 00 00 40                                     # msg-length\n" +
+                "b9 02 74 6f                                     # to: (event)\n" +
+                "e3 62 65 65                                     # bee\n" +
+                "b9 03 73 61 79                                  # say: (event)\n" +
+                "e6 68 69 20 42 42 42                            # hi BBB\n" +
+                "14 00 00 00                                     # msg-length\n" +
+                "b9 02 74 6f                                     # to: (event)\n" +
+                "e3 74 77 6f                                     # two\n" +
+                "b9 03 73 61 79                                  # say: (event)\n" +
+                "e6 68 69 20 32 32 32                            # hi 222\n", wire.bytes().toHexString());
         StringWriter out = new StringWriter();
         final MethodReader reader = wire.methodReaderBuilder()
                 .scanning(scanning)
@@ -388,33 +388,33 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         if (!scanning) {
             assertTrue(reader.readOne());
             assertEquals("meta: to[aye]\n" +
-                            "meta: say[hi AAA]\n", asString(out));
+                    "meta: say[hi AAA]\n", asString(out));
         }
 
         assertTrue(reader.readOne());
         assertEquals("meta: to[aye]\n" +
-                        "meta: say[hi AAA]\n" +
-                        "data: to[one]\n" +
-                        "data: say[hi 111]\n", asString(out));
+                "meta: say[hi AAA]\n" +
+                "data: to[one]\n" +
+                "data: say[hi 111]\n", asString(out));
         if (!scanning) {
             assertTrue(reader.readOne());
             assertEquals("meta: to[aye]\n" +
-                            "meta: say[hi AAA]\n" +
-                            "data: to[one]\n" +
-                            "data: say[hi 111]\n" +
-                            "meta: to[bee]\n" +
-                            "meta: say[hi BBB]\n", asString(out));
+                    "meta: say[hi AAA]\n" +
+                    "data: to[one]\n" +
+                    "data: say[hi 111]\n" +
+                    "meta: to[bee]\n" +
+                    "meta: say[hi BBB]\n", asString(out));
         }
 
         assertTrue(reader.readOne());
         assertEquals("meta: to[aye]\n" +
-                        "meta: say[hi AAA]\n" +
-                        "data: to[one]\n" +
-                        "data: say[hi 111]\n" +
-                        "meta: to[bee]\n" +
-                        "meta: say[hi BBB]\n" +
-                        "data: to[two]\n" +
-                        "data: say[hi 222]\n", asString(out));
+                "meta: say[hi AAA]\n" +
+                "data: to[one]\n" +
+                "data: say[hi 111]\n" +
+                "meta: to[bee]\n" +
+                "meta: say[hi BBB]\n" +
+                "data: to[two]\n" +
+                "data: say[hi 222]\n", asString(out));
 
         assertFalse(reader.readOne());
         wire.bytes().releaseLast();

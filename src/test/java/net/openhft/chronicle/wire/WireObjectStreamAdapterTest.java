@@ -14,10 +14,10 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class WireObjectStreamAdapterTest extends WireTestCommon {
+class WireObjectStreamAdapterTest extends WireTestCommon {
 
     @Test
-    public void roundTripPrimitivesCollectionsAndRawBytes() throws Exception {
+    void roundTripPrimitivesCollectionsAndRawBytes() throws Exception {
         Bytes<?> buffer = Bytes.allocateElasticOnHeap();
         Wire wire = WireType.BINARY.apply(buffer);
 
@@ -69,7 +69,7 @@ public class WireObjectStreamAdapterTest extends WireTestCommon {
     }
 
     @Test
-    public void readFullyIsUnsupported() throws IOException {
+    void readFullyIsUnsupported() throws IOException {
         assertThrows(UnsupportedOperationException.class, () -> {
             Wire wire = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
             WireObjectInput input = new WireObjectInput(wire);

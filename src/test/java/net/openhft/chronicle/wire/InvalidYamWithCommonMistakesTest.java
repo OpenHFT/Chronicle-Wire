@@ -14,11 +14,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>
  * Tests that common mistakes are still parsed where we can
  */
-public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
+class InvalidYamWithCommonMistakesTest extends WireTestCommon {
 
     // Test to verify the parsing of a DTO from a string representation
     @Test
-    public void testDtp() {
+    void testDtp() {
 
         // Expected DTO object with value "hello8"
         DtoB expected = new DtoB("hello8");
@@ -34,7 +34,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
 
     // Test to assume the type of DTO and parse it
     @Test
-    public void testAssumeTheType() {
+    void testAssumeTheType() {
 
         // Expected DTO object with value "hello8"
         DtoB expected = new DtoB("hello8");
@@ -50,7 +50,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
 
     // Test to assume the type of DTO without mentioning the full class path and parse it
     @Test
-    public void testAssumeTheType2() {
+    void testAssumeTheType2() {
 
         // Expected DTO object with value "hello8"
         DtoB expected = new DtoB("hello8");
@@ -66,7 +66,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
     }
 
     @Test
-    public void testAssumeTheTypeMissingTypeThrows() {
+    void testAssumeTheTypeMissingTypeThrows() {
         assertThrows(ClassNotFoundRuntimeException.class, () -> {
             Wires.GENERATE_TUPLES = false;
 
@@ -85,7 +85,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
 
     // Test to parse a DTO with nested types
     @Test
-    public void testBadTypeDtp0() {
+    void testBadTypeDtp0() {
 
         // Expected DTO object with values "hello" and "c"
         Dto expected = new Dto("hello", new DtoB("c"));
@@ -104,7 +104,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
 
     // Test to parse a DTO with incorrect nested type definition
     @Test
-    public void testBadTypeDtpBadType() {
+    void testBadTypeDtpBadType() {
 
         // Expected DTO object with values "hello" and "c"
         Dto expected = new Dto("hello", new DtoB("c"));
@@ -125,7 +125,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
 
     // Test to assume the type based on the type details provided within the YAML string
     @Test
-    public void testAssumeTypeBasedOnWhatIsIntheYaml() {
+    void testAssumeTypeBasedOnWhatIsIntheYaml() {
 
         // Expected DtoB object with value "hello8"
         DtoB expected = new DtoB("hello8");
@@ -142,7 +142,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
 
     // Test to assume the type based on the class provided and the YAML string
     @Test
-    public void testAssumeTypeBasedOnWhatIsIntheYaml3() {
+    void testAssumeTypeBasedOnWhatIsIntheYaml3() {
 
         // Expected DtoB object with value "hello8"
         DtoB expected = new DtoB("hello8");
@@ -158,7 +158,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
 
     // Test to assume the type based on the type details within the YAML string containing a space
     @Test
-    public void testAssumeTypeBasedOnWhatIsIntheYamlWithSpace() {
+    void testAssumeTypeBasedOnWhatIsIntheYamlWithSpace() {
 
         // Expected DtoB object with value "hello8"
         DtoB expected = new DtoB("hello8");
@@ -175,7 +175,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
 
     // Test to assume the type based on the type details within the YAML string containing a space at a different position
     @Test
-    public void testAssumeTypeBasedOnWhatIsIntheYamlWithSpace2() {
+    void testAssumeTypeBasedOnWhatIsIntheYamlWithSpace2() {
 
         // Expected DtoB object with value "hello8"
         DtoB expected = new DtoB("hello8");
@@ -191,7 +191,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
 
     // Test to assume the type based on an alias instead of the full type name
     @Test
-    public void testAssumeTypeBasedOnWhatButUseAlias() {
+    void testAssumeTypeBasedOnWhatButUseAlias() {
 
         // Add alias for DtoB class
         ClassAliasPool.CLASS_ALIASES.addAlias(DtoB.class);
@@ -231,7 +231,7 @@ public class InvalidYamWithCommonMistakesTest extends WireTestCommon {
     }
 
     // DTO class containing a string property
-    public static class DtoB extends SelfDescribingMarshallable {
+    static class DtoB extends SelfDescribingMarshallable {
         String y;
 
         // Constructor to initialize DtoB with given value

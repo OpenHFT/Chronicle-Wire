@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assumptions.*;
  * Tests the ability to skip certain values in wire formats based on the parameterized input.
  */
 @SuppressWarnings("rawtypes")
-public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
+class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     private String name; // Represents the name of the binary wire code.
     private int code;   // Represents the binary wire code.
@@ -52,7 +52,7 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
         // An array that will be populated with test cases.
         Object[][] list = {
                 // Here you define each test case. The array consists of:
-            // { name of wire code (filled out later), the code itself, a consumer to produce the value }
+                // { name of wire code (filled out later), the code itself, a consumer to produce the value }
                 {null, BYTES_LENGTH8, wr(v -> v.object(Dto8.class, new Dto8()))},
                 {null, BYTES_LENGTH16, wr(v -> v.object(Dto16.class, new Dto16()))},
                 {null, BYTES_LENGTH32, wr(v -> v.object(Dto32.class, new Dto32()))},
@@ -133,7 +133,7 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void test(String name, int code, Consumer<ValueOut> valueOutConsumer) {
+    void test(String name, int code, Consumer<ValueOut> valueOutConsumer) {
         this.name = name;
         this.code = code;
         this.valueOutConsumer = valueOutConsumer;

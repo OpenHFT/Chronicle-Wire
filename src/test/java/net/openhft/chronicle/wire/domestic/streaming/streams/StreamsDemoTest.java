@@ -461,7 +461,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         }
     }
 
-    public static final class News extends SelfDescribingMarshallable {
+    static final class News extends SelfDescribingMarshallable {
 
         String symbol;
         String header;

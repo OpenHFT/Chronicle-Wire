@@ -16,7 +16,7 @@ import java.util.Collection;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ValueOutTest extends WireTestCommon {
+class ValueOutTest extends WireTestCommon {
 
     private WireType wireType;
 
@@ -31,7 +31,7 @@ public class ValueOutTest extends WireTestCommon {
     // Test the writing and reading of a byte array using the specified WireType
     @ParameterizedTest
     @MethodSource("data")
-    public void test(WireType wireType) {
+    void test(WireType wireType) {
         this.wireType = wireType;
         // Apply the wire type and ensure padding is used if binary
         Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
@@ -44,8 +44,8 @@ public class ValueOutTest extends WireTestCommon {
 
         );
 
-       // System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
-       // Verify that the read byte array matches the written byte array
+        // System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
+        // Verify that the read byte array matches the written byte array
         wire.readDocument(null, w -> {
             @NotNull final byte[] actual = (byte[]) w.read().object();
             assertArrayEquals(expected, actual);
@@ -60,7 +60,7 @@ public class ValueOutTest extends WireTestCommon {
     // when specifying the desired type explicitly
     @ParameterizedTest
     @MethodSource("data")
-    public void testRequestedType(WireType wireType) {
+    void testRequestedType(WireType wireType) {
         this.wireType = wireType;
         // Initialize the Wire object and enable padding for binary format
         Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
@@ -70,8 +70,8 @@ public class ValueOutTest extends WireTestCommon {
         @NotNull final byte[] expected = "this is my byte array".getBytes(ISO_8859_1);
         wire.writeDocument(false, w -> w.write().object(expected));
 
-       // System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
-       // Read the byte array back and ensure it matches the original
+        // System.out.println(Wires.fromSizePrefixedBlobs(wire.bytes()));
+        // Read the byte array back and ensure it matches the original
         wire.readDocument(null, w -> {
             @Nullable final byte[] actual = w.read().object(byte[].class);
             assertArrayEquals(expected, actual);
@@ -84,7 +84,7 @@ public class ValueOutTest extends WireTestCommon {
     // Test the serialization and deserialization of all possible byte values
     @ParameterizedTest
     @MethodSource("data")
-    public void testAllBytes(WireType wireType) {
+    void testAllBytes(WireType wireType) {
         this.wireType = wireType;
         // Apply the wire type, ensuring padding is applied if binary
         Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());

@@ -12,13 +12,18 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class GenerateMethodWriterMultiInterfaceTest extends WireTestCommon {
+class GenerateMethodWriterMultiInterfaceTest extends WireTestCommon {
 
-    interface First { void one(int v); }
-    interface Second { void two(String s); }
+    interface First {
+        void one(int v);
+    }
+
+    interface Second {
+        void two(String s);
+    }
 
     @Test
-    public void builderSupportsAdditionalInterfaces() {
+    void builderSupportsAdditionalInterfaces() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 
@@ -32,9 +37,15 @@ public class GenerateMethodWriterMultiInterfaceTest extends WireTestCommon {
 
         List<String> seen = new ArrayList<>();
         MethodReader reader = wire.methodReader(new First() {
-            @Override public void one(int v) { seen.add("one:" + v); }
+            @Override
+            public void one(int v) {
+                seen.add("one:" + v);
+            }
         }, new Second() {
-            @Override public void two(String s) { seen.add("two:" + s); }
+            @Override
+            public void two(String s) {
+                seen.add("two:" + s);
+            }
         });
         while (reader.readOne()) {
             // drain

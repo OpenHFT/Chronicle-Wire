@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 // Runner to enable parameterized tests for the MarshallableWireTest class
-public class MarshallableWireTest extends WireTestCommon {
+class MarshallableWireTest extends WireTestCommon {
 
     // Type of wire to be tested
     private WireType wireType;
@@ -31,7 +31,7 @@ public class MarshallableWireTest extends WireTestCommon {
     private Marshallable m;
 
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
@@ -71,7 +71,7 @@ public class MarshallableWireTest extends WireTestCommon {
     @SuppressWarnings("rawtypes")
     @ParameterizedTest
     @MethodSource("combinations")
-    public void writeMarshallable(WireType wireType, Marshallable m) {
+    void writeMarshallable(WireType wireType, Marshallable m) {
         this.wireType = wireType;
         this.m = m;
 

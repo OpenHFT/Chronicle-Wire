@@ -22,10 +22,10 @@ import static org.junit.jupiter.api.Assumptions.*;
  * Validates that Bytes reference counts remain stable when multiple {@link ReferenceOwner}s
  * reserve and release handles on different threads.
  */
-public class BytesReferenceCountingTest extends WireTestCommon {
+class BytesReferenceCountingTest extends WireTestCommon {
 
     @Test
-    public void heapBytesMaintainReferenceCountsAcrossOwners() throws InterruptedException {
+    void heapBytesMaintainReferenceCountsAcrossOwners() throws InterruptedException {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         try {
             exerciseReferenceCountingAcrossThreads(bytes);
@@ -37,7 +37,7 @@ public class BytesReferenceCountingTest extends WireTestCommon {
     }
 
     @Test
-    public void warnLoggedWhenOwnerLeakedAndForceReleased() {
+    void warnLoggedWhenOwnerLeakedAndForceReleased() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
             ReferenceOwner leaky = ReferenceOwner.temporary("leaky-owner");
@@ -51,7 +51,7 @@ public class BytesReferenceCountingTest extends WireTestCommon {
     }
 
     @Test
-    public void directBytesMaintainReferenceCountsAcrossOwners() throws InterruptedException {
+    void directBytesMaintainReferenceCountsAcrossOwners() throws InterruptedException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         Bytes<?> bytes = Bytes.allocateElasticDirect(64);
         try {

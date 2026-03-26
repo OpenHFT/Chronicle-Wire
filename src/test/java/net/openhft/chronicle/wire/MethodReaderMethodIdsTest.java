@@ -13,14 +13,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MethodReaderMethodIdsTest extends WireTestCommon {
+class MethodReaderMethodIdsTest extends WireTestCommon {
 
     /**
      * Test case to verify that method calls can be identified by Method IDs.
      */
     @SuppressWarnings("deprecation")
     @Test
-    public void shouldDetermineMethodNamesFromMethodIds() {
+    void shouldDetermineMethodNamesFromMethodIds() {
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
 

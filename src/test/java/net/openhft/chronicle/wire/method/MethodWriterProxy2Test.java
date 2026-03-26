@@ -7,11 +7,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 // Test class extending MethodWriter2Test to evaluate behavior of method writers with enforced proxy generation
-public class MethodWriterProxy2Test extends MethodWriter2Test {
+class MethodWriterProxy2Test extends MethodWriter2Test {
 
     // Set up the environment before each test
     @BeforeEach
-    public void before() {
+    void before() {
         // Enforce proxy generation by disabling proxy code generation
         System.setProperty("disableProxyCodegen", "true");
 
@@ -21,7 +21,7 @@ public class MethodWriterProxy2Test extends MethodWriter2Test {
 
     // Clean up and reset the environment after each test
     @AfterEach
-    public void after() {
+    void after() {
         // Clear the property to revert to the default method writer generation behavior
         System.clearProperty("disableProxyCodegen");
     }

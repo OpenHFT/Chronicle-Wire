@@ -14,13 +14,13 @@ import static org.junit.jupiter.api.Assumptions.*;
 /**
  * Unit test for the ThreeSequence class.
  */
-public class ThreeSequenceTest extends WireTestCommon {
+class ThreeSequenceTest extends WireTestCommon {
 
     /**
      * Tests the serialization and deserialization process for the ThreeSequence class.
      */
     @Test
-    public void testThree() {
+    void testThree() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Deserialize the YAML string into a ThreeSequence object

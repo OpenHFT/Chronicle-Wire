@@ -18,23 +18,23 @@ import java.util.Collection;
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class YamlSpecificationTextWireTest extends WireTestCommon {
+class YamlSpecificationTextWireTest extends WireTestCommon {
 
     // Provides the parameters for the parameterized test
     public static Collection<Object[]> tests() {
         return Arrays.asList(new Object[][]{
-                    // {"2_1_SequenceOfScalars"},  // Uncomment to include in the test
-                    {"2_2_MappingScalarsToScalars"},
-                    {"2_6_MappingOfMappings"},
-                    // {"2_19Integers"},  // Uncomment to include in the test
-                    {"2_21MiscellaneousBis"}
-            });
+                // {"2_1_SequenceOfScalars"},  // Uncomment to include in the test
+                {"2_2_MappingScalarsToScalars"},
+                {"2_6_MappingOfMappings"},
+                // {"2_19Integers"},  // Uncomment to include in the test
+                {"2_21MiscellaneousBis"}
+        });
     }
 
     // Test method to decode YAML as TextWire and validate it
     @ParameterizedTest
     @MethodSource("tests")
-    public void decodeAs(String input) throws IOException {
+    void decodeAs(String input) throws IOException {
         // Reads the YAML file and converts it to a string
         String snippet = new String(getBytes(input + ".yaml"), StandardCharsets.UTF_8);
 
@@ -53,7 +53,7 @@ public class YamlSpecificationTextWireTest extends WireTestCommon {
         }
 
         // Validate if the actual output matches the expected output
-        assertEquals(input, Bytes.wrapForRead(expected.getBytes(StandardCharsets.UTF_8)).toString().replace("\r\n", "\n"), actual);
+        assertEquals(Bytes.wrapForRead(expected.getBytes(StandardCharsets.UTF_8)).toString().replace("\r\n", "\n"), actual, input);
     }
 
     // Helper method to parse a given YAML string using TextWire

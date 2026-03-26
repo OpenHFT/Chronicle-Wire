@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * This class tests the usage of Bytes in various operations, emphasizing the importance of garbage-free operations.
  */
-public class BytesUsageTest extends WireTestCommon {
+class BytesUsageTest extends WireTestCommon {
 
     /**
      * Test the operations and manipulations on Bytes.
@@ -22,7 +22,7 @@ public class BytesUsageTest extends WireTestCommon {
      */
     @SuppressWarnings("rawtypes")
     @Test
-    public void testBytes() {
+    void testBytes() {
         // Initialize a BytesStore instance from a string
         BytesStore<?, ?> value = Bytes.from("helloWorld");
 

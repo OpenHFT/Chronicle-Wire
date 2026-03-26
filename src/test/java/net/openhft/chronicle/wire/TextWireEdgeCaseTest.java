@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TextWireEdgeCaseTest extends WireTestCommon {
+class TextWireEdgeCaseTest extends WireTestCommon {
 
     @Test
-    public void parsesVariousNumericFormats() {
+    void parsesVariousNumericFormats() {
         String yaml = "i: +5\nj: 1_000\nhex: 0xFF\nfloat: 1.2e3\nminusZero: -0.0\ntext: \"line1\\nline2\"\n";
         TextWire wire = TextWire.from(yaml);
 
@@ -24,7 +24,7 @@ public class TextWireEdgeCaseTest extends WireTestCommon {
     }
 
     @Test
-    public void writesAndReadsEscapedText() {
+    void writesAndReadsEscapedText() {
         TextWire wire = new TextWire(Bytes.allocateElasticOnHeap());
         wire.write("message").text("needs: \"quoting\"");
         String output = wire.bytes().toString();
@@ -33,7 +33,7 @@ public class TextWireEdgeCaseTest extends WireTestCommon {
     }
 
     @Test
-    public void documentContextRoundTrip() {
+    void documentContextRoundTrip() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         TextWire wire = new TextWire(bytes);
         wire.useTextDocuments();

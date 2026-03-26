@@ -11,10 +11,10 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ValueOutMapTest extends WireTestCommon {
+class ValueOutMapTest extends WireTestCommon {
 
     @Test
-    public void writesAndReadsMaps() {
+    void writesAndReadsMaps() {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("name", "alice");
         map.put("count", 12L);

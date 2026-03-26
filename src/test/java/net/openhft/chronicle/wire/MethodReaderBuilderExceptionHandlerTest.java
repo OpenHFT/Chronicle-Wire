@@ -17,7 +17,7 @@ import java.io.StringWriter;
 import static org.junit.jupiter.api.Assertions.*;
 
 // Testing the behavior of the MethodReaderBuilder exception handler with various scenarios.
-public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
+class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
 
     // Static input data for the tests
     private static final String input = "" +
@@ -61,7 +61,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
 
     // Test where nothing is expected to happen, using non-scanning method
     @Test
-    public void testNothing() {
+    void testNothing() {
         doTest("# true\n" +
                         "# true\n" +
                         "# true\n" +
@@ -73,14 +73,14 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
 
     // Test where nothing is expected to happen, using scanning method
     @Test
-    public void testNothingScanning() {
+    void testNothingScanning() {
         doTest("# false\n",
                 ExceptionHandler.ignoresEverything(), IgnoresEverything.class, true);
     }
 
     // Test focusing on the 'a' type message, using non-scanning method
     @Test
-    public void testA() {
+    void testA() {
         doTest("a[a1]\n" +
                         "# true\n" +
                         "# true\n" +
@@ -94,7 +94,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
 
     // Test focusing on the 'a' type message, using scanning method
     @Test
-    public void testAScanning() {
+    void testAScanning() {
         doTest("a[a1]\n" +
                         "# true\n" +
                         "a[a2]\n" +
@@ -107,7 +107,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
 
     // Test focusing on both 'b' and 'c' type messages using non-scanning method
     @Test
-    public void testBC() {
+    void testBC() {
         doTest("# true\n" +
                         "b[b1]\n" +
                         "# true\n" +
@@ -123,7 +123,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
 
     // Test focusing on both 'b' and 'c' type messages using scanning method
     @Test
-    public void testBCScanning() {
+    void testBCScanning() {
         doTest("b[b1]\n" +
                         "# true\n" +
                         "c[c1]\n" +
@@ -137,7 +137,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
 
     // Test focusing on 'b' and 'c' type messages using non-scanning method, while expecting a warning for the 'a' type message
     @Test
-    public void testBCWarn() {
+    void testBCWarn() {
         expectException("Unknown method-name='a'");
         doTest("# true\n" +
                         "b[b1]\n" +
@@ -154,7 +154,7 @@ public class MethodReaderBuilderExceptionHandlerTest extends WireTestCommon {
 
     // Test focusing on 'b' and 'c' type messages using scanning method, while expecting a warning for the 'a' type message
     @Test
-    public void testBCWarnScanning() {
+    void testBCWarnScanning() {
         expectException("Unknown method-name='a'");
         doTest("b[b1]\n" +
                         "# true\n" +

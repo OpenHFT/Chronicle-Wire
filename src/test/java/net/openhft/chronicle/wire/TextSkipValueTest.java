@@ -14,7 +14,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TextSkipValueTest extends WireTestCommon {
+class TextSkipValueTest extends WireTestCommon {
 
     // This will store the input string for each run of the test.
     private String input;
@@ -74,13 +74,13 @@ public class TextSkipValueTest extends WireTestCommon {
     // This is the actual test that will run once for each input string provided by combinations() method.
     @ParameterizedTest
     @MethodSource("combinations")
-    public void skipValue(String input) {
+    void skipValue(String input) {
         this.input = input;
         // Create a TextWire from the input string.
         Wire wire = TextWire.from(input);
         // Try to skip the value in the input string.
         wire.getValueIn()
-            .skipValue();
+                .skipValue();
         // Consume any padding in the wire.
         wire.consumePadding();
         // After skipping the value and consuming padding,

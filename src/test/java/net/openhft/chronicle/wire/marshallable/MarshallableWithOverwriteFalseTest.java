@@ -20,13 +20,13 @@ import static org.junit.jupiter.api.Assumptions.*;
 /**
  * Test class to validate behavior of marshallable objects with overwriting disabled.
  */
-public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
+class MarshallableWithOverwriteFalseTest extends WireTestCommon {
 
     /**
      * Test method to evaluate the behavior of the marshallable logic.
      */
     @Test
-    public void test() {
+    void test() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Create instances of MyDto2 and MyDto
@@ -60,6 +60,7 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
 
         /**
          * Reads the data from the provided WireIn object to populate this DTO.
+         *
          * @param wire WireIn instance containing serialized data
          * @throws IORuntimeException If an IO error occurs during reading
          */
@@ -69,7 +70,7 @@ public class MarshallableWithOverwriteFalseTest extends WireTestCommon {
             // Wires.readMarshallable(this, wire, true);
 
             // WORKS
-             // Wires.readMarshallable(this, wire, true);  // WORKS
+            // Wires.readMarshallable(this, wire, true);  // WORKS
 
             // FAILS
             Wires.readMarshallable(this, wire, false);

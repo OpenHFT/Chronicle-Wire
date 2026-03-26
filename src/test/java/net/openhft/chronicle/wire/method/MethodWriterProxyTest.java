@@ -14,11 +14,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 // Test class extending MethodWriterTest to test behavior of method writers when using proxies
-public class MethodWriterProxyTest extends MethodWriterTest {
+class MethodWriterProxyTest extends MethodWriterTest {
 
     // Method to set up the test environment before each test method
     @BeforeEach
-    public void before() {
+    void before() {
         // Disable proxy code generation for the duration of the tests
         System.setProperty("disableProxyCodegen", "true");
 
@@ -28,7 +28,7 @@ public class MethodWriterProxyTest extends MethodWriterTest {
 
     // Method to clean up and reset the environment after each test method
     @AfterEach
-    public void after() {
+    void after() {
         // Clear the property to re-enable proxy code generation
         System.clearProperty("disableProxyCodegen");
     }
@@ -36,7 +36,7 @@ public class MethodWriterProxyTest extends MethodWriterTest {
     // Test method inherited from the parent class but ignored due to a known issue
     @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     @Test
-    public void multiOut() {
+    void multiOut() {
         // Calls the same test method from the parent class
         super.multiOut();
         fail();
@@ -45,7 +45,7 @@ public class MethodWriterProxyTest extends MethodWriterTest {
     // Test method for testing primitives, ignored on specific conditions and known issues
     @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     @Test
-    public void testPrimitives() {
+    void testPrimitives() {
         // Calls the test method for primitives from the parent class
         super.doTestPrimitives(true);
         fail();

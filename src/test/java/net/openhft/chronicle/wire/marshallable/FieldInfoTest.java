@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 // Runner to enable parameterized tests for the FieldInfoTest class
-public class FieldInfoTest extends WireTestCommon {
+class FieldInfoTest extends WireTestCommon {
 
     // Marshallable object for test scenarios
     private Marshallable m;
@@ -260,7 +260,7 @@ public class FieldInfoTest extends WireTestCommon {
     // Test method to ensure the field information from the Marshallable object matches the expected value
     @ParameterizedTest
     @MethodSource("combinations")
-    public void fieldInfo(Marshallable m, String fieldInfos) {
+    void fieldInfo(Marshallable m, String fieldInfos) {
         this.fieldInfos = fieldInfos;
         this.m = m;
         assumeFalse(Jvm.maxDirectMemory() == 0);

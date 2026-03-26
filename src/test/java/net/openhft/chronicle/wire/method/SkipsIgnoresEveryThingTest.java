@@ -26,7 +26,7 @@ public class SkipsIgnoresEveryThingTest extends net.openhft.chronicle.wire.WireT
      * based on the given condition.
      */
     @Test
-    public void selective() {
+    void selective() {
         // Setup a wire with predefined text representing a sequence of messages
         String text = "" +
                 "to: 1\n" +

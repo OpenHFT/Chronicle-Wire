@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Issue844Test extends WireTestCommon {
+class Issue844Test extends WireTestCommon {
 
     @Test
-    public void nestedMapsJson() {
+    void nestedMapsJson() {
 
         // at least 3 levels of nested to reproduce this issue
         Object o2 = WireType.JSON_ONLY.fromString("\"serviceConfig\": {\n" +
