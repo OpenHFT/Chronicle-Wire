@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * This class tests the behavior of MethodWriter when handling String messages.
  * It extends the WireTestCommon from the `net.openhft.chronicle.wire` package for common test setup and utilities.
  */
-class MethodWriterStringTest extends net.openhft.chronicle.wire.WireTestCommon {
+public class MethodWriterStringTest extends net.openhft.chronicle.wire.WireTestCommon {
     // A blocking queue to hold String messages, used for synchronization between writer and reader.
     private ArrayBlockingQueue<String> q = new ArrayBlockingQueue<>(1);
 

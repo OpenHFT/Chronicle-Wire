@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MethodReaderMethodIdsTest extends WireTestCommon {
+public class MethodReaderMethodIdsTest extends WireTestCommon {
 
     /**
      * Test case to verify that method calls can be identified by Method IDs.

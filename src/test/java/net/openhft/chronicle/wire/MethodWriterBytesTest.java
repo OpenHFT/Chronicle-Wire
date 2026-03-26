@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * It extends the WireTestCommon from the `net.openhft.chronicle.wire` package for common test setup and utilities.
  */
 @SuppressWarnings("rawtypes")
-class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCommon {
+public class MethodWriterBytesTest extends net.openhft.chronicle.wire.WireTestCommon {
     // A blocking queue to hold Bytes instances, used for synchronization between writer and reader.
     private ArrayBlockingQueue<Bytes> q = new ArrayBlockingQueue<>(1);
 

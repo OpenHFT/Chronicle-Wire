@@ -22,7 +22,7 @@ import java.util.function.BiConsumer;
  * This class tests the behavior of MethodWriter when handling vague/interfaced messages.
  * It extends the WireTestCommon from the `net.openhft.chronicle.wire` package for common test setup and utilities.
  */
-class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
+public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
     private ArrayBlockingQueue<Object> singleQ = new ArrayBlockingQueue<>(1);
     private ArrayBlockingQueue<Object> doubleQ = new ArrayBlockingQueue<>(2);
     private final List<Map<Class<?>, Object>> usedObjects = Arrays.asList(new HashMap<>(), new HashMap<>());

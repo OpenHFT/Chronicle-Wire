@@ -19,7 +19,7 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
+public class VanillaMethodWriterBuilderVerboseTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // Static initialization block to alias two classes
     static {

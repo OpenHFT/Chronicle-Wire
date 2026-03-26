@@ -18,7 +18,7 @@ import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRIT
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-class ChainedMethodsTest extends WireTestCommon {
+public class ChainedMethodsTest extends WireTestCommon {
 
     // Parameter that will be set per test invocation.
     private boolean disableProxyCodegen;

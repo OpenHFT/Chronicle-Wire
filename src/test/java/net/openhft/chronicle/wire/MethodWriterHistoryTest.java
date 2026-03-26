@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import static net.openhft.chronicle.bytes.MethodReader.MESSAGE_HISTORY_METHOD_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
-class MethodWriterHistoryTest extends WireTestCommon {
+public class MethodWriterHistoryTest extends WireTestCommon {
 
     interface Events {
         void event(CharSequence value);

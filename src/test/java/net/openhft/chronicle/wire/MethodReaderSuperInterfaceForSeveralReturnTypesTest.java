@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * This class tests the capability of the MethodReader to handle super interfaces with multiple return types.
  * It extends the WireTestCommon which provides utilities for monitoring thread and exception behaviors during tests.
  */
-class MethodReaderSuperInterfaceForSeveralReturnTypesTest extends WireTestCommon {
+public class MethodReaderSuperInterfaceForSeveralReturnTypesTest extends WireTestCommon {
 
     /**
      * This test checks the interaction between interfaces with shared super interfaces.

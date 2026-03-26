@@ -14,9 +14,6 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
@@ -152,7 +149,7 @@ class EnumSetMarshallingTest extends WireTestCommon {
         tw.readingDocument().wire().read("key").marshallable(read);
 
         // Ensure that the two EnumSets in the object graph are distinct
-        assertThat(read.f1.get(0).f, is(not(read.f2.get(0).f)));
+        assertNotEquals(read.f1.get(0).f, read.f2.get(0).f);
         bytes.releaseLast();
     }
 

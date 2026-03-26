@@ -33,7 +33,7 @@ interface WithDefault {
  * Test class for validating the handling of default methods in the WithDefault interface.
  * Extends WireTestCommon for common wire testing utilities.
  */
-class DefaultMethodHandlingTest extends WireTestCommon {
+public class DefaultMethodHandlingTest extends WireTestCommon {
 
     /**
      * Executes tests for method writers and readers with the specified WireType.

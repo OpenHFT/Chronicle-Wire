@@ -4,9 +4,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.MethodReader;
-import org.hamcrest.core.Is;
-import org.hamcrest.core.IsNot;
-import org.hamcrest.core.IsSame;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -15,9 +12,7 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
  class DemarshallableMethodReaderTest {
 
@@ -54,15 +49,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
         AtomicReference<SelfDescribingDemarshallableObject> marshalledObjectRef = new AtomicReference<>();
 
         MessageListener messageListenerAssertion = value -> {
-            assertThat(value instanceof SelfDescribingDemarshallableObject, Is.is(true));
+            assertInstanceOf(SelfDescribingDemarshallableObject.class, value);
             SelfDescribingDemarshallableObject obj = (SelfDescribingDemarshallableObject) value;
             if (marshalledObjectRef.get() == null) {
                 marshalledObjectRef.set(obj);
             } else {
-                assertThat(obj, not(IsSame.sameInstance(marshalledObjectRef.get())));
+                assertNotSame(marshalledObjectRef.get(), obj);
             }
-            assertThat(obj.name, IsNot.not(nullValue()));
-            assertThat(obj.value, IsNot.not(Double.NaN));
+            assertNotNull(obj.name);
+            assertNotEquals(Double.NaN, obj.value);
             System.out.println("Received message: " + obj.name + ", id: " + obj.value);
         };
 

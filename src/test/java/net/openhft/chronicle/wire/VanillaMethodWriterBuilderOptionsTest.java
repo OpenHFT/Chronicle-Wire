@@ -12,7 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class VanillaMethodWriterBuilderOptionsTest extends WireTestCommon {
+public class VanillaMethodWriterBuilderOptionsTest extends WireTestCommon {
 
     interface Events {
         void event(String s);

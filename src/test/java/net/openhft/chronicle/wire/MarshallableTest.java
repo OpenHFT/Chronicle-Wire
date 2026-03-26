@@ -118,7 +118,7 @@ class MarshallableTest extends WireTestCommon {
     }
 
     // TODO: This test is currently ignored. The copy process using WireType.YAML_ONLY needs to be fixed.
-    @Disabled(/* TODO FIX */)
+    @Disabled("TODO FIX")
     @Test
     void testCopyYaml() {
         doTestCopy(WireType.YAML_ONLY);

@@ -14,7 +14,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class GenerateMethodWriter2CoverageTest extends WireTestCommon {
+public class GenerateMethodWriter2CoverageTest extends WireTestCommon {
 
     @Test
     void generatesNestedWritersWithMethodIds() {

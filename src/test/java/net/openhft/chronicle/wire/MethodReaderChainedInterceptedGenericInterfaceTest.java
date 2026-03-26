@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * This class tests the capability of the MethodReader to handle parametrized interfaces hierarchy and chained calls.
  * This pattern arises when using Web Gateway.
  */
-class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTestCommon {
+public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTestCommon {
     @SuppressWarnings("deprecation")
     @Test
     void testDefinitive() {

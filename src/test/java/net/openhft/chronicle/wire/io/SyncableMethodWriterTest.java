@@ -21,7 +21,7 @@ import java.io.FileNotFoundException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
+public class SyncableMethodWriterTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     // A custom interface combining message sending (say) and synchronization capabilities (sync)
     interface SayAndSync extends Syncable {

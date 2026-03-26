@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * This class tests the capability of MethodWriter to handle methods with nested return types.
  * It extends the WireTestCommon for common test setup and utilities.
  */
-class MethodWriterNestedReturnTypeTest extends WireTestCommon {
+public class MethodWriterNestedReturnTypeTest extends WireTestCommon {
 
     /**
      * This test ensures that MethodWriter can handle methods with nested return types without resorting to proxy classes.

@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * This class provides tests for non-standard instances being passed to the MethodReader.
  * It extends the WireTestCommon which provides utilities for monitoring thread and exception behaviors during tests.
  */
-class MethodReaderNonStandardInstancesTest extends WireTestCommon {
+public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
 
     /**
      * Test case to verify that an anonymous class can be passed to MethodReader.

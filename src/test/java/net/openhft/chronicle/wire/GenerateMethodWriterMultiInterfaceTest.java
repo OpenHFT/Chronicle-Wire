@@ -12,7 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class GenerateMethodWriterMultiInterfaceTest extends WireTestCommon {
+public class GenerateMethodWriterMultiInterfaceTest extends WireTestCommon {
 
     interface First {
         void one(int v);

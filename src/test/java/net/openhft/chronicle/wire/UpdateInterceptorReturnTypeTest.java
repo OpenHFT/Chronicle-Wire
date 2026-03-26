@@ -17,7 +17,7 @@ import static net.openhft.chronicle.wire.WireType.BINARY;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-class UpdateInterceptorReturnTypeTest extends WireTestCommon {
+public class UpdateInterceptorReturnTypeTest extends WireTestCommon {
 
     // Parameterized value to determine if proxy code generation is disabled
     private boolean disableProxyCodegen;

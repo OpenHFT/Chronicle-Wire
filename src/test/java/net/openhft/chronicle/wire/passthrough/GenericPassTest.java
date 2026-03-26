@@ -60,12 +60,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
         Wire wire0 = new TextWire(bytes0).useTextDocuments();
 
         // Attempt to read the opaque message and expect an exception
-        try {
-            wire0.getValueIn().object();
-            fail(); // Fail if no exception is thrown
-        } catch (Exception ise) {
-            // Expected exception caught
-        }
+        assertThrows(Exception.class, () -> wire0.getValueIn().object());
 
         // Setup wire1 for writing the opaque message
         Wire wire1 = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
@@ -99,12 +94,7 @@ public class GenericPassTest extends net.openhft.chronicle.wire.WireTestCommon {
         Wire wire0 = new BinaryWire(bytes0);
 
         // Attempt to read the opaque message and expect an exception
-        try {
-            wire0.getValueIn().object();
-            fail(); // Fail if no exception is thrown
-        } catch (Exception ise) {
-            // Expected exception caught
-        }
+        assertThrows(Exception.class, () -> wire0.getValueIn().object());
 
         // Setup wire1 for writing the opaque message
         Wire wire1 = new BinaryWire(new HexDumpBytes());

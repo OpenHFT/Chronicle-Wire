@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MethodReaderArgumentsRecycleTest extends WireTestCommon {
+public class MethodReaderArgumentsRecycleTest extends WireTestCommon {
 
     // Interface that represents the different method signatures we want to test.
     private MyInterface writer;

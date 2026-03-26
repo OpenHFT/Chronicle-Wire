@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MethodReaderInterceptorReturnsTest extends WireTestCommon {
+public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
 
     // Setting up before the tests
     @Override

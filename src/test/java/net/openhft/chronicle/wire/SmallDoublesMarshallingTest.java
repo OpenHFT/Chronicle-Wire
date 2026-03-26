@@ -3,10 +3,8 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
 // A test class to ensure small double values are marshaled and unmarshaled correctly using
@@ -35,7 +33,7 @@ class SmallDoublesMarshallingTest extends WireTestCommon {
         final String textRepr = example.toString();
         final Example demarshalled = WireType.TEXT.fromString(Example.class, textRepr);
 
-        MatcherAssert.assertThat(textRepr, containsString("1.104326320059551E-14"));
+        assertTrue(textRepr.contains("1.104326320059551E-14"));
         assertEquals(example.doubleVal(), demarshalled.doubleVal(), 1e-14);
     }
 }

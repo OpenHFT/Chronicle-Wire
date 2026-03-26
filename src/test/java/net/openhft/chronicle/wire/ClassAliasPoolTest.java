@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 import static org.easymock.EasyMock.*;
 import static org.junit.jupiter.api.Assertions.*;
 
- class ClassAliasPoolTest extends WireTestCommon {
+public class ClassAliasPoolTest extends WireTestCommon {
 
     // Helper method to match char sequences in a mock setup
     private static CharSequence charSequence(String text) {

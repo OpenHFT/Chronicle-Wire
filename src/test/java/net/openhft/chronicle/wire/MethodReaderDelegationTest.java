@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static net.openhft.chronicle.wire.VanillaMethodReaderBuilder.DISABLE_READER_PROXY_CODEGEN;
 import static org.junit.jupiter.api.Assertions.*;
 
-class MethodReaderDelegationTest extends WireTestCommon {
+public class MethodReaderDelegationTest extends WireTestCommon {
 
     // Define parameters for this parameterized test
     public static Collection<Object[]> data() {

@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Smoke test that toggles codegen/proxy path via system property and verifies
  * events still round-trip through MethodWriter/Reader.
  */
- class MethodWriterCodegenToggleTest extends WireTestCommon {
+public class MethodWriterCodegenToggleTest extends WireTestCommon {
 
     interface API { void a(int x); void b(String s); }
 

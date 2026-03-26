@@ -12,7 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MethodWriterReaderDispatchTest extends WireTestCommon {
+public class MethodWriterReaderDispatchTest extends WireTestCommon {
 
     interface Api {
         void a(int i);

@@ -11,9 +11,6 @@ import org.junit.jupiter.api.Test;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
@@ -81,18 +78,14 @@ class UnknownEnumTest extends WireTestCommon {
     // This test ensures that TextWire produces a friendly error message for unknown Enum types
     @Test
     void shouldGenerateFriendlyErrorMessageWhenTypeIsNotKnownInTextWire() {
-        try {
+        Exception thrown = assertThrows(Exception.class, () -> {
             final Wire textWire = TextWire.from("enumField: !UnknownEnum QUX")
                     .generateTuples(true);
             textWire.getValueIn().wireIn().read("enumField").object();
-
-            fail(); // This point should not be reached
-        } catch (Exception e) {
-            // Ensuring the error message is in the expected format
-            String message = e.getMessage().replaceAll(" [a-z0-9.]+.Proxy\\d+", " ProxyXX");
-            assertThat(message,
-                    is(equalTo("Trying to read marshallable class ProxyXX at [pos: 23, rlim: 27, wlim: 27, cap: 27 ]  QUX expected to find a {")));
-        }
+        });
+        // Ensuring the error message is in the expected format
+        String message = thrown.getMessage().replaceAll(" [a-z0-9.]+.Proxy\\d+", " ProxyXX");
+        assertEquals("Trying to read marshallable class ProxyXX at [pos: 23, rlim: 27, wlim: 27, cap: 27 ]  QUX expected to find a {", message);
     }
 
     @SuppressWarnings("deprecation")

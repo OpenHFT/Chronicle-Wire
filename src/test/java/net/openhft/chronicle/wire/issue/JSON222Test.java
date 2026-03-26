@@ -59,7 +59,7 @@ class JSON222Test extends WireTestCommon {
     }
 
     // Temporarily ignore this test; will be re-enabled once fixed
-    @Disabled(/* TODO FIX */)
+    @Disabled("TODO FIX")
     @ParameterizedTest
     @MethodSource("combinations")
     void testJSONAsYamlWire(String fileName, File file) throws IOException {

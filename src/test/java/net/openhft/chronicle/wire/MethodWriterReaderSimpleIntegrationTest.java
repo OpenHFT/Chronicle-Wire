@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Small end‑to‑end flow using MethodWriter and VanillaMethodReader to
  * exercise method dispatch and basic argument serialisation.
  */
-class MethodWriterReaderSimpleIntegrationTest extends WireTestCommon {
+public class MethodWriterReaderSimpleIntegrationTest extends WireTestCommon {
 
     interface Echo {
         void one(int v);

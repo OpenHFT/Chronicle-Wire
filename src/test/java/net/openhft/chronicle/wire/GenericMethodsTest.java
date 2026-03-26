@@ -17,7 +17,7 @@ interface MyInterface<I extends MyInterface<I>> {
 }
 
 // Test class to validate the behavior of generic methods in the context of Wire operations
-class GenericMethodsTest extends WireTestCommon {
+public class GenericMethodsTest extends WireTestCommon {
 
     // Test for chained method calls with TextWire
     @Test
