@@ -6,21 +6,21 @@ package net.openhft.chronicle.wire.issue;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * @author ryanlea
  */
-public class WireBug35Test extends WireTestCommon {
+class WireBug35Test extends WireTestCommon {
 
     @Test
-    public void objectsInSequence() {
+    void objectsInSequence() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -40,7 +40,7 @@ public class WireBug35Test extends WireTestCommon {
     }
 
     @Test
-    public void objectsInSequenceBinaryWire() {
+    void objectsInSequenceBinaryWire() {
         final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         final Wire wire = WireType.BINARY.apply(bytes);
         wire.write(() -> "seq").sequence(seq -> {

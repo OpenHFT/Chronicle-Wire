@@ -7,14 +7,14 @@ import net.openhft.chronicle.wire.JSONWire;
 import net.openhft.chronicle.wire.JsonUtil;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class to validate the serialization behavior of a map using JSONWire.
@@ -22,13 +22,13 @@ import static org.junit.Assert.assertEquals;
  * This test is designed to ensure the keys are correctly serialized as strings.
  * It extends WireTestCommon for utility behaviors related to Wire tests.
  */
-public class Issue328Test extends WireTestCommon {
+class Issue328Test extends WireTestCommon {
 
     /**
      * Tests the serialization of a map where the keys are integers and values are their string representations.
      */
     @Test
-    public void map() {
+    void map() {
         // Initializes a wire with JSON format and types set to true.
         final Wire wire = new JSONWire().useTypes(true);
         final int size = 3;

@@ -12,10 +12,9 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
@@ -24,22 +23,15 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(value = Parameterized.class)
-public class JSON222Test extends WireTestCommon {
+class JSON222Test extends WireTestCommon {
 
     @NotNull
-    private final File file;
-
-    // Constructor that accepts parameters for each test iteration
-    public JSON222Test(@NotNull String fileName, File file) {
-        this.file = file;
-    }
+    private File file;
 
     // Provide the test parameters from a collection of files found in a specific directory
     @NotNull
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
 
@@ -58,15 +50,19 @@ public class JSON222Test extends WireTestCommon {
     }
 
     // Test the JSON content using TextWire type
-    @Test
-    public void testJSONAsTextWire() throws IOException {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    void testJSONAsTextWire(String fileName, File file) throws IOException {
+        this.file = file;
         testJSON(WireType.TEXT);
     }
 
     // Temporarily ignore this test; will be re-enabled once fixed
-    @Ignore(/* TODO FIX */)
-    @Test
-    public void testJSONAsYamlWire() throws IOException {
+    @Disabled("TODO FIX")
+    @ParameterizedTest
+    @MethodSource("combinations")
+    void testJSONAsYamlWire(String fileName, File file) throws IOException {
+        this.file = file;
         testJSON(WireType.YAML_ONLY);
     }
 

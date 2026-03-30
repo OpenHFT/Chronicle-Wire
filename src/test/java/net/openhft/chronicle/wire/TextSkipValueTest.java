@@ -4,30 +4,22 @@
 package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(value = Parameterized.class)
-public class TextSkipValueTest extends WireTestCommon {
+class TextSkipValueTest extends WireTestCommon {
 
     // This will store the input string for each run of the test.
-    private final String input;
-
-    // Constructor that initializes the 'input' member variable.
-    public TextSkipValueTest(String input) {
-        this.input = input;
-    }
+    private String input;
 
     // This method provides the parameters (inputs) for the test.
     @NotNull
-    @Parameterized.Parameters
     public static Collection<Object[]> combinations() {
         List<Object[]> list = new ArrayList<>();
         // Here are the different inputs we are testing:
@@ -79,13 +71,15 @@ public class TextSkipValueTest extends WireTestCommon {
     }
 
     // This is the actual test that will run once for each input string provided by combinations() method.
-    @Test
-    public void skipValue() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    void skipValue(String input) {
+        this.input = input;
         // Create a TextWire from the input string.
         Wire wire = TextWire.from(input);
         // Try to skip the value in the input string.
         wire.getValueIn()
-            .skipValue();
+                .skipValue();
         // Consume any padding in the wire.
         wire.consumePadding();
         // After skipping the value and consuming padding,

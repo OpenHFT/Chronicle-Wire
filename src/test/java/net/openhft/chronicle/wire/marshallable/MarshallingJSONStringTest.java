@@ -10,13 +10,11 @@ import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireIn;
 import net.openhft.chronicle.wire.WireOut;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class MarshallingJSONStringTest implements Marshallable {
+class MarshallingJSONStringTest implements Marshallable {
 
     private String configAsJSON;
 
@@ -31,7 +29,7 @@ public class MarshallingJSONStringTest implements Marshallable {
     }
 
     @Test
-    public void testNoPrefixAddedToJson() {
+    void testNoPrefixAddedToJson() {
 
         String configJson = "!net.openhft.chronicle.wire.marshallable.MarshallingJSONStringTest {\n" +
                 "  config: {\n" +
@@ -42,7 +40,7 @@ public class MarshallingJSONStringTest implements Marshallable {
                 "  }\n" +
                 "}";
         String expectedJson = "{\n" +
-        "    \"username\": \"sampleApp\",\n" +
+                "    \"username\": \"sampleApp\",\n" +
                 "    \"password\": \"samplePassword\",\n" +
                 "    \"publishPort\": 4021,\n" +
                 "    \"subscribePort\": 4024,\n" +
@@ -53,7 +51,7 @@ public class MarshallingJSONStringTest implements Marshallable {
     }
 
     @Test
-    public void readingJsonListWithNestedSingleListAsLastElement() {
+    void readingJsonListWithNestedSingleListAsLastElement() {
         ClassAliasPool.CLASS_ALIASES.addAlias(NestedList.class);
         String jsonText = "{\n" +
                 "  items: [\n" +
@@ -70,13 +68,13 @@ public class MarshallingJSONStringTest implements Marshallable {
                 "}\n";
 
         NestedList read = Marshallable.fromString(NestedList.class, jsonText);
-        Assert.assertNotNull(read);
+        assertNotNull(read);
         String actualJson = read.toString();
         assertEquals(expectedJson, actualJson);
     }
 
     @Test
-    public void readingJsonListWithNestedSingleListInMiddle() {
+    void readingJsonListWithNestedSingleListInMiddle() {
         ClassAliasPool.CLASS_ALIASES.addAlias(NestedList.class);
         String jsonText = "{\n" +
                 "  items: [\n" +
@@ -93,7 +91,7 @@ public class MarshallingJSONStringTest implements Marshallable {
                 "}\n";
 
         NestedList read = Marshallable.fromString(NestedList.class, jsonText);
-        Assert.assertNotNull(read);
+        assertNotNull(read);
         String actualJson = read.toString();
         assertEquals(expectedJson, actualJson);
     }

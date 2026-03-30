@@ -8,25 +8,24 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * Test class to validate behaviors associated with class aliases in the context of Wire.
  * This test extends the WireTestCommon for utility behaviors related to Wire tests.
  */
-public class Issue277Test extends WireTestCommon {
+class Issue277Test extends WireTestCommon {
 
     /**
      * Sets up the testing environment before executing the test methods.
      * It specifically adds class aliases to the ClassAliasPool.
      */
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         // Add class aliases for Data1 and Data2 to the ClassAliasPool
         ClassAliasPool.CLASS_ALIASES.addAlias(Data1.class);
         ClassAliasPool.CLASS_ALIASES.addAlias(Data2.class);
@@ -45,7 +44,7 @@ public class Issue277Test extends WireTestCommon {
      * This test does not expect a RuntimeException because a correct class alias is provided.
      */
     @Test
-    public void isOk() {
+    void isOk() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Deserialize the sample data into a Data2 object without throwing an exception
@@ -63,13 +62,12 @@ public class Issue277Test extends WireTestCommon {
      * Aims to reproduce a ClassCastException by trying to parse a Data1 serialized data
      * as if it was a Data2 serialized data without providing the class alias.
      */
-    @Test(expected = ClassCastException.class)
-    public void reproduce() {
+    @Test
+    void reproduce() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // This operation should fail and throw a ClassCastException
-        Data2 o2 = WireType.TEXT.fromString(data);
-        fail("" + o2);
+        assertThrows(ClassCastException.class, () -> Data2.class.cast(WireType.TEXT.fromString(data)));
     }
 
     /**

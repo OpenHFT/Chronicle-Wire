@@ -6,21 +6,21 @@ package net.openhft.chronicle.wire.converter;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * The Base64Test class tests the Base64 encoding and decoding functionalities
  * using the facilities provided by the WireTestCommon.
  */
-public class Base64Test extends net.openhft.chronicle.wire.WireTestCommon {
+class Base64Test extends net.openhft.chronicle.wire.WireTestCommon {
 
     /**
      * Test the Base64 encoding for various field types and validate against expected outputs.
      */
     @Test
-    public void onAnField() {
+    void onAnField() {
         // Create a new YAML wire with memory allocated on the heap
         Wire wire = Wire.newYamlWireOnHeap();
 

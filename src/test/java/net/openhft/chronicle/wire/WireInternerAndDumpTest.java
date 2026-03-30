@@ -4,17 +4,17 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Light checks for string interning via WireInternal and simple dump content.
  */
-public class WireInternerAndDumpTest extends WireTestCommon {
+class WireInternerAndDumpTest extends WireTestCommon {
 
     @Test
-    public void textWireInternsRepeatedStrings() {
+    void textWireInternsRepeatedStrings() {
         TextWire w = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
         try (DocumentContext dc = w.writingDocument()) {
             dc.wire().write("k").text("alpha");
@@ -36,7 +36,7 @@ public class WireInternerAndDumpTest extends WireTestCommon {
     }
 
     @Test
-    public void binaryWireHexDumpContainsKeys() {
+    void binaryWireHexDumpContainsKeys() {
         Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap(128));
         try (DocumentContext dc = w.writingDocument()) {
             dc.wire().write("foo").int32(42);

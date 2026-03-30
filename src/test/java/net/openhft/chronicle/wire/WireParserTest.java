@@ -4,14 +4,14 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class WireParserTest extends WireTestCommon {
+class WireParserTest extends WireTestCommon {
 
     @Test
-    public void noOpReadOne() {
+    void noOpReadOne() {
         // Create an elastic byte buffer with an initial capacity of 128 bytes.
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
 

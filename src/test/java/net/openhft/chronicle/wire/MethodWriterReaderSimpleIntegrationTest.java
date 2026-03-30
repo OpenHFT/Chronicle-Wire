@@ -5,12 +5,12 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Small end‑to‑end flow using MethodWriter and VanillaMethodReader to
@@ -27,7 +27,7 @@ public class MethodWriterReaderSimpleIntegrationTest extends WireTestCommon {
     }
 
     @Test
-    public void roundTrip() {
+    void roundTrip() {
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap(256));
 
         Echo writer = w.methodWriter(Echo.class);
@@ -38,11 +38,19 @@ public class MethodWriterReaderSimpleIntegrationTest extends WireTestCommon {
         List<String> seen = new ArrayList<>();
         MethodReader reader = w.methodReader(new Echo() {
             @Override
-            public void one(int v) { seen.add("one:" + v); }
+            public void one(int v) {
+                seen.add("one:" + v);
+            }
+
             @Override
-            public void two(String t) { seen.add("two:" + t); }
+            public void two(String t) {
+                seen.add("two:" + t);
+            }
+
             @Override
-            public void three(long a, double b) { seen.add("three:" + a + "," + b); }
+            public void three(long a, double b) {
+                seen.add("three:" + a + "," + b);
+            }
         });
 
         while (reader.readOne()) {

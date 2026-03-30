@@ -8,45 +8,45 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.wire.*;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.lang.reflect.Proxy;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 // Test class extending WireTestCommon to test method writing and reading via interface implementations
 public class MethodWriterByInterfaceTest extends WireTestCommon {
 
     // Setup method to configure default object creation for interfaces before each test
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         ObjectUtils.defaultObjectForInterface(c -> Class.forName(c.getName() + "mpl"));
     }
 
     // Teardown method to reset default object creation for interfaces after each test
-    @After
-    public void teardown() {
+    @AfterEach
+    void teardown() {
         ObjectUtils.defaultObjectForInterface(c -> c);
     }
 
     // Test method writing and reading via implementation with text wire type
     @Test
-    public void writeReadViaImplementation() {
+    void writeReadViaImplementation() {
         checkWriteReadViaImplementation(WireType.TEXT, false);
     }
 
     // Test method writing and reading with text wire type and tuple generation enabled
     @Test
-    public void writeReadViaImplementationGenerateTuples() {
+    void writeReadViaImplementationGenerateTuples() {
         checkWriteReadViaImplementation(WireType.TEXT, true);
     }
 
     // Test method writing and reading via implementation with YAML wire type
     @Test
-    public void writeReadViaImplementationYaml() {
+    void writeReadViaImplementationYaml() {
         checkWriteReadViaImplementation(WireType.YAML_ONLY, false);
     }
 

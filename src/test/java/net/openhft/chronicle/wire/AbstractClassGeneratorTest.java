@@ -6,7 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.UpdateInterceptor;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.lang.reflect.Method;
@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 // Generator for simple classes based on SimpleMetaData
 class SimpleClassGenerator extends AbstractClassGenerator<SimpleMetaData> {
@@ -73,11 +73,11 @@ class SimpleMetaData extends AbstractClassGenerator.MetaData<SimpleMetaData> {
 }
 
 // Tests for the AbstractClassGenerator's functionality
-public class AbstractClassGeneratorTest extends WireTestCommon {
+class AbstractClassGeneratorTest extends WireTestCommon {
 
     // Test case to validate the SimpleClassGenerator's functionality
     @Test
-    public void simpleGenerator() throws Exception {
+    void simpleGenerator() throws Exception {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         doTest("Hello World");
@@ -102,7 +102,7 @@ public class AbstractClassGeneratorTest extends WireTestCommon {
     // Test Cases
     // Test case to validate the interceptor's functionality in the UIClassGenerator
     @Test
-    public void useInterceptor() throws Exception {
+    void useInterceptor() throws Exception {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // StringWriter to capture the interceptor's output

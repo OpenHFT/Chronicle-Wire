@@ -7,28 +7,24 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
 import net.openhft.chronicle.wire.*;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
 
 import java.time.ZoneId;
 import java.util.Map;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
-public class NullFieldMarshallingTest extends WireTestCommon {
+class NullFieldMarshallingTest extends WireTestCommon {
     private Map<ExceptionKey, Integer> exceptions;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         exceptions = Jvm.recordExceptions();
     }
 
-    @After
-    public void checkExceptions() {
+    @AfterEach
+    protected void checkExceptions() {
         // find any discarded resources.
         System.gc();
         Jvm.pause(Jvm.isAzulZing() ? 100 : 10);
@@ -36,12 +32,12 @@ public class NullFieldMarshallingTest extends WireTestCommon {
         if (Jvm.hasException(exceptions)) {
             Jvm.dumpException(exceptions);
             Jvm.resetExceptionHandlers();
-            Assert.fail();
+            fail();
         }
     }
 
     @Test
-    public void testAbstractNullFieldUnmarshalledCorrectlyText() {
+    void testAbstractNullFieldUnmarshalledCorrectlyText() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         VO object = new VO();
@@ -54,7 +50,7 @@ public class NullFieldMarshallingTest extends WireTestCommon {
     }
 
     @Test
-    public void testAbstractNullFieldUnmarshalledCorrectlyBinary() {
+    void testAbstractNullFieldUnmarshalledCorrectlyBinary() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         VO object = new VO();

@@ -6,9 +6,9 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.util.Mocker;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * This class tests the capability of the MethodReader to handle super interfaces with multiple return types.
@@ -21,9 +21,9 @@ public class MethodReaderSuperInterfaceForSeveralReturnTypesTest extends WireTes
      * It aims to verify that method calls from interfaces `A`, `B`, and `C` (all having a relation to interface `D`)
      * are correctly written to and read from a BinaryWire.
      */
-    @SuppressWarnings("deprecation")
     @Test
-    public void test() {
+    @SuppressWarnings("deprecation")
+    void test() {
         // Initialization of the wire with padding
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);

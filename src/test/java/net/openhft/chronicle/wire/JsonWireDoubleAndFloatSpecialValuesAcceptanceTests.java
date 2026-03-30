@@ -4,7 +4,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -12,7 +11,7 @@ import java.util.function.DoublePredicate;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Acceptance tests for JSON Wire Double and Float special value handling, e.g. NaN, Infinity.
@@ -65,8 +64,8 @@ class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
         // Deserialize back to an object, ensure that the special value is retained
         JSONWire outputWire = JSONWire.from(text);
         DoubleDto object = outputWire.getValueIn().object(DoubleDto.class);
-        Assertions.assertNotNull(object);
-        Assertions.assertTrue(doubleTestInput.expectOutputDoubleToMatchThisPredicate.test(object.value));
+        assertNotNull(object);
+        assertTrue(doubleTestInput.expectOutputDoubleToMatchThisPredicate.test(object.value));
     }
 
     @ParameterizedTest
@@ -85,8 +84,8 @@ class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
         // Deserialize back to an object, ensure that the special value is retained
         JSONWire outputWire = JSONWire.from(text);
         FloatDto object = outputWire.getValueIn().object(FloatDto.class);
-        Assertions.assertNotNull(object);
-        Assertions.assertTrue(floatTestInput.expectOutputFloatToMatchThisPredicate.test(object.value));
+        assertNotNull(object);
+        assertTrue(floatTestInput.expectOutputFloatToMatchThisPredicate.test(object.value));
     }
 
     private static Stream<DoubleTestInput> doubleTestInputs() {
@@ -194,5 +193,4 @@ class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
             this.value = value;
         }
     }
-
 }

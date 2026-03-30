@@ -7,11 +7,11 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class extending WireTestCommon to validate the pass-through functionality of method writers
@@ -24,7 +24,7 @@ public class PassThroughTest extends WireTestCommon {
      * read and pass through the input text correctly.
      */
     @Test
-    public void testPassThroughputText() {
+    void testPassThroughputText() {
         String input = "" +
                 "to: dest1\n" +
                 "send: message\n" +
@@ -69,7 +69,7 @@ public class PassThroughTest extends WireTestCommon {
      * matches the expected format.
      */
     @Test
-    public void methodWriterText() {
+    void methodWriterText() {
         Wire wire2 = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         final Destination destination = wire2.methodWriter(Destination.class);
         try (DocumentContext dc = destination.to("dest")) {
@@ -78,10 +78,9 @@ public class PassThroughTest extends WireTestCommon {
 
         // Assert the content written to wire2
         assertEquals("" +
-                        "to: dest\n" +
-                        "send: message\n" +
-                        "...\n",
-                wire2.toString());
+                "to: dest\n" +
+                "send: message\n" +
+                "...\n", wire2.toString());
     }
 
     /**
@@ -89,7 +88,7 @@ public class PassThroughTest extends WireTestCommon {
      * read and pass through the input YAML text correctly.
      */
     @Test
-    public void testPassThroughputYaml() {
+    void testPassThroughputYaml() {
         String input = "" +
                 "to: dest1\n" +
                 "send: message\n" +
@@ -134,7 +133,7 @@ public class PassThroughTest extends WireTestCommon {
      * matches the expected YAML format.
      */
     @Test
-    public void methodWriterYaml() {
+    void methodWriterYaml() {
         // Create a YAML wire for writing
         Wire wire2 = Wire.newYamlWireOnHeap();
         final Destination destination = wire2.methodWriter(Destination.class);
@@ -146,10 +145,9 @@ public class PassThroughTest extends WireTestCommon {
 
         // Assert the content written to wire2
         assertEquals("" +
-                        "to: dest\n" +
-                        "send: message\n" +
-                        "...\n",
-                wire2.toString());
+                "to: dest\n" +
+                "send: message\n" +
+                "...\n", wire2.toString());
     }
 
     /**
@@ -157,7 +155,7 @@ public class PassThroughTest extends WireTestCommon {
      * read and pass through binary formatted messages correctly.
      */
     @Test
-    public void testPassThroughputBinary() {
+    void testPassThroughputBinary() {
         String input = "" +
                 "to: dest1\n" +
                 "send: message\n" +
@@ -182,21 +180,20 @@ public class PassThroughTest extends WireTestCommon {
 
         // Assert the binary output
         assertEquals("" +
-                        "18 00 00 00                                     # msg-length\n" +
-                        "b9 02 74 6f                                     # to: (event)\n" +
-                        "e5 64 65 73 74 31                               # dest1\n" +
-                        "b9 04 73 65 6e 64                               # send: (event)\n" +
-                        "e7 6d 65 73 73 61 67 65                         # message\n" +
-                        "32 00 00 00                                     # msg-length\n" +
-                        "b9 02 74 6f                                     # to: (event)\n" +
-                        "e5 64 65 73 74 32                               # dest2\n" +
-                        "b9 05 73 65 6e 64 73                            # sends: (event)\n" +
-                        "82 1c 00 00 00                                  # MapMarshaller\n" +
-                        "b9 03 6f 6e 65                                  # one: (event)\n" +
-                        "a7 01 00 00 00 00 00 00 00                      # 1\n" +
-                        "b9 03 74 77 6f                                  # two: (event)\n" +
-                        "a7 02 00 00 00 00 00 00 00                      # 2\n",
-                wire2.bytes().toHexString());
+                "18 00 00 00                                     # msg-length\n" +
+                "b9 02 74 6f                                     # to: (event)\n" +
+                "e5 64 65 73 74 31                               # dest1\n" +
+                "b9 04 73 65 6e 64                               # send: (event)\n" +
+                "e7 6d 65 73 73 61 67 65                         # message\n" +
+                "32 00 00 00                                     # msg-length\n" +
+                "b9 02 74 6f                                     # to: (event)\n" +
+                "e5 64 65 73 74 32                               # dest2\n" +
+                "b9 05 73 65 6e 64 73                            # sends: (event)\n" +
+                "82 1c 00 00 00                                  # MapMarshaller\n" +
+                "b9 03 6f 6e 65                                  # one: (event)\n" +
+                "a7 01 00 00 00 00 00 00 00                      # 1\n" +
+                "b9 03 74 77 6f                                  # two: (event)\n" +
+                "a7 02 00 00 00 00 00 00 00                      # 2\n", wire2.bytes().toHexString());
 
         // Setup another binary wire for reading the output of wire2 and assert the result
         Bytes<?> bytes3 = new HexDumpBytes();
@@ -214,17 +211,16 @@ public class PassThroughTest extends WireTestCommon {
         for (int i = 2; i >= 0; i--)
             assertEquals(i > 0, reader2.readOne());
         assertEquals("" +
-                        "17 00 00 00                                     # msg-length\n" +
-                        "c2 74 6f                                        # to:\n" +
-                        "e5 64 65 73 74 31                               # dest1\n" +
-                        "b9 04 73 65 6e 64 e7 6d 65 73 73 61 67 65       # passed-through\n" +
-                        "31 00 00 00                                     # msg-length\n" +
-                        "c2 74 6f                                        # to:\n" +
-                        "e5 64 65 73 74 32                               # dest2\n" +
-                        "b9 05 73 65 6e 64 73 82 1c 00 00 00 b9 03 6f 6e # passed-through\n" +
-                        "65 a7 01 00 00 00 00 00 00 00 b9 03 74 77 6f a7\n" +
-                        "02 00 00 00 00 00 00 00\n",
-                wire3.bytes().toHexString().replaceAll("Lambda.*", "Lambda"));
+                "17 00 00 00                                     # msg-length\n" +
+                "c2 74 6f                                        # to:\n" +
+                "e5 64 65 73 74 31                               # dest1\n" +
+                "b9 04 73 65 6e 64 e7 6d 65 73 73 61 67 65       # passed-through\n" +
+                "31 00 00 00                                     # msg-length\n" +
+                "c2 74 6f                                        # to:\n" +
+                "e5 64 65 73 74 32                               # dest2\n" +
+                "b9 05 73 65 6e 64 73 82 1c 00 00 00 b9 03 6f 6e # passed-through\n" +
+                "65 a7 01 00 00 00 00 00 00 00 b9 03 74 77 6f a7\n" +
+                "02 00 00 00 00 00 00 00\n", wire3.bytes().toHexString().replaceAll("Lambda.*", "Lambda"));
 
         // Setup a text wire for reading the output of wire3 and compare it to the original input
         Wire wire4 = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
@@ -245,7 +241,7 @@ public class PassThroughTest extends WireTestCommon {
      * matches the expected binary format.
      */
     @Test
-    public void methodWriterBinary() {
+    void methodWriterBinary() {
         // Create a binary wire for writing
         Wire wire2 = WireType.BINARY_LIGHT.apply(new HexDumpBytes());
         final Destination destination = wire2.methodWriter(Destination.class);
@@ -257,12 +253,11 @@ public class PassThroughTest extends WireTestCommon {
 
         // Assert the content written to wire2 in binary format
         assertEquals("" +
-                        "16 00 00 00                                     # msg-length\n" +
-                        "b9 02 74 6f                                     # to: (event)\n" +
-                        "e4 64 65 73 74                                  # dest\n" +
-                        "c4 73 65 6e 64                                  # send:\n" +
-                        "e7 6d 65 73 73 61 67 65                         # message\n",
-                wire2.bytes().toHexString());
+                "16 00 00 00                                     # msg-length\n" +
+                "b9 02 74 6f                                     # to: (event)\n" +
+                "e4 64 65 73 74                                  # dest\n" +
+                "c4 73 65 6e 64                                  # send:\n" +
+                "e7 6d 65 73 73 61 67 65                         # message\n", wire2.bytes().toHexString());
     }
 
     /**

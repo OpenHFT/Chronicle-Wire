@@ -5,24 +5,24 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.BitSet;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
-public class BitSetTest extends WireTestCommon {
+class BitSetTest extends WireTestCommon {
 
-    @Before
-    public void hasDirect() {
+    @BeforeEach
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     // Test the equality of a BitSet after being written and read from a wire
     @Test
-    public void testBitSetEquals() {
+    void testBitSetEquals() {
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.TEXT.apply(b);
@@ -32,7 +32,7 @@ public class BitSetTest extends WireTestCommon {
             wire.getValueOut().object(original);
 
             BitSet read = wire.getValueIn().object(BitSet.class);
-            Assert.assertEquals(original, read);
+            assertEquals(original, read);
         } finally {
             b.releaseLast();
         }
@@ -40,7 +40,7 @@ public class BitSetTest extends WireTestCommon {
 
     // Test the equality of a BitSet with multiple bits set after being written and read from a wire
     @Test
-    public void testBitSetEquals2() {
+    void testBitSetEquals2() {
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.TEXT.apply(b);
@@ -51,7 +51,7 @@ public class BitSetTest extends WireTestCommon {
             wire.getValueOut().object(original);
 
             BitSet read = wire.getValueIn().object(BitSet.class);
-            Assert.assertEquals(original, read);
+            assertEquals(original, read);
         } finally {
             b.releaseLast();
         }
@@ -59,7 +59,7 @@ public class BitSetTest extends WireTestCommon {
 
     // Test the conversion of a BitSet to text format after being written to a wire
     @Test
-    public void testBitSetToText() {
+    void testBitSetToText() {
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.TEXT.apply(b);
@@ -68,7 +68,7 @@ public class BitSetTest extends WireTestCommon {
             bs.set(10);
 
             wire.getValueOut().object(bs);
-            Assert.assertEquals("!!bitset [\n" +
+            assertEquals("!!bitset [\n" +
                     "  1024,\n" +
                     "  # 0000000000000000000000000000000000000000000000000000010000000000\n" +
                     "]\n", wire.toString());
@@ -79,7 +79,7 @@ public class BitSetTest extends WireTestCommon {
 
     // Test the conversion of a BitSet with multiple bits set to text format after being written to a wire
     @Test
-    public void testBitSet2ToText() {
+    void testBitSet2ToText() {
         Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = WireType.TEXT.apply(b);
@@ -88,7 +88,7 @@ public class BitSetTest extends WireTestCommon {
             bs.set(10);
             bs.set(89);
             wire.getValueOut().object(bs);
-            Assert.assertEquals("!!bitset [\n" +
+            assertEquals("!!bitset [\n" +
                     "  1024,\n" +
                     "  # 0000000000000000000000000000000000000000000000000000010000000000\n" +
                     "  33554432,\n" +
@@ -101,7 +101,7 @@ public class BitSetTest extends WireTestCommon {
 
     // Test reading a BitSet into an existing BitSet instance using 'using' from a wire
     @Test
-    public void testBitSetUsing() {
+    void testBitSetUsing() {
 
         BitSet using = new BitSet(4);
         using.set(1);
@@ -116,7 +116,7 @@ public class BitSetTest extends WireTestCommon {
             wire.getValueOut().object(original);
 
             BitSet read = wire.getValueIn().object(using, BitSet.class);
-            Assert.assertEquals(original, read);
+            assertEquals(original, read);
         } finally {
             b.releaseLast();
         }

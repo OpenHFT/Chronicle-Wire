@@ -4,32 +4,38 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class WireMarshallerDeepGraphTest extends WireTestCommon {
+class WireMarshallerDeepGraphTest extends WireTestCommon {
 
-    public static class Child extends SelfDescribingMarshallable {
+    static class Child extends SelfDescribingMarshallable {
         int id;
         String name;
-        public Child() {}
-        public Child(int id, String name) { this.id = id; this.name = name; }
+
+        public Child() {
+        }
+
+        public Child(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
     }
 
-    public static class Parent extends SelfDescribingMarshallable {
+    static class Parent extends SelfDescribingMarshallable {
         String title = "p";
         List<Child> children = new ArrayList<>();
         Map<String, Long> counters = new LinkedHashMap<>();
     }
 
     @Test
-    public void deepGraphBinaryAndText() {
+    void deepGraphBinaryAndText() {
         for (WireType wt : new WireType[]{WireType.BINARY, WireType.TEXT}) {
             Parent p = new Parent();
             p.children.add(new Child(1, "a"));

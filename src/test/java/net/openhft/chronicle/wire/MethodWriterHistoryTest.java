@@ -4,13 +4,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import net.openhft.chronicle.wire.ValueIn;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.bytes.MethodReader.MESSAGE_HISTORY_METHOD_ID;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MethodWriterHistoryTest extends WireTestCommon {
 
@@ -31,7 +29,7 @@ public class MethodWriterHistoryTest extends WireTestCommon {
     }
 
     @Test
-    public void historyEventIsPrependedWhenRecordingEnabled() {
+    void historyEventIsPrependedWhenRecordingEnabled() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(256);
         Wire wire = new RecordingTextWire(bytes);
         try {

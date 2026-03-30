@@ -5,20 +5,19 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * Exercises {@link Bytes} elastic behaviour without Wire involvement to prove capacity growth
  * maintains reader/writer cursor invariants.
  */
-public class ElasticBytesCapacityTest extends WireTestCommon {
+class ElasticBytesCapacityTest extends WireTestCommon {
 
     @Test
-    public void heapBytesGrowAndRestorePositions() {
+    void heapBytesGrowAndRestorePositions() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         try {
             assertElasticGrowthPreservesState(bytes);
@@ -28,7 +27,7 @@ public class ElasticBytesCapacityTest extends WireTestCommon {
     }
 
     @Test
-    public void directBytesGrowAndRestorePositions() {
+    void directBytesGrowAndRestorePositions() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         Bytes<?> bytes = Bytes.allocateElasticDirect(32);
         try {
@@ -43,8 +42,7 @@ public class ElasticBytesCapacityTest extends WireTestCommon {
         int payloadLength = (int) initialCapacity + 128;
         fill(bytes, payloadLength);
 
-        assertTrue("elastic buffer should grow when payload exceeds initial capacity",
-                bytes.realCapacity() >= initialCapacity);
+        assertTrue(bytes.realCapacity() >= initialCapacity, "elastic buffer should grow when payload exceeds initial capacity");
 
         long writePosition = bytes.writePosition();
         long readPosition = bytes.readPosition();
@@ -52,24 +50,24 @@ public class ElasticBytesCapacityTest extends WireTestCommon {
         long writeLimit = bytes.writeLimit();
 
         bytes.readPositionRemaining(0, writePosition);
-        assertEquals("read view should span written payload", writePosition, bytes.readLimit());
-        assertEquals("read view should reset to start", 0, bytes.readPosition());
+        assertEquals(writePosition, bytes.readLimit(), "read view should span written payload");
+        assertEquals(0, bytes.readPosition(), "read view should reset to start");
 
         bytes.readPosition(readPosition);
         bytes.readLimit(readLimit);
-        assertEquals("write limit unchanged by read slices", writeLimit, bytes.writeLimit());
+        assertEquals(writeLimit, bytes.writeLimit(), "write limit unchanged by read slices");
 
         Bytes<?> snapshot = bytes.bytesStore().bytesForRead();
         try {
             snapshot.readPositionRemaining(0, writePosition);
-            assertEquals("snapshot read limit aligns with payload", writePosition, snapshot.readLimit());
-            assertEquals("snapshot read position reset to zero", 0, snapshot.readPosition());
+            assertEquals(writePosition, snapshot.readLimit(), "snapshot read limit aligns with payload");
+            assertEquals(0, snapshot.readPosition(), "snapshot read position reset to zero");
         } finally {
             snapshot.releaseLast();
         }
 
-        assertEquals("original read position unaffected by snapshot", readPosition, bytes.readPosition());
-        assertEquals("original read limit unaffected by snapshot", readLimit, bytes.readLimit());
+        assertEquals(readPosition, bytes.readPosition(), "original read position unaffected by snapshot");
+        assertEquals(readLimit, bytes.readLimit(), "original read limit unaffected by snapshot");
 
         bytes.clear();
         assertEquals(0L, bytes.readPosition());

@@ -6,19 +6,16 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 // Class to test behavior of Wire in the context of Enums, especially unknown Enums
-public class UnknownEnumTest extends WireTestCommon {
+class UnknownEnumTest extends WireTestCommon {
 
     // Serialized map data, presumably representing an unknown Enum value for testing purposes
     private static final byte[] SERIALISED_MAP_DATA = new byte[]{
@@ -35,7 +32,7 @@ public class UnknownEnumTest extends WireTestCommon {
 
     // Test to check how the Wire handles an unknown dynamic Enum
     @Test
-    public void testUnknownDynamicEnum() {
+    void testUnknownDynamicEnum() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Wire wire = createWire();
@@ -54,7 +51,7 @@ public class UnknownEnumTest extends WireTestCommon {
 
     // Test to check how the Wire handles an unknown static Enum
     @Test
-    public void testUnknownStaticEnum() {
+    void testUnknownStaticEnum() {
         Wire wire = createWire();
         wire.write("value").text("Maybe");
 
@@ -65,32 +62,30 @@ public class UnknownEnumTest extends WireTestCommon {
     /*
     Documents the behaviour of BinaryWire when an enum type is unknown
      */
-    @Test(expected = ClassNotFoundRuntimeException.class)
-    public void shouldConvertEnumValueToStringWhenTypeIsNotKnownInBinaryWireThrows() {
-        final Bytes<ByteBuffer> bytes = Bytes.wrapForRead(ByteBuffer.wrap(SERIALISED_MAP_DATA));
+    @Test
+    void shouldConvertEnumValueToStringWhenTypeIsNotKnownInBinaryWireThrows() {
+        assertThrows(ClassNotFoundRuntimeException.class, () -> {
+            final Bytes<ByteBuffer> bytes = Bytes.wrapForRead(ByteBuffer.wrap(SERIALISED_MAP_DATA));
 
-        final Wire wire = WireType.BINARY.apply(bytes);
+            final Wire wire = WireType.BINARY.apply(bytes);
 
-        // Reading the serialized map data and ensuring the unknown Enum value is read as a String
-        final Map<String, Object> enumField = wire.read("event").marshallableAsMap(String.class, Object.class);
-        assertEquals("FIRST", enumField.get("key"));
+            // Reading the serialized map data and ensuring the unknown Enum value is read as a String
+            final Map<String, Object> enumField = wire.read("event").marshallableAsMap(String.class, Object.class);
+            assertEquals("FIRST", enumField.get("key"));
+        });
     }
 
     // This test ensures that TextWire produces a friendly error message for unknown Enum types
     @Test
-    public void shouldGenerateFriendlyErrorMessageWhenTypeIsNotKnownInTextWire() {
-        try {
+    void shouldGenerateFriendlyErrorMessageWhenTypeIsNotKnownInTextWire() {
+        Exception thrown = assertThrows(Exception.class, () -> {
             final Wire textWire = TextWire.from("enumField: !UnknownEnum QUX")
-                                            .generateTuples(true);
+                    .generateTuples(true);
             textWire.getValueIn().wireIn().read("enumField").object();
-
-            fail(); // This point should not be reached
-        } catch (Exception e) {
-            // Ensuring the error message is in the expected format
-            String message = e.getMessage().replaceAll(" [a-z0-9.]+.Proxy\\d+", " ProxyXX");
-            assertThat(message,
-                    is(equalTo("Trying to read marshallable class ProxyXX at [pos: 23, rlim: 27, wlim: 27, cap: 27 ]  QUX expected to find a {")));
-        }
+        });
+        // Ensuring the error message is in the expected format
+        String message = thrown.getMessage().replaceAll(" [a-z0-9.]+.Proxy\\d+", " ProxyXX");
+        assertEquals("Trying to read marshallable class ProxyXX at [pos: 23, rlim: 27, wlim: 27, cap: 27 ]  QUX expected to find a {", message);
     }
 
     @SuppressWarnings("deprecation")

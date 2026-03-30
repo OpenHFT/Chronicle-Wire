@@ -9,19 +9,18 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * Test class to validate the handling of nested objects
  * during serialization and deserialization using the Wire framework.
  */
-public class WireBug38Test extends WireTestCommon {
+class WireBug38Test extends WireTestCommon {
 
     /**
      * Validates that a nested object can be correctly serialized and deserialized
@@ -29,7 +28,7 @@ public class WireBug38Test extends WireTestCommon {
      * deserialization results of nested structures.
      */
     @Test
-    public void testNestedObj() {
+    void testNestedObj() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Define the TEXT WireType and a test string
@@ -49,7 +48,7 @@ public class WireBug38Test extends WireTestCommon {
 
         // Convert the bytes back to string
         final String output = bytes.toString();
-       // System.out.println("output: [" + output + "]");
+        // System.out.println("output: [" + output + "]");
 
         // Deserialize the string back into obj2 and ensure it matches obj1
         obj2.readMarshallable(wireType.apply(Bytes.from(output)));

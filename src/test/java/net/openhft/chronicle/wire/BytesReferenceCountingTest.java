@@ -7,7 +7,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.ReferenceCountedTracer;
 import net.openhft.chronicle.core.io.ReferenceOwner;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,18 +15,17 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * Validates that Bytes reference counts remain stable when multiple {@link ReferenceOwner}s
  * reserve and release handles on different threads.
  */
-public class BytesReferenceCountingTest extends WireTestCommon {
+class BytesReferenceCountingTest extends WireTestCommon {
 
     @Test
-    public void heapBytesMaintainReferenceCountsAcrossOwners() throws InterruptedException {
+    void heapBytesMaintainReferenceCountsAcrossOwners() throws InterruptedException {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         try {
             exerciseReferenceCountingAcrossThreads(bytes);
@@ -38,7 +37,7 @@ public class BytesReferenceCountingTest extends WireTestCommon {
     }
 
     @Test
-    public void warnLoggedWhenOwnerLeakedAndForceReleased() {
+    void warnLoggedWhenOwnerLeakedAndForceReleased() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
             ReferenceOwner leaky = ReferenceOwner.temporary("leaky-owner");
@@ -52,7 +51,7 @@ public class BytesReferenceCountingTest extends WireTestCommon {
     }
 
     @Test
-    public void directBytesMaintainReferenceCountsAcrossOwners() throws InterruptedException {
+    void directBytesMaintainReferenceCountsAcrossOwners() throws InterruptedException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         Bytes<?> bytes = Bytes.allocateElasticDirect(64);
         try {
@@ -65,7 +64,7 @@ public class BytesReferenceCountingTest extends WireTestCommon {
     }
 
     private void exerciseReferenceCountingAcrossThreads(Bytes<?> bytes) throws InterruptedException {
-        assertEquals("fresh Bytes should start with refCount=1", 1, bytes.refCount());
+        assertEquals(1, bytes.refCount(), "fresh Bytes should start with refCount=1");
 
         int ownersCount = 4;
         int iterationsPerOwner = 64;
@@ -108,7 +107,7 @@ public class BytesReferenceCountingTest extends WireTestCommon {
         }
 
         start.countDown();
-        assertTrue("workers did not finish in time", done.await(10, TimeUnit.SECONDS));
+        assertTrue(done.await(10, TimeUnit.SECONDS), "workers did not finish in time");
         for (Thread worker : workers) {
             worker.join(TimeUnit.SECONDS.toMillis(1));
         }
@@ -117,12 +116,12 @@ public class BytesReferenceCountingTest extends WireTestCommon {
             throw error;
         }
 
-        assertEquals("all temporary owners released", 1, bytes.refCount());
+        assertEquals(1, bytes.refCount(), "all temporary owners released");
 
         ReferenceOwner finalOwner = ReferenceOwner.temporary("final-owner");
         bytes.reserve(finalOwner);
-        assertEquals("final owner should increment refCount", 2, bytes.refCount());
+        assertEquals(2, bytes.refCount(), "final owner should increment refCount");
         bytes.release(finalOwner);
-        assertEquals("reference count returns to baseline", 1, bytes.refCount());
+        assertEquals(1, bytes.refCount(), "reference count returns to baseline");
     }
 }

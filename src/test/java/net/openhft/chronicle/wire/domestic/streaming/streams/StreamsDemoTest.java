@@ -28,9 +28,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor.builder;
 import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.*;
-import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
 
@@ -264,8 +262,8 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     }
 
-    @Disabled("Does not work properly since net.openhft.chronicle.bytes.NativeBytes is not thread-safe")
     @Test
+    @Disabled("Does not work properly since net.openhft.chronicle.bytes.NativeBytes is not thread-safe")
     void streamParallel() {
         final int no = 100_000;
 
@@ -463,7 +461,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         }
     }
 
-    public static final class News extends SelfDescribingMarshallable {
+    static final class News extends SelfDescribingMarshallable {
 
         String symbol;
         String header;

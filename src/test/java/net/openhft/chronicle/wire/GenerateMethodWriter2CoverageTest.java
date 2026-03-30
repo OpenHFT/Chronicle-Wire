@@ -7,19 +7,17 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class GenerateMethodWriter2CoverageTest extends WireTestCommon {
 
     @Test
-    public void generatesNestedWritersWithMethodIds() {
+    void generatesNestedWritersWithMethodIds() {
         String previous = System.getProperty("wire.generator.v2");
         System.setProperty("wire.generator.v2", "true");
         try {
@@ -28,7 +26,7 @@ public class GenerateMethodWriter2CoverageTest extends WireTestCommon {
 
             Primary writer = wire.methodWriterBuilder(Primary.class).build();
             writer.say("hello");
-            assertSame("non-terminating methods should return the same writer", writer, writer.reopen());
+            assertSame(writer, writer.reopen(), "non-terminating methods should return the same writer");
 
             Chain chain = writer.begin(17);
             chain.more(2).done();
@@ -46,10 +44,8 @@ public class GenerateMethodWriter2CoverageTest extends WireTestCommon {
             expected.add("begin:17");
             expected.add("more:2");
             expected.add("done");
-            assertEquals("Generated writer should emit method invocations in order",
-                    expected, recorder.events);
-            assertTrue("nested writer should be reused via thread-local state",
-                    recorder.chainInvocations >= 2);
+            assertEquals(expected, recorder.events, "Generated writer should emit method invocations in order");
+            assertTrue(recorder.chainInvocations >= 2, "nested writer should be reused via thread-local state");
         } finally {
             if (previous != null)
                 System.setProperty("wire.generator.v2", previous);

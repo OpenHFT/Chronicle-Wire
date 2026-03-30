@@ -9,13 +9,12 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class extending WireTestCommon to validate the behavior of method readers
@@ -28,7 +27,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      * Tests method writing and reading using a simple interface implementation.
      */
     @Test
-    public void testInterface() {
+    void testInterface() {
         Simple simple = name -> queue.add(name);
         checkWriteRead(simple);
     }
@@ -37,7 +36,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      * Tests method writing and reading using a descendant of a simple interface.
      */
     @Test
-    public void testInterfaceDescend() {
+    void testInterfaceDescend() {
         SimpleDescendant simple = name -> queue.add(name);
         checkWriteRead(simple);
     }
@@ -46,7 +45,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      * Tests method writing and reading with a concrete class implementation of a descendant interface.
      */
     @Test
-    public void testDescendantClass() {
+    void testDescendantClass() {
         SimpleDescendant simple = new SimpleDescendantClass(queue);
         checkWriteRead(simple);
     }
@@ -56,7 +55,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      * This test addresses a specific issue (referenced by a GitHub issue link).
      */
     @Test
-    public void testDescendantAbstractClass() {
+    void testDescendantAbstractClass() {
         // this was the problem - https://github.com/OpenHFT/Chronicle-Wire/issues/154
         SimpleDescendant simple = new SimpleDescendantClass2(queue);
         checkWriteRead(simple);
@@ -66,7 +65,7 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      * Tests method writing and reading with a class that extends another class and implements the same interface.
      */
     @Test
-    public void testDescendantExtendsSameInterface() {
+    void testDescendantExtendsSameInterface() {
         SimpleDescendant simple = new SimpleDescendantClass3(queue);
         checkWriteRead(simple);
     }
@@ -75,13 +74,14 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      * Tests method writing and reading with duck typing - implementing multiple interfaces with the same method.
      */
     @Test
-    public void testDuckTyping() {
+    void testDuckTyping() {
         DuckTyping simple = new DuckTyping(queue);
         checkWriteRead(simple);
     }
 
     /**
      * Helper method to check the method writing and reading functionality.
+     *
      * @param simple An implementation of the Simple interface.
      */
     private void checkWriteRead(Simple simple) throws InvalidMarshallableException {
@@ -122,9 +122,11 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      */
     private static class SimpleDescendantClass implements SimpleDescendant {
         private final BlockingQueue<String> queue;
+
         SimpleDescendantClass(BlockingQueue<String> queue) {
             this.queue = queue;
         }
+
         @Override
         public void hello(String name) {
             queue.add(name);
@@ -142,9 +144,11 @@ public class VanillaMethodReaderHierarchyTest extends WireTestCommon {
      */
     private static class SimpleDescendantClass2 extends SimpleAbstractDescendantClass {
         private final BlockingQueue<String> queue;
+
         SimpleDescendantClass2(BlockingQueue<String> queue) {
             this.queue = queue;
         }
+
         @Override
         public void hello(String name) {
             queue.add(name);

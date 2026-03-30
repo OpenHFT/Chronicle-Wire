@@ -8,12 +8,12 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BrokenChainTest extends WireTestCommon {
     interface First {
@@ -25,17 +25,17 @@ public class BrokenChainTest extends WireTestCommon {
     }
 
     @Test
-    public void brokenChainYaml() {
+    void brokenChainYaml() {
         doBrokenChain(WireType.YAML_ONLY);
     }
 
     @Test
-    public void brokenChainText() {
+    void brokenChainText() {
         doBrokenChain(WireType.TEXT);
     }
 
     @Test
-    public void brokenChainBinary() {
+    void brokenChainBinary() {
         doBrokenChain(WireType.BINARY_LIGHT);
     }
 

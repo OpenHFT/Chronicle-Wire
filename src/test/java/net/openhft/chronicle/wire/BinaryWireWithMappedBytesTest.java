@@ -12,18 +12,18 @@ import net.openhft.chronicle.core.values.IntValue;
 import net.openhft.chronicle.core.values.LongValue;
 import net.openhft.chronicle.core.values.TwoLongValue;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * This class tests the behavior of BinaryWire with mapped bytes.
  */
-public class BinaryWireWithMappedBytesTest extends WireTestCommon {
+class BinaryWireWithMappedBytesTest extends WireTestCommon {
 
     // Defines if the MappedFile should retain its contents
     private static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
@@ -34,9 +34,9 @@ public class BinaryWireWithMappedBytesTest extends WireTestCommon {
      *
      * @throws FileNotFoundException if the file for mapping bytes is not found
      */
-    @SuppressWarnings("rawtypes")
     @Test
-    public void testRefAtStart() throws FileNotFoundException {
+    @SuppressWarnings("rawtypes")
+    void testRefAtStart() throws FileNotFoundException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Define the file for the test and ensure its deletion if it already exists
@@ -59,9 +59,12 @@ public class BinaryWireWithMappedBytesTest extends WireTestCommon {
              @NotNull LongValue c = wire.newLongReference();
              TwoLongValue d = new BinaryTwoLongReference()) {
 
-            wire.read().int32(a, null, (o, i) -> {});
-            wire.read().int32(b, null, (o, i) -> {});
-            wire.read().int64(c, null, (o, i) -> {});
+            wire.read().int32(a, null, (o, i) -> {
+            });
+            wire.read().int32(b, null, (o, i) -> {
+            });
+            wire.read().int64(c, null, (o, i) -> {
+            });
             wire.read().int128(d);
 
             // Assertions for the values read

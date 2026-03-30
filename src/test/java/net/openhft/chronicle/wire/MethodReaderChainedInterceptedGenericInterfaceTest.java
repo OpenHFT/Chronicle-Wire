@@ -5,18 +5,18 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * This class tests the capability of the MethodReader to handle parametrized interfaces hierarchy and chained calls.
  * This pattern arises when using Web Gateway.
  */
 public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTestCommon {
-    @SuppressWarnings("deprecation")
     @Test
-    public void testDefinitive() {
+    @SuppressWarnings("deprecation")
+    void testDefinitive() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
 
@@ -55,9 +55,9 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
         methodReader.readOne();
     }
 
-    @SuppressWarnings("deprecation")
     @Test
-    public void testIndefinite() {
+    @SuppressWarnings("deprecation")
+    void testIndefinite() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
 
@@ -96,9 +96,9 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
         methodReader.readOne();
     }
 
-    @SuppressWarnings("deprecation")
     @Test
-    public void testNested() {
+    @SuppressWarnings("deprecation")
+    void testNested() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
 

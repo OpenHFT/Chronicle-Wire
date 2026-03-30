@@ -4,17 +4,17 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.wire.converter.Words;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class WordsLongConverterTest extends WireTestCommon {
+class WordsLongConverterTest extends WireTestCommon {
 
     // Test how WordsLongConverter integrates with YAML Wire
     @Test
-    public void inYaml() {
+    void inYaml() {
         // Initialize YAML wire
         Wire wire = Wire.newYamlWireOnHeap();
 
@@ -38,7 +38,7 @@ public class WordsLongConverterTest extends WireTestCommon {
 
     // Test the conversion of longs to strings
     @Test
-    public void asString() {
+    void asString() {
         // Initialize WordsLongConverter
         LongConverter bic = new WordsLongConverter();
 
@@ -50,28 +50,27 @@ public class WordsLongConverterTest extends WireTestCommon {
             sb.append(i).append(": ").append(bic.asString(i)).append("\n");
         System.out.println(sb);
         assertEquals("" +
-                        "1: aid\n" +
-                        "17: by\n" +
-                        "289: dish\n" +
-                        "4913: strip.aim\n" +
-                        "83521: sense.go\n" +
-                        "1419857: ours.saint\n" +
-                        "24137569: global.pure.and\n" +
-                        "410338673: lodge.theme.we\n" +
-                        "6975757441: course.drop.stayed\n" +
-                        "118587876497: dare.circle.spears.bay\n" +
-                        "2015993900449: neatly.such.metro.claim\n" +
-                        "34271896307633: present.style.sadly.myself.aid\n" +
-                        "582622237229761: scroll.others.ease.climb.eye\n" +
-                        "9904578032905937: unit.grass.hints.day.moon\n" +
-                        "168377826559400929: adjust.ancient.weekly.fifth.layout.all\n" +
-                        "2862423051509815793: knock.blocks.pose.expert.walk.sky\n",
-                sb.toString());
+                "1: aid\n" +
+                "17: by\n" +
+                "289: dish\n" +
+                "4913: strip.aim\n" +
+                "83521: sense.go\n" +
+                "1419857: ours.saint\n" +
+                "24137569: global.pure.and\n" +
+                "410338673: lodge.theme.we\n" +
+                "6975757441: course.drop.stayed\n" +
+                "118587876497: dare.circle.spears.bay\n" +
+                "2015993900449: neatly.such.metro.claim\n" +
+                "34271896307633: present.style.sadly.myself.aid\n" +
+                "582622237229761: scroll.others.ease.climb.eye\n" +
+                "9904578032905937: unit.grass.hints.day.moon\n" +
+                "168377826559400929: adjust.ancient.weekly.fifth.layout.all\n" +
+                "2862423051509815793: knock.blocks.pose.expert.walk.sky\n", sb.toString());
     }
 
     // Test the parsing capabilities of WordsLongConverter
     @Test
-    public void parse() {
+    void parse() {
         // Initialize WordsLongConverter
         LongConverter bic = new WordsLongConverter();
         for (String s : ("square.army.plan.player.wash.disk\n" +

@@ -6,16 +6,16 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.wire.RFCExamplesTest.Fields.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /* Based on
 https://github.com/OpenHFT/RFC/blob/master/Chronicle/Engine/Remote/Chronicle-Engine-0.1.md
  */
-public class RFCExamplesTest extends WireTestCommon {
+class RFCExamplesTest extends WireTestCommon {
 
     // This is what this test is trying to recreate.
     /*
@@ -26,7 +26,7 @@ public class RFCExamplesTest extends WireTestCommon {
     map.put(3, "bye");
      */
     @Test
-    public void testPuts() {
+    void testPuts() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Allocate an elastic buffer on heap.
@@ -50,20 +50,19 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
         // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         // Validate the serialization result.
         assertEquals("" +
-                        "--- !!meta-data\n" +
-                        "csp: ///service-lookup\n" +
-                        "tid: 149873598325\n" +
-                        "# position: 48, header: 0\n" +
-                        "--- !!data\n" +
-                        "lookup: {\n" +
-                        "  relativeUri: test,\n" +
-                        "  view: !type Map,\n" +
-                        "  types: {\n" +
-                        "    keyType: !type Integer,\n" +
-                        "    valueType: !type String\n" +
-                        "  }\n" +
-                        "}\n",
-                Wires.fromSizePrefixedBlobs(bytes));
+                "--- !!meta-data\n" +
+                "csp: ///service-lookup\n" +
+                "tid: 149873598325\n" +
+                "# position: 48, header: 0\n" +
+                "--- !!data\n" +
+                "lookup: {\n" +
+                "  relativeUri: test,\n" +
+                "  view: !type Map,\n" +
+                "  types: {\n" +
+                "    keyType: !type Integer,\n" +
+                "    valueType: !type String\n" +
+                "  }\n" +
+                "}\n", Wires.fromSizePrefixedBlobs(bytes));
 
         // Create a binary representation of the wire.
         @NotNull Wire wire = new BinaryWire(bytes);
@@ -74,8 +73,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
 
         // Validate the binary representation.
         assertEquals("" +
-                        "[pos: 0, rlim: 132, wlim: 2147483632, cap: 2147483632 ] ǁ$٠٠@Ãcspñ///service-lookupÃtid§u\\u009F)å\"٠٠٠\\u008FX٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠٠٠٠٠٠",
-                bytes.toDebugString());
+                "[pos: 0, rlim: 132, wlim: 2147483632, cap: 2147483632 ] ǁ$٠٠@Ãcspñ///service-lookupÃtid§u\\u009F)å\"٠٠٠\\u008FX٠٠٠Ælookup\\u0082I٠٠٠ËrelativeUriätestÄview¼⒊MapÅtypes\\u0082#٠٠٠ÇkeyType¼⒎IntegerÉvalueType¼⒍String\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
 
         // Create a raw representation of the wire.
         @NotNull Wire raw = new RawWire(bytes);
@@ -85,8 +83,7 @@ lookup: { relativeUri: test, view: !Map, types: [ !Integer, !String ] }
 
         // Validate the raw representation.
         assertEquals("" +
-                        "[pos: 0, rlim: 68, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@⒘///service-lookupu\\u009F)å\"٠٠٠٠٠ ٠٠٠\\u001C٠٠٠⒋test⒊Map⒖٠٠٠⒎Integer⒍String‡٠٠٠٠٠٠٠٠",
-                bytes.toDebugString());
+                "[pos: 0, rlim: 68, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@⒘///service-lookupu\\u009F)å\"٠٠٠٠٠ ٠٠٠\\u001C٠٠٠⒋test⒊Map⒖٠٠٠⒎Integer⒍String‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
 
         /*
         This serialized format is supposed to be a representation of put operations.
@@ -110,31 +107,29 @@ put: [ 3, bye ]
 
         // Validate the serialized format of the put operations.
         assertEquals("" +
-                        "--- !!meta-data\n" +
-                        "csp: //server1/test\n" +
-                        "cid: 1\n" +
-                        "# position: 32, header: 0\n" +
-                        "--- !!data\n" +
-                        "put: {\n" +
-                        "  key: 1,\n" +
-                        "  value: hello\n" +
-                        "}\n" +
-                        "# position: 72, header: 1\n" +
-                        "--- !!data\n" +
-                        "put: {\n" +
-                        "  key: 2,\n" +
-                        "  value: world\n" +
-                        "}\n" +
-                        "# position: 112, header: 2\n" +
-                        "--- !!data\n" +
-                        "put: {\n" +
-                        "  key: 3,\n" +
-                        "  value: bye\n" +
-                        "}\n",
-                Wires.fromSizePrefixedBlobs(bytes));
+                "--- !!meta-data\n" +
+                "csp: //server1/test\n" +
+                "cid: 1\n" +
+                "# position: 32, header: 0\n" +
+                "--- !!data\n" +
+                "put: {\n" +
+                "  key: 1,\n" +
+                "  value: hello\n" +
+                "}\n" +
+                "# position: 72, header: 1\n" +
+                "--- !!data\n" +
+                "put: {\n" +
+                "  key: 2,\n" +
+                "  value: world\n" +
+                "}\n" +
+                "# position: 112, header: 2\n" +
+                "--- !!data\n" +
+                "put: {\n" +
+                "  key: 3,\n" +
+                "  value: bye\n" +
+                "}\n", Wires.fromSizePrefixedBlobs(bytes));
         assertEquals("" +
-                        "[pos: 0, rlim: 148, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@csp: //server1/test⒑cid: 1⒑ $٠٠٠put: {⒑  key: 1,⒑  value: hello⒑}⒑  $٠٠٠put: {⒑  key: 2,⒑  value: world⒑}⒑   ٠٠٠put: {⒑  key: 3,⒑  value: bye⒑}⒑‡٠٠٠٠٠٠٠٠٠٠٠٠٠",
-                bytes.toDebugString());
+                "[pos: 0, rlim: 148, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@csp: //server1/test⒑cid: 1⒑ $٠٠٠put: {⒑  key: 1,⒑  value: hello⒑}⒑  $٠٠٠put: {⒑  key: 2,⒑  value: world⒑}⒑   ٠٠٠put: {⒑  key: 3,⒑  value: bye⒑}⒑‡٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
 
         clear(bytes);
         writeMessageTwo(wire);
@@ -142,16 +137,14 @@ put: [ 3, bye ]
         // System.out.println(Wires.fromSizePrefixedBlobs(bytes));
         // Validate the binary format of the put operations.
         assertEquals("" +
-                        "[pos: 0, rlim: 128, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@Ãcspî//server1/testÃcid¡⒈\\u008F\\u008F\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒈Åvalueåhello\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒉Åvalueåworld\\u008F\\u001C٠٠٠Ãput\\u0082⒗٠٠٠Ãkey¡⒊Åvalueãbye\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠٠",
-                bytes.toDebugString());
+                "[pos: 0, rlim: 128, wlim: 2147483632, cap: 2147483632 ] ǁ\\u001C٠٠@Ãcspî//server1/testÃcid¡⒈\\u008F\\u008F\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒈Åvalueåhello\\u008F\\u001C٠٠٠Ãput\\u0082⒙٠٠٠Ãkey¡⒉Åvalueåworld\\u008F\\u001C٠٠٠Ãput\\u0082⒗٠٠٠Ãkey¡⒊Åvalueãbye\\u008F\\u008F\\u008F‡٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
 
         clear(bytes);
         writeMessageTwo(raw);
 
         // Validate the raw format of the put operations.
         assertEquals("" +
-                        "[pos: 0, rlim: 96, wlim: 2147483632, cap: 2147483632 ] ǁ\\u0018٠٠@⒕//server1/test⒈٠٠٠٠٠٠٠٠⒛٠٠٠⒕٠٠٠⒈٠٠٠٠٠٠٠⒌hello٠٠⒛٠٠٠⒕٠٠٠⒉٠٠٠٠٠٠٠⒌world٠٠⒗٠٠٠⒓٠٠٠⒊٠٠٠٠٠٠٠⒊bye‡٠٠٠٠٠٠٠٠",
-                bytes.toDebugString());
+                "[pos: 0, rlim: 96, wlim: 2147483632, cap: 2147483632 ] ǁ\\u0018٠٠@⒕//server1/test⒈٠٠٠٠٠٠٠٠⒛٠٠٠⒕٠٠٠⒈٠٠٠٠٠٠٠⒌hello٠٠⒛٠٠٠⒕٠٠٠⒉٠٠٠٠٠٠٠⒌world٠٠⒗٠٠٠⒓٠٠٠⒊٠٠٠٠٠٠٠⒊bye‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
     }
 
     // Clear the byte buffer.
@@ -179,8 +172,8 @@ put: [ 3, bye ]
                         out2.write(relativeUri).text("test")
                                 .write(view).typeLiteral("Map")
                                 .write(types).marshallable(m ->
-                                m.write(() -> "keyType").typeLiteral("Integer")
-                                        .write(() -> "valueType").typeLiteral("String"))));
+                                        m.write(() -> "keyType").typeLiteral("Integer")
+                                                .write(() -> "valueType").typeLiteral("String"))));
 
         // Uncomment to print the serialized data.
         // System.out.println(wire);

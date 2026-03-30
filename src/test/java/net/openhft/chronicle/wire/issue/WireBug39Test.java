@@ -9,19 +9,18 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * Test class that examines the BINARY WireType's ability to serialize
  * and deserialize a string containing a Unicode character (emoji followed by text).
  */
-public class WireBug39Test extends WireTestCommon {
+class WireBug39Test extends WireTestCommon {
 
     /**
      * Test the serialization and deserialization of a string
@@ -29,7 +28,7 @@ public class WireBug39Test extends WireTestCommon {
      * The test checks for consistent serialization and deserialization results.
      */
     @Test
-    public void testBinaryEncoding() {
+    void testBinaryEncoding() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Define the BINARY WireType and a test string (an emoji followed by text)
@@ -46,7 +45,7 @@ public class WireBug39Test extends WireTestCommon {
         obj2.append(exampleString);
 
         // Assert that both objects are the same after the operation
-        assertEquals("obj1.equals(obj2): ", obj1, obj2);
+        assertEquals(obj1, obj2, "obj1.equals(obj2): ");
 
         // Serialize obj2 into bytes using the BINARY WireType
         final Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();
@@ -54,12 +53,12 @@ public class WireBug39Test extends WireTestCommon {
 
         // Convert the bytes back to string
         final String output = bytes.toString();
-       // System.out.println("output: [" + output + "]");
+        // System.out.println("output: [" + output + "]");
 
         // Deserialize the string back into obj3 and ensure it matches obj1 and obj2
         obj3.readMarshallable(wireType.apply(Bytes.from(output)));
 
-        assertEquals("obj2.equals(obj3): ", obj1, obj2);
+        assertEquals(obj1, obj2, "obj2.equals(obj3): ");
 
         // Release the resources associated with the byte buffer
         bytes.releaseLast();

@@ -9,17 +9,16 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 // Test class extending WireTestCommon to test method identification in binary wire format
 public class MethodIdTest extends WireTestCommon {
 
     // Test method to verify serialization and deserialization of methods with various IDs
     @Test
-    public void methodIdInBinary() {
+    void methodIdInBinary() {
         // Create a new BinaryWire instance with specified configurations
         Wire wire = new BinaryWire(new HexDumpBytes(), true, true, false, 128, "");
 
@@ -105,6 +104,7 @@ public class MethodIdTest extends WireTestCommon {
 
         @MethodId('@')
         void methodAt(char at);
+
         @MethodId('z')
         void method_z(char z);
 

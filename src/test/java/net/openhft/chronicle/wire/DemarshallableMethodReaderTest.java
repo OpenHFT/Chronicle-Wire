@@ -4,33 +4,18 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.MethodReader;
-import org.hamcrest.core.Is;
-import org.hamcrest.core.IsNot;
-import org.hamcrest.core.IsSame;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(Parameterized.class)
-public class DemarshallableMethodReaderTest {
+ class DemarshallableMethodReaderTest {
 
-    private final Wire wire;
-
-    public DemarshallableMethodReaderTest(Wire wire) {
-        this.wire = wire;
-        System.out.println("Using wire: " + wire.getClass().getSimpleName());
-    }
-
-    @Parameterized.Parameters()
     public static Collection<Wire> combinations() {
         return Arrays.asList(
                 new BinaryWire(allocateElasticOnHeap()),
@@ -52,8 +37,11 @@ public class DemarshallableMethodReaderTest {
         void onMessage(Object value);
     }
 
-    @Test
-    public void writesAndReadsMultipleMessages() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    void writesAndReadsMultipleMessages(Wire wire) {
+        System.out.println("Using wire: " + wire.getClass().getSimpleName());
+
         MessageListener writer = wire.methodWriter(MessageListener.class);
         writer.onMessage(new SelfDescribingDemarshallableObject("msg1", 1.5));
         writer.onMessage(new SelfDescribingDemarshallableObject("msg2", 2.3));
@@ -61,15 +49,15 @@ public class DemarshallableMethodReaderTest {
         AtomicReference<SelfDescribingDemarshallableObject> marshalledObjectRef = new AtomicReference<>();
 
         MessageListener messageListenerAssertion = value -> {
-            assertThat(value instanceof SelfDescribingDemarshallableObject, Is.is(true));
+            assertInstanceOf(SelfDescribingDemarshallableObject.class, value);
             SelfDescribingDemarshallableObject obj = (SelfDescribingDemarshallableObject) value;
             if (marshalledObjectRef.get() == null) {
                 marshalledObjectRef.set(obj);
             } else {
-                assertThat(obj, not(IsSame.sameInstance(marshalledObjectRef.get())));
+                assertNotSame(marshalledObjectRef.get(), obj);
             }
-            assertThat(obj.name, IsNot.not(nullValue()));
-            assertThat(obj.value, IsNot.not(Double.NaN));
+            assertNotNull(obj.name);
+            assertNotEquals(Double.NaN, obj.value);
             System.out.println("Received message: " + obj.name + ", id: " + obj.value);
         };
 

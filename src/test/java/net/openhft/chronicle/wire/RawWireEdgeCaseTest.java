@@ -4,15 +4,15 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class RawWireEdgeCaseTest extends WireTestCommon {
+class RawWireEdgeCaseTest extends WireTestCommon {
 
     @Test
-    public void writesAndReadsPrimitives() {
+    void writesAndReadsPrimitives() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         RawWire wire = new RawWire(bytes);
 

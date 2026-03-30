@@ -5,10 +5,10 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -20,19 +20,13 @@ import java.util.function.BiConsumer;
  * This class tests the behavior of MethodWriter when handling vague/interfaced messages.
  * It extends the WireTestCommon from the `net.openhft.chronicle.wire` package for common test setup and utilities.
  */
-@RunWith(value = Parameterized.class)
 public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireTestCommon {
     private ArrayBlockingQueue<Object> singleQ = new ArrayBlockingQueue<>(1);
     private ArrayBlockingQueue<Object> doubleQ = new ArrayBlockingQueue<>(2);
     private final List<Map<Class<?>, Object>> usedObjects = Arrays.asList(new HashMap<>(), new HashMap<>());
     private Class<?>[] prevObjClasses = new Class<?>[2];
-    private final Boolean multipleNonMarshallableParamTypes;
+    private Boolean multipleNonMarshallableParamTypes;
 
-    public MethodWriterVagueTypesTest(Boolean multipleNonMarshallableParamTypes) {
-        this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
-    }
-
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> wireTypes() {
         return Arrays.asList(
                 new Object[]{null},
@@ -40,6 +34,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
                 new Object[]{false}
         );
     }
+
     /**
      * An interface defining a single method that accepts a String message.
      */
@@ -59,8 +54,11 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         void msg(FinalMarshallableContainer m, FinalNonMarshallableContainer nm);
     }
 
-    static final class FinalMarshallableContainer extends NonMarshallableTestContainer implements Marshallable{}
-    static final class FinalNonMarshallableContainer extends NonMarshallableTestContainer{}
+    static final class FinalMarshallableContainer extends NonMarshallableTestContainer implements Marshallable {
+    }
+
+    static final class FinalNonMarshallableContainer extends NonMarshallableTestContainer {
+    }
 
     static class MarshallableTestContainer extends NonMarshallableTestContainer implements Marshallable {
     }
@@ -76,7 +74,7 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
 
         @Override
         public boolean equals(Object obj) {
-            return obj instanceof NonMarshallableTestContainer && randomInt.equals(((NonMarshallableTestContainer)obj).randomInt);
+            return obj instanceof NonMarshallableTestContainer && randomInt.equals(((NonMarshallableTestContainer) obj).randomInt);
         }
 
         @Override
@@ -85,10 +83,13 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         }
     }
 
-    interface Container{}
+    interface Container {
+    }
 
-    @Test
-    public void testSingle() throws Exception {
+    @ParameterizedTest
+    @MethodSource("wireTypes")
+    void testSingle(Boolean multipleNonMarshallableParamTypes) throws Exception {
+        this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
         // Initialization of the wire
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap());
         PrintObjectSingle printer = w.methodWriter(PrintObjectSingle.class);
@@ -107,8 +108,10 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         testSingle(printer, reader, new NonMarshallableTestContainer());
     }
 
-    @Test
-    public void testDouble() throws Exception {
+    @ParameterizedTest
+    @MethodSource("wireTypes")
+    void testDouble(Boolean multipleNonMarshallableParamTypes) throws Exception {
+        this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
         // Initialization of the wire
         Wire w = new TextWire(Bytes.allocateElasticOnHeap());
         PrintObjectDouble printer = w.methodWriter(PrintObjectDouble.class);
@@ -130,8 +133,10 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         testDouble(printer::msg, reader, Long.valueOf(3L), new MarshallableTestContainer());
     }
 
-    @Test
-    public void testDoubleFinal() throws Exception {
+    @ParameterizedTest
+    @MethodSource("wireTypes")
+    void testDoubleFinal(Boolean multipleNonMarshallableParamTypes) throws Exception {
+        this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
         // Initialization of the wire
         Wire w = new TextWire(Bytes.allocateElasticOnHeap());
         PrintFinalObjectDouble printer = w.methodWriter(PrintFinalObjectDouble.class);
@@ -148,8 +153,10 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         testDouble(printer::msg, reader, new FinalMarshallableContainer(), new FinalNonMarshallableContainer());
     }
 
-    @Test
-    public void testPrimitive() throws Exception {
+    @ParameterizedTest
+    @MethodSource("wireTypes")
+    void testPrimitive(Boolean multipleNonMarshallableParamTypes) throws Exception {
+        this.multipleNonMarshallableParamTypes = multipleNonMarshallableParamTypes;
         // Initialization of the wire
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap());
         PrintPrimitiveDouble printer = w.methodWriter(PrintPrimitiveDouble.class);
@@ -180,24 +187,24 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
         test(() -> printer.msg(key, obj), reader, doubleQ, key, obj);
     }
 
-    private void test(Runnable methodCall, MethodReader reader, ArrayBlockingQueue<Object> queue, Object ... objs) throws Exception {
+    private void test(Runnable methodCall, MethodReader reader, ArrayBlockingQueue<Object> queue, Object... objs) throws Exception {
         methodCall.run();
         boolean marshallableToNonMarshallable = false;
         if (prevObjClasses[0] != null) {
-            for (int i=0; i < objs.length; i++) {
+            for (int i = 0; i < objs.length; i++) {
                 marshallableToNonMarshallable |= Marshallable.class.isAssignableFrom(prevObjClasses[i]) && !(objs[i] instanceof Marshallable) && !(objs[i] instanceof Number);
             }
         }
         if (Boolean.FALSE.equals(multipleNonMarshallableParamTypes) && marshallableToNonMarshallable) {
-            Assert.assertThrows(RuntimeException.class, () -> assertWrite(reader, queue, objs));
+            assertThrows(RuntimeException.class, () -> assertWrite(reader, queue, objs));
         } else {
             assertWrite(reader, queue, objs);
         }
 
-        Assert.assertTrue("Reception Queue should be empty", queue.isEmpty());
+        assertTrue(queue.isEmpty(), "Reception Queue should be empty");
     }
 
-    private void assertWrite(MethodReader reader, ArrayBlockingQueue<Object> queue, Object ... objs) throws Exception {
+    private void assertWrite(MethodReader reader, ArrayBlockingQueue<Object> queue, Object... objs) throws Exception {
         reader.readOne();
 
         String classMismatchString = "";
@@ -211,15 +218,15 @@ public class MethodWriterVagueTypesTest extends net.openhft.chronicle.wire.WireT
                 classMismatchString = "Invalid class type! " + objClass.getSimpleName() + " != " + result.getClass().getSimpleName();
                 continue;
             }
-            Assert.assertEquals(obj, result);
+            assertEquals(obj, result);
             prevObjClasses[i] = objClass;
             Object usedObj = usedObjects.get(i).get(objClass);
             if (usedObj != null) {
                 if (objClass != String.class && !Number.class.isAssignableFrom(objClass) && (!Boolean.FALSE.equals(multipleNonMarshallableParamTypes) ||
                         Marshallable.class.isAssignableFrom(objClass) || Modifier.isFinal(objClass.getModifiers()))) {
-                    Assert.assertSame(usedObj, result);
+                    assertSame(usedObj, result);
                 } else {
-                    Assert.assertNotSame(usedObj, result);
+                    assertNotSame(usedObj, result);
                 }
             }
             usedObjects.get(i).put(objClass, result);

@@ -4,19 +4,18 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class ReadAnyWireDetectionTest extends WireTestCommon {
+class ReadAnyWireDetectionTest extends WireTestCommon {
 
     @Test
-    public void detectsWireTypeAndReadsPayload() {
+    void detectsWireTypeAndReadsPayload() {
         for (TestCase testCase : cases()) {
             Bytes<?> encoded = encode(testCase.type, wire -> {
                 try (DocumentContext dc = wire.writingDocument(false)) {

@@ -6,12 +6,11 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.util.BooleanConsumer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * This test verifies that MethodReader can handle non-standard instances like anonymous classes,
@@ -26,9 +25,9 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
      * Test case to verify that an anonymous class can be passed to MethodReader.
      * It sets up a writer, writes a message, then uses a MethodReader to read and process the message using an anonymous class implementation.
      */
-    @SuppressWarnings("deprecation")
     @Test
-    public void testAnonymousClassCanBePassedToMethodReader() {
+    @SuppressWarnings("deprecation")
+    void testAnonymousClassCanBePassedToMethodReader() {
         // Initialization of the wire with padding
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
@@ -60,9 +59,9 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
      * Test case to verify that a core class can be passed to MethodReader.
      * Similar to the above test but uses a BooleanConsumer core class.
      */
-    @SuppressWarnings("deprecation")
     @Test
-    public void testCoreClassCanBePassedToMethodReader() throws Exception {
+    @SuppressWarnings("deprecation")
+    void testCoreClassCanBePassedToMethodReader() throws Exception {
         // Initialization of the wire with padding
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
@@ -94,9 +93,9 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
      * Test case to verify that a lambda expression can be passed to MethodReader.
      * It demonstrates how a lambda can be used to implement the reading functionality.
      */
-    @SuppressWarnings("deprecation")
     @Test
-    public void testLambdaCanBePassedToMethodReader() {
+    @SuppressWarnings("deprecation")
+    void testLambdaCanBePassedToMethodReader() {
         // Initialization of the wire with padding
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);

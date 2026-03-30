@@ -9,14 +9,14 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.util.Time;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("deprecation")
-public class WireTypeTest extends WireTestCommon {
+class WireTypeTest extends WireTestCommon {
 
     // Add alias for TestMarshallable class for the test
     static {
@@ -25,7 +25,7 @@ public class WireTypeTest extends WireTestCommon {
 
     // Test if the WireType enum is correctly identified by its name
     @Test
-    public void testNameFor() {
+    void testNameFor() {
         // Add alias for WireType class
         ClassAliasPool.CLASS_ALIASES.addAlias(WireType.class);
 
@@ -37,7 +37,7 @@ public class WireTypeTest extends WireTestCommon {
 
     // Test conversion from a TestMarshallable object to String representations
     @Test
-    public void testAsString() {
+    void testAsString() {
         @NotNull TestMarshallable tm = new TestMarshallable();
         tm.setCount(1);
         tm.setName("name");
@@ -49,10 +49,9 @@ public class WireTypeTest extends WireTestCommon {
                 "}\n", WireType.TEXT.asString(tm));
         // Test Binary-based WireType
         assertEquals("" +
-                        "00000000 b6 10 54 65 73 74 4d 61  72 73 68 61 6c 6c 61 62 ··TestMa rshallab\n" +
-                        "00000010 6c 65 82 12 00 00 00 c4  6e 61 6d 65 e4 6e 61 6d le······ name·nam\n" +
-                        "00000020 65 c5 63 6f 75 6e 74 a1  01                      e·count· ·       \n",
-                WireType.BINARY.asString(tm));
+                "00000000 b6 10 54 65 73 74 4d 61  72 73 68 61 6c 6c 61 62 ··TestMa rshallab\n" +
+                "00000010 6c 65 82 12 00 00 00 c4  6e 61 6d 65 e4 6e 61 6d le······ name·nam\n" +
+                "00000020 65 c5 63 6f 75 6e 74 a1  01                      e·count· ·       \n", WireType.BINARY.asString(tm));
 
         assertEquals("00000000 10 54 65 73 74 4d 61 72  73 68 61 6c 6c 61 62 6c ·TestMar shallabl\n" +
                 "00000010 65 09 00 00 00 04 6e 61  6d 65 01 00 00 00       e·····na me····  \n", WireType.RAW.asString(tm));
@@ -60,7 +59,7 @@ public class WireTypeTest extends WireTestCommon {
 
     // Test conversion from String representations to a TestMarshallable object
     @Test
-    public void testFromString() {
+    void testFromString() {
         // Define the text representation
         @NotNull String asText = "!TestMarshallable {\n" +
                 "  name: name,\n" +
@@ -91,7 +90,7 @@ public class WireTypeTest extends WireTestCommon {
 
     // Test WireType's ability to write and read from a file
     @Test
-    public void testFromFile() throws IOException {
+    void testFromFile() throws IOException {
         // Create a TestMarshallable object
         @NotNull TestMarshallable tm = new TestMarshallable();
         tm.setCount(1);

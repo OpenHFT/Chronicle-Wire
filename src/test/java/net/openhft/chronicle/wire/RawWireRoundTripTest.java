@@ -4,20 +4,17 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesOut;
-import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
-import net.openhft.chronicle.core.values.LongArrayValues;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class RawWireRoundTripTest extends WireTestCommon {
+class RawWireRoundTripTest extends WireTestCommon {
 
     @Test
-    public void roundTripPrimitiveSequenceAndReset() {
+    void roundTripPrimitiveSequenceAndReset() {
         // Use direct bytes to satisfy BinaryLongArrayReference.lazyWrite preconditions
         Bytes<?> bytes = Bytes.allocateElasticDirect();
         RawWire wire = new RawWire(bytes);
@@ -62,7 +59,7 @@ public class RawWireRoundTripTest extends WireTestCommon {
     }
 
     @Test
-    public void copyToRequiresRawWire() {
+    void copyToRequiresRawWire() {
         RawWire source = new RawWire(Bytes.allocateElasticOnHeap());
         BinaryWire target = new BinaryWire(Bytes.allocateElasticOnHeap());
         try {
@@ -73,9 +70,11 @@ public class RawWireRoundTripTest extends WireTestCommon {
         }
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void rawBytesUnsupported() {
-        RawWire wire = new RawWire(Bytes.allocateElasticOnHeap());
-        wire.getValueOut().rawBytes(new byte[]{1});
+    @Test
+    void rawBytesUnsupported() {
+        assertThrows(UnsupportedOperationException.class, () -> {
+            RawWire wire = new RawWire(Bytes.allocateElasticOnHeap());
+            wire.getValueOut().rawBytes(new byte[]{1});
+        });
     }
 }

@@ -8,7 +8,7 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
 import net.openhft.chronicle.wire.domestic.streaming.CreateUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -19,9 +19,9 @@ import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toConcurrentMap;
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.replacingMerger;
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.throwingMerger;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class MethodWriterTest extends WireTestCommon {
+class MethodWriterTest extends WireTestCommon {
 
     private static final List<MarketData> MARKET_DATA_SET = Arrays.asList(
             new MarketData("MSFT", 10, 11, 9),
@@ -30,7 +30,7 @@ public class MethodWriterTest extends WireTestCommon {
     );
 
     @Test
-    public void lastSeen() {
+    void lastSeen() {
 
         final Reduction<AtomicReference<MarketData>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class)
@@ -47,7 +47,7 @@ public class MethodWriterTest extends WireTestCommon {
     }
 
     @Test
-    public void map() {
+    void map() {
 
         final Reduction<Map<String, MarketData>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class).withMethod(ServiceOut.class, ServiceOut::marketData).build())

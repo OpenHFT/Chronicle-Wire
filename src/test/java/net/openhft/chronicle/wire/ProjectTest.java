@@ -5,30 +5,21 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 // This class tests the functionalities related to the projection of wire data.
-public class ProjectTest extends WireTestCommon {
-
-    // Rule to retrieve the name of the currently-running test
-    @NotNull
-    @Rule
-    public TestName name = new TestName();
+class ProjectTest extends WireTestCommon {
 
     // Provide the parameters for parameterized tests - in this case, the wire type.
     @NotNull
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         Object[][] list = {
                 {WireType.BINARY},
@@ -40,9 +31,9 @@ public class ProjectTest extends WireTestCommon {
     }
 
     // Test case to verify the projection functionality between two data transfer objects.
-    @SuppressWarnings("unchecked")
     @Test
-    public void testProject() throws Exception {
+    @SuppressWarnings("unchecked")
+    void testProject() throws Exception {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Initialize the first DTO with sample data
@@ -55,15 +46,15 @@ public class ProjectTest extends WireTestCommon {
         Dto2 dto2 = Wires.project(Dto2.class, dto1);
 
         // Assert that the data has been correctly projected
-        Assert.assertEquals(dto2.someValue, dto1.someValue);
-        Assert.assertEquals(dto2.anotherField, dto1.anotherField);
-        Assert.assertEquals(dto2.m, dto1.m);
+        assertEquals(dto2.someValue, dto1.someValue);
+        assertEquals(dto2.anotherField, dto1.anotherField);
+        assertEquals(dto2.m, dto1.m);
 
     }
 
     // Test case to verify the projection functionality with nested marshallable objects.
     @Test
-    public void testProjectWithNestedMarshallable() {
+    void testProjectWithNestedMarshallable() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Initialize the simple object with a nested inner object and sample data
@@ -76,7 +67,7 @@ public class ProjectTest extends WireTestCommon {
 
         // Project the data from the simple object to an outer object
         final Outer project = Wires.project(Outer.class, simple);
-        Assert.assertEquals("some data", project.inner().name());
+        assertEquals("some data", project.inner().name());
     }
 
     // Data Transfer Object 1 - holds sample data for projection tests
@@ -98,7 +89,7 @@ public class ProjectTest extends WireTestCommon {
     }
 
     // Inner class representing a nested marshallable object
-    public static class Inner extends SelfDescribingMarshallable {
+    static class Inner extends SelfDescribingMarshallable {
         private String name;
 
         String name() {
@@ -112,7 +103,7 @@ public class ProjectTest extends WireTestCommon {
     }
 
     // Outer class which can potentially contain an instance of the Inner class
-    public static class Outer extends SelfDescribingMarshallable {
+    static class Outer extends SelfDescribingMarshallable {
         private Inner inner;
 
         Inner inner() {
@@ -126,7 +117,7 @@ public class ProjectTest extends WireTestCommon {
     }
 
     // Simple class extending the Outer class to demonstrate nested projections
-    public static class Simple extends Outer {
+    static class Simple extends Outer {
         private String name2;
 
         public String name2() {

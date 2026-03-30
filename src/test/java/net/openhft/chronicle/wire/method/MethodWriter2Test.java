@@ -12,16 +12,16 @@ import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 // Test class for verifying the behavior of a method writer with different argument types and update interceptor
-public class MethodWriter2Test extends WireTestCommon {
+class MethodWriter2Test extends WireTestCommon {
 
     // Static block - can be used for setting properties like code dumping
     static {
@@ -31,39 +31,39 @@ public class MethodWriter2Test extends WireTestCommon {
 
     // Test to verify that method calls with DTO arguments are allowed through
     @Test
-    public void allowThrough() {
+    void allowThrough() {
         ignoreException("Generated code to call updateInterceptor for public abstract void net.openhft.chronicle.wire.method.FundingListener.fundingPrimitive(int) will box and generate garbage");
         check(true, ARGUMENT.DTO);
     }
 
     // Test to verify that method calls with primitive arguments are allowed through
     @Test
-    public void allowThroughPrimitive() {
+    void allowThroughPrimitive() {
         check(true, ARGUMENT.PRIMITIVE);
     }
 
     // Test to verify that method calls with no arguments are allowed through
     @Test
-    public void allowThroughNoArg() {
+    void allowThroughNoArg() {
         ignoreException("Generated code to call updateInterceptor for public abstract void net.openhft.chronicle.wire.method.FundingListener.fundingPrimitive(int) will box and generate garbage");
         check(true, ARGUMENT.NONE);
     }
 
     // Test to verify that method calls with DTO arguments are blocked
     @Test
-    public void block() {
+    void block() {
         check(false, ARGUMENT.DTO);
     }
 
     // Test to verify that method calls with primitive arguments are blocked
     @Test
-    public void blockPrimitive() {
+    void blockPrimitive() {
         check(false, ARGUMENT.PRIMITIVE);
     }
 
     // Test to verify that method calls with no arguments are blocked
     @Test
-    public void blockNoArg() {
+    void blockNoArg() {
         check(false, ARGUMENT.NONE);
     }
 

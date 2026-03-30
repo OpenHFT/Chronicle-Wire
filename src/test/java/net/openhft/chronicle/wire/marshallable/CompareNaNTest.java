@@ -7,23 +7,23 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * This class tests the behavior of NaN values when used in different data types like primitives, wrappers, and objects.
  * The tests emphasize the importance of consistent behavior when comparing such entities containing NaN.
  */
-public class CompareNaNTest extends WireTestCommon {
+class CompareNaNTest extends WireTestCommon {
 
     /**
      * Test the comparison behavior for primitive data types containing NaN values.
      * Ensures that two DTOs with NaN primitive values are considered equal.
      */
     @Test
-    public void testPrim() {
+    void testPrim() {
         @NotNull PrimDTO a = new PrimDTO(Double.NaN, Float.NaN);
         @NotNull PrimDTO b = new PrimDTO(Double.NaN, Float.NaN);
         assertEquals(a.toString(), b.toString());
@@ -35,7 +35,7 @@ public class CompareNaNTest extends WireTestCommon {
      * Ensures that two DTOs with NaN wrapped values are considered equal.
      */
     @Test
-    public void testWrapDTO() {
+    void testWrapDTO() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         @NotNull WrapDTO a = new WrapDTO(Double.NaN, Float.NaN);
@@ -49,7 +49,7 @@ public class CompareNaNTest extends WireTestCommon {
      * Ensures that two DTOs with NaN object values are considered equal.
      */
     @Test
-    public void testObjectWrapDTO() {
+    void testObjectWrapDTO() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         @NotNull ObjectWrapDTO a = new ObjectWrapDTO(Double.NaN, Float.NaN);

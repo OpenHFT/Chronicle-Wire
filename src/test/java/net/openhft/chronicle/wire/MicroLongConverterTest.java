@@ -3,21 +3,21 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * This class tests the functionality of the MicroLongConverter.
  * It extends the WireTestCommon for common test setup and utilities.
  */
-public class MicroLongConverterTest extends WireTestCommon {
+class MicroLongConverterTest extends WireTestCommon {
 
     /**
      * This test ensures that MicroLongConverter properly converts microsecond timestamp and duration representations.
      */
     @Test
-    public void testMicro() {
+    void testMicro() {
         String in = "!net.openhft.chronicle.wire.MicroLongConverterTest$Data {\n" +
                 "  time: 2019-01-20T23:45:11.123456,\n" +
                 "  ttl: PT1H15M\n" +
@@ -31,7 +31,7 @@ public class MicroLongConverterTest extends WireTestCommon {
     /**
      * Data class with fields representing time and duration, both using custom LongConverters.
      */
-    public static class Data extends SelfDescribingMarshallable {
+    static class Data extends SelfDescribingMarshallable {
         @LongConversion(MicroTimestampLongConverter.class)
         public long time;  // Timestamp in microseconds
 

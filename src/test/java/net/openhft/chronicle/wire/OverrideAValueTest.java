@@ -7,17 +7,17 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 // Class OverrideAValueTest extends WireTestCommon to perform tests related to value overrides and immutability
-public class OverrideAValueTest extends WireTestCommon {
+class OverrideAValueTest extends WireTestCommon {
 
     // Test to ensure deserialization does not modify immutable objects
     @Test
-    public void testDontTouchImmutables() {
+    void testDontTouchImmutables() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Deserialization of a NumberHolder instance with num set to 2
@@ -29,7 +29,7 @@ public class OverrideAValueTest extends WireTestCommon {
 
     // Test to ensure deserialization does not modify immutable nested objects
     @Test
-    public void testDontTouchImmutables2() {
+    void testDontTouchImmutables2() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Mark NumberHolder class as immutable
@@ -44,7 +44,7 @@ public class OverrideAValueTest extends WireTestCommon {
 
     // Test to ensure that class changes during deserialization are handled appropriately
     @Test
-    public void testAllowClassChange() {
+    void testAllowClassChange() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Deserialization of a ParentHolder instance with a nested SubClass object having name "bob" and value 3.3

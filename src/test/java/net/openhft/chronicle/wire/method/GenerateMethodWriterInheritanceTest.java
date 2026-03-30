@@ -8,16 +8,14 @@ import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static net.openhft.chronicle.wire.WireType.BINARY;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * Test class for verifying method writer generation and inheritance behaviors in the Chronicle Wire system.
@@ -28,7 +26,7 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
      * Tests that method writer generation works for the same class in the hierarchy.
      */
     @Test
-    public void testSameClassInHierarchy() {
+    void testSameClassInHierarchy() {
         // Create a new binary wire that uses padding
         final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
@@ -61,7 +59,7 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
      * Tests that method writer generation handles methods with the same name properly.
      */
     @Test
-    public void testSameNamedMethod() {
+    void testSameNamedMethod() {
         // Similar setup as the previous test
         final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
@@ -87,23 +85,27 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
 
     // TODO: same names but different MethodIds should barf
 
-    @Test(expected = MethodWriterValidationException.class)
-    public void testDuplicateMethodIds() {
-        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
+    @Test
+    void testDuplicateMethodIds() {
+        assertThrows(MethodWriterValidationException.class, () -> {
+            final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
-        // Attempt to build a method writer with duplicate method IDs, expecting an exception
-        final VanillaMethodWriterBuilder<AnInterfaceMethodId> builder =
-            (VanillaMethodWriterBuilder<AnInterfaceMethodId>) wire.methodWriterBuilder(AnInterfaceMethodId.class);
-        builder.addInterface(AnInterfaceSameMethodId.class).build();
+            // Attempt to build a method writer with duplicate method IDs, expecting an exception
+            final VanillaMethodWriterBuilder<AnInterfaceMethodId> builder =
+                    (VanillaMethodWriterBuilder<AnInterfaceMethodId>) wire.methodWriterBuilder(AnInterfaceMethodId.class);
+            builder.addInterface(AnInterfaceSameMethodId.class).build();
+        });
     }
 
     // This test is expected to throw a MethodWriterValidationException when trying to generate a method writer for a class
-    @Test(expected = MethodWriterValidationException.class)
-    public void testGenerateForClass() {
-        final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
+    @Test
+    void testGenerateForClass() {
+        assertThrows(MethodWriterValidationException.class, () -> {
+            final Wire wire = BINARY.apply(Bytes.allocateElasticOnHeap());
 
-        // Attempt to generate a method writer for a non-interface class, expecting an exception
-        wire.methodWriter(GenerateMethodWriterInheritanceTest.class);
+            // Attempt to generate a method writer for a non-interface class, expecting an exception
+            wire.methodWriter(GenerateMethodWriterInheritanceTest.class);
+        });
     }
 
     /**
@@ -112,7 +114,7 @@ public class GenerateMethodWriterInheritanceTest extends WireTestCommon {
      * in certain dynamic proxy or code generation scenarios.
      */
     @Test
-    public void testGenerateForLongGeneratedClassName() {
+    void testGenerateForLongGeneratedClassName() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Allocate a new binary wire buffer

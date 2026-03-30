@@ -9,19 +9,19 @@ import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 @SuppressWarnings("unchecked")
-public class ConventionsTest extends WireTestCommon {
+class ConventionsTest extends WireTestCommon {
 
-    @SuppressWarnings("rawtypes")
     @Test
-    public void testTypeConversionsMaxValue() throws NoSuchFieldException, IllegalAccessException {
+    @SuppressWarnings("rawtypes")
+    void testTypeConversionsMaxValue() throws NoSuchFieldException, IllegalAccessException {
 
         for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short
                 .class, Byte
@@ -29,7 +29,7 @@ public class ConventionsTest extends WireTestCommon {
             Object extected;
             // Check if type is a subclass of Number
             if (Number.class.isAssignableFrom(type)) {
-               // System.out.println("" + type + "");
+                // System.out.println("" + type + "");
                 // Retrieve the MAX_VALUE field from the type class
                 final Field max_value = type.getField("MAX_VALUE");
                 extected = max_value.get(type);
@@ -39,13 +39,13 @@ public class ConventionsTest extends WireTestCommon {
             }
 
             // Assert equality between the expected value and the result of the test method
-            Assert.assertEquals("type=" + type, extected, test(extected, type));
+            assertEquals(extected, test(extected, type), "type=" + type);
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
-    public void testTypeConversionsMinValue() throws IllegalAccessException, NoSuchFieldException {
+    @SuppressWarnings("rawtypes")
+    void testTypeConversionsMinValue() throws IllegalAccessException, NoSuchFieldException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short.class, Byte
@@ -63,13 +63,13 @@ public class ConventionsTest extends WireTestCommon {
             }
 
             // Assert equality between the expected value and the result of the test method
-            Assert.assertEquals("type=" + type, extected, test(extected, type));
+            assertEquals(extected, test(extected, type), "type=" + type);
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
-    public void testTypeConversionsSmallNumber() {
+    @SuppressWarnings("rawtypes")
+    void testTypeConversionsSmallNumber() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short
@@ -77,18 +77,18 @@ public class ConventionsTest extends WireTestCommon {
             // Use a small number as a string for the expected value
             @NotNull Object extected = "123"; // small number
             // Assert equality between the expected value and the result of the test method
-            Assert.assertEquals("type=" + type, extected, String.valueOf(test(extected, type)));
+            assertEquals(extected, String.valueOf(test(extected, type)), "type=" + type);
         }
 
         // Special cases for floating-point numbers
-        Assert.assertEquals(123.0, test("123", Double.class), 0);
-        Assert.assertEquals(123.0, (double) test("123", Float.class), 0);
+        assertEquals(123.0, test("123", Double.class), 0);
+        assertEquals(123.0, (double) test("123", Float.class), 0);
 
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
-    public void testTypeConversionsConvertViaString() throws NoSuchFieldException, IllegalAccessException {
+    @SuppressWarnings("rawtypes")
+    void testTypeConversionsConvertViaString() throws NoSuchFieldException, IllegalAccessException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         for (@NotNull Class<?> type : new Class[]{Integer.class, Long.class, Short.class, Byte
@@ -108,18 +108,18 @@ public class ConventionsTest extends WireTestCommon {
             @Nullable final Object actual = test(value, extected.getClass());
 
             // Assert that the converted value matches the expected value
-            Assert.assertEquals("type=" + type, extected, actual);
+            assertEquals(extected, actual, "type=" + type);
         }
     }
 
     @Test
-    public void testTypeConversionsMaxUnsigned() {
+    void testTypeConversionsMaxUnsigned() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Test conversions for maximum unsigned long value
         for (long shift : new long[]{8}) {
             long extected = 1L << shift;
-            Assert.assertEquals(extected, (long) test(extected, Long.class));
+            assertEquals(extected, (long) test(extected, Long.class));
         }
     }
 

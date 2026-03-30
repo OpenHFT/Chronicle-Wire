@@ -9,18 +9,18 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Objects;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
-public class NestedGenericTest extends WireTestCommon {
+class NestedGenericTest extends WireTestCommon {
 
     // Test to verify generic serialization and deserialization using Chronicle Wire with generic ValueHolder
     @Test
-    public void testGeneric() {
+    void testGeneric() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Ignore specific warning about possible unmarshalling issues with the A class.
@@ -43,7 +43,7 @@ public class NestedGenericTest extends WireTestCommon {
 
     // Test to verify serialization and deserialization using Chronicle Wire with a non-generic ValueHolderDef
     @Test
-    public void testDefined() {
+    void testDefined() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Allocate elastic bytes on heap and create binary wire to handle serialization

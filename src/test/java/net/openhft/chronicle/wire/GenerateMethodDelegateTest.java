@@ -7,8 +7,8 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.wire.utils.SourceCodeFormatter;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -18,29 +18,32 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
-public class GenerateMethodDelegateTest extends WireTestCommon {
+class GenerateMethodDelegateTest extends WireTestCommon {
 
-    @Before
-    public void hasDirect() {
+    @BeforeEach
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
-    // Test the validity of class naming conventions
-    @Test(expected = IllegalArgumentException.class)
-    public void testInvalidName() {
-        // Initialize a new GenerateMethodDelegate
-        GenerateMethodDelegate gmd = new GenerateMethodDelegate();
 
-        // Set metadata for the generated class with an invalid name
-        gmd.metaData().packageName(Jvm.getPackageName(GenerateMethodDelegateTest.class))
-                .baseClassName("GMDT-");
+    // Test the validity of class naming conventions
+    @Test
+    void testInvalidName() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            // Initialize a new GenerateMethodDelegate
+            GenerateMethodDelegate gmd = new GenerateMethodDelegate();
+
+            // Set metadata for the generated class with an invalid name
+            gmd.metaData().packageName(Jvm.getPackageName(GenerateMethodDelegateTest.class))
+                    .baseClassName("GMDT-");
+        });
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
-    public void testAcquireClass() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    void testAcquireClass() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         // Initialize a new GenerateMethodDelegate
         GenerateMethodDelegate gmd = new GenerateMethodDelegate();
 
@@ -74,9 +77,9 @@ public class GenerateMethodDelegateTest extends WireTestCommon {
                 "accept[bi, consumer]\n", sw.toString().replace("\r", ""));
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
-    public void chainedDelegate() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    void chainedDelegate() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         // Create a custom GenerateMethodDelegate with overridden methods for chaining
         GenerateMethodDelegate gmd = new GenerateMethodDelegate() {
 

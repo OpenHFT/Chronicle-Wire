@@ -6,8 +6,8 @@ package net.openhft.chronicle.wire.bytesmarshallable;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,15 +16,15 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class PerfRegressionTest extends WireTestCommon {
+class PerfRegressionTest extends WireTestCommon {
 
     private final String cpuClass = Jvm.getCpuClass();  // Likely obtaining some CPU class information from a utility class 'Jvm'.
 
-    @Ignore("Long running")
     @Test
-    public void regressionTests() throws Exception {
+    @Disabled("Long running")
+    void regressionTests() throws Exception {
         final URL location = PerfRegressionTest.class.getProtectionDomain().getCodeSource().getLocation();
 //        System.getProperties().forEach((k,v) -> System.out.println(k+"= "+v));
         File file = new File(location.getFile());
@@ -152,8 +152,8 @@ public class PerfRegressionTest extends WireTestCommon {
     private boolean timesOk(double d, double ds, double dn) {
         // Validate times against predefined thresholds depending on the CPU class
         if (cpuClass.equals("AMD Ryzen 5 3600 6-Core Processor") ||
-            cpuClass.startsWith("ARM") ||
-            cpuClass.contains(" Xeon")) {
+                cpuClass.startsWith("ARM") ||
+                cpuClass.contains(" Xeon")) {
 
             // Check if times are within the defined ranges for general CPUs
             if ((0.7 <= d && d <= 0.92) &&

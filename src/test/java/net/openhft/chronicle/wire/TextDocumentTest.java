@@ -9,17 +9,16 @@ import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
-public class TextDocumentTest extends WireTestCommon {
+class TextDocumentTest extends WireTestCommon {
 
     // A helper function that performs the test on documents given a wireType.
     private static void doTestDocument(WireType wireType) {
@@ -37,9 +36,9 @@ public class TextDocumentTest extends WireTestCommon {
         // Check that the written bytes contain the expected serialized atomic values.
         @NotNull Bytes<?> bytes = wire.bytes();
         String actual = Wires.fromSizePrefixedBlobs(bytes);
-        Assert.assertTrue(actual.contains(
+        assertTrue(actual.contains(
                 "  writeByte: !!atomic {  locked: false, value: 00000000000000000512 }"));
-        Assert.assertTrue(actual.contains(
+        assertTrue(actual.contains(
                 "  readByte: !!atomic {  locked: false, value: 00000000000000001024 }"));
 
         // Read the header from the wire and populate rheader.
@@ -56,16 +55,16 @@ public class TextDocumentTest extends WireTestCommon {
 
     // Test the document writing and reading for TEXT wireType.
     @Test
-    public void testDocument() {
+    void testDocument() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         doTestDocument(WireType.TEXT);
     }
 
     // An ignored test for YAML_ONLY wireType. Needs to be fixed before running.
-    @Ignore(/* TODO FIX */)
     @Test
-    public void testDocumentYaml() {
+    @Disabled("TODO FIX")
+    void testDocumentYaml() {
         doTestDocument(WireType.YAML_ONLY);
     }
 

@@ -4,18 +4,18 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.pool.ClassAliasPool;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class WiresFromFileTest extends WireTestCommon {
+class WiresFromFileTest extends WireTestCommon {
     @Test
-    public void testFromFile() throws IOException {
+    void testFromFile() throws IOException {
         // Add an alias for MDU class
         ClassAliasPool.CLASS_ALIASES.addAlias(MDU.class);
 
@@ -36,7 +36,7 @@ public class WiresFromFileTest extends WireTestCommon {
     }
 
     @Test
-    public void testStreamFromFile() throws IOException {
+    void testStreamFromFile() throws IOException {
         // Add an alias for MDU class
         ClassAliasPool.CLASS_ALIASES.addAlias(MDU.class);
 

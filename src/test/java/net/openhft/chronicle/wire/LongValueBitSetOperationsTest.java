@@ -4,14 +4,14 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Exercises {@link LongValueBitSet} across word boundaries and common operations.
  */
-public class LongValueBitSetOperationsTest extends WireTestCommon {
+class LongValueBitSetOperationsTest extends WireTestCommon {
 
     private static LongValueBitSet newSet(int bits) {
         // Bind to a BinaryWire so LongReferences are initialised
@@ -20,7 +20,7 @@ public class LongValueBitSetOperationsTest extends WireTestCommon {
     }
 
     @Test
-    public void setGetFlipAcrossWords() {
+    void setGetFlipAcrossWords() {
         LongValueBitSet bs = newSet(128);
         try {
 
@@ -56,7 +56,7 @@ public class LongValueBitSetOperationsTest extends WireTestCommon {
     }
 
     @Test
-    public void cardinalityAndToByteArray() {
+    void cardinalityAndToByteArray() {
         LongValueBitSet bs = newSet(130);
         try {
             bs.set(1);

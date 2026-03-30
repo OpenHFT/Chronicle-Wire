@@ -4,14 +4,14 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Covers scalar edge cases across common wire types to exercise ValueIn/ValueOut branches.
  */
-public class WireScalarEdgeCasesTest extends WireTestCommon {
+class WireScalarEdgeCasesTest extends WireTestCommon {
 
     private static final WireType[] TYPES = new WireType[]{
             WireType.BINARY,
@@ -20,7 +20,7 @@ public class WireScalarEdgeCasesTest extends WireTestCommon {
     };
 
     @Test
-    public void numericAndSpecialValues() {
+    void numericAndSpecialValues() {
         for (WireType wt : TYPES) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 
@@ -58,7 +58,7 @@ public class WireScalarEdgeCasesTest extends WireTestCommon {
     }
 
     @Test
-    public void bytesAndEmptyText() {
+    void bytesAndEmptyText() {
         for (WireType wt : TYPES) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 

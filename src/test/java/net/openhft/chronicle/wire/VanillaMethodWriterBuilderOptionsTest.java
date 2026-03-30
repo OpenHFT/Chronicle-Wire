@@ -5,19 +5,21 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class VanillaMethodWriterBuilderOptionsTest extends WireTestCommon {
 
-    interface Events { void event(String s); }
+    interface Events {
+        void event(String s);
+    }
 
     @Test
-    public void honoursUpdateInterceptorAndThreadSafeToggle() {
+    void honoursUpdateInterceptorAndThreadSafeToggle() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
 

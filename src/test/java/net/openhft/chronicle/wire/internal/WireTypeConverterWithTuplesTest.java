@@ -5,13 +5,13 @@ package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireTypeConverter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class WireTypeConverterWithTuplesTest extends WireTestCommon {
+class WireTypeConverterWithTuplesTest extends WireTestCommon {
     @Test
-    public void fromYamlToJsonAndBackToYaml() {
+    void fromYamlToJsonAndBackToYaml() {
         WireTypeConverter wireTypeConverter = new WireTypeConverter();
         String originalYaml = "" +
                 "!ChronicleServicesCfg {\n" +
@@ -81,8 +81,7 @@ public class WireTypeConverterWithTuplesTest extends WireTestCommon {
                 "\"affinityCpu\":\"any\",\n" +
                 "\"pretouchMS\":100,\n" +
                 "\"serviceConfig\":{\"param\":{\"@CustomClass1\":{\"param2\":\"value\"}}}}}}}";
-        assertEquals(expected,
-                json.toString().replace(",", ",\n"));
+        assertEquals(expected, json.toString().replace(",", ",\n"));
 
         CharSequence jsonToYaml = wireTypeConverter.jsonToYaml(json.toString());
 

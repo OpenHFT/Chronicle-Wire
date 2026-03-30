@@ -5,22 +5,23 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodReader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MethodWriterReaderDispatchTest extends WireTestCommon {
 
     interface Api {
         void a(int i);
+
         void b(String s);
     }
 
     @Test
-    public void dispatchKnownMethodsAndIgnoreUnknown() {
+    void dispatchKnownMethodsAndIgnoreUnknown() {
         Wire w = new BinaryWire(Bytes.allocateElasticOnHeap(256));
         Api writer = w.methodWriter(Api.class);
         writer.a(1);
@@ -31,8 +32,15 @@ public class MethodWriterReaderDispatchTest extends WireTestCommon {
 
         List<String> seen = new ArrayList<>();
         MethodReader r = w.methodReader(new Api() {
-            @Override public void a(int i) { seen.add("a:" + i); }
-            @Override public void b(String s) { seen.add("b:" + s); }
+            @Override
+            public void a(int i) {
+                seen.add("a:" + i);
+            }
+
+            @Override
+            public void b(String s) {
+                seen.add("b:" + s);
+            }
         });
         while (r.readOne()) {
             // drain

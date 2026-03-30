@@ -10,14 +10,14 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class JSONWithAMapTest extends net.openhft.chronicle.wire.WireTestCommon {
+class JSONWithAMapTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
-    public void test1() {
+    void test1() {
         final String expected = "{\"@ResponseItem\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":null}}";
 
         final String input = "!ResponseItem {\n" +
@@ -29,7 +29,7 @@ public class JSONWithAMapTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     @Test
-    public void test2() {
+    void test2() {
         final String input = "!ResponseItem {\n" +
                 "  index: \"4ab100000005\",\n" +
                 "  key: seqNumber,\n" +
@@ -42,7 +42,7 @@ public class JSONWithAMapTest extends net.openhft.chronicle.wire.WireTestCommon 
     }
 
     @Test
-    public void test5() {
+    void test5() {
 
         final String input = "!ResponseItem {\n" +
                 "  index: \"4ab100000005\",\n" +
@@ -91,10 +91,10 @@ public class JSONWithAMapTest extends net.openhft.chronicle.wire.WireTestCommon 
         }
 
         // check the number of '{' match the number of '}'
-        Assert.assertTrue("openBracket=" + openBracket + ",closeBracket=" + closeBracket, openBracket == closeBracket);
+        assertTrue(openBracket == closeBracket, "openBracket=" + openBracket + ",closeBracket=" + closeBracket);
 
         // DON'T CHANGE THE EXPECTED JSON IT IS CORRECT ! - please use this website to validate the json - https://jsonformatter.org
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     private static class ResponseItem extends SelfDescribingMarshallable {

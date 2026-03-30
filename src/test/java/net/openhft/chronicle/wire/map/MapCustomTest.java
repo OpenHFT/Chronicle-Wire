@@ -6,28 +6,28 @@ package net.openhft.chronicle.wire.map;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.Wires;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.Closeable;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test suite for custom map implementations and their serialization.
  * Inherits from WireTestCommon for common test setup and teardown functionalities.
  */
 @SuppressWarnings("serial")
-public class MapCustomTest extends WireTestCommon {
+class MapCustomTest extends WireTestCommon {
 
     /**
      * Test the deep copy functionality of custom map holders.
      * Validates the equality of the original and the copied objects.
      */
     @Test
-    public void test() {
+    void test() {
         // Initialize a MapsHolder with sample values
         MapsHolder<Integer> mapsHolder = new MapsHolder<>(10, "one");
 
@@ -84,7 +84,7 @@ public class MapCustomTest extends WireTestCommon {
     /**
      * Custom TreeMap implementation marked with an interface.
      */
-    public static class IntToStringMap extends TreeMap<Integer, String> implements MarkedMap<String> {
+    static class IntToStringMap extends TreeMap<Integer, String> implements MarkedMap<String> {
         @Override
         public void close() {
             // No-op.
@@ -94,21 +94,21 @@ public class MapCustomTest extends WireTestCommon {
     /**
      * Custom HashMap that contains an additional generic field.
      */
-    public static class IntMap<IGNORE, V> extends HashMap<Integer, V> {
+    static class IntMap<IGNORE, V> extends HashMap<Integer, V> {
         public IGNORE me;
     }
 
     /**
      * Extended version of IntMap.
      */
-    public static class IntSuperMap<SUPER, SELF> extends IntMap<Function<Integer, SELF>, SUPER> {
+    static class IntSuperMap<SUPER, SELF> extends IntMap<Function<Integer, SELF>, SUPER> {
         // No-op.
     }
 
     /**
      * Custom LinkedHashMap that supports value transformation.
      */
-    public static class TransformingMap<K, O, I> extends LinkedHashMap<K, I> {
+    static class TransformingMap<K, O, I> extends LinkedHashMap<K, I> {
         Function<I, O> transform;
 
         // Constructor to set the transformation function
@@ -131,7 +131,7 @@ public class MapCustomTest extends WireTestCommon {
      * A more generic version of IntMap.
      */
     @SuppressWarnings("rawtypes")
-    public static class GeneralMap extends IntMap {
+    static class GeneralMap extends IntMap {
         // No-op.
     }
 

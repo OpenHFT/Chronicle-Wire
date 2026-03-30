@@ -3,21 +3,20 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class HashWireTest extends WireTestCommon {
+class HashWireTest extends WireTestCommon {
 
     // Test the hashing capability for a sequence of marshallable entries
     @Test
-    public void testHash64() {
+    void testHash64() {
 
         // Calculate a 64-bit hash value for the given wire data structure
         long h = HashWire.hash64(wire ->
@@ -40,7 +39,7 @@ public class HashWireTest extends WireTestCommon {
 
     // Test the hashing capability for the Field object with a given name
     @Test
-    public void testHashWithMap() {
+    void testHashWithMap() {
         assertEquals(428977857, new Field("hi").hashCode());
     }
 

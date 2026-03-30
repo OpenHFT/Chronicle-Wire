@@ -5,15 +5,14 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
-public class AbstractMarshallableCfgTest extends WireTestCommon{
+class AbstractMarshallableCfgTest extends WireTestCommon {
     static class MyAMC extends AbstractMarshallableCfg {
         NestedAMC nestedAMC = new NestedAMC();  // Configuration nested inside MyAMC
         NestedSDM nestedSDM = new NestedSDM();  // Self-describing data nested inside MyAMC
@@ -34,16 +33,15 @@ public class AbstractMarshallableCfgTest extends WireTestCommon{
     // Test Cases
     // Test the string representation of the MyAMC configuration
     @Test
-    public void asString() {
+    void asString() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         MyAMC myAMC = new MyAMC();
 
         // Verify default string representation
         assertEquals("" +
-                        "!net.openhft.chronicle.wire.AbstractMarshallableCfgTest$MyAMC {\n" +
-                        "}\n",
-                myAMC.toString());
+                "!net.openhft.chronicle.wire.AbstractMarshallableCfgTest$MyAMC {\n" +
+                "}\n", myAMC.toString());
 
         // Modify values for nested configurations
         myAMC.nestedAMC.number = 0;
@@ -52,22 +50,21 @@ public class AbstractMarshallableCfgTest extends WireTestCommon{
 
         // Verify modified string representation
         assertEquals("" +
-                        "!net.openhft.chronicle.wire.AbstractMarshallableCfgTest$MyAMC {\n" +
-                        "  nestedAMC: {\n" +
-                        "    number: 0,\n" +
-                        "    flag: true\n" +
-                        "  },\n" +
-                        "  nestedSDM: {\n" +
-                        "    bytes: Hi,\n" +
-                        "    amt: 1.0\n" +
-                        "  }\n" +
-                        "}\n",
-                myAMC.toString());
+                "!net.openhft.chronicle.wire.AbstractMarshallableCfgTest$MyAMC {\n" +
+                "  nestedAMC: {\n" +
+                "    number: 0,\n" +
+                "    flag: true\n" +
+                "  },\n" +
+                "  nestedSDM: {\n" +
+                "    bytes: Hi,\n" +
+                "    amt: 1.0\n" +
+                "  }\n" +
+                "}\n", myAMC.toString());
     }
 
     // Test the deep copy functionality
     @Test
-    public void deepCopy() {
+    void deepCopy() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         MyAMC myAMC = new MyAMC();

@@ -9,12 +9,12 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.wire.Wires.acquireStringBuilderScoped;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class CSVBytesMarshallableTest extends WireTestCommon {
+class CSVBytesMarshallableTest extends WireTestCommon {
 
     // Bytes representing raw data for the tests
     private Bytes<?> bytes = Bytes.from(
@@ -24,7 +24,7 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
 
     // Test for low level bytes marshalling using FXPrice
     @Test
-    public void bytesMarshallable() {
+    void bytesMarshallable() {
         Bytes<?> bytes2 = Bytes.allocateElasticOnHeap();
         @NotNull FXPrice fxPrice = new FXPrice();
 
@@ -43,32 +43,32 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
 
     // wire marshalling.
     @Test
-    public void marshallableJSON() {
+    void marshallableJSON() {
         doTest(WireType.JSON, false);
     }
 
     @Test
-    public void marshallableTEXT() {
+    void marshallableTEXT() {
         doTest(WireType.TEXT, false);
     }
 
     @Test
-    public void marshallableYAML_ONLY() {
+    void marshallableYAML_ONLY() {
         doTest(WireType.YAML_ONLY, false);
     }
 
     @Test
-    public void marshallableBINARY() {
+    void marshallableBINARY() {
         doTest(WireType.BINARY, true);
     }
 
     @Test
-    public void marshallableFIELDLESS() {
+    void marshallableFIELDLESS() {
         doTest(WireType.FIELDLESS_BINARY, true);
     }
 
     @Test
-    public void marshallableRAW() {
+    void marshallableRAW() {
         doTest(WireType.RAW, true);
     }
 
@@ -90,13 +90,14 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
             fxPrice.writeMarshallable(out);
         }
 
-       // System.out.println();
-       // System.out.println(wt);
-       // System.out.println(binary ? bytes2.toHexString() : bytes2.toString());
+        // System.out.println();
+        // System.out.println(wt);
+        // System.out.println(binary ? bytes2.toHexString() : bytes2.toString());
 
         bytes2.releaseLast();
     }
 }
+
 /**
  * Class representing a foreign exchange price.
  * Implements the BytesMarshallable interface to support reading and writing of its values from/to bytes.
@@ -146,7 +147,7 @@ class FXPrice implements BytesMarshallable {
     /**
      * Helper method to parse an enum from bytes using an interner.
      *
-     * @param bytes Source bytes
+     * @param bytes    Source bytes
      * @param interner The enum interner to use for parsing
      * @return Parsed enum value
      */
@@ -158,6 +159,7 @@ class FXPrice implements BytesMarshallable {
         }
     }
 }
+
 /**
  * Class representing a foreign exchange price.
  * Implements the Marshallable interface to support reading and writing of its values using the Wire format.

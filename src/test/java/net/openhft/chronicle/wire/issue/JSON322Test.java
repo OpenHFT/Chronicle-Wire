@@ -9,19 +9,18 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.JSONWire;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * see https://github.com/OpenHFT/Chronicle-Wire/issues/322
  */
-public class JSON322Test extends WireTestCommon {
+class JSON322Test extends WireTestCommon {
 
     static class One extends SelfDescribingMarshallable {
         String text;
@@ -57,7 +56,7 @@ public class JSON322Test extends WireTestCommon {
     }
 
     @Test
-    public void supportNestedTypes() {
+    void supportNestedTypes() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final Three three = new Three();
@@ -82,20 +81,20 @@ public class JSON322Test extends WireTestCommon {
         final Object parsed = parserWire.getValueIn().object();
 
         assertNotNull(parsed);
-        assertEquals(Three.class, parsed.getClass());
+        assertSame(Three.class, parsed.getClass());
 
         final Three parsedThree = (Three) parsed;
 
 /*        bytes.clear();
         wire.getValueOut().object(parsed);*/
 
-        assertEquals(One.class, parsedThree.one.getClass());
-        assertEquals(Four.class, parsedThree.two.getClass());
+        assertSame(One.class, parsedThree.one.getClass());
+        assertSame(Four.class, parsedThree.two.getClass());
         assertEquals(three, parsed);
     }
 
     @Test
-    public void supportTypes() {
+    void supportTypes() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         ClassAliasPool.CLASS_ALIASES.addAlias(Combined322.class, TypeOne322.class, TypeTwo322.class);
@@ -113,11 +112,10 @@ public class JSON322Test extends WireTestCommon {
                 .object(c);
 
         assertEquals("" +
-                        "{\"@Combined322\":{" +
-                        "\"t1\":{\"@TypeOne322\":{\"text\":\"one-one\"}}," +
-                        "\"t2\":{\"@TypeTwo322\":{\"id\":222,\"value\":2020}}," +
-                        "\"list\":[ {\"@TypeOne322\":{\"text\":\"one\"}},{\"@TypeTwo322\":{\"id\":2,\"value\":22}} ]}}",
-                wire.bytes().toString());
+                "{\"@Combined322\":{" +
+                "\"t1\":{\"@TypeOne322\":{\"text\":\"one-one\"}}," +
+                "\"t2\":{\"@TypeTwo322\":{\"id\":222,\"value\":2020}}," +
+                "\"list\":[ {\"@TypeOne322\":{\"text\":\"one\"}},{\"@TypeTwo322\":{\"id\":2,\"value\":22}} ]}}", wire.bytes().toString());
 
         // Now try reading it back again
         final JSONWire parserWire = new JSONWire(bytes)
@@ -126,16 +124,16 @@ public class JSON322Test extends WireTestCommon {
         final Object parsed = parserWire.getValueIn().object();
 
         assertNotNull(parsed);
-        assertEquals(Combined322.class, parsed.getClass());
+        assertSame(Combined322.class, parsed.getClass());
 
-        final Combined322 combined322 = (Combined322)parsed;
+        final Combined322 combined322 = (Combined322) parsed;
 
-        assertEquals(TypeOne322.class, combined322.t1.getClass());
-        assertEquals(TypeTwo322.class, combined322.t2.getClass());
+        assertSame(TypeOne322.class, combined322.t1.getClass());
+        assertSame(TypeTwo322.class, combined322.t2.getClass());
         final List<? extends SelfDescribingMarshallable> l = combined322.list;
         assertEquals(2, l.size());
-        assertEquals(TypeOne322.class, l.get(0).getClass());
-        assertEquals(TypeTwo322.class, l.get(1).getClass());
+        assertSame(TypeOne322.class, l.get(0).getClass());
+        assertSame(TypeTwo322.class, l.get(1).getClass());
 
         assertEquals(c, combined322);
     }

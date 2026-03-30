@@ -10,7 +10,7 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.StringReader;
@@ -18,33 +18,33 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class JSON222IndividualTest extends WireTestCommon {
+class JSON222IndividualTest extends WireTestCommon {
 
     // Test empty JSON object representation
     @Test
-    public void testEmptyBrackets() {
+    void testEmptyBrackets() {
         checkSerialized("{}", new LinkedHashMap<>());
     }
 
     // Test JSON string representation with a tab character
     @Test
-    public void testTab() {
+    void testTab() {
         checkSerialized("\"hello\\tworld\"\n", "hello\tworld");
         checkDeserialized("hello\tworld", "\"hello\\tworld\"");
     }
 
     // Test JSON string representation with a special unicode character
     @Test
-    public void testSpecial() {
+    void testSpecial() {
         checkSerialized("\"\\u1000\"\n", "\u1000");
         checkDeserialized("\u1000", "\"\\u1000\"");
     }
 
     // Test nested JSON arrays
     @Test
-    public void nestedSeq() {
+    void nestedSeq() {
         @SuppressWarnings("rawtypes")
         @NotNull List list = Arrays.asList(3L, Arrays.asList(4L));
         checkSerialized("[\n" +
@@ -57,7 +57,7 @@ public class JSON222IndividualTest extends WireTestCommon {
 
     // Test parsing of a JSON object with array as key
     @Test
-    public void parseArrayKey() {
+    void parseArrayKey() {
         checkDeserialized("{5=[6], [7]=}", "{ '5': [ 6 ], [ 7 ] }\n");
     }
 
@@ -92,8 +92,8 @@ public class JSON222IndividualTest extends WireTestCommon {
         try {
             @NotNull Yaml yaml = new Yaml();
             Object o = yaml.load(new StringReader(input));
-           // Debugging output commented out
-           // System.out.println(o);
+            // Debugging output commented out
+            // System.out.println(o);
         } catch (Exception e) {
             throw e;
         }

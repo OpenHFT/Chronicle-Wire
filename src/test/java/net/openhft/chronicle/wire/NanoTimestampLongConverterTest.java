@@ -3,13 +3,13 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
 import static net.openhft.chronicle.wire.NanoTimestampLongConverter.INSTANCE;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class NanoTimestampLongConverterTest extends WireTestCommon {
+class NanoTimestampLongConverterTest extends WireTestCommon {
 
     // Static constants for test cases.
     private static final String TIMESTAMP_STRING_UTC = "2023-02-15T05:31:49.856123456Z";
@@ -19,7 +19,7 @@ public class NanoTimestampLongConverterTest extends WireTestCommon {
 
     // Testing parsing of nanosecond timestamps.
     @Test
-    public void parse() {
+    void parse() {
         // Getting current nanosecond timestamp.
         long now = CLOCK.currentTimeNanos();
 
@@ -35,32 +35,27 @@ public class NanoTimestampLongConverterTest extends WireTestCommon {
 
     // Testing parsing of different string formats for nanosecond timestamps.
     @Test
-    public void parseString() {
-        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"),
-                INSTANCE.parse("2020-09-18T01:02:03.456"));
-        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456789"),
-                INSTANCE.parse("2020-09-18T01:02:03.456789"));
-        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456789012"),
-                INSTANCE.parse("2020-09-18T01:02:03.456789012"));
+    void parseString() {
+        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456"), INSTANCE.parse("2020-09-18T01:02:03.456"));
+        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456789"), INSTANCE.parse("2020-09-18T01:02:03.456789"));
+        assertEquals(INSTANCE.parse("2020/09/18T01:02:03.456789012"), INSTANCE.parse("2020-09-18T01:02:03.456789012"));
     }
 
     @Test
-    public void parseSubsequence() {
-        assertEquals(INSTANCE.parse("202020/09/18T01:02:03.456789012", 2, 31),
-                INSTANCE.parse("2020-09-18T01:02:03.4567890123", 0, 29));
+    void parseSubsequence() {
+        assertEquals(INSTANCE.parse("202020/09/18T01:02:03.456789012", 2, 31), INSTANCE.parse("2020-09-18T01:02:03.4567890123", 0, 29));
     }
 
     // Testing assumption of default timezone (local) if no timezone is provided.
     @Test
-    public void datesWithNoTimezoneAreAssumedToBeLocal() {
+    void datesWithNoTimezoneAreAssumedToBeLocal() {
         NanoTimestampLongConverter mtlc = new NanoTimestampLongConverter("America/New_York");
-        assertEquals(mtlc.parse("2020-09-17T21:02:03.123456789-04:00"),
-                mtlc.parse("2020-09-17T21:02:03.123456789"));
+        assertEquals(mtlc.parse("2020-09-17T21:02:03.123456789-04:00"), mtlc.parse("2020-09-17T21:02:03.123456789"));
     }
 
     // Testing conversion of nanosecond timestamp to Melbourne timezone.
     @Test
-    public void appendTest() {
+    void appendTest() {
         final NanoTimestampLongConverter converter = new NanoTimestampLongConverter("Australia/Melbourne");
         StringBuilder builder = new StringBuilder();
         converter.append(builder, TIMESTAMP);
@@ -69,7 +64,7 @@ public class NanoTimestampLongConverterTest extends WireTestCommon {
 
     // Testing conversion of nanosecond timestamp to UTC.
     @Test
-    public void appendTestUTC() {
+    void appendTestUTC() {
         final NanoTimestampLongConverter converter = new NanoTimestampLongConverter("UTC");
         StringBuilder builder = new StringBuilder();
         converter.append(builder, TIMESTAMP);
@@ -78,7 +73,7 @@ public class NanoTimestampLongConverterTest extends WireTestCommon {
 
     // Testing round-trip conversions (from string to long and back) for different timezones and formats.
     @Test
-    public void roundTripTest() {
+    void roundTripTest() {
         roundTrip(TIMESTAMP_STRING_MELBOURNE, TIMESTAMP, new NanoTimestampLongConverter("Australia/Melbourne"));
         roundTrip(TIMESTAMP_STRING_UTC_NO_SUFFIX, TIMESTAMP, new NanoTimestampLongConverter("UTC"));
     }

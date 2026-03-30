@@ -8,9 +8,8 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -18,44 +17,34 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(value = Parameterized.class)
-public class SerializableWireTest extends WireTestCommon {
+class SerializableWireTest extends WireTestCommon {
     // Wire type for the test
-    private final WireType wireType;
+    private WireType wireType;
 
     // Serializable object to be tested
-    private final Serializable m;
+    private Serializable m;
 
     // Indicates whether to expect an InvalidMarshallableException
-    private final boolean ime;
-
-    // Constructor initializing wire type, serializable object, and exception expectation flag
-    public SerializableWireTest(WireType wireType, Serializable m, boolean ime) {
-        this.wireType = wireType;
-        this.m = m;
-        this.ime = ime;
-    }
+    private boolean ime;
 
     // Parameterized tests with various combinations of wire types and serializable objects
     @NotNull
-    @Parameterized.Parameters(name = "wt: {0}, object: {1}, IME: {2}") // toString() implicility called here
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
         // Wire types for testing
         @NotNull WireType[] wireTypes = {WireType.TEXT /*, WireType.YAML_ONLY, WireType.BINARY*/};
         // Serializable objects for testing
         @NotNull Serializable[] objects = {
-            // Various serializable objects to test
-            new Nested(),
-            new ScalarValues(),
-            new Nested(new ScalarValues(), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap()),
-            new Nested(new ScalarValues(1), null, Collections.emptySet(), Collections.emptyMap()),
-            new Nested(new ScalarValues(1), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap()),
-            new ScalarValues(1),
-            new ScalarValues(10)
+                // Various serializable objects to test
+                new Nested(),
+                new ScalarValues(),
+                new Nested(new ScalarValues(), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap()),
+                new Nested(new ScalarValues(1), null, Collections.emptySet(), Collections.emptyMap()),
+                new Nested(new ScalarValues(1), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap()),
+                new ScalarValues(1),
+                new ScalarValues(10)
         };
         // Generate combinations of wire types and serializable objects
         for (WireType wt : wireTypes) {
@@ -69,8 +58,12 @@ public class SerializableWireTest extends WireTestCommon {
 
     // Test method to write and read serializable objects using different wire types
     @SuppressWarnings("rawtypes")
-    @Test
-    public void writeMarshallable() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    void writeMarshallable(WireType wireType, Serializable m, boolean ime) {
+        this.wireType = wireType;
+        this.m = m;
+        this.ime = ime;
         // Ignore exceptions for certain test cases
         if (ime) // TODO Fix to be expected
             ignoreException(ek -> ek.throwable instanceof InvalidMarshallableException, "IME");
@@ -100,13 +93,17 @@ public class SerializableWireTest extends WireTestCommon {
         }
     }
 
-    @Test
-    public void testStringBuilderSerialization() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    void testStringBuilderSerialization(WireType wireType, Serializable m, boolean ime) {
+        this.wireType = wireType;
+        this.m = m;
+        this.ime = ime;
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
             Wire wire = new BinaryWire(bytes);
             TextContainer outerContainer = new TextContainer();
-            outerContainer.innerBuilders = new StringBuilder[] { new StringBuilder("innerText") };
+            outerContainer.innerBuilders = new StringBuilder[]{new StringBuilder("innerText")};
             wire.write("data").object(outerContainer);
 
             TextContainer deserializedContainer = wire.read("data").object(TextContainer.class);
@@ -120,5 +117,4 @@ public class SerializableWireTest extends WireTestCommon {
     static class TextContainer extends SelfDescribingMarshallable {
         StringBuilder[] innerBuilders; // Represents inner StringBuilders
     }
-
 }

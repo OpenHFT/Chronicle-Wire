@@ -11,28 +11,17 @@ import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(Parameterized.class)
 public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.WireTestCommon {
 
-    private final WireType wireType;
-
-    public HandleSkippedValueReadsTest(WireType wireType) {
-        this.wireType = wireType;
-    }
-
-    @Parameterized.Parameters(name = "wireType={0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(
                 new Object[]{WireType.BINARY_LIGHT},
@@ -42,17 +31,19 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
         );
     }
 
-    @Test
-    public void test() {
-        doTest(false);
+    @ParameterizedTest
+    @MethodSource("data")
+    void test(WireType wireType) {
+        doTest(wireType, false);
     }
 
-    @Test
-    public void testScanning() {
-        doTest(true);
+    @ParameterizedTest
+    @MethodSource("data")
+    void testScanning(WireType wireType) {
+        doTest(wireType, true);
     }
 
-    private void doTest(boolean scanning) {
+    private void doTest(WireType wireType, boolean scanning) {
         Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         try (DocumentContext dc = wire.writingDocument(true)) {
             dc.wire()
@@ -163,17 +154,19 @@ public class HandleSkippedValueReadsTest extends net.openhft.chronicle.wire.Wire
         return sw.toString().replace("\r", "");
     }
 
-    @Test
-    public void index2index() {
-        doIndex2index(false);
+    @ParameterizedTest
+    @MethodSource("data")
+    void index2index(WireType wireType) {
+        doIndex2index(wireType, false);
     }
 
-    @Test
-    public void index2indexScanning() {
-        doIndex2index(true);
+    @ParameterizedTest
+    @MethodSource("data")
+    void index2indexScanning(WireType wireType) {
+        doIndex2index(wireType, true);
     }
 
-    private void doIndex2index(boolean scanning) {
+    private void doIndex2index(WireType wireType, boolean scanning) {
         Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         try (DocumentContext dc = wire.writingDocument(true)) {
             dc.wire()

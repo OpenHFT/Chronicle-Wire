@@ -8,23 +8,23 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.Wires;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * Test suite for validating the marshalling capabilities of maps.
  * Inherits from WireTestCommon for common test setup and teardown functionalities.
  */
-public class MapMarshallableTest extends WireTestCommon {
-    @Before
-    public void hasDirect() {
+class MapMarshallableTest extends WireTestCommon {
+    @BeforeEach
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
@@ -36,7 +36,7 @@ public class MapMarshallableTest extends WireTestCommon {
      * - Copying values between maps with different implementations.
      */
     @Test
-    public void test() {
+    void test() {
         // Initialize a LinkedHashMap and populate it with sample data
         @NotNull final Map<String, Object> map = new LinkedHashMap<>();
         map.put("one", 10);

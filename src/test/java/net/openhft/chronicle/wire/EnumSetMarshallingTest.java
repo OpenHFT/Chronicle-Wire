@@ -6,7 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -14,16 +14,13 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * Tests for marshalling and unmarshalling of EnumSets using Wire.
  */
-public class EnumSetMarshallingTest extends WireTestCommon {
+class EnumSetMarshallingTest extends WireTestCommon {
 
     // Serialized representation of a complete set of thread states
     private static final String FULL_SET_SERIALISED_FORM =
@@ -50,7 +47,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
      * Test marshalling an empty set of thread states.
      */
     @Test
-    public void shouldMarshallEmptySet() {
+    void shouldMarshallEmptySet() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Initialization of resources and test data
@@ -77,7 +74,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
      * Test marshalling a full set of thread states.
      */
     @Test
-    public void shouldMarshallFullSet() {
+    void shouldMarshallFullSet() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Initialization of resources and test data
@@ -105,7 +102,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
      * Test unmarshalling into a container that initially has a null value for the EnumSet.
      */
     @Test
-    public void shouldUnmarshallToContainerWithNullValue() {
+    void shouldUnmarshallToContainerWithNullValue() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Initialization of resources and test data
@@ -134,7 +131,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
      * Test handling multiple instances of EnumSets within an object graph.
      */
     @Test
-    public void shouldAllowMultipleInstancesInObjectGraph() {
+    void shouldAllowMultipleInstancesInObjectGraph() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Initialization of resources and test data
@@ -152,7 +149,7 @@ public class EnumSetMarshallingTest extends WireTestCommon {
         tw.readingDocument().wire().read("key").marshallable(read);
 
         // Ensure that the two EnumSets in the object graph are distinct
-        assertThat(read.f1.get(0).f, is(not(read.f2.get(0).f)));
+        assertNotEquals(read.f1.get(0).f, read.f2.get(0).f);
         bytes.releaseLast();
     }
 

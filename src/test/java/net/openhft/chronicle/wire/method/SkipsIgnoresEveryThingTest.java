@@ -8,13 +8,12 @@ import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.util.IgnoresEverything;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.Wire;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class extending WireTestCommon to verify selective reading behavior in Chronicle Wire.
@@ -27,7 +26,7 @@ public class SkipsIgnoresEveryThingTest extends net.openhft.chronicle.wire.WireT
      * based on the given condition.
      */
     @Test
-    public void selective() {
+    void selective() {
         // Setup a wire with predefined text representing a sequence of messages
         String text = "" +
                 "to: 1\n" +

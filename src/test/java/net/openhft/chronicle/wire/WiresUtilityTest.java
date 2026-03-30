@@ -4,14 +4,14 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class WiresUtilityTest extends WireTestCommon {
+class WiresUtilityTest extends WireTestCommon {
 
     @Test
-    public void dumpsBinaryDocuments() {
+    void dumpsBinaryDocuments() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
         try (DocumentContext dc = wire.writingDocument(false)) {
@@ -24,7 +24,7 @@ public class WiresUtilityTest extends WireTestCommon {
     }
 
     @Test
-    public void dumpsViaWireIn() {
+    void dumpsViaWireIn() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire wire = new BinaryWire(bytes);
         try (DocumentContext dc = wire.writingDocument(false)) {

@@ -3,20 +3,19 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class BinaryWireHighCodeTest extends WireTestCommon {
+class BinaryWireHighCodeTest extends WireTestCommon {
 
     // Test if the BinaryWireHighCode values are unique and no duplicates exist
     @Test
-    public void testUnique() throws IllegalAccessException {
+    void testUnique() throws IllegalAccessException {
         // Ensure there are no pre-defined values
         assertEquals(0, BinaryWireHighCode.values().length);
 

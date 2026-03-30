@@ -9,24 +9,24 @@ import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * The DotNetTest class tests the .NET serialization and deserialization
  * using the facilities provided by the WireTestCommon.
  */
-public class DotNetTest extends WireTestCommon {
+class DotNetTest extends WireTestCommon {
 
     /**
      * Test the conversion of a Hex string representation to a textual format.
      * It uses a sample Hex string (possibly from a .NET application) and checks
      * if it's correctly converted to a text representation.
      */
-    @SuppressWarnings("rawtypes")
     @Test
-    public void testCode() {
+    @SuppressWarnings("rawtypes")
+    void testCode() {
         // Sample Hex string possibly representing serialized data
         final Bytes<?> bytes = Bytes.fromHexString("000000: B9 06 75 73 65 72 49 64 E5 61 6E 64 72 65 B9 06\n" +
                 "000016: 64 6F 6D 61 69 6E EB 54 45 53 54 2D 44 4F 4D 41\n" +
@@ -47,11 +47,10 @@ public class DotNetTest extends WireTestCommon {
 
         // Validate the converted textual representation against the expected output
         assertEquals("" +
-                        "userId: andre\n" +
-                        "domain: TEST-DOMAIN\n" +
-                        "securityToken: SimplePassword\n" +
-                        "clientId: \"4b425a18-ab49-4e97-9fe8-e760288144d9\"\n",
-                text.toString());
+                "userId: andre\n" +
+                "domain: TEST-DOMAIN\n" +
+                "securityToken: SimplePassword\n" +
+                "clientId: \"4b425a18-ab49-4e97-9fe8-e760288144d9\"\n", text.toString());
 
         // Release the allocated bytes to prevent memory leaks
         bytes.releaseLast();

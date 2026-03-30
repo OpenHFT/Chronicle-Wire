@@ -9,17 +9,16 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * ByteArrayReuseTest extends WireTestCommon to test the reuse of byte arrays during
  * serialization and deserialization in Chronicle Wire.
  */
-public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestCommon {
+class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     /**
      * Test method to verify the serialization and deserialization of byte arrays using
@@ -27,7 +26,7 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
      * with the expected hexadecimal string.
      */
     @Test
-    public void writeReadBytesArray() {
+    void writeReadBytesArray() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         SELF_DESCRIBING = true;
@@ -52,7 +51,7 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
      * hexadecimal string.
      */
     @Test
-    public void writeReadBytesArrayBinary() {
+    void writeReadBytesArrayBinary() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         SELF_DESCRIBING = false;
@@ -85,8 +84,7 @@ public class ByteArrayResuseTest extends net.openhft.chronicle.wire.WireTestComm
                 .object(Data.class, data);
         wire.write("data").object(Data.class, data);
 
-        assertEquals(expected,
-                wire.bytes().toHexString());
+        assertEquals(expected, wire.bytes().toHexString());
 
         Data data2 = new Data();
         wire.read("data").object(data2, Data.class);

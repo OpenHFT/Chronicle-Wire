@@ -4,16 +4,15 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class Base32LongConverterTest extends WireTestCommon {
+class Base32LongConverterTest extends WireTestCommon {
 
     // A test to check the parsing functionality of Base32LongConverter.
     @Test
-    public void parse() {
+    void parse() {
         LongConverter bic = new Base32LongConverter();
 
         // Iterate through predefined string values to check the conversion consistency
@@ -26,7 +25,7 @@ public class Base32LongConverterTest extends WireTestCommon {
 
     // A test to check the character safety in TextWire.
     @Test
-    public void parseSubsequence() {
+    void parseSubsequence() {
         LongConverter c = Base32LongConverter.INSTANCE;
         String s = ",O,A,L,ZZ,QQ,ABCDEGHIJKLM,5OPQRSTVWXYZ,JZZZZZZZZZZZ,";
         int comparisons = 9;
@@ -34,25 +33,29 @@ public class Base32LongConverterTest extends WireTestCommon {
         assertTrue(true);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void parseLengthCheck() {
-        Base32LongConverter.INSTANCE.parse(getClass().getCanonicalName());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void parseSubstringLengthCheck() {
-        Base32LongConverter.INSTANCE.parse("ABCD", 3, 0);
+    @Test
+    void parseLengthCheck() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Base32LongConverter.INSTANCE.parse(getClass().getCanonicalName());
+        });
     }
 
     @Test
-    public void allSafeCharsTextWire() {
+    void parseSubstringLengthCheck() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Base32LongConverter.INSTANCE.parse("ABCD", 3, 0);
+        });
+    }
+
+    @Test
+    void allSafeCharsTextWire() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         allSafeChars(wire);
     }
 
     // A test to check the character safety in YamlWire.
     @Test
-    public void allSafeCharsYamlWire() {
+    void allSafeCharsYamlWire() {
         Wire wire = new YamlWire();
         allSafeChars(wire);
     }
@@ -73,8 +76,7 @@ public class Base32LongConverterTest extends WireTestCommon {
                 v.writeLong(converter, i2);
             });
             // Validate that the read value matches the written value.
-            assertEquals(wire.toString(),
-                    i, wire.read("a").readLong(converter));
+            assertEquals(i, wire.read("a").readLong(converter), wire.toString());
             wire.read("b").sequence(i, (i2, v) -> {
                 // Validate that the sequence read values match the written values.
                 assertEquals((long) i2, v.readLong(converter));

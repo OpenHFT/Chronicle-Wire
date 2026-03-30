@@ -6,16 +6,16 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("all")
-public class DocumentContextTest extends WireTestCommon {
+class DocumentContextTest extends WireTestCommon {
 
     // Test multi-message serialization in TEXT format.
     @Test
-    public void multiMessageText() {
+    void multiMessageText() {
         // Create a wire of TEXT type
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
@@ -31,9 +31,9 @@ public class DocumentContextTest extends WireTestCommon {
     }
 
     // Test multi-message serialization in BINARY format.
-    @SuppressWarnings("deprecation")
     @Test
-    public void multiMessageBinary() {
+    @SuppressWarnings("deprecation")
+    void multiMessageBinary() {
         // Create a wire of BINARY type with hex dump
         BinaryWire wire = new BinaryWire(new HexDumpBytes());
         wire.usePadding(true);

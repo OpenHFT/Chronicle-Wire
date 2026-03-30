@@ -6,19 +6,19 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class DefaultValueInCoverageTest extends WireTestCommon {
+class DefaultValueInCoverageTest extends WireTestCommon {
 
     @Test
-    public void handlesBytesPointerAndBooleanBranches() {
+    void handlesBytesPointerAndBooleanBranches() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         DefaultValueIn valueIn = new DefaultValueIn(wire);
         PointerBytesStore pointer = new PointerBytesStore();
@@ -31,12 +31,12 @@ public class DefaultValueInCoverageTest extends WireTestCommon {
         direct.write("hi".getBytes(StandardCharsets.ISO_8859_1));
         valueIn.defaultValue = direct.bytesStore();
         valueIn.bytesSet(pointer);
-        assertTrue("pointer should point at direct store", pointer.safeLimit() >= 2);
+        assertTrue(pointer.safeLimit() >= 2, "pointer should point at direct store");
         direct.releaseLast();
     }
 
     @Test
-    public void suppliesDefaultValuesAcrossReaders() throws InvalidMarshallableException {
+    void suppliesDefaultValuesAcrossReaders() throws InvalidMarshallableException {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         DefaultValueIn valueIn = new DefaultValueIn(wire);
 
@@ -67,7 +67,7 @@ public class DefaultValueInCoverageTest extends WireTestCommon {
     }
 
     @Test
-    public void sequenceAndMarshallableDelegatesInvocations() {
+    void sequenceAndMarshallableDelegatesInvocations() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         DefaultValueIn valueIn = new DefaultValueIn(wire);
         valueIn.defaultValue = null;
@@ -84,7 +84,7 @@ public class DefaultValueInCoverageTest extends WireTestCommon {
     }
 
     @Test
-    public void objectConversionFollowsClassLookup() {
+    void objectConversionFollowsClassLookup() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         DefaultValueIn valueIn = new DefaultValueIn(wire);
 

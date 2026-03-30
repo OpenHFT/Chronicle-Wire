@@ -6,13 +6,13 @@ package net.openhft.chronicle.wire.marshallable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.Marshallable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class TriviallyCopyableMarketDataTest extends net.openhft.chronicle.wire.WireTestCommon {
+class TriviallyCopyableMarketDataTest extends net.openhft.chronicle.wire.WireTestCommon {
     @Test
-    public void test() {
+    void test() {
         ClassAliasPool.CLASS_ALIASES.addAlias(TriviallyCopyableMarketData.class, "MarketData");
         final String str = "" +
                 "!MarketData {\n" +

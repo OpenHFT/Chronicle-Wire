@@ -3,19 +3,18 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class ValueInBestEffortTest extends WireTestCommon {
+class ValueInBestEffortTest extends WireTestCommon {
 
     private static final String YAML = "value: { foo: bar }";
 
     @Test
-    public void strictModeReturnsNullOnTypeMismatch() {
+    void strictModeReturnsNullOnTypeMismatch() {
         TextWire wire = TextWire.from(YAML);
         Object result = wire.read("value").object(null, String.class, false);
         // In strict mode, mismatched types are not coerced into a target class;
@@ -28,7 +27,7 @@ public class ValueInBestEffortTest extends WireTestCommon {
     }
 
     @Test
-    public void bestEffortAllowsMismatchedTypes() {
+    void bestEffortAllowsMismatchedTypes() {
         TextWire wire = TextWire.from(YAML);
         @SuppressWarnings("unchecked")
         Map<String, Object> map = wire.read("value").object(null, Map.class, true);

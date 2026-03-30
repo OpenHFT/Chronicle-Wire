@@ -5,17 +5,17 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class BinaryMethodWriterInvocationHandlerTest extends WireTestCommon {
+class BinaryMethodWriterInvocationHandlerTest extends WireTestCommon {
 
     @Test
-    public void testOnClose() {
+    void testOnClose() {
         Closeable closeable = createMock(Closeable.class);
 
         // Setting expectations on the mock: When the close() method is called, do nothing.

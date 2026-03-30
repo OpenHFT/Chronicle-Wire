@@ -9,16 +9,16 @@ import net.openhft.chronicle.wire.BinaryWire;
 import net.openhft.chronicle.wire.DocumentContext;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.YamlWire;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class to validate the behavior and serialization of Wire objects with arrays.
  */
-public class Issue272Test {
+class Issue272Test {
 
     /**
      * Test case to handle the serialization and deserialization of int arrays
@@ -26,7 +26,7 @@ public class Issue272Test {
      * and BinaryWire and their respective outputs.
      */
     @Test
-    public void arrays() {
+    void arrays() {
         Bytes<?> buffer = Bytes.allocateElasticOnHeap();
 
         // Define two int arrays for testing
@@ -57,22 +57,21 @@ public class Issue272Test {
         new YamlWire(buffer.readPosition(0)) // Verify the hex representation of the binary wire
                 .copyTo(copyWire0);
         assertEquals("" +
-                        "28 00 00 00                                     # msg-length\n" +
-                        "b9 03 6f 6e 65                                  # one: (event)\n" +
-                        "82 0a 00 00 00                                  # sequence\n" +
-                        "a1 01                                           # 1\n" +
-                        "a1 02                                           # 2\n" +
-                        "a1 03                                           # 3\n" +
-                        "a1 04                                           # 4\n" +
-                        "a1 05                                           # 5\n" +
-                        "b9 03 74 77 6f                                  # two: (event)\n" +
-                        "82 0a 00 00 00                                  # sequence\n" +
-                        "a1 65                                           # 101\n" +
-                        "a1 66                                           # 102\n" +
-                        "a1 67                                           # 103\n" +
-                        "a1 68                                           # 104\n" +
-                        "a1 69                                           # 105\n",
-                bytes.toHexString());
+                "28 00 00 00                                     # msg-length\n" +
+                "b9 03 6f 6e 65                                  # one: (event)\n" +
+                "82 0a 00 00 00                                  # sequence\n" +
+                "a1 01                                           # 1\n" +
+                "a1 02                                           # 2\n" +
+                "a1 03                                           # 3\n" +
+                "a1 04                                           # 4\n" +
+                "a1 05                                           # 5\n" +
+                "b9 03 74 77 6f                                  # two: (event)\n" +
+                "82 0a 00 00 00                                  # sequence\n" +
+                "a1 65                                           # 101\n" +
+                "a1 66                                           # 102\n" +
+                "a1 67                                           # 103\n" +
+                "a1 68                                           # 104\n" +
+                "a1 69                                           # 105\n", bytes.toHexString());
 
         // Create a fresh YamlWire, copy data from the BinaryWire, and verify the result
         Wire copyWire = new YamlWire(Bytes.allocateElasticOnHeap());
@@ -80,21 +79,20 @@ public class Issue272Test {
             dc.wire().copyTo(copyWire);
         }
         assertEquals("" +
-                        "one: [\n" +
-                        "  1,\n" +
-                        "  2,\n" +
-                        "  3,\n" +
-                        "  4,\n" +
-                        "  5\n" +
-                        "]\n" +
-                        "two: [\n" +
-                        "  101,\n" +
-                        "  102,\n" +
-                        "  103,\n" +
-                        "  104,\n" +
-                        "  105\n" +
-                        "]\n",
-                copyWire.toString());
+                "one: [\n" +
+                "  1,\n" +
+                "  2,\n" +
+                "  3,\n" +
+                "  4,\n" +
+                "  5\n" +
+                "]\n" +
+                "two: [\n" +
+                "  101,\n" +
+                "  102,\n" +
+                "  103,\n" +
+                "  104,\n" +
+                "  105\n" +
+                "]\n", copyWire.toString());
         doTest(copyWire);
     }
 
@@ -104,7 +102,7 @@ public class Issue272Test {
      * and BinaryWire and their respective outputs for map structures.
      */
     @Test
-    public void map() {
+    void map() {
         // Create an input string with Yaml format to be parsed
         String input = "" +
                 "to: dest1\n" +
@@ -125,39 +123,37 @@ public class Issue272Test {
         Wire copyWire = new BinaryWire(bytes);
         copyAll(wire, copyWire);
         assertEquals("" +
-                        "1b 00 00 00                                     # msg-length\n" +
-                        "82 16 00 00 00                                  # Marshallable\n" +
-                        "c2 74 6f                                        # to:\n" +
-                        "e5 64 65 73 74 31                               # dest1\n" +
-                        "c4 73 65 6e 64                                  # send:\n" +
-                        "e7 6d 65 73 73 61 67 65                         # message\n" +
-                        "25 00 00 00                                     # msg-length\n" +
-                        "82 20 00 00 00                                  # Marshallable\n" +
-                        "c2 74 6f                                        # to:\n" +
-                        "e5 64 65 73 74 32                               # dest2\n" +
-                        "c5 73 65 6e 64 73                               # sends:\n" +
-                        "82 0c 00 00 00                                  # Marshallable\n" +
-                        "c3 6f 6e 65                                     # one:\n" +
-                        "a1 01                                           # 1\n" +
-                        "c3 74 77 6f                                     # two:\n" +
-                        "a1 02                                           # 2\n",
-                bytes.toHexString());
+                "1b 00 00 00                                     # msg-length\n" +
+                "82 16 00 00 00                                  # Marshallable\n" +
+                "c2 74 6f                                        # to:\n" +
+                "e5 64 65 73 74 31                               # dest1\n" +
+                "c4 73 65 6e 64                                  # send:\n" +
+                "e7 6d 65 73 73 61 67 65                         # message\n" +
+                "25 00 00 00                                     # msg-length\n" +
+                "82 20 00 00 00                                  # Marshallable\n" +
+                "c2 74 6f                                        # to:\n" +
+                "e5 64 65 73 74 32                               # dest2\n" +
+                "c5 73 65 6e 64 73                               # sends:\n" +
+                "82 0c 00 00 00                                  # Marshallable\n" +
+                "c3 6f 6e 65                                     # one:\n" +
+                "a1 01                                           # 1\n" +
+                "c3 74 77 6f                                     # two:\n" +
+                "a1 02                                           # 2\n", bytes.toHexString());
 
         // Convert the BinaryWire back into a YamlWire and verify its string representation
         Wire wire2 = new YamlWire();
         copyAll(copyWire, wire2);
         assertEquals("to: dest1\n" +
-                        "send: message\n" +
-                        "...\n" +
-                        "{\n" +
-                        "  to: dest2,\n" +
-                        "  sends: {\n" +
-                        "    one: 1,\n" +
-                        "    two: 2\n" +
-                        "  }\n" +
-                        "}\n" +
-                        "...\n",
-                wire2.toString());
+                "send: message\n" +
+                "...\n" +
+                "{\n" +
+                "  to: dest2,\n" +
+                "  sends: {\n" +
+                "    one: 1,\n" +
+                "    two: 2\n" +
+                "  }\n" +
+                "}\n" +
+                "...\n", wire2.toString());
     }
 
     /**
@@ -169,7 +165,7 @@ public class Issue272Test {
      */
     private static void copyAll(Wire wire, Wire copyWire) {
         // Iterate through all documents in the source wire
-        while(!wire.isEmpty()) {
+        while (!wire.isEmpty()) {
             try (DocumentContext dc = wire.readingDocument()) {
                 try (DocumentContext dc2 = copyWire.writingDocument()) {
                     dc.wire().copyTo(dc2.wire());

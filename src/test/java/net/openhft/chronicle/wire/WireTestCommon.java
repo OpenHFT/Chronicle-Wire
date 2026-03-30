@@ -11,9 +11,8 @@ import net.openhft.chronicle.core.onoes.LogLevel;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.threads.CleaningThread;
 import net.openhft.chronicle.core.threads.ThreadDump;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -21,7 +20,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({"this-escape"})
 public class WireTestCommon {
@@ -49,7 +48,14 @@ public class WireTestCommon {
     }
 
     // Activates the reference tracing before executing tests
-    @Before
+    @BeforeEach
+    void beforeEachWireTestCommon() {
+        enableReferenceTracing();
+        recordExceptions();
+        rememberGenerateTuples();
+        throwCNFRE();
+    }
+
     public void enableReferenceTracing() {
         AbstractReferenceCounted.enableReferenceTracing();
     }
@@ -59,7 +65,7 @@ public class WireTestCommon {
         AbstractReferenceCounted.assertReferencesReleased();
     }
 
-    // Intended to be used with @Before for tests that might create threads
+    // Intended to be used with @BeforeEach for tests that might create threads
     // Captures a snapshot of all threads before test execution
     void threadDump() {
         threadDump = new ThreadDump();
@@ -72,7 +78,6 @@ public class WireTestCommon {
     }
 
     // Records exceptions before the test runs
-    @Before
     public void recordExceptions() {
         exceptions = Jvm.recordExceptions();
     }
@@ -134,7 +139,7 @@ public class WireTestCommon {
                             .collect(Collectors.joining(", "));
             Jvm.dumpException(exceptions);
             Jvm.resetExceptionHandlers();
-            Assert.fail(msg);
+            fail(msg);
         }
     }
 
@@ -155,7 +160,12 @@ public class WireTestCommon {
         assertEquals(0, comparisons);
     }
 
-    @After
+    @AfterEach
+    void afterEachWireTestCommon() {
+        afterChecks();
+        restoreGenerateTuples();
+    }
+
     public void afterChecks() {
         preAfter(); // Any custom operations before the default cleanup
         CleaningThread.performCleanup(Thread.currentThread());
@@ -175,18 +185,15 @@ public class WireTestCommon {
     }
 
     // Store the current value of GENERATE_TUPLES before test execution
-    @Before
     public void rememberGenerateTuples() {
         gt = Wires.GENERATE_TUPLES;
     }
 
     // Restore the original value of GENERATE_TUPLES after the test execution
-    @After
     public void restoreGenerateTuples() {
         Wires.GENERATE_TUPLES = gt;
     }
 
-    @Before
     public void throwCNFRE() {
     }
 }

@@ -9,7 +9,7 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.domestic.extractor.DocumentExtractor;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
 import net.openhft.chronicle.wire.domestic.streaming.CreateUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.function.Function;
@@ -17,9 +17,9 @@ import java.util.stream.Collector;
 
 import static java.util.stream.Collectors.*;
 import static net.openhft.chronicle.wire.domestic.reduction.ConcurrentCollectors.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
+class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
 
     private static final List<MarketData> MARKET_DATA_SET = Arrays.asList(
             new MarketData("MSFT", 10, 11, 9),
@@ -28,7 +28,7 @@ public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
     );
 
     @Test
-    public void lastMarketDataPerSymbolCustom() {
+    void lastMarketDataPerSymbolCustom() {
 
         // This first Accumulation will keep track of the min and max value for all symbols
 
@@ -58,7 +58,7 @@ public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
     }
 
     @Test
-    public void lastMarketDataPerSymbol() {
+    void lastMarketDataPerSymbol() {
 
         final Reduction<Map<String, MarketData>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class).build())
@@ -75,7 +75,7 @@ public class MinMaxLastMarketDataPerSymbolTest extends WireTestCommon {
     }
 
     @Test
-    public void symbolSet() {
+    void symbolSet() {
 
         Reduction<Set<String>> listener = Reduction.of(
                         DocumentExtractor.builder(MarketData.class)

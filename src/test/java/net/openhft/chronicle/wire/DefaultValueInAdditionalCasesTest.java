@@ -6,17 +6,17 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.PointerBytesStore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Covers DefaultValueIn branches for bytes/text and primitive defaults.
  */
-public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
+class DefaultValueInAdditionalCasesTest extends WireTestCommon {
 
     @Test
-    public void bytesTextAndMatchBranches() {
+    void bytesTextAndMatchBranches() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
 
@@ -38,7 +38,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
     }
 
     @Test
-    public void primitiveDefaultsAreZeroWhenNull() {
+    void primitiveDefaultsAreZeroWhenNull() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         dvi.defaultValue = null;
@@ -57,7 +57,7 @@ public class DefaultValueInAdditionalCasesTest extends WireTestCommon {
     }
 
     @Test
-    public void bytesArrayAccessor() {
+    void bytesArrayAccessor() {
         TextWire tw = TextWire.from("");
         DefaultValueIn dvi = new DefaultValueIn(tw);
         byte[] data = new byte[]{1, 2, 3};

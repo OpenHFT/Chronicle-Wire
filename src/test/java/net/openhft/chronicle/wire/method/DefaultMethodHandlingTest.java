@@ -9,11 +9,11 @@ import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Interface defining default behavior for an object that can perform operations
@@ -28,6 +28,7 @@ interface WithDefault {
         throw new UnsupportedOperationException();
     }
 }
+
 /**
  * Test class for validating the handling of default methods in the WithDefault interface.
  * Extends WireTestCommon for common wire testing utilities.
@@ -74,7 +75,7 @@ public class DefaultMethodHandlingTest extends WireTestCommon {
      * Tests the method writers and readers using TEXT wire format.
      */
     @Test
-    public void withDefault() {
+    void withDefault() {
         doTest(WireType.TEXT);
     }
 
@@ -82,7 +83,7 @@ public class DefaultMethodHandlingTest extends WireTestCommon {
      * Tests the method writers and readers using YAML_ONLY wire format.
      */
     @Test
-    public void withDefaultYaml() {
+    void withDefaultYaml() {
         doTest(WireType.YAML_ONLY);
     }
 }

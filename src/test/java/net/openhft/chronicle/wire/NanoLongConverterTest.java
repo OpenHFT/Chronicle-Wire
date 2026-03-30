@@ -3,16 +3,16 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.wire.NanoTimestampLongConverter.INSTANCE;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class NanoLongConverterTest extends WireTestCommon {
+class NanoLongConverterTest extends WireTestCommon {
 
     // Test if a nanosecond timestamp and a duration string can be successfully converted into a Data object and back to the original string format.
     @Test
-    public void testNano() {
+    void testNano() {
         // Create a string representation of a Data object with a nanosecond timestamp and a duration.
         String in = "!net.openhft.chronicle.wire.NanoLongConverterTest$Data {\n" +
                 "  time: 2019-01-20T23:45:11.123456789,\n" +
@@ -28,13 +28,13 @@ public class NanoLongConverterTest extends WireTestCommon {
 
     // Test if trailing 'Z' in the timestamp (indicating UTC time) does not affect parsing for nanoseconds.
     @Test
-    public void testTrailingZ() {
+    void testTrailingZ() {
         final String text = "2019-01-20T23:45:11.123456789";
         assertEquals(INSTANCE.parse(text), INSTANCE.parse(text + "Z"));
     }
 
     // Define a nested static class, Data, to represent the timestamp and duration in nanoseconds.
-    public static class Data extends SelfDescribingMarshallable {
+    static class Data extends SelfDescribingMarshallable {
         // The `@LongConversion` annotation tells the deserializer to use the NanoTimestampLongConverter class
         // to convert the timestamp string to a long value representing nanoseconds.
         @LongConversion(NanoTimestampLongConverter.class)

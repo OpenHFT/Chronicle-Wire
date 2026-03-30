@@ -7,22 +7,22 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * This class tests the usage of Bytes in various operations, emphasizing the importance of garbage-free operations.
  */
-public class BytesUsageTest extends WireTestCommon {
+class BytesUsageTest extends WireTestCommon {
 
     /**
      * Test the operations and manipulations on Bytes.
      * It showcases creating Bytes from a string and then appending it to other Bytes instances.
      */
-    @SuppressWarnings("rawtypes")
     @Test
-    public void testBytes() {
+    @SuppressWarnings("rawtypes")
+    void testBytes() {
         // Initialize a BytesStore instance from a string
         BytesStore<?, ?> value = Bytes.from("helloWorld");
 

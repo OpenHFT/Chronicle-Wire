@@ -11,21 +11,18 @@ import net.openhft.chronicle.core.util.Mocker;
 import net.openhft.chronicle.wire.*;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.lang.reflect.Proxy;
 
-import static junit.framework.TestCase.assertFalse;
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MethodWriterTest extends WireTestCommon {
     @Test
-    public void testSubclasses() {
+    void testSubclasses() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
 
         Event writer = wire.methodWriterBuilder(Event.class).genericEvent("event").build();
@@ -92,7 +89,7 @@ public class MethodWriterTest extends WireTestCommon {
     }
 
     @Test
-    public void testDefault() {
+    void testDefault() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
 
@@ -100,12 +97,12 @@ public class MethodWriterTest extends WireTestCommon {
         checkWriterType(writer);
         writer.callToDefaultMethod("hello world");
 
-        Assert.assertTrue(wire.toString().startsWith("callToDefaultMethod: hello world"));
+        assertTrue(wire.toString().startsWith("callToDefaultMethod: hello world"));
     }
 
-    @SuppressWarnings("deprecation")
     @Test
-    public void multiOut() {
+    @SuppressWarnings("deprecation")
+    void multiOut() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
         Event event = wire.methodWriter(Event.class);
@@ -122,16 +119,15 @@ public class MethodWriterTest extends WireTestCommon {
                 "]\n" +
                 "...\n", wire.toString());
         assertEquals("14 00 00 00                                     # msg-length\n" +
-                        "b9 05 65 76 65 6e 74                            # event: (event)\n" +
-                        "82 08 00 00 00                                  # sequence\n" +
-                        "e3 74 77 6f                                     # two\n" +
-                        "e3 74 77 6f                                     # two\n",
-                wire2.bytes().toHexString());
+                "b9 05 65 76 65 6e 74                            # event: (event)\n" +
+                "82 08 00 00 00                                  # sequence\n" +
+                "e3 74 77 6f                                     # two\n" +
+                "e3 74 77 6f                                     # two\n", wire2.bytes().toHexString());
         wire2.bytes().releaseLast();
     }
 
     @Test
-    public void ignoreStatic() {
+    void ignoreStatic() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap(256));
 
         Closeable writer = wire.methodWriter(Closeable.class);
@@ -141,7 +137,7 @@ public class MethodWriterTest extends WireTestCommon {
     }
 
     @Test
-    public void testNoArgs() {
+    void testNoArgs() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
 
@@ -164,7 +160,7 @@ public class MethodWriterTest extends WireTestCommon {
     }
 
     @Test
-    public void testUpdateListener() {
+    void testUpdateListener() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
 
@@ -178,25 +174,25 @@ public class MethodWriterTest extends WireTestCommon {
 
         String expected = "hello world";
         instance.method(expected);
-        Assert.assertEquals(expected, value.toString());
+        assertEquals(expected, value.toString());
 
-        Assert.assertTrue(wire.toString().startsWith("method: hello world\n" +
+        assertTrue(wire.toString().startsWith("method: hello world\n" +
                 "...\n"));
     }
 
     @Test
-    public void testUpdateListenerCheckUpdateInterceptorReturnValue() {
+    void testUpdateListenerCheckUpdateInterceptorReturnValue() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
         StringMethod instance = wire.methodWriterBuilder(StringMethod.class).updateInterceptor((methodName, t) -> false).build();
         checkWriterType(instance);
         instance.method(" this should not be written because the return value above is false");
 
-        Assert.assertEquals("", wire.toString());
+        assertEquals("", wire.toString());
     }
 
     @Test
-    public void testMicroTS() {
+    void testMicroTS() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256))
                 .useTextDocuments();
 
@@ -220,7 +216,7 @@ public class MethodWriterTest extends WireTestCommon {
     }
 
     @Test
-    public void testPrimitives() {
+    void testPrimitives() {
         doTestPrimitives(false);
     }
 
@@ -253,7 +249,7 @@ public class MethodWriterTest extends WireTestCommon {
     }
 
     @Test
-    public void testExceptionInMarshallingRollsBack() {
+    void testExceptionInMarshallingRollsBack() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
         HasMarshallable instance = wire.methodWriterBuilder(HasMarshallable.class).build();
@@ -263,20 +259,20 @@ public class MethodWriterTest extends WireTestCommon {
         } catch (NullPointerException npe) {
             // ignore
         }
-        Assert.assertEquals("half message should not be written", "", wire.toString());
+        assertEquals("", wire.toString(), "half message should not be written");
     }
 
     @Test
-    public void testMultipleImplsInheritBoth() {
+    void testMultipleImplsInheritBoth() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
         InheritBoth instance = wire.methodWriterBuilder(InheritBoth.class).build();
         checkWriterType(instance);
     }
 
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/274")
     @Test
-    public void testMultipleImplsReturnValues() {
+    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/274")
+    void testMultipleImplsReturnValues() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
         ReturnValues instance = wire.methodWriterBuilder(ReturnValues.class).build();
@@ -284,7 +280,7 @@ public class MethodWriterTest extends WireTestCommon {
     }
 
     @Test
-    public void testMultipleImplsReturnValuesWorkAround() {
+    void testMultipleImplsReturnValuesWorkAround() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 
         ReturnValuesWorkAround instance = wire.methodWriterBuilder(ReturnValuesWorkAround.class).build();
@@ -367,6 +363,7 @@ public class MethodWriterTest extends WireTestCommon {
 
     interface ReturnValues {
         IgnoreMethod1 ignoreMethod1();
+
         IgnoreMethod2 ignoreMethod2();
     }
 

@@ -5,16 +5,16 @@ package net.openhft.chronicle.wire.internal;
 
 import net.openhft.chronicle.wire.BracketType;
 import net.openhft.chronicle.wire.WireTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class VanillaFieldInfoTest extends WireTestCommon {
+class VanillaFieldInfoTest extends WireTestCommon {
 
     @Test
-    public void readsWritesPrimitiveAndGenericMetadata() throws Exception {
+    void readsWritesPrimitiveAndGenericMetadata() throws Exception {
         Sample sample = new Sample();
         Field number = Sample.class.getDeclaredField("number");
         VanillaFieldInfo numberInfo = new VanillaFieldInfo("number", int.class, BracketType.NONE, number);
@@ -24,7 +24,7 @@ public class VanillaFieldInfoTest extends WireTestCommon {
 
         Field names = Sample.class.getDeclaredField("names");
         VanillaFieldInfo namesInfo = new VanillaFieldInfo("names", Iterable.class, BracketType.SEQ, names);
-        assertEquals(String.class, namesInfo.genericType(0));
+        assertSame(String.class, namesInfo.genericType(0));
 
         // Clear cached field to exercise the reflective lookup branch
         Field fieldField = VanillaFieldInfo.class.getDeclaredField("field");
@@ -34,7 +34,7 @@ public class VanillaFieldInfoTest extends WireTestCommon {
     }
 
     @Test
-    public void equalityCoversPrimitivesAndObjectPaths() throws Exception {
+    void equalityCoversPrimitivesAndObjectPaths() throws Exception {
         Sample first = new Sample();
         Sample second = new Sample();
         Field ch = Sample.class.getDeclaredField("character");

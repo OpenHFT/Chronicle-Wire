@@ -7,18 +7,18 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 // Test class focusing on the functionality of elastic byte buffers with wire operations.
-public class ElasticByteBufferTest extends WireTestCommon {
+class ElasticByteBufferTest extends WireTestCommon {
 
     @Test
-    public void testElasticByteBufferWithWire() {
+    void testElasticByteBufferWithWire() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Initialize an elastic byte buffer with initial size of 10.
@@ -41,7 +41,7 @@ public class ElasticByteBufferTest extends WireTestCommon {
 
         // Assert that the text was written correctly.
         @NotNull String s = stringBuilder.toString();
-        Assert.assertTrue(s.contains("some value of more than ten characters"));
+        assertTrue(s.contains("some value of more than ten characters"));
 
         byteBufferBytes.releaseLast();
     }

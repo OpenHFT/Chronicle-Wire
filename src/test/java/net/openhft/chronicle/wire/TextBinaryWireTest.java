@@ -5,36 +5,24 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.ObjIntConsumer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 // Use Parameterized runner for performing tests with different WireType instances.
-@RunWith(value = Parameterized.class)
-public class TextBinaryWireTest extends WireTestCommon {
+class TextBinaryWireTest extends WireTestCommon {
 
     // The specific WireType for the current test run.
-    private final WireType wireType;
-
-    // Constructor to initialize the test with a specific WireType instance.
-    public TextBinaryWireTest(WireType wireType) {
-
-        this.wireType = wireType;
-    }
+    private WireType wireType;
 
     // Provide the combinations of WireType instances for the tests.
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         Object[][] list = {
                 {WireType.BINARY},
@@ -48,8 +36,10 @@ public class TextBinaryWireTest extends WireTestCommon {
     }
 
     // Test the WireType's valueOf() method.
-    @Test
-    public void testValueOf() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    void testValueOf(WireType wireType) {
+        this.wireType = wireType;
         Wire wire = createWire();
         @NotNull WireType wt = WireType.valueOf(wire);
         assertEquals(wireType, wt);
@@ -59,14 +49,16 @@ public class TextBinaryWireTest extends WireTestCommon {
 
     // Create a Wire instance based on the wireType of the test.
     private Wire createWire() {
-        final Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
+        Wire wire = wireType.apply(Bytes.allocateElasticOnHeap());
         wire.usePadding(wire.isBinary());
         return wire;
     }
 
     // Test reading a document location from a Wire instance.
-    @Test
-    public void readingDocumentLocation() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    void readingDocumentLocation(WireType wireType) {
+        this.wireType = wireType;
         Wire wire = createWire();
         if (wire instanceof TextWire)
             ((TextWire) wire).useBinaryDocuments();
@@ -82,8 +74,10 @@ public class TextBinaryWireTest extends WireTestCommon {
     }
 
     // Test reading comments from a Wire instance.
-    @Test
-    public void testReadComment() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    void testReadComment(WireType wireType) {
+        this.wireType = wireType;
         // Only execute for specific wireTypes.
         assumeTrue(wireType == WireType.TEXT || wireType == WireType.BINARY || wireType == WireType.YAML);
 
@@ -97,8 +91,10 @@ public class TextBinaryWireTest extends WireTestCommon {
     }
 
     // Test reading fields as objects from a Wire instance.
-    @Test
-    public void readFieldAsObject() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    void readFieldAsObject(WireType wireType) {
+        this.wireType = wireType;
         // Exclude certain wireTypes.
         assumeFalse(wireType == WireType.RAW || wireType == WireType.FIELDLESS_BINARY);
 
@@ -116,8 +112,10 @@ public class TextBinaryWireTest extends WireTestCommon {
     }
 
     // Test reading fields as long values from a Wire instance.
-    @Test
-    public void readFieldAsLong() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    void readFieldAsLong(WireType wireType) {
+        this.wireType = wireType;
         // Exclude certain wireTypes.
         assumeFalse(wireType == WireType.RAW || wireType == WireType.FIELDLESS_BINARY);
 
@@ -139,8 +137,10 @@ public class TextBinaryWireTest extends WireTestCommon {
     }
 
     // Test conversion of different values to numeric values in a Wire instance.
-    @Test
-    public void testConvertToNum() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    void testConvertToNum(WireType wireType) {
+        this.wireType = wireType;
         // Exclude certain wireTypes.
         assumeFalse(wireType == WireType.RAW || /* No support for bool conversions */ wireType == WireType.YAML);
 
@@ -150,7 +150,7 @@ public class TextBinaryWireTest extends WireTestCommon {
                 .write("c").float32(2.0f)
                 .write("d").float64(3.0);
 
-        @NotNull final ObjIntConsumer<Integer> assertEquals = (expected, actual) -> Assert.assertEquals((long) expected, actual);
+        @NotNull final ObjIntConsumer<Integer> assertEquals = (expected, actual) -> assertEquals((long) expected, actual);
         wire.read(() -> "a").int32(0, assertEquals);
         wire.read(() -> "b").int32(1, assertEquals);
         wire.read(() -> "c").int32(2, assertEquals);

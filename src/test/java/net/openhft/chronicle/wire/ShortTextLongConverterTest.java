@@ -4,19 +4,19 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class ShortTextLongConverterTest extends WireTestCommon {
+class ShortTextLongConverterTest extends WireTestCommon {
 
     private static final CharSequence TEST_STRING = "world";
 
     @Test
-    public void parseLeadingZero() {
+    void parseLeadingZero() {
         LongConverter c = ShortTextLongConverter.INSTANCE;
         assertEquals(0L, c.parse(""));
         assertEquals(0L, c.parse(" "));
@@ -38,7 +38,7 @@ public class ShortTextLongConverterTest extends WireTestCommon {
     }
 
     @Test
-    public void parse() {
+    void parse() {
         LongConverter c = ShortTextLongConverter.INSTANCE;
         // System.out.println(c.asString(-1L));
         for (String s : ",a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0".split(",")) {
@@ -50,7 +50,7 @@ public class ShortTextLongConverterTest extends WireTestCommon {
     }
 
     @Test
-    public void parseSubsequence() {
+    void parseSubsequence() {
         LongConverter c = ShortTextLongConverter.INSTANCE;
         String s = ",a,ab,abc,abcd,ab.de,123=56,1234567,12345678,zzzzzzzzz,+ko2&)z.0,";
         int comparisons = 11;
@@ -58,30 +58,30 @@ public class ShortTextLongConverterTest extends WireTestCommon {
         assertTrue(true);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void parseLengthCheck() {
-        ShortTextLongConverter.INSTANCE.parse(getClass().getCanonicalName());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void parseSubstringLengthCheck() {
-        ShortTextLongConverter.INSTANCE.parse("abcd", 3, -2);
+    @Test
+    void parseLengthCheck() {
+        assertThrows(IllegalArgumentException.class, () -> ShortTextLongConverter.INSTANCE.parse(getClass().getCanonicalName()));
     }
 
     @Test
-    public void asString() {
+    void parseSubstringLengthCheck() {
+        assertThrows(IllegalArgumentException.class, () -> ShortTextLongConverter.INSTANCE.parse("abcd", 3, -2));
+    }
+
+    @Test
+    void asString() {
         LongConverter c = ShortTextLongConverter.INSTANCE;
         IntStream.range(0, 10_000_000)
                 .parallel()
                 .mapToLong(i -> ThreadLocalRandom.current().nextLong())
                 .forEach(l -> {
                     String s = c.asString(l);
-                    assertEquals(s, l, c.parse(s));
+                    assertEquals(l, c.parse(s), s);
                 });
     }
 
     @Test
-    public void testAppend() {
+    void testAppend() {
         final Bytes<?> b = Bytes.allocateElasticOnHeap();
         try {
             final LongConverter idLongConverter = ShortTextLongConverter.INSTANCE;
@@ -94,7 +94,7 @@ public class ShortTextLongConverterTest extends WireTestCommon {
     }
 
     @Test
-    public void testAppendWithExistingData() {
+    void testAppendWithExistingData() {
         final Bytes<?> b = Bytes.allocateElasticOnHeap().append("hello");
         try {
             final LongConverter idLongConverter = ShortTextLongConverter.INSTANCE;
@@ -107,13 +107,13 @@ public class ShortTextLongConverterTest extends WireTestCommon {
     }
 
     @Test
-    public void allSafeCharsTextWire() {
+    void allSafeCharsTextWire() {
         Wire wire = new TextWire(Bytes.allocateElasticOnHeap()).useTextDocuments();
         allSafeChars(wire);
     }
 
     @Test
-    public void allSafeCharsYamlWire() {
+    void allSafeCharsYamlWire() {
         Wire wire = new YamlWire();
         allSafeChars(wire);
     }
@@ -127,8 +127,7 @@ public class ShortTextLongConverterTest extends WireTestCommon {
                 v.writeLong(converter, i2);
                 v.writeLong(converter, i2);
             });
-            assertEquals(wire.toString(),
-                    i, wire.read("a").readLong(converter));
+            assertEquals(i, wire.read("a").readLong(converter), wire.toString());
             wire.read("b").sequence(i, (i2, v) -> {
                 assertEquals((long) i2, v.readLong(converter));
                 assertEquals((long) i2, v.readLong(converter));

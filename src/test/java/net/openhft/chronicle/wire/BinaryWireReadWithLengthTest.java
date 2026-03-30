@@ -4,17 +4,17 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Illustrates Chronicle-Queue style copying of binary fragments into a textual representation.
  */
-public class BinaryWireReadWithLengthTest extends WireTestCommon {
+class BinaryWireReadWithLengthTest extends WireTestCommon {
 
     @Test
-    public void copiesMapFragmentToText() {
+    void copiesMapFragmentToText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire writer = new BinaryWire(bytes);
         try (DocumentContext dc = writer.writingDocument(false)) {
@@ -35,7 +35,7 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
     }
 
     @Test
-    public void copiesSequenceFragmentToText() {
+    void copiesSequenceFragmentToText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire writer = new BinaryWire(bytes);
         try (DocumentContext dc = writer.writingDocument(false)) {
@@ -61,7 +61,7 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
     }
 
     @Test
-    public void copyEntireWireToText() {
+    void copyEntireWireToText() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire writer = new BinaryWire(bytes);
         writer.writeEventName("say").text("hello");
@@ -77,7 +77,7 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
     }
 
     @Test
-    public void copyMessagesIndividually() {
+    void copyMessagesIndividually() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         BinaryWire writer = new BinaryWire(bytes);
         writer.writeEventName("alpha").text("one");

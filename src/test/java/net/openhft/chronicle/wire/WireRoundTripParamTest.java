@@ -4,18 +4,16 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Basic round‑trip checks across a few {@link WireType}s.
  * Covers primitive scalars and a small sequence to exercise ValueIn/ValueOut
  * for Binary/Text/YAML wires.
  */
-public class WireRoundTripParamTest extends WireTestCommon {
+class WireRoundTripParamTest extends WireTestCommon {
 
     private static final WireType[] TYPES = new WireType[]{
             WireType.BINARY,
@@ -24,7 +22,7 @@ public class WireRoundTripParamTest extends WireTestCommon {
     };
 
     @Test
-    public void primitivesRoundTrip() {
+    void primitivesRoundTrip() {
         for (WireType wt : TYPES) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 
@@ -50,7 +48,7 @@ public class WireRoundTripParamTest extends WireTestCommon {
     }
 
     @Test
-    public void sequenceRoundTrip() {
+    void sequenceRoundTrip() {
         for (WireType wt : TYPES) {
             Wire w = wt.apply(Bytes.allocateElasticOnHeap(256));
 

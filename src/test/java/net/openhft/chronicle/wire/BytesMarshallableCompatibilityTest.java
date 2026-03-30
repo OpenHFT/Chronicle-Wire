@@ -5,18 +5,18 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
-public final class BytesMarshallableCompatibilityTest extends WireTestCommon {
+final class BytesMarshallableCompatibilityTest extends WireTestCommon {
 
     // Test the serialization and deserialization of the Container object using BytesMarshallable
     @Test
-    public void shouldSerialiseToBytes() {
+    void shouldSerialiseToBytes() {
 
         // Instantiate and initialize a Container object
         final Container container = new Container();

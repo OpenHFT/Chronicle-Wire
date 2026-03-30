@@ -5,8 +5,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.lang.annotation.RetentionPolicy;
@@ -16,42 +16,48 @@ import java.util.Arrays;
 import java.util.List;
 
 import static net.openhft.chronicle.bytes.Bytes.allocateElasticOnHeap;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class MarshallableTest extends WireTestCommon {
+class MarshallableTest extends WireTestCommon {
 
     // Test to check if the fromFile() method of Marshallable throws an IOException for an empty file.
-    @Test(expected = IOException.class)
-    public void fromFile() throws IOException {
-        fail("Got " + Marshallable.fromFile("empty-file.yaml"));
+    @Test
+    void fromFile() throws IOException {
+        assertThrows(IOException.class, () -> {
+            fail("Got " + Marshallable.fromFile("empty-file.yaml"));
+        });
     }
 
     // Test to check if Marshallable.fromString() method returns an empty string when an empty string is provided.
     @Test
-    public void testEmptyFromString() {
+    void testEmptyFromString() {
         assertEquals("", Marshallable.fromString(""));
     }
 
     // Test for undefined behavior when a string with a single double-quote is passed.
-    @Ignore("Undefined behaviour")
-    @Test(expected = IllegalArgumentException.class)
-    public void testFromString2() {
-        Object o = Marshallable.fromString("\"");
-        assertNotNull(o);
+    @Test
+    @Disabled("Undefined behaviour")
+    void testFromString2() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Object o = Marshallable.fromString("\"");
+            assertNotNull(o);
+        });
     }
 
     // Test for undefined behavior when a string with a single single-quote is passed.
-    @Ignore("Undefined behaviour")
-    @Test(expected = IllegalArgumentException.class)
-    public void testFromString3() {
-        Object o = Marshallable.fromString("'");
-        assertNotNull(o);
+    @Test
+    @Disabled("Undefined behaviour")
+    void testFromString3() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Object o = Marshallable.fromString("'");
+            assertNotNull(o);
+        });
     }
 
     // Test for verifying the marshallable operation on bytes.
-    @SuppressWarnings("rawtypes")
     @Test
-    public void testBytesMarshallable() {
+    @SuppressWarnings("rawtypes")
+    void testBytesMarshallable() {
         @NotNull Marshallable m = new MyTypes();
 
         @NotNull Bytes<?> bytes = allocateElasticOnHeap();
@@ -63,9 +69,9 @@ public class MarshallableTest extends WireTestCommon {
     }
 
     // Test for verifying the equals operation on marshalled objects.
-    @SuppressWarnings("rawtypes")
     @Test
-    public void testEquals() {
+    @SuppressWarnings("rawtypes")
+    void testEquals() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         assertTrue(bytes.isElastic());
         @NotNull final MyTypes source = new MyTypes();
@@ -75,7 +81,7 @@ public class MarshallableTest extends WireTestCommon {
         source.d(1.0);
         source.l(1L);
         source.i(1);
-        source.ch((char)0xFFFF);
+        source.ch((char) 0xFFFF);
         source.text("a");
         @NotNull final Marshallable destination = new MyTypes();
         assertNotEquals(source, destination);
@@ -107,20 +113,20 @@ public class MarshallableTest extends WireTestCommon {
 
     // Test the copying process using WireType.TEXT
     @Test
-    public void testCopy() {
+    void testCopy() {
         doTestCopy(WireType.TEXT);
     }
 
     // TODO: This test is currently ignored. The copy process using WireType.YAML_ONLY needs to be fixed.
-    @Ignore(/* TODO FIX */)
     @Test
-    public void testCopyYaml() {
+    @Disabled("TODO FIX")
+    void testCopyYaml() {
         doTestCopy(WireType.YAML_ONLY);
     }
 
     // Test equality of two objects containing arrays
     @Test
-    public void equalsWithArray() {
+    void equalsWithArray() {
         WithArray a = new WithArray();
         WithArray b = new WithArray();
         assertEquals(a, b);
@@ -135,7 +141,7 @@ public class MarshallableTest extends WireTestCommon {
 
     // Test to confirm certain expected exceptions and object behaviors during marshalling
     @Test
-    public void test() {
+    void test() {
         expectException("Found this$0, in class net.openhft.chronicle.wire.MarshallableTest$NonStaticData which will be ignored!");
 
         StaticData staticData0 = Marshallable.fromString(StaticData.class, "{ }");
@@ -156,7 +162,7 @@ public class MarshallableTest extends WireTestCommon {
 
     // Test the reset functionality of the MyTypes object. This should reset all its fields to default values.
     @Test
-    public void testReset() {
+    void testReset() {
         MyTypes mt = new MyTypes()
                 .flag(true)
                 .b((byte) 1)
@@ -194,7 +200,7 @@ public class MarshallableTest extends WireTestCommon {
 
     // Test to get and set the field "three" in DTO1 using getField and setField methods
     @Test
-    public void getField() throws NoSuchFieldException {
+    void getField() throws NoSuchFieldException {
         DTO1 dto1 = new DTO1();
         LocalDate three = dto1.getField("three", LocalDate.class);
         assertNull(three);  // Initially, the field should be null
@@ -206,7 +212,7 @@ public class MarshallableTest extends WireTestCommon {
 
     // Test the getLongField and setLongField methods with different edge cases on the StaticData class
     @Test
-    public void getLongField() throws NoSuchFieldException {
+    void getLongField() throws NoSuchFieldException {
         StaticData sd = new StaticData();
         long anInt = sd.getLongField("anInt");
         assertEquals(100, anInt);  // Default value is 100

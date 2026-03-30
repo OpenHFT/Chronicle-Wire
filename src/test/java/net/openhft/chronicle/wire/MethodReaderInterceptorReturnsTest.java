@@ -7,8 +7,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.Invocation;
 import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.bytes.MethodReaderInterceptorReturns;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -18,14 +18,14 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
 
     // Setting up before the tests
     @Override
-    @Before
-    public void threadDump() {
+    @BeforeEach
+    void threadDump() {
         super.threadDump();
     }
 
@@ -34,7 +34,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      * the generated method reader.
      */
     @Test
-    public void testInterceptorSupportedInGeneratedCode() {
+    void testInterceptorSupportedInGeneratedCode() {
         doTestInterceptorSupportedInGeneratedCode(new CountDownLatch(1), false);
     }
 
@@ -43,7 +43,7 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      * are created at the same time.
      */
     @Test
-    public void testInterceptingReaderConcurrentCreation() throws ExecutionException, InterruptedException, TimeoutException {
+    void testInterceptingReaderConcurrentCreation() throws ExecutionException, InterruptedException, TimeoutException {
         int concurrencyLevel = 5;
 
         // Creating a fixed-size thread pool to simulate concurrency
@@ -138,9 +138,9 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      * Covers {@link GeneratingMethodReaderInterceptorReturns}, which allows intervening in method reader's logic
      * without resorting to reflective calls.
      */
-    @SuppressWarnings("deprecation")
     @Test
-    public void testGeneratingAggregatingInfoInterceptor() {
+    @SuppressWarnings("deprecation")
+    void testGeneratingAggregatingInfoInterceptor() {
         // Create a wire with a buffer of size 128 and padding enabled
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
@@ -180,9 +180,9 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      * Covers {@link GeneratingMethodReaderInterceptorReturns}, which allows intervening in method reader's logic
      * without resorting to reflective calls.
      */
-    @SuppressWarnings("deprecation")
     @Test
-    public void testGeneratingSkippingInterceptor() {
+    @SuppressWarnings("deprecation")
+    void testGeneratingSkippingInterceptor() {
         // Create a wire with a buffer of size 128 and padding enabled
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);

@@ -10,24 +10,22 @@ import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.WireType;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * NestedClassTest is a parameterized test class extending WireTestCommon.
  * It tests the serialization and deserialization of OuterClass instances
  * with different Wire formats.
  */
-@RunWith(value = Parameterized.class)
-public class NestedClassTest extends WireTestCommon {
+class NestedClassTest extends WireTestCommon {
     // Static instances of OuterClass for testing.
     private static final OuterClass outerClass1 = new OuterClass();
     private static final OuterClass outerClass2 = new OuterClass();
@@ -55,35 +53,25 @@ public class NestedClassTest extends WireTestCommon {
         outerClass2.addListB().setTextNumber("num2B", 22);
     }
 
-    // Function to create Wire instances for each test run.
-    @SuppressWarnings("rawtypes")
-    private final Function<Bytes<?>, Wire> wireType;
-
-    // Constructor to inject the Wire creation function.
-    @SuppressWarnings("rawtypes")
-    public NestedClassTest(Function<Bytes<?>, Wire> wireType) {
-        this.wireType = wireType;
-    }
-
     // Method to provide different combinations of Wire instances for testing.
     @SuppressWarnings("rawtypes")
-    @Parameterized.Parameters
-    public static Collection<Object[]> combinations() {
+    public static Collection<Function<Bytes<?>, Wire>> combinations() {
         return Arrays.asList(
-                new Object[]{(Function<Bytes<?>, Wire>) bytes -> new BinaryWire(bytes, false, true, false, 128, "binary")},
-                new Object[]{WireType.TEXT},
-                new Object[]{WireType.YAML_ONLY},
-                new Object[]{WireType.BINARY},
-                new Object[]{WireType.BINARY_LIGHT},
-                new Object[]{WireType.FIELDLESS_BINARY},
-                new Object[]{WireType.JSON}
+                bytes -> new BinaryWire(bytes, false, true, false, 128, "binary"),
+                WireType.TEXT,
+                WireType.YAML_ONLY,
+                WireType.BINARY,
+                WireType.BINARY_LIGHT,
+                WireType.FIELDLESS_BINARY,
+                WireType.JSON
         );
     }
 
     // Test method to verify multiple reads of OuterClass instances.
     @SuppressWarnings("rawtypes")
-    @Test
-    public void testMultipleReads() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    void testMultipleReads(Function<Bytes<?>, Wire> wireType) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Bytes<?> bytes = Bytes.elasticByteBuffer();
@@ -95,8 +83,8 @@ public class NestedClassTest extends WireTestCommon {
             wire.bytes().writeUnsignedByte('\n');
         wire.writeEventName(() -> "test2").marshallable(outerClass2);
 
-       // System.out.println(bytes.readByte(0) < 0 ? bytes.toHexString() : bytes.toString());
-       // StringBuilder to capture event names during reading.
+        // System.out.println(bytes.readByte(0) < 0 ? bytes.toHexString() : bytes.toString());
+        // StringBuilder to capture event names during reading.
         @NotNull StringBuilder sb = new StringBuilder();
         @NotNull OuterClass outerClass0 = new OuterClass();
 

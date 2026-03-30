@@ -4,11 +4,11 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * This class tests the capability of MethodWriter to handle methods with nested return types.
@@ -20,7 +20,7 @@ public class MethodWriterNestedReturnTypeTest extends WireTestCommon {
      * This test ensures that MethodWriter can handle methods with nested return types without resorting to proxy classes.
      */
     @Test
-    public void testNestedReturnTypeIsSupportedInGeneratedWriter() {
+    void testNestedReturnTypeIsSupportedInGeneratedWriter() {
         // Initialization of the wire
         BinaryWire binaryWire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
 

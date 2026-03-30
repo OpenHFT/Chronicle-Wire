@@ -6,10 +6,8 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -20,13 +18,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(Parameterized.class)
-public class WireToOutputStreamTest extends WireTestCommon {
+class WireToOutputStreamTest extends WireTestCommon {
 
     // Serializable class for testing
-    public static class AnObject implements Serializable {
+    static class AnObject implements Serializable {
         private static final long serialVersionUID = 0L;
         long value;
         String text;
@@ -44,15 +41,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
         }
     }
 
-    private WireType currentWireType;
-
-    // Constructor to initialize the parameter
-    public WireToOutputStreamTest(WireType currentWireType) {
-        this.currentWireType = currentWireType;
-    }
-
     // Parameters for the test
-    @Parameters(name = "{index}: {0}")
     public static Collection<WireType> data() {
         List<WireType> wireTypes = new ArrayList<>();
         // populate wireTypes based on availability and certain conditions
@@ -69,33 +58,36 @@ public class WireToOutputStreamTest extends WireTestCommon {
         return wireTypes;
     }
 
-    @Test
-    // Test to ensure the Timestamp object can be serialized and deserialized correctly
-    public void testTimestamp() {
+    @ParameterizedTest
+    @MethodSource("data")
+        // Test to ensure the Timestamp object can be serialized and deserialized correctly
+    void testTimestamp(WireType currentWireType) {
         Wire wire = currentWireType.apply(Bytes.allocateElasticOnHeap(128));
         Timestamp ts = new Timestamp(1234567890000L);
         wire.write().object(ts);
-       // System.out.println(wire);
+        // System.out.println(wire);
 
         Timestamp ts2 = wire.read()
                 .object(Timestamp.class);
         assertEquals(ts.toString(), ts2.toString());
     }
 
-    @Test
-    // Test serialization and deserialization without a socket
-    public void testNoSocket() {
+    @ParameterizedTest
+    @MethodSource("data")
+        // Test serialization and deserialization without a socket
+    void testNoSocket(WireType currentWireType) {
         Wire wire = currentWireType.apply(Bytes.allocateElasticOnHeap(128));
         AnObject ao = writeAnObject(wire);
-       // System.out.println(wire);
+        // System.out.println(wire);
 
         Object ao2 = readAnObject(wire);
         assertEquals(ao.toString(), ao2.toString());
     }
 
-    @Test
-    // Test serialization and deserialization using a socket
-    public void testVisSocket() throws IOException {
+    @ParameterizedTest
+    @MethodSource("data")
+        // Test serialization and deserialization using a socket
+    void testVisSocket(WireType currentWireType) throws IOException {
         try (ServerSocket ss = new ServerSocket(0);
              Socket s = new Socket("localhost", ss.getLocalPort());
              Socket s2 = ss.accept()) {
@@ -108,7 +100,7 @@ public class WireToOutputStreamTest extends WireTestCommon {
             InputStreamToWire istw = new InputStreamToWire(currentWireType, s2.getInputStream());
             Wire wire2 = istw.readOne();
             Object ao2 = readAnObject(wire2);
-           // System.out.println(ao2);
+            // System.out.println(ao2);
             assertEquals(ao.toString(), ao2.toString());
         }
     }

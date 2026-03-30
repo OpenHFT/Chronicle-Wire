@@ -6,21 +6,21 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.MethodId;
 import net.openhft.chronicle.bytes.MethodReader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MethodReaderMethodIdsTest extends WireTestCommon {
 
     /**
      * Test case to verify that method calls can be identified by Method IDs.
      */
-    @SuppressWarnings("deprecation")
     @Test
-    public void shouldDetermineMethodNamesFromMethodIds() {
+    @SuppressWarnings("deprecation")
+    void shouldDetermineMethodNamesFromMethodIds() {
         final BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap());
         wire.usePadding(true);
 
@@ -28,7 +28,7 @@ public class MethodReaderMethodIdsTest extends WireTestCommon {
         final Speaker speaker = wire.methodWriterBuilder(Speaker.class).get();
 
         // Ensure we're not using a proxy instance
-        assertFalse("check we are using generated code", Proxy.isProxyClass(speaker.getClass()));
+        assertFalse(Proxy.isProxyClass(speaker.getClass()), "check we are using generated code");
 
         // Call a method on the proxy
         speaker.say("hello");
@@ -40,7 +40,7 @@ public class MethodReaderMethodIdsTest extends WireTestCommon {
         final MethodReader reader = new VanillaMethodReaderBuilder(wire).build((Speaker) message -> heard.incrementAndGet());
 
         // Ensure we're using a generated code instance and not a VanillaMethodReader
-        assertFalse("check we are using generated code", reader instanceof VanillaMethodReader);
+        assertFalse(reader instanceof VanillaMethodReader, "check we are using generated code");
 
         // Read one message from the wire
         assertTrue(reader.readOne());

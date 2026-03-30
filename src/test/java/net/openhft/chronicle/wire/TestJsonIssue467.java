@@ -6,13 +6,13 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.OnHeapBytes;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
+import static org.junit.jupiter.api.Assertions.*;
 
 // relates to https://github.com/OpenHFT/Chronicle-Wire/issues/467
-public class TestJsonIssue467 {
+class TestJsonIssue467 {
 
     static class ResponseItem467 extends SelfDescribingMarshallable {
         @NotNull
@@ -22,7 +22,7 @@ public class TestJsonIssue467 {
     }
 
     @Test
-    public void test() {
+    void test() {
         CLASS_ALIASES.addAlias(ResponseItem467.class);
 
         ResponseItem467 responseItem467 = Marshallable.fromString(ResponseItem467.class, "!ResponseItem467 {\n" +
@@ -64,14 +64,14 @@ public class TestJsonIssue467 {
         }
 
         // check the number of '{' match the number of '}'
-        Assert.assertEquals("openBracket and closeBracket should match", openBracket, closeBracket);
+        assertEquals(openBracket, closeBracket, "openBracket and closeBracket should match");
 
         // DON'T CHANGE THE EXPECTED JSON IT IS CORRECT ! - please use this website to validate the json - https://jsonformatter.org
-        Assert.assertEquals("{\"@ResponseItem467\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":{\"eventId\":\"periodicUpdate\",\"eventTime\":1652109920838805734,\"seqNumbers\":[ {\"sessionID\":{\"localCompID\":\"SERVER\",\"remoteCompID\":\"CLIENT\",\"localSubID\":null,\"remoteSubID\":null},\"rSeq\":1517,\"wSeq\":1519,\"isActive\":true,\"isConnected\":false} ]}}}", actual);
+        assertEquals("{\"@ResponseItem467\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":{\"eventId\":\"periodicUpdate\",\"eventTime\":1652109920838805734,\"seqNumbers\":[ {\"sessionID\":{\"localCompID\":\"SERVER\",\"remoteCompID\":\"CLIENT\",\"localSubID\":null,\"remoteSubID\":null},\"rSeq\":1517,\"wSeq\":1519,\"isActive\":true,\"isConnected\":false} ]}}}", actual);
     }
 
     @Test
-    public void test2() {
+    void test2() {
         CLASS_ALIASES.addAlias(ResponseItem467.class);
 
         ResponseItem467 responseItem467 = Marshallable.fromString(ResponseItem467.class, "!ResponseItem467 {\n" +
@@ -113,10 +113,10 @@ public class TestJsonIssue467 {
         }
 
         // check the number of '{' match the number of '}'
-        Assert.assertEquals("openBracket and closeBracket should match", openBracket, closeBracket);
+        assertEquals(openBracket, closeBracket, "openBracket and closeBracket should match");
 
         // DON'T CHANGE THE EXPECTED JSON IT IS CORRECT ! - please use this website to validate the json - https://jsonformatter.org
-        Assert.assertEquals("{\"@ResponseItem467\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":{\"eventId\":\"periodicUpdate\",\"eventTime\":1652109920838805734,\"seqNumbers\":[ {\"sessionID\":{\"localCompID\":\"SERVER\",\"remoteCompID\":\"CLIENT\",\"localSubID\":null,\"remoteSubID\":null},\"rSeq\":1517,\"wSeq\":1519,\"isActive\":true,\"isConnected\":false} ]}}}", actual);
+        assertEquals("{\"@ResponseItem467\":{\"index\":\"4ab100000005\",\"key\":\"seqNumber\",\"payload\":{\"eventId\":\"periodicUpdate\",\"eventTime\":1652109920838805734,\"seqNumbers\":[ {\"sessionID\":{\"localCompID\":\"SERVER\",\"remoteCompID\":\"CLIENT\",\"localSubID\":null,\"remoteSubID\":null},\"rSeq\":1517,\"wSeq\":1519,\"isActive\":true,\"isConnected\":false} ]}}}", actual);
     }
 
     private static Wire jsonResponseItem() {
@@ -127,11 +127,11 @@ public class TestJsonIssue467 {
     }
 
     @Test
-    public void testWireObject() {
+    void testWireObject() {
         final Wire jsonWire = jsonResponseItem();
         ResponseItem467 responseItem467 = jsonWire.getValueIn().object(ResponseItem467.class);
 
-        Assert.assertEquals("!ResponseItem467 {\n" +
+        assertEquals("!ResponseItem467 {\n" +
                 "  index: \"4dc800000034\",\n" +
                 "  key: notificationMsg,\n" +
                 "  payload: Successfully debited your account by 0.0\n" +
@@ -139,11 +139,11 @@ public class TestJsonIssue467 {
     }
 
     @Test
-    public void testWireReusingObject() {
+    void testWireReusingObject() {
         final Wire jsonWire = jsonResponseItem();
         ResponseItem467 responseItem4671 = new ResponseItem467();
         ResponseItem467 responseItem467 = jsonWire.getValueIn().object(responseItem4671, ResponseItem467.class);
-        Assert.assertEquals("!ResponseItem467 {\n" +
+        assertEquals("!ResponseItem467 {\n" +
                 "  index: \"4dc800000034\",\n" +
                 "  key: notificationMsg,\n" +
                 "  payload: Successfully debited your account by 0.0\n" +

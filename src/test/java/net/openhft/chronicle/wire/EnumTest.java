@@ -6,24 +6,22 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.util.ReadResolvable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * Tests for marshalling and unmarshalling of Enum using Wire.
  */
-public class EnumTest extends WireTestCommon {
-    @Before
-    public void hasDirect() {
+class EnumTest extends WireTestCommon {
+    @BeforeEach
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
@@ -31,7 +29,7 @@ public class EnumTest extends WireTestCommon {
      * Tests serialization and deserialization of the TestEnum enumeration.
      */
     @Test
-    public void testEnum() {
+    void testEnum() {
         // Expecting an exception regarding enum handling
         expectException("Treating class net.openhft.chronicle.wire.EnumTest$TestEnum as enum not WriteMarshallable");
 
@@ -43,7 +41,7 @@ public class EnumTest extends WireTestCommon {
 
             // Write the TestEnum.INSTANCE to the wire
             wire.write("test")
-                .object(TestEnum.INSTANCE);
+                    .object(TestEnum.INSTANCE);
 
             // Validate the serialized form of the TestEnum
             assertEquals("test: !net.openhft.chronicle.wire.EnumTest$TestEnum INSTANCE\n", wire.toString());
@@ -55,10 +53,10 @@ public class EnumTest extends WireTestCommon {
 
             // Deserialize the TestEnum back from the wire
             @Nullable Object enumObject = wire2.read(() -> "test")
-                .object();
+                    .object();
 
             // Ensure original and read enum are the same
-            Assert.assertSame(TestEnum.INSTANCE, enumObject);
+            assertSame(TestEnum.INSTANCE, enumObject);
         } finally {
             // Release the byte buffer resources
             bytes.releaseLast();

@@ -8,17 +8,17 @@ import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.domestic.extractor.ToLongDocumentExtractor;
 import net.openhft.chronicle.wire.domestic.reduction.Reduction;
 import net.openhft.chronicle.wire.domestic.reduction.Reductions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.LongSupplier;
 
 import static net.openhft.chronicle.wire.domestic.streaming.CreateUtil.createThenValueOuts;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class LastIndexSeenTailerTest extends WireTestCommon {
+class LastIndexSeenTailerTest extends WireTestCommon {
 
     @Test
-    public void lastIndexSeenTailer() {
+    void lastIndexSeenTailer() {
 
         // Add stuff that simulated existing values in the queue
         MarshallableIn tailer = createThenValueOuts(

@@ -4,14 +4,14 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class LongArrayValueBitSetMoreOpsTest extends WireTestCommon {
+class LongArrayValueBitSetMoreOpsTest extends WireTestCommon {
 
     @Test
-    public void previousAndRangeOps() {
+    void previousAndRangeOps() {
         LongArrayValueBitSet bs = new LongArrayValueBitSet(256, new BinaryWire(Bytes.allocateElasticOnHeap(256)));
         try {
             bs.set(2, 70);

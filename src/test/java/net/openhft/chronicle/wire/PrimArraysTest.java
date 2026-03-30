@@ -6,36 +6,26 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 // Use the Parameterized runner for JUnit to execute tests with different combinations of parameters
-@RunWith(value = Parameterized.class)
-public class PrimArraysTest extends WireTestCommon {
+class PrimArraysTest extends WireTestCommon {
 
     // Class variables to hold the parameters
-    private final WireType wireType;
-    private final Object array;
-    private final String asText;
-
-    // Constructor that initializes the class variables
-    public PrimArraysTest(WireType wireType, Object array, String asText) {
-        this.wireType = wireType;
-        this.array = array;
-        this.asText = asText;
-    }
+    private WireType wireType;
+    private Object array;
+    private String asText;
 
     // Define the combinations of parameters with which the test method will be executed
     @NotNull
-    @Parameterized.Parameters(name = "wt={0}, asText={2}")
     public static Collection<Object[]> combinations() {
         @NotNull List<Object[]> list = new ArrayList<>();
         for (WireType wt : new WireType[]{
@@ -74,7 +64,7 @@ public class PrimArraysTest extends WireTestCommon {
             for (int i = 0; i < objects.length; i += 3) {
                 Object array = objects[i];
                 list.add(new Object[]{wt, array, objects[i + 1]});
-                final Object emptyArray = Array.newInstance(array.getClass().getComponentType(), 0);
+                Object emptyArray = Array.newInstance(array.getClass().getComponentType(), 0);
                 list.add(new Object[]{wt, emptyArray, objects[i + 2]});
             }
         }
@@ -82,21 +72,25 @@ public class PrimArraysTest extends WireTestCommon {
     }
 
     // The test method that will be executed for each combination of parameters
-    @Test
-    public void testPrimArray() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    void testPrimArray(WireType wireType, Object array, String asText) {
+        this.wireType = wireType;
+        this.array = array;
+        this.asText = asText;
         Wire wire = createWire();  // Create a wire instance based on the wireType
         try {
             // Write the test array to the wire
             wire.write("test")
                     .object(array);
-           // System.out.println(wire);
+            // System.out.println(wire);
             // Assert that the textual representation matches when using WireType.TEXT
             if (wireType == WireType.TEXT)
                 assertEquals(asText.trim(), wire.toString().trim());
 
             // Read the array from the wire and assert it matches the original
             @Nullable Object array2 = wire.read().object();
-            assertEquals(array.getClass(), array2.getClass());
+            assertSame(array.getClass(), array2.getClass());
             assertEquals(Array.getLength(array), Array.getLength(array));
             for (int i = 0, len = Array.getLength(array); i < len; i++)
                 assertEquals(Array.get(array, i), Array.get(array2, i));

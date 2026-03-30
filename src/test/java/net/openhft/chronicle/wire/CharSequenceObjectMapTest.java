@@ -3,15 +3,15 @@
  */
 package net.openhft.chronicle.wire;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class CharSequenceObjectMapTest extends WireTestCommon {
+class CharSequenceObjectMapTest extends WireTestCommon {
 
     // Test the put operation of the CharSequenceObjectMap
     @Test
-    public void put() {
+    void put() {
         // Initialize a new CharSequenceObjectMap with a capacity of 10
         CharSequenceObjectMap<String> map = new CharSequenceObjectMap<>(10);
 

@@ -17,10 +17,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for YAML serialisation of null and empty container fields.
@@ -30,12 +27,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("YAML Wire Format: null and empty container serialisation")
 @SuppressWarnings({"checkstyle:MMOverusedWord", // "round-trip" is the standard serialisation term
         "checkstyle:MMLacksPurpose"}) // file has Javadoc and assertion messages explaining purpose
-public class NullContainerYamlTest extends WireTestCommon {
+class NullContainerYamlTest extends WireTestCommon {
 
     @Test
     @DisplayName("null container fields round-trip as null with !!null tag")
-    @SuppressWarnings("deprecation") // testing deprecated WireType.fromString() intentionally
-    public void nullFieldsRoundTripAsNull() {
+    @SuppressWarnings("deprecation")
+        // testing deprecated WireType.fromString() intentionally
+    void nullFieldsRoundTripAsNull() {
         NullContainers expected = new NullContainers();
         expected.collection = null;
         expected.set = null;
@@ -77,8 +75,9 @@ public class NullContainerYamlTest extends WireTestCommon {
 
     @Test
     @DisplayName("empty container fields round-trip as empty, not null")
-    @SuppressWarnings("deprecation") // testing deprecated WireType.fromString() intentionally
-    public void emptyFieldsRoundTripAsEmpty() {
+    @SuppressWarnings("deprecation")
+        // testing deprecated WireType.fromString() intentionally
+    void emptyFieldsRoundTripAsEmpty() {
         NullContainers expected = new NullContainers();
         expected.collection = new ArrayList<>();
         expected.set = new HashSet<>();

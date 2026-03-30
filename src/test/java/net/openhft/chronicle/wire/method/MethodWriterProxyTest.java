@@ -4,23 +4,19 @@
 package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.core.Jvm;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
 
 import java.lang.reflect.Proxy;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 // Test class extending MethodWriterTest to test behavior of method writers when using proxies
-public class MethodWriterProxyTest extends MethodWriterTest {
+class MethodWriterProxyTest extends MethodWriterTest {
 
     // Method to set up the test environment before each test method
-    @Before
-    public void before() {
+    @BeforeEach
+    void before() {
         // Disable proxy code generation for the duration of the tests
         System.setProperty("disableProxyCodegen", "true");
 
@@ -29,25 +25,25 @@ public class MethodWriterProxyTest extends MethodWriterTest {
     }
 
     // Method to clean up and reset the environment after each test method
-    @After
-    public void after() {
+    @AfterEach
+    void after() {
         // Clear the property to re-enable proxy code generation
         System.clearProperty("disableProxyCodegen");
     }
 
     // Test method inherited from the parent class but ignored due to a known issue
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     @Test
-    public void multiOut() {
+    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
+    void multiOut() {
         // Calls the same test method from the parent class
         super.multiOut();
         fail();
     }
 
     // Test method for testing primitives, ignored on specific conditions and known issues
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     @Test
-    public void testPrimitives() {
+    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
+    void testPrimitives() {
         // Calls the test method for primitives from the parent class
         super.doTestPrimitives(true);
         fail();

@@ -6,19 +6,17 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 import static net.openhft.chronicle.wire.Marshallable.fromString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 // see also UnsafeTextBytesTest
 // Class to test the serialization and deserialization of double values.
-public class DoubleTest extends WireTestCommon {
+class DoubleTest extends WireTestCommon {
 
     // DTO representing two double values.
     private static class TwoDoubleDto extends SelfDescribingMarshallable {
@@ -26,17 +24,17 @@ public class DoubleTest extends WireTestCommon {
         double qty;
     }
 
-    @Before
-    public void hasDirect() {
+    @BeforeEach
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     /**
      * relates to https://github.com/OpenHFT/Chronicle-Wire/issues/299 Fixed case where a serializable 'double' value sometimes has trailing zero
      */
-     // Test the serialization format of two double values without trailing zeros.
+    // Test the serialization format of two double values without trailing zeros.
     @Test
-    public void testParsingForTwoDoubles() {
+    void testParsingForTwoDoubles() {
         CLASS_ALIASES.addAlias(TwoDoubleDto.class);
 
         // Expected serialized format
@@ -46,12 +44,12 @@ public class DoubleTest extends WireTestCommon {
                 "}\n";
         final TwoDoubleDto twoDoubleDto = fromString(TwoDoubleDto.class, EXPECTED);
 
-        Assert.assertEquals(EXPECTED, twoDoubleDto.toString());
+        assertEquals(EXPECTED, twoDoubleDto.toString());
     }
 
     // Test the serialization of many double values ensuring no trailing zeros.
     @Test
-    public void testManyDoubles() {
+    void testManyDoubles() {
         // Create an elastic buffer for serialization
         final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
@@ -65,7 +63,7 @@ public class DoubleTest extends WireTestCommon {
 
             // Ensure no trailing zeros
             final String message = bytes.toString();
-            assertFalse(message + " has trailing 0", message.endsWith("0"));
+            assertFalse(message.endsWith("0"), message + " has trailing 0");
         }
         bytes.releaseLast();
     }

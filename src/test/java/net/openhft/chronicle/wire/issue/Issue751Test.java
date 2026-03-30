@@ -3,18 +3,17 @@
  */
 package net.openhft.chronicle.wire.issue;
 
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
-public class Issue751Test extends WireTestCommon {
+class Issue751Test extends WireTestCommon {
 
-    public static class One extends SelfDescribingMarshallable {
+    static class One extends SelfDescribingMarshallable {
         Comparable<?> text;
 
         One(Comparable<?> text) {
@@ -22,7 +21,7 @@ public class Issue751Test extends WireTestCommon {
         }
     }
 
-    public static class Two implements Comparable<Two>, Marshallable {
+    static class Two implements Comparable<Two>, Marshallable {
         Comparable<?> text;
 
         Two(Comparable<?> text) {
@@ -46,7 +45,7 @@ public class Issue751Test extends WireTestCommon {
     }
 
     @Test
-    public void comparableField() {
+    void comparableField() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Wire wire = new YamlWire();

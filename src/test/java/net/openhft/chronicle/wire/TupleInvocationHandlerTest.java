@@ -5,24 +5,24 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class TupleInvocationHandlerTest extends WireTestCommon {
+class TupleInvocationHandlerTest extends WireTestCommon {
 
     private final boolean originalGenerateTuples = Wires.GENERATE_TUPLES;
 
-    @After
-    public void restoreTuplesFlag() {
+    @AfterEach
+    void restoreTuplesFlag() {
         Wires.GENERATE_TUPLES = originalGenerateTuples;
     }
 
     @Test
-    public void tupleSupportsFieldApiAndDeepCopy() throws InvalidMarshallableException, NoSuchFieldException {
+    void tupleSupportsFieldApiAndDeepCopy() throws InvalidMarshallableException, NoSuchFieldException {
         Wires.GENERATE_TUPLES = true;
         SampleTuple tuple = Wires.tupleFor(SampleTuple.class, "sampleType");
         assertNotNull(tuple);

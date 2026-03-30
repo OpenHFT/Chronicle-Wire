@@ -9,18 +9,18 @@ import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.wire.RawWire;
 import net.openhft.chronicle.wire.Wire;
 import net.openhft.chronicle.wire.WireTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * This class tests the marshalling and unmarshalling of objects using ByteBuffers.
  */
-public class ByteBufferMarshallingTest extends WireTestCommon {
+class ByteBufferMarshallingTest extends WireTestCommon {
 
     /**
      * Test the write and read capabilities of a ByteBuffer.
@@ -28,7 +28,7 @@ public class ByteBufferMarshallingTest extends WireTestCommon {
      * Finally, it asserts that the original and the read objects are the same.
      */
     @Test
-    public void writeReadByteBuffer() {
+    void writeReadByteBuffer() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Initialize an elastic ByteBuffer and create a Wire for it
@@ -54,7 +54,7 @@ public class ByteBufferMarshallingTest extends WireTestCommon {
      * This test showcases the transition of data between two ByteBuffers.
      */
     @Test
-    public void writeReadViaByteBuffer() {
+    void writeReadViaByteBuffer() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Initialize an elastic ByteBuffer and create a Wire for it
@@ -102,7 +102,7 @@ public class ByteBufferMarshallingTest extends WireTestCommon {
      * This test demonstrates the use of ByteBuffers without explicitly using a Wire.
      */
     @Test
-    public void writeReadBytesViaByteBuffer() {
+    void writeReadBytesViaByteBuffer() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         // Initialize an elastic ByteBuffer

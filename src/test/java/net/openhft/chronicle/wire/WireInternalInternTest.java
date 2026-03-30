@@ -5,21 +5,18 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.*;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 // This class tests the internal interning behavior of the Wire component.
-@RunWith(value = Parameterized.class)
-public class WireInternalInternTest extends WireTestCommon {
+class WireInternalInternTest extends WireTestCommon {
 
     // Static initializer block to add aliases to the WireInternal component upon class loading.
     static {
@@ -27,27 +24,21 @@ public class WireInternalInternTest extends WireTestCommon {
     }
 
     // Field to store the test input value for each test iteration.
-    private final String typeValue;
-
-    // Constructor to set the test input value.
-    public WireInternalInternTest(String typeValue) {
-        this.typeValue = typeValue;
-    }
+    private String typeValue;
 
     // This method provides a collection of test data to be used in the parameterized test.
     @NotNull
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() {
         return Stream.of(
-                // A list of date/time related objects for testing.
+                        // A list of date/time related objects for testing.
 //                new Date(),
 //                TimeZone.getTimeZone("GMT"),
 //                UUID.randomUUID(),
-                DayOfWeek.of(1),
-                LocalDate.now(),
-                LocalDateTime.now(),
-                LocalTime.now(),
-                Month.of(1)
+                        DayOfWeek.of(1),
+                        LocalDate.now(),
+                        LocalDateTime.now(),
+                        LocalTime.now(),
+                        Month.of(1)
 //                MonthDay.of(1, 2),
 //                OffsetDateTime.now(),
 //                OffsetTime.now(),
@@ -57,9 +48,9 @@ public class WireInternalInternTest extends WireTestCommon {
 //                ZonedDateTime.now()
 //                ZoneId.of("GMT")
 //                ZoneOffset.ofHoursMinutes(5, 30)
-        )
-        // Mapping each object to a new Object array with a formatted string.
-        .map(s -> new Object[]{"!" + ClassAliasPool.CLASS_ALIASES.nameFor(s.getClass()) + " " + s + " "})
+                )
+                // Mapping each object to a new Object array with a formatted string.
+                .map(s -> new Object[]{"!" + ClassAliasPool.CLASS_ALIASES.nameFor(s.getClass()) + " " + s + " "})
                 .collect(Collectors.toList());
     }
 
@@ -81,8 +72,10 @@ public class WireInternalInternTest extends WireTestCommon {
     }
 
     // This test ensures that the marshallable component behaves as expected.
-    @Test
-    public void marshallable() {
+    @ParameterizedTest
+    @MethodSource("combinations")
+    void marshallable(String typeValue) {
+        this.typeValue = typeValue;
         // Creating a Marshallable object from the test input value.
         Object o = Marshallable.fromString(typeValue);
         // Creating another instance and ensuring that the same instance is returned.
