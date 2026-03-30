@@ -531,9 +531,9 @@ class RawWireTest extends WireTestCommon {
 
     // Test case for writing and reading byte arrays using a Wire
     // Currently, this test is ignored due to an UnsupportedOperationException
+    @Test
     @Disabled("todo fix :currently using NoBytesStore so will fail with UnsupportedOperationException")
     @SuppressWarnings("rawtypes")
-    @Test
     void testBytes() {
         @NotNull Wire wire = createWire();
         @NotNull byte[] allBytes = new byte[256];

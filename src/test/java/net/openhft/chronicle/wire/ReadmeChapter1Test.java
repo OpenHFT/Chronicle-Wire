@@ -28,8 +28,8 @@ class ReadmeChapter1Test extends WireTestCommon {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
-    @SuppressWarnings("unused")
     @Test
+    @SuppressWarnings("unused")
     void example1() {
         // Bytes which wraps a ByteBuffer which is resized as needed.
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer();

@@ -41,8 +41,8 @@ class GenerateMethodDelegateTest extends WireTestCommon {
         });
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
     void testAcquireClass() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         // Initialize a new GenerateMethodDelegate
         GenerateMethodDelegate gmd = new GenerateMethodDelegate();
@@ -77,8 +77,8 @@ class GenerateMethodDelegateTest extends WireTestCommon {
                 "accept[bi, consumer]\n", sw.toString().replace("\r", ""));
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
     void chainedDelegate() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         // Create a custom GenerateMethodDelegate with overridden methods for chaining
         GenerateMethodDelegate gmd = new GenerateMethodDelegate() {

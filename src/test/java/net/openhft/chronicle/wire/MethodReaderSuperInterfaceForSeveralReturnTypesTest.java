@@ -21,8 +21,8 @@ public class MethodReaderSuperInterfaceForSeveralReturnTypesTest extends WireTes
      * It aims to verify that method calls from interfaces `A`, `B`, and `C` (all having a relation to interface `D`)
      * are correctly written to and read from a BinaryWire.
      */
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
     void test() {
         // Initialization of the wire with padding
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));

@@ -4,7 +4,6 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.jupiter.api.Test;
 

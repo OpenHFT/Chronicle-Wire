@@ -19,8 +19,8 @@ import static org.junit.jupiter.api.Assumptions.*;
 @SuppressWarnings("unchecked")
 class ConventionsTest extends WireTestCommon {
 
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     void testTypeConversionsMaxValue() throws NoSuchFieldException, IllegalAccessException {
 
         for (@NotNull Class<?> type : new Class[]{String.class, Integer.class, Long.class, Short
@@ -43,8 +43,8 @@ class ConventionsTest extends WireTestCommon {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     void testTypeConversionsMinValue() throws IllegalAccessException, NoSuchFieldException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -67,8 +67,8 @@ class ConventionsTest extends WireTestCommon {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     void testTypeConversionsSmallNumber() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -86,8 +86,8 @@ class ConventionsTest extends WireTestCommon {
 
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     void testTypeConversionsConvertViaString() throws NoSuchFieldException, IllegalAccessException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 

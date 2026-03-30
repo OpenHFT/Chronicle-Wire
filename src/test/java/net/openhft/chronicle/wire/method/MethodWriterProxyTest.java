@@ -5,8 +5,6 @@ package net.openhft.chronicle.wire.method;
 
 import net.openhft.chronicle.core.Jvm;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 
 import java.lang.reflect.Proxy;
 
@@ -34,8 +32,8 @@ class MethodWriterProxyTest extends MethodWriterTest {
     }
 
     // Test method inherited from the parent class but ignored due to a known issue
-    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     @Test
+    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     void multiOut() {
         // Calls the same test method from the parent class
         super.multiOut();
@@ -43,8 +41,8 @@ class MethodWriterProxyTest extends MethodWriterTest {
     }
 
     // Test method for testing primitives, ignored on specific conditions and known issues
-    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     @Test
+    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/159")
     void testPrimitives() {
         // Calls the test method for primitives from the parent class
         super.doTestPrimitives(true);

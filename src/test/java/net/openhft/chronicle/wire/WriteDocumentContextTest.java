@@ -88,8 +88,8 @@ class WriteDocumentContextTest extends WireTestCommon {
     }
 
     // Test writing nested key-value pairs in YAML format (Currently Ignored)
-    @Disabled("TODO FIX")
     @Test
+    @Disabled("TODO FIX")
     void nestedYaml() {
         Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
 
@@ -102,8 +102,8 @@ class WriteDocumentContextTest extends WireTestCommon {
     }
 
     // Test writing chained key-value pairs in YAML format (Currently Ignored)
-    @Disabled("TODO FIX")
     @Test
+    @Disabled("TODO FIX")
     void chainedYaml() {
         Wire wire = WireType.YAML_ONLY.apply(Bytes.allocateElasticOnHeap());
 

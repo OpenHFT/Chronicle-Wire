@@ -812,8 +812,8 @@ class YamlTokeniserTest extends WireTestCommon {
     }
 
     // Test case for tokenizing a YAML file that includes multi-line flow scalars, both plain and quoted
-    @Disabled("TODO FIX")  // This test is currently ignored and needs fixing
     @Test
+    @Disabled("TODO FIX")  // This test is currently ignored and needs fixing
     void eg2_18() {
         // The expected tokenized representation of the 2_18Multi_lineFlowScalars.yaml file
         assertEquals("DIRECTIVES_END \n" +

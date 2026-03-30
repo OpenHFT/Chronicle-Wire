@@ -64,13 +64,10 @@ class Issue277Test extends WireTestCommon {
      */
     @Test
     void reproduce() {
-        assertThrows(ClassCastException.class, () -> {
-            assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
-            // This operation should fail and throw a ClassCastException
-            Data2 o2 = WireType.TEXT.fromString(data);
-            fail("" + o2);
-        });
+        // This operation should fail and throw a ClassCastException
+        assertThrows(ClassCastException.class, () -> Data2.class.cast(WireType.TEXT.fromString(data)));
     }
 
     /**

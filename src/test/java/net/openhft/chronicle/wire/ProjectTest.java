@@ -31,8 +31,8 @@ class ProjectTest extends WireTestCommon {
     }
 
     // Test case to verify the projection functionality between two data transfer objects.
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
     void testProject() throws Exception {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 

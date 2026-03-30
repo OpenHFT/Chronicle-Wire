@@ -96,8 +96,8 @@ class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireTestComm
     }
 
     // Test writing messages to an HTTP endpoint and validate the response
-    @Disabled("long running test")
     @Test
+    @Disabled("long running test")
     void http() throws IOException, InterruptedException {
         InetSocketAddress address = new InetSocketAddress(0);
         HttpServer server = HttpServer.create(address, 0);
@@ -117,8 +117,8 @@ class MarshallableOutBuilderTest extends net.openhft.chronicle.wire.WireTestComm
     }
 
     // Another HTTP test that might be used in conjunction with queue-web-gateway. This is a work in progress.
-    @Disabled("test was added to work with queue-web-gateway, so work in progress")
     @Test
+    @Disabled("test was added to work with queue-web-gateway, so work in progress")
     void http2() throws IOException, InterruptedException {
         InetSocketAddress address = new InetSocketAddress(0);
         HttpServer server = HttpServer.create(address, 0);

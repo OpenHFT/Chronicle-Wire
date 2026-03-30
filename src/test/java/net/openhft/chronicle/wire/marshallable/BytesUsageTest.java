@@ -20,8 +20,8 @@ class BytesUsageTest extends WireTestCommon {
      * Test the operations and manipulations on Bytes.
      * It showcases creating Bytes from a string and then appending it to other Bytes instances.
      */
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     void testBytes() {
         // Initialize a BytesStore instance from a string
         BytesStore<?, ?> value = Bytes.from("helloWorld");

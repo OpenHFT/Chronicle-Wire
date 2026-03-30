@@ -139,8 +139,8 @@ final class BinaryWireStringInternerTest extends WireTestCommon {
     /**
      * Test to demonstrate potential errors that can arise when threads share the same BinaryWire instance.
      */
-    @Disabled("used to demonstrate errors that can occur when buffers are shared between threads")
     @Test
+    @Disabled("used to demonstrate errors that can occur when buffers are shared between threads")
     void multipleThreadsSharingBinaryWireShouldCauseProblems() throws Exception {
         // List to capture exceptions during the execution of concurrent tasks
         final List<RuntimeException> capturedExceptions = new CopyOnWriteArrayList<>();

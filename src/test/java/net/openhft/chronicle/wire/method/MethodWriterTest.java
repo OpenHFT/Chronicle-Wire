@@ -100,8 +100,8 @@ public class MethodWriterTest extends WireTestCommon {
         assertTrue(wire.toString().startsWith("callToDefaultMethod: hello world"));
     }
 
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
     void multiOut() {
         Wire wire = WireType.TEXT.apply(Bytes.allocateElasticOnHeap());
 
@@ -270,8 +270,8 @@ public class MethodWriterTest extends WireTestCommon {
         checkWriterType(instance);
     }
 
-    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/274")
     @Test
+    @Disabled("https://github.com/OpenHFT/Chronicle-Wire/issues/274")
     void testMultipleImplsReturnValues() {
         final Wire wire = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
 

@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 class JSONWireTypesTest extends WireTestCommon {
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
     void nestedSets() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 

@@ -138,8 +138,8 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      * Covers {@link GeneratingMethodReaderInterceptorReturns}, which allows intervening in method reader's logic
      * without resorting to reflective calls.
      */
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
     void testGeneratingAggregatingInfoInterceptor() {
         // Create a wire with a buffer of size 128 and padding enabled
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
@@ -180,8 +180,8 @@ public class MethodReaderInterceptorReturnsTest extends WireTestCommon {
      * Covers {@link GeneratingMethodReaderInterceptorReturns}, which allows intervening in method reader's logic
      * without resorting to reflective calls.
      */
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
     void testGeneratingSkippingInterceptor() {
         // Create a wire with a buffer of size 128 and padding enabled
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));

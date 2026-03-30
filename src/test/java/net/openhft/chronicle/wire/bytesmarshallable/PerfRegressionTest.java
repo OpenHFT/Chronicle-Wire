@@ -22,8 +22,8 @@ class PerfRegressionTest extends WireTestCommon {
 
     private final String cpuClass = Jvm.getCpuClass();  // Likely obtaining some CPU class information from a utility class 'Jvm'.
 
-    @Disabled("Long running")
     @Test
+    @Disabled("Long running")
     void regressionTests() throws Exception {
         final URL location = PerfRegressionTest.class.getProtectionDomain().getCodeSource().getLocation();
 //        System.getProperties().forEach((k,v) -> System.out.println(k+"= "+v));

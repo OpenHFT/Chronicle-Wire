@@ -7,8 +7,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.StreamCorruptedException;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class RawWirePerfMain extends WireTestCommon {
 
     public static void main(String[] args) throws StreamCorruptedException {

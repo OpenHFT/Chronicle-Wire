@@ -34,8 +34,8 @@ class BinaryWireWithMappedBytesTest extends WireTestCommon {
      *
      * @throws FileNotFoundException if the file for mapping bytes is not found
      */
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     void testRefAtStart() throws FileNotFoundException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 

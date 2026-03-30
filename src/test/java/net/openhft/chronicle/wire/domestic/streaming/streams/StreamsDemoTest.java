@@ -262,8 +262,8 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     }
 
-    @Disabled("Does not work properly since net.openhft.chronicle.bytes.NativeBytes is not thread-safe")
     @Test
+    @Disabled("Does not work properly since net.openhft.chronicle.bytes.NativeBytes is not thread-safe")
     void streamParallel() {
         final int no = 100_000;
 

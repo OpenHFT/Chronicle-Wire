@@ -35,8 +35,8 @@ class MarshallableTest extends WireTestCommon {
     }
 
     // Test for undefined behavior when a string with a single double-quote is passed.
-    @Disabled("Undefined behaviour")
     @Test
+    @Disabled("Undefined behaviour")
     void testFromString2() {
         assertThrows(IllegalArgumentException.class, () -> {
             Object o = Marshallable.fromString("\"");
@@ -45,8 +45,8 @@ class MarshallableTest extends WireTestCommon {
     }
 
     // Test for undefined behavior when a string with a single single-quote is passed.
-    @Disabled("Undefined behaviour")
     @Test
+    @Disabled("Undefined behaviour")
     void testFromString3() {
         assertThrows(IllegalArgumentException.class, () -> {
             Object o = Marshallable.fromString("'");
@@ -55,8 +55,8 @@ class MarshallableTest extends WireTestCommon {
     }
 
     // Test for verifying the marshallable operation on bytes.
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     void testBytesMarshallable() {
         @NotNull Marshallable m = new MyTypes();
 
@@ -69,8 +69,8 @@ class MarshallableTest extends WireTestCommon {
     }
 
     // Test for verifying the equals operation on marshalled objects.
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     void testEquals() {
         @NotNull final Bytes<?> bytes = allocateElasticOnHeap();
         assertTrue(bytes.isElastic());
@@ -118,8 +118,8 @@ class MarshallableTest extends WireTestCommon {
     }
 
     // TODO: This test is currently ignored. The copy process using WireType.YAML_ONLY needs to be fixed.
-    @Disabled("TODO FIX")
     @Test
+    @Disabled("TODO FIX")
     void testCopyYaml() {
         doTestCopy(WireType.YAML_ONLY);
     }

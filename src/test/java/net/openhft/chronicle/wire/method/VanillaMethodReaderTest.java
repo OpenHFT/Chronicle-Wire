@@ -95,8 +95,8 @@ public class VanillaMethodReaderTest extends WireTestCommon {
         assertEquals(expected.toString().trim().replace("\r", ""), wire2.toString().trim());
     }
 
-    @SuppressWarnings("unused")
     @Test
+    @SuppressWarnings("unused")
     void readMethodsCollections() throws IOException, InterruptedException {
         Wire wire = new TextWire(BytesUtil.readFile("methods-collections-in.yaml"))
                 .useTextDocuments();

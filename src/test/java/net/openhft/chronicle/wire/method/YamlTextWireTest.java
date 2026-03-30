@@ -9,7 +9,6 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.TextWire;
 import net.openhft.chronicle.wire.WireTestCommon;
 import net.openhft.chronicle.wire.YamlWire;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 

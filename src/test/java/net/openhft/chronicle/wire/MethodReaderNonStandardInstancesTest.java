@@ -25,8 +25,8 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
      * Test case to verify that an anonymous class can be passed to MethodReader.
      * It sets up a writer, writes a message, then uses a MethodReader to read and process the message using an anonymous class implementation.
      */
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
     void testAnonymousClassCanBePassedToMethodReader() {
         // Initialization of the wire with padding
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
@@ -59,8 +59,8 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
      * Test case to verify that a core class can be passed to MethodReader.
      * Similar to the above test but uses a BooleanConsumer core class.
      */
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
     void testCoreClassCanBePassedToMethodReader() throws Exception {
         // Initialization of the wire with padding
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
@@ -93,8 +93,8 @@ public class MethodReaderNonStandardInstancesTest extends WireTestCommon {
      * Test case to verify that a lambda expression can be passed to MethodReader.
      * It demonstrates how a lambda can be used to implement the reading functionality.
      */
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
     void testLambdaCanBePassedToMethodReader() {
         // Initialization of the wire with padding
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));

@@ -14,13 +14,10 @@ import net.openhft.chronicle.wire.converter.NanoTime;
 import org.easymock.EasyMock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.lang.annotation.RetentionPolicy;
 import java.net.Socket;
@@ -50,7 +47,6 @@ import org.junit.jupiter.api.Assertions;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings({"rawtypes", "unchecked", "try", "serial"})
 class YamlWireTest extends WireTestCommon {

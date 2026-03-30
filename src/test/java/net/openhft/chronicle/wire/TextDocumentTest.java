@@ -62,8 +62,8 @@ class TextDocumentTest extends WireTestCommon {
     }
 
     // An ignored test for YAML_ONLY wireType. Needs to be fixed before running.
-    @Disabled("TODO FIX")
     @Test
+    @Disabled("TODO FIX")
     void testDocumentYaml() {
         doTestDocument(WireType.YAML_ONLY);
     }

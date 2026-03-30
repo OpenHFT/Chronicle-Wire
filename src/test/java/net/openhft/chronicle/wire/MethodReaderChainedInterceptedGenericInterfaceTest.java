@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * This pattern arises when using Web Gateway.
  */
 public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTestCommon {
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
     void testDefinitive() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
@@ -55,8 +55,8 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
         methodReader.readOne();
     }
 
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
     void testIndefinite() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
@@ -96,8 +96,8 @@ public class MethodReaderChainedInterceptedGenericInterfaceTest extends WireTest
         methodReader.readOne();
     }
 
-    @SuppressWarnings("deprecation")
     @Test
+    @SuppressWarnings("deprecation")
     void testNested() {
         BinaryWire wire = new BinaryWire(Bytes.allocateElasticOnHeap(128));
         wire.usePadding(true);
