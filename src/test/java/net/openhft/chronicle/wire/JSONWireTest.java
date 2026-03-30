@@ -682,5 +682,4 @@ class JSONWireTest extends WireTestCommon {
     private static class CollectionContainer {
         private Collection<String> collection;
     }
-
 }

@@ -49,5 +49,4 @@ class JsonWireToStringAcceptanceTest {
         jsonWire.getValueOut().object(map);
         assertEquals("{\"x\":\"" + input + "\"}", JSONWire.asText(jsonWire));
     }
-
 }

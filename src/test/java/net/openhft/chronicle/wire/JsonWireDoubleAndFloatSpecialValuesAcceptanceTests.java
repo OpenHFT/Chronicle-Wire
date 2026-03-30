@@ -193,5 +193,4 @@ class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
             this.value = value;
         }
     }
-
 }

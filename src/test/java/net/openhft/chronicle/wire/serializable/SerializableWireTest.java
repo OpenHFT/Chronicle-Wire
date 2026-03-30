@@ -117,5 +117,4 @@ class SerializableWireTest extends WireTestCommon {
     static class TextContainer extends SelfDescribingMarshallable {
         StringBuilder[] innerBuilders; // Represents inner StringBuilders
     }
-
 }

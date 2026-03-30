@@ -65,5 +65,4 @@ public class Example2 {
         bytes.releaseLast();
         bytes2.releaseLast();
     }
-
 }
