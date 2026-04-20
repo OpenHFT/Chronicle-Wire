@@ -44,4 +44,16 @@ class UnsafeFieldInfo extends VanillaFieldInfo {
         }
         return this.offset;
     }
+
+    protected boolean isInstance(Object object) {
+        try {
+            Field field = getField();
+            Class<?> declaringClass = field.getDeclaringClass();
+            if (declaringClass.isInstance(object))
+                return true;
+            throw new AssertionError(object + " is not a " + declaringClass + " for " + field);
+        } catch (NoSuchFieldException e) {
+            throw new AssertionError(e);
+        }
+    }
 }
