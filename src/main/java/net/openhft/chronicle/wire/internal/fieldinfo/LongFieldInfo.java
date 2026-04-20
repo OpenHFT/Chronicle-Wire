@@ -30,7 +30,9 @@ public final class LongFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
+    @SuppressWarnings("CSCallerCheckedBounds")
     public long getLong(Object object) {
+        assert isInstance(object);
         try {
             return UnsafeMemory.unsafeGetLong(object, getOffset());
         } catch (@NotNull NoSuchFieldException e) {
@@ -40,7 +42,9 @@ public final class LongFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
+    @SuppressWarnings("CSCallerCheckedBounds")
     public void set(Object object, long value) throws IllegalArgumentException {
+        assert isInstance(object);
         try {
             UnsafeMemory.unsafePutLong(object, getOffset(), value);
         } catch (@NotNull NoSuchFieldException e) {

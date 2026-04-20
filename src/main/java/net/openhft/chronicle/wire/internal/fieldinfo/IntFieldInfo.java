@@ -30,7 +30,9 @@ public final class IntFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
+    @SuppressWarnings("CSCallerCheckedBounds")
     public int getInt(Object object) {
+        assert isInstance(object);
         try {
             return UnsafeMemory.unsafeGetInt(object, getOffset());
         } catch (@NotNull NoSuchFieldException e) {
@@ -40,7 +42,9 @@ public final class IntFieldInfo extends UnsafeFieldInfo {
     }
 
     @Override
+    @SuppressWarnings("CSCallerCheckedBounds")
     public void set(Object object, int value) throws IllegalArgumentException {
+        assert isInstance(object);
         try {
             UnsafeMemory.unsafePutInt(object, getOffset(), value);
         } catch (@NotNull NoSuchFieldException e) {
