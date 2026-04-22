@@ -35,6 +35,7 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
             return getField().get(object);
         } catch (@NotNull NoSuchFieldException | IllegalAccessException e) {
             Jvm.debug().on(VanillaFieldInfo.class, e);
+            // CSWarnReturnNull REVIEW keep return null; here because this fallback in VanillaFieldInfo#get still needs an explicit reviewed degraded-outcome contract.
             return null;
         }
     }
@@ -129,6 +130,7 @@ public class VanillaFieldInfo extends AbstractFieldInfo implements FieldInfo {
     public Field getField() throws NoSuchFieldException {
         if (field == null) {
             field = parent.getDeclaredField(name);
+            // CSSetAccessibleEscalation REVIEW Jvm.setAccessible(field) because this access override in VanillaFieldInfo#getField still needs either encapsulation-preserving access or an explicit reviewed runtime-access contract.
             Jvm.setAccessible(field);
         }
         return field;

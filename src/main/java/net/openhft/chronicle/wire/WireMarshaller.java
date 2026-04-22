@@ -62,7 +62,9 @@ public class WireMarshaller<T> {
     static {
         if (Jvm.isJava14Plus()) {
             try {
+                // CSReflectiveMethodLookup REVIEW isRecord = Jvm.getMethod(Class.class, "isRecord") because this reflective or runtime-loading boundary still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
                 isRecord = Jvm.getMethod(Class.class, "isRecord");
+                // CSCatchBroadException REVIEW catch (Exception ignored) because this broad catch still needs either narrower handling or an explicit reviewed recovery contract.
             } catch (Exception ignored) {
             }
         }
@@ -226,6 +228,7 @@ public class WireMarshaller<T> {
                     Jvm.warn().on(WireMarshaller.class, "Found " + name + ", in " + clazz + " which will be ignored!");
                 continue;
             }
+            // CSSetAccessibleEscalation REVIEW Jvm.setAccessible(field) because this access override in WireMarshaller#getAllField still needs either encapsulation-preserving access or an explicit reviewed runtime-access contract.
             Jvm.setAccessible(field);
             map.put(name, field);
         }
@@ -243,6 +246,7 @@ public class WireMarshaller<T> {
                 && !tClass.getName().startsWith("java")
                 && !tClass.isEnum()
                 && !tClass.isArray()) {
+            // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance(tClass) here because this unchecked type materialisation in WireMarshaller#defaultValueForType still needs either a closed type map or an explicit reviewed instantiation contract.
             T t = ObjectUtils.newInstance(tClass);
             Monitorable.unmonitor(t);
             return t;
@@ -250,7 +254,9 @@ public class WireMarshaller<T> {
         if (DynamicEnum.class.isAssignableFrom(tClass)) {
             try {
                 T t = OS.memory().allocateInstance(tClass);
+                // CSReflectiveFieldLookup REVIEW Jvm.getField(Enum.class, "name").set(t, "[unset]") because this reflective or runtime-loading boundary in WireMarshaller#defaultValueForType still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
                 Jvm.getField(Enum.class, "name").set(t, "[unset]");
+                // CSReflectiveFieldLookup REVIEW Jvm.getField(Enum.class, "ordinal").set(t, -1) because this reflective or runtime-loading boundary in WireMarshaller#defaultValueForType.
                 Jvm.getField(Enum.class, "ordinal").set(t, -1);
                 IOTools.unmonitor(t);
                 return t;
@@ -755,6 +761,7 @@ public class WireMarshaller<T> {
                 Field converterField = clazz.getDeclaredField("INSTANCE");
                 return (LongConverter) converterField.get(null);
             } catch (NoSuchFieldException nsfe) {
+                // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance(clazz) here because this unchecked type materialisation in LongConverterFieldAccess#getInstance.
                 return (LongConverter) ObjectUtils.newInstance(clazz);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
@@ -862,6 +869,7 @@ public class WireMarshaller<T> {
         public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
                 StringBuilder sb = stlSb.get();
+                // CSUnboundedUtf8Decode REVIEW keep sb here because this input or payload boundary in LongConverterFieldAccess#getAsBytes still needs an explicit reviewed input-trust contract.
                 bytes.readUtf8(sb);
                 long i = longConverter.parse(sb);
                 bytes.writeLong(i);
@@ -959,9 +967,11 @@ public class WireMarshaller<T> {
                     boolean isLeaf = !Throwable.class.isAssignableFrom(componentType)
                             && WIRE_MARSHALLER_CL.get(componentType).isLeaf;
                     try {
+                        // CSReflectiveMethodLookup REVIEW Object[] values = (Object[]) Jvm.getMethod(componentType, "values").invoke(componentType) because this reflective or runtime-loading boundary in FieldAccess#create.
                         Object[] values = (Object[]) Jvm.getMethod(componentType, "values").invoke(componentType);
                         return new EnumSetFieldAccess(field, isLeaf, values, componentType);
                     } catch (IllegalAccessException | InvocationTargetException e) {
+                        // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in FieldAccess#create converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
                         throw Jvm.rethrow(e);
                     }
                 }
@@ -1034,6 +1044,7 @@ public class WireMarshaller<T> {
                         return new ObjectFieldAccess(field, isLeaf);
                 }
             } catch (IllegalAccessException | InvocationTargetException ex) {
+                // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(ex) because this rethrow in FieldAccess#create converts a checked cause into an unchecked wrapper and.
                 throw Jvm.rethrow(ex);
             }
         }
@@ -1220,7 +1231,9 @@ public class WireMarshaller<T> {
                 try {
                     setValue(o, read, overwrite);
                 } catch (UnexpectedFieldHandlingException | ClassCastException | ClassNotFoundRuntimeException e) {
+                    // CSCheckedSwallowThroughRethrow REVIEW Jvm.rethrow(e) because this rethrow in FieldAccess#readValue converts a checked cause into an unchecked wrapper and.
                     Jvm.rethrow(e);
+                    // CSCatchBroadException REVIEW catch (Exception e) because the local fallback still begins with calling read.wireIn().bytes().readPosition(pos) and needs either narrower handling or an explicit reviewed recovery contract.
                 } catch (Exception e) {
                     read.wireIn().bytes().readPosition(pos);
                     try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
@@ -1403,6 +1416,7 @@ public class WireMarshaller<T> {
                 Object object = null;
                 try {
                     object = read.object(using, type, false);
+                    // CSWarnAndContinue REVIEW catch (Exception e) because the local fallback still begins with entering a conditional fallback branch and then continues execution, and needs either fail-closed handling or an explicit reviewed degraded-mode contract.
                 } catch (Exception e) {
                     // "Unhandled" Abstract classes that are not types should be null (Enums are abstract classes in Java but should not be null here)
                     if (using == null &&
@@ -1413,6 +1427,7 @@ public class WireMarshaller<T> {
                         // retain the null value of object
                         Jvm.warn().on(getClass(), "Ignoring exception and setting field '" + field.getName() + "' to null", e);
                     } else {
+                        // CSCheckedSwallowThroughRethrow REVIEW Jvm.rethrow(e) because this rethrow in ObjectFieldAccess#setValue converts a checked cause into an unchecked wrapper and.
                         Jvm.rethrow(e);
                     }
                 }
@@ -1423,6 +1438,7 @@ public class WireMarshaller<T> {
 
             } catch (UnexpectedFieldHandlingException | ClassCastException | ClassNotFoundRuntimeException e) {
                 Jvm.rethrow(e);
+                // CSCatchBroadException REVIEW catch (Exception e) because the local fallback still begins with calling read.wireIn().bytes().readPosition(pos) and needs either narrower handling or an explicit reviewed recovery contract.
             } catch (Exception e) {
                 read.wireIn().bytes().readPosition(pos);
                 Jvm.warn().on(getClass(), "Unable to parse field: " + field.getName() + ", as a marshallable as it is " + read.objectBestEffort(), e);
@@ -1469,6 +1485,7 @@ public class WireMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull ValueOut write, Object previous) {
+            // REVIEW TASK CSRawAddressAccess: move write.text behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             write.text(UnsafeMemory.<String>unsafeGetObject(o, offset));
         }
 
@@ -1506,6 +1523,7 @@ public class WireMarshaller<T> {
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             StringBuilder sb = unsafeGetObject(o, offset);
             if (sb == null) {
+                // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
                 sb = new StringBuilder();
                 unsafePutObject(o, offset, sb);
             }
@@ -1524,6 +1542,7 @@ public class WireMarshaller<T> {
             if (sb == defaultValue)
                 return;
             if (sb == null) {
+                // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
                 sb = new StringBuilder();
                 unsafePutObject(o, offset, sb);
             }
@@ -1550,6 +1569,7 @@ public class WireMarshaller<T> {
                 unsafePutObject(to, offset, null);
                 return;
             } else if (toSequence == null) {
+                // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
                 toSequence = new StringBuilder();
                 unsafePutObject(to, offset, toSequence);
             }
@@ -1612,6 +1632,7 @@ public class WireMarshaller<T> {
                 @NotNull StringBuilder sb0 = stlSb.get();
                 read.text(sb0);
                 String s = WireInternal.INTERNER.intern(sb0);
+                // CSBase64DecodeInput REVIEW keep ).decode(s here because this input or payload boundary in BytesFieldAccess#decodeBytes still needs an explicit reviewed input-trust contract.
                 byte[] decode = Base64.getDecoder().decode(s);
                 bytes.clear();
                 bytes.write(decode);
@@ -2046,6 +2067,7 @@ public class WireMarshaller<T> {
          * @return A supplier that can create a new instance of the collection type.
          */
         private Supplier<Collection> newInstance() {
+            // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance(type) here because this unchecked type materialisation in CollectionFieldAccess#newInstance.
             return () -> (Collection) ObjectUtils.newInstance(type);
         }
 
@@ -2170,6 +2192,7 @@ public class WireMarshaller<T> {
          * @return A supplier that can create a new instance of the collection type.
          */
         private Supplier<Collection> newInstance() {
+            // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance(type) here because this unchecked type materialisation in StringCollectionFieldAccess#newInstance.
             return () -> (Collection) ObjectUtils.newInstance(type);
         }
 
@@ -2293,6 +2316,7 @@ public class WireMarshaller<T> {
          */
         @NotNull
         private Supplier<Map> newInstance() {
+            // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance(type) here because this unchecked type materialisation in MapFieldAccess#newInstance.
             return () -> (Map) ObjectUtils.newInstance(type);
         }
 
@@ -2816,6 +2840,7 @@ public class WireMarshaller<T> {
 
         IntConversionFieldAccess(@NotNull Field field, @NotNull LongConversion conversion) {
             super(field);
+            // CSResolvedTypeInstantiation REVIEW keep conversion.value() here because this unchecked type materialisation in IntConversionFieldAccess constructor.
             this.converter = (LongConverter) ObjectUtils.newInstance(conversion.value());
         }
 
@@ -2876,6 +2901,7 @@ public class WireMarshaller<T> {
         public void getAsBytes(Object o, @NotNull Bytes<?> bytes) {
             try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
                 StringBuilder sb = stlSb.get();
+                // CSUnboundedUtf8Decode REVIEW keep sb here because this input or payload boundary in IntConversionFieldAccess#getAsBytes.
                 bytes.readUtf8(sb);
                 long i = converter.parse(sb);
                 bytes.writeLong(i);

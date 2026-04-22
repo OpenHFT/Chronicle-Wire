@@ -257,7 +257,9 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         if (proxyClass != null) {
             try {
                 Constructor<T> constructor = (Constructor) proxyClass.getConstructor(MethodWriterInvocationHandlerSupplier.class);
+                // CSReflectiveConstructorInvoke REVIEW constructor.newInstance(handlerSupplier) because this reflective or runtime-loading boundary in VanillaMethodWriterBuilder#get still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
                 return constructor.newInstance(handlerSupplier);
+                // CSCatchThrowable REVIEW catch (Throwable e) because the local fallback still begins with guarding a call to Jvm.debug() and needs either a narrower terminal boundary or an explicit reviewed last-resort contract.
             } catch (Throwable e) {
                 // do nothing and drop through
                 if (Jvm.isDebugEnabled(getClass()))
@@ -276,6 +278,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
 
         //noinspection unchecked
+        // CSProxyAdmission REVIEW (T) Proxy.newProxyInstance(classLoader, interfacesArr, new CallSupplierInvocationHandler(this)) because this reflective or runtime-loading boundary in VanillaMethodWriterBuilder#get still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
         return (T) Proxy.newProxyInstance(classLoader, interfacesArr, new CallSupplierInvocationHandler(this));
     }
 
@@ -295,6 +298,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         try {
             try {
                 // Attempt to create an instance from an already loaded class
+                // CSClassForNameInput REVIEW (T) newInstance(Class.forName(fullClassName)) because this reflective or runtime-loading boundary in VanillaMethodWriterBuilder#createInstance still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
                 return (T) newInstance(Class.forName(fullClassName));
             } catch (ClassNotFoundException e) {
                 Class<?> clazz;
@@ -308,6 +312,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             }
         } catch (MethodWriterValidationException e) {
             throw e;
+            // CSCatchThrowable REVIEW catch (Throwable e) because the local fallback still begins with calling classCache.put(fullClassName, COMPILE_FAILED) and needs either a narrower terminal boundary or an explicit reviewed last-resort contract.
         } catch (Throwable e) {
             // Log the exception and fallback to proxy method writer
             classCache.put(fullClassName, COMPILE_FAILED);
@@ -342,6 +347,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                     updateInterceptor != null, verboseTypes);
 
         // Configure and use version 2 of the method writer generator
+        // REVIEW TASK CQTryWithResourcesMissing: wrap GenerateMethodWriter2 gmw in try-with-resources or document explicit close ownership.
         GenerateMethodWriter2 gmw = new GenerateMethodWriter2();
         gmw.metaData()
                 .packageName(fullClassName.substring(0, fullClassName.lastIndexOf('.')))
@@ -383,6 +389,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
             return aClass.getDeclaredConstructors()[0].newInstance(outSupplier, closeable, updateInterceptor);
         } catch (Exception e) {
             // Rethrow any exception that might occur during instantiation.
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in VanillaMethodWriterBuilder#newInstance converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
             throw Jvm.rethrow(e);
         }
     }

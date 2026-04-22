@@ -87,6 +87,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
         int bytes0 = description0 & 0xFF;
 
         if (longs0 + ints0 + shorts0 + bytes0 > FIELD_COUNT_LIMIT)
+            // CSRawHeaderOrPathMessage REVIEW emit throw new IllegalStateException here because this operator-facing diagnostic in SelfDescribingTriviallyCopyable#carefulCopy still needs an explicit reviewed operator-diagnostic contract.
             throw new IllegalStateException("Excessive field count in description: " +
                     Integer.toHexString(description0));
 
@@ -95,6 +96,7 @@ public abstract class SelfDescribingTriviallyCopyable extends SelfDescribingMars
 
         // Validation: Check if the description0 is even or if the length exceeds the remaining data in the input
         if (Integer.bitCount(description0) % 2 == 0 || length > in.readRemaining())
+            // CSRawHeaderOrPathMessage REVIEW emit throw new IllegalStateException("Invalid description: " + Integer.toHexString(description0) + ", length: " + length + ", remaining: " + in.readRemaining()); here because this operator-facing diagnostic in SelfDescribingTriviallyCopyable#carefulCopy.
             throw new IllegalStateException("Invalid description: " + Integer.toHexString(description0) + ", length: " + length + ", remaining: " + in.readRemaining());
 
         // Copy long values from the input source to the object's memory

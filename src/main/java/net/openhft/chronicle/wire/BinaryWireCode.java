@@ -37,18 +37,21 @@ public enum BinaryWireCode {
      */
     public static final int HISTORY_MESSAGE = 0x86;
 
+    // REVIEW TASK CQDeprecationJavadoc: add a @deprecated Javadoc tag to BinaryWireCode explaining the replacement and removal plan.
     /**
      * Indicates a field anchor point within the serialized structure.
      */
     @Deprecated
     public static final int FIELD_ANCHOR = 0x87;
 
+    // REVIEW TASK CQDeprecationJavadoc: add a @deprecated Javadoc tag to BinaryWireCode explaining the replacement and removal plan.
     /**
      * Indicates a general anchor point within the serialized structure.
      */
     @Deprecated
     public static final int ANCHOR = 0x88;
 
+    // REVIEW TASK CQDeprecationJavadoc: add a @deprecated Javadoc tag to BinaryWireCode explaining the replacement and removal plan.
     /**
      * Denotes an updated alias value.
      */

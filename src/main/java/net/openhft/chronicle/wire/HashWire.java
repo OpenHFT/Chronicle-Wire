@@ -103,11 +103,13 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         return hashWire.hash32();
     }
 
+    // CSClassLookupExposure REVIEW keep classLookup(ClassLookup classLookup) here because this class-lookup surface in HashWire#classLookup still needs either a closed alias registry or an explicit reviewed class-resolution contract.
     @Override
     public void classLookup(ClassLookup classLookup) {
         // Do nothing
     }
 
+    // CSClassLookupExposure REVIEW keep @Override here because this class-lookup surface in HashWire#classLookup.
     /**
      * Always returns {@link ClassAliasPool#CLASS_ALIASES} as type
      * resolution is still required for consistent hashing.
@@ -257,6 +259,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
         throw new UnsupportedOperationException("todo");
     }
 
@@ -509,6 +512,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut int128forBinding(long i64x0, long i64x1, TwoLongValue longValue) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 
@@ -589,6 +593,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
             return this;
         }
 
+        // CSClassLookupExposure REVIEW keep @Override here because this class-lookup surface in HashValueOut#classLookup.
         @Override
         public ClassLookup classLookup() {
             return HashWire.this.classLookup();
@@ -622,6 +627,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut int32forBinding(int value) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 
@@ -629,6 +635,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut int32forBinding(int value, @NotNull IntValue intValue) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 
@@ -636,6 +643,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut int64forBinding(long value) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 
@@ -643,6 +651,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut int64forBinding(long value, @NotNull LongValue longValue) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 
@@ -650,6 +659,7 @@ public class HashWire implements WireOut, HexDumpBytesDescription {
         @NotNull
         @Override
         public WireOut boolForBinding(final boolean value, @NotNull final BooleanValue longValue) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 

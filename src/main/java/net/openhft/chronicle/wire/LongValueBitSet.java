@@ -16,6 +16,7 @@ import java.nio.ByteOrder;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
+import net.openhft.chronicle.core.annotation.NonNegative;
 
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
@@ -68,6 +69,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      */
     public LongValueBitSet(final long maxNumberOfBits) {
         int size = (int) ((maxNumberOfBits + BITS_PER_WORD - 1) / BITS_PER_WORD);
+        // CSOwnershipCheckDisable REVIEW keep singleThreadedCheckDisabled(true); here because this lifecycle or ownership exception in LongValueBitSet constructor still needs an explicit reviewed lifecycle contract.
         words = new LongValue[size];
         singleThreadedCheckDisabled(true);
     }
@@ -239,7 +241,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * Atomically toggles the bit at {@code bitIndex}.
      */
-    public void flip(int bitIndex) {
+    public void flip(@NonNegative int bitIndex) {
         throwExceptionIfClosed();
 
         if (bitIndex < 0)
@@ -267,7 +269,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * Atomically flips bits in the range [{@code fromIndex}, {@code toIndex}).
      */
-    public void flip(int fromIndex, int toIndex) {
+    public void flip(@NonNegative int fromIndex, @NonNegative int toIndex) {
         throwExceptionIfClosed();
 
         checkRange(fromIndex, toIndex);
@@ -304,7 +306,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * Atomically sets the bit at {@code bitIndex}.
      */
-    public void set(int bitIndex) {
+    public void set(@NonNegative int bitIndex) {
         // Check if the BitSet is closed, if so, throws an exception
         throwExceptionIfClosed();
 
@@ -330,7 +332,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * Sets the bit at {@code bitIndex} to {@code value}.
      */
-    public void set(int bitIndex, boolean value) {
+    public void set(@NonNegative int bitIndex, boolean value) {
         throwExceptionIfClosed();
 
         if (value)
@@ -342,7 +344,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * Atomically sets all bits in the range [{@code fromIndex}, {@code toIndex}) to {@code true}.
      */
-    public void set(int fromIndex, int toIndex) {
+    public void set(@NonNegative int fromIndex, @NonNegative int toIndex) {
         throwExceptionIfClosed();
 
         checkRange(fromIndex, toIndex);
@@ -379,7 +381,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * Atomically sets all bits in the range to {@code value}.
      */
-    public void set(int fromIndex, int toIndex, boolean value) {
+    public void set(@NonNegative int fromIndex, @NonNegative int toIndex, boolean value) {
         throwExceptionIfClosed();
 
         if (value)
@@ -391,7 +393,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * Sets the bit specified by the index to {@code false}.
      */
-    public void clear(int bitIndex) {
+    public void clear(@NonNegative int bitIndex) {
         throwExceptionIfClosed();
 
         if (bitIndex < 0)
@@ -407,7 +409,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /**
      * Sets the bits from the specified {@code fromIndex} (inclusive) to the specified {@code toIndex} (exclusive) to {@code false}.
      */
-    public void clear(int fromIndex, int toIndex) {
+    public void clear(@NonNegative int fromIndex, @NonNegative int toIndex) {
         throwExceptionIfClosed();
 
         checkRange(fromIndex, toIndex);
@@ -467,7 +469,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @param bitIndex the index of the bit to check
      * @return true if the bit at the specified index is set, false otherwise
      */
-    public boolean get(int bitIndex) {
+    public boolean get(@NonNegative int bitIndex) {
         throwExceptionIfClosed();
 
         if (bitIndex < 0)
@@ -485,7 +487,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @param fromIndex the index to start checking from
      * @return the index of the next set bit, or -1 if no such bit is found
      */
-    public int nextSetBit(int fromIndex) {
+    public int nextSetBit(@NonNegative int fromIndex) {
         throwExceptionIfClosed();
 
         if (fromIndex < 0)
@@ -523,7 +525,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @param toIndex the index to stop checking (exclusive)
      * @return the index of the next set bit within the specified range, or -1 if no such bit is found
      */
-    public int nextSetBit(int fromIndex, int toIndex) {
+    public int nextSetBit(@NonNegative int fromIndex, @NonNegative int toIndex) {
         throwExceptionIfClosed();
 
         if (fromIndex < 0)
@@ -560,7 +562,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * @param fromIndex the index to start checking from
      * @return the index of the next unset bit, or the total length if all bits are set
      */
-    public int nextClearBit(int fromIndex) {
+    public int nextClearBit(@NonNegative int fromIndex) {
         throwExceptionIfClosed();
 
         // Neither spec nor implementation handle ChronicleBitSets of maximal length.
@@ -907,6 +909,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
 
         int numBits = (getWordsInUse() > 128) ?
                 cardinality() : Math.toIntExact(getWordsInUse() * BITS_PER_WORD);
+        // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
         StringBuilder b = new StringBuilder(6 * numBits + 2);
         b.append('{');
 
@@ -983,6 +986,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
     /** Deserialises the backing words from {@code wire}. */
     @Override
     public void readMarshallable(@NotNull final WireIn wire) throws IORuntimeException {
+        // CSOwnershipCheckDisable REVIEW keep singleThreadedCheckDisabled(true); here because this lifecycle or ownership exception in LongValueBitSet#readMarshallable.
         singleThreadedCheckDisabled(true);
         throwExceptionIfClosed();
 

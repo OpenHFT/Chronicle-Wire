@@ -35,11 +35,13 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
         return false; // as we don't know
     }
 
+    // CSClassLookupExposure REVIEW keep classLookup(ClassLookup classLookup) here because this class-lookup surface in ReadAnyWire#classLookup still needs either a closed alias registry or an explicit reviewed class-resolution contract.
     @Override
     public void classLookup(ClassLookup classLookup) {
         this.wireAcquisition.classLookup(classLookup);
     }
 
+    // CSClassLookupExposure REVIEW keep @Override here because this class-lookup surface in ReadAnyWire#classLookup.
     @Override
     public ClassLookup classLookup() {
         return wireAcquisition.classLookup();
@@ -59,6 +61,7 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
     @NotNull
     @Override
     public BooleanValue newBooleanReference() {
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
         throw new UnsupportedOperationException("todo");
     }
 
@@ -84,6 +87,7 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
         WireType wireType;
         @Nullable
         Wire wire = null;
+        // CSAliasPoolDefault REVIEW keep private ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES here because this runtime type boundary still needs an explicit reviewed type-admission contract.
         private ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
 
         /**
@@ -95,6 +99,7 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
             this.bytes = bytes;
         }
 
+        // CSClassLookupExposure REVIEW keep classLookup(ClassLookup classLookup) here because this class-lookup surface in ReadAnyWireAcquisition#classLookup.
         @Override
         public void classLookup(ClassLookup classLookup) {
             this.classLookup = classLookup;
@@ -102,6 +107,7 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
                 wire.classLookup(classLookup);
         }
 
+        // CSClassLookupExposure REVIEW keep @Override here because this class-lookup surface in ReadAnyWireAcquisition#classLookup.
         @Override
         public ClassLookup classLookup() {
             return classLookup;

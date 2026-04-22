@@ -72,6 +72,7 @@ public class GenerateJsonSchemaMain {
         // Validate class-name input early so typos fail fast during startup.
         Set<Class<?>> interfaces = new LinkedHashSet<>();
         for (String arg : args) {
+            // CSClassForNameInput REVIEW interfaces.add(Class.forName(arg)) because this reflective or runtime-loading boundary in GenerateJsonSchemaMain#main0 still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
             interfaces.add(Class.forName(arg));
         }
         // Keep generator state isolated to avoid accidental reuse across invocations.

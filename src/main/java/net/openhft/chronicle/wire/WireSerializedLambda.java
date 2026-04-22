@@ -69,10 +69,13 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
      */
     public static <L> void write(@NotNull L lambda, @NotNull ValueOut valueOut) {
         try {
+            // CSReflectiveMethodLookup REVIEW Method writeReplace = lambda.getClass().getDeclaredMethod("writeReplace") because this reflective or runtime-loading boundary in WireSerializedLambda#write still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
             Method writeReplace = lambda.getClass().getDeclaredMethod("writeReplace");
+            // CSSetAccessibleEscalation REVIEW Jvm.setAccessible(writeReplace) because this access override in WireSerializedLambda#write still needs either encapsulation-preserving access or an explicit reviewed runtime-access contract.
             Jvm.setAccessible(writeReplace);
             @NotNull SerializedLambda sl = (SerializedLambda) writeReplace.invoke(lambda);
 
+            // CSTypePrefixEmit REVIEW keep valueOut.typePrefix here because this emitted type prefix in WireSerializedLambda#write still needs either a closed wire type map or an explicit reviewed type-prefix contract.
             valueOut.typePrefix("SerializedLambda");
             valueOut.marshallable(v ->
                     v.write(() -> "cc").typeLiteral(sl.getCapturingClass().replace('/', '.'))
@@ -129,7 +132,9 @@ public class WireSerializedLambda implements ReadMarshallable, ReadResolvable {
                 implMethodKind, implClass, implMethodName, implMethodSignature,
                 instantiatedMethodType, capturedArgs.toArray());
         try {
+            // CSReflectiveMethodLookup REVIEW Method readResolve = SerializedLambda.class.getDeclaredMethod("readResolve") because this reflective or runtime-loading boundary in WireSerializedLambda#readResolve.
             Method readResolve = SerializedLambda.class.getDeclaredMethod("readResolve");
+            // CSSetAccessibleEscalation REVIEW Jvm.setAccessible(readResolve) because this access override in WireSerializedLambda#readResolve.
             Jvm.setAccessible(readResolve);
             return readResolve.invoke(sl);
         } catch (Exception e) {

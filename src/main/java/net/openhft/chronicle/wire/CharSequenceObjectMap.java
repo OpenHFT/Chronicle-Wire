@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.util.StringUtils;
+import net.openhft.chronicle.core.annotation.NonNegative;
 
 /**
  * Simple hash map implementation optimised for {@link CharSequence} keys.
@@ -39,7 +40,7 @@ public class CharSequenceObjectMap<T> {
      * @param capacity desired initial capacity before rounding
      */
     @SuppressWarnings("unchecked")
-    public CharSequenceObjectMap(int capacity) {
+    public CharSequenceObjectMap(@NonNegative int capacity) {
         int nextPower2 = Maths.nextPower2(capacity, 16);
         keys = new String[nextPower2];
         values = (T[]) new Object[nextPower2];
@@ -79,6 +80,7 @@ public class CharSequenceObjectMap<T> {
         int h = hashFor(cs);
         for (int i = 0; i < mask; i++) {
             if (keys[i] == null)
+                // REVIEW TASK CQNullabilityReturns: annotate the return value of get(...) with @Nullable or @NotNull.
                 return null;
             if (StringUtils.isEqual(keys[i], cs))
                 return values[i];

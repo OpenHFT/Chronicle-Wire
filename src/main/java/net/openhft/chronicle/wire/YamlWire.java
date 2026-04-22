@@ -270,12 +270,14 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         StringBuilder targetBuffer = inputTextBuilder;
         // YAML octal notation
         if (StringUtils.startsWith(inputTextBuilder, "0o")) {
+            // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
             targetBuffer = new StringBuilder(inputTextBuilder);
             targetBuffer.deleteCharAt(1);
         }
 
         // Remove underscores if present, as they can be used in YAML as visual separators in numbers.
         if (inputTextBuilder.indexOf("_") >= 0) {
+            // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
             targetBuffer = new StringBuilder(inputTextBuilder);
             removeUnderscore(targetBuffer);
         }
@@ -365,12 +367,14 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @Override
     public boolean hintReadInputOrder() {
         // TODO Fix YamlTextWireTest for false.
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (return true;) with a concrete implementation decision or remove it.
         return true;
     }
 
     @Override
     @NotNull
     public <T> T methodWriter(@NotNull Class<T> tClass, Class<?>... additional) {
+        // REVIEW TASK CQTryWithResourcesMissing: wrap VanillaMethodWriterBuilder<T> builder in try-with-resources or document explicit close ownership.
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.YAML,
                 () -> newTextMethodWriterInvocationHandler(tClass));
@@ -554,6 +558,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     yt.next();
                     break;
                 }
+                // CSTypePrefixEmit REVIEW keep wireValueOut.typePrefix here because this emitted type prefix in YamlWire#copyOne still needs either a closed wire type map or an explicit reviewed type-prefix contract.
                 ValueOut valueOut2 = wireValueOut.typePrefix(yt.text());
                 yt.next();
                 copyOne(wire, true);
@@ -847,6 +852,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             valueIn.consumeAny(minIndent >= 0 ? minIndent : Integer.MAX_VALUE);
         }
 
+        // CSUnknownModeFallback REVIEW keep return defaultValueIn; here because this fallback in YamlWire#read still needs an explicit reviewed degraded-outcome contract.
         return defaultValueIn;
     }
 
@@ -1145,6 +1151,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * Implementation of the ValueIn interface for reading text-based values from YamlWire.
      */
     class TextValueIn implements ValueIn {
+        // CSClassLookupExposure REVIEW keep @Override here because this class-lookup surface in TextValueIn#classLookup still needs either a closed alias registry or an explicit reviewed class-resolution contract.
         @Override
         public ClassLookup classLookup() {
             return YamlWire.this.classLookup();
@@ -1334,6 +1341,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Nullable
         @Override
         public WireIn bytesSet(@NotNull PointerBytesStore toBytes) {
+            // CSPointerIntake REVIEW keep return bytes here because this raw-memory or native boundary in TextValueIn#bytesSet still needs an explicit reviewed native-memory contract.
             return bytes(bytes -> {
                 long capacity = bytes.readRemaining();
                 Bytes<Void> bytes2 = Bytes.allocateDirect(capacity);
@@ -1347,6 +1355,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public WireIn bytes(@NotNull ReadBytesMarshallable bytesConsumer) {
             consumePadding();
             // TODO needs to be made much more efficient.
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (@NotNull StringBuilder targetBuffer = acquireStringBuilder();) with a concrete implementation decision or remove it.
             @NotNull StringBuilder targetBuffer = acquireStringBuilder();
             if (yt.current() == YamlToken.TAG) {
                 bytes.readSkip(1);
@@ -1354,9 +1363,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 yt.next();
                 if (yt.current() != YamlToken.TEXT)
                     throw new UnsupportedOperationException(yt.toString());
+                // CSCompressionUncompress REVIEW keep Compression.uncompress here because this input or payload boundary in TextValueIn#bytes still needs an explicit reviewed input-trust contract.
                 @Nullable byte[] uncompressed = Compression.uncompress(targetBuffer, yt, t -> {
                     @NotNull StringBuilder sb2 = acquireStringBuilder();
                     t.text(sb2);
+                    // CSBase64DecodeInput REVIEW keep sb2.toString() here because this input or payload boundary in TextValueIn#bytes still needs an explicit reviewed input-trust contract.
                     return Base64.getDecoder().decode(sb2.toString());
                 });
                 if (uncompressed != null) {
@@ -1850,6 +1861,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public Class<?> typePrefix() {
             if (yt.current() != YamlToken.TAG)
+                // REVIEW TASK CQNullabilityReturns: annotate the return value of typePrefix(...) with @Nullable or @NotNull.
                 return null;
             final StringBuilder stringBuilder = acquireStringBuilder();
             yt.text(stringBuilder);
@@ -1861,8 +1873,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             try {
                 yt.next();
                 return classLookup().forName(stringBuilder);
+                // CSWarnAndContinue REVIEW catch (ClassNotFoundRuntimeException e) because the local fallback still begins with calling Jvm.warn().on(getClass(), "Unable to find " + stringBuilder + " " + e) and then continues execution, and needs either fail-closed handling or an explicit reviewed degraded-mode contract.
             } catch (ClassNotFoundRuntimeException e) {
                 Jvm.warn().on(getClass(), "Unable to find " + stringBuilder + " " + e);
+                // CSWarnReturnNull REVIEW keep return null; here because this fallback in TextValueIn#typePrefix still needs an explicit reviewed degraded-outcome contract.
                 return null;
             }
         }
@@ -1876,6 +1890,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                     return type;
                 }
                 default:
+                    // REVIEW TASK CQNullabilityReturns: annotate the return value of typePrefixOrObject(...) with @Nullable or @NotNull.
                     return null;
 /*
 
@@ -1961,6 +1976,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 case TAG:
                     Class<?> clazz = typePrefix();
                     if (clazz != object.getClass())
+                        // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance(clazz) here because this unchecked type materialisation in TextValueIn#marshallable still needs either a closed type map or an explicit reviewed instantiation contract.
                         object = ObjectUtils.newInstance(clazz);
                     return marshallable(object, strategy);
 
@@ -2468,6 +2484,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          */
         private Object decodeBinary(Class<?> type) throws InvalidMarshallableException {
             Object o = objectWithInferredType(null, SerializationStrategies.ANY_SCALAR, String.class);
+            // CSBase64DecodeInput REVIEW keep o.toString() here because this input or payload boundary in TextValueIn#decodeBinary.
             byte[] decoded = Base64.getDecoder().decode(o == null ? "" : o.toString().replaceAll("\\s", ""));
 
             // Check if the desired type matches a BytesStore or is left unspecified
@@ -2480,7 +2497,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
             // Attempt to convert the byte array into other supported types, such as BitSet
             try {
+                // CSReflectiveMethodLookup REVIEW Method valueOf = type.getDeclaredMethod("valueOf", byte[].class) because this reflective or runtime-loading boundary in TextValueIn#decodeBinary still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
                 Method valueOf = type.getDeclaredMethod("valueOf", byte[].class);
+                // CSSetAccessibleEscalation REVIEW Jvm.setAccessible(valueOf) because this access override in TextValueIn#decodeBinary still needs either encapsulation-preserving access or an explicit reviewed runtime-access contract.
                 Jvm.setAccessible(valueOf);
                 return valueOf.invoke(null, decoded);
             } catch (NoSuchMethodException e) {

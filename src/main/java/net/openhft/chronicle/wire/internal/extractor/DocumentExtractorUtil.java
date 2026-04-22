@@ -47,6 +47,7 @@ public final class DocumentExtractorUtil {
         final MethodNameAndMessageType<E> info = methodOf(type, methodReference);
         final String expectedEventName = info.name();
         final Class<E> elementType = info.messageType();
+        // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
         final StringBuilder eventName = new StringBuilder();
         return (wire, index) -> {
             wire.startEvent();
@@ -96,6 +97,7 @@ public final class DocumentExtractorUtil {
 
         final AtomicReference<MethodNameAndMessageType<M>> method = new AtomicReference<>();
         Class<?>[] interfaces = {type};
+        // CSProxyAdmission REVIEW @SuppressWarnings("unchecked") final I proxy = (I) Proxy.newProxyInstance(type.getClassLoader(), interfaces, (p, m, args) -> { if (args == null || args.lengt... because this reflective or runtime-loading boundary in DocumentExtractorUtil#methodOf still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
         @SuppressWarnings("unchecked") final I proxy = (I) Proxy.newProxyInstance(type.getClassLoader(), interfaces, (p, m, args) -> {
             if (args == null || args.length != 1) {
                 throw new IllegalArgumentException("The provided method reference does not take exactly one parameter");

@@ -207,6 +207,7 @@ public enum SerializationStrategies implements SerializationStrategy {
     DYNAMIC_ENUM {
 
         // Reflective field access to the ordinal of the Enum class
+        // CSReflectiveFieldLookup REVIEW private Field ordinal = Jvm.getField(Enum.class, "ordinal") because this reflective or runtime-loading boundary still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
         private Field ordinal = Jvm.getField(Enum.class, "ordinal");
 
         /**
@@ -296,10 +297,13 @@ public enum SerializationStrategies implements SerializationStrategy {
         @Override
         public Object readUsing(Class clazz, Object o, @NotNull ValueIn in, BracketType bracketType) throws InvalidMarshallableException {
             if (in.isNull()) {
+                // REVIEW TASK CQNullabilityReturns: annotate the return value of readUsing(...) with @Nullable or @NotNull.
                 return null;
             }
             if (o == null)
+                // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance(clazz) here because this unchecked type materialisation in SerializationStrategies#readUsing still needs either a closed type map or an explicit reviewed instantiation contract.
                 o = ObjectUtils.newInstance(clazz);
+            // CSWireReadObject REVIEW keep clazz, o, in.wireIn(), true here because this runtime type boundary in SerializationStrategies#readUsing still needs an explicit reviewed type-admission contract.
             Wires.readMarshallable(clazz, o, in.wireIn(), true);
             return o;
         }

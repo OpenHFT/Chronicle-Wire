@@ -242,6 +242,7 @@ public class VanillaMethodReader implements MethodReader {
                 } else {
                     String text = valueIn.text();
                     if (text != null && !text.isEmpty()) {
+                        // CSResolvedTypeInstantiation REVIEW keep lc.value() here because this unchecked type materialisation in VanillaMethodReader#invokeMethodWithOneLong still needs either a closed type map or an explicit reviewed instantiation contract.
                         LongConverter longConverter = (LongConverter) ObjectUtils.newInstance(lc.value());
                         arg = longConverter.parse(text);
                     }
@@ -272,6 +273,7 @@ public class VanillaMethodReader implements MethodReader {
             }
         } catch (InvocationTargetException e) {
             throw new InvocationTargetRuntimeException(e);
+            // CSCatchThrowable REVIEW catch (Throwable e) because the local fallback still begins with setting msg for the fallback path and needs either a narrower terminal boundary or an explicit reviewed last-resort contract.
         } catch (Throwable e) {
             String msg = "Failure to dispatch message: " + method.getName() + " " + Arrays.asList(argHolder);
             Jvm.warn().on(target.getClass(), msg, e);
@@ -301,6 +303,7 @@ public class VanillaMethodReader implements MethodReader {
         try {
             return method.invoke(target, args);
         } catch (IllegalAccessException iae) {
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(iae) because this rethrow in VanillaMethodReader#actualInvoke converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
             throw Jvm.rethrow(iae);
         }
     }
@@ -332,6 +335,7 @@ public class VanillaMethodReader implements MethodReader {
                 try {
                     valueIn.wireIn().copyTo(WireType.TEXT.apply(bytes));
                     rest = bytes.toString();
+                    // CSCatchBroadException REVIEW catch (Exception t) because the local fallback still begins with setting rest for the fallback path and needs either narrower handling or an explicit reviewed recovery contract.
                 } catch (Exception t) {
                     rest = bytes0.toHexString(pos, bytes0.readLimit() - pos);
                 } finally {
@@ -346,6 +350,7 @@ public class VanillaMethodReader implements MethodReader {
             if (rest.endsWith("\n"))
                 rest = rest.substring(0, rest.length() - 1);
             return "read " + eventName + " - " + rest;
+            // CSCatchBroadException REVIEW catch (Exception e) because the local fallback still begins with returning "read " + eventName + " - " + e and needs either narrower handling or an explicit reviewed recovery contract.
         } catch (Exception e) {
             return "read " + eventName + " - " + e;
         }
@@ -532,6 +537,7 @@ public class VanillaMethodReader implements MethodReader {
         throwExceptionIfClosed();
 
         // Make the method accessible to bypass security checks for faster invocations
+        // CSSetAccessibleEscalation REVIEW Jvm.setAccessible(method) because this access override in VanillaMethodReader#addParseletForMethod still needs either encapsulation-preserving access or an explicit reviewed runtime-access contract.
         Jvm.setAccessible(method);
         String name = method.getName();
         Class<?> parameterType2 = ObjectUtils.implementationToUse(parameterType);
@@ -541,6 +547,7 @@ public class VanillaMethodReader implements MethodReader {
                 @NotNull Object[] argArr = {null};
                 MethodWireKey key = createWireKey(method, name);
                 wireParser.registerOnce(key, (s, v) -> invokeMethodWithOneLong(target, contextHolder, method, name, mh, argArr, s, v, methodReaderInterceptorReturns));
+                // CSWarnAndContinue REVIEW catch (IllegalAccessException e) because the local fallback still begins with calling Jvm.warn().on(target.getClass(), "Unable to unreflect " + method, e) and then continues execution, and needs either fail-closed handling or an explicit reviewed degraded-mode contract.
             } catch (IllegalAccessException e) {
                 Jvm.warn().on(target.getClass(), "Unable to unreflect " + method, e);
             }
@@ -559,6 +566,7 @@ public class VanillaMethodReader implements MethodReader {
             });
 
         } else {
+            // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance(parameterType2) here because this unchecked type materialisation in VanillaMethodReader#addParseletForMethod.
             ReadMarshallable arg = (ReadMarshallable) ObjectUtils.newInstance(parameterType2);
             @NotNull ReadMarshallable[] argArr = {arg};
             MethodWireKey key = createWireKey(method, name);
@@ -582,6 +590,7 @@ public class VanillaMethodReader implements MethodReader {
     public void addParseletForMethod(WireParser wireParser, Object target, Object[] contextHolder, Supplier contextSupplier, @NotNull Method method) {
         throwExceptionIfClosed();
 
+        // CSSetAccessibleEscalation REVIEW Jvm.setAccessible(method); // turn of security check to make a little faster because this access override in VanillaMethodReader#addParseletForMethod.
         Jvm.setAccessible(method); // turn of security check to make a little faster
         String name = method.getName();
         MethodWireKey key = createWireKey(method, name);
@@ -785,6 +794,8 @@ public class VanillaMethodReader implements MethodReader {
                 Jvm.warn().on(target.getClass(), msg + " " + cause);
             else
                 Jvm.warn().on(target.getClass(), msg, cause);
+            // REVIEW TASK CSWarnReturnNull: decompose this line so each concern can be reviewed truthfully, then address it directly.
+            // REVIEW TASK CQNullabilityReturns: annotate the return value of invoke(...) with @Nullable or @NotNull.
             return null;
         }
     }

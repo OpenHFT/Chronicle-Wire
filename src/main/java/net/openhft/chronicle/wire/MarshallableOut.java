@@ -95,6 +95,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
             wire.write(key).object(value);
         } catch (Throwable t) {
             dc.rollbackOnClose();
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(t) because this rethrow in MarshallableOut#writeMessage converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
             throw Jvm.rethrow(t);
         } finally {
             dc.close();
@@ -138,6 +139,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
                 writer.writeMarshallable(wire);
             } catch (Throwable t) {
                 dc.rollbackOnClose();
+                // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(t) because this rethrow in MarshallableOut#writeDocument converts a checked cause into an unchecked wrapper and.
                 throw Jvm.rethrow(t);
             }
         }
@@ -157,6 +159,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
             marshallable.writeMarshallable(dc.wire().bytes());
         } catch (Throwable t) {
             dc.rollbackOnClose();
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(t) because this rethrow in MarshallableOut#writeBytes converts a checked cause into an unchecked wrapper and.
             throw Jvm.rethrow(t);
         } finally {
             dc.close();
@@ -182,6 +185,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
             writer.accept(wire.getValueOut(), t);
         } catch (Throwable e) {
             dc.rollbackOnClose();
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in MarshallableOut#writeDocument converts a checked cause into an unchecked wrapper and.
             throw Jvm.rethrow(e);
         } finally {
             dc.close();
@@ -201,6 +205,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
             dc.wire().getValueOut().text(text);
         } catch (Throwable t) {
             dc.rollbackOnClose();
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(t) because this rethrow in MarshallableOut#writeText converts a checked cause into an unchecked wrapper and.
             throw Jvm.rethrow(t);
         } finally {
             dc.close();
@@ -225,6 +230,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
             }
         } catch (Throwable t) {
             dc.rollbackOnClose();
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(t) because this rethrow in MarshallableOut#writeMap converts a checked cause into an unchecked wrapper and.
             throw Jvm.rethrow(t);
         } finally {
             dc.close();
@@ -244,6 +250,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     @SuppressWarnings("rawtypes")
     @NotNull
     default <T> T methodWriter(@NotNull Class<T> tClass, Class<?>... additional) {
+        // REVIEW TASK CQTryWithResourcesMissing: wrap VanillaMethodWriterBuilder<T> builder in try-with-resources or document explicit close ownership.
         VanillaMethodWriterBuilder<T> builder =
                 (VanillaMethodWriterBuilder<T>) methodWriterBuilder(false, tClass);
         Stream.of(additional).forEach(builder::addInterface);

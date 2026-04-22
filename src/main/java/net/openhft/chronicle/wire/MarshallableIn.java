@@ -89,6 +89,7 @@ public interface MarshallableIn {
             Bytes<?> bytes = dc.wire().bytes();
             long len = Math.min(using.writeRemaining(), bytes.readRemaining());
             using.write(bytes, bytes.readPosition(), len);
+            // CSDynamicReadSkip REVIEW keep len here because this input or payload boundary in MarshallableIn#readBytes still needs an explicit reviewed input-trust contract.
             bytes.readSkip(len);
         }
         return true;

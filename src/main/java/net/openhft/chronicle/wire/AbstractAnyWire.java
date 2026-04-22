@@ -232,6 +232,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
         @Nullable
         Wire acquireWire();
 
+        // CSClassLookupExposure REVIEW keep void classLookup(ClassLookup classLookup) here because this class-lookup surface in WireAcquisition#classLookup still needs either a closed alias registry or an explicit reviewed class-resolution contract.
         /**
          * Sets the class lookup mechanism for this wire acquisition.
          *
@@ -239,6 +240,7 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
          */
         void classLookup(ClassLookup classLookup);
 
+        // CSClassLookupExposure REVIEW keep @Nullable here because this class-lookup surface in WireAcquisition#classLookup.
         /**
          * Retrieves the class lookup mechanism associated with this wire acquisition.
          *

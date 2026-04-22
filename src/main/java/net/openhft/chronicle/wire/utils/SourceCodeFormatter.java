@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire.utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import net.openhft.chronicle.core.annotation.NonNegative;
 
 /**
  * Represents a simple Java source code formatter.
@@ -114,7 +115,7 @@ public class SourceCodeFormatter implements Appendable, CharSequence {
      *
      * @param len The new length for the formatted string.
      */
-    public void setLength(int len) {
+    public void setLength(@NonNegative int len) {
         formattedCode.setLength(len);
     }
 

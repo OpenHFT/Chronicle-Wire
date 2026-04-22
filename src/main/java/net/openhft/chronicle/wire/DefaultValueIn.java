@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+// REVIEW TASK CQInternalPackageExposure: import from internal package net.openhft.chronicle.bytes.internal -- expose a public wrapper, move the caller, or declare an explicit internal-reuse contract.
 import net.openhft.chronicle.bytes.internal.NoBytesStore;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
@@ -91,8 +92,10 @@ public class DefaultValueIn implements ValueIn {
     public WireIn bytesSet(@NotNull PointerBytesStore toBytes) {
         @Nullable Object o = defaultValue;
         if (o == null) {
+            // CSPointerIntake REVIEW keep toBytes.set(NoBytesStore.NO_PAGE, 0); here because this raw-memory or native boundary in DefaultValueIn#bytesSet still needs an explicit reviewed native-memory contract.
             toBytes.set(NoBytesStore.NO_PAGE, 0);
             return wireIn();
+        // CSPointerIntake REVIEW keep toBytes.set(bytes.addressForRead(0), bytes.realCapacity()); here because this raw-memory or native boundary in DefaultValueIn#bytesSet.
         }
         @NotNull BytesStore<?, ?> bytes = (BytesStore) o;
         toBytes.set(bytes.addressForRead(0), bytes.realCapacity());
@@ -289,6 +292,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public <T> WireIn int64array(@Nullable LongArrayValues values, T t, @NotNull BiConsumer<T, LongArrayValues> setter) {
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
         throw new UnsupportedOperationException("todo");
     }
 
@@ -315,6 +319,7 @@ public class DefaultValueIn implements ValueIn {
      */
     @Override
     public WireIn bool(@NotNull final BooleanValue ret) {
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
         throw new UnsupportedOperationException("todo");
     }
 
@@ -396,6 +401,7 @@ public class DefaultValueIn implements ValueIn {
         return wireIn();
     }
 
+    // CSClassLookupExposure REVIEW keep @Override here because this class-lookup surface in DefaultValueIn#classLookup still needs either a closed alias registry or an explicit reviewed class-resolution contract.
     @Override
     public ClassLookup classLookup() {
         return wireIn.classLookup();

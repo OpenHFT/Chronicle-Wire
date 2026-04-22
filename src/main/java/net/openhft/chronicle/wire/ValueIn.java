@@ -37,6 +37,7 @@ import static net.openhft.chronicle.wire.SerializationStrategies.MARSHALLABLE;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface ValueIn {
+    // REVIEW TASK CQDeprecationJavadoc: add a @deprecated Javadoc tag to ValueIn explaining the replacement and removal plan.
     /**
      * A {@link Consumer} that ignores the supplied {@code ValueIn}.  Useful as a
      * no-op placeholder.
@@ -886,6 +887,7 @@ public interface ValueIn {
     @NotNull <T> WireIn typeLiteralAsText(T t, @NotNull BiConsumer<T, CharSequence> classNameConsumer)
             throws IORuntimeException, BufferUnderflowException;
 
+    // CSClassLookupExposure REVIEW keep ClassLookup classLookup() here because this class-lookup surface in ValueIn#classLookup still needs either a closed alias registry or an explicit reviewed class-resolution contract.
     /**
      * Retrieves a {@link ClassLookup} instance associated with the current {@link WireIn}.
      * The ClassLookup allows for the resolution of class names to actual {@link Class} objects.
@@ -1182,6 +1184,7 @@ public interface ValueIn {
         ValidatableUtil.startValidateDisabled();
         try {
             return object();
+            // CSCatchThrowable REVIEW catch (Throwable t) because the local fallback still begins with returning t and needs either a narrower terminal boundary or an explicit reviewed last-resort contract.
         } catch (Throwable t) {
             return t;
         } finally {

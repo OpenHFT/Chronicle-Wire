@@ -72,6 +72,7 @@ class WireObjectInput implements ObjectInput {
         @NotNull final Bytes<?> bytes = wire.bytes();
         final long maxRewind = bytes.start() - bytes.readPosition();
         long len = Math.max(maxRewind, Math.min(bytes.readRemaining(), n));
+        // CSDynamicReadSkip REVIEW keep len here because this input or payload boundary in WireObjectInput#skip still needs an explicit reviewed input-trust contract.
         bytes.readSkip(len);
         return len;
     }
@@ -98,6 +99,7 @@ class WireObjectInput implements ObjectInput {
     /** Unsupported. */
     @Override
     public void readFully(byte[] b, int off, int len) throws IOException {
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("TODO");) with a concrete implementation decision or remove it.
         throw new UnsupportedOperationException("TODO");
     }
 

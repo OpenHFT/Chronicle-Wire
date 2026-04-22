@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
+import net.openhft.chronicle.core.annotation.NonNegative;
 
 import static net.openhft.chronicle.core.time.SystemTimeProvider.CLOCK;
 
@@ -336,20 +337,26 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     private void readMarshallableDirect(@NotNull BytesIn<?> bytes) {
         long addr = bytes.addressForRead(bytes.readPosition());
         long start = addr;
+        // REVIEW TASK CSRawAddressAccess: move memory.readByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
         Memory memory = OS.memory();
         sources = memory.readByte(addr++);
+        // REVIEW TASK CSRawAddressAccess: move memory.readInt behind a reviewed aegis helper or another explicit unsafe-boundary contract.
         for (int i = 0; i < sources; i++) {
             sourceIdArray[i] = memory.readInt(addr);
             addr += 4;
         }
+        // REVIEW TASK CSRawAddressAccess: move memory.readLong behind a reviewed aegis helper or another explicit unsafe-boundary contract.
         for (int i = 0; i < sources; i++) {
             sourceIndexArray[i] = memory.readLong(addr);
             addr += 8;
+        // REVIEW TASK CSRawAddressAccess: move memory.readByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
         }
         timings = memory.readByte(addr++);
+        // REVIEW TASK CSRawAddressAccess: move memory.readLong behind a reviewed aegis helper or another explicit unsafe-boundary contract.
         for (int i = 0; i < timings; i++) {
             timingsArray[i] = memory.readLong(addr);
             addr += 8;
+        // CSDynamicReadSkip REVIEW keep addr - start here because this input or payload boundary in VanillaMessageHistory#readMarshallableDirect still needs an explicit reviewed input-trust contract.
         }
         bytes.readSkip(addr - start);
     }
@@ -385,22 +392,29 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
     private void writeMarshallableDirect(BytesOut<?> b) {
         long addr = b.addressForWritePosition();
         long start = addr;
+        // REVIEW TASK CSRawAddressAccess: move memory.writeByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
         Memory memory = OS.memory();
         memory.writeByte(addr++, (byte) sources);
+        // REVIEW TASK CSRawAddressAccess: move memory.writeInt behind a reviewed aegis helper or another explicit unsafe-boundary contract.
         for (int i = 0; i < sources; i++) {
             memory.writeInt(addr, sourceIdArray[i]);
             addr += 4;
         }
+        // REVIEW TASK CSRawAddressAccess: move memory.writeLong behind a reviewed aegis helper or another explicit unsafe-boundary contract.
         for (int i = 0; i < sources; i++) {
             memory.writeLong(addr, sourceIndexArray[i]);
             addr += 8;
+        // REVIEW TASK CSRawAddressAccess: move memory.writeByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
         }
         memory.writeByte(addr++, (byte) (timings + 1));
+        // REVIEW TASK CSRawAddressAccess: move memory.writeLong behind a reviewed aegis helper or another explicit unsafe-boundary contract.
         for (int i = 0; i < timings; i++) {
             memory.writeLong(addr, timingsArray[i]);
             addr += 8;
+        // REVIEW TASK CSRawAddressAccess: move memory.writeLong behind a reviewed aegis helper or another explicit unsafe-boundary contract.
         }
         memory.writeLong(addr, nanoTime()); // add time for this output
+        // CSDynamicReadSkip REVIEW keep addr - start here because this input or payload boundary in VanillaMessageHistory#writeMarshallableDirect.
         addr += 8;
         b.writeSkip(addr - start);
     }
@@ -484,7 +498,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
      * @param id    source identifier
      * @param index source index
      */
-    public void addSource(int id, long index) {
+    public void addSource(int id, @NonNegative long index) {
         sourceIdArray[sources] = id;
         sourceIndexArray[sources++] = index;
         dirty = true;  // Mark as modified
@@ -541,6 +555,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     /** Internal helper for {@link #toString()}. */
     private CharSequence toStringSources() {
+        // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < sources; i++) {
             // Append comma for all items after the first
@@ -553,6 +568,7 @@ public class VanillaMessageHistory extends SelfDescribingMarshallable implements
 
     /** Internal helper for {@link #toString()}. */
     private CharSequence toStringTimings() {
+        // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < timings; i++) {
             if (i > 0)

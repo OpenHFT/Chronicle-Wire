@@ -27,6 +27,7 @@ abstract class AbstractCommonMarshallable implements Marshallable, BytesMarshall
         ValidatableUtil.startValidateDisabled();
         try {
             return Marshallable.$toString(this);
+            // CSCatchThrowable REVIEW catch (Throwable e) because the local fallback still begins with returning getClass() + "  " + e and needs either a narrower terminal boundary or an explicit reviewed last-resort contract.
         } catch (Throwable e) {
             return getClass() + "  " + e;
         } finally {

@@ -103,7 +103,9 @@ public final class InternalAutoTailers {
 
         private static Runnable closer(MarshallableIn tailer) {
             if (tailer instanceof AutoCloseable) {
+                // REVIEW TASK CQTryWithResourcesMissing: wrap AutoCloseable ac in try-with-resources or document explicit close ownership.
                 final AutoCloseable ac = (AutoCloseable) tailer;
+                // CSCheckedSwallowThroughRethrow REVIEW return () because this rethrow in AbstractPoller#closer converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
                 return () -> {
                     try {
                         ac.close();

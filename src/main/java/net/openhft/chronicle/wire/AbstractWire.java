@@ -51,6 +51,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     @NotNull
     protected final Bytes<?> bytes;
     protected final boolean use8bit;
+    // CSAliasPoolDefault REVIEW keep protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES here because this runtime type boundary still needs an explicit reviewed type-admission contract.
     protected ClassLookup classLookup = ClassAliasPool.CLASS_ALIASES;
     protected Object parent;
     protected Consumer<CharSequence> commentListener = IgnoringConsumer.IGNORING_CONSUMER;
@@ -188,11 +189,13 @@ public abstract class AbstractWire implements Wire, InternalWire {
         return headerNumber;
     }
 
+    // CSClassLookupExposure REVIEW keep classLookup(ClassLookup classLookup) here because this class-lookup surface in AbstractWire#classLookup still needs either a closed alias registry or an explicit reviewed class-resolution contract.
     @Override
     public void classLookup(ClassLookup classLookup) {
         this.classLookup = classLookup;
     }
 
+    // CSClassLookupExposure REVIEW keep @Override here because this class-lookup surface in AbstractWire#classLookup.
     @Override
     public ClassLookup classLookup() {
         return classLookup;
@@ -278,6 +281,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
                 return;
             }
         }
+        // CSRawHeaderOrPathMessage REVIEW emit throw new IllegalStateException("Meta data not ready " + Integer.toHexString(header)); here because this operator-facing diagnostic in AbstractWire#readMetaDataHeader still needs an explicit reviewed operator-diagnostic contract.
         throw new IllegalStateException("Meta data not ready " + Integer.toHexString(header));
     }
 
@@ -295,6 +299,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
                 throw new StreamCorruptedException("Not ready header is found");
             int len = lengthOf(header);
             if (!isReadyMetaData(header) || len > 64 << 10)
+                // CSRawHeaderOrPathMessage REVIEW emit throw new StreamCorruptedException("Unexpected magic number " + Integer.toHexString(header)); here because this operator-facing diagnostic in AbstractWire#readFirstHeader.
                 throw new StreamCorruptedException("Unexpected magic number " + Integer.toHexString(header));
             bytes.readPositionRemaining(SPB_HEADER_SIZE, len);
         } else {
@@ -353,6 +358,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
 
             if (isNotComplete(header)) {
                 if (header != END_OF_DATA)
+                    // CSRawHeaderOrPathMessage REVIEW emit Jvm.warn().on(getClass(), new Exception("Incomplete header found at pos: " + pos + ": " + Integer.toHexString(header) + ", overwriting")); here because this operator-facing diagnostic in AbstractWire#enterHeader.
                     Jvm.warn().on(getClass(), new Exception("Incomplete header found at pos: " + pos + ": " + Integer.toHexString(header) + ", overwriting"));
                 else
                     throw new WriteAfterEOFException();
@@ -435,6 +441,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
      */
     private void unexpectedValue(long position, int expectedHeader) throws StreamCorruptedException {
         int currentHeader = bytes.readVolatileInt(position);
+        // CSRawHeaderOrPathMessage REVIEW emit throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(currentHeader)); here because this operator-facing diagnostic in AbstractWire#unexpectedValue.
         throw new StreamCorruptedException("Data at " + position + " overwritten? Expected: " + Integer.toHexString(expectedHeader) + " was " + Integer.toHexString(currentHeader));
     }
 
@@ -482,6 +489,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     public boolean writeFirstHeader() {
         boolean cas = bytes.compareAndSwapInt(0L, 0, NOT_COMPLETE_UNKNOWN_LENGTH);
         if (cas)
+            // CSDynamicReadSkip REVIEW keep SPB_HEADER_SIZE here because this input or payload boundary in AbstractWire#writeFirstHeader still needs an explicit reviewed input-trust contract.
             bytes.writeSkip(SPB_HEADER_SIZE);
         return cas;
     }
@@ -501,6 +509,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
             throw new IllegalStateException("Header too large was " + actualLength);
         int header = (int) (META_DATA | actualLength);
         if (!bytes.compareAndSwapInt(0L, NOT_COMPLETE_UNKNOWN_LENGTH, header))
+            // CSRawHeaderOrPathMessage REVIEW emit throw new IllegalStateException("Data at 0 overwritten? Expected: " + Integer.toHexString(NOT_COMPLETE_UNKNOWN_LENGTH) + " was " + Integer.toHexString(bytes.readVolatileInt(0L))); here because this operator-facing diagnostic in AbstractWire#updateFirstHeader.
             throw new IllegalStateException("Data at 0 overwritten? Expected: " + Integer.toHexString(NOT_COMPLETE_UNKNOWN_LENGTH) + " was " + Integer.toHexString(bytes.readVolatileInt(0L)));
     }
 
@@ -557,6 +566,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
                     try {
                         acquireTimedParser().pause(timeout, timeUnit);
 
+                        // CSWarnAndContinue REVIEW catch (TimeoutException e) because the local fallback still begins with setting success for the fallback path and then continues execution, and needs either fail-closed handling or an explicit reviewed degraded-mode contract.
                     } catch (TimeoutException e) {
                         boolean success = bytes.compareAndSwapInt(pos, header, END_OF_DATA);
                         if (success) {
@@ -636,6 +646,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
         insideHeader = false;
     }
 
+    // REVIEW TASK CQDeprecationJavadoc: add a @deprecated Javadoc tag to usePadding explaining the replacement and removal plan.
     @Deprecated(/* to be removed as soon as is practical */)
     public void usePadding(boolean usePadding) {
         this.usePadding = usePadding;

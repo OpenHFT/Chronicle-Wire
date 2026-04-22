@@ -24,6 +24,7 @@ import java.nio.BufferUnderflowException;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import net.openhft.chronicle.core.annotation.NonNegative;
 
 import static net.openhft.chronicle.core.pool.ClassAliasPool.CLASS_ALIASES;
 import static net.openhft.chronicle.wire.Wires.toIntU30;
@@ -81,10 +82,13 @@ public enum WireInternal {
 //            ZoneOffset.class
     ));
 
+    // CSUnboundedInternCache REVIEW keep static final Map<Class, ObjectInterner> OBJECT_INTERNERS = new ConcurrentHashMap<>(); here because this lifecycle or ownership exception still needs an explicit reviewed lifecycle contract.
     // Map to store and retrieve object interners for specific classes.
     static final Map<Class, ObjectInterner> OBJECT_INTERNERS = new ConcurrentHashMap<>();
 
+    // CSReflectiveFieldLookup REVIEW private static final Field DETAILED_MESSAGE = Jvm.getField(Throwable.class, "detailMessage") because this reflective or runtime-loading boundary still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
     // Internal fields for obtaining detailed messages and stack traces from Throwable instances.
+    // CSReflectiveFieldLookup REVIEW private static final Field STACK_TRACE = Jvm.getField(Throwable.class, "stackTrace") because this reflective or runtime-loading boundary.
     private static final Field DETAILED_MESSAGE = Jvm.getField(Throwable.class, "detailMessage");
     private static final Field STACK_TRACE = Jvm.getField(Throwable.class, "stackTrace");
 
@@ -160,6 +164,7 @@ public enum WireInternal {
 //                System.out.println("Message truncated from " + position + " to " + position1);
         int length;
         if (bytes instanceof HexDumpBytes) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (length = metaDataBit | toIntU30((int) position1 - (int) position - 4, "Document length %,d ou...) with a concrete implementation decision or remove it.
             // Todo: this looks suspicious. Why cast to int individually rather than use long arithmetics?
             length = metaDataBit | toIntU30((int) position1 - (int) position - 4, "Document length %,d out of 30-bit int range.");
         } else {
@@ -186,7 +191,7 @@ public enum WireInternal {
      * @return A boolean value indicating success or failure of reading the data.
      * @throws InvalidMarshallableException If the data cannot be unmarshalled properly.
      */
-    public static boolean readData(long offset,
+    public static boolean readData(@NonNegative long offset,
                                    @NotNull WireIn wireIn,
                                    @Nullable ReadMarshallable metaDataConsumer,
                                    @Nullable ReadMarshallable dataConsumer) throws InvalidMarshallableException {
@@ -257,6 +262,7 @@ public enum WireInternal {
 
                 if (metaDataConsumer == null) {
                     // Skip the metadata
+                    // CSDynamicReadSkip REVIEW keep len here because this input or payload boundary in WireInternal#readData still needs an explicit reviewed input-trust contract.
                     bytes.readSkip(len);
                 } else {
                     // bytes.readWithLength(len, b -> metaDataConsumer.accept(wireIn));
@@ -336,6 +342,7 @@ public enum WireInternal {
      * @throws InvalidMarshallableException If the throwable cannot be instantiated properly.
      */
     public static Throwable throwable(@NotNull ValueIn valueIn, boolean appendCurrentStack) throws InvalidMarshallableException {
+        // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance here because this unchecked type materialisation in WireInternal#throwable still needs either a closed type map or an explicit reviewed instantiation contract.
         @Nullable Class<?> type = valueIn.typePrefix();
         Throwable throwable = ObjectUtils.newInstance((Class<Throwable>) type);
 
@@ -407,6 +414,7 @@ public enum WireInternal {
         try {
             STACK_TRACE.set(finalThrowable, stes.toArray(NO_STE));
         } catch (IllegalAccessException e) {
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in WireInternal#throwable converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
             throw Jvm.rethrow(e);
         }
         return throwable;

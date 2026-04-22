@@ -9,6 +9,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
+import net.openhft.chronicle.core.annotation.NonNegative;
 
 /**
  * A cache designed to provide a unique representation for equivalent string values,
@@ -40,7 +41,7 @@ public abstract class FromStringInterner<T> {
      * @throws IllegalArgumentException
      */
     @SuppressWarnings("rawtypes")
-    protected FromStringInterner(int capacity) throws IllegalArgumentException {
+    protected FromStringInterner(@NonNegative int capacity) throws IllegalArgumentException {
         int n = Maths.nextPower2(capacity, 128);
         shift = Maths.intLog2(n);
         entries = Jvm.uncheckedCast(new InternerEntry[n]);

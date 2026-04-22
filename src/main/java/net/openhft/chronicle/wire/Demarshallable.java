@@ -23,6 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 public interface Demarshallable {
 
     // Holds a cache for constructors of Demarshallable implementing classes, optimized for retrieval performance.
+    // CSSetAccessibleEscalation REVIEW ClassValue<Constructor<Demarshallable>> DEMARSHALLABLES = new ClassValue<Constructor<Demarshallable>>() because this access override still needs either encapsulation-preserving access or an explicit reviewed runtime-access contract.
     ClassValue<Constructor<Demarshallable>> DEMARSHALLABLES = new ClassValue<Constructor<Demarshallable>>() {
         @NotNull
         @Override
@@ -32,6 +33,7 @@ public interface Demarshallable {
                 @SuppressWarnings("unchecked")
                 @NotNull Constructor<Demarshallable> declaredConstructor =
                         (Constructor<Demarshallable>)
+                                // CSReflectiveConstructorLookup REVIEW type.getDeclaredConstructor(WireIn.class) because this reflective or runtime-loading boundary in Demarshallable#computeValue still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
                                 type.getDeclaredConstructor(WireIn.class);
                 // Ensure the constructor is accessible, even if it's a private constructor.
                 Jvm.setAccessible(declaredConstructor);
@@ -56,6 +58,7 @@ public interface Demarshallable {
     static <T extends Demarshallable> T newInstance(@NotNull Class<T> clazz, WireIn wireIn) {
         try {
             Constructor<Demarshallable> constructor = DEMARSHALLABLES.get(clazz);
+            // CSReflectiveConstructorInvoke REVIEW (T) constructor.newInstance(wireIn) because this reflective or runtime-loading boundary in Demarshallable#newInstance still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
             return (T) constructor.newInstance(wireIn);
 
         } catch (IllegalAccessException e) {

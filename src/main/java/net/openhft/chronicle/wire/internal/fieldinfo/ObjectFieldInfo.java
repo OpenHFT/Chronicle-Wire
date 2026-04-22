@@ -38,6 +38,7 @@ public final class ObjectFieldInfo extends UnsafeFieldInfo {
             return UnsafeMemory.unsafeGetObject(object, getOffset());
         } catch (@NotNull NoSuchFieldException e) {
             Jvm.debug().on(ObjectFieldInfo.class, e);
+            // CSWarnReturnNull REVIEW keep return null; here because this fallback in ObjectFieldInfo#get still needs an explicit reviewed degraded-outcome contract.
             return null;
         }
     }

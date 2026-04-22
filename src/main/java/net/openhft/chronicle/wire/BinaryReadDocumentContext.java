@@ -42,6 +42,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         this.wire = wire;
     }
 
+    // REVIEW TASK CQDeprecationJavadoc: add a @deprecated Javadoc tag to BinaryReadDocumentContext explaining the replacement and removal plan.
     /**
      * Constructor that initializes the BinaryReadDocumentContext using the provided wire and
      * a flag to determine if a full read should be ensured.
@@ -168,6 +169,7 @@ public class BinaryReadDocumentContext implements ReadDocumentContext {
         final int len = lengthOf(header);
 
         if (len > bytes.readRemaining()) {
+            // CSBacktrackSkip REVIEW keep -4 here because this input or payload boundary in BinaryReadDocumentContext#start still needs an explicit reviewed input-trust contract.
             bytes.readSkip(-4);
             return;
         }

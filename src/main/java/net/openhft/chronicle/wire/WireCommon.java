@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 public interface WireCommon {
 
+    // CSClassLookupExposure REVIEW keep void classLookup(ClassLookup classLookup) here because this class-lookup surface in WireCommon#classLookup still needs either a closed alias registry or an explicit reviewed class-resolution contract.
     /**
      * Sets the {@link ClassLookup} implementation to be used for class lookup.
      *
@@ -21,6 +22,7 @@ public interface WireCommon {
      */
     void classLookup(ClassLookup classLookup);
 
+    // CSClassLookupExposure REVIEW keep ClassLookup classLookup() here because this class-lookup surface in WireCommon#classLookup.
     /**
      * Returns the current {@link ClassLookup} implementation being used for class lookup.
      *

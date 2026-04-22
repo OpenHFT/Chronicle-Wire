@@ -283,6 +283,7 @@ public class QueryWire extends TextWire {
         @NotNull
         @Override
         public QueryWire bytes(@Nullable BytesStore<?, ?> fromBytes) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 

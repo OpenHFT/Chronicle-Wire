@@ -95,6 +95,7 @@ public class BinaryMethodWriterInvocationHandler extends AbstractMethodWriterInv
 
             } catch (Throwable t) {
                 dc.rollbackOnClose();
+                // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(t) because this rethrow in BinaryMethodWriterInvocationHandler#handleInvoke converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
                 throw Jvm.rethrow(t);
             }
         }

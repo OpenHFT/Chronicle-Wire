@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.util.CoreDynamicEnum;
 
 import java.util.List;
 
+// REVIEW TASK CQDeprecationJavadoc: add a @deprecated Javadoc tag to DynamicEnum explaining the replacement and removal plan.
 /**
  * Represents a dynamic enumeration which can either be a traditional {@code Enum} or a class
  * possessing a {@code String name} field. The interface extends both {@link CoreDynamicEnum} and

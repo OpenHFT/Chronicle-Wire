@@ -30,6 +30,7 @@ public class FileMarshallableOut implements MarshallableOut {
     private Wire wire; // The underlying Wire data structure managing the data
 
     // DocumentContextHolder for managing document context lifecycle and output operations
+    // CSDirectFileDeleteOrRename REVIEW keep new DocumentContextHolder() here because this filesystem boundary still needs an explicit reviewed path-handling contract.
     private final DocumentContextHolder dcHolder = new DocumentContextHolder() {
         @Override
         public void close() {

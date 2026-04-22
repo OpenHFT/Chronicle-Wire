@@ -392,6 +392,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             return WireType.TEXT;
 
         if (wire instanceof BinaryWire) {
+            // CSFieldLessMode REVIEW keep binaryWire.fieldLess here because this input or payload boundary in WireType#valueOf still needs an explicit reviewed input-trust contract.
             @NotNull BinaryWire binaryWire = (BinaryWire) wire;
             return binaryWire.fieldLess() ? FIELDLESS_BINARY : WireType.BINARY;
         }
@@ -544,6 +545,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             if (!Collection.class.isAssignableFrom(field.getType())) continue;
 
             try {
+                // CSSetAccessibleEscalation REVIEW field.setAccessible(true) because this access override in WireType#cleanNullCollections still needs either encapsulation-preserving access or an explicit reviewed runtime-access contract.
                 field.setAccessible(true);
                 Object fieldValue = field.get(object);
 
@@ -586,6 +588,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      */
     @Nullable
     public <T> T fromFile(@NotNull Class<T> expectedType, String filename) throws IOException, InvalidMarshallableException {
+        // CSPathFromInput REVIEW keep filename here because this filesystem boundary in WireType#fromFile still needs an explicit reviewed path-handling contract.
         File file = new File(filename);
         URL url = null;
         if (!file.exists()) {
@@ -688,9 +691,11 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             Wire wire = apply(bytes);
             wire.getValueOut().typedMarshallable(marshallable);
             writeFile(tempFilename, bytes.toByteArray());
+        // CSDirectFileDeleteOrRename REVIEW keep !file2.renameTo(new File(filename)) here because this filesystem boundary in WireType#toFile still needs an explicit reviewed path-handling contract.
         }
         @NotNull File file2 = new File(tempFilename);
         if (!file2.renameTo(new File(filename))) {
+            // CSDirectFileDeleteOrRename REVIEW keep file2.delete() here because this filesystem boundary in WireType#toFile.
             file2.delete();
             throw new IOException("Failed to rename " + tempFilename + " to " + filename);
         }

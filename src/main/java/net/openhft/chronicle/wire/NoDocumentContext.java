@@ -33,6 +33,7 @@ public enum NoDocumentContext implements DocumentContext {
 
     @Override
     public Wire wire() {
+        // REVIEW TASK CQNullabilityReturns: annotate the return value of wire(...) with @Nullable or @NotNull.
         return null;
     }
 

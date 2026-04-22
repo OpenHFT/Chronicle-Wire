@@ -84,6 +84,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
                 handleInvoke(method, args, wire);
             } catch (Throwable t) {
                 dc.rollbackOnClose();
+                // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(t) because this rethrow in TextMethodWriterInvocationHandler#handleInvoke converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
                 throw Jvm.rethrow(t);
             }
         }
@@ -142,6 +143,7 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
             lc = (LongConverter) value.getField("INSTANCE").get(null);
         } catch (NoSuchFieldException e) {
             // If there's no INSTANCE field, create a new instance of the converter.
+            // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance(value) here because this unchecked type materialisation in TextMethodWriterInvocationHandler#buildLongConverter still needs either a closed type map or an explicit reviewed instantiation contract.
             lc = (LongConverter) ObjectUtils.newInstance(value);
         } catch (IllegalAccessException e) {
             // Throw an exception if there's a problem accessing the field.

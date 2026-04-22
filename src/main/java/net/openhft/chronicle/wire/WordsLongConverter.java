@@ -37,6 +37,7 @@ public class WordsLongConverter implements LongConverter {
     static {
         try {
             // Load the words from the resource file, ignoring comment lines.
+            // CSIOToolsInputPath REVIEW keep IOTools.readFile(WordsLongConverter.class, "common-words.txt"), StandardCharsets.ISO_8859_1 here because this filesystem boundary still needs an explicit reviewed path-handling contract.
             String content = new String(IOTools.readFile(WordsLongConverter.class, "common-words.txt"), StandardCharsets.ISO_8859_1);
             String[] lines = content.split("\\R");
             List<String> list = new ArrayList<>();
@@ -54,6 +55,7 @@ public class WordsLongConverter implements LongConverter {
                 Integer ii = WORD_ID.put(word, i);
                 assert ii == null : "Duplicate " + word;
             }
+            // REVIEW TASK CQIORuntimeExceptionWrapping: narrow catch to a specific declared exception or document the runtime-wrap contract.
         } catch (IOException e) {
             throw new AssertionError(e);
         }

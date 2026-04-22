@@ -245,6 +245,7 @@ public class RawWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public BooleanValue newBooleanReference() {
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
         throw new UnsupportedOperationException("todo");
     }
 
@@ -459,6 +460,7 @@ public class RawWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut rawBytes(byte[] value) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 
@@ -529,6 +531,7 @@ public class RawWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut int128forBinding(long i64x0, long i64x1, TwoLongValue longValue) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 
@@ -608,6 +611,7 @@ public class RawWire extends AbstractWire implements Wire {
             return this;
         }
 
+        // CSClassLookupExposure REVIEW keep @Override here because this class-lookup surface in RawValueOut#classLookup still needs either a closed alias registry or an explicit reviewed class-resolution contract.
         @Override
         public ClassLookup classLookup() {
             return RawWire.this.classLookup();
@@ -740,6 +744,7 @@ public class RawWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public WireOut map(Map map) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 
@@ -818,6 +823,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @Override
         public Class<?> typePrefix() {
+            // REVIEW TASK CQNullabilityReturns: annotate the return value of typePrefix(...) with @Nullable or @NotNull.
             return null;
         }
 
@@ -861,6 +867,7 @@ public class RawWire extends AbstractWire implements Wire {
             @NotNull Bytes<?> bytes = wireIn().bytes();
 
             toBytes.write(bytes, bytes.readPosition(), length);
+            // CSDynamicReadSkip REVIEW keep length here because this input or payload boundary in RawValueIn#bytes still needs an explicit reviewed input-trust contract.
             bytes.readSkip(length);
             return wireIn();
         }
@@ -868,6 +875,7 @@ public class RawWire extends AbstractWire implements Wire {
         @Nullable
         @Override
         public WireIn bytesSet(@NotNull PointerBytesStore toBytes) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 
@@ -882,6 +890,7 @@ public class RawWire extends AbstractWire implements Wire {
             } else {
                 consumer.accept(false);
             }
+            // CSDynamicReadSkip REVIEW keep length here because this input or payload boundary in RawValueIn#bytesMatch.
             bytes.readSkip(length);
             return wireIn();
 
@@ -909,6 +918,7 @@ public class RawWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public byte @NotNull [] bytes(byte[] using) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 
@@ -1066,6 +1076,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @Override
         public WireIn bool(@NotNull final BooleanValue ret) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 
@@ -1085,17 +1096,20 @@ public class RawWire extends AbstractWire implements Wire {
 
         @Override
         public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 
         @Override
         public <T> boolean sequence(List<T> list, @NotNull List<T> buffer, Supplier<T> bufferAdd, Reader reader0) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 
         @NotNull
         @Override
         public <T, K> WireIn sequence(@NotNull T t, K kls, @NotNull TriConsumer<T, K, ValueIn> tReader) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 
@@ -1121,6 +1135,7 @@ public class RawWire extends AbstractWire implements Wire {
             return RawWire.this;
         }
 
+        // CSClassLookupExposure REVIEW keep @Override here because this class-lookup surface in RawValueIn#classLookup.
         @Override
         public ClassLookup classLookup() {
             return RawWire.this.classLookup();
@@ -1162,6 +1177,7 @@ public class RawWire extends AbstractWire implements Wire {
         @Nullable
         @Override
         public <T> T typedMarshallable() {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 
@@ -1172,6 +1188,7 @@ public class RawWire extends AbstractWire implements Wire {
 
         @Override
         public boolean hasNextSequenceItem() {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 

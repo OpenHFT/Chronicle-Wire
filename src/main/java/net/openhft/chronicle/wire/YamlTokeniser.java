@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import net.openhft.chronicle.core.annotation.NonNegative;
 
 /**
  * A tokenizer for YAML documents. The YamlTokeniser class is responsible for
@@ -671,6 +672,7 @@ public class YamlTokeniser {
         return token; // Otherwise, return the original token.
     }
 
+    // CSBacktrackSkip REVIEW keep -1 here because this input or payload boundary in YamlTokeniser#unreadLast still needs an explicit reviewed input-trust contract.
     /**
      * Moves back by one position in the input stream.
      */
@@ -1148,6 +1150,7 @@ public class YamlTokeniser {
      * @return true if the text of the current block is equal to 's', false otherwise.
      */
     public boolean isText(String s) {
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (return text().equals(s);) with a concrete implementation decision or remove it.
         // TODO: This method can potentially be optimized for efficiency.
         return text().equals(s);
     }
@@ -1170,7 +1173,7 @@ public class YamlTokeniser {
      *
      * @param offset The position from which the reading should start.
      */
-    public void rereadFrom(long offset) {
+    public void rereadFrom(@NonNegative long offset) {
         lineStart = offset;
         pushed.clear();
     }

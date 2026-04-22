@@ -114,6 +114,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         try {
             final Method method = clazz.getMethod(name, parameterTypes);
 
+            // CSSetAccessibleEscalation REVIEW Jvm.setAccessible(method) because this access override in AbstractGeneratedMethodReader#lookupMethod still needs either encapsulation-preserving access or an explicit reviewed runtime-access contract.
             Jvm.setAccessible(method);
 
             return method;
@@ -194,6 +195,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                 long start = bytes.readPosition();
 
                 // Read the wire based on whether it's data or metadata.
+                // REVIEW TASK CQTryWithResourcesMissing: wrap MethodReaderStatus mrs in try-with-resources or document explicit close ownership.
                 MethodReaderStatus mrs = context.isData()
                         ? readOneGenerated(wireIn)
                         : readOneMetaGenerated(wireIn);
@@ -309,6 +311,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
                     break;
                 }
 
+                // REVIEW TASK CQTryWithResourcesMissing: wrap MethodReaderStatus mrs in try-with-resources or document explicit close ownership.
                 MethodReaderStatus mrs = readOne0(context);
                 switch (mrs) {
                     case KNOWN:
@@ -348,6 +351,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      */
     @Override
     public MethodReaderInterceptorReturns methodReaderInterceptorReturns() {
+        // REVIEW TASK CQNullabilityReturns: annotate the return value of methodReaderInterceptorReturns(...) with @Nullable or @NotNull.
         return null;
     }
 
@@ -392,6 +396,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
      */
     protected <T> T checkRecycle(T o) {
         if (o == null || o.getClass().isArray()) // If the object is null or an array, return null to prevent recycling.
+            // REVIEW TASK CQNullabilityReturns: annotate the return value of checkRecycle(...) with @Nullable or @NotNull.
             return null;
 
         if (o instanceof Collection) { // If the object is a collection, clear its content.
@@ -424,6 +429,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         try {
             return method.invoke(o, objects);
         } catch (Exception e) {
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in AbstractGeneratedMethodReader#actualInvoke converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
             throw Jvm.rethrow(e);
         }
     }

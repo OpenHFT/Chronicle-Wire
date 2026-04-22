@@ -111,6 +111,7 @@ public abstract class AbstractMethodWriterInvocationHandler extends AbstractInvo
     @SuppressWarnings("unchecked")
     private void writeEvent0(Wire wire, @NotNull Method method, Object[] args, String methodName, int oneParam) throws InvalidMarshallableException {
         // Fetch or compute the parameter holder for the method
+        // REVIEW TASK CQTryWithResourcesMissing: wrap ParameterHolderSequenceWriter phsw in try-with-resources or document explicit close ownership.
         final ParameterHolderSequenceWriter phsw = parameterMap.computeIfAbsent(method, ParameterHolderSequenceWriter::new);
         boolean useMethodId = useMethodIds && phsw.methodId >= 0 && wire.getValueOut().isBinary();
         ValueOut valueOut = useMethodId

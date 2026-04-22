@@ -32,6 +32,7 @@ class WireObjectOutput implements ObjectOutput {
     public void writeObject(Object obj) {
         @NotNull final ValueOut valueOut = wire.getValueOut();
         if (obj instanceof Map)
+            // CSTypePrefixEmit REVIEW keep valueOut.typePrefix here because this emitted type prefix in WireObjectOutput#writeObject still needs either a closed wire type map or an explicit reviewed type-prefix contract.
             valueOut.typePrefix(Map.class);
         else if (obj instanceof List)
             valueOut.typePrefix(List.class);

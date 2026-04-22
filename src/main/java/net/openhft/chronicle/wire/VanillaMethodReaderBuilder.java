@@ -75,6 +75,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         this.in = in;
     }
 
+    // REVIEW TASK CQDeprecationJavadoc: add a @deprecated Javadoc tag to createDefaultParselet explaining the replacement and removal plan.
     /**
      * Creates a default {@link WireParselet} that handles unrecognized methods.
      * When an unrecognized method is encountered, it logs a warning or uses
@@ -126,6 +127,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
         // Determine whether the provided sequence is a method name or a method ID based on its first character.
         final String identifierType = s.length() != 0 && Character.isDigit(s.charAt(0)) ? "@MethodId" : "method-name";
+        // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
         StringBuilder msg = new StringBuilder()
                 .append("Unknown ").append(identifierType)
                 .append("='").append(s).append("'");
@@ -229,12 +231,14 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         if (ignoreDefaults || Jvm.getBoolean(DISABLE_READER_PROXY_CODEGEN))
             return null;
 
+        // REVIEW TASK CQTryWithResourcesMissing: wrap GenerateMethodReader generateMethodReader in try-with-resources or document explicit close ownership.
         GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, multipleNonMarshallableParamTypes, metaDataHandler, impls);
 
         String fullClassName = generateMethodReader.packageName() + "." + generateMethodReader.generatedClassName();
 
         try {
             try {
+                // CSClassForNameInput REVIEW final Class<?> generatedClass = Class.forName(fullClassName) because this reflective or runtime-loading boundary in VanillaMethodReaderBuilder#createGeneratedInstance still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
                 final Class<?> generatedClass = Class.forName(fullClassName);
 
                 return instanceForGeneratedClass(generatedClass, impls);
@@ -244,6 +248,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
                     return instanceForGeneratedClass(clazz, impls);
                 }
             }
+            // CSCatchThrowable REVIEW catch (Throwable e) because the local fallback still begins with calling classCache.put(fullClassName, COMPILE_FAILED) and needs either a narrower terminal boundary or an explicit reviewed last-resort contract.
         } catch (Throwable e) {
             classCache.put(fullClassName, COMPILE_FAILED);
             Jvm.warn().on(getClass(), "Failed to compile generated method reader - " +
@@ -272,10 +277,12 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
         WireParselet debugLoggingParselet = VanillaMethodReader::logMessage;
 
+        // CSReflectiveConstructorInvoke REVIEW MethodReader reader = (MethodReader) constructor.newInstance( in, defaultParselet, debugLoggingParselet, methodReaderInterceptorReturns, metaDataHandler, impls) because this reflective or runtime-loading boundary in VanillaMethodReaderBuilder#instanceForGeneratedClass still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
         MethodReader reader = (MethodReader) constructor.newInstance(
                 in, defaultParselet, debugLoggingParselet, methodReaderInterceptorReturns, metaDataHandler,
                 impls);
         if (reader instanceof AbstractGeneratedMethodReader) {
+            // REVIEW TASK CQTryWithResourcesMissing: wrap AbstractGeneratedMethodReader reader0 in try-with-resources or document explicit close ownership.
             AbstractGeneratedMethodReader reader0 = (AbstractGeneratedMethodReader) reader;
             reader0.scanning(scanning);
             reader0.predicate(predicate);
@@ -302,6 +309,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         if (this.defaultParselet == null)
             this.defaultParselet = createDefaultParselet(exceptionHandlerOnUnknownMethod, impls.length > 0 ? impls[0].getClass() : null);
 
+        // REVIEW TASK CQTryWithResourcesMissing: wrap MethodReader generatedInstance in try-with-resources or document explicit close ownership.
         @SuppressWarnings("resource")
         final MethodReader generatedInstance = createGeneratedInstance(impls);
 

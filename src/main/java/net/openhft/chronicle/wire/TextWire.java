@@ -321,6 +321,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     @Override
     @NotNull
     public <T> T methodWriter(@NotNull Class<T> tClass, Class<?>... additional) {
+        // REVIEW TASK CQTryWithResourcesMissing: wrap VanillaMethodWriterBuilder<T> builder in try-with-resources or document explicit close ownership.
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.TEXT,
                 () -> newTextMethodWriterInvocationHandler(tClass));
@@ -364,11 +365,13 @@ public class TextWire extends YamlWireOut<TextWire> {
         return super.methodReaderBuilder().wireType(WireType.TEXT);
     }
 
+    // CSClassLookupExposure REVIEW keep classLookup(ClassLookup classLookup) here because this class-lookup surface in TextWire#classLookup still needs either a closed alias registry or an explicit reviewed class-resolution contract.
     @Override
     public void classLookup(ClassLookup classLookup) {
         this.classLookup = classLookup;
     }
 
+    // CSClassLookupExposure REVIEW keep @Override here because this class-lookup surface in TextWire#classLookup.
     @Override
     public ClassLookup classLookup() {
         return classLookup;
@@ -502,6 +505,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             this.bytes.readSkip(length);
         } else {
             // TODO: implement copying
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("Not implemented yet. Can only copy TextWire format t...) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("Not implemented yet. Can only copy TextWire format to the same format  not " + wire.getClass());
         }
     }
@@ -538,6 +542,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             int ch = peekCode();
             // 10xx xxxx, 1111 xxxx
             if (ch > 0x80 && ((ch & 0xC0) == 0x80 || (ch & 0xF0) == 0xF0)) {
+                // CSRawHeaderOrPathMessage REVIEW emit throw new IllegalStateException("Attempting to read binary as TextWire ch=" + Integer.toHexString(ch)); here because this operator-facing diagnostic in TextWire#readField still needs an explicit reviewed operator-diagnostic contract.
                 throw new IllegalStateException("Attempting to read binary as TextWire ch=" + Integer.toHexString(ch));
             }
             if (ch < 0 || ch == '!' || ch == '[' || ch == '{') {
@@ -580,6 +585,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             }
             unescape(sb);
 
+            // CSWarnAndContinue REVIEW catch (BufferUnderflowException e) because the local fallback still begins with calling Jvm.debug().on(getClass(), e) and then continues execution, and needs either fail-closed handling or an explicit reviewed degraded-mode contract.
         } catch (BufferUnderflowException e) {
             Jvm.debug().on(getClass(), e);
         }
@@ -606,6 +612,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             int ch = peekCode();
             // 10xx xxxx, 1111 xxxx
             if (ch > 0x80 && ((ch & 0xC0) == 0x80 || (ch & 0xF0) == 0xF0)) {
+                // CSRawHeaderOrPathMessage REVIEW emit throw new IllegalStateException("Attempting to read binary as TextWire ch=" + Integer.toHexString(ch)); here because this operator-facing diagnostic in TextWire#readEvent.
                 throw new IllegalStateException("Attempting to read binary as TextWire ch=" + Integer.toHexString(ch));
 
             } else if (ch == '?') {
@@ -648,6 +655,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 parseUntil(sb, getEscapingEndOfText());
             }
             unescape(sb);
+            // CSWarnAndContinue REVIEW catch (BufferUnderflowException e) because the local fallback still begins with calling Jvm.debug().on(getClass(), e) and then continues execution, and needs either fail-closed handling or an explicit reviewed degraded-mode contract.
         } catch (BufferUnderflowException e) {
             Jvm.debug().on(getClass(), e);
         }
@@ -944,6 +952,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         return read2(defaultValue, curr, stringBuilder, keyName);
     }
 
+    // REVIEW TASK CQDeprecationJavadoc: add a @deprecated Javadoc tag to read2 explaining the replacement and removal plan.
     /**
      * Attempts to read the value of a given key, continuing the read operation from the primary `read` method.
      * If the current and old fields do not match the specified key, the default value is returned.
@@ -1226,6 +1235,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             if (lineStart == ls) {
                 objects.add(valueIn.objectWithInferredType(null, SerializationStrategies.ANY_OBJECT, elementType));
             } else {
+                // CSWireReadObject REVIEW keep indentation here because this runtime type boundary in TextWire#readList still needs an explicit reviewed type-admission contract.
                 @Nullable Object e = readObject(indentation);
                 if (e != NoObject.NO_OBJECT)
                     objects.add(e);
@@ -1414,6 +1424,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                     final long len = readLength();
                     try {
                         destination.append(Bytes.toString(bytes, bytes.readPosition(), len));
+                        // REVIEW TASK CQIORuntimeExceptionWrapping: narrow catch to a specific declared exception or document the runtime-wrap contract.
                     } catch (IOException e) {
                         throw new AssertionError(e);
                     }
@@ -1523,6 +1534,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 try {
                     // Append the read character to the provided appendable
                     destination.append(c);
+                    // REVIEW TASK CQIORuntimeExceptionWrapping: narrow catch to a specific declared exception or document the runtime-wrap contract.
                 } catch (IOException e) {
                     throw new AssertionError(e);
                 }
@@ -1555,6 +1567,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 if (prev != ' ') {
                     if (prev == '\n' || prev == '\r') {
                         // TODO doesn't look right.
+                        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (TextWire.this.lineStart = bytes.readPosition();) with a concrete implementation decision or remove it.
                         TextWire.this.lineStart = bytes.readPosition();
                     }
                     return prev;
@@ -1567,6 +1580,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         @NotNull
         @Override
         public WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, BooleanConsumer consumer) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 
@@ -1580,6 +1594,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         @Nullable
         @Override
         public WireIn bytesSet(@NotNull PointerBytesStore toBytes) {
+            // CSPointerIntake REVIEW keep return bytes here because this raw-memory or native boundary in TextValueIn#bytesSet still needs an explicit reviewed native-memory contract.
             return bytes(bytes -> {
                 long capacity = bytes.readRemaining();
                 Bytes<Void> bytes2 = Bytes.allocateDirect(capacity);
@@ -1594,14 +1609,17 @@ public class TextWire extends YamlWireOut<TextWire> {
             consumePadding();
             try {
                 // TODO needs to be made much more efficient.
+                // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (@NotNull StringBuilder sb = acquireStringBuilder();) with a concrete implementation decision or remove it.
                 @NotNull StringBuilder sb = acquireStringBuilder();
                 if (peekCode() == '!') {
                     bytes.readSkip(1);
                     parseWord(sb);
+                    // CSCompressionUncompress REVIEW keep Compression.uncompress here because this input or payload boundary in TextValueIn#bytes still needs an explicit reviewed input-trust contract.
                     @Nullable byte[] uncompressed = Compression.uncompress(sb, TextWire.this, t -> {
                         @NotNull StringBuilder sb2 = acquireStringBuilder();
                         AppendableUtil.setLength(sb2, 0);
                         t.parseUntil(sb2, StopCharTesters.COMMA_SPACE_STOP);
+                        // CSBase64DecodeInput REVIEW keep sb2.toString() here because this input or payload boundary in TextValueIn#bytes still needs an explicit reviewed input-trust contract.
                         return Base64.getDecoder().decode(sb2.toString());
                     });
                     if (uncompressed != null) {
@@ -1628,6 +1646,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             consumePadding();
             try {
                 // TODO needs to be made much more efficient.
+                // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (final StringBuilder stringBuilder = acquireStringBuilder();) with a concrete implementation decision or remove it.
                 final StringBuilder stringBuilder = acquireStringBuilder();
                 if (peekCode() == '!') {
                     bytes.readSkip(1);
@@ -1641,6 +1660,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                     byte @Nullable [] bytes = Compression.uncompress(stringBuilder, this, t -> {
                         @NotNull StringBuilder sb0 = acquireStringBuilder();
                         parseUntil(sb0, StopCharTesters.COMMA_SPACE_STOP);
+                        // CSBase64DecodeInput REVIEW keep WireInternal.INTERNER.intern(sb0) here because this input or payload boundary in TextValueIn#bytes.
                         return Base64.getDecoder().decode(WireInternal.INTERNER.intern(sb0));
                     });
                     if (bytes != null)
@@ -1661,6 +1681,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                         return using;
                     }
                     // todo fix this.
+                    // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (return stringBuilder.toString().getBytes(ISO_8859_1);) with a concrete implementation decision or remove it.
                     return stringBuilder.toString().getBytes(ISO_8859_1);
                 }
             } finally {
@@ -1701,6 +1722,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 this.consumeAny = false;
                 bytes.readPosition(start);
                 // @TODO - use ScopedResource<StringBuilder> for consistency throughout YamlWireOut - https://github.com/OpenHFT/Chronicle-Wire/issues/879
+                // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (sb.setLength(0);) with a concrete implementation decision or remove it.
                 sb.setLength(0);
             }
         }
@@ -2368,6 +2390,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                 bytes.readSkip(-1);
                 return classLookup().forName(stringBuilder);
             }
+            // REVIEW TASK CQNullabilityReturns: annotate the return value of typePrefix(...) with @Nullable or @NotNull.
             return null;
         }
 
@@ -2392,6 +2415,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             }
             if (Wires.dtoInterface(tClass) && generateTuples() && ObjectUtils.implementationToUse(tClass) == tClass)
                 return Wires.tupleFor(tClass, null);
+            // REVIEW TASK CQNullabilityReturns: annotate the return value of typePrefixOrObject(...) with @Nullable or @NotNull.
             return null;
         }
 
@@ -2459,6 +2483,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             return TextWire.this;
         }
 
+        // CSClassLookupExposure REVIEW keep @Override here because this class-lookup surface in TextValueIn#classLookup.
         @Override
         public ClassLookup classLookup() {
             return TextWire.this.classLookup();
@@ -3053,6 +3078,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         private Object readSequence(@NotNull Class<?> clazz) {
             if (clazz == Object[].class || clazz == Object.class) {
                 // TODO: Consider using reflection to handle all array types.
+                // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (@NotNull List<Object> list = new ArrayList<>();) with a concrete implementation decision or remove it.
                 @NotNull List<Object> list = new ArrayList<>();
                 sequence(list, (l, v) -> {
                     while (v.hasNextSequenceItem()) {

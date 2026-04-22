@@ -81,6 +81,7 @@ public enum GeneratedProxyClass {
 
                 // Handle methods with a generic return type
                 if (dm.getGenericReturnType() instanceof TypeVariable)
+                    // REVIEW TASK CQNullabilityReturns: annotate the return value of from(...) with @Nullable or @NotNull.
                     return null;
 
                 // Add the method only if it hasn't been added already
@@ -112,12 +113,15 @@ public enum GeneratedProxyClass {
 
         // If DUMP_CODE is true, print the generated Java code
         if (DUMP_CODE)
+            // CQJvmLogOverSystemErr REVIEW System.out.println because this direct system-console diagnostic in GeneratedProxyClass#from still needs either Jvm logging indirection or an explicit reviewed operator-diagnostic contract.
             System.out.println(sb);
 
         // Attempt to load the generated proxy class
         try {
+            // CSWiresLoadFromJava REVIEW Wires.loadFromJava(classLoader, packageName + '.' + className, sb.toString()) because this reflective or runtime-loading boundary in GeneratedProxyClass#from still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
             return Wires.loadFromJava(classLoader, packageName + '.' + className, sb.toString());
         } catch (Throwable e) {
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + sb, e)) because this rethrow in GeneratedProxyClass#from converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + sb, e));
         }
     }

@@ -39,6 +39,7 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
+import net.openhft.chronicle.core.annotation.NonNegative;
 
 import static java.util.Arrays.asList;
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
@@ -108,6 +109,7 @@ public enum Wires {
      */
     public static final int SPB_HEADER_SIZE = 4;
 
+    // CSMutableStaticState REVIEW keep CLASS_STRATEGY_FUNCTIONS here because this ambient configuration boundary still needs an explicit reviewed configuration-trust contract.
     /**
      * Registry of functions that determine the {@link SerializationStrategy} for a class.
      */
@@ -129,6 +131,7 @@ public enum Wires {
     // Cache of {@link FieldInfoPair} describing marshallable fields for each class
     static final ClassLocal<FieldInfoPair> FIELD_INFOS = ClassLocal.withInitial(FieldInfo::lookupClass);
 
+    // CSSetAccessibleEscalation REVIEW static final ClassLocal<Function<String, Marshallable>> MARSHALLABLE_FUNCTION = ClassLocal.withInitial because this access override still needs either encapsulation-preserving access or an explicit reviewed runtime-access contract.
     // Provides a function that can create proxy {@link Marshallable} implementations for tuple-like interfaces
     static final ClassLocal<Function<String, Marshallable>> MARSHALLABLE_FUNCTION = ClassLocal.withInitial(tClass -> {
         Class[] interfaces = {Marshallable.class, tClass};
@@ -198,6 +201,7 @@ public enum Wires {
         // Do nothing here
     }
 
+    // CSStdoutStderrOutput REVIEW System.err.println(...) because this direct console output in Wires#recordAsYaml still needs either structured Chronicle diagnostics or an explicit reviewed operator-diagnostic contract.
     /**
      * Creates and returns a proxy of the specified interface. The proxy writes inputs into
      * the specified PrintStream in Yaml format. This is useful when there's a need to serialize
@@ -231,6 +235,7 @@ public enum Wires {
      */
     public static void replay(String file, Object obj) throws IOException, InvalidMarshallableException {
         Bytes bytes = BytesUtil.readFile(file);
+        // REVIEW TASK CQTryWithResourcesMissing: wrap MethodReader readerObj in try-with-resources or document explicit close ownership.
         Wire wire = new YamlWire(bytes).useTextDocuments();
         MethodReader readerObj = wire.methodReader(obj);
         while (readerObj.readOne()) {
@@ -292,7 +297,7 @@ public enum Wires {
      * @param padding  whether message boundaries are padded
      * @return textual dump of the blobs
      */
-    public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, long position, boolean padding) {
+    public static String fromSizePrefixedBlobs(@NotNull Bytes<?> bytes, @NonNegative long position, boolean padding) {
         final long limit = bytes.readLimit();
         if (position > limit)
             return "";
@@ -348,6 +353,7 @@ public enum Wires {
                 // Copy data from the original wire to the temporary bytes
                 tempBytes.write(wire2.bytes(), 0, wire2.bytes().readLimit());
 
+                // CSFormatAutodetect REVIEW keep wire here because this input or payload boundary in Wires#fromSizePrefixedBlobs still needs an explicit reviewed input-trust contract.
                 // Derive the wire type and apply it to the temporary bytes
                 final WireType wireType = WireType.valueOf(wire);
 
@@ -599,7 +605,7 @@ public enum Wires {
      * @throws InvalidMarshallableException if there's an issue during marshalling
      */
     @ForceInline
-    public static long readWire(@NotNull WireIn wireIn, long size, @NotNull ReadMarshallable readMarshallable) throws InvalidMarshallableException {
+    public static long readWire(@NotNull WireIn wireIn, @NonNegative long size, @NotNull ReadMarshallable readMarshallable) throws InvalidMarshallableException {
         @NotNull final Bytes<?> bytes = wireIn.bytes();
         final long limit0 = bytes.readLimit();
         final long limit = bytes.readPosition() + size;
@@ -664,6 +670,7 @@ public enum Wires {
      * @throws InvalidMarshallableException if there's an issue during the marshalling process
      */
     public static void readMarshallable(@NotNull Object marshallable, @NotNull WireIn wire, boolean overwrite) throws InvalidMarshallableException {
+        // CSWireReadObject REVIEW keep clazz, marshallable, wire, overwrite here because this runtime type boundary in Wires#readMarshallable still needs an explicit reviewed type-admission contract.
         final Class<?> clazz = marshallable.getClass();
         readMarshallable(clazz, marshallable, wire, overwrite);
     }
@@ -750,6 +757,7 @@ public enum Wires {
             return marshallable;
 
         try (ScopedResource<Wire> wireSR = acquireBinaryWireScoped()) {
+            // CSResolvedTypeInstantiation REVIEW keep marshallable.getClass() here because this unchecked type materialisation in Wires#deepCopy still needs either a closed type map or an explicit reviewed instantiation contract.
             Wire wire = wireSR.get();
             @NotNull T t = (T) ObjectUtils.newInstance(marshallable.getClass());
             boolean useSelfDescribing = t.usesSelfDescribingMessage() || !(t instanceof BytesMarshallable);
@@ -787,6 +795,7 @@ public enum Wires {
         }
     }
 
+    // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance(tClass) here because this unchecked type materialisation in Wires#project.
     /**
      * Projects the source object's fields into a new instance of a specified class.
      *
@@ -1242,6 +1251,7 @@ public enum Wires {
      */
     static Marshallable newInstance(Constructor constructor, String typeName) {
         try {
+            // CSReflectiveConstructorInvoke REVIEW (Marshallable) constructor.newInstance(new TupleInvocationHandler(typeName)) because this reflective or runtime-loading boundary in Wires#newInstance still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
             // Attempt to create a new instance using the provided constructor and type name.
             return (Marshallable) constructor.newInstance(new TupleInvocationHandler(typeName));
         } catch (Exception e) {
@@ -1292,7 +1302,7 @@ public enum Wires {
      * byte store.  The returned wire shares the underlying bytes; no copy is made.
      */
     @NotNull
-    public static BinaryWire binaryWireForRead(Bytes<?> in, long position, long length) {
+    public static BinaryWire binaryWireForRead(Bytes<?> in, @NonNegative long position, @NonNegative long length) {
         BinaryWire wire = WIRE_TL.get();
         VanillaBytes bytes = (VanillaBytes) wire.bytes();
         wire.clear();
@@ -1305,7 +1315,7 @@ public enum Wires {
      * byte store.  The returned wire views the given bytes without copying.
      */
     @NotNull
-    public static BinaryWire binaryWireForWrite(Bytes<?> in, long position, long length) {
+    public static BinaryWire binaryWireForWrite(Bytes<?> in, @NonNegative long position, @NonNegative long length) {
         BinaryWire wire = WIRE_TL.get();
         VanillaBytes bytes = (VanillaBytes) wire.bytes();
         bytes.bytesStore(in.bytesStore(), 0, position);
@@ -1324,8 +1334,11 @@ public enum Wires {
             File sourceDir = null;
             File classDir = null;
 
+            // CSPathFromInput REVIEW keep new File(target).exists() && DUMP_CODE_TO_TARGET here because this filesystem boundary in Wires#loadFromJava still needs an explicit reviewed path-handling contract.
             if (new File(target).exists() && DUMP_CODE_TO_TARGET) {
+                // CSPathFromInput REVIEW keep target, "generated-test-sources" here because this filesystem boundary in Wires#loadFromJava.
                 sourceDir = new File(target, "generated-test-sources");
+                // CSPathFromInput REVIEW keep target, "test-classes" here because this filesystem boundary in Wires#loadFromJava.
                 classDir = new File(target, "test-classes");
             }
 
@@ -1339,6 +1352,7 @@ public enum Wires {
         }
         try {
             // Use the CachedCompiler to load the class from the provided Java source code.
+            // CSCachedCompilerLoadFromJava REVIEW CACHED_COMPILER.loadFromJava(classLoader, className, code) because this reflective or runtime-loading boundary in Wires#loadFromJava still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
             return CACHED_COMPILER.loadFromJava(classLoader, className, code);
         } catch (Throwable t) {
             // On any error, close the CachedCompiler quietly and reset it.
@@ -1523,6 +1537,7 @@ public enum Wires {
 
                 case "java.lang.StringBuilder":
                     return ScalarStrategy.of(StringBuilder.class, (o, in) -> {
+                        // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
                         StringBuilder builder = (o == null)
                                 ? new StringBuilder()
                                 : o;
@@ -1588,6 +1603,7 @@ public enum Wires {
                     return ScalarStrategy.of(java.sql.Date.class, (o, in) -> new java.sql.Date(parseDate(in).getTime()));
 
                 case "javax.naming.CompositeName":
+                    // CSCheckedSwallowThroughRethrow REVIEW return ScalarStrategy.of because this rethrow in SerializeJavaLang#apply converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
                     return ScalarStrategy.of(CompositeName.class, (o, in) -> {
                         try {
                             return new CompositeName(in.text());
@@ -1639,6 +1655,7 @@ public enum Wires {
                         @Nullable final SerializationStrategy ss = SerializeMarshallables.getSerializationStrategy(aClass);
                         return ss == null ? ENUM : ss;
                     }
+                    // REVIEW TASK CQNullabilityReturns: annotate the return value of apply(...) with @Nullable or @NotNull.
                     return null;
             }
         }
@@ -1694,6 +1711,7 @@ public enum Wires {
             if (Comparable.class.isAssignableFrom(aClass))
                 return ANY_SCALAR;
             if (aClass.isInterface())
+                // REVIEW TASK CQNullabilityReturns: annotate the return value of apply(...) with @Nullable or @NotNull.
                 return null;
             return ANY_NESTED;
         }
@@ -1719,6 +1737,7 @@ public enum Wires {
                 @NotNull StringBuilder sb0 = stlSb.get();
                 in.text(sb0);
                 String s = WireInternal.INTERNER.intern(sb0);
+                // CSBase64DecodeInput REVIEW keep ).decode(s here because this input or payload boundary in SerializeBytes#decodeBase64 still needs an explicit reviewed input-trust contract.
                 byte[] decode = Base64.getDecoder().decode(s);
                 if (o == null)
                     return Bytes.wrapForRead(decode);
@@ -1746,6 +1765,7 @@ public enum Wires {
                     return ScalarStrategy.of(Bytes.class,
                             SerializeBytes::decodeBase64);
                 default:
+                    // REVIEW TASK CQNullabilityReturns: annotate the return value of apply(...) with @Nullable or @NotNull.
                     return null;
             }
         }
@@ -1826,6 +1846,7 @@ public enum Wires {
                     if (args == null || args.length == 0) {
                         TupleInvocationHandler h2 = new TupleInvocationHandler(typeName);
                         h2.fields.putAll(fields);
+                        // CSReflectiveConstructorLookup REVIEW proxy.getClass().getDeclaredConstructor(InvocationHandler.class).newInstance(h2) because this reflective or runtime-loading boundary in TupleInvocationHandler#invoke still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
                         return proxy.getClass().getDeclaredConstructor(InvocationHandler.class).newInstance(h2);
                     }
                     break;
@@ -1839,6 +1860,7 @@ public enum Wires {
                         while (in.hasMore()) {
                             fields.put(in.readEvent(String.class), in.getValueIn().object());
                         }
+                        // REVIEW TASK CQNullabilityReturns: annotate the return value of invoke(...) with @Nullable or @NotNull.
                         return null;
                     }
                     break;

@@ -161,6 +161,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      */
     @Nullable
     default <T> T getField(String name, Class<T> tClass) throws NoSuchFieldException {
+        // CSFieldByNameReflection REVIEW Wires.getField(this, name, tClass) because this reflective or runtime-loading boundary in Marshallable#getField still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
         return Wires.getField(this, name, tClass);
     }
 
@@ -171,6 +172,7 @@ public interface Marshallable extends WriteMarshallable, ReadMarshallable, Reset
      * @param value The new value for the specified field.
      */
     default void setField(String name, Object value) throws NoSuchFieldException {
+        // CSFieldByNameReflection REVIEW Wires.setField(this, name, value) because this reflective or runtime-loading boundary in Marshallable#setField.
         Wires.setField(this, name, value);
     }
 

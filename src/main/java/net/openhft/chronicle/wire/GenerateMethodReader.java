@@ -172,17 +172,21 @@ public class GenerateMethodReader {
         final String fullClassName = packageName() + "." + generatedClassName();
 
         try {
+            // CSWiresLoadFromJava REVIEW Wires.loadFromJava(classLoader, fullClassName, sourceCode.toString()) because this reflective or runtime-loading boundary in GenerateMethodReader#createClass still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
             return Wires.loadFromJava(classLoader, fullClassName, sourceCode.toString());
         } catch (AssertionError e) {
             if (e.getCause() instanceof LinkageError) {
                 try {
+                    // CSClassForNameInput REVIEW Class.forName(fullClassName, true, classLoader) because this reflective or runtime-loading boundary in GenerateMethodReader#createClass still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
                     return Class.forName(fullClassName, true, classLoader);
                 } catch (ClassNotFoundException x) {
+                    // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(x) because this rethrow in GenerateMethodReader#createClass converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
                     throw Jvm.rethrow(x);
                 }
             }
             throw Jvm.rethrow(e);
         } catch (Throwable e) {
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + sourceCode, e)) because this rethrow in GenerateMethodReader#createClass converts a checked cause into an unchecked wrapper and.
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + sourceCode, e));
         }
     }
@@ -439,6 +443,7 @@ public class GenerateMethodReader {
 
         // Dump the generated source code to console if the flag is set.
         if (DUMP_CODE)
+            // CSStdoutStderrOutput REVIEW System.out.println because this direct console output in GenerateMethodReader#generateSourceCode still needs either structured Chronicle diagnostics or an explicit reviewed operator-diagnostic contract.
             System.out.println(sourceCode);
     }
 
@@ -536,6 +541,7 @@ public class GenerateMethodReader {
      * @param eventNameSwitchBlock The block of code that handles the switching of event names.
      */
     private void handleMethod(Method m, Class<?> anInterface, String instanceFieldName, boolean methodFilter, SourceCodeFormatter eventNameSwitchBlock, SourceCodeFormatter eventIdSwitchBlock) {
+        // CSSetAccessibleEscalation REVIEW Jvm.setAccessible(m) because this access override in GenerateMethodReader#handleMethod still needs either encapsulation-preserving access or an explicit reviewed runtime-access contract.
         Jvm.setAccessible(m);
 
         // Retrieving parameter and return type information of the method
@@ -710,6 +716,7 @@ public class GenerateMethodReader {
         // called for no interceptor and a generating interceptor
         if (!hasRealInterceptorReturns()) {
             // Potential cast to the generating interceptor type
+            // REVIEW TASK CQTryWithResourcesMissing: wrap GeneratingMethodReaderInterceptorReturns generatingInterceptor in try-with-resources or document explicit close ownership.
             GeneratingMethodReaderInterceptorReturns generatingInterceptor = interceptor != null ?
                     (GeneratingMethodReaderInterceptorReturns) interceptor : null;
 

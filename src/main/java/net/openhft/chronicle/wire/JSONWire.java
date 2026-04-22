@@ -41,6 +41,7 @@ public class JSONWire extends TextWire {
 
     // The rest of null
     private static final @NotNull Bytes<byte[]> _ULL = Bytes.from("ull");
+    // REVIEW TASK CQDeprecationJavadoc: add a @deprecated Javadoc tag to JSONWire explaining the replacement and removal plan.
     /**
      * Constant bytes for JSON literal {@code null} suffix.
      */
@@ -1120,7 +1121,9 @@ public class JSONWire extends TextWire {
         private CharSequence applyAsAlias(ClassLookup classLookup, CharSequence typeName) {
             // TODO use classLookup.applyAsAlias(typeName);
             try {
+                // CSAliasOrClassResolve REVIEW keep classLookup.forName(typeName) here because this runtime type boundary in JSONValueOut#applyAsAlias still needs an explicit reviewed type-admission contract.
                 return classLookup.nameFor(classLookup.forName(typeName));
+                // CSCatchBroadException REVIEW catch (Exception e) because the local fallback still begins with returning typeName and needs either narrower handling or an explicit reviewed recovery contract.
             } catch (Exception e) {
                 return typeName;
             }
@@ -1262,6 +1265,7 @@ public class JSONWire extends TextWire {
         @Override
         public @NotNull JSONWire time(final LocalTime localTime) {
             // Todo: fix quoted text
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (return (JSONWire) super.time(localTime);) with a concrete implementation decision or remove it.
             return (JSONWire) super.time(localTime);
             /*return text(localTime.toString());*/
         }
@@ -1573,6 +1577,7 @@ public class JSONWire extends TextWire {
     public <T> T methodWriter(@NotNull Class<T> tClass, Class<?>... additional) {
         if (jsonlMode) {
             // In JSONL mode, skip useTextDocuments() to preserve JSONL contexts
+            // REVIEW TASK CQTryWithResourcesMissing: wrap VanillaMethodWriterBuilder<T> builder in try-with-resources or document explicit close ownership.
             VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                     WireType.TEXT,
                     () -> newTextMethodWriterInvocationHandler(tClass));
@@ -1612,6 +1617,7 @@ public class JSONWire extends TextWire {
                 long writePosition = bytes.writePosition();
                 if (writePosition == start) {
                     // Nothing written, remove the opening brace
+                    // CSBacktrackSkip REVIEW keep -1 here because this input or payload boundary in JSONLWriteDocumentContext#close still needs an explicit reviewed input-trust contract.
                     bytes.writeSkip(-1);
                 } else if (shouldUnwrapObject(bytes, writePosition)) {
                     long length = writePosition - start;

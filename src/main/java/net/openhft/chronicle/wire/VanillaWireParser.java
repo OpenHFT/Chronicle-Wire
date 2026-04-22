@@ -28,6 +28,7 @@ public class VanillaWireParser implements WireParser {
     private final Map<CharSequence, WireParselet> namedConsumer = new TreeMap<>(CharSequenceComparator.INSTANCE);
 
     // Map of numeric field ids to the original name and parselet
+    // CSUnboundedInternCache REVIEW keep private final Map<Integer, Map.Entry<String, WireParselet>> numberedConsumer = new HashMap<>(); here because this lifecycle or ownership exception still needs an explicit reviewed lifecycle contract.
     private final Map<Integer, Map.Entry<String, WireParselet>> numberedConsumer = new HashMap<>();
 
     // Invoked when a field name is not present in {@link #namedConsumer}

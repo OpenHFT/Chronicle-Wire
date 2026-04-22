@@ -31,9 +31,11 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.BiConsumer;
+import net.openhft.chronicle.core.annotation.NonNegative;
 
 import static net.openhft.chronicle.bytes.BytesStore.empty;
 
+// REVIEW TASK CQDeprecationJavadoc: add a @deprecated Javadoc tag to YamlWireOut explaining the replacement and removal plan.
 /**
  * Provides functionality for writing data in a YAML-based wire format.
  * This class encapsulates methods and attributes to handle data serialization into YAML format.
@@ -396,7 +398,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
      * @param offset Starting index of the subsequence.
      * @param length Length of the subsequence.
      */
-    public void append(@NotNull CharSequence cs, int offset, int length) {
+    public void append(@NotNull CharSequence cs, @NonNegative int offset, @NonNegative int length) {
         if (use8bit)
             bytes.append8bit(cs, offset, offset + length);
         else
@@ -521,6 +523,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         @Nullable
         private String eventName;
 
+        // CSClassLookupExposure REVIEW keep @Override here because this class-lookup surface in YamlValueOut#classLookup still needs either a closed alias registry or an explicit reviewed class-resolution contract.
         @Override
         public ClassLookup classLookup() {
             return YamlWireOut.this.classLookup();
@@ -897,6 +900,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         @NotNull
         @Override
         public T int128forBinding(long i64x0, long i64x1, TwoLongValue longValue) {
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
         }
 
@@ -1647,6 +1651,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         public YamlValueOut write(Class<?> expectedType, @NotNull Object objectKey) throws InvalidMarshallableException {
             if (dropDefault) {
                 if (expectedType != String.class)
+                    // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
                     throw new UnsupportedOperationException("todo");
                 eventName = objectKey.toString();
             } else {

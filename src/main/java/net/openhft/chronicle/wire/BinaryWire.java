@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
+// REVIEW TASK CQInternalPackageExposure: import from internal package net.openhft.chronicle.bytes.internal -- expose a public wrapper, move the caller, or declare an explicit internal-reuse contract.
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.bytes.util.BinaryLengthLength;
@@ -39,6 +40,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.*;
+import net.openhft.chronicle.core.annotation.NonNegative;
 
 import static net.openhft.chronicle.core.util.ReadResolvable.readResolve;
 import static net.openhft.chronicle.wire.BinaryWire.AnyCodeMatch.ANY_CODE_MATCH;
@@ -66,6 +68,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     private static final Bit8StringInterner BIT8 = new Bit8StringInterner(1024);
 
     // Class value mapping to determine whether an object uses self-describing messages
+    // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance(k) here because this unchecked type materialisation still needs either a closed type map or an explicit reviewed instantiation contract.
     private static final ClassValue<Boolean> USES_SELF_DESCRIBING = ClassLocal.withInitial(k -> {
         Object m = ObjectUtils.newInstance(k);
         if (m instanceof Marshallable)
@@ -149,7 +152,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @param compressedSize Threshold size for compression
      * @param compression Type of compression (e.g., "binary")
      */
-    public BinaryWire(@NotNull Bytes<?> bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression) {
+    public BinaryWire(@NotNull Bytes<?> bytes, boolean fixed, boolean numericFields, boolean fieldLess, @NonNegative int compressedSize, String compression) {
         super(bytes, false);
         this.numericFields = numericFields;
         this.fieldLess = fieldLess;
@@ -160,6 +163,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         readContext = new BinaryReadDocumentContext(this);
     }
 
+    // REVIEW TASK CQDeprecationJavadoc: add a @deprecated Javadoc tag to BinaryWire explaining the replacement and removal plan.
     /**
      * Same as the main constructor but with a legacy {@code supportDelta} parameter
      * which is ignored as delta wire format is not supported.
@@ -173,7 +177,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @param supportDelta must be false
      */
     @Deprecated(/* to be removed in 2028.x */)
-    public BinaryWire(@NotNull Bytes<?> bytes, boolean fixed, boolean numericFields, boolean fieldLess, int compressedSize, String compression, boolean supportDelta) {
+    public BinaryWire(@NotNull Bytes<?> bytes, boolean fixed, boolean numericFields, boolean fieldLess, @NonNegative int compressedSize, String compression, boolean supportDelta) {
         this(bytes, fixed, numericFields, fieldLess, compressedSize, compression);
         assert !supportDelta;
     }
@@ -563,6 +567,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 bytes.uncheckedReadSkipOne();
                 try {
                     Number d = readFloat0(peekCode);
+                    // CSCatchBroadException REVIEW catch (Exception e) because the local fallback still begins with calling unknownCode(wire) and needs either narrower handling or an explicit reviewed recovery contract.
                     wire.getValueOut().object(d);
                 } catch (Exception e) {
                     unknownCode(wire);
@@ -661,7 +666,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @throws InvalidMarshallableException If there's an issue during marshalling.
      */
     @SuppressWarnings("incomplete-switch")
-    public void readWithLength(@NotNull WireOut wire, int len) throws InvalidMarshallableException {
+    public void readWithLength(@NotNull WireOut wire, @NonNegative int len) throws InvalidMarshallableException {
         long limit = bytes.readLimit();
         long newLimit = bytes.readPosition() + len;
         if (newLimit > limit)
@@ -1180,6 +1185,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             try {
                 // General parsing for non-direct memory.
                 AppendableUtil.parse8bit(bytes, sb, peekCode & 0x1f);
+                // REVIEW TASK CQIORuntimeExceptionWrapping: narrow catch to a specific declared exception or document the runtime-wrap contract.
             } catch (IOException e) {
                 throw new AssertionError(e);
             }
@@ -1331,14 +1337,17 @@ public class BinaryWire extends AbstractWire implements Wire {
                         }
                         if (aClass.isInterface() || usesSelfDescribing(aClass))
                             break;
+                        // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance(aClass) here because this unchecked type materialisation in BinaryWire#copySpecial.
                         Marshallable m = (Marshallable) ObjectUtils.newInstance(aClass);
                         valueIn.marshallable(m);
                         wire.getValueOut().marshallable(m);
+                        // CSWarnAndContinue REVIEW catch (ClassNotFoundRuntimeException ex) because the local fallback still begins with guarding a call to Jvm.warn() and then continues execution, and needs either fail-closed handling or an explicit reviewed degraded-mode contract.
                     } catch (ClassNotFoundRuntimeException ex) {
                         // Log a warning if the class is not found.
                         if (FIRST_WARN_MISSING_CLASS.compareAndSet(false, true))
                             Jvm.warn().on(BinaryWire.class, "Unable to copy object safely, message will not be repeated: " + ex);
                         copyOne(wire, false);
+                        // CSCatchBroadException REVIEW catch (Exception e) because the local fallback still begins with calling Jvm.warn().on(getClass(), "Unable to copy " + sb + " safely will try anyway " + e) and needs either narrower handling or an explicit reviewed recovery contract.
                     } catch (Exception e) {
                         // Log a warning for any other exceptions.
                         Jvm.warn().on(getClass(), "Unable to copy " + sb + " safely will try anyway " + e);
@@ -2568,6 +2577,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return this;
         }
 
+        // CSClassLookupExposure REVIEW keep @Override here because this class-lookup surface in FixedBinaryValueOut#classLookup still needs either a closed alias registry or an explicit reviewed class-resolution contract.
         @Override
         public ClassLookup classLookup() {
             return BinaryWire.this.classLookup();
@@ -3392,6 +3402,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 case TYPE_PREFIX: {
                     @Nullable StringBuilder sb = readUtf8();
                     if (sb != null) {
+                        // CSCompressionUncompress REVIEW keep sb, this, ValueIn::bytes here because this input or payload boundary in BinaryValueIn#text still needs an explicit reviewed input-trust contract.
                         @Nullable byte[] bytes = Compression.uncompress(sb, this, ValueIn::bytes);
                         if (bytes != null)
                             return new String(bytes, StandardCharsets.UTF_8);
@@ -3435,6 +3446,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 if (code2 != U8_ARRAY)
                     cantRead(code);
 
+                // CSCompressionUncompress REVIEW keep length2 - 1, (b, sb1, toBytes1) -> Compression.uncompress(sb1, b, toBytes1), sb, toBytes here because this input or payload boundary in BinaryValueIn#bytes.
                 bytes.readWithLength0(length2 - 1, (b, sb1, toBytes1) -> Compression.uncompress(sb1, b, toBytes1), sb, toBytes);
                 return wireIn();
 
@@ -3479,6 +3491,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (code != U8_ARRAY)
                 cantRead(code);
             long startAddr = bytes.addressForRead(bytes.readPosition());
+            // CSPointerIntake REVIEW keep toBytes.set(startAddr, length - 1); here because this raw-memory or native boundary in BinaryValueIn#bytesSet still needs an explicit reviewed native-memory contract.
             toBytes.set(startAddr, length - 1);
             bytes.readSkip(length - 1);
             return wireIn();
@@ -3516,6 +3529,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     return toBytes;
 
                 case TYPE_PREFIX: {
+                    // CSCompressionUncompress REVIEW keep sb, this, ValueIn::bytes here because this input or payload boundary in BinaryValueIn#bytesStore.
                     @Nullable StringBuilder sb = readUtf8();
                     @Nullable byte[] bytes = Compression.uncompress(sb, this, ValueIn::bytes);
                     if (bytes != null)
@@ -3774,6 +3788,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             switch (code) {
                 case NULL:
                     // todo take the default.
+                    // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (tFlag.accept(t, null);) with a concrete implementation decision or remove it.
                     tFlag.accept(t, null);
                     break;
 
@@ -4333,6 +4348,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 throw new IllegalStateException("its not possible to Marshallable and object that" +
                         " is not of type Marshallable, type=" + sb);
 
+            // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance here because this unchecked type materialisation in BinaryValueIn#typedMarshallable0.
             ReadMarshallable m = ObjectUtils.newInstance((Class<ReadMarshallable>) clazz);
 
             marshallable(m, true);
@@ -4347,6 +4363,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             int code = peekCode();
             if (code != TYPE_PREFIX)
                 // todo get delta wire to support Function<Class, ReadMarshallable> correctly
+                // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (return typedMarshallable();) with a concrete implementation decision or remove it.
                 return typedMarshallable();
 
             @Nullable final Class<T>aClass = (Class<T>) typePrefix();
@@ -4363,6 +4380,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         public Class<?> typePrefix() {
             int code = peekCode();
             if (code != TYPE_PREFIX) {
+                // REVIEW TASK CQNullabilityReturns: annotate the return value of typePrefix(...) with @Nullable or @NotNull.
                 return null;
             }
             bytes.uncheckedReadSkipOne();
@@ -4372,6 +4390,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 return classLookup().forName(sb);
             } catch (ClassNotFoundRuntimeException e) {
                 Jvm.warn().on(BinaryWire.this.getClass(), "Unable to find class " + sb);
+                // CSWarnReturnNull REVIEW keep return null; here because this fallback in BinaryValueIn#typePrefix still needs an explicit reviewed degraded-outcome contract.
                 return null;
             }
         }
@@ -4380,6 +4399,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         public Object typePrefixOrObject(Class<?> tClass) {
             int code = peekCode();
             if (code != TYPE_PREFIX) {
+                // REVIEW TASK CQNullabilityReturns: annotate the return value of typePrefixOrObject(...) with @Nullable or @NotNull.
                 return null;
             }
             bytes.uncheckedReadSkipOne();
@@ -4436,6 +4456,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             return BinaryWire.this;
         }
 
+        // CSClassLookupExposure REVIEW keep @Override here because this class-lookup surface in BinaryValueIn#classLookup.
         @Override
         public ClassLookup classLookup() {
             return BinaryWire.this.classLookup();
@@ -4453,6 +4474,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         return unresolvedHandler.apply(sb, e.getCause());
                     }
                 case NULL:
+                    // REVIEW TASK CQNullabilityReturns: annotate the return value of typeLiteral(...) with @Nullable or @NotNull.
                     return null;
 
                 default:
@@ -4497,6 +4519,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                         if (overwrite)
                             object.readMarshallable(BinaryWire.this);
                         else
+                            // CSWireReadObject REVIEW keep object, BinaryWire.this, false here because this runtime type boundary in BinaryValueIn#marshallable still needs an explicit reviewed type-admission contract.
                             Wires.readMarshallable(object, BinaryWire.this, false);
                     } else {
                         ((ReadBytesMarshallable) object).readMarshallable(BinaryWire.this.bytes);
@@ -4593,6 +4616,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             @Nullable String text;
             try {
                 text = text();  // Read text from the wire.
+                // CSCatchBroadException REVIEW catch (Exception e) because the local fallback still begins with returning otherwise if (text == null || text.length() == 0) return otherwise and needs either narrower handling or an explicit reviewed recovery contract.
             } catch (Exception e) {
                 return otherwise;  // On any exception, return the default value.
             }
@@ -4854,6 +4878,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                             return Boolean.TRUE;
                         case NULL:
                             bytes.uncheckedReadSkipOne();
+                            // REVIEW TASK CQNullabilityReturns: annotate the return value of objectWithInferredType(...) with @Nullable or @NotNull.
                             return null;
                         case STRING_ANY:
                             return text();

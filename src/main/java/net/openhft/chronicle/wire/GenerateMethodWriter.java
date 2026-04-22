@@ -507,17 +507,21 @@ public class GenerateMethodWriter {
 
             // Printing the generated code (only for debugging purposes)
             if (DUMP_CODE)
+                // CQJvmLogOverSystemErr REVIEW System.out.println because this direct system-console diagnostic in GenerateMethodWriter#createClass still needs either Jvm logging indirection or an explicit reviewed operator-diagnostic contract.
                 System.out.println(imports);
 
             // Attempt to load the class using the generated code
+            // CSWiresLoadFromJava REVIEW Wires.loadFromJava(classLoader, packageName + '.' + className, imports.toString()) because this reflective or runtime-loading boundary in GenerateMethodWriter#createClass still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
             return Wires.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
 
         } catch (AssertionError e) {
             // In case there is a linkage error, try loading the class directly
             if (e.getCause() instanceof LinkageError) {
                 try {
+                    // CSClassForNameInput REVIEW Class.forName(packageName + '.' + className, true, classLoader) because this reflective or runtime-loading boundary in GenerateMethodWriter#createClass still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
                     return Class.forName(packageName + '.' + className, true, classLoader);
                 } catch (ClassNotFoundException x) {
+                    // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(x) because this rethrow in GenerateMethodWriter#createClass converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
                     throw Jvm.rethrow(x);
                 }
             }
@@ -526,6 +530,7 @@ public class GenerateMethodWriter {
             throw e; // This seems to be a custom exception, rethrow it as is
         } catch (Throwable e) {
             // In case of other exceptions, wrap the cause and rethrow
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + imports, e)) because this rethrow in GenerateMethodWriter#createClass converts a checked cause into an unchecked wrapper and.
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + imports, e));
         }
     }

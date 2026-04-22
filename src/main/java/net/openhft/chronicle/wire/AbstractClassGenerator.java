@@ -77,6 +77,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
         String fullName = metaData.packageName() + "." + className();
         try {
             // Try loading the class if it's already been generated and loaded.
+            // CSClassForNameInput REVIEW (Class<T>) classLoader.loadClass(fullName) because this reflective or runtime-loading boundary in AbstractClassGenerator#acquireClass still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
             return (Class<T>) classLoader.loadClass(fullName);
 
         } catch (ClassNotFoundException cnfe) {
@@ -126,9 +127,11 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
             }
 
             // Compile and load the generated class.
+            // CSCachedCompilerLoadFromJava REVIEW (Class<T>) CACHED_COMPILER.loadFromJava(classLoader, fullName, sourceCode.toString()) because this reflective or runtime-loading boundary in AbstractClassGenerator#acquireClass still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
             return (Class<T>) CACHED_COMPILER.loadFromJava(classLoader, fullName, sourceCode.toString());
         } catch (Throwable e) {
             // If there's any error during generation, compile, or load, throw an exception.
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + sourceCode, e)) because this rethrow in AbstractClassGenerator#acquireClass converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + sourceCode, e));
         }
     }
@@ -139,6 +142,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
      * @return The generic type as a String, or null if there's none.
      */
     protected String generateGenericType() {
+        // REVIEW TASK CQNullabilityReturns: annotate the return value of generateGenericType(...) with @Nullable or @NotNull.
         return null;
     }
 

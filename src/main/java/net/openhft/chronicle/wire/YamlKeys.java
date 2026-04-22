@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import java.util.Arrays;
+import net.openhft.chronicle.core.annotation.NonNegative;
 
 /**
  * Represents a collection of offsets used in a YAML structure.
@@ -27,7 +28,7 @@ public class YamlKeys {
      *
      * @param offset The offset value to be added.
      */
-    public void push(long offset) {
+    public void push(@NonNegative long offset) {
         if (count == offsets.length) {
             int size = Math.max(7, offsets.length * 2);
             offsets = Arrays.copyOf(offsets, size);

@@ -109,6 +109,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
             String s;
             try {
                 s = bytes().toDebugString(128);
+                // CSCatchThrowable REVIEW catch (Throwable ex) because the local fallback still begins with storing the caught exception for later handling and needs either a narrower terminal boundary or an explicit reviewed last-resort contract.
             } catch (Throwable ex) {
                 s = ex.toString();
             }

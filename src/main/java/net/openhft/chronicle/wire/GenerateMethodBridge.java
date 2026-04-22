@@ -60,6 +60,7 @@ public class GenerateMethodBridge extends AbstractClassGenerator<GenerateMethodB
         Class<?> aClass = gmb.acquireClass(destType.getClassLoader());
         try {
             // Instantiate the acquired class based on the presence of the UpdateInterceptor.
+            // CSReflectiveConstructorInvoke REVIEW ui == null ? aClass.getConstructor(List.class).newInstance(toInvoke) : aClass.getConstructor(List.class, UpdateInterceptor.class).newInstance(toInvoke, ui) because this reflective or runtime-loading boundary in GenerateMethodBridge#bridgeFor still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
             return ui == null
                     ? aClass.getConstructor(List.class).newInstance(toInvoke)
                     : aClass.getConstructor(List.class, UpdateInterceptor.class).newInstance(toInvoke, ui);

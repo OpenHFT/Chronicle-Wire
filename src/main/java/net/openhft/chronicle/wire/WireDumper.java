@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import net.openhft.chronicle.core.annotation.NonNegative;
 
 /**
  * The WireDumper class provides utility methods to obtain a human-readable dump representation of {@link WireIn} content.
@@ -119,6 +120,7 @@ public class WireDumper {
         return asString(position, length, false);
     }
 
+    // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
     /**
      * Dumps a specific region of the wire content, starting at {@code position}
      * for {@code length} bytes, as a string.
@@ -129,7 +131,7 @@ public class WireDumper {
      * @return A string representation of the specified wire content region
      */
     @NotNull
-    public String asString(long position, long length, boolean abbrev) {
+    public String asString(@NonNegative long position, @NonNegative long length, boolean abbrev) {
         @NotNull StringBuilder sb = new StringBuilder();
         final long limit0 = bytes.readLimit();
         final long position0 = bytes.readPosition();
@@ -147,6 +149,7 @@ public class WireDumper {
 
             }
             if (missing > 0 && !abbrev)
+                // CSCatchThrowable REVIEW catch (Throwable t) because the local fallback still begins with calling sb.append(" ").append(t) and needs either a narrower terminal boundary or an explicit reviewed last-resort contract.
                 sb.append(" # missing: ").append(missing);
         } catch (Throwable t) {
             sb.append(" ").append(t);
@@ -270,6 +273,7 @@ public class WireDumper {
                 wireIn.copyTo(textWire);
 
                 textBytes = bytes2;
+                // CSCatchBroadException REVIEW catch (Exception e) because the local fallback still begins with calling dumpAsHexadecimal(sb, len, readPosition, sblen) and needs either narrower handling or an explicit reviewed recovery contract.
                 BytesUtil.combineDoubleNewline(bytes2);
             } catch (Exception e) {
                 dumpAsHexadecimal(sb, len, readPosition, sblen);
@@ -291,6 +295,7 @@ public class WireDumper {
             for (int i = 0; i < len; i++) {
                 int ch = textBytes.readUnsignedByte();
                 sb.append((char) ch);
+            // CSCatchBroadException REVIEW catch (Exception e) because the local fallback still begins with calling sb.append(" ").append(e) and needs either narrower handling or an explicit reviewed recovery contract.
             }
         } catch (Exception e) {
             sb.append(" ").append(e);
@@ -317,7 +322,7 @@ public class WireDumper {
      * @param readPosition The starting position in {@link #bytes} to read from
      * @param sblen       The length to which {@code sb} should be reset before appending the hex dump
      */
-    public void dumpAsHexadecimal(@NotNull StringBuilder sb, int len, long readPosition, int sblen) {
+    public void dumpAsHexadecimal(@NotNull StringBuilder sb, @NonNegative int len, @NonNegative long readPosition, @NonNegative int sblen) {
         // Set the read position and remaining length for the byte buffer.
         bytes.readPositionRemaining(readPosition, len);
 

@@ -89,6 +89,7 @@ class ScalarStrategy<E> implements SerializationStrategy {
     @NotNull
     @Override
     public <T> T newInstanceOrNull(Class<T>type) {
+        // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance(this.type) here because this unchecked type materialisation in ScalarStrategy#newInstanceOrNull still needs either a closed type map or an explicit reviewed instantiation contract.
         return Jvm.uncheckedCast(ObjectUtils.newInstance(this.type));
     }
 

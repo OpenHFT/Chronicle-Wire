@@ -35,6 +35,7 @@ public enum ConfigLoader {
     ; // none
 
     public static String loadFile(Class<?> classLoader, String filename) throws IOException {
+        // CSIOToolsInputPath REVIEW keep IOTools.readFile(classLoader, filename), StandardCharsets.UTF_8 here because this filesystem boundary in ConfigLoader#loadFile still needs an explicit reviewed path-handling contract.
         return new String(IOTools.readFile(classLoader, filename), StandardCharsets.UTF_8);
     }
 

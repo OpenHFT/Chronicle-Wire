@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NonNegative;
 
 /**
  * Represents the state associated with a particular input value.
@@ -43,7 +44,7 @@ class ValueInState {
      *
      * @param wirePosition position of an unexpected field
      */
-    public void addUnexpected(long wirePosition) {
+    public void addUnexpected(@NonNegative long wirePosition) {
         if (unexpectedSize >= unexpected.length) {
             int newSize = unexpected.length * 3 / 2 + 8;
             @NotNull long[] unexpected2 = new long[newSize];
@@ -58,7 +59,7 @@ class ValueInState {
      *
      * @param savedPosition position to save
      */
-    public void savedPosition(long savedPosition) {
+    public void savedPosition(@NonNegative long savedPosition) {
         this.savedPosition = savedPosition;
     }
 
@@ -86,7 +87,7 @@ class ValueInState {
      * @param index The index of the unexpected position
      * @return The unexpected position at the given index
      */
-    public long unexpected(int index) {
+    public long unexpected(@NonNegative int index) {
         return unexpected[index];
     }
 

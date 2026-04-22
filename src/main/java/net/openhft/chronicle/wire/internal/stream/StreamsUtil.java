@@ -85,6 +85,7 @@ public final class StreamsUtil {
                     batchSize += BATCH_UNIT_INCREASE;
                     return Spliterators.spliterator(a, 0, j, characteristics());
                 }
+                // REVIEW TASK CQNullabilityReturns: annotate the return value of trySplit(...) with @Nullable or @NotNull.
                 return null;
             }
         }
@@ -226,6 +227,7 @@ public final class StreamsUtil {
                     batchSize += BATCH_UNIT_INCREASE;
                     return split(n);
                 }
+                // REVIEW TASK CQNullabilityReturns: annotate the return value of trySplit(...) with @Nullable or @NotNull.
                 return null;
             }
         }

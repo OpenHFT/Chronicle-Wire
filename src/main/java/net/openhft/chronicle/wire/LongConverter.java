@@ -134,6 +134,7 @@ public interface LongConverter {
      * @return The CharSequence representation of the value.
      */
     default CharSequence asText(long numericValue) {
+        // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
         StringBuilder sb = new StringBuilder();
         append(sb, numericValue);
         return sb;

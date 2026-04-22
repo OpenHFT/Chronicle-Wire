@@ -546,9 +546,11 @@ public interface ValueOut {
      */
     @NotNull
     default ValueOut typePrefix(Class<?> type) {
+        // CSTypePrefixEmit REVIEW keep typePrefix here because this emitted type prefix in ValueOut#typePrefix still needs either a closed wire type map or an explicit reviewed type-prefix contract.
         return type == null ? this : typePrefix(classLookup().nameFor(type));
     }
 
+    // CSClassLookupExposure REVIEW keep ClassLookup classLookup() here because this class-lookup surface in ValueOut#classLookup still needs either a closed alias registry or an explicit reviewed class-resolution contract.
     /**
      * Provides a lookup mechanism to resolve class names. The exact mechanism and source
      * of class name data is determined by the implementation.
@@ -679,6 +681,7 @@ public interface ValueOut {
             typePrefix = null;
 
         if (typePrefix != null)
+            // CSTypePrefixEmit REVIEW keep typePrefix here because this emitted type prefix in ValueOut#sequence.
             typePrefix(typePrefix);
 
         final WireOut result = sequence(t, (it, out) -> {
@@ -860,6 +863,7 @@ public interface ValueOut {
     @NotNull
     default WireOut array(@NotNull WriteValue writer, @NotNull Class<?> arrayType) {
         if (arrayType == String[].class) {
+            // CSTypePrefixEmit REVIEW keep typePrefix here because this emitted type prefix in ValueOut#array.
             typePrefix("String[] ");
         } else if (arrayType != Object[].class) {
             typePrefix(classLookup().nameFor(arrayType.getComponentType()) + "[]");
@@ -923,6 +927,7 @@ public interface ValueOut {
             return nu11();
         String typeName = Wires.typeNameFor(classLookup(), marshallable);
         if (typeName != null)
+            // CSTypePrefixEmit REVIEW keep typePrefix here because this emitted type prefix in ValueOut#typedMarshallable.
             typePrefix(typeName);
         final WireOut wire = marshallable(marshallable);
         if (typeName != null)
@@ -1178,6 +1183,7 @@ public interface ValueOut {
         final Class<?> valueClass = value.getClass();
         switch (valueClass.getName()) {
             case "[B": { // Byte array
+                // CSTypePrefixEmit REVIEW keep typePrefix here because this emitted type prefix in ValueOut#object.
                 typePrefix(byte[].class).bytes((byte[]) value);
                 endTypePrefix();
                 return wireOut();
@@ -1288,6 +1294,7 @@ public interface ValueOut {
             case "java.sql.Time":
             case "java.util.Date":
             case "java.sql.Date": {
+                // CSTypePrefixEmit REVIEW keep Wires.SerializeJavaLang.writeDate here because this emitted type prefix in ValueOut#object.
                 final WireOut result = Wires.SerializeJavaLang.writeDate((Date) value, typePrefix(valueClass));
                 endTypePrefix();
                 return result;
@@ -1429,6 +1436,7 @@ public interface ValueOut {
      */
     @NotNull
     default WireOut fixedFloat32(float value) {
+        // CSTypePrefixEmit REVIEW keep typePrefix here because this emitted type prefix in ValueOut#fixedFloat32.
         return typePrefix(float.class).float32(value);
     }
 
@@ -1437,6 +1445,7 @@ public interface ValueOut {
      */
     @NotNull
     default WireOut fixedInt8(byte value) {
+        // CSTypePrefixEmit REVIEW keep typePrefix here because this emitted type prefix in ValueOut#fixedInt8.
         return typePrefix(byte.class).int8(value);
     }
 
@@ -1445,6 +1454,7 @@ public interface ValueOut {
      */
     @NotNull
     default WireOut fixedInt16(short value) {
+        // CSTypePrefixEmit REVIEW keep typePrefix here because this emitted type prefix in ValueOut#fixedInt16.
         return typePrefix(short.class).int16(value);
     }
 
@@ -1453,6 +1463,7 @@ public interface ValueOut {
      */
     @NotNull
     default WireOut fixedInt32(int value) {
+        // CSTypePrefixEmit REVIEW keep typePrefix here because this emitted type prefix in ValueOut#fixedInt32.
         return typePrefix(int.class).int32(value);
     }
 
@@ -1549,6 +1560,7 @@ public interface ValueOut {
     @NotNull
     default WireOut typedScalar(@NotNull Object value) {
         // Prefix with the type of the value
+        // CSTypePrefixEmit REVIEW keep typePrefix here because this emitted type prefix in ValueOut#typedScalar.
         typePrefix(Wires.typeNameFor(classLookup(), value));
 
         // Check if value is an Enum and get its name

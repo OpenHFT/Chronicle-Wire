@@ -33,15 +33,22 @@ final class BitSetUtil {
     // Static block to initialise reflective fields
     static {
         try {
+            // CSReflectiveFieldLookup REVIEW wordsField = BitSet.class.getDeclaredField("words") because this reflective or runtime-loading boundary still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
             wordsField = BitSet.class.getDeclaredField("words");
+            // CSReflectiveFieldLookup REVIEW wordsInUse = BitSet.class.getDeclaredField("wordsInUse") because this reflective or runtime-loading boundary.
             wordsInUse = BitSet.class.getDeclaredField("wordsInUse");
+            // CSReflectiveFieldLookup REVIEW sizeIsSticky = BitSet.class.getDeclaredField("sizeIsSticky") because this reflective or runtime-loading boundary.
             sizeIsSticky = BitSet.class.getDeclaredField("sizeIsSticky");
             // Making the fields accessible for manipulation
+            // CSSetAccessibleEscalation REVIEW Jvm.setAccessible(wordsField) because this access override still needs either encapsulation-preserving access or an explicit reviewed runtime-access contract.
             Jvm.setAccessible(wordsField);
+            // CSSetAccessibleEscalation REVIEW Jvm.setAccessible(wordsInUse) because this access override.
             Jvm.setAccessible(wordsInUse);
+            // CSSetAccessibleEscalation REVIEW Jvm.setAccessible(sizeIsSticky) because this access override.
             Jvm.setAccessible(sizeIsSticky);
         } catch (Exception e) {
             // Rethrow any caught exception for external handling
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
             throw Jvm.rethrow(e);
         }
     }
@@ -60,6 +67,7 @@ final class BitSetUtil {
             return longs[index];
         } catch (IllegalAccessException e) {
             // Rethrow any caught exception for external handling
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in BitSetUtil#getWord converts a checked cause into an unchecked wrapper and.
             throw Jvm.rethrow(e);
         }
     }
@@ -82,6 +90,7 @@ final class BitSetUtil {
             return using;
         } catch (IllegalAccessException e) {
             // Rethrow any caught exception for external handling
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in BitSetUtil#set converts a checked cause into an unchecked wrapper and.
             throw Jvm.rethrow(e);
         }
     }
