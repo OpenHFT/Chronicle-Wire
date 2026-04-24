@@ -198,7 +198,7 @@ Fluent API Marshalling (Manual Wiring) ::
 
 Only use this where there is no DTO available or when you need to write data that does not map directly to a `Marshallable` POJO.
 
-* This approach is more verbose but allows for dynamic schemas or when the data structure does not map cleanly to a Java class.
+* This approach is more verbose but allows dynamic schemas or when the data structure does not map cleanly to a Java class.
 * Example of using the fluent API to write a trade message:
 [source,java]
 ----

@@ -15,7 +15,7 @@ The tests were run with -Xmx1g -XX:MaxInlineSize=400 on an isolated CPU on an i7
 
 These are latency test with the [full Results Here](https://github.com/OpenHFT/Chronicle-Wire/tree/master/microbenchmarks/results)
 
-Something I found interesting is that while a typical time might be stable for a given run, you can get different results at different time.  
+Something I found interesting is that while a typical time might be stable for a given run, you can get different results at different time.
 For this reason I ran the tests with 10 forks.  By looking at the high percentiles, we tend to pick up the results of the worst run.
 
 | Wire Format | Text encoding | Fixed width values? | Numeric Fields? | field-less?| Bytes | 99.9 %tile | 99.99 %tile | 99.999 %tile | worst |
@@ -64,7 +64,7 @@ public void writeMarshallable(WireOut wire) {
 ```
 
 ## The code for BytesMarshallable
-The code to support BytesMarshallable can eb added to the class marshalled.  While this is faster than using Wire, there is no option to visualise the data without deserializing it, nor does it directly support schema changes.
+The code to support BytesMarshallable can be added to the class marshalled.  While this is faster than using Wire, there is no option to visualise the data without deserializing it, nor does it directly support schema changes.
 
 ```yaml
 @Override
@@ -124,12 +124,12 @@ Tests with "*" on Bytes mean this has been written to/read from direct memory an
 ## SBE (Simple Binary Encoding)
 SBE performs as well are BytesMarshallable.  Even though it was slower in this test, the difference to too small to draw any conclusions. i.e. in a different use case, a different developer might find the difference reversed.
 
-However, I didn't find SBE simple.  Perhaps this is because I didn't use the generation for different languages, but I found it was non-trivial to use and setup.  
+However, I didn't find SBE simple.  Perhaps this is because I didn't use the generation for different languages, but I found it was non-trivial to use and setup.
 For a flat class with just six fields it generated 9 classes, we have three support classes, and I ended up adding methods to the generated class to get it to perform as efficiently as I wanted.
 This is likely to be a lack of understanding on my part, though I might not be alone in this.
 
 ## Snake YAML
-Snake YAML is a fully featured YAML 1.1 parser. The library has to do much more work to support all the features of the YAML standard which necessarily takes longer.  
+Snake YAML is a fully featured YAML 1.1 parser. The library has to do much more work to support all the features of the YAML standard which necessarily takes longer.
 However, it takes a lot longer which means it may not be suitable if you need performance but you don't need a complete YAML parser.
 
 If you need to decode YAML which could come from any sources, Snake YAML is a better choice.
@@ -140,7 +140,7 @@ Here some selected examples.  The UTF-8 encoded and 8-bit encoded tests look the
 ## Text Wire
 The main advantage of YAML based wire format is it is easier to implement with, document and debug.
 
-What you want is the ease of a text wire format but the speed of a binary wire format.  
+What you want is the ease of a text wire format but the speed of a binary wire format.
 Being able to switch from one to the other can save you a lot of time in development and support, but still give you the speed you want.
 
 This uses 91 bytes, Note: the "--- !!data" is added by the method to dump the data. This information is encoded in the first 4 bytes which contains the size.
@@ -179,7 +179,7 @@ longInt: 1234567890
 ```
 
 ## Binary Wire with fixed width fields.
-Fixed width fields support binding to values later and updating them atomically.  
+Fixed width fields support binding to values later and updating them atomically.
 Note: if you want to bind to specific values, there is support for this which will also ensure the values are aligned.
 
 This format uses 84 bytes
@@ -220,7 +220,7 @@ Test bwireTTF used 58 bytes.
 2: 1234567890
 ```
 
-## Binary Wire with variable width values only. 
+## Binary Wire with variable width values only.
 
 Test bwireFTT used 32 bytes.
 ```yaml
@@ -264,7 +264,7 @@ Test bytesMarshallable used 28 bytes.
 # Comparison outputs
 
 ## SnakeYAML
-Snake YAML used the .0 on the end of the price to signify that it was a double.  
+Snake YAML used the .0 on the end of the price to signify that it was a double.
 This added two characters but is an elegant way of encoding that it should be a double.
 
 ```yaml
@@ -305,11 +305,11 @@ Test sbe used 43 chars.
 ```
 00000000 29 00 7B 00 00 00 D2 02  96 49 00 00 00 00 00 00 )·{····· ·I······
 00000010 00 00 00 48 93 40 01 0C  48 65 6C 6C 6F 20 57 6F ···H·@·· Hello Wo
-00000020 72 6C 64 21 00 00 00 00  01 00 00                rld!···· ···     
+00000020 72 6C 64 21 00 00 00 00  01 00 00                rld!···· ···
 ```
 
 ## Externalizable
-While Externalizable is more efficient than Serializable, it is still a heavy weight serialization.  
+While Externalizable is more efficient than Serializable, it is still a heavyweight serialization.
 Where Java Serialization does well is in serializing Object Graphs instead of Object Tree, i.e. objects with circular references.
 
 Test externalizable used 293 chars.
@@ -332,5 +332,5 @@ Test externalizable used 293 chars.
 000000f0 6F 72 6C 64 21 00 02 73  69 64 65 00 05 00 00 00 orld!··s ide·····
 00000100 53 65 6C 6C 00 10 73 6D  61 6C 6C 49 6E 74 00 7B Sell··sm allInt·{
 00000110 00 00 00 12 6C 6F 6E 67  49 6E 74 00 D2 02 96 49 ····long Int····I
-00000120 00 00 00 00 00                                   ·····                  
+00000120 00 00 00 00 00                                   ·····
 ```

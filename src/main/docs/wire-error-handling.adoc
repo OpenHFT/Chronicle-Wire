@@ -233,7 +233,7 @@ try {
 === Logging `Bytes` Content
 
 * `bytes.toHexString()`: Provides a hexadecimal dump of the buffer's content.
-Useful for inspecting binary data at a low level.
+Useful for inspecting binary data at a low-level.
 * `bytes.toDebugString()`: Can provide more detailed internal state of the `Bytes` object.
 * `bytes.readRemaining()` / `bytes.writeRemaining()`: Check remaining capacity.
 

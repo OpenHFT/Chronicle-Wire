@@ -525,7 +525,7 @@ public class MultiDocumentDemo {
 ----
 
 *Discussion:*
-The `try-with-resources` block ensures that each `DocumentContext` is properly closed. When `writingDocument()`'s context is closed, metadata (like message length) is written, allowing the reader to correctly identify document boundaries. `readingDocument()` returns a context; `dc.isPresent()` tells you if a document was found. `dc.isData()` or `dc.isMetaData()` can be used to distinguish message types, a pattern heavily used by Chronicle Queue.
+The `try-with-resources` block ensures that each `DocumentContext` is properly closed. When `writingDocument()`'s context is closed, metadata (like message length) is written, allowing the reader to correctly identify document boundaries. `readingDocument()` returns a context; `dc.isPresent()` tells you if a document was found. `dc.isData()` or `dc.isMetaData()` can distinguish message types, a pattern heavily used by Chronicle Queue.
 
 == Advanced & Performance
 

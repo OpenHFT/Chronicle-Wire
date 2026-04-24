@@ -967,7 +967,7 @@ assertEquals(60, config.monitoring.interval);
 
 == LongConverter
 
-Provides an abstraction for converting between long values and their string representations, potentially based on a custom character or symbol set.
+Defines an abstraction for converting between long values and their string representations, potentially based on a custom character or symbol set.
 
 The conversion allows encoding long values into compact, human-readable strings and vice versa, useful in contexts where storage efficiency is a concern.
 
@@ -1031,14 +1031,14 @@ public class Person extends SelfDescribingMarshallable {
 
 == A note on `Wires.reset()`
 
-Chronicle Wire allows (and encourages) objects to be re-used in order to reduce allocation rates.
+Chronicle Wire allows (and encourages) objects to be re-used to reduce allocation rates.
 
 When a marshallable object is re-used or initialised by the framework, it is first reset by way of `Marshallable.reset()`
 which is recommended over calling `Wires.reset()`.
 In the case of most DTOs with simple scalar values, this will not cause any issues.
 However, more complicated objects with object instance fields may experience undesired behaviour.
 
-In order to `reset` a marshallable object, the process is as follows:
+To `reset` a marshallable object, the process is as follows:
 
 . create a new instance of the object to be reset (this is done just once per object type, then cached)
 . reset all fields, so that
@@ -1091,7 +1091,7 @@ showing that the field *b* of each container object is now referencing the same 
 An exception to this is when the field value implements `Resettable` interface, when the default value of the field is not null, and the current field value is of exactly the same class as the default value.
 In this case, `value.reset()` will be called instead of overwriting it with default value by reference.
 
-In order to work around this, if necessary, the marshallable class can override `Marshallable.reset`:
+To work around this, if necessary, the marshallable class can override `Marshallable.reset`:
 
 [source,java,opts=novalidate]
 ----
@@ -1124,17 +1124,17 @@ public class ContainedDto implements SelfDescribingMarshallable {
 
 While serialized data can be updated by replacing a whole record, this might not be the most efficient option, nor thread-safe.
 
-Chronicle Wire offers the ability to bind a reference to a fixed value of a field, and perform atomic operations on that field; for example, volatile read/write, and compare-and-swap.
+Chronicle Wire can bind a reference to a fixed field value and perform atomic operations on that field; for example, volatile read/write, and compare-and-swap.
 
 [source,java,opts=novalidate]
 ----
    // field to cache the location and object used to reference a field.
    private LongValue counter = null;
 
-   // find the field and bind an approritae wrapper for the wire format.
+   // find the field and bind an appropriate wrapper for the wire format.
    wire.read(COUNTER).int64(counter, x -> counter = x);
 
-   // thread safe across processes on the same machine.
+   // thread-safe across processes on the same machine.
    long id = counter.getAndAdd(1);
 ----
 
@@ -1348,7 +1348,7 @@ This feature allows Chronicle Wire to de-serialize, manipulate, and serialize an
 
 If the type is unknown at runtime, a proxy is created; assuming that the required type is an interface.
 
-When the tuple is serialized, it will be give the same type as when it was deserialized, even if that class is not available.
+When the tuple is serialized, it will be given the same type as when it was deserialized, even if that class is not available.
 
 Methods following our `getter`/`setter` convention will be treated as `getters` and `setters`.
 
@@ -1433,7 +1433,7 @@ It's possible to capture such fields by overriding method or `ReadMarshallable`:
     }
 ----
 
-One of best practices is saving unexpected fields in order to process them after the deserialization:
+One best practice is saving unexpected fields to process them after the deserialization:
 
 [source,java,opts=novalidate]
 ----
@@ -1489,7 +1489,7 @@ public void testUnknownClass() {
 
 === Filtering with MethodReaders
 
-To support filtering, you need to make sure the first of multiple arguments can be used to filter the method call.
+To support filtering, you need to make sure the first of multiple arguments can filter the method call.
 If you have only one argument, you may need to add an additional argument to support efficient filtering.
 
 This feature calls an implementation of `MethodFilterOnFirstArg` to see if the rest of the method call should be parsed.
@@ -1536,11 +1536,11 @@ For an example, see `net.openhft.chronicle.wire.MethodFilterOnFirstArgTest`.
 
 === Intercepting `MethodReader` calls
 
-You may wish to intercept handling a call in the method reader in order to execute additional logic, to record a call somewhere for monitoring purposes, or to even skip the original method invocation.
+You may wish to intercept handling a call in the method reader to execute additional logic, to record a call somewhere for monitoring purposes, or to even skip the original method invocation.
 
 ==== Intercepting by passing control over the original method call
 
-`MethodReader` provides a flexible feature for supporting all the above use cases -- the option to specify `MethodReaderInterceptorReturns`.
+`MethodReader` supports the above use cases through the option to specify `MethodReaderInterceptorReturns`.
 If set, it will be triggered *instead* of the original call.
 It's possible to either skip the original method or to call it via passed `Invocation` instance:
 
@@ -1559,7 +1559,7 @@ class MyInterceptor implements MethodReaderInterceptorReturns {
 
 ==== Intercepting by modifying `MethodReader` generated source code
 
-`GeneratingMethodReaderInterceptorReturns` allows to change the logic of `MethodReader` without an overhead provided by reflexive calls.
+`GeneratingMethodReaderInterceptorReturns` allows changes to the logic of `MethodReader` without overhead from reflexive calls.
 
 Code returned by `codeBeforeCall` and `codeAfterCall` will be added before and after actual method call in the generated source code of the method reader.
 It's possible to use original call arguments and object instance in the added code.
@@ -1594,7 +1594,7 @@ See `MethodReaderInterceptorReturnsTest` for more examples.
 === Spring Boot and dynamic compilation in Chronicle Wire
 
 Chronicle Wire's `MethodReader` and `MethodWriter` dynamically compile Java code to get around some limitations in Java's underlying proxy mechanism and to do this the Java platform's standard compilation mechanism is used.
-The platform compiler uses the classpath variable to look for classes in directories and JAR files, and is not able to make use of classloaders to find classes.
+The platform compiler uses the classpath variable to look for classes in directories and JAR files, and is not able to use classloaders to find classes.
 Spring Boot uses a custom deployment mechanism - all classes and JARs are deployed in a fat JAR and Spring's classloader can extract classes from this.
 In order for the compiler to be able to see classes from the fat JAR, the classes should be extracted onto the disk somewhere.
 This is easy if the classes are contained in a JAR (i.e. a JAR inside the fat JAR) - Spring can be made to extract the JAR to a temp directory, such as by configuring Maven Spring Boot plugin:
@@ -2114,7 +2114,7 @@ private static final int MASHALLABLE_VERSION = 1;
 === JLBH Benchmark Performance
 
 To explore the efficiency of the examples above, this link:https://github.com/OpenHFT/Chronicle-Wire/blob/develop/src/test/java/net/openhft/chronicle/wire/TriviallyCopyableJLBH.java[TrivallyCopyableJLBH.java] test was created.
-As can be seen on lines 18-26, we have the ability to switch between running the TriviallyCopyable House ("House1"), the BinaryWire House ("House2") or 'UNKNOWN'.Important to note is that trivially copyable objects were used in order to improve java serialisation speeds.For further understanding on trivially copyable objects, refer to link:https://dzone.com/articles/how-to-get-c-speed-in-java-serialisation[this article].
+As can be seen on lines 18-26, we have the ability to switch between running the TriviallyCopyable House ("House1"), the BinaryWire House ("House2") or 'UNKNOWN'.Important to note is that trivially copyable objects were used to improve java serialisation speeds.For further understanding on trivially copyable objects, refer to link:https://dzone.com/articles/how-to-get-c-speed-in-java-serialisation[this article].
 This shows that we can serialise and then de-serialise 100,000 messages in a second.The Trivially Copyable version is even faster, especially at the higher percentiles.
 
 .Benchmark Performance Between TriviallyCopyable and BinaryWire
