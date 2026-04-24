@@ -260,7 +260,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * Start the first header, if there is none This will increment the headerNumber as appropriate
      * if successful <p> Note: the file might contain other data and the caller has to check this.
      *
-     * @return true if the header needs to be written, false if there is a data already
+     * @return {@code true} if the header needs to be written, false if there is a data already
      */
     boolean writeFirstHeader();
 

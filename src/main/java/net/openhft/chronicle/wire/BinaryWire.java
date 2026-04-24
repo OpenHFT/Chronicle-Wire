@@ -80,7 +80,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     private static final ThreadLocal<VanillaMessageHistory> VANILLA_MESSAGE_HISTORY_TL = ThreadLocal.withInitial(VanillaMessageHistory::new);
 
     /**
-     * Used when the wire is configured for fixed size output. Provides more
+     * Used when the wire is configured for fixed-size output. Provides more
      * predictable writes when value types are constrained.
      */
     private final FixedBinaryValueOut fixedValueOut = new FixedBinaryValueOut();
@@ -194,7 +194,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * This method checks each byte of the BytesStore to ensure it's a printable character or a newline.
      *
      * @param bytes The BytesStore to check
-     * @return true if the BytesStore can be treated as text, false otherwise
+     * @return {@code true} if the BytesStore can be treated as text, false otherwise
      */
     static boolean textable(BytesStore<?, ?> bytes) {
         if (bytes == null)
@@ -212,7 +212,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * This method checks each character of the CharSequence to ensure it's a printable character.
      *
      * @param cs The CharSequence to check
-     * @return true if the CharSequence can be treated as text, false otherwise
+     * @return {@code true} if the CharSequence can be treated as text, false otherwise
      */
     static boolean textable(CharSequence cs) {
         if (cs == null)
@@ -229,7 +229,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * Checks if the provided character is a digit (0-9).
      *
      * @param c The character to check
-     * @return true if the character is a digit, false otherwise
+     * @return {@code true} if the character is a digit, false otherwise
      */
     static boolean isDigit(char c) {
         // use underflow to make digits below '0' large.
@@ -321,7 +321,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     /**
      * Checks and returns if this BinaryWire instance is field-less.
      *
-     * @return true if the BinaryWire is field-less, false otherwise.
+     * @return {@code true} if the BinaryWire is field-less, false otherwise.
      */
     public boolean fieldLess() {
         return fieldLess;
@@ -2080,7 +2080,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      * it uses the self-describing value from the provided object.
      *
      * @param object The object whose self-describing status needs to be checked.
-     * @return true if the object should use the self-describing message format, false otherwise.
+     * @return {@code true} if the object should use the self-describing message format, false otherwise.
      */
     public boolean useSelfDescribingMessage(@NotNull CommonMarshallable object) {
         // Check for override or get the value from the object.
@@ -3092,7 +3092,7 @@ public class BinaryWire extends AbstractWire implements Wire {
          *
          * @param l The float value.
          * @param l6 The float value multiplied by 1e6 and rounded.
-         * @return true if the float was written as fixed-point, otherwise false.
+         * @return {@code true} if the float was written as fixed-point, otherwise false.
          */
         private boolean writeAsFixedPoint(float l, long l6) {
             // Try 2 decimal precision
@@ -3128,7 +3128,7 @@ public class BinaryWire extends AbstractWire implements Wire {
          *
          * @param l The double value.
          * @param l6 The double value multiplied by 1e6 and rounded.
-         * @return true if the double was written as fixed-point, otherwise false.
+         * @return {@code true} if the double was written as fixed-point, otherwise false.
          */
         private boolean writeAsFixedPoint(double l, long l6) {
             // (The logic here is the same as for the float method)
@@ -3321,7 +3321,7 @@ public class BinaryWire extends AbstractWire implements Wire {
          * Checks if the provided code corresponds to text data.
          *
          * @param code The code to be checked.
-         * @return true if the code corresponds to text, false otherwise.
+         * @return {@code true} if the code corresponds to text, false otherwise.
          */
         private boolean isText(int code) {
             // Check for general string code or specific length-based codes

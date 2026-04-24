@@ -541,7 +541,7 @@ public interface ValueIn {
      * @param list      of items to populate
      * @param buffer    of objects of the same type to reuse
      * @param bufferAdd supplier to call when the buffer needs extending
-     * @return true if there is any data.
+     * @return {@code true} if there is any data.
      */
     default <T> boolean sequence(@NotNull List<T> list,
                                  @NotNull List<T> buffer,
@@ -888,7 +888,7 @@ public interface ValueIn {
 
     /**
      * Retrieves a {@link ClassLookup} instance associated with the current {@link WireIn}.
-     * The ClassLookup allows for the resolution of class names to actual {@link Class} objects.
+     * The ClassLookup allows the resolution of class names to actual {@link Class} objects.
      *
      * @return The associated ClassLookup instance.
      */
@@ -1239,7 +1239,7 @@ public interface ValueIn {
      * @param <E>        The type of the object to read.
      * @param using      An instance of the object to reuse, or null to create a new instance.
      * @param clazz      The class of the object to read.
-     * @param bestEffort Set to true for best effort reading, which may not throw exceptions for some errors.
+     * @param bestEffort Set to true for best-effort reading, which may not throw exceptions for some errors.
      * @return The object read from the wire, or null if it cannot be read.
      * @throws InvalidMarshallableException if the object is invalid
      */

@@ -35,7 +35,7 @@ import java.util.function.BiConsumer;
 import static net.openhft.chronicle.bytes.BytesStore.empty;
 
 /**
- * Provides functionality for writing data in a YAML-based wire format.
+ * Supports writing data in a YAML-based wire format.
  * This class encapsulates methods and attributes to handle data serialization into YAML format.
  *
  * @param <T> The type that extends YamlWireOut
@@ -494,8 +494,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     }
 
     /**
-     * This internal class represents an output value in the YAML format. It provides functionalities related
-     * to appending separators, handling whitespace, and maintaining indentation among others.
+     * This internal class represents an output value in the YAML format. It supports
+     * appending separators, handling whitespace, and maintaining indentation, among other operations.
      */
     class YamlValueOut implements ValueOut, CommentAnnotationNotifier {
         protected boolean hasCommentAnnotation = false;
@@ -885,7 +885,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             prependSeparator();
             bytes.append(i64);
             elementSeparator();
-            // 2001 to 2100 best effort basis.
+            // 2001 to 2100 best-effort basis.
             boolean addTimeStamp = YamlWireOut.this.addTimeStamps && !leaf;
             if (addTimeStamp) {
                 addTimeStamp(i64);

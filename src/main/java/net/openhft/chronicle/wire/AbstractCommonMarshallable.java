@@ -23,7 +23,7 @@ abstract class AbstractCommonMarshallable implements Marshallable, BytesMarshall
 
     @Override
     public String toString() {
-        // this allows even invalid DTOs to be written to dump on a best effort basis.
+        // this allows even invalid DTOs to be written to dump on a best-effort basis.
         ValidatableUtil.startValidateDisabled();
         try {
             return Marshallable.$toString(this);

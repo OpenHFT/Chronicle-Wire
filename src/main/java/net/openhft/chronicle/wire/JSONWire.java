@@ -31,8 +31,8 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 /**
  * Represents the JSON wire format for text-based marshalling and parsing.
  * <p>
- * This class provides functionality for managing JSON data in a wire format.
- * It currently provides a subset of functionalities similar to the YAML wire format.
+ * This class supports managing JSON data in a wire format.
+ * It currently supports a subset of the YAML wire format's functionality.
  * The core capability of this class is to handle JSON data structures as {@code Bytes}
  * objects, allowing for efficient manipulation and parsing.
  */
@@ -1459,7 +1459,7 @@ public class JSONWire extends TextWire {
          *
          * @param using The object instance to use, or null if not provided.
          * @param clazz The class to parse the object as, or null if not provided.
-         * @param bestEffort Indicates whether to give a best effort attempt to parse the object even if it's partially incorrect.
+         * @param bestEffort Indicates whether to give a best-effort attempt to parse the object even if it's partially incorrect.
          * @return The parsed object.
          * @throws InvalidMarshallableException If there's an issue with unmarshalling the data.
          * @throws ClassCastException If there's a type mismatch between the provided class or instance and the type definition.
@@ -1497,7 +1497,7 @@ public class JSONWire extends TextWire {
          * Checks if the next set of characters in the bytes stream represents a type definition.
          * A type definition is expected to start with the pattern {"@ after consuming any padding.
          *
-         * @return true if a type definition is found, false otherwise.
+         * @return {@code true} if a type definition is found, false otherwise.
          */
         boolean hasTypeDefinition() {
             final long readPos = bytes.readPosition();
@@ -1539,7 +1539,7 @@ public class JSONWire extends TextWire {
         /**
          * Indicates whether types are being used in the current context or not.
          *
-         * @return true if types are being used, false otherwise.
+         * @return {@code true} if types are being used, false otherwise.
          */
         public boolean useTypes() {
             return useTypes;

@@ -23,7 +23,7 @@ public interface MethodFilterOnFirstArg<T> {
      * @param methodName The name of the method being evaluated.
      * @param firstArg   The first argument passed to the method.
      *
-     * @return true if the method should be ignored, otherwise false.
+     * @return {@code true} if the method should be ignored, otherwise false.
      */
     boolean ignoreMethodBasedOnFirstArg(String methodName, T firstArg);
 }

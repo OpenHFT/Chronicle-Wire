@@ -465,7 +465,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * is currently set in this {@code ChronicleBitSet}; otherwise, the result is {@code false}.
      *
      * @param bitIndex the index of the bit to check
-     * @return true if the bit at the specified index is set, false otherwise
+     * @return {@code true} if the bit at the specified index is set, false otherwise
      */
     public boolean get(int bitIndex) {
         throwExceptionIfClosed();
@@ -1014,7 +1014,7 @@ public class LongValueBitSet extends AbstractCloseable implements Marshallable, 
      * This is the {@code long}-consuming and {@code long}-producing primitive specialization for
      * {@link java.util.function.Function}.
      *
-     * <p>For example, this interface can be used to represent functions like addition:
+     * <p>For example, this interface can represent functions like addition:
      * <pre>
      * {@code
      * LongFunction add = (oldValue, param) -> oldValue + param;

@@ -33,7 +33,7 @@ public interface RollbackIfNotCompleteNotifier {
      * reflect the actual completion status of their write operation (for
      * example, the inverse of {@link DocumentContext#isNotComplete()}).
      *
-     * @return true if the current operation is complete, false otherwise
+     * @return {@code true} if the current operation is complete, false otherwise
      */
     default boolean writingIsComplete() {
         return true;

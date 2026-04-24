@@ -24,7 +24,7 @@ import java.util.List;
 public class CSVWire extends TextWire {
 
     /**
-     * Thread local tester used when parsing CSV fields to honour escaping rules
+     * Thread-local tester used when parsing CSV fields to honour escaping rules
      * for commas within quoted text.
      */
     private static final ThreadLocal<StopCharTester> ESCAPED_END_OF_TEXT = ThreadLocal.withInitial(
@@ -89,7 +89,7 @@ public class CSVWire extends TextWire {
     }
 
     /**
-     * Returns a thread local tester configured for CSV fields and resets its
+     * Returns a thread-local tester configured for CSV fields and resets its
      * state before use.
      */
     @NotNull

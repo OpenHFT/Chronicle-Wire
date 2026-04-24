@@ -11,7 +11,7 @@ import net.openhft.chronicle.wire.converter.SymbolsLongConverter;
  * <p>
  * The base 66 encoding support 0-9, A-Z, a-z, period, underscore, tilde and caret. Leading zeros are truncated.
  * <p>
- * As this is intended for timestamps based on the wall clock, these shouldn't conflict.
+ * As this is intended for timestamps based on the wall-clock, these shouldn't conflict.
  * <p>
  * Negative ids are reserved for application specific encodings.
  */

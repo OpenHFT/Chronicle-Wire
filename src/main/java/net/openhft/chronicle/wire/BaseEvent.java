@@ -27,7 +27,7 @@ public interface BaseEvent<E extends BaseEvent<E>> extends Marshallable {
      * an event generated externally to the system first entered the system).
      * <p>
      * By default, the time is represented in nanoseconds. System property 'service.time.unit'
-     * can be changed in order to represent time in different units.
+     * can be changed to represent time in different units.
      *
      * @param eventTime the time to store, expressed in the service time unit
      *                  (see {@link ServicesTimestampLongConverter}).
@@ -44,7 +44,7 @@ public interface BaseEvent<E extends BaseEvent<E>> extends Marshallable {
      * current time.
      * <p>
      * By default, the time is represented in nanoseconds. System property 'service.time.unit'
-     * can be changed in order to represent time in different units.
+     * can be changed to represent time in different units.
      *
      * @return this event instance
      */

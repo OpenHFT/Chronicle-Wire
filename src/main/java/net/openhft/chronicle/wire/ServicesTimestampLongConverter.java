@@ -91,7 +91,7 @@ public class ServicesTimestampLongConverter implements LongConverter {
      * Fetches the current time in the system-configured time unit using the provided TimeProvider.
      *
      * @param clock The {@link net.openhft.chronicle.core.time.TimeProvider} instance used to obtain
-     *              the current time. This allows for custom time sources, for example in tests.
+     *              the current time. This allows custom time sources, for example in tests.
      * @return The current time in the system-configured time unit.
      */
     public static long currentTime(TimeProvider clock) {

@@ -902,7 +902,7 @@ public class YamlTokeniser {
     /**
      * Checks if the current position in the stream marks the end of a field (denoted by a colon).
      *
-     * @return true if the current position is a field end, false otherwise.
+     * @return {@code true} if the current position is a field end, false otherwise.
      */
     private boolean isFieldEnd() {
         consumeSpaces(); // Consume any spaces or tabs.
@@ -1145,7 +1145,7 @@ public class YamlTokeniser {
      * Checks if the text of the current block is equal to the provided string.
      *
      * @param s The string to be checked.
-     * @return true if the text of the current block is equal to 's', false otherwise.
+     * @return {@code true} if the text of the current block is equal to 's', false otherwise.
      */
     public boolean isText(String s) {
         // TODO: This method can potentially be optimized for efficiency.

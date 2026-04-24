@@ -53,7 +53,7 @@ public class YamlKeys {
 
     /**
      * Resets the count of offsets to zero.
-     * This method does not clear the offset data but allows for reuse of the storage.
+     * This method does not clear the offset data but allows reuse of the storage.
      */
     public void reset() {
         count = 0;

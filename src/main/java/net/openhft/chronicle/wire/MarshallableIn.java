@@ -35,7 +35,7 @@ public interface MarshallableIn {
     int MARSHALLABLE_IN_INTERN_SIZE = Integer.getInteger("marshallableIn.intern.size", 128);
 
     /**
-     * Provides a {@code DocumentContext} that can be used to read data from a source. The specific
+     * Provides a {@code DocumentContext} that can read data from a source. The specific
      * source and the means of reading are determined by the concrete implementation.
      *
      * @return A {@code DocumentContext} appropriate for reading from the underlying source.
@@ -76,7 +76,7 @@ public interface MarshallableIn {
     }
 
     /**
-     * Reads bytes from the source into the provided {@code Bytes} object. This method allows for
+     * Reads bytes from the source into the provided {@code Bytes} object. This method allows
      * direct population of a {@code Bytes} instance without additional translation or processing.
      *
      * @param using The {@code Bytes} object to populate with read data.
@@ -183,7 +183,7 @@ public interface MarshallableIn {
     }
 
     /**
-     * Provides a builder instance that can be used to construct and configure a {@code MethodReader}
+     * Provides a builder instance that can construct and configure a {@code MethodReader}
      * suitable for this reader's content. The builder offers flexibility in configuring the
      * {@code MethodReader} to suit specific requirements.
      *

@@ -221,7 +221,7 @@ public enum Wires {
 
     /**
      * Reads the content of a specified Yaml file and replays the serialized method calls
-     * to the specified object. This can be used to re-execute or simulate a sequence of
+     * to the specified object. This can re-execute or simulate a sequence of
      * operations captured in the Yaml file.
      *
      * @param file the name of the input Yaml file containing serialized method calls
@@ -239,7 +239,7 @@ public enum Wires {
     }
 
     /**
-     * Dumps a sequence of size-prefixed binary messages as a human readable
+     * Dumps a sequence of size-prefixed binary messages as a human-readable
      * string.  The first four bytes of each message contain the length and
      * status flags.  See the <a href="https://github.com/OpenHFT/RFC/tree/master/Size-Prefixed-Blob">Size Prefixed Blob</a>
      * specification.
@@ -383,7 +383,7 @@ public enum Wires {
     }
 
     /**
-     * Dumps the messages from a {@link WireIn} as a human readable string.
+     * Dumps the messages from a {@link WireIn} as a human-readable string.
      *
      * @param wireIn the input wire
      * @return textual dump of the blobs
@@ -567,7 +567,7 @@ public enum Wires {
      * Checks if the given length exceeds the maximum allowed length.
      *
      * @param length the length to check
-     * @return true if the length exceeds the maximum, false otherwise
+     * @return {@code true} if the length exceeds the maximum, false otherwise
      */
     public static boolean exceedsMaxLength(long length) {
         return length > LENGTH_MASK;
@@ -808,7 +808,7 @@ public enum Wires {
      *
      * @param o1 First object
      * @param o2 Second object
-     * @return true if objects are of the same type and equal, false otherwise
+     * @return {@code true} if objects are of the same type and equal, false otherwise
      */
     public static boolean isEquals(@NotNull Object o1, @NotNull Object o2) {
         return o1.getClass() == o2.getClass() && WireMarshaller.WIRE_MARSHALLER_CL.get(o1.getClass()).isEqual(o1, o2);
@@ -1933,7 +1933,7 @@ public enum Wires {
     /**
      * Represents the field information specific to a tuple.
      * <p>
-     * This class extends {@link AbstractFieldInfo} to provide additional functionalities
+     * This class extends {@link AbstractFieldInfo} to provide additional functionality
      * tailored to tuples. It mainly provides a way to deduce the {@link BracketType} of
      * a given serialization strategy and a mechanism to retrieve the fields of a tuple.
      */
