@@ -36,8 +36,8 @@ public class TupleInvocationHandlerTest extends WireTestCommon {
 
         int hash = tuple.hashCode();
         assertTrue(hash != 0);
-        assertTrue(tuple.equals(tuple));
-        assertFalse(tuple.equals("other"));
+        assertEquals(tuple, tuple);
+        assertNotEquals("other", tuple);
 
         SampleTuple copy = tuple.deepCopy();
         assertNotNull(copy);
@@ -58,9 +58,9 @@ public class TupleInvocationHandlerTest extends WireTestCommon {
     }
 
     interface SampleTuple extends Marshallable {
-        void setField(String name, Object value) throws NoSuchFieldException;
+        void setField(String name, Object value);
 
-        <T> T getField(String name, Class<T> type) throws NoSuchFieldException;
+        <T> T getField(String name, Class<T> type);
 
         List<FieldInfo> $fieldInfos();
     }

@@ -33,7 +33,7 @@ public class Issue886Test {
     }
 
     @Test
-    public void test() throws IOException {
+    public void test() {
         String data = "{\n" +
                 "  \"a\": 1.234,\n" +
                 "  \"a1\": '1.234'\n" +

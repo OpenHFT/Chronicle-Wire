@@ -22,7 +22,7 @@ public class CSVBytesMarshallableTest extends WireTestCommon {
                     "1.50935,1.50936,GBPUSD,5,1,RTRS\n" +
                     "1.0906,1.09065,EURCHF,3,1,EBS\n");
 
-    // Test for low level bytes marshalling using FXPrice
+    // Test for low-level bytes marshalling using FXPrice
     @Test
     public void bytesMarshallable() {
         Bytes<?> bytes2 = Bytes.allocateElasticOnHeap();

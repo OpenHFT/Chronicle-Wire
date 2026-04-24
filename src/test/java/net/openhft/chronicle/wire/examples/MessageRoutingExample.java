@@ -44,7 +44,7 @@ public class MessageRoutingExample {
     }
 
     /**
-     * A example of a simple business event
+     * An example of a simple business event
      */
     static class Product extends SelfDescribingMarshallable {
         String name;

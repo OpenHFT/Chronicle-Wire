@@ -301,7 +301,7 @@ Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
     @Test
     public void example5() {
 /*
-## Write a message with a thread safe size prefix.
+## Write a message with a thread-safe size prefix.
 
 The benefits of using this approach ares that
  - the reader can block until the message is complete.

@@ -778,8 +778,7 @@ public class JSONLCoverageTest extends WireTestCommon {
             assertNotNull(writer, "methodWriter should return non-null proxy");
 
             // Should also implement the additional interface
-            assertTrue(writer instanceof Events2,
-                    "Proxy should implement additional interface Events2");
+            assertInstanceOf(Events2.class, writer, "Proxy should implement additional interface Events2");
 
             // Write via primary interface
             writer.event("test", 1);

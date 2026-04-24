@@ -220,7 +220,7 @@ public class TextWireTest extends WireTestCommon {
 
     // Test to check the license validation for different WireTypes.
     @Test
-    public void licenseCheck() {
+    public void licenceCheck() {
         // Verify that TEXT WireType doesn't require any license check.
         WireType.TEXT.licenceCheck();
         assertTrue(WireType.TEXT.isAvailable());
@@ -1967,13 +1967,13 @@ public class TextWireTest extends WireTestCommon {
 
     // Test for attempting to serialize a non-serializable object (current thread).
     @Test(expected = IllegalArgumentException.class)
-    public void writeUnserializable1() throws IOException {
+    public void writeUnserializable1() {
         System.out.println(TEXT.asString(Thread.currentThread()));
     }
 
     // Test for attempting to serialize a non-serializable object (socket instance).
     @Test(expected = IllegalArgumentException.class)
-    public void writeUnserializable2() throws IOException {
+    public void writeUnserializable2() {
         @NotNull Socket s = new Socket();
         System.out.println(TEXT.asString(s));
     }

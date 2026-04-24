@@ -158,7 +158,7 @@ public class ReadDocumentContextTest extends WireTestCommon {
     }
 
     @Test
-    public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt2Bytes() throws Exception {
+    public void testReadingADocumentThatHasNotBeenFullyReadFromTheTcpSocketAt2Bytes() {
         // Create an elastic byte buffer
         Bytes<?> b = Bytes.allocateElasticOnHeap();
 

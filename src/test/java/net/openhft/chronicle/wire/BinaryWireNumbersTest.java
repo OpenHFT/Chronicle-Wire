@@ -104,7 +104,7 @@ public class BinaryWireNumbersTest extends WireTestCommon {
         perform.writeValue(wire2.write());
 
         // Compare the lengths of the serialized values
-        assertEquals("Lengths for variable length expected " + bytes1
+        assertEquals("Lengths for variable-length expected " + bytes1
                         + " and actual " + bytes2 + " don't match for " + TextWire.asText(wire1),
                 bytes1.readRemaining(), bytes2.readRemaining());
 

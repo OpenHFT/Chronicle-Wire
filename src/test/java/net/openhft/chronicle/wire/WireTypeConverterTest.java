@@ -38,7 +38,7 @@ public class WireTypeConverterTest extends net.openhft.chronicle.wire.WireTestCo
     }
 
     @Test
-    public void testYamlToJsonUnknownClass() throws Exception {
+    public void testYamlToJsonUnknownClass() {
         Assert.assertEquals(jsonUnknownClass, new WireTypeConverter().yamlToJson(yamlUnknownClass).toString());
         Assert.assertEquals(yamlUnknownClass, new WireTypeConverter().jsonToYaml(jsonUnknownClass).toString());
     }

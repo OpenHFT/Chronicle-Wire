@@ -49,7 +49,7 @@ public class ForwardAndBackwardCompatibilityMarshallableTest extends WireTestCom
 
     // Test to check the compatibility of a marshallable StringBuilder
     @Test
-    public void marshableStringBuilderTest() throws Exception {
+    public void marshableStringBuilderTest() {
         final Wire wire = wireType.apply(bytes);
         wire.usePadding(wire.isBinary());
         ClassLookup wrap1 = CLASS_ALIASES.wrap();

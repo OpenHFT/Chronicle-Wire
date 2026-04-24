@@ -1586,7 +1586,7 @@ public class BinaryWireTest extends WireTestCommon {
     }
 
     @Test
-    public void testUsingEvents() throws Exception {
+    public void testUsingEvents() {
         // Creating a wire instance with binary format
         final Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap());
         w.usePadding(true);
