@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
  * Annotation for fields or parameters to indicate that the annotated long value
  * represents a string of 0 to 16 characters encoded in Base16.
  * <p>
- * This allows for consistent, self-descriptive annotations in fields or parameters,
+ * This allows consistent, self-descriptive annotations in fields or parameters,
  * guiding developers and API users about the intended format of the long value.
  * <p>
  * The Base16 format is often used for representing binary data in an ASCII string format,

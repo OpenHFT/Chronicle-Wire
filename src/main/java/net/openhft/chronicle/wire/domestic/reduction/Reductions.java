@@ -22,8 +22,8 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
  * This is the Reductions utility class.
- * It provides static methods to create various types of Reductions, offering functionalities
- * related to longs, doubles, and counting excerpts.
+ * It provides static methods to create various types of Reductions for
+ * longs, doubles, and counting excerpts.
  */
 public final class Reductions {
 
