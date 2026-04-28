@@ -184,7 +184,7 @@ Strategy :: When a field type must change, the safest approach is often to:
 
 The `FIELDLESS_BINARY` `WireType` is designed for extreme performance and compactness by omitting all field names and numbers.
 
-* **Mechanism:** Data is written as a direct sequence of field values in the exact order they are declared in the `Marshallable` class.
+* **Mechanism:** Data is written as a direct sequence of field values in the marshaller order. By default this is the order fields are discovered on the `Marshallable` class; `@FieldOrder` can make that order explicit for fields declared directly on a class.
 +
 [source,java]
 ----
@@ -195,7 +195,7 @@ class MyFieldlessData extends SelfDescribingMarshallable {
 }
 ----
 * **Brittleness:** This format is *extremely* intolerant of schema changes:
-** **Order Matters:** Changing the order of fields in the class breaks deserialisation.
+** **Order Matters:** Changing the marshaller order of fields breaks deserialisation. `@FieldOrder` can stabilise the order, but the reader and writer must still use the same field order, types, and count.
 ** **Type Matters:** Changing a field's type (e.g., `int` to `long`) breaks deserialisation as the number of bytes read/written will mismatch.
 ** **Count Matters:** Adding or removing fields breaks deserialisation.
 * **Consequences of Mismatch:** `BufferUnderflowException`, `BufferOverflowException`, reading garbage data, or application-level errors due to incorrect field values.

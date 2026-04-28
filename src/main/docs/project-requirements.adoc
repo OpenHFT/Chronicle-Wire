@@ -74,7 +74,7 @@ Schema Evolution and Versioning ::
 * **Comparison:** Explicit comparison of Wire's schema evolution capabilities with those of Protobuf and Avro.
 
 Annotations for Fine-Grained Control and Customisation ::
-* For each key annotation (e.g., `@LongConversion`, `@NanoTime`, `@Base64`, `@Base85`, `@ShortText`, `@MaxUtf8Len`, `@Comment`, `@FieldNumber`):
+* For each key annotation (e.g., `@LongConversion`, `@NanoTime`, `@Base64`, `@Base85`, `@ShortText`, `@MaxUtf8Len`, `@Comment`, `@FieldNumber`, `@FieldOrder`):
 ** **Purpose and Functionality:** Clear explanation of what the annotation does.
 ** **Parameters:** Description of any parameters the annotation takes.
 ** **Impact:** How it affects serialisation in different `WireType`s (e.g., text vs. binary representation).
@@ -268,4 +268,3 @@ Access to Resources :: Development of this documentation will have access to the
 Benchmark Data :: Performance comparisons will rely on publicly available benchmark results, with appropriate attribution and caveats. No new primary benchmarking activities are within the scope of this documentation project itself.
 
 Source Document :: The initial technical review document that prompted this requirements specification serves as a foundational research base.
-

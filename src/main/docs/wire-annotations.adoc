@@ -205,6 +205,45 @@ public class FinancialInstrument extends SelfDescribingMarshallable {
 
 IMPORTANT: Ensure field numbers are unique within a class hierarchy if polymorphism and shared binary formats are involved.
 
+=== `@FieldOrder`
+
+Purpose :: To give a `Marshallable` type an explicit, repeatable field serialisation order instead of relying on reflection order.
+
+Target :: Type
+
+Attributes ::
+`value` (String[]):: The names of all non-static, non-transient marshallable fields declared directly on the annotated class, in the order they should be written. Names are trimmed before validation and lookup.
+
+Behaviour ::
+* **Text Formats:** Fields are emitted in the declared order, which keeps string and YAML assertions stable across JVMs.
+* **Binary Formats:** Named-field binary formats use the same marshaller field order when writing fields. Formats that omit field names remain sensitive to sender and receiver schema agreement.
+* **Inheritance:** The annotation applies only to fields declared directly on the annotated class. Inherited fields keep the order declared by their own class.
+* **Validation:** Chronicle Wire rejects incomplete lists, duplicate names, blank names, and names that do not resolve to marshallable fields.
+
+Use Case :: Stabilising serialised output for classes whose field order is part of a test fixture, text dump, or fieldless/named binary compatibility contract.
+
+Example ::
+[source,java]
+----
+import net.openhft.chronicle.wire.FieldOrder;
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+
+@FieldOrder({"baseId", "createdTime"})
+class Base extends SelfDescribingMarshallable {
+    long createdTime;
+    long baseId;
+}
+
+@FieldOrder({"symbol", "price", "quantity"})
+class Trade extends Base {
+    double price;
+    String symbol;
+    long quantity;
+}
+----
+
+The resulting order is `baseId`, `createdTime`, then `symbol`, `price`, `quantity`.
+
 === `@Comment`
 
 Purpose :: To add a descriptive comment to a field, which will be included in some text-based wire formats, typically YAML.
@@ -248,10 +287,10 @@ AppConfig {
 
 == Best Practices for Using Annotations
 
-* **Be Purposeful:** Use annotations where they add clear value, such as improving readability in text formats (`@Comment`, `@NanoTime`), optimising binary size/performance (`@LongConversion`, `@FieldNumber`), or ensuring schema stability (`@FieldNumber`).
+* **Be Purposeful:** Use annotations where they add clear value, such as improving readability in text formats (`@Comment`, `@NanoTime`), optimising binary size/performance (`@LongConversion`, `@FieldNumber`), or ensuring schema stability (`@FieldNumber`, `@FieldOrder`).
 * **Understand Format Impact:** Be aware that some annotations only affect text formats (e.g., `@Comment`), while others primarily impact binary formats (e.g., `@FieldNumber`'s core use).
 * **Consistency:** Apply annotations consistently across related `Marshallable` classes for predictable behaviour.
-* **Test Thoroughly:** When using annotations that affect data representation or schema (like `@LongConversion` or `@FieldNumber`), thoroughly test both serialisation and deserialisation, especially across different versions of your classes if schema evolution is a concern.
+* **Test Thoroughly:** When using annotations that affect data representation or schema (like `@LongConversion`, `@FieldNumber`, or `@FieldOrder`), thoroughly test both serialisation and deserialisation, especially across different versions of your classes if schema evolution is a concern.
 * **Consult Javadoc:** The Javadoc for each annotation is the ultimate source of truth for its specific attributes and behaviour in the version of Chronicle Wire you are using.
 * **Keep it Simple:** While powerful, avoid over-using annotations if simpler solutions suffice. The default behaviour of `SelfDescribingMarshallable` is often sufficient for many use cases.
 
