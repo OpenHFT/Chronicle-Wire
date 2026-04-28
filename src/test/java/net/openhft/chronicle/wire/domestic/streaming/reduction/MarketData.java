@@ -7,6 +7,7 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.Validatable;
 import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.wire.Base85LongConverter;
+import net.openhft.chronicle.wire.FieldOrder;
 import net.openhft.chronicle.wire.LongConversion;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
@@ -16,6 +17,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * Represents the market data for a particular stock symbol.
  * This class is self-describing, marshallable, and validatable.
  */
+@FieldOrder({"symbol", "last", "high", "low"})
 public final class MarketData extends SelfDescribingMarshallable implements Validatable {
 
     // Symbol for the market data, stored as a long but represented in base85 format for human readability

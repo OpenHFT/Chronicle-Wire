@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire.converter;
 
 import net.openhft.chronicle.bytes.MethodReader;
+import net.openhft.chronicle.wire.FieldOrder;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
 import org.junit.Test;
@@ -87,6 +88,7 @@ public class Base64Test extends net.openhft.chronicle.wire.WireTestCommon {
     /**
      * The Data64 class represents a set of data fields to be serialized using Base64 encoding.
      */
+    @FieldOrder({"b", "s", "i", "data"})
     static class Data64 extends SelfDescribingMarshallable {
         @Base64
         byte b;

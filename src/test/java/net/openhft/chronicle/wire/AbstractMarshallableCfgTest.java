@@ -14,18 +14,21 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assume.assumeFalse;
 
 public class AbstractMarshallableCfgTest extends WireTestCommon{
+    @FieldOrder({"nestedAMC", "nestedSDM"})
     static class MyAMC extends AbstractMarshallableCfg {
         NestedAMC nestedAMC = new NestedAMC();  // Configuration nested inside MyAMC
         NestedSDM nestedSDM = new NestedSDM();  // Self-describing data nested inside MyAMC
     }
 
     // Define a nested configuration class that also extends AbstractMarshallableCfg
+    @FieldOrder({"number", "flag"})
     static class NestedAMC extends AbstractMarshallableCfg {
         long number = 128;    // Default value for the number
         boolean flag;        // Boolean flag
     }
 
     // Define a nested self-describing data class
+    @FieldOrder({"bytes", "amt"})
     static class NestedSDM extends SelfDescribingMarshallable {
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer();
         double amt = 1.0;
