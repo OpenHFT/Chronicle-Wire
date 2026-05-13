@@ -3740,7 +3740,20 @@ public class BinaryWire extends AbstractWire implements Wire {
                 }
 
                 case I64_ARRAY: {
-                    long capacity = bytes.readLong(bytes.readPosition() + 1);
+                    // Split the raw read from the validated capacity so the
+                    // unproven `readLong` value cannot be used as a length
+                    // without first passing through bounds checks. A
+                    // malformed wire message could carry a negative or
+                    // arbitrarily large value here; both produce wrong
+                    // behaviour downstream (negative arithmetic from
+                    // `2 * 8 + capacity * Long.BYTES`, or overflow from a
+                    // huge `capacity * Long.BYTES`).
+                    final long value = bytes.readLong(bytes.readPosition() + 1);
+                    final long capacity = Longs.requireNonNegative(value);
+                    if (capacity > (Long.MAX_VALUE - 17) / Long.BYTES)
+                        throw new IllegalArgumentException(
+                                "I64_ARRAY capacity " + capacity
+                                        + " would overflow size computation");
                     return 1 + 2 * 8 + (capacity * Long.BYTES);
                 }
 
