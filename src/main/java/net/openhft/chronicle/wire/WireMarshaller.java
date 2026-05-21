@@ -207,28 +207,104 @@ public class WireMarshaller<T> {
      * Recursively fetches all non-static, non-transient fields from the provided class and its superclasses,
      * up to but not including Object or AbstractCommonMarshallable, and adds them to the provided map.
      * Fields that are flagged for exclusion (e.g., the "ordinal" field for Enum types) are skipped.
+     * If a class declares {@link FieldOrder}, that annotation controls the insertion order for fields
+     * declared directly on that class and invalid declarations are rejected.
      *
      * @param clazz The class type from which fields are to be extracted.
      * @param map   The map to populate with field names and their corresponding Field objects.
+     * @throws IllegalArgumentException if {@link FieldOrder} is incomplete, duplicated, blank,
+     *                                  or names an unknown or non-marshallable field
      */
-    public static void getAllField(@NotNull Class<?> clazz, @NotNull Map<String, Field> map) {
+    public static void getAllField(@NotNull Class<?> clazz,
+                                   @NotNull Map<String, Field> map) {
         if (clazz != Object.class && clazz != AbstractCommonMarshallable.class)
             getAllField(clazz.getSuperclass(), map);
-        for (@NotNull Field field : clazz.getDeclaredFields()) {
-            if ((field.getModifiers() & (Modifier.STATIC | Modifier.TRANSIENT)) != 0)
-                continue;
-            String fieldName = field.getName();
-            if (("ordinal".equals(fieldName) || "hash".equals(fieldName)) && Enum.class.isAssignableFrom(clazz))
-                continue;
-            String name = fieldName;
-            if (name.startsWith("this$0")) {
-                if (ValidatableUtil.validateEnabled())
-                    Jvm.warn().on(WireMarshaller.class, "Found " + name + ", in " + clazz + " which will be ignored!");
-                continue;
-            }
+
+        for (@NotNull Field field : orderedDeclaredFields(clazz)) {
+            String name = field.getName();
             Jvm.setAccessible(field);
             map.put(name, field);
         }
+    }
+
+    private static Field[] orderedDeclaredFields(@NotNull Class<?> clazz) {
+        boolean isEnum = Enum.class.isAssignableFrom(clazz);
+        Map<String, Field> marshallable = new LinkedHashMap<>();
+        Map<String, Field> declared = new LinkedHashMap<>();
+
+        for (@NotNull Field field : clazz.getDeclaredFields()) {
+            declared.put(field.getName(), field);
+            if (isMarshallableField(clazz, field, isEnum))
+                marshallable.put(field.getName(), field);
+        }
+
+        FieldOrder order = clazz.getAnnotation(FieldOrder.class);
+
+        if (order == null)
+            return marshallable.values().toArray(new Field[0]);
+
+        String[] names = order.value();
+        Field[] ordered = new Field[names.length];
+        Set<String> seen = new HashSet<>();
+
+        for (int i = 0; i < names.length; i++) {
+            String name = Objects.requireNonNull(names[i],
+                    clazz.getName() + " @FieldOrder contains null at index " + i).trim();
+
+            if (name.isEmpty()) {
+                throw new IllegalArgumentException(clazz.getName()
+                        + " @FieldOrder contains blank field name at index " + i);
+            }
+
+            if (!seen.add(name)) {
+                throw new IllegalArgumentException(clazz.getName()
+                        + " @FieldOrder contains duplicate field: " + name);
+            }
+
+            Field field = marshallable.get(name);
+            if (field == null) {
+                if (declared.containsKey(name)) {
+                    throw new IllegalArgumentException(clazz.getName()
+                            + " @FieldOrder references non-marshallable field: " + name
+                            + " (static, transient, or otherwise excluded)");
+                }
+                throw new IllegalArgumentException(clazz.getName()
+                        + " @FieldOrder references unknown field: " + name
+                        + "; declared marshallable fields are " + marshallable.keySet());
+            }
+
+            ordered[i] = field;
+        }
+
+        if (seen.size() != marshallable.size()) {
+            Set<String> missing = new LinkedHashSet<>(marshallable.keySet());
+            missing.removeAll(seen);
+            throw new IllegalArgumentException(clazz.getName()
+                    + " @FieldOrder is missing marshallable fields: " + missing);
+        }
+
+        return ordered;
+    }
+
+    private static boolean isMarshallableField(@NotNull Class<?> clazz,
+                                               @NotNull Field field,
+                                               boolean isEnum) {
+        if ((field.getModifiers() & (Modifier.STATIC | Modifier.TRANSIENT)) != 0)
+            return false;
+
+        String fieldName = field.getName();
+
+        if (isEnum && ("ordinal".equals(fieldName) || "hash".equals(fieldName)))
+            return false;
+
+        if (fieldName.startsWith("this$0")) {
+            if (ValidatableUtil.validateEnabled())
+                Jvm.warn().on(WireMarshaller.class,
+                        "Found " + fieldName + ", in " + clazz + " which will be ignored!");
+            return false;
+        }
+
+        return true;
     }
 
     /**

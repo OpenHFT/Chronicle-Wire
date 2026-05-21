@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire.domestic.streaming.streams;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.wire.DocumentContext;
+import net.openhft.chronicle.wire.FieldOrder;
 import net.openhft.chronicle.wire.MarshallableIn;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 import net.openhft.chronicle.wire.Wire;
@@ -433,6 +434,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
 
     }
 
+    @FieldOrder({"symbol", "noShares"})
     static final class Shares extends SelfDescribingMarshallable {
 
         String symbol;
@@ -463,6 +465,7 @@ final class StreamsDemoTest extends net.openhft.chronicle.wire.WireTestCommon {
         }
     }
 
+    @FieldOrder({"symbol", "header", "body"})
     public static final class News extends SelfDescribingMarshallable {
 
         String symbol;

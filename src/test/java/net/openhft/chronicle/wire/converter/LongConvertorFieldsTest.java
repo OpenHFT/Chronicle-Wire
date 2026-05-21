@@ -17,6 +17,7 @@ public class LongConvertorFieldsTest {
     /**
      * DTO class representing data fields to be serialized using Base16 encoding.
      */
+    @FieldOrder({"b", "ch", "s", "i", "l"})
     static class Base16DTO extends SelfDescribingMarshallable {
         @Base16
         byte b;
@@ -76,6 +77,7 @@ public class LongConvertorFieldsTest {
     /**
      * DTO class representing data fields to be serialized using Base64 encoding.
      */
+    @FieldOrder({"b", "ch", "s", "i", "l"})
     static class Base64DTO extends SelfDescribingMarshallable {
         @Base64
         byte b;
@@ -135,6 +137,7 @@ public class LongConvertorFieldsTest {
     /**
      * DTO class representing data fields to be serialized using Base85 encoding.
      */
+    @FieldOrder({"b", "ch", "s", "i", "l"})
     static class Base85DTO extends SelfDescribingMarshallable {
         @Base85
         byte b;
@@ -207,6 +210,7 @@ public class LongConvertorFieldsTest {
         }
     }
 
+    @FieldOrder({"b", "ch", "s", "i", "l"})
     static class ShortTextDTO extends SelfDescribingMarshallable {
         @ShortText
         byte b;
@@ -265,6 +269,7 @@ public class LongConvertorFieldsTest {
         }
     }
 
+    @FieldOrder({"b", "ch", "s", "i", "l"})
     static class WordsDTO extends SelfDescribingMarshallable {
         @Words
         byte b;
