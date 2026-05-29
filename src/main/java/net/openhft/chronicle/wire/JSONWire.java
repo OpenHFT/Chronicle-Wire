@@ -1193,29 +1193,41 @@ public class JSONWire extends TextWire {
         }
 
         /**
-         * Write a special double value (e.g. NaN) as a string to the given bytes.
+         * Write a double value to the given bytes. IEEE754 non-finite values (NaN, Infinity) are
+         * quoted as JSON strings since they have no numeric representation in JSON. Finite values,
+         * including large magnitudes, are written as unquoted JSON numbers.
          *
          * @param bytes The bytes to append the stringified double value to
          * @param value The double value to convert to a string
          */
         @Override
         protected void writeSpecialDoubleValueToBytes(Bytes<?> bytes, double value) {
-            bytes.append('"');
-            bytes.append(Double.toString(value));
-            bytes.append('"');
+            if (Double.isNaN(value) || Double.isInfinite(value)) {
+                bytes.append('"');
+                bytes.append(Double.toString(value));
+                bytes.append('"');
+            } else {
+                bytes.append(Double.toString(value));
+            }
         }
 
         /**
-         * Write a special float value (e.g. NaN) as a string to the given bytes.
+         * Write a float value to the given bytes. IEEE754 non-finite values (NaN, Infinity) are
+         * quoted as JSON strings since they have no numeric representation in JSON. Finite values,
+         * including large magnitudes, are written as unquoted JSON numbers.
          *
          * @param bytes The bytes to append the stringified float value to
          * @param value The float value to convert to a string
          */
         @Override
         protected void writeSpecialFloatValueToBytes(Bytes<?> bytes, float value) {
-            bytes.append('"');
-            bytes.append(Float.toString(value));
-            bytes.append('"');
+            if (Float.isNaN(value) || Float.isInfinite(value)) {
+                bytes.append('"');
+                bytes.append(Float.toString(value));
+                bytes.append('"');
+            } else {
+                bytes.append(Float.toString(value));
+            }
         }
 
         @NotNull

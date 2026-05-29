@@ -89,6 +89,30 @@ class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
         Assertions.assertTrue(floatTestInput.expectOutputFloatToMatchThisPredicate.test(object.value));
     }
 
+    @ParameterizedTest
+    @MethodSource("largeFiniteFloatInputs")
+    void largeFiniteFloatSerialiseAsJsonNumber(float value) {
+        String json = toJson(value);
+        Assertions.assertFalse(json.startsWith("\""),
+                "Finite float " + value + " must serialise as a JSON number, not a quoted string literal");
+    }
+
+    @ParameterizedTest
+    @MethodSource("largeFiniteDoubleInputs")
+    void largeFiniteDoubleSerialiseAsJsonNumber(double value) {
+        String json = toJson(value);
+        Assertions.assertFalse(json.startsWith("\""),
+                "Finite double " + value + " must serialise as a JSON number, not a quoted string literal");
+    }
+
+    private static Stream<Float> largeFiniteFloatInputs() {
+        return Stream.of(5_000_000.0f, 1e7f, -5_000_000.0f, 1.23456789e10f);
+    }
+
+    private static Stream<Double> largeFiniteDoubleInputs() {
+        return Stream.of(1e15, 1e16, -5e15, 1.23456789e20);
+    }
+
     private static Stream<DoubleTestInput> doubleTestInputs() {
         return Stream.of(
                 new DoubleTestInput(Double.NaN, "NaN", Double::isNaN),
