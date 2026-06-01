@@ -1004,28 +1004,19 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
             double ad = Math.abs(d);
             if (ad == 0) {
                 bytes.append(d);
-            } else if (ad >= 1e-7 && ad < 1e15) {
+            } else if (ad >= 1e-3 && ad < 1e15) {
                 if ((int) (ad / 1e6) * 1e6 == ad) {
                     bytes.append((int) (d / 1e6)).append("E6");
                 } else if ((int) (ad / 1e3) * 1e3 == ad) {
                     bytes.append((int) (d / 1e3)).append("E3");
-                } else if (ad < 1e-3) {
-                    double d7 = Math.round(d * 1e16) / 1e9;
-                    double ad7 = Math.abs(d7);
-                    if (ad7 < 1e1)
-                        bytes.append(d7).append("E-7");
-                    else if (ad7 < 1e2)
-                        bytes.append(d7 / 1e1).append("E-6");
-                    else if (ad7 < 1e3)
-                        bytes.append(d7 / 1e2).append("E-5");
-                    else if (ad7 < 1e4)
-                        bytes.append(d7 / 1e3).append("E-4");
-                    else
-                        bytes.append(d7 / 1e4).append("E-3");
                 } else {
                     bytes.append(d);
                 }
             } else {
+                // |d| < 1e-3 (including the former [1e-7, 1e-3) band), |d| >= 1e15, and NaN/Infinity
+                // all delegate to writeSpecialDoubleValueToBytes, which formats finite values with the
+                // faithful Double.toString. The previous Math.round(d * 1e16) / 1e9 compaction over
+                // [1e-7, 1e-3) silently truncated high-precision small magnitudes (CORE-64).
                 writeSpecialDoubleValueToBytes(bytes, d);
             }
             elementSeparator();
