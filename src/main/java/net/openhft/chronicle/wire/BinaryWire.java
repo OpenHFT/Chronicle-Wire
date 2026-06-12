@@ -485,14 +485,14 @@ public class BinaryWire extends AbstractWire implements Wire {
                     // Handle byte lengths and read accordingly.
                     case BYTES_LENGTH8: {
                         bytes.uncheckedReadSkipOne();
-                        int len = bytes.readUnsignedByte();
+                        long len = bytes.readUnsignedByte();
                         readWithLength(wire, len);
                         break outerSwitch;
                     }
 
                     case BYTES_LENGTH16: {
                         bytes.uncheckedReadSkipOne();
-                        int len = bytes.readUnsignedShort();
+                        long len = bytes.readUnsignedShort();
                         readWithLength(wire, len);
                         break outerSwitch;
                     }
@@ -671,17 +671,17 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @param wire The wire output stream to write data to.
      * @param len  The length of data to be read, as an unsigned 32-bit value (0 to 4294967295).
      * @throws InvalidMarshallableException If there's an issue during marshalling.
-     * @throws IORuntimeException If the length is outside the unsigned 32-bit range.
+     * @throws IORuntimeException If the length is outside the unsigned 32-bit range,
+     *                            or exceeds the data remaining before the read limit.
      */
     @SuppressWarnings("incomplete-switch")
     public void readWithLength(@NotNull WireOut wire, long len) throws InvalidMarshallableException {
         // A length over 32-bit unsigned is unexpected: BYTES_LENGTH32 cannot encode it.
         if (len < 0 || len > 0xFFFF_FFFFL)
-            throw new IORuntimeException("Invalid length " + len + ", expected an unsigned 32-bit value");
+            throw new IORuntimeException("Invalid length " + len + ", expected an unsigned 32-bit value (0 to 4294967295)");
         long limit = bytes.readLimit();
         long newLimit = guardedReadLimit(len);
-        if (newLimit > limit)
-            throw new IORuntimeException("Can't extend the limit");
+
         try {
             bytes.readLimit(newLimit);
             @NotNull final ValueOut wireValueOut = wire.getValueOut();
@@ -720,21 +720,27 @@ public class BinaryWire extends AbstractWire implements Wire {
         }
     }
 
-    // Can only shrink the readLimit
+    /**
+     * Computes the read limit for a nested, length-prefixed value. A nested value must lie
+     * within the enclosing document, so the read limit can only shrink, never extend past
+     * the current one into data that is not readable.
+     *
+     * @param len The length of the nested value, as an unsigned 32-bit value.
+     * @return The read limit for the nested value: the current read position plus the length.
+     * @throws IORuntimeException If the length exceeds the data remaining before the read limit.
+     */
     private long guardedReadLimit(long len) {
         long start = bytes.readPosition();
         long prevLimit = bytes.readLimit();
 
-        assert len >= 0 && len <= 0xFFFF_FFFFL : len;
+        assert len >= 0 && len <= 0xFFFF_FFFFL : "len: " + len;
         assert start <= prevLimit : "readPosition " + start + " > readLimit " + prevLimit;
 
         if (len > prevLimit - start)
-            throw new IORuntimeException("Can't extend the limit");
+            throw new IORuntimeException("Length " + len + " exceeds the " + (prevLimit - start) +
+                    " bytes remaining between readPosition " + start + " and readLimit " + prevLimit);
 
-        long newLimit = start + len;
-        assert newLimit >= start;
-        assert newLimit <= prevLimit;
-        return newLimit;
+        return start + len;
     }
 
     /**

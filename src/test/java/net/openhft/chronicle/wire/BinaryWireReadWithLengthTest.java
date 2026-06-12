@@ -133,7 +133,7 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
                 fail("Expected IORuntimeException for unchecked unsigned 32-bit length");
             } catch (IORuntimeException e) {
                 assertTrue("Unexpected message: " + e.getMessage(),
-                        e.getMessage().contains("Can't extend the limit"));
+                        e.getMessage().contains("bytes remaining between readPosition"));
             }
         } finally {
             uncheckedBytes.releaseLast();
@@ -151,7 +151,7 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
                 fail("Expected IORuntimeException for unchecked unsigned 32-bit object length");
             } catch (IORuntimeException e) {
                 assertTrue("Unexpected message: " + e.getMessage(),
-                        e.getMessage().contains("Can't extend the limit"));
+                        e.getMessage().contains("bytes remaining between readPosition"));
             }
         } finally {
             uncheckedBytes.releaseLast();
@@ -172,7 +172,7 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
     /**
      * Builds a stream of BYTES_LENGTH32 followed by a 4-byte length with the top bit set,
      * but no payload. The length must be read as unsigned 32-bit, so the (impossibly large)
-     * length fails the read-limit check with "Can't extend the limit". Before the fix,
+     * length fails the read-limit check, reporting the bytes remaining. Before the fix,
      * {@code copyOne} read the length with the signed {@code readInt()}, so the limit check
      * passed on a negative length and reading continued with a corrupt read limit.
      */
@@ -189,7 +189,7 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
             fail("Expected IORuntimeException for unsigned 32-bit length " + length);
         } catch (IORuntimeException e) {
             assertTrue("Unexpected message: " + e.getMessage(),
-                    e.getMessage().contains("Can't extend the limit"));
+                    e.getMessage().contains("bytes remaining between readPosition"));
         }
     }
 
