@@ -479,20 +479,20 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case PADDING32:
                         // Handle 32-bit padding and skip reading.
                         bytes.uncheckedReadSkipOne();
-                        bytes.readSkip(bytes.readUnsignedInt());
+                        guardedSkipDecodedLength(readPadding32Length());
                         break outerSwitch;
 
                     // Handle byte lengths and read accordingly.
                     case BYTES_LENGTH8: {
                         bytes.uncheckedReadSkipOne();
-                        long len = bytes.readUnsignedByte();
+                        long len = readGuardedUnsignedByteLength();
                         readWithLength(wire, len);
                         break outerSwitch;
                     }
 
                     case BYTES_LENGTH16: {
                         bytes.uncheckedReadSkipOne();
-                        long len = bytes.readUnsignedShort();
+                        long len = readGuardedUnsignedShortLength();
                         readWithLength(wire, len);
                         break outerSwitch;
                     }
@@ -500,7 +500,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case BYTES_LENGTH32: {
                         // Handle 32-bit length bytes and read accordingly.
                         bytes.uncheckedReadSkipOne();
-                        long len = bytes.readUnsignedInt();
+                        long len = readGuardedUnsignedIntLength();
                         readWithLength(wire, len);
                         break outerSwitch;
                     }
@@ -730,10 +730,11 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @throws IORuntimeException If the length exceeds the data remaining before the read limit.
      */
     private long guardedReadLimit(long len) {
+        if (len < 0 || len > 0xFFFF_FFFFL)
+            throw new IORuntimeException("Invalid length " + len + ", expected an unsigned 32-bit value (0 to 4294967295)");
         long start = bytes.readPosition();
         long prevLimit = bytes.readLimit();
 
-        assert len >= 0 && len <= 0xFFFF_FFFFL : "len: " + len;
         assert start <= prevLimit : "readPosition " + start + " > readLimit " + prevLimit;
 
         if (len > prevLimit - start)
@@ -741,6 +742,225 @@ public class BinaryWire extends AbstractWire implements Wire {
                     " bytes remaining between readPosition " + start + " and readLimit " + prevLimit);
 
         return start + len;
+    }
+
+    private void requireReadablePrefixBytes(long prefixLength) {
+        long start = bytes.readPosition();
+        long limit = bytes.readLimit();
+        long remaining = limit - start;
+        if (prefixLength < 0 || remaining < 0 || prefixLength > remaining)
+            throw new IORuntimeException("Length prefix " + prefixLength + " exceeds the " + remaining +
+                    " bytes remaining between readPosition " + start + " and readLimit " + limit);
+    }
+
+    private long readGuardedUnsignedByteLength() {
+        requireReadablePrefixBytes(Byte.BYTES);
+        return bytes.readUnsignedByte();
+    }
+
+    private long readGuardedUnsignedShortLength() {
+        requireReadablePrefixBytes(Short.BYTES);
+        return bytes.readUnsignedShort();
+    }
+
+    private long readGuardedUnsignedIntLength() {
+        requireReadablePrefixBytes(Integer.BYTES);
+        return bytes.readUnsignedInt();
+    }
+
+    private long readGuardedStopBitLength() {
+        long start = bytes.readPosition();
+        long limit = bytes.readLimit();
+        long remaining = limit - start;
+
+        // Validate the stop-bit prefix terminates inside the current readLimit before decoding it.
+        for (long pos = start; pos < limit; pos++) {
+            if ((bytes.readUnsignedByte(pos) & 0x80) == 0)
+                return bytes.readStopBit();
+        }
+
+        throw new IORuntimeException("Stop bit length prefix exceeds the " + remaining +
+                " bytes remaining between readPosition " + start + " and readLimit " + limit);
+    }
+
+    private long guardedTextEnd(long len) {
+        long start = bytes.readPosition();
+        long limit = bytes.readLimit();
+        long remaining = limit - start;
+        if (len < 0 || remaining < 0 || len > remaining)
+            throw new IORuntimeException("Text length " + len + " exceeds the " + remaining +
+                    " bytes remaining between readPosition " + start + " and readLimit " + limit);
+        return start + len;
+    }
+
+    @Nullable
+    private String readGuardedUtf8String() {
+        long len0 = readGuardedStopBitLength();
+        if (len0 == -1L)
+            return null;
+        if (len0 < -1L)
+            throw new IORuntimeException("Invalid text length " + len0);
+
+        long limit = bytes.readLimit();
+        long end = guardedTextEnd(len0);
+        Maths.toUInt31(len0);
+        String text;
+        try {
+            bytes.readLimit(end);
+            text = UTF8.intern(bytes);
+        } finally {
+            bytes.readLimit(limit);
+        }
+        bytes.readPosition(end);
+        return text;
+    }
+
+    private boolean readGuardedUtf8(@NotNull StringBuilder sb) {
+        String original = sb.toString();
+        long len0 = readGuardedStopBitLength();
+        if (len0 == -1L) {
+            sb.setLength(0);
+            return false;
+        }
+        if (len0 < -1L)
+            throw new IORuntimeException("Invalid text length " + len0);
+
+        long limit = bytes.readLimit();
+        long end = guardedTextEnd(len0);
+        int len = Maths.toUInt31(len0);
+        try {
+            bytes.readLimit(end);
+            if (len > 0)
+                bytes.parseUtf8(sb, true, len);
+            else
+                sb.setLength(0);
+        } catch (RuntimeException | Error e) {
+            sb.setLength(0);
+            sb.append(original);
+            throw e;
+        } finally {
+            bytes.readLimit(limit);
+        }
+        bytes.readPosition(end);
+        return true;
+    }
+
+    private boolean readGuardedUtf8(@NotNull Bytes<?> target) {
+        long len0 = readGuardedStopBitLength();
+        if (len0 == -1L) {
+            target.clear();
+            return false;
+        }
+        if (len0 < -1L)
+            throw new IORuntimeException("Invalid text length " + len0);
+
+        long limit = bytes.readLimit();
+        long end = guardedTextEnd(len0);
+        int len = Maths.toUInt31(len0);
+        Bytes<?> tmp = Bytes.allocateElasticOnHeap();
+        try {
+            if (len > 0)
+                try {
+                    bytes.readLimit(end);
+                    bytes.parseUtf8(tmp, true, len);
+                } finally {
+                    bytes.readLimit(limit);
+                }
+            else
+                tmp.clear();
+            bytes.readPosition(end);
+            target.clear();
+            tmp.readPosition(0);
+            target.write(tmp, 0, tmp.writePosition());
+            return true;
+        } finally {
+            bytes.readLimit(limit);
+            tmp.releaseLast();
+        }
+    }
+
+    private void readGuardedUtf8(int len, @NotNull StringBuilder sb) {
+        String original = sb.toString();
+        long limit = bytes.readLimit();
+        long end = guardedTextEnd(len);
+        try {
+            bytes.readLimit(end);
+            if (len > 0)
+                bytes.parseUtf8(sb, true, len);
+            else
+                sb.setLength(0);
+        } catch (RuntimeException | Error e) {
+            sb.setLength(0);
+            sb.append(original);
+            throw e;
+        } finally {
+            bytes.readLimit(limit);
+        }
+        bytes.readPosition(end);
+    }
+
+    private void readGuardedUtf8(int len, @NotNull Bytes<?> target) {
+        long limit = bytes.readLimit();
+        long end = guardedTextEnd(len);
+        Bytes<?> tmp = Bytes.allocateElasticOnHeap();
+        try {
+            if (len > 0)
+                try {
+                    bytes.readLimit(end);
+                    bytes.parseUtf8(tmp, true, len);
+                } finally {
+                    bytes.readLimit(limit);
+                }
+            else
+                tmp.clear();
+            bytes.readPosition(end);
+            target.clear();
+            tmp.readPosition(0);
+            target.write(tmp, 0, tmp.writePosition());
+        } finally {
+            bytes.readLimit(limit);
+            tmp.releaseLast();
+        }
+    }
+
+    @Nullable
+    private <T extends Appendable & CharSequence> T readGuardedUtf8Text(@NotNull T target) {
+        if (target instanceof StringBuilder)
+            return readGuardedUtf8((StringBuilder) target) ? target : null;
+        if (target instanceof Bytes)
+            return readGuardedUtf8((Bytes<?>) target) ? target : null;
+        @Nullable String text = readGuardedUtf8String();
+        if (text == null)
+            return null;
+        AppendableUtil.append(target, text);
+        return target;
+    }
+
+    @NotNull
+    private <T extends Appendable & CharSequence> T readGuardedUtf8Text(int len, @NotNull T target) {
+        if (target instanceof StringBuilder) {
+            readGuardedUtf8(len, (StringBuilder) target);
+            return target;
+        }
+        if (target instanceof Bytes) {
+            readGuardedUtf8(len, (Bytes<?>) target);
+            return target;
+        }
+        StringBuilder tmp = acquireStringBuilder();
+        readGuardedUtf8(len, tmp);
+        AppendableUtil.append(target, tmp, 0, tmp.length());
+        return target;
+    }
+
+
+    // The code and length prefix must already be consumed; len starts at the current payload position.
+    private void guardedSkipDecodedLength(long len) {
+        long newPosition = guardedReadLimit(len);
+        bytes.readPosition(newPosition);
+    }
+
+    private long readPadding32Length() {
+        return readGuardedUnsignedIntLength();
     }
 
     /**
@@ -980,7 +1200,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     public Wire readComment(@NotNull StringBuilder s) {
         if (peekCode() == COMMENT) {
             bytes.uncheckedReadSkipOne();
-            bytes.readUtf8(s);
+            readGuardedUtf8(s);
         } else {
             s.setLength(0);
         }
@@ -1137,7 +1357,7 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                 case PADDING32:
                     bytes.uncheckedReadSkipOne();
-                    bytes.readSkip(bytes.readUnsignedInt());
+                    guardedSkipDecodedLength(readPadding32Length());
                     break;
 
                 case COMMENT: {
@@ -1303,8 +1523,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     <T extends Appendable & CharSequence> T getStringBuilder(int code, @NotNull T sb) {
         // Parse the UTF-8 encoded data from bytes based on the provided code and populate the StringBuilder.
-        bytes.parseUtf8(sb, true, code & 0x1f);
-        return sb;
+        return readGuardedUtf8Text(code & 0x1f, sb);
     }
 
     /**
@@ -1958,7 +2177,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case PADDING:
                         return readText(bytes.readUnsignedByte(), sb);
                     case PADDING32:
-                        bytes.readSkip(bytes.readUnsignedInt());
+                        guardedSkipDecodedLength(readPadding32Length());
                         return readText(bytes.readUnsignedByte(), sb);
                     default:
                         break;
@@ -1985,9 +2204,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case TYPE_LITERAL:
                     case STRING_ANY:
                         // Handle various string/textual representations.
-                        if (bytes.readUtf8(sb))
-                            return sb;
-                        return null;
+                        return readGuardedUtf8Text(sb);
                     case EVENT_OBJECT:
                         valueIn.text((StringBuilder) sb);
                         return sb;
@@ -2109,7 +2326,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     StringBuilder readUtf8() {
         @NotNull StringBuilder sb = acquireStringBuilder();
         // Read the UTF-8 encoded string into the StringBuilder.
-        return bytes.readUtf8(sb) ? sb : null;
+        return readGuardedUtf8(sb) ? sb : null;
     }
 
     /**
@@ -3338,14 +3555,14 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                 case STRING_ANY:
                     // Read the UTF-8 string from bytes and consume it
-                    s.accept(bytes.readUtf8());
+                    s.accept(readGuardedUtf8String());
                     break;
                 default:
                     // Check for special string codes
                     if (code >= STRING_0 && code <= STRING_31) {
                         @NotNull StringBuilder sb = acquireStringBuilder();
                         // Parse the UTF-8 string based on its length code and consume it
-                        bytes.parseUtf8(sb, code & 0b11111);
+                        readGuardedUtf8(code & 0b11111, sb);
                         s.accept(WireInternal.INTERNER.intern(sb));
 
                     } else {
@@ -3411,21 +3628,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     return null;
 
                 case STRING_ANY: { // NOSONAR
-                    long len0 = bytes.readStopBit();
-                    if (len0 == -1L) {
-                        return null;
-
-                    }
-                    int len = Maths.toUInt31(len0);
-                    long limit = bytes.readLimit();
-                    long end = bytes.readPosition() + len;
-                    try {
-                        bytes.readLimit(end);
-                        return UTF8.intern(bytes);
-                    } finally {
-                        bytes.readLimit(limit);
-                        bytes.readPosition(end);
-                    }
+                    return readGuardedUtf8String();
                 }
 
                 case TYPE_PREFIX: {
@@ -3459,30 +3662,96 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public WireIn bytes(@NotNull BytesOut<?> toBytes, boolean clearBytes) {
             long length = readLength();
+            long bodyStart = bytes.readPosition();
+            requireReadableBodyWithCode(length);
+            long declaredEnd = guardDeclaredBodyEnd(length, bodyStart);
             int code = readCode();
-            if (clearBytes)
-                toBytes.clear();
             if (code == NULL) {
+                if (clearBytes)
+                    toBytes.clear();
                 return BinaryWire.this;
             }
             if (code == TYPE_PREFIX) {
-                @Nullable StringBuilder sb = readUtf8();
-                assert sb != null;
+                Bytes<?> tmp = Bytes.allocateElasticOnHeap();
+                try {
+                    long limit0 = bytes.readLimit();
+                    try {
+                        bytes.readLimit(declaredEnd);
+                        @Nullable StringBuilder sb = readUtf8();
+                        assert sb != null;
 
-                long length2 = readLength();
-                int code2 = readCode();
-                if (code2 != U8_ARRAY)
-                    cantRead(code);
+                        long length2 = readLength();
+                        long bodyStart2 = bytes.readPosition();
+                        requireReadableBodyWithCode(length2);
+                        long declaredEnd2 = guardDeclaredBodyEnd(length2, bodyStart2);
+                        int code2 = readCode();
+                        if (code2 != U8_ARRAY)
+                            cantRead(code);
 
-                bytes.readWithLength0(length2 - 1, (b, sb1, toBytes1) -> Compression.uncompress(sb1, b, toBytes1), sb, toBytes);
+                        long payloadLength = length2 - 1;
+                        requireReadableLength(payloadLength);
+                        long limit1 = bytes.readLimit();
+                        try {
+                            bytes.readLimit(declaredEnd2);
+                            bytes.readWithLength0(payloadLength, (b, sb1, toBytes1) -> Compression.uncompress(sb1, b, toBytes1), sb, tmp);
+                        } finally {
+                            bytes.readLimit(limit1);
+                        }
+                        bytes.readPosition(declaredEnd);
+                    } catch (AssertionError e) {
+                        if (bytes.readPosition() > declaredEnd)
+                            bytes.readPosition(declaredEnd);
+                        throw new IORuntimeException(e);
+                    } catch (RuntimeException e) {
+                        if (bytes.readPosition() > declaredEnd)
+                            bytes.readPosition(declaredEnd);
+                        throw e;
+                    } finally {
+                        bytes.readLimit(limit0);
+                    }
+                    if (clearBytes)
+                        toBytes.clear();
+                    tmp.readPosition(0);
+                    toBytes.write(tmp, 0, tmp.writePosition());
+                } finally {
+                    tmp.releaseLast();
+                }
                 return wireIn();
 
             }
             if (code == U8_ARRAY) {
-                ((Bytes) bytes).readWithLength(length - 1, toBytes);
+                long payloadLength = length - 1;
+                requireReadableLength(payloadLength);
+                if (clearBytes)
+                    toBytes.clear();
+                ((Bytes) bytes).readWithLength(payloadLength, toBytes);
             } else {
-                bytes.uncheckedReadSkipBackOne();
-                textTo((Bytes) toBytes);
+                Bytes<?> tmp = Bytes.allocateElasticOnHeap();
+                try {
+                    bytes.uncheckedReadSkipBackOne();
+                    long limit0 = bytes.readLimit();
+                    try {
+                        bytes.readLimit(declaredEnd);
+                        textTo((Bytes) tmp);
+                        bytes.readPosition(declaredEnd);
+                    } catch (AssertionError e) {
+                        if (bytes.readPosition() > declaredEnd)
+                            bytes.readPosition(declaredEnd);
+                        throw new IORuntimeException(e);
+                    } catch (RuntimeException e) {
+                        if (bytes.readPosition() > declaredEnd)
+                            bytes.readPosition(declaredEnd);
+                        throw e;
+                    } finally {
+                        bytes.readLimit(limit0);
+                    }
+                    if (clearBytes)
+                        toBytes.clear();
+                    tmp.readPosition(0);
+                    toBytes.write(tmp, 0, tmp.writePosition());
+                } finally {
+                    tmp.releaseLast();
+                }
             }
             return wireIn();
         }
@@ -3491,6 +3760,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public WireIn bytesLiteral(@NotNull BytesOut<?> toBytes) {
             long length = readLength();
+            requireReadableLength(length);
             toBytes.clear();
             toBytes.write(bytes, bytes.readPosition(), length);
             bytes.readSkip(length);
@@ -3500,10 +3770,12 @@ public class BinaryWire extends AbstractWire implements Wire {
         @NotNull
         @Override
         public BytesStore<?, ?> bytesLiteral() {
-            int length = Maths.toUInt31(readLength());
-            @NotNull BytesStore<?, ?> toBytes = BytesStore.wrap(new byte[length]);
-            toBytes.write(0, bytes, bytes.readPosition(), length);
-            bytes.readSkip(length);
+            long length = readLength();
+            requireReadableLength(length);
+            int length31 = Maths.toUInt31(length);
+            @NotNull BytesStore<?, ?> toBytes = BytesStore.wrap(new byte[length31]);
+            toBytes.write(0, bytes, bytes.readPosition(), length31);
+            bytes.readSkip(length31);
             return toBytes;
         }
 
@@ -3511,15 +3783,18 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Nullable
         public WireIn bytesSet(@NotNull PointerBytesStore toBytes) {
             long length = readLength();
+            requireReadableBodyWithCode(length);
             int code = readCode();
             if (code == NULL) {
                 return BinaryWire.this;
             }
             if (code != U8_ARRAY)
                 cantRead(code);
+            long payloadLength = length - 1;
+            requireReadableLength(payloadLength);
             long startAddr = bytes.addressForRead(bytes.readPosition());
-            toBytes.set(startAddr, length - 1);
-            bytes.readSkip(length - 1);
+            toBytes.set(startAddr, payloadLength);
+            bytes.readSkip(payloadLength);
             return wireIn();
         }
 
@@ -3527,39 +3802,84 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public WireIn bytesMatch(@NotNull BytesStore<?, ?> compareBytes, @NotNull BooleanConsumer consumer) {
             long length = readLength();
+            requireReadableBodyWithCode(length);
             int code = readCode();
             if (code != U8_ARRAY)
                 cantRead(code);
-            length--;
-            if (compareBytes.readRemaining() == length) {
-                consumer.accept(bytes.equalBytes(compareBytes, length));
+            long payloadLength = length - 1;
+            requireReadableLength(payloadLength);
+            if (compareBytes.readRemaining() == payloadLength) {
+                consumer.accept(bytes.equalBytes(compareBytes, payloadLength));
             } else {
                 consumer.accept(false);
             }
-            bytes.readSkip(length);
+            bytes.readSkip(payloadLength);
             return wireIn();
 
+        }
+
+        private void requireReadableLength(long length) {
+            long remaining = bytes.readRemaining();
+            if (length < 0 || length > remaining)
+                throw new IORuntimeException("Length " + length + " exceeds the " + remaining +
+                        " bytes remaining between readPosition " + bytes.readPosition() + " and readLimit " + bytes.readLimit());
+        }
+
+        private void requireReadableBodyWithCode(long length) {
+            if (length < 1)
+                throw new IORuntimeException("Length " + length + " does not include a value code");
+            requireReadableLength(length);
+        }
+
+        private long guardDeclaredBodyEnd(long length, long bodyStart) {
+            long limit = bytes.readLimit();
+            long remaining = limit - bodyStart;
+            if (length < 0 || length > remaining)
+                throw new IORuntimeException("Length " + length + " exceeds the " + remaining +
+                        " bytes remaining between readPosition " + bodyStart + " and readLimit " + limit);
+            return bodyStart + length;
         }
 
         @Override
         @Nullable
         public BytesStore<?, ?> bytesStore() {
-            long length = readLength() - 1;
+            long length = readLength();
+            long bodyStart = bytes.readPosition();
+            requireReadableBodyWithCode(length);
+            long declaredEnd = guardDeclaredBodyEnd(length, bodyStart);
+            long payloadLength = length - 1;
             int code = readCode();
             switch (code) {
                 case I64_ARRAY:
                 case U8_ARRAY:
-                    @NotNull BytesStore<?, ?> toBytes = BytesStore.lazyNativeBytesStoreWithFixedCapacity(length);
-                    toBytes.write(0, bytes, bytes.readPosition(), length);
-                    bytes.readSkip(length);
+                    requireReadableLength(payloadLength);
+                    @NotNull BytesStore<?, ?> toBytes = BytesStore.lazyNativeBytesStoreWithFixedCapacity(payloadLength);
+                    toBytes.write(0, bytes, bytes.readPosition(), payloadLength);
+                    bytes.readSkip(payloadLength);
                     return toBytes;
 
                 case TYPE_PREFIX: {
-                    @Nullable StringBuilder sb = readUtf8();
-                    @Nullable byte[] bytes = Compression.uncompress(sb, this, ValueIn::bytes);
-                    if (bytes != null)
-                        return BytesStore.wrap(bytes);
-                    throw new UnsupportedOperationException("Unsupported type " + sb);
+                    long limit0 = bytes.readLimit();
+                    try {
+                        bytes.readLimit(declaredEnd);
+                        @Nullable StringBuilder sb = readUtf8();
+                        @Nullable byte[] uncompressed = Compression.uncompress(sb, this, ValueIn::bytes);
+                        if (uncompressed != null) {
+                            bytes.readPosition(declaredEnd);
+                            return BytesStore.wrap(uncompressed);
+                        }
+                        throw new UnsupportedOperationException("Unsupported type " + sb);
+                    } catch (AssertionError e) {
+                        if (bytes.readPosition() > declaredEnd)
+                            bytes.readPosition(declaredEnd);
+                        throw new IORuntimeException(e);
+                    } catch (RuntimeException e) {
+                        if (bytes.readPosition() > declaredEnd)
+                            bytes.readPosition(declaredEnd);
+                        throw e;
+                    } finally {
+                        bytes.readLimit(limit0);
+                    }
                 }
                 case NULL:
                     return null;
@@ -3576,37 +3896,44 @@ public class BinaryWire extends AbstractWire implements Wire {
          * @param sb The StringBuilder to store the read bytes.
          */
         public void bytesStore(@NotNull StringBuilder sb) {
-            sb.setLength(0);
-
             // Consume any padding before reading bytes
             consumePadding();
             long pos = bytes.readPosition();
             long length = readLength();
+            long bodyStart = bytes.readPosition();
 
             // Validate if the read length is valid or recognized
             if (length < 0)
                 throw cantRead(peekCode());
 
             // Ensure enough bytes remain for reading the length specified
-            if (length > bytes.readRemaining())
-                throw new BufferUnderflowException();
+            requireReadableBodyWithCode(length);
 
             int code = readCode();
             if (code == U8_ARRAY) {
+                long payloadLength = length - 1;
+                requireReadableLength(payloadLength);
+                sb.setLength(0);
                 // Read each byte and cast to char to store in StringBuilder
-                for (long i = 1; i < length; i++)
+                for (long i = 0; i < payloadLength; i++)
                     sb.append((char) bytes.readUnsignedByte());
             } else {
                 // Reset the reading position and store from size-prefixed blobs
                 bytes.readPosition(pos);
                 long limit = bytes.readLimit();
-                bytes.readLimit(pos + 4 + length);
+                long remaining = limit - bodyStart;
+                if (length < 0 || length > remaining)
+                    throw new IORuntimeException("Length " + length + " exceeds the " + remaining +
+                            " bytes remaining between readPosition " + bodyStart + " and readLimit " + limit);
+                long declaredEnd = bodyStart + length;
+                sb.setLength(0);
+                bytes.readLimit(declaredEnd);
                 try {
                     sb.append(Wires.fromSizePrefixedBlobs(bytes));
                 } finally {
                     // Restore the original limit and position after reading
                     bytes.readLimit(limit);
-                    bytes.readPosition(limit);
+                    bytes.readPosition(declaredEnd);
                 }
             }
         }
@@ -3617,41 +3944,42 @@ public class BinaryWire extends AbstractWire implements Wire {
          * @param toBytes The Bytes object to store the read bytes.
          */
         public void bytesStore(@NotNull Bytes<?> toBytes) {
-            // Clear the provided Bytes object before storing
-            toBytes.clear();
-            long length = readLength() - 1;
+            long length = readLength();
+            requireReadableBodyWithCode(length);
+            long payloadLength = length - 1;
             int code = readCode();
 
             // If null code is encountered, terminate early
             if (code == NULL) {
+                toBytes.clear();
                 return;
             }
             if (code != U8_ARRAY)
                 cantRead(code);
 
             // Validate length to ensure no reading past available bytes
-            if (length > bytes.readRemaining())
-                throw new IllegalStateException("Length of Bytes " + length + " > " + bytes.readRemaining());
+            requireReadableLength(payloadLength);
 
             // Write the bytes read into the provided Bytes object
-            toBytes.ensureCapacity(toBytes.writePosition() + length);
-            toBytes.write(0, bytes, bytes.readPosition(), length);
-            toBytes.readLimit(length);
-            bytes.readSkip(length);
+            toBytes.clear();
+            toBytes.ensureCapacity(toBytes.writePosition() + payloadLength);
+            toBytes.write(0, bytes, bytes.readPosition(), payloadLength);
+            toBytes.readLimit(payloadLength);
+            bytes.readSkip(payloadLength);
         }
 
         @Override
         @NotNull
         public WireIn bytes(@NotNull ReadBytesMarshallable bytesConsumer) {
-            long length = readLength() - 1;
+            long length = readLength();
+            requireReadableBodyWithCode(length);
+            long payloadLength = length - 1;
             int code = readCode();
             if (code != U8_ARRAY)
                 cantRead(code);
 
-            if (length > bytes.readRemaining())
-                throw new BufferUnderflowException();
             long limit0 = bytes.readLimit();
-            long limit = bytes.readPosition() + length;
+            long limit = guardedReadLimit(payloadLength);
             try {
                 bytes.readLimit(limit);
                 bytesConsumer.readMarshallable(bytes);
@@ -3666,23 +3994,58 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public byte[] bytes(byte[] using) {
             long length = readLength();
+            long bodyStart = bytes.readPosition();
+            requireReadableBodyWithCode(length);
+            long declaredEnd = guardDeclaredBodyEnd(length, bodyStart);
             int code = readCode();
             if (code == NULL) {
                 return null;
             }
 
             if (code == TYPE_PREFIX) {
-                @Nullable StringBuilder sb = readUtf8();
-                assert "byte[]".contentEquals(sb);
-                length = readLength();
-                code = readCode();
+                long limit0 = bytes.readLimit();
+                try {
+                    bytes.readLimit(declaredEnd);
+                    @Nullable StringBuilder sb = readUtf8();
+                    assert "byte[]".contentEquals(sb);
+                    long length2 = readLength();
+                    long bodyStart2 = bytes.readPosition();
+                    requireReadableBodyWithCode(length2);
+                    long declaredEnd2 = guardDeclaredBodyEnd(length2, bodyStart2);
+                    int code2 = readCode();
+                    if (code2 != U8_ARRAY)
+                        cantRead(code2);
+                    long payloadLength = length2 - 1;
+                    requireReadableLength(payloadLength);
+                    @NotNull byte[] bytes2 = using != null && using.length == payloadLength ? using : new byte[Maths.toUInt31(payloadLength)];
+                    long limit1 = bytes.readLimit();
+                    try {
+                        bytes.readLimit(declaredEnd2);
+                        bytes.readWithLength(payloadLength, b -> b.read(bytes2));
+                    } finally {
+                        bytes.readLimit(limit1);
+                    }
+                    bytes.readPosition(declaredEnd);
+                    return bytes2;
+                } catch (AssertionError e) {
+                    if (bytes.readPosition() > declaredEnd)
+                        bytes.readPosition(declaredEnd);
+                    throw new IORuntimeException(e);
+                } catch (RuntimeException e) {
+                    if (bytes.readPosition() > declaredEnd)
+                        bytes.readPosition(declaredEnd);
+                    throw e;
+                } finally {
+                    bytes.readLimit(limit0);
+                }
             }
 
             if (code != U8_ARRAY)
                 cantRead(code);
-            length--;
-            @NotNull byte[] bytes2 = using != null && using.length == length ? using : new byte[Maths.toUInt31(length)];
-            bytes.readWithLength(length, b -> b.read(bytes2));
+            long payloadLength = length - 1;
+            requireReadableLength(payloadLength);
+            @NotNull byte[] bytes2 = using != null && using.length == payloadLength ? using : new byte[Maths.toUInt31(payloadLength)];
+            bytes.readWithLength(payloadLength, b -> b.read(bytes2));
             return bytes2;
         }
 
@@ -3703,19 +4066,20 @@ public class BinaryWire extends AbstractWire implements Wire {
 
                 case BYTES_LENGTH8:
                     bytes.uncheckedReadSkipOne();
-                    return bytes.uncheckedReadUnsignedByte();
+                    return readGuardedUnsignedByteLength();
 
                 case BYTES_LENGTH16:
                     bytes.uncheckedReadSkipOne();
-                    return bytes.readUnsignedShort();
+                    return readGuardedUnsignedShortLength();
 
                 case BYTES_LENGTH32:
                     bytes.uncheckedReadSkipOne();
-                    return bytes.readUnsignedInt();
+                    return readGuardedUnsignedIntLength();
 
                 case TYPE_PREFIX:
                     bytes.uncheckedReadSkipOne();
-                    long len = bytes.readStopBit();
+                    long len = readGuardedStopBitLength();
+                    requireReadableLength(len);
                     bytes.readSkip(len);
                     return readLength();
                 case FALSE:
@@ -3771,8 +4135,15 @@ public class BinaryWire extends AbstractWire implements Wire {
                     long pos0 = bytes.readPosition();
                     try {
                         bytes.uncheckedReadSkipOne();
-                        long len2 = bytes.readStopBit();
-                        return bytes.readPosition() - pos0 + len2;
+                        long len2 = readGuardedStopBitLength();
+                        if (len2 == -1L)
+                            return bytes.readPosition() - pos0;
+                        if (len2 < -1L)
+                            throw new IORuntimeException("Invalid text length " + len2);
+                        long bodyStart = bytes.readPosition();
+                        guardedTextEnd(len2);
+                        Maths.toUInt31(len2);
+                        return bodyStart - pos0 + len2;
                     } finally {
                         bytes.readPosition(pos0);
                     }
@@ -3800,8 +4171,10 @@ public class BinaryWire extends AbstractWire implements Wire {
             final long length = readLength();
             if (length < 0)
                 objectBestEffort();
-            else
+            else {
+                requireReadableLength(length);
                 bytes.readSkip(length);
+            }
 
             return BinaryWire.this;
         }
@@ -4188,7 +4561,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 throw cantRead(peekCode());
 
             long limit = bytes.readLimit();
-            long limit2 = bytes.readPosition() + length;
+            long limit2 = guardedReadLimit(length);
             bytes.readLimit(limit2);
             try {
                 tReader.accept(t, this);
@@ -4219,7 +4592,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 throw cantRead(peekCode());
 
             long limit = bytes.readLimit();
-            long limit2 = bytes.readPosition() + length;
+            long limit2 = guardedReadLimit(length);
             bytes.readLimit(limit2);
             try {
                 tReader.accept(this, list, buffer, bufferAdd);
@@ -4237,7 +4610,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             int code = readCode();
             long length = readLengthPrefixed(code);
             long limit = bytes.readLimit();
-            long limit2 = bytes.readPosition() + length;
+            long limit2 = guardedReadLimit(length);
             bytes.readLimit(limit2);
             try {
                 tReader.accept(t, kls, this);
@@ -4260,15 +4633,15 @@ public class BinaryWire extends AbstractWire implements Wire {
             switch (code) {
                 case BYTES_LENGTH8:
                     // Read an 8-bit unsigned integer as the length
-                    length = bytes.readUnsignedByte();
+                    length = readGuardedUnsignedByteLength();
                     break;
                 case BYTES_LENGTH16:
                     // Read a 16-bit unsigned integer as the length
-                    length = bytes.readUnsignedShort();
+                    length = readGuardedUnsignedShortLength();
                     break;
                 case BYTES_LENGTH32:
                     // Read a 32-bit unsigned integer as the length
-                    length = bytes.readUnsignedInt();
+                    length = readGuardedUnsignedIntLength();
                     break;
                 default:
                     // If an unrecognized code is encountered, throw an exception
@@ -4283,7 +4656,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             int code = readCode();
             long length = readLengthPrefixed(code);
             long limit = bytes.readLimit();
-            long limit2 = bytes.readPosition() + length;
+            long limit2 = guardedReadLimit(length);
             bytes.readLimit(limit2);
             try {
                 return tReader.applyAsInt(this, t);
@@ -4301,7 +4674,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                 long length = readLength();
                 if (length >= 0) {
                     long limit = bytes.readLimit();
-                    long limit2 = bytes.readPosition() + length;
+                    long limit2 = guardedReadLimit(length);
                     bytes.readLimit(limit2);
                     try {
                         return marshallableReader.apply(BinaryWire.this);
@@ -4441,7 +4814,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             int code = readCode();
             switch (code) {
                 case TYPE_PREFIX:
-                    bytes.readUtf8(sb);
+                    readGuardedUtf8(sb);
 
                     break;
                 case NULL:
@@ -4523,32 +4896,34 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (this.isNull())
                 return false;
             pushState();
-
-            // Get the length of the data to be read
-            long length = readLength();
-            if (length >= 0) {
-                long limit = bytes.readLimit();
-                long limit2 = bytes.readPosition() + length;
-                bytes.readLimit(limit2);
-                try {
-                    // Read the object based on its type
-                    if (useSelfDescribingMessage(object)) {
-                        if (overwrite)
-                            object.readMarshallable(BinaryWire.this);
-                        else
-                            Wires.readMarshallable(object, BinaryWire.this, false);
-                    } else {
-                        ((ReadBytesMarshallable) object).readMarshallable(BinaryWire.this.bytes);
+            try {
+                // Get the length of the data to be read
+                long length = readLength();
+                if (length >= 0) {
+                    long limit = bytes.readLimit();
+                    long limit2 = guardedReadLimit(length);
+                    bytes.readLimit(limit2);
+                    try {
+                        // Read the object based on its type
+                        if (useSelfDescribingMessage(object)) {
+                            if (overwrite)
+                                object.readMarshallable(BinaryWire.this);
+                            else
+                                Wires.readMarshallable(object, BinaryWire.this, false);
+                        } else {
+                            ((ReadBytesMarshallable) object).readMarshallable(BinaryWire.this.bytes);
+                        }
+                    } finally {
+                        bytes.readLimit(limit);
+                        bytes.readPosition(limit2);
                     }
-                } finally {
-                    bytes.readLimit(limit);
-                    bytes.readPosition(limit2);
-                    popState();
+                } else {
+                    throw new IORuntimeException("Length unknown");
                 }
-            } else {
-                throw new IORuntimeException("Length unknown");
+                return true;
+            } finally {
+                popState();
             }
-            return true;
         }
 
         @Override
@@ -4568,24 +4943,27 @@ public class BinaryWire extends AbstractWire implements Wire {
             if (this.isNull())
                 return null;
             pushState();
-            consumePadding();
-            long length = readLength();
-            if (length >= 0) {
-                long limit = bytes.readLimit();
-                long limit2 = bytes.readPosition() + length;
-                bytes.readLimit(limit2);
-                try {
-                    strategy.readUsing(null, Jvm.uncheckedCast(object), this, BracketType.MAP);
+            try {
+                consumePadding();
+                long length = readLength();
+                if (length >= 0) {
+                    long limit = bytes.readLimit();
+                    long limit2 = guardedReadLimit(length);
+                    bytes.readLimit(limit2);
+                    try {
+                        strategy.readUsing(null, Jvm.uncheckedCast(object), this, BracketType.MAP);
 
-                } finally {
-                    bytes.readLimit(limit);
-                    bytes.readPosition(limit2);
-                    popState();
+                    } finally {
+                        bytes.readLimit(limit);
+                        bytes.readPosition(limit2);
+                    }
+                } else {
+                    throw new IORuntimeException("Length unknown " + length);
                 }
-            } else {
-                throw new IORuntimeException("Length unknown " + length);
+                return object;
+            } finally {
+                popState();
             }
-            return object;
         }
 
         /**
@@ -4604,7 +4982,7 @@ public class BinaryWire extends AbstractWire implements Wire {
             long length = readLength();  // Read the expected length of the data.
             if (length >= 0) {  // If length is valid, proceed.
                 long limit = bytes.readLimit();
-                long limit2 = bytes.readPosition() + length;
+                long limit2 = guardedReadLimit(length);
                 bytes.readLimit(limit2);  // Set a temporary limit for the buffer based on the expected length.
                 try {
                     return Demarshallable.newInstance(clazz, wireIn());  // Deserialize the object using the current wire input.
@@ -4843,14 +5221,21 @@ public class BinaryWire extends AbstractWire implements Wire {
                                 long pos = bytes.readPosition();
                                 bytes.uncheckedReadSkipOne();
                                 long len = readLength(code);
+                                long nestedLimit = guardedReadLimit(len);
                                 code = peekCode();
                                 if (code == U8_ARRAY) {
                                     bytes.readPosition(pos);
-                                    return bytesStore();
+                                    long lim = bytes.readLimit();
+                                    try {
+                                        bytes.readLimit(nestedLimit);
+                                        return bytesStore();
+                                    } finally {
+                                        bytes.readLimit(lim);
+                                    }
                                 }
                                 long lim = bytes.readLimit();
                                 try {
-                                    bytes.readLimit(guardedReadLimit(len));
+                                    bytes.readLimit(nestedLimit);
                                     Object using1 = using;
                                     if (using1 == null && type != null)
                                         using1 = strategy.newInstanceOrNull(type);
@@ -4954,13 +5339,13 @@ public class BinaryWire extends AbstractWire implements Wire {
             // Determine the code and read the corresponding length.
             switch (code) {
                 case BYTES_LENGTH8:
-                    len = bytes.readUnsignedByte();  // Read an unsigned 8-bit value.
+                    len = readGuardedUnsignedByteLength();  // Read an unsigned 8-bit value.
                     break;
                 case BYTES_LENGTH16:
-                    len = bytes.readUnsignedShort();  // Read an unsigned 16-bit value.
+                    len = readGuardedUnsignedShortLength();  // Read an unsigned 16-bit value.
                     break;
                 case BYTES_LENGTH32:
-                    len = bytes.readUnsignedInt();  // Read an unsigned 32-bit value.
+                    len = readGuardedUnsignedIntLength();  // Read an unsigned 32-bit value.
                     break;
                 default:
                     throw new AssertionError(); // Throw an assertion error if the code is unrecognized.
@@ -5002,18 +5387,18 @@ public class BinaryWire extends AbstractWire implements Wire {
                         // For lengths, skip the bytes that define the length and then
                         // skip the number of bytes specified by the length.
                         case BYTES_LENGTH8:
-                            bytes.readSkip(1);  // Skip length definition byte.
-                            bytes.readSkip(bytes.readUnsignedByte());  // Skip the specified bytes.
+                            bytes.uncheckedReadSkipOne();
+                            guardedSkipDecodedLength(readGuardedUnsignedByteLength());
                             return;
 
                         case BYTES_LENGTH16:
-                            bytes.readSkip(1);
-                            bytes.readSkip(bytes.readUnsignedShort());
+                            bytes.uncheckedReadSkipOne();
+                            guardedSkipDecodedLength(readGuardedUnsignedShortLength());
                             return;
 
                         case BYTES_LENGTH32:
-                            bytes.readSkip(1);
-                            bytes.readSkip(bytes.readUnsignedInt());
+                            bytes.uncheckedReadSkipOne();
+                            guardedSkipDecodedLength(readGuardedUnsignedIntLength());
 
                             return;
 
