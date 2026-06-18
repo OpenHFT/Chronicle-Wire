@@ -6,10 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.ref.*;
-import net.openhft.chronicle.bytes.util.BinaryLengthLength;
-import net.openhft.chronicle.bytes.util.Bit8StringInterner;
-import net.openhft.chronicle.bytes.util.Compression;
-import net.openhft.chronicle.bytes.util.UTF8StringInterner;
+import net.openhft.chronicle.bytes.util.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -78,6 +75,9 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     // Thread-local storage for {@link VanillaMessageHistory}
     private static final ThreadLocal<VanillaMessageHistory> VANILLA_MESSAGE_HISTORY_TL = ThreadLocal.withInitial(VanillaMessageHistory::new);
+
+    // For returning empty byte arrays
+    static final byte[] NO_BYTE_ARRAY = {};
 
     /**
      * Used when the wire is configured for fixed size output. Provides more
@@ -729,11 +729,12 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @return The read limit for the nested value: the current read position plus the length.
      * @throws IORuntimeException If the length exceeds the data remaining before the read limit.
      */
-    private long guardedReadLimit(long len) {
+    long guardedReadLimit(long len) {
+        // this private method assumes this caller has made the check already
+        assert len >= 0 && len <= 0xFFFF_FFFFL : "len: " + len;
+
         long start = bytes.readPosition();
         long prevLimit = bytes.readLimit();
-
-        assert len >= 0 && len <= 0xFFFF_FFFFL : "len: " + len;
         assert start <= prevLimit : "readPosition " + start + " > readLimit " + prevLimit;
 
         if (len > prevLimit - start)
@@ -1958,6 +1959,8 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case PADDING:
                         return readText(bytes.readUnsignedByte(), sb);
                     case PADDING32:
+                        if (bytes.readRemaining() < 5)
+                            throw new DecoratedBufferUnderflowException("Requires at least five bytes, readRemaining: " + bytes.readRemaining());
                         bytes.readSkip(bytes.readUnsignedInt());
                         return readText(bytes.readUnsignedByte(), sb);
                     default:
@@ -3482,7 +3485,14 @@ public class BinaryWire extends AbstractWire implements Wire {
                 ((Bytes) bytes).readWithLength(length - 1, toBytes);
             } else {
                 bytes.uncheckedReadSkipBackOne();
-                textTo((Bytes) toBytes);
+                long readLimit = bytes.readLimit();
+
+                try {
+                    bytes.readLimit(bytes.readPosition() + length);
+                    textTo((Bytes) toBytes);
+                } finally {
+                    bytes.readLimit(readLimit);
+                }
             }
             return wireIn();
         }
@@ -3666,6 +3676,9 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public byte[] bytes(byte[] using) {
             long length = readLength();
+            if (length == 0) {
+                return NO_BYTE_ARRAY;
+            }
             int code = readCode();
             if (code == NULL) {
                 return null;

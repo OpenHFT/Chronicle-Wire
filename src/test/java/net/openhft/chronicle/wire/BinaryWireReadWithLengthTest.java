@@ -4,12 +4,15 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import java.nio.BufferUnderflowException;
+
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Illustrates Chronicle-Queue style copying of binary fragments into a textual representation.
@@ -158,7 +161,70 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
         }
     }
 
+    @Test
+    public void valueInBytesRejectsMaxUnsignedLengthWithScalarPayload() {
+        expectValueInBytesRejectsMaxUnsignedLength(BinaryWireCode.TRUE, 0x55);
+    }
+
+    @Test
+    public void valueInBytesRejectsMaxUnsignedLengthWithU8ArrayPayload() {
+        expectValueInBytesRejectsMaxUnsignedLength(BinaryWireCode.U8_ARRAY, 0x55);
+    }
+
+    @Test
+    public void objectRejectsMaxUnsignedLengthWithoutReadingNestedU8Array() {
+        Bytes<?> bytes = bytesLength32(0xFFFFFFFFL, BinaryWireCode.U8_ARRAY, 1, 2, 3);
+        try {
+            BinaryWire source = new BinaryWire(bytes);
+            try {
+                source.getValueIn().object();
+                fail("Expected IORuntimeException for unsigned 32-bit object length");
+            } catch (BufferUnderflowException expected) {
+            }
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    public void valueInBytesCopiesValidBytesLength32U8ArrayPayload() {
+        Bytes<?> bytes = bytesLength32(4, BinaryWireCode.U8_ARRAY, 1, 2, 3);
+        Bytes<?> out = Bytes.allocateElasticOnHeap();
+        try {
+            new BinaryWire(bytes).getValueIn().bytes(out);
+
+            assertEquals(3, out.writePosition());
+            assertArrayEquals(new byte[]{1, 2, 3}, out.toByteArray());
+            assertEquals(9, bytes.readPosition());
+            assertTrue(bytes.readPosition() <= bytes.readLimit());
+        } finally {
+            out.releaseLast();
+            bytes.releaseLast();
+        }
+    }
+
+    private void expectValueInBytesRejectsMaxUnsignedLength(int... payloadCodes) {
+        Bytes<?> bytes = bytesLength32(0xFFFFFFFFL, payloadCodes);
+        Bytes<?> out = Bytes.allocateElasticOnHeap();
+        out.writeByte((byte) 0x66);
+        try {
+            BinaryWire source = new BinaryWire(bytes);
+            try {
+                source.getValueIn().bytes(out);
+            } catch (BufferUnderflowException e) {
+                // expected
+            }
+        } finally {
+            out.releaseLast();
+            bytes.releaseLast();
+        }
+    }
+
     private Bytes<?> uncheckedBytesLength32(long length, int... payloadCodes) {
+        return bytesLength32(length, payloadCodes).unchecked(true);
+    }
+
+    private Bytes<?> bytesLength32(long length, int... payloadCodes) {
         Bytes<?> encoded = Bytes.allocateElasticOnHeap();
         encoded.writeUnsignedByte(BinaryWireCode.BYTES_LENGTH32);
         encoded.writeUnsignedInt(length);
@@ -166,7 +232,7 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
             encoded.writeUnsignedByte(payloadCode);
         byte[] data = encoded.toByteArray();
         encoded.releaseLast();
-        return Bytes.wrapForRead(data).unchecked(true);
+        return Bytes.wrapForRead(data);
     }
 
     /**
@@ -207,5 +273,123 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
         source.copyOne(textWire);
         String first = textWire.bytes().toString();
         assertTrue(first.length() > 0);
+    }
+
+    @Test
+    public void valueInBytesRejectsTypePrefixThatExceedsDeclaredLength() {
+        byte[] payload = {
+                (byte) BinaryWireCode.BYTES_LENGTH8,
+                0x01,
+                (byte) BinaryWireCode.TYPE_PREFIX,
+                0x03,
+                'x', 'x', 'x',
+                (byte) BinaryWireCode.U8_ARRAY,
+                0x55
+        };
+        Bytes<?> bytes = Bytes.wrapForRead(payload).unchecked(true);
+
+        long originalLimit = bytes.readLimit();
+        BinaryWire wire = new BinaryWire(bytes);
+        Bytes<?> output = Bytes.allocateElasticOnHeap();
+        output.writeByte((byte) 0x66);
+
+        RuntimeException e = assertThrows(RuntimeException.class,
+                () -> wire.getValueIn().bytes(output));
+
+        assertNotNull(e);
+        assertEquals(0, output.writePosition());
+        assertEquals(originalLimit, bytes.readLimit());
+        assertTrailingTypePrefixBytes(bytes);
+    }
+
+    @Test
+    public void readTextRejectsTruncatedPadding32LengthField() {
+        byte[] payload = {
+                0x04, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x02
+        };
+        Bytes<?> bytes1 = Bytes.wrapForRead(payload).unchecked(true);
+        bytes1.readLimit(4);
+
+        BinaryWire wire = new BinaryWire(bytes1);
+        StringBuilder sb = new StringBuilder();
+
+        DecoratedBufferUnderflowException e = assertThrows(DecoratedBufferUnderflowException.class,
+                () -> wire.readText(BinaryWireCode.PADDING32, sb));
+
+        assertTrue(e.getMessage().contains("Requires at least five bytes, readRemaining: "));
+        assertEquals(0, bytes1.readPosition());
+        assertEquals(4, bytes1.readLimit());
+        assertEquals(4, bytes1.readRemaining());
+        assertTrue(bytes1.readPosition() <= bytes1.readLimit());
+    }
+
+    @Test
+    public void valueInBytesRejectsPadding32ThatExceedsDeclaredLength() {
+        byte[] payload = {
+                (byte) BinaryWireCode.BYTES_LENGTH8,
+                0x01,
+                (byte) BinaryWireCode.PADDING32,
+                0x04, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00,
+                (byte) BinaryWireCode.TRUE
+        };
+        Bytes<?> bytes = Bytes.wrapForRead(payload).unchecked(true);
+
+        long originalLimit = bytes.readLimit();
+        BinaryWire wire = new BinaryWire(bytes);
+        Bytes<?> output = Bytes.allocateElasticOnHeap();
+        output.writeByte((byte) 0x66);
+
+        DecoratedBufferUnderflowException e = assertThrows(DecoratedBufferUnderflowException.class,
+                () -> wire.getValueIn().bytes(output));
+
+        assertTrue(e.getMessage().contains("Requires at least five bytes, readRemaining: "));
+        assertEquals(0, output.writePosition());
+        assertEquals(originalLimit, bytes.readLimit());
+        assertTrailingPaddingAndTrue(bytes);
+    }
+
+    @Test
+    public void byteArrayReturnsEmptyArrayForZeroLengthBody() {
+        byte[] payload = {
+                (byte) BinaryWireCode.BYTES_LENGTH32,
+                0x00, 0x00, 0x00, 0x00,
+                (byte) BinaryWireCode.U8_ARRAY,
+                0x55
+        };
+        Bytes<?> bytes2 = Bytes.wrapForRead(payload).unchecked(true);
+        assertEquals(0, bytes2.readInt(1));
+        bytes2.readLimit(5);
+
+        BinaryWire wire = new BinaryWire(bytes2);
+        byte[] using = {(byte) 0x66};
+
+        byte[] bytes1 = wire.getValueIn().bytes(using);
+
+        assertEquals(0, bytes1.length);
+    }
+
+    static void assertTrailingPaddingAndTrue(Bytes<?> bytes) {
+        assertEquals(BinaryWireCode.PADDING32, bytes.readUnsignedByte(2));
+        assertEquals(0x04, bytes.readUnsignedByte(3));
+        assertEquals(0x00, bytes.readUnsignedByte(4));
+        assertEquals(0x00, bytes.readUnsignedByte(5));
+        assertEquals(0x00, bytes.readUnsignedByte(6));
+        assertEquals(0x00, bytes.readUnsignedByte(7));
+        assertEquals(0x00, bytes.readUnsignedByte(8));
+        assertEquals(0x00, bytes.readUnsignedByte(9));
+        assertEquals(0x00, bytes.readUnsignedByte(10));
+        assertEquals(BinaryWireCode.TRUE, bytes.readUnsignedByte(11));
+    }
+
+    static void assertTrailingTypePrefixBytes(Bytes<?> bytes) {
+        assertEquals(BinaryWireCode.TYPE_PREFIX, bytes.readUnsignedByte(2));
+        assertEquals(0x03, bytes.readUnsignedByte(3));
+        assertEquals('x', bytes.readUnsignedByte(4));
+        assertEquals('x', bytes.readUnsignedByte(5));
+        assertEquals('x', bytes.readUnsignedByte(6));
+        assertEquals(BinaryWireCode.U8_ARRAY, bytes.readUnsignedByte(7));
+        assertEquals(0x55, bytes.readUnsignedByte(8));
     }
 }
