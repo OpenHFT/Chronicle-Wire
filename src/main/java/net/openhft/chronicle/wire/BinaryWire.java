@@ -6,10 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.ref.*;
-import net.openhft.chronicle.bytes.util.BinaryLengthLength;
-import net.openhft.chronicle.bytes.util.Bit8StringInterner;
-import net.openhft.chronicle.bytes.util.Compression;
-import net.openhft.chronicle.bytes.util.UTF8StringInterner;
+import net.openhft.chronicle.bytes.util.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -78,6 +75,9 @@ public class BinaryWire extends AbstractWire implements Wire {
 
     // Thread-local storage for {@link VanillaMessageHistory}
     private static final ThreadLocal<VanillaMessageHistory> VANILLA_MESSAGE_HISTORY_TL = ThreadLocal.withInitial(VanillaMessageHistory::new);
+
+    // For returning empty byte arrays
+    static final byte[] NO_BYTE_ARRAY = {};
 
     /**
      * Used when the wire is configured for fixed size output. Provides more
@@ -485,14 +485,14 @@ public class BinaryWire extends AbstractWire implements Wire {
                     // Handle byte lengths and read accordingly.
                     case BYTES_LENGTH8: {
                         bytes.uncheckedReadSkipOne();
-                        int len = bytes.readUnsignedByte();
+                        long len = bytes.readUnsignedByte();
                         readWithLength(wire, len);
                         break outerSwitch;
                     }
 
                     case BYTES_LENGTH16: {
                         bytes.uncheckedReadSkipOne();
-                        int len = bytes.readUnsignedShort();
+                        long len = bytes.readUnsignedShort();
                         readWithLength(wire, len);
                         break outerSwitch;
                     }
@@ -500,7 +500,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case BYTES_LENGTH32: {
                         // Handle 32-bit length bytes and read accordingly.
                         bytes.uncheckedReadSkipOne();
-                        int len = bytes.readInt();
+                        long len = bytes.readUnsignedInt();
                         readWithLength(wire, len);
                         break outerSwitch;
                     }
@@ -660,12 +660,28 @@ public class BinaryWire extends AbstractWire implements Wire {
      * @param len  The length of data to be read.
      * @throws InvalidMarshallableException If there's an issue during marshalling.
      */
-    @SuppressWarnings("incomplete-switch")
     public void readWithLength(@NotNull WireOut wire, int len) throws InvalidMarshallableException {
+        readWithLength(wire, (long) len);
+    }
+
+    /**
+     * Reads data of a specified length from the bytes stream and writes to the WireOut stream
+     * while interpreting the type of data (Map, Sequence, or Object).
+     *
+     * @param wire The wire output stream to write data to.
+     * @param len  The length of data to be read, as an unsigned 32-bit value (0 to 4294967295).
+     * @throws InvalidMarshallableException If there's an issue during marshalling.
+     * @throws IORuntimeException If the length is outside the unsigned 32-bit range,
+     *                            or exceeds the data remaining before the read limit.
+     */
+    @SuppressWarnings("incomplete-switch")
+    public void readWithLength(@NotNull WireOut wire, long len) throws InvalidMarshallableException {
+        // A length over 32-bit unsigned is unexpected: BYTES_LENGTH32 cannot encode it.
+        if (len < 0 || len > 0xFFFF_FFFFL)
+            throw new IORuntimeException("Invalid length " + len + ", expected an unsigned 32-bit value (0 to 4294967295)");
         long limit = bytes.readLimit();
-        long newLimit = bytes.readPosition() + len;
-        if (newLimit > limit)
-            throw new IORuntimeException("Can't extend the limit");
+        long newLimit = guardedReadLimit(len);
+
         try {
             bytes.readLimit(newLimit);
             @NotNull final ValueOut wireValueOut = wire.getValueOut();
@@ -702,6 +718,30 @@ public class BinaryWire extends AbstractWire implements Wire {
         } finally {
             bytes.readLimit(limit);  // Reset the read limit to its original value.
         }
+    }
+
+    /**
+     * Computes the read limit for a nested, length-prefixed value. A nested value must lie
+     * within the enclosing document, so the read limit can only shrink, never extend past
+     * the current one into data that is not readable.
+     *
+     * @param len The length of the nested value, as an unsigned 32-bit value.
+     * @return The read limit for the nested value: the current read position plus the length.
+     * @throws IORuntimeException If the length exceeds the data remaining before the read limit.
+     */
+    long guardedReadLimit(long len) {
+        // this private method assumes this caller has made the check already
+        assert len >= 0 && len <= 0xFFFF_FFFFL : "len: " + len;
+
+        long start = bytes.readPosition();
+        long prevLimit = bytes.readLimit();
+        assert start <= prevLimit : "readPosition " + start + " > readLimit " + prevLimit;
+
+        if (len > prevLimit - start)
+            throw new IORuntimeException("Length " + len + " exceeds the " + (prevLimit - start) +
+                    " bytes remaining between readPosition " + start + " and readLimit " + prevLimit);
+
+        return start + len;
     }
 
     /**
@@ -1919,6 +1959,9 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case PADDING:
                         return readText(bytes.readUnsignedByte(), sb);
                     case PADDING32:
+                        // 4-byte padding length + 1-byte trailing value code
+                        if (bytes.readRemaining() < 5)
+                            throw new DecoratedBufferUnderflowException("Requires at least five bytes, readRemaining: " + bytes.readRemaining());
                         bytes.readSkip(bytes.readUnsignedInt());
                         return readText(bytes.readUnsignedByte(), sb);
                     default:
@@ -3443,7 +3486,14 @@ public class BinaryWire extends AbstractWire implements Wire {
                 ((Bytes) bytes).readWithLength(length - 1, toBytes);
             } else {
                 bytes.uncheckedReadSkipBackOne();
-                textTo((Bytes) toBytes);
+                long readLimit = bytes.readLimit();
+
+                try {
+                    bytes.readLimit(bytes.readPosition() + length);
+                    textTo((Bytes) toBytes);
+                } finally {
+                    bytes.readLimit(readLimit);
+                }
             }
             return wireIn();
         }
@@ -3627,6 +3677,9 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public byte[] bytes(byte[] using) {
             long length = readLength();
+            if (length == 0) {
+                return NO_BYTE_ARRAY;
+            }
             int code = readCode();
             if (code == NULL) {
                 return null;
@@ -4803,7 +4856,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                             } else {
                                 long pos = bytes.readPosition();
                                 bytes.uncheckedReadSkipOne();
-                                int len = readLength(code);
+                                long len = readLength(code);
                                 code = peekCode();
                                 if (code == U8_ARRAY) {
                                     bytes.readPosition(pos);
@@ -4811,7 +4864,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                                 }
                                 long lim = bytes.readLimit();
                                 try {
-                                    bytes.readLimit(bytes.readPosition() + len);
+                                    bytes.readLimit(guardedReadLimit(len));
                                     Object using1 = using;
                                     if (using1 == null && type != null)
                                         using1 = strategy.newInstanceOrNull(type);
@@ -4910,8 +4963,8 @@ public class BinaryWire extends AbstractWire implements Wire {
          * @param code The code representing the length format.
          * @return The length value read.
          */
-        private int readLength(int code) {
-            int len;
+        private long readLength(int code) {
+            long len;
             // Determine the code and read the corresponding length.
             switch (code) {
                 case BYTES_LENGTH8:
@@ -4921,7 +4974,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     len = bytes.readUnsignedShort();  // Read an unsigned 16-bit value.
                     break;
                 case BYTES_LENGTH32:
-                    len = bytes.readInt();  // Read a 32-bit integer value.
+                    len = bytes.readUnsignedInt();  // Read an unsigned 32-bit value.
                     break;
                 default:
                     throw new AssertionError(); // Throw an assertion error if the code is unrecognized.
