@@ -1959,6 +1959,7 @@ public class BinaryWire extends AbstractWire implements Wire {
                     case PADDING:
                         return readText(bytes.readUnsignedByte(), sb);
                     case PADDING32:
+                        // 4-byte padding length + 1-byte trailing value code
                         if (bytes.readRemaining() < 5)
                             throw new DecoratedBufferUnderflowException("Requires at least five bytes, readRemaining: " + bytes.readRemaining());
                         bytes.readSkip(bytes.readUnsignedInt());
