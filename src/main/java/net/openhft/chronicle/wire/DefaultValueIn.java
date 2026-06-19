@@ -91,6 +91,7 @@ public class DefaultValueIn implements ValueIn {
     @NotNull
     @Override
     public WireIn bytes(@NotNull BytesOut<?> toBytes) {
+        toBytes.clear();
         @Nullable Object o = defaultValue;
         if (o == null)
             return wireIn();
