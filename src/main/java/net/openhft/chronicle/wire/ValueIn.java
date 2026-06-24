@@ -140,6 +140,7 @@ public interface ValueIn {
 
     /**
      * Reads byte data into the provided BytesOut object.
+     * toBytes is always cleared
      *
      * @param toBytes The BytesOut object to store the byte data.
      * @return The current WireIn instance.
