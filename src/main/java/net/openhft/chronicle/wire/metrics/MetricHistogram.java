@@ -6,6 +6,8 @@ package net.openhft.chronicle.wire.metrics;
 import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.wire.SelfDescribingMarshallable;
 
+import java.util.Arrays;
+
 /**
  * A marshallable snapshot of a {@link Histogram}: the sample {@code count}, {@code min},
  * {@code max} and {@code sum} of the window, the values at a fixed set of
@@ -24,6 +26,14 @@ import net.openhft.chronicle.wire.SelfDescribingMarshallable;
  */
 public class MetricHistogram extends SelfDescribingMarshallable {
 
+    /**
+     * The sentinel {@link #sum()} value meaning "the producer did not supply a sum".
+     * Producers that only see a pre-built {@link Histogram} (which tracks neither a sum nor
+     * a mean) leave the sum unset; consumers/exporters must omit sum-derived output rather
+     * than compute averages from a fake zero. Use {@link #hasSum()} to test.
+     */
+    public static final long SUM_UNSET = -1;
+
     // The percentile fractions captured by sampleFrom, in ascending order.
     static final double[] FRACTIONS = {0.5, 0.9, 0.99, 0.999, 0.9999};
 
@@ -36,8 +46,9 @@ public class MetricHistogram extends SelfDescribingMarshallable {
     // Largest observation in the window (Histogram.max(), bucket-quantised)
     private double max;
 
-    // Sum of the window's observations; maintained by the instrument, not the Histogram
-    private long sum;
+    // Sum of the window's observations; maintained by the instrument, not the Histogram.
+    // SUM_UNSET when the producer cannot know it (e.g. it only sees a pre-built Histogram).
+    private long sum = SUM_UNSET;
 
     // Values at FRACTIONS, in the unit the samples were recorded in (normally nanoseconds)
     private double[] percentiles = new double[FRACTIONS.length];
@@ -73,6 +84,13 @@ public class MetricHistogram extends SelfDescribingMarshallable {
      */
     public MetricHistogram sampleFrom(Histogram histogram) {
         count = histogram.totalCount();
+        if (count == 0) {
+            min = Double.NaN;
+            max = Double.NaN;
+            Arrays.fill(percentiles, Double.NaN);
+            worst = Double.NaN;
+            return this;
+        }
         min = histogram.min();
         max = histogram.max();
         for (int i = 0; i < FRACTIONS.length; i++)
@@ -110,12 +128,21 @@ public class MetricHistogram extends SelfDescribingMarshallable {
 
     /**
      * Returns the sum of the window's observations, as maintained by the producing
-     * instrument - see the class javadoc.
+     * instrument - see the class javadoc - or {@link #SUM_UNSET} when the producer could
+     * not supply one.
      *
-     * @return the sum
+     * @return the sum, or {@link #SUM_UNSET}
      */
     public long sum() {
         return sum;
+    }
+
+    /**
+     * @return {@code true} if the producing instrument supplied a sum for this window;
+     * consumers must not treat an unset sum as zero (averages would read as 0)
+     */
+    public boolean hasSum() {
+        return sum >= 0;
     }
 
     /**
