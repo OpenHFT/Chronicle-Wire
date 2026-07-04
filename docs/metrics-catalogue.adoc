@@ -213,8 +213,8 @@ label is not derivable at these seams (single anonymous cluster in the QE config
 |===
 | Metric | Kind | Unit | Labels | Emitting class | Cadence | Since
 
-| `chronicle_queue_replication_named_tailer_ack_lag_indices`
-| gauge | queue indices (clamped at 0)
+| `chronicle_queue_replication_named_tailer_ack_lag_excerpts`
+| gauge | excerpts (entries not yet acknowledged; clamped at 0)
 | `queue`, `tailer`, `remoteHostId`; *optional* `localHostId`, `role`
   (`acceptor`/`initiator`) when the handler supplied them before the first ack
 | `NamedTailerAckLagMetrics` (owned by `SourceReplicationHandler`)
@@ -317,7 +317,7 @@ checked against this catalogue (2026-07-04):
 | `chronicle_queue_appends_total` | yes
 | `chronicle_queue_write_latency_ns` | yes
 | `chronicle_threads_eventloop_busy_ratio` | yes
-| `chronicle_queue_replication_named_tailer_ack_lag_indices` | yes
+| `chronicle_queue_replication_named_tailer_ack_lag_excerpts` | yes
 | `chronicle_fix_session_logons_total` | yes
 | `chronicle_queue_replication_reconnects_total` | yes
 | `chronicle_gateway_events_ingested_total` | yes
