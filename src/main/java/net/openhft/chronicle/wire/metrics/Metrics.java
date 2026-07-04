@@ -187,8 +187,15 @@ public final class Metrics {
      */
     public static ThreadLocalisedMetricsOut threadLocalised(String source) {
         ThreadLocalisedMetricsOut out = SOURCES.get(source);
-        if (out == null)
-            out = SOURCES.computeIfAbsent(source, Metrics::newSource);
+        if (out == null) {
+            // cold path, once per source: the Metrics.class lock makes creation atomic with
+            // install()'s binding swap + facade re-resolve sweep. Without it a facade created
+            // concurrently with install() could resolve the OLD binding yet be missed by the
+            // sweep's weakly-consistent iteration - permanently bound to a stale handler.
+            synchronized (Metrics.class) {
+                out = SOURCES.computeIfAbsent(source, Metrics::newSource);
+            }
+        }
         return out;
     }
 

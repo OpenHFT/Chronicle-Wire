@@ -7,10 +7,13 @@ import net.openhft.chronicle.core.util.Histogram;
 
 /**
  * A latency instrument: {@link #record(long)} samples into a {@link Histogram}
- * (Chronicle-Core's zero-allocation histogram, the same one JLBH uses) intended to be
- * thread-confined to the recording thread; the flush copies the histogram's state into the
- * instrument's reused {@link MetricHistogram} in place, emits the reused
- * {@link HistogramMetric}, and resets the histogram for the next window.
+ * (Chronicle-Core's zero-allocation histogram, the same one JLBH uses). Recording and
+ * window rollover are synchronized because the underlying histogram is mutable; the flush
+ * copies the histogram's state into the instrument's reused {@link MetricHistogram} and
+ * rolls the window <em>under</em> that monitor (bounded work, no I/O), then writes to the
+ * sink <em>outside</em> it - a recording thread (e.g. an appender committing an excerpt)
+ * is never blocked behind a slow sink. Flushing is single-flusher (the registry's flush
+ * cadence); concurrent flushers would race on the reused DTO.
  */
 public class LatencyInstrument extends Instrument {
 
@@ -18,8 +21,7 @@ public class LatencyInstrument extends Instrument {
     private final HistogramMetric metric;
 
     // Window sum of recorded durations. Core's Histogram does not track a sum (and its mean
-    // is not exposed), so it is maintained here: one long add per record(), allocation-free.
-    // Written by the recording thread with plain stores; read and reset at flush cadence.
+    // is not exposed), so it is maintained here under the same monitor as the histogram.
     private long sum;
 
     LatencyInstrument(String source, String name) {
@@ -46,7 +48,7 @@ public class LatencyInstrument extends Instrument {
      * @throws IllegalArgumentException if {@code key} or {@code value} contains {@code '='} or {@code ';'}
      */
     public LatencyInstrument label(String key, String value) {
-        metric.label(key, value);
+        addLabel(metric, key, value);
         return this;
     }
 
@@ -66,7 +68,10 @@ public class LatencyInstrument extends Instrument {
      *
      * @param durationNs the duration in nanoseconds
      */
-    public void record(long durationNs) {
+    public synchronized void record(long durationNs) {
+        if (durationNs < 0)
+            throw new IllegalArgumentException(
+                    "negative latency " + durationNs + " for histogram '" + metric.name() + "'");
         histogram.sampleNanos(durationNs);
         sum += durationNs;
     }
@@ -78,14 +83,23 @@ public class LatencyInstrument extends Instrument {
      *
      * @return the histogram samples accumulate into
      */
-    public Histogram histogram() {
+    public synchronized Histogram histogram() {
         return histogram;
     }
 
     @Override
     void flushTo(MetricsOut out, long eventTime, long intervalNs) {
-        metric.histogram().sampleFrom(histogram).sum(sum);
+        synchronized (this) {
+            metric.histogram().sampleFrom(histogram).sum(sum);
+            histogram.reset();
+            sum = 0;
+        }
+        // sink write outside the monitor: record() must never wait on sink I/O
         out.histogramMetric(metric.eventTime(eventTime).intervalNs(intervalNs));
+    }
+
+    @Override
+    synchronized void rollWindow() {
         histogram.reset();
         sum = 0;
     }
