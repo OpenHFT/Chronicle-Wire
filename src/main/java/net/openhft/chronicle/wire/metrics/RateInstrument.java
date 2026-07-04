@@ -3,11 +3,12 @@
  */
 package net.openhft.chronicle.wire.metrics;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
- * A rate instrument: {@link #inc()} / {@link #inc(long)} count occurrences with plain-field
- * updates intended to be thread-confined to the recording thread; the flush emits the running
- * total plus the observed per-second rate over the window through the instrument's reused
- * {@link RateMetric}.
+ * A rate instrument: {@link #inc()} / {@link #inc(long)} count occurrences with thread-safe
+ * atomic updates; the flush emits the running total plus the observed per-second rate over
+ * the window through the instrument's reused {@link RateMetric}.
  */
 public class RateInstrument extends Instrument {
 
@@ -15,11 +16,9 @@ public class RateInstrument extends Instrument {
 
     private final RateMetric metric;
 
-    // Written by the recording thread with plain stores; read at flush cadence.
-    private long count;
-
-    // Only touched by the flusher.
-    private long lastFlushedCount;
+    // Atomic so shared owners can record while a monitor thread flushes the window.
+    private final AtomicLong count = new AtomicLong();
+    private final AtomicLong lastFlushedCount = new AtomicLong();
 
     RateInstrument(String source, String name) {
         metric = new RateMetric().source(source).name(name);
@@ -36,10 +35,10 @@ public class RateInstrument extends Instrument {
      * @param key   the label key
      * @param value the label value
      * @return this instance for chaining
-     * @throws IllegalArgumentException if {@code key} or {@code value} contains {@code '='} or {@code ';'}
+     * @throws IllegalArgumentException if {@code key} is invalid or duplicate, or {@code value} is {@code null}
      */
     public RateInstrument label(String key, String value) {
-        metric.label(key, value);
+        addLabel(metric, key, value);
         return this;
     }
 
@@ -55,19 +54,22 @@ public class RateInstrument extends Instrument {
     }
 
     /**
-     * Counts one occurrence. Hot path: no allocation, no volatile store.
+     * Counts one occurrence. Hot path: no allocation; one atomic add.
      */
     public void inc() {
-        count++;
+        inc(1);
     }
 
     /**
-     * Counts {@code n} occurrences. Hot path: no allocation, no volatile store.
+     * Counts {@code n} occurrences. Hot path: no allocation; one atomic add.
      *
      * @param n the number of occurrences
      */
     public void inc(long n) {
-        count += n;
+        if (n < 0)
+            throw new IllegalArgumentException(
+                    "negative delta " + n + " on rate '" + metric.name() + "'");
+        count.addAndGet(n);
     }
 
     /**
@@ -76,15 +78,20 @@ public class RateInstrument extends Instrument {
      * @return the count
      */
     public long count() {
-        return count;
+        return count.get();
     }
 
     @Override
     void flushTo(MetricsOut out, long eventTime, long intervalNs) {
-        long c = count;
-        double perSecond = intervalNs > 0 ? (c - lastFlushedCount) * NANOS_PER_SECOND / intervalNs : 0.0;
+        long c = count.get();
+        long previous = lastFlushedCount.getAndSet(c);
+        double perSecond = intervalNs > 0 ? (c - previous) * NANOS_PER_SECOND / intervalNs : 0.0;
         out.rateMetric(metric.count(c).perSecond(perSecond)
                 .eventTime(eventTime).intervalNs(intervalNs));
-        lastFlushedCount = c;
+    }
+
+    @Override
+    void rollWindow() {
+        lastFlushedCount.set(count.get());
     }
 }

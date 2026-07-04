@@ -21,10 +21,10 @@ import java.util.Map;
  * <p>
  * Registration applies <b>identity dedup</b>: registering the same kind, name and labels twice
  * on one registry returns the <em>same</em> instrument instance, never a duplicate series.
- * The identity is the (kind, name, labels) passed to the registration call - labels appended
- * fluently afterwards do not participate, so pass labels at registration when relying on
- * dedup. Metric names are validated against {@code ^[a-zA-Z_:][a-zA-Z0-9_:]*$} at
- * registration.
+ * Labels supplied at registration are part of that identity. Labels appended fluently after
+ * registration re-key the instrument inside this registry, and are rejected if they would
+ * collide with an existing instrument identity. Metric names are validated against
+ * {@code ^[a-zA-Z_:][a-zA-Z0-9_:]*$} at registration.
  * <p>
  * Instruments deregister via {@link Instrument#close()}; {@link #close()} removes all
  * instruments and makes further flushes no-ops (further registrations throw
@@ -33,8 +33,9 @@ import java.util.Map;
  * <p>
  * The flush path is steady-state allocation-free: an indexed {@code for} loop over a flat
  * {@link Instrument} array - no {@code Iterator}, no streams, no boxing - and each instrument
- * re-emits its reused DTO. Registration is thread-safe; recording is designed to be
- * thread-confined per the design's ownership rules.
+ * re-emits its reused DTO. Registration is thread-safe; counter/rate/gauge instruments are
+ * safe for concurrent record/flush paths, and latency histograms synchronize around their
+ * mutable histogram state.
  */
 public class MetricsRegistry implements AutoCloseable {
 
@@ -211,6 +212,22 @@ public class MetricsRegistry implements AutoCloseable {
         return instrument;
     }
 
+    // Called by Instrument.label(...); cold path, may allocate.
+    synchronized void addLabel(Instrument instrument, Metric<?> metric, String key, String value) {
+        if (closed)
+            throw new IllegalStateException("registry for source '" + source + "' is closed");
+        String labels = Metric.appendLabel(metric.labels(), key, value);
+        String newKey = instrument.identityKey.charAt(0) + metric.name() + '|' + labels;
+        Instrument existing = byIdentity.get(newKey);
+        if (existing != null && existing != instrument)
+            throw new IllegalArgumentException("label mutation would duplicate metric identity '" + newKey
+                    + "' in registry for source '" + source + "'");
+        byIdentity.remove(instrument.identityKey);
+        byIdentity.put(newKey, instrument);
+        instrument.identityKey = newKey;
+        metric.labelsUnchecked(labels);
+    }
+
     // Called by Instrument.close(); cold path, may allocate.
     synchronized void remove(Instrument instrument) {
         Instrument[] instruments = this.instruments;
@@ -257,7 +274,8 @@ public class MetricsRegistry implements AutoCloseable {
      * Emits every registered instrument's current window through the matching
      * {@link MetricsOut} method. Steady-state allocation-free; skips all work when the
      * destination, after unwrapping a {@link ThreadLocalisedMetricsOut} facade, is
-     * {@code instanceof} {@link IgnoresEverything}, and is a no-op once this registry is
+     * {@code instanceof} {@link IgnoresEverything}; disabled flushes still roll aggregation
+     * windows forward without emitting; once closed, this registry is
      * {@linkplain #close() closed}.
      *
      * @param out        the destination
@@ -265,10 +283,13 @@ public class MetricsRegistry implements AutoCloseable {
      * @param intervalNs the aggregation window ending at {@code eventTime}, in nanoseconds
      */
     public void flush(MetricsOut out, long eventTime, long intervalNs) {
-        out = ThreadLocalisedMetricsOut.unwrap(out);
-        if (out instanceof IgnoresEverything)
-            return;
+        MetricsOut resolved = ThreadLocalisedMetricsOut.unwrap(out);
         final Instrument[] instruments = this.instruments;
+        if (resolved == null || resolved instanceof IgnoresEverything) {
+            for (int i = 0; i < instruments.length; i++)
+                instruments[i].rollWindow();
+            return;
+        }
         for (int i = 0; i < instruments.length; i++)
             instruments[i].flushTo(out, eventTime, intervalNs);
     }

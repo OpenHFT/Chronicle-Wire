@@ -7,12 +7,12 @@ package net.openhft.chronicle.wire.metrics;
  * The base of the tier-2 recording instruments ({@link CounterInstrument},
  * {@link GaugeInstrument}, {@link LatencyInstrument}, {@link RateInstrument}). Each instrument
  * is created once at registration by a {@link MetricsRegistry}, owns its reused concrete
- * {@link Metric} DTO with the identity fields set once, and accumulates into plain fields on
- * the hot path - flushing overwrites only the value fields and re-emits the same instance.
+ * {@link Metric} DTO with the identity fields set once, and accumulates into instrument-owned
+ * state on the hot path - flushing overwrites only the value fields and re-emits the same instance.
  * <p>
  * {@link #close()} deregisters the instrument from its registry, after which it is no longer
- * flushed; recording into a closed instrument remains safe (plain field updates) but is never
- * emitted. Closing is a cold path and may allocate.
+ * flushed; recording into a closed instrument remains safe but is never emitted. Closing is a
+ * cold path and may allocate.
  * <p>
  * The instrument set is closed: subclassing outside this package is unsupported.
  */
@@ -47,6 +47,21 @@ public abstract class Instrument implements AutoCloseable {
      * @param intervalNs the aggregation window ending at {@code eventTime}, in nanoseconds
      */
     abstract void flushTo(MetricsOut out, long eventTime, long intervalNs);
+
+    /**
+     * Advances this instrument's aggregation window without emitting. Used when a source is
+     * disabled so re-enabling later does not replay disabled-period deltas.
+     */
+    abstract void rollWindow();
+
+    final void addLabel(Metric<?> metric, String key, String value) {
+        MetricsRegistry registry = this.registry;
+        if (registry == null) {
+            metric.label(key, value);
+            return;
+        }
+        registry.addLabel(this, metric, key, value);
+    }
 
     void registered(MetricsRegistry registry, String identityKey) {
         this.registry = registry;

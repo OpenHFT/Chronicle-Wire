@@ -3,20 +3,20 @@
  */
 package net.openhft.chronicle.wire.metrics;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
- * A monotonic counter instrument: {@link #inc()} / {@link #inc(long)} are plain-field updates
- * intended to be thread-confined to the recording thread; the flush emits the running total
- * and the window's delta through the instrument's reused {@link CounterMetric}.
+ * A monotonic counter instrument: {@link #inc()} / {@link #inc(long)} are thread-safe
+ * atomic updates; the flush emits the running total and the window's delta through the
+ * instrument's reused {@link CounterMetric}.
  */
 public class CounterInstrument extends Instrument {
 
     private final CounterMetric metric;
 
-    // Written by the recording thread with plain stores; read at flush cadence.
-    private long count;
-
-    // Only touched by the flusher.
-    private long lastFlushedCount;
+    // Atomic so shared owners can record while a monitor thread flushes the window.
+    private final AtomicLong count = new AtomicLong();
+    private final AtomicLong lastFlushedCount = new AtomicLong();
 
     // Registration-time switch; false enforces the Prometheus monotonic-counter contract.
     private boolean allowNegative;
@@ -49,10 +49,10 @@ public class CounterInstrument extends Instrument {
      * @param key   the label key
      * @param value the label value
      * @return this instance for chaining
-     * @throws IllegalArgumentException if {@code key} or {@code value} contains {@code '='} or {@code ';'}
+     * @throws IllegalArgumentException if {@code key} is invalid or duplicate, or {@code value} is {@code null}
      */
     public CounterInstrument label(String key, String value) {
-        metric.label(key, value);
+        addLabel(metric, key, value);
         return this;
     }
 
@@ -68,14 +68,14 @@ public class CounterInstrument extends Instrument {
     }
 
     /**
-     * Increments the counter by one. Hot path: no allocation, no volatile store.
+     * Increments the counter by one. Hot path: no allocation; one atomic add.
      */
     public void inc() {
-        count++;
+        inc(1);
     }
 
     /**
-     * Increments the counter by {@code n}. Hot path: no allocation, no volatile store.
+     * Increments the counter by {@code n}. Hot path: no allocation; one atomic add.
      * Negative {@code n} throws unless the instrument was registered with
      * {@link #allowNegative()} - counters are exported with the Prometheus monotonic
      * contract, see there.
@@ -89,7 +89,7 @@ public class CounterInstrument extends Instrument {
             throw new IllegalArgumentException(
                     "negative delta " + n + " on monotonic counter '" + metric.name()
                             + "'; register with allowNegative() if this is intended");
-        count += n;
+        count.addAndGet(n);
     }
 
     /**
@@ -98,14 +98,19 @@ public class CounterInstrument extends Instrument {
      * @return the count
      */
     public long count() {
-        return count;
+        return count.get();
     }
 
     @Override
     void flushTo(MetricsOut out, long eventTime, long intervalNs) {
-        long c = count;
-        out.counterMetric(metric.count(c).delta(c - lastFlushedCount)
+        long c = count.get();
+        long previous = lastFlushedCount.getAndSet(c);
+        out.counterMetric(metric.count(c).delta(c - previous)
                 .eventTime(eventTime).intervalNs(intervalNs));
-        lastFlushedCount = c;
+    }
+
+    @Override
+    void rollWindow() {
+        lastFlushedCount.set(count.get());
     }
 }

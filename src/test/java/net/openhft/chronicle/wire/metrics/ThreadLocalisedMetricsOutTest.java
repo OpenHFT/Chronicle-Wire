@@ -149,4 +149,42 @@ public class ThreadLocalisedMetricsOutTest extends WireTestCommon {
         // unwrap(MetricsOut) sees through the facade
         assertSame(out.defaultHandler(), ThreadLocalisedMetricsOut.unwrap(out));
     }
+
+    @Test
+    public void delegateFailuresAreContainedAndWarnedOnce() {
+        expectException("Metrics sink threw");
+        final ThreadLocalisedMetricsOut out = new ThreadLocalisedMetricsOut(new ThrowingMetricsOut());
+        out.counterMetric(new CounterMetric().name("x"));
+        out.gaugeMetric(new GaugeMetric().name("x"));
+        out.histogramMetric(new HistogramMetric().name("x"));
+        out.rateMetric(new RateMetric().name("x"));
+        out.pointEvent(new PointEvent().name("x"));
+    }
+
+    static final class ThrowingMetricsOut implements MetricsOut {
+        @Override
+        public void counterMetric(CounterMetric metric) {
+            throw new IllegalStateException("broken counter sink");
+        }
+
+        @Override
+        public void gaugeMetric(GaugeMetric metric) {
+            throw new IllegalStateException("broken gauge sink");
+        }
+
+        @Override
+        public void histogramMetric(HistogramMetric metric) {
+            throw new IllegalStateException("broken histogram sink");
+        }
+
+        @Override
+        public void rateMetric(RateMetric metric) {
+            throw new IllegalStateException("broken rate sink");
+        }
+
+        @Override
+        public void pointEvent(PointEvent metric) {
+            throw new IllegalStateException("broken point sink");
+        }
+    }
 }

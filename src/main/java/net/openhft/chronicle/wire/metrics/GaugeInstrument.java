@@ -4,16 +4,16 @@
 package net.openhft.chronicle.wire.metrics;
 
 /**
- * A gauge instrument: {@link #set(double)} is a plain-field store intended to be
- * thread-confined to the recording thread; the flush emits the latest value through the
- * instrument's reused {@link GaugeMetric}.
+ * A gauge instrument: {@link #set(double)} publishes the latest reading with a volatile
+ * last-value store; the flush emits that latest value through the instrument's reused
+ * {@link GaugeMetric}.
  */
 public class GaugeInstrument extends Instrument {
 
     private final GaugeMetric metric;
 
-    // Written by the recording thread with plain stores; read at flush cadence.
-    private double value;
+    // Last-writer-wins publication for concurrent record/flush paths.
+    private volatile double value;
 
     GaugeInstrument(String source, String name) {
         metric = new GaugeMetric().source(source).name(name);
@@ -30,10 +30,10 @@ public class GaugeInstrument extends Instrument {
      * @param key   the label key
      * @param value the label value
      * @return this instance for chaining
-     * @throws IllegalArgumentException if {@code key} or {@code value} contains {@code '='} or {@code ';'}
+     * @throws IllegalArgumentException if {@code key} is invalid or duplicate, or {@code value} is {@code null}
      */
     public GaugeInstrument label(String key, String value) {
-        metric.label(key, value);
+        addLabel(metric, key, value);
         return this;
     }
 
@@ -49,7 +49,7 @@ public class GaugeInstrument extends Instrument {
     }
 
     /**
-     * Records the current reading. Hot path: no allocation, no volatile store.
+     * Records the current reading. Hot path: no allocation; one volatile store.
      *
      * @param value the reading
      */
@@ -69,5 +69,10 @@ public class GaugeInstrument extends Instrument {
     @Override
     void flushTo(MetricsOut out, long eventTime, long intervalNs) {
         out.gaugeMetric(metric.value(value).eventTime(eventTime).intervalNs(intervalNs));
+    }
+
+    @Override
+    void rollWindow() {
+        // last-value gauge: no window state to advance
     }
 }

@@ -45,7 +45,7 @@ public class LatencyInstrument extends Instrument {
      * @param key   the label key
      * @param value the label value
      * @return this instance for chaining
-     * @throws IllegalArgumentException if {@code key} or {@code value} contains {@code '='} or {@code ';'}
+     * @throws IllegalArgumentException if {@code key} is invalid or duplicate, or {@code value} is {@code null}
      */
     public LatencyInstrument label(String key, String value) {
         addLabel(metric, key, value);

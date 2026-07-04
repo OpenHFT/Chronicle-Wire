@@ -3,7 +3,10 @@
  */
 package net.openhft.chronicle.wire.metrics;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.IgnoresEverything;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A stable, per-source {@link MetricsOut} facade following the pattern of
@@ -17,6 +20,9 @@ import net.openhft.chronicle.core.util.IgnoresEverything;
  * and every thread observes it on its next call. Test harnesses install per-thread captures
  * via {@link #threadLocal(MetricsOut)} and remove them with {@link #resetThreadLocal()}.
  * <p>
+ * Delegate failures are contained: the first throwing sink is warned, the event is dropped,
+ * and later calls continue best-effort without surfacing sink failures to product code.
+ * <p>
  * This facade is deliberately <em>not</em> {@link IgnoresEverything} itself: callers wanting
  * to skip expensive sample preparation should check {@code unwrap() instanceof IgnoresEverything}.
  */
@@ -24,6 +30,7 @@ public class ThreadLocalisedMetricsOut implements MetricsOut {
 
     private volatile MetricsOut defaultOut;
     private final ThreadLocal<MetricsOut> outTL = new ThreadLocal<>();
+    private final AtomicBoolean failureLogged = new AtomicBoolean();
 
     /**
      * Creates a facade using the supplied handler as the shared default.
@@ -41,7 +48,11 @@ public class ThreadLocalisedMetricsOut implements MetricsOut {
         MetricsOut out = resolve();
         if (out instanceof IgnoresEverything)
             return;
-        out.counterMetric(metric);
+        try {
+            out.counterMetric(metric);
+        } catch (Throwable t) {
+            sinkFailure(t);
+        }
     }
 
     @Override
@@ -49,7 +60,11 @@ public class ThreadLocalisedMetricsOut implements MetricsOut {
         MetricsOut out = resolve();
         if (out instanceof IgnoresEverything)
             return;
-        out.gaugeMetric(metric);
+        try {
+            out.gaugeMetric(metric);
+        } catch (Throwable t) {
+            sinkFailure(t);
+        }
     }
 
     @Override
@@ -57,7 +72,11 @@ public class ThreadLocalisedMetricsOut implements MetricsOut {
         MetricsOut out = resolve();
         if (out instanceof IgnoresEverything)
             return;
-        out.histogramMetric(metric);
+        try {
+            out.histogramMetric(metric);
+        } catch (Throwable t) {
+            sinkFailure(t);
+        }
     }
 
     @Override
@@ -65,7 +84,11 @@ public class ThreadLocalisedMetricsOut implements MetricsOut {
         MetricsOut out = resolve();
         if (out instanceof IgnoresEverything)
             return;
-        out.rateMetric(metric);
+        try {
+            out.rateMetric(metric);
+        } catch (Throwable t) {
+            sinkFailure(t);
+        }
     }
 
     @Override
@@ -73,7 +96,11 @@ public class ThreadLocalisedMetricsOut implements MetricsOut {
         MetricsOut out = resolve();
         if (out instanceof IgnoresEverything)
             return;
-        out.pointEvent(metric);
+        try {
+            out.pointEvent(metric);
+        } catch (Throwable t) {
+            sinkFailure(t);
+        }
     }
 
     private MetricsOut resolve() {
@@ -81,6 +108,12 @@ public class ThreadLocalisedMetricsOut implements MetricsOut {
         if (out == null)
             out = defaultOut;
         return out;
+    }
+
+    private void sinkFailure(Throwable t) {
+        if (failureLogged.compareAndSet(false, true))
+            Jvm.warn().on(ThreadLocalisedMetricsOut.class,
+                    "Metrics sink threw; dropping this and further sink failures for this source facade", t);
     }
 
     /**
@@ -125,6 +158,7 @@ public class ThreadLocalisedMetricsOut implements MetricsOut {
     public ThreadLocalisedMetricsOut defaultHandler(MetricsOut defaultOut) {
         defaultOut = unwrap(defaultOut);
         this.defaultOut = defaultOut == null ? Metrics.ignored() : defaultOut;
+        failureLogged.set(false);
         return this;
     }
 
@@ -150,6 +184,7 @@ public class ThreadLocalisedMetricsOut implements MetricsOut {
             outTL.remove();
         else
             outTL.set(out);
+        failureLogged.set(false);
         return this;
     }
 
@@ -158,5 +193,6 @@ public class ThreadLocalisedMetricsOut implements MetricsOut {
      */
     public void resetThreadLocal() {
         outTL.remove();
+        failureLogged.set(false);
     }
 }
