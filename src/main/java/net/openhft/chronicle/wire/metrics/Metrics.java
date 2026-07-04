@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.util.IgnoresEverything;
 import net.openhft.chronicle.core.util.Mocker;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -51,6 +52,12 @@ public final class Metrics {
 
     // Guarded by the Metrics.class lock; reset when the binding changes.
     private static boolean warnedBindingThrew;
+
+    // Sources resolved via forSourceStatic() while NO binding was installed: those handles
+    // are permanently no-op, which is silent and surprising when install() happens later
+    // ("why are there no metrics in prod"). Reported once at the next install, then cleared.
+    private static final Set<String> STATIC_RESOLVED_UNBOUND = ConcurrentHashMap.newKeySet();
+    private static final int STATIC_RESOLVED_UNBOUND_CAP = 64;
 
     private Metrics() {
     }
@@ -103,6 +110,9 @@ public final class Metrics {
      * @return the currently resolved handler; never {@code null}, never throws
      */
     public static MetricsOut forSourceStatic(String source) {
+        // best-effort ordering diagnostic; see the install() warning
+        if (binding == null && STATIC_RESOLVED_UNBOUND.size() < STATIC_RESOLVED_UNBOUND_CAP)
+            STATIC_RESOLVED_UNBOUND.add(source);
         return resolve(source);
     }
 
@@ -147,6 +157,14 @@ public final class Metrics {
      *         is safe in try-with-resources
      */
     public static synchronized Installation install(MetricsBinding binding) {
+        if (binding != null && !STATIC_RESOLVED_UNBOUND.isEmpty()) {
+            Jvm.warn().on(Metrics.class, "Metrics.install() was called after " + STATIC_RESOLVED_UNBOUND.size()
+                    + " source(s) had already been resolved via forSourceStatic() with no binding installed;"
+                    + " those handles are permanently no-op and will record nothing: " + STATIC_RESOLVED_UNBOUND
+                    + ". Install the binding before constructing those components, or have them use"
+                    + " Metrics.forSource(), which observes later installs.");
+            STATIC_RESOLVED_UNBOUND.clear();
+        }
         MetricsBinding previous = Metrics.binding;
         Metrics.binding = binding;
         warnedBindingThrew = false;
@@ -169,6 +187,7 @@ public final class Metrics {
     public static synchronized void resetForTesting() {
         binding = null;
         warnedBindingThrew = false;
+        STATIC_RESOLVED_UNBOUND.clear();
         for (ThreadLocalisedMetricsOut out : SOURCES.values())
             out.defaultHandler(IGNORED);
         for (MetricsRegistry registry : REGISTRIES.values())

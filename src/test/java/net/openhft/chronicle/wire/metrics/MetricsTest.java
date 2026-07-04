@@ -13,6 +13,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -28,6 +29,20 @@ public class MetricsTest extends WireTestCommon {
     @After
     public void resetMetrics() {
         Metrics.resetForTesting();
+    }
+
+    @Test
+    public void installAfterStaticResolveWarnsAboutPermanentlyNoOpSources() {
+        // the classic "why are there no metrics in prod" trap: a component cached a
+        // resolve-once handle before install(); the handle is permanently no-op and the
+        // operator gets no signal - install() must name the affected sources once
+        expectException("permanently no-op");
+        assertTrue(Metrics.forSourceStatic("chronicle.test.early") instanceof IgnoresEverything);
+
+        CapturingMetricsOut capture = new CapturingMetricsOut();
+        try (Metrics.Installation installation = Metrics.install(source -> capture)) {
+            assertNotNull(installation);
+        }
     }
 
     @Test
@@ -75,20 +90,28 @@ public class MetricsTest extends WireTestCommon {
     public void registryFlushSkipsIgnoredFacadeWithoutTouchingInstruments() {
         MetricsRegistry registry = Metrics.newRegistry("chronicle.test.flush.ignored");
         CounterInstrument counter = registry.counter("chronicle_test_flush_ignored_total");
+        LatencyInstrument latency = registry.latency("chronicle_test_flush_ignored_latency_ns");
         counter.inc();
+        latency.record(1000);
 
         MetricsOut ignoredFacade = Metrics.forSource("chronicle.test.flush.ignored");
         assertTrue(ThreadLocalisedMetricsOut.unwrap(ignoredFacade) instanceof IgnoresEverything);
         registry.flush(ignoredFacade, 1, 1);
 
+        latency.record(2000);
         CapturingMetricsOut capture = new CapturingMetricsOut();
         registry.flush(capture, 2, 1);
-        assertEquals(1, capture.size());
-        assertEquals(1, capture.<CounterMetric>metric(0).delta());
+        assertEquals(2, capture.size());
+        assertEquals(0, capture.<CounterMetric>metric(0).delta());
+        HistogramMetric histogram = capture.metric(1);
+        assertEquals(1, histogram.histogram().count());
+        assertEquals(2000, histogram.histogram().sum());
     }
 
     @Test
     public void forSourceStaticIsResolveOnce() {
+        // resolving statically before install is exactly the trap install() now warns about
+        expectException("permanently no-op");
         MetricsOut preInstall = Metrics.forSourceStatic("chronicle.test.fixed");
         assertTrue(preInstall instanceof IgnoresEverything);
 
@@ -227,11 +250,27 @@ public class MetricsTest extends WireTestCommon {
         assertSame(registry.latency("chronicle_test_dedup_ns"), registry.latency("chronicle_test_dedup_ns"));
         assertSame(registry.rate("chronicle_test_dedup_rate"), registry.rate("chronicle_test_dedup_rate"));
 
-        // dedup means no duplicate series: three "registrations", one emission
+        CounterInstrument fluent = registry.counter("chronicle_test_fluent_total")
+                .label("queue", "orders-out");
+        assertSame("fluent labels re-key the registered instrument",
+                fluent, registry.counter("chronicle_test_fluent_total", "queue=orders-out"));
+        assertNotSame("the original unlabelled identity is now free for a new instrument",
+                fluent, registry.counter("chronicle_test_fluent_total"));
+
+        CounterInstrument duplicate = registry.counter("chronicle_test_duplicate_total");
+        registry.counter("chronicle_test_duplicate_total", "queue=orders-out");
+        try {
+            duplicate.label("queue", "orders-out");
+            fail("expected duplicate identity re-key to fail");
+        } catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("duplicate metric identity"));
+        }
+
+        // dedup means no duplicate series for repeated identities; every distinct identity emits once.
         counter.inc();
         CapturingMetricsOut capture = new CapturingMetricsOut();
         registry.flush(capture, 1, 1);
-        assertEquals(6, capture.size()); // 3 counters + gauge + latency + rate
+        assertEquals(10, capture.size());
         assertEquals("queue=orders", capture.metrics.get(0).labels());
     }
 
@@ -319,6 +358,37 @@ public class MetricsTest extends WireTestCommon {
         signed.inc(2);
         signed.inc(-3);
         assertEquals(-1, signed.count());
+    }
+
+    @Test
+    public void negativeRatesAndLatenciesThrow() {
+        MetricsRegistry registry = Metrics.newRegistry("chronicle.test.negative.more");
+        try {
+            registry.rate("chronicle_test_rate").inc(-1);
+            fail("expected negative rate increment to fail");
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage(), e.getMessage().contains("-1"));
+            assertTrue(e.getMessage(), e.getMessage().contains("chronicle_test_rate"));
+        }
+        try {
+            registry.latency("chronicle_test_latency_ns").record(-1);
+            fail("expected negative latency to fail");
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage(), e.getMessage().contains("-1"));
+            assertTrue(e.getMessage(), e.getMessage().contains("chronicle_test_latency_ns"));
+        }
+    }
+
+    @Test
+    public void emptyHistogramSnapshotUsesNanWindowValues() {
+        MetricHistogram histogram = new MetricHistogram().sampleFrom(new Histogram()).sum(0);
+        assertEquals(0, histogram.count());
+        assertEquals(0, histogram.sum());
+        assertTrue(Double.isNaN(histogram.min()));
+        assertTrue(Double.isNaN(histogram.max()));
+        assertTrue(Double.isNaN(histogram.worst()));
+        for (int i = 0; i < MetricHistogram.percentileFractions().length; i++)
+            assertTrue(Double.isNaN(histogram.percentile(i)));
     }
 
     @Test
@@ -417,10 +487,16 @@ public class MetricsTest extends WireTestCommon {
         MetricsRegistry registry = Metrics.registry("chronicle.test.noop");
         CounterInstrument counter = registry.counter("chronicle_test_noop_total");
         counter.inc();
-        // must not throw, must not touch the instruments
+        // must not throw; disabled flushes roll the delta window forward without emission
         registry.flush(Metrics.ignored(), 1, 1);
         registry.flush(new ThreadLocalisedMetricsOut(null), 1, 1);
         assertEquals(1, counter.count());
+
+        CapturingMetricsOut capture = new CapturingMetricsOut();
+        registry.flush(capture, 2, 1);
+        assertEquals(1, capture.size());
+        assertEquals(1, capture.<CounterMetric>metric(0).count());
+        assertEquals(0, capture.<CounterMetric>metric(0).delta());
     }
 
     @Test
