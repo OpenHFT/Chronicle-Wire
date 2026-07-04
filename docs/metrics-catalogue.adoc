@@ -1,0 +1,377 @@
+= Chronicle metrics catalogue
+:toc:
+:toclevels: 2
+
+The authoritative registry of every metric the Chronicle portfolio emits through the
+`net.openhft.chronicle.wire.metrics` API (review item #48). It was built by inspecting the
+registration calls and reused-DTO builders in the emitting sources of every instrumented
+repository; when this document and the code disagree, the code wins and this document must be
+fixed in the same change.
+
+Companion document: link:metrics-integration.adoc[metrics-integration.adoc] - where to
+install the binding, which integrations are startup-only vs runtime-toggleable, and the
+metrics-queue topology.
+
+Design reference: `p1-chronicle-metrics-design-2026-07-03.md` (workspace root), sections 6
+(on-queue schema and naming conventions) and 8 (gateway).
+
+== Conventions
+
+* Names follow `chronicle_<product>_<subsystem>_<metric>_<unit>`: `_total` for counters,
+  units in the name (`_ns`, `_bytes`, `_ratio`, `_indices`, `_percent`).
+* *Kind* is the on-wire event kind (the `MetricsOut` method name): `counter`, `gauge`,
+  `histogram`, `rate` or `point event`. The gateway exports point events as Prometheus
+  counters counted since gateway start/replay (a `_total` suffix is appended when missing);
+  histograms export as fixed-quantile summaries plus `_sum`/`_count` - *not aggregatable
+  across hosts*.
+* *Source* is the dotted source name carried on every event
+  (`chronicle.<product>.<subsystem>`), used for log-level-style selection
+  (`SourceSelection`) and gateway routing.
+* *Cadence*: `per-flush` metrics are recorded into instruments/DTOs and emitted on an owner
+  or host cadence; `per-event` metrics are emitted at the moment of the underlying event.
+* *Since* is the first release train carrying the metric (the emitting repository's
+  in-flight version at the time of writing; all listed integrations are currently
+  uncommitted work targeting that release).
+* The gateway may decorate every exported producer series with per-source `extraLabels`
+  (e.g. `host=prod-a`) from its configuration and always adds the reserved Prometheus
+  label `chronicle_source` from the producer source key carried on the metric event.
+  Prometheus adds `job`/`instance` at scrape time. These exporter-side labels do not appear
+  in the producer label columns below because producers do not emit them.
+
+== Chronicle Queue - appender (`chronicle.queue.appender`)
+
+Emitting classes: `net.openhft.chronicle.queue.metrics.QueueMetrics` (registration),
+recorded by `StoreAppender` and the queue's `MetricsStoreFileListener` seam in
+`SingleChronicleQueue`. Startup-only policy (resolve-once at appender construction). Flushed
+by the host: `Metrics.registry(QueueMetrics.APPENDER_SOURCE).flush(out, eventTime, intervalNs)`.
+
+[cols="3,1,1,2,2,1,1",options="header"]
+|===
+| Metric | Kind | Unit | Labels | Emitting class | Cadence | Since
+
+| `chronicle_queue_appends_total`
+| counter | excerpts | `queue` (directory basename)
+| `QueueMetrics.appends()` / `StoreAppender`
+| recorded per append, emitted per-flush | 2026.5
+
+| `chronicle_queue_write_latency_ns`
+| histogram | ns (`unit("ns")` set on the wire) | `queue`
+| `QueueMetrics.writeLatency()` / `StoreAppender`
+| sampled per `writingDocument()` commit, emitted per-flush | 2026.5
+
+| `chronicle_queue_rolls_total`
+| counter | store files | `queue`
+| `QueueMetrics.rolls()` / `MetricsStoreFileListener`
+| recorded per store acquire (first open + each cycle roll), emitted per-flush | 2026.5
+|===
+
+== Chronicle Queue - metrics self-metrics (`chronicle.queue.metrics`)
+
+[cols="3,1,1,2,2,1,1",options="header"]
+|===
+| Metric | Kind | Unit | Labels | Emitting class | Cadence | Since
+
+| `chronicle_queue_metrics_dropped_total`
+| counter | events | `queue` (the *metrics* queue's directory basename)
+| `QueueMetricsBinding`
+| per-event: on the binding's next successful write after a drop | 2026.5
+|===
+
+== Chronicle Threads - event loops (`chronicle.threads.eventloop`)
+
+Emitting class: `net.openhft.chronicle.threads.internal.EventLoopMetrics`, hooked into
+`MediumEventLoop` (and its subclass `VanillaEventLoop`); other loop types are deliberately
+not instrumented. Startup-only policy (resolve-once at loop construction). Each loop owns an
+independent registry (`Metrics.newRegistry`) flushed by the loop itself every
+`chronicle.threads.metrics.flush.interval.ms` (default 1 s); the registry is closed
+(instruments deregistered) when the loop closes.
+
+Labels on every instrument: `loop` (the loop name); `service` (*optional* - only when the
+`chronicle.metrics.service` system property is set and non-empty, read at loop construction).
+
+[cols="3,1,1,2,1",options="header"]
+|===
+| Metric | Kind | Unit | Cadence | Since
+
+| `chronicle_threads_eventloop_task_latency_ns` | histogram | ns
+| sampled per busy iteration, emitted per-flush | 2026.4
+
+| `chronicle_threads_eventloop_busy_ratio` | gauge | ratio 0..1
+| per-flush (fraction of the window in busy iterations) | 2026.4
+
+| `chronicle_threads_eventloop_idle_ratio` | gauge | ratio 0..1
+| per-flush (fraction of the window measured idle; busy+idle ~= 1, shortfall = stall) | 2026.4
+
+| `chronicle_threads_eventloop_iterations_total` | counter | iterations
+| recorded per iteration, emitted per-flush | 2026.4
+|===
+
+== Chronicle Network - connections (`chronicle.network.connection`, `chronicle.network.heartbeat`)
+
+Emitting class: `net.openhft.chronicle.network.MetricsConnectionListener` (installed via
+`addConnectionListener(...)`). Runtime-toggleable (facade + unwrap at emission time).
+
+Labels: `remoteId` (bounded cluster host identifier - never a socket address) and
+`isAcceptor` (`true`/`false`) on every connection point event; user labels added via
+`label(key, value)` before the first event (*optional*, e.g. `cluster`) are prepended.
+The heartbeat gauge carries only the *optional user labels* (it aggregates across peers).
+
+[cols="3,1,1,2,1",options="header"]
+|===
+| Metric | Kind | Unit | Cadence | Since
+
+| `chronicle_network_connects_total` | point event | connections
+| per-event (first `onConnected` per connected key) | 2026.4
+
+| `chronicle_network_disconnects_total` | point event | disconnections
+| per-event (matched `onDisconnected` only) | 2026.4
+
+| `chronicle_network_reconnects_without_disconnect_total` | point event | anomalies
+| per-event (repeated `onConnected` while already connected) | 2026.4
+
+| `chronicle_network_heartbeat_state` | gauge | live connections
+| per connection state transition (source `chronicle.network.heartbeat`) | 2026.4
+|===
+
+== Chronicle Ring (`chronicle.ring`)
+
+Emitting class: `software.chronicle.enterprise.ring.RingBufferStats`. Runtime-toggleable
+(facade unwrapped once per stats interval). Cadence: the ring stats interval,
+`rb.stats.interval.ms` (default 20 s); identical values feed the debug log line and the
+metrics. Labels: `ring` (the stats id) on everything; per-reader metrics add `reader`
+(the reader's fixed slot index in the ring's reader table - stable for the life of the
+ring). Stopped reader slots emit no series.
+
+[cols="3,1,1,2,1",options="header"]
+|===
+| Metric | Kind | Unit | Labels | Since
+
+| `chronicle_ring_writes_total` | counter | writes | `ring` | 2026.3
+| `chronicle_ring_missed_writes_total` | counter | rejected writes (ring full) | `ring` | 2026.3
+| `chronicle_ring_contention_total` | counter | write-lock CAS contentions | `ring` | 2026.3
+| `chronicle_ring_free_bytes` | gauge | bytes (interval-min write capacity; skipped when unsampled) | `ring` | 2026.3
+| `chronicle_ring_free_percent` | gauge | percent 0..100 | `ring` | 2026.3
+| `chronicle_ring_reads_total` | counter | reads | `ring`, `reader` | 2026.3
+| `chronicle_ring_missed_reads_total` | counter | missed reads | `ring`, `reader` | 2026.3
+| `chronicle_ring_reader_lag_bytes` | gauge | bytes behind writer | `ring`, `reader` | 2026.3
+| `chronicle_ring_reader_behind_percent` | gauge | percent of capacity | `ring`, `reader` | 2026.3
+|===
+
+== Chronicle Market Data Distributor (`chronicle.mdd`)
+
+Emitting class: `software.chronicle.market.data.distributor.metrics.MetricsOutBridge`
+(wraps the existing `MetricsProviderFactory` SPI). Runtime-toggleable; cadence is each host
+call to `publish()` (typically 1 s from a monitor thread). Labels: `subscriber` and `key` on
+per-subscriber metrics - numeric ids by default, or the bounded values produced by the
+builder's `subscriberName`/`keyName` resolvers; the two bridge-level gauges carry no labels.
+
+[cols="3,1,1,2,1",options="header"]
+NOTE: `chronicle_mdd_subscriber_reads_total` and the rr/rw gap gauges are populated only when
+`-Dmdd.stats.recordavgs=true` is set (otherwise MDD uses `SliderNoOp`: count 0, avg/worst -1 - the
+bridge skips the dead values). `chronicle_mdd_subscriber_lag_indices` is ~0 by construction for the
+conflating latest-value reader; use the rr-gap gauges as the slow-consumer signal.
+
+|===
+| Metric | Kind | Unit | Labels | Since
+
+| `chronicle_mdd_subscriber_reads_total` | counter | reads | `subscriber`, `key` | 2026.1
+| `chronicle_mdd_subscriber_lag_indices` | gauge | ring indices (last write - last read) | `subscriber`, `key` | 2026.1
+| `chronicle_mdd_subscriber_rr_gap_avg_indices` | gauge | ring indices | `subscriber`, `key` | 2026.1
+| `chronicle_mdd_subscriber_rw_gap_avg_indices` | gauge | ring indices | `subscriber`, `key` | 2026.1
+| `chronicle_mdd_subscriber_rr_gap_worst_indices` | gauge | ring indices | `subscriber`, `key` | 2026.1
+| `chronicle_mdd_subscriber_rw_gap_worst_indices` | gauge | ring indices | `subscriber`, `key` | 2026.1
+| `chronicle_mdd_active_subscribers` | gauge | subscribers | (none) | 2026.1
+| `chronicle_mdd_active_keys` | gauge | keys | (none) | 2026.1
+|===
+
+== JLBH (`chronicle.jlbh`)
+
+Emitting class: `net.openhft.chronicle.jlbh.JLBH`, only when
+`JLBHOptions.metricsOut(MetricsOut)` is set (explicit sink - JLBH does not resolve through
+`Metrics.forSource`). Cadence: once per completed run, one `histogramMetric` per probe.
+A failing sink is logged once and never affects the benchmark.
+
+[cols="3,1,1,2,1",options="header"]
+|===
+| Metric | Kind | Unit | Labels | Since
+
+| `chronicle_jlbh_latency_ns` | histogram | ns
+| `probe` (sanitized probe name; `end_to_end` for the built-in probe), `benchmark`
+  (sanitized benchmark name), `run` (1-based run number), `iterations`, `warmup`
+| 2026.3
+|===
+
+== Chronicle Queue Enterprise - replication (`chronicle.queue.replication`)
+
+Emitting classes in
+`software.chronicle.enterprise.queue.internal.replication.metrics`; both are
+runtime-toggleable (facade + unwrap per event). Host ids are byte-typed in the QE
+replication configuration, so the host-id labels are bounded by construction. A `cluster`
+label is not derivable at these seams (single anonymous cluster in the QE config).
+
+[cols="3,1,1,2,2,1,1",options="header"]
+|===
+| Metric | Kind | Unit | Labels | Emitting class | Cadence | Since
+
+| `chronicle_queue_replication_named_tailer_ack_lag_indices`
+| gauge | queue indices (clamped at 0)
+| `queue`, `tailer`, `remoteHostId`; *optional* `localHostId`, `role`
+  (`acceptor`/`initiator`) when the handler supplied them before the first ack
+| `NamedTailerAckLagMetrics` (owned by `SourceReplicationHandler`)
+| per named-tailer ack processed | 2026.5
+
+| `chronicle_queue_replication_reconnects_total`
+| point event | reconnects
+| `localHostId`, `remoteHostId`, `role` (`acceptor`/`initiator`)
+| `ReplicationReconnectMetrics` (one per cluster, see `QueueClusterContext`)
+| per-event (every re-established connection; the first connection is not a reconnect)
+| 2026.5
+|===
+
+The `tailer` label is bounded by `NamedTailerAckLagMetrics.MAX_TAILERS` (1024) with idle
+eviction - see the cardinality guidelines below.
+
+== Chronicle Services Enterprise - monitor (`chronicle.services.monitor`)
+
+Emitting class: `software.chronicle.services.runner.impl.InternalMonitorService`, in
+parallel with its unchanged `MonitorOut` output. Runtime-toggleable (facade unwrapped once
+per periodic update). Cadence: the service's `periodicUpdateMS` (1 s assumed when
+unconfigured); rates are normalised to per-second using that period. Every metric carries an
+*optional* `serviceId` label (from the `ServiceContext`, else the
+`chronicle.metrics.service` system property, omitted when neither is available).
+
+[cols="3,1,1,2,1",options="header"]
+|===
+| Metric | Kind | Unit | Labels | Since
+
+| `chronicle_services_monitor_error_rate` | rate | errors/s | `service` (+`serviceId`*) | 2026.7
+| `chronicle_services_monitor_service_message_rate` | rate | messages/s | `service` (+`serviceId`*) | 2026.7
+| `chronicle_services_monitor_queue_message_rate` | rate | messages/s | `queue` (+`serviceId`*) | 2026.7
+| `chronicle_services_monitor_service_latency_ns` | histogram | ns | `service` (+`serviceId`*) | 2026.7
+| `chronicle_services_monitor_queue_latency_ns` | histogram | ns | `queue` (+`serviceId`*) | 2026.7
+| `chronicle_services_monitor_health_status` | gauge | enum: `DOWN=0`, `DEGRADED=1`, `UP=2` | `service` (+`serviceId`*) | 2026.7
+|===
+
+`*` optional, see above.
+
+== Chronicle FIX - session lifecycle (`chronicle.fix.session`)
+
+Emitting class: `software.chronicle.fix.staticcode.internal.SessionLifecycleMetrics`,
+constructed per session by `VanillaSessionHandler`. Runtime-toggleable (facade + unwrap per
+event); exactly one event per real transition (duplicates suppressed). Labels: `sender`
+(local CompID), `target` (remote CompID); *optional* `begin_string` (the FIX BeginString,
+omitted when the session's `FixVersion` is unknown/UNDEFINED).
+
+[cols="3,1,1,2,1",options="header"]
+|===
+| Metric | Kind | Unit | Cadence | Since
+
+| `chronicle_fix_session_logons_total` | point event | logons | per-event (logon established) | 2026.12
+| `chronicle_fix_session_logouts_total` | point event | logouts | per-event | 2026.12
+| `chronicle_fix_session_disconnects_total` | point event | disconnects | per-event (re-armed by the next connect) | 2026.12
+|===
+
+== Metrics gateway self-metrics (`chronicle-queue-metrics-gateway`)
+
+The gateway's own operational metrics. These are *export-side*: they are not written to a
+metrics queue and carry no dotted source - they are rendered directly into the gateway's
+Prometheus exposition (and OTLP push) by `PrometheusRenderer` from `GatewaySelfMetrics`
+state, once per scrape/push. Since: 2026.5 (Chronicle-Queue-Enterprise).
+
+[cols="3,1,3,2",options="header"]
+|===
+| Metric | Kind | Meaning | Labels
+
+| `chronicle_gateway_events_ingested_total` | counter | Metric events applied to the index since start | (none)
+| `chronicle_gateway_series` | gauge | Live series in the index | (none)
+| `chronicle_gateway_started_epoch` | gauge | Gateway start time, epoch seconds - the zero point of since-start counts | (none)
+| `chronicle_gateway_invalid_metrics_total` | counter | Events skipped at ingest as invalid | `reason` (bounded enum of skip reasons, e.g. `invalid_name`, `invalid_labels`)
+| `chronicle_gateway_conflicting_metrics_total` | counter | Events skipped for a conflicting kind/unit on an existing name | (none)
+| `chronicle_gateway_stale_series_dropped_total` | counter | Series dropped after the staleness TTL | (none)
+| `chronicle_gateway_nonfinite_values_total` | counter | NaN/Infinity values skipped at export | (none)
+| `chronicle_gateway_ingest_errors_total` | counter | Read/dispatch errors on the ingest thread | (none)
+| `chronicle_gateway_sources` | gauge | Configured ingest sources | (none)
+| `chronicle_gateway_source_status` | gauge | Per-source status state-set (1 on the current status, 0 on the rest) | `source`, `status` (the `SourceStatus` enum)
+| `chronicle_gateway_source_lag_events` | gauge | Approximate unread events per source (raw index delta) | `source`
+| `chronicle_gateway_otlp_pushes_total` | counter | OTLP push attempts | (none)
+| `chronicle_gateway_otlp_failures_total` | counter | OTLP push failures | (none)
+| `chronicle_gateway_otlp_last_success_epoch` | gauge | Last successful OTLP push, epoch seconds (0 if never) | (none)
+|===
+
+== Demo-only metrics
+
+`chronicle.demo` / `chronicle_demo_msgs_per_second` (rate) is emitted only by the gateway
+module's `demo.DemoProducerMain` synthetic producer (which otherwise reuses the real names
+above); it is not a product metric and must not be dashboarded outside the demo.
+
+== Grafana dashboard cross-check
+
+Every metric referenced by
+`Chronicle-Queue-Enterprise/chronicle-queue-metrics-gateway/deploy/grafana/dashboards/chronicle-metrics.json`,
+checked against this catalogue (2026-07-04):
+
+[cols="4,1",options="header"]
+|===
+| Dashboard metric | In catalogue
+
+| `chronicle_queue_appends_total` | yes
+| `chronicle_queue_write_latency_ns` | yes
+| `chronicle_threads_eventloop_busy_ratio` | yes
+| `chronicle_queue_replication_named_tailer_ack_lag_indices` | yes
+| `chronicle_fix_session_logons_total` | yes
+| `chronicle_queue_replication_reconnects_total` | yes
+| `chronicle_gateway_events_ingested_total` | yes
+| `chronicle_gateway_series` | yes
+| `chronicle_gateway_source_status` | yes
+| `chronicle_gateway_source_lag_events` | yes
+| `chronicle_gateway_otlp_pushes_total` | yes
+| `chronicle_gateway_otlp_failures_total` | yes (fixed 2026-07-04: dashboard renamed to the emitted name)
+| `chronicle_gateway_invalid_metrics_total` | yes
+|===
+
+== Cardinality guidelines
+
+These rules (review item #49) bound the number of time series any Chronicle producer can
+mint. A time series is expensive forever; a label value is a series multiplier.
+
+*Labels must be bounded, enumerable sets.* Before adding a label, you must be able to state
+its maximum cardinality from configuration or code - number of queues on the host, number
+of configured cluster peers, number of event loops, number of services in the runner
+configuration, the ring's reader-table size. Every label in this catalogue is justified
+that way (see the per-product notes above, e.g. Network's `remoteId` reasoning and MDD's
+resolver contract).
+
+*Explicitly banned as label values:*
+
+* *Order IDs, message IDs*, trade IDs, correlation IDs - per-message data is *data*, not a
+  label; it belongs on a business or trace queue.
+* *Raw unbounded session or tailer names* - anything user- or client-supplied that is not
+  drawn from a bounded configured set. Where a name-shaped label is unavoidable, cap and
+  evict, as `NamedTailerAckLagMetrics` does (`MAX_TAILERS` = 1024, idle eviction), and
+  document the cap.
+* *Timestamps, socket addresses, ephemeral ports, connection ids* - a new value per
+  connection attempt means a new series per attempt (this is exactly why
+  `MetricsConnectionListener` labels the bounded `remoteId`, never `host:port`).
+* *Symbols / instruments as labels*, `key=<symbol>` style, *unless* the instrument universe
+  is bounded and documented - i.e. it is a fixed, configured set (such as MDD's
+  `0..maxKeys-1` key space mapped through a bounded `keyName` resolver), and the maximum
+  count is stated where the resolver/label is configured. An open-ended symbol space (any
+  tradable instrument, client-supplied symbology) is banned.
+
+*Series-identity rule.* A series is identified by *name + the concatenated labels string*
+(`key=value;key2=value2`), with keys in *registration order*; that order is canonical.
+`name{a=1;b=2}` and `name{b=2;a=1}` are *different series* - producers must register labels
+in one fixed order and reuse the DTO, never rebuild label strings in varying order.
+Registries dedup instruments on (kind, name, labels) under the same rule.
+
+*Practical checks.*
+
+* Label keys must match `[a-zA-Z_][a-zA-Z0-9_]*` (Prometheus-valid), values must be
+  non-null; `=` and `;` are structural in the concatenated form and are sanitized to `_` by
+  the producers in this catalogue.
+* Estimate worst-case series: multiply each label's bound (e.g. Network:
+  `peers x 2 roles x 3 names`). If you cannot write that product down, the label set is not
+  bounded and must not ship.
+* The gateway rejects and counts invalid names/labels
+  (`chronicle_gateway_invalid_metrics_total`) rather than adopting them - a producer that
+  violates these rules becomes visible, not stored.

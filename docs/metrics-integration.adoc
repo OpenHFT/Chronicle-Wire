@@ -1,0 +1,240 @@
+= Chronicle metrics integration guide
+:toc:
+:toclevels: 2
+
+How to wire the `net.openhft.chronicle.wire.metrics` API into a real service (review items
+#116-#119): where the binding is installed, which product integrations resolve their
+destination once at startup and which are runtime-toggleable, and how the metrics queues are
+laid out and collected on a multi-process host.
+
+Companion document: link:metrics-catalogue.adoc[metrics-catalogue.adoc] - the authoritative
+registry of every metric name, its labels and cadence, plus the cardinality guidelines.
+
+[WARNING]
+====
+*Once a binding is installed, every source defaults to ENABLED.* Source selection is
+default-on by design (recording is designed to be ignorable): installing
+`QueueMetricsBinding` with no `SourceSelection` turns on *all* the sources in the catalogue
+for components constructed afterwards. To flip the default and opt in selectively, configure
+the root prefix `""` off:
+
+[source,yaml]
+----
+metrics: {
+  sources: {
+    "": off,                        # flip the default: everything off ...
+    "chronicle.fix.session": on     # ... except what is explicitly enabled
+  }
+}
+----
+
+(`SourceSelection` matches by longest dotted prefix, exactly like logger configuration;
+the empty key `""` is the root.)
+====
+
+== Installing `QueueMetricsBinding` in a real service
+
+The production binding is `net.openhft.chronicle.queue.metrics.QueueMetricsBinding`
+(Chronicle-Queue): it writes every enabled source's events to a dedicated metrics Chronicle
+Queue via a generated `MetricsOut` method writer, never blocks and never throws into product
+code (drops are counted and re-exposed as `chronicle_queue_metrics_dropped_total`).
+
+Install it in the process entry point - the `main`/runner bootstrap - *before constructing
+any queue, event loop or other component you want measured*. The hot-path integrations
+(queue appenders, event loops) decide once, at construction, whether they record
+(see the next section); a binding installed after they exist is deliberately not observed
+by them.
+
+[source,java]
+----
+public static void main(String[] args) {
+    // 1. FIRST: create and install the binding - before any queue or event loop exists.
+    //    One metrics queue per process: <run-dir>/metrics/<serviceId>.
+    SourceSelection selection = null; // null = every source enabled (see the WARNING above)
+    try (QueueMetricsBinding binding =
+                 QueueMetricsBinding.at(new File(runDir, "metrics/" + serviceId), selection)
+                         .install()) {
+
+        // 2. Only now construct event loops, queues, appenders, sessions, ...
+        //    - their construction-time enablement checks see the installed binding.
+        try (ChronicleQueue ordersQueue = ChronicleQueue.single(new File(runDir, "orders"));
+             EventLoop loop = /* MediumEventLoop / VanillaEventLoop via EventGroup */ build()) {
+
+            // 3. Startup-only instruments accumulate into registries; schedule the flush
+            //    for sources the host owns (event loops flush themselves; the queue
+            //    appender source is flushed by the host's monitor thread):
+            MetricsOut out = Metrics.forSource(QueueMetrics.APPENDER_SOURCE);
+            monitorThread.scheduleAtFixedRate(() ->
+                    Metrics.registry(QueueMetrics.APPENDER_SOURCE)
+                            .flush(out, ServicesTimestampLongConverter.currentTime(),
+                                   1_000_000_000L),
+                    1, 1, TimeUnit.SECONDS);
+
+            runService();
+        }
+    } // close() uninstalls the binding (restoring the previous one), then closes the queue
+}
+----
+
+Notes:
+
+* `QueueMetricsBinding.at(path)` creates and owns the queue (default roll cycle
+  `RollCycles.FAST_HOURLY` - the retention granularity); pass a `RollCycle` to change it,
+  or use `new QueueMetricsBinding(queue, selection)` over a queue you own. Retention is
+  your job - see `Chronicle-Queue/docs/queue-metrics.adoc`.
+* `install()` retains the `Metrics.Installation` handle; `close()` uninstalls before
+  closing the queue, so the global `Metrics` never routes to a closed binding. In tests use
+  `try (Metrics.Installation i = Metrics.install(binding)) { ... }` and
+  `Metrics.resetForTesting()` in tear-down.
+* Construction fails fast if only an allocating proxy method writer is available;
+  `-Dchronicle.queue.metrics.allowProxyWriter=true` accepts the allocating fallback.
+
+=== Chronicle Services note
+
+In a Services runner the same rule applies to the *runner's* bootstrap: install the binding
+before the runner constructs its event loops and service queues. The monitor integration
+itself (`InternalMonitorService`, source `chronicle.services.monitor`) is runtime-toggleable
+- it re-checks the facade once per periodic update, so it starts emitting even if the
+binding is installed after the services are up - but the queue-appender and event-loop
+metrics of the very same process are startup-only and will stay dark unless the binding was
+installed first. Give each service its own metrics queue directory
+(`<run-dir>/metrics/<serviceId>`) and set the `serviceId` label source: it is taken from
+the `ServiceContext`, with the `chronicle.metrics.service` system property as the fallback
+(the same property adds the `service` label to event-loop metrics).
+
+=== Chronicle FIX note
+
+The FIX engine's session lifecycle metrics (`chronicle.fix.session`,
+`SessionLifecycleMetrics` built per session by `VanillaSessionHandler`) are
+runtime-toggleable, so logon/logout/disconnect events flow as soon as a binding is
+installed, even mid-session. But a FIX engine also runs on Chronicle event loops and writes
+Chronicle queues - to get *those* measured, install the binding in the process bootstrap
+before starting the engine, same as any other service.
+
+== Startup-only vs runtime-toggleable touch points
+
+Two deliberate policies coexist (design section 4.2):
+
+* *Startup-only* (`Metrics.forSourceStatic`): hot-path instrumentation resolves its
+  destination *once, at component construction*, and caches the enabled decision in a
+  `final` field. Cost when disabled: one cached-boolean check. A later
+  `Metrics.install(...)` is *not* observed by already-constructed components - install
+  first, construct second.
+* *Runtime-toggleable* (`Metrics.forSource` facade +
+  `ThreadLocalisedMetricsOut.unwrap(out) instanceof IgnoresEverything` at emission/cadence
+  time): cadence- and event-class emission re-checks enablement per interval or per event,
+  so late installs, uninstalls and source toggles are observed.
+
+[cols="2,2,2,1",options="header"]
+|===
+| Source | Touch point (emitting class) | Where it checks enablement | Policy
+
+| `chronicle.queue.appender`
+| `StoreAppender` / `MetricsStoreFileListener` via `QueueMetrics.appenderEnabled()`
+| once, at queue/appender construction
+| *startup-only*
+
+| `chronicle.threads.eventloop`
+| `MediumEventLoop`/`VanillaEventLoop` via `EventLoopMetrics.createIfEnabled()`
+| once, at event-loop construction
+| *startup-only*
+
+| `chronicle.ring`
+| `RingBufferStats` (Chronicle-Ring)
+| once per stats interval (`rb.stats.interval.ms`, default 20 s)
+| runtime-toggleable
+
+| `chronicle.services.monitor`
+| `InternalMonitorService` (Chronicle-Services-Enterprise)
+| once per periodic update (`periodicUpdateMS`)
+| runtime-toggleable
+
+| `chronicle.network.connection`, `chronicle.network.heartbeat`
+| `MetricsConnectionListener` (Chronicle-Network)
+| per connection event, at emission time
+| runtime-toggleable
+
+| `chronicle.queue.replication`
+| `NamedTailerAckLagMetrics` (per ack), `ReplicationReconnectMetrics` (per connect) -
+  Chronicle-Queue-Enterprise
+| per event, at emission time
+| runtime-toggleable
+
+| `chronicle.mdd`
+| `MetricsOutBridge.publish()` (Chronicle-Market-Data-Distributor)
+| once per `publish()` call
+| runtime-toggleable
+
+| `chronicle.fix.session`
+| `SessionLifecycleMetrics` (Chronicle-FIX, Chronicle-Fix-Runtime)
+| per lifecycle event, at emission time
+| runtime-toggleable
+
+| `chronicle.queue.metrics`
+| `QueueMetricsBinding` dropped-events self-metric (Chronicle-Queue)
+| at emission time (next successful write after a drop)
+| runtime-toggleable
+
+| `chronicle.jlbh`
+| `JLBH` histogram emission
+| n/a - explicit sink via `JLBHOptions.metricsOut(MetricsOut)`, not resolved through
+  `Metrics.forSource`
+| explicit wiring
+|===
+
+Rule of thumb: if a component in the startup-only rows was constructed while no binding was
+installed (or its source was disabled by the selection), it records nothing for its
+lifetime; everything in the runtime-toggleable rows reacts to `install()`/toggles at its
+next event or interval. State needed for correctness (connection flags, first-connection
+tracking, session transitions) is tracked even while disabled, so late-enabled sources
+start with sane values.
+
+== Metrics-queue topology for multi-process hosts
+
+*One metrics queue per process.* A metrics queue has a single writer process - that is what
+keeps provenance obvious and writes uncontended. Never point two processes at the same
+metrics directory.
+
+*Directory convention:* `<run-dir>/metrics/<serviceId>` - each process's binding at
+`QueueMetricsBinding.at(new File(runDir, "metrics/" + serviceId))`. On a host running three
+services you get, for example:
+
+----
+/data/host-a/
+  metrics/order-engine/     # metricsFormat header + order-engine's events
+  metrics/md-distributor/
+  metrics/fix-gateway/
+----
+
+*The gateway tails many sources.* One `chronicle-queue-metrics-gateway` process per host
+(or per monitoring domain) lists every metrics queue in its `sources` configuration and
+serves a single Prometheus endpoint / OTLP push for all of them, decorating each source's
+series with provenance labels:
+
+[source,yaml]
+----
+sources: [
+  { dir: /data/host-a/metrics/order-engine,   extraLabels: host=host-a;service=order-engine },
+  { dir: /data/host-a/metrics/md-distributor, extraLabels: host=host-a;service=md-distributor },
+  { dir: /data/host-a/metrics/fix-gateway,    extraLabels: host=host-a;service=fix-gateway }
+]
+prometheusPort: 9404
+fromEnd: true      # live monitoring; false replays history (catch-up/backfill)
+----
+
+*Replication to a monitoring host.* Because the metrics queue is an ordinary Chronicle
+Queue, the recommended production layout keeps the hot boxes free of all export machinery:
+add each process's metrics queue to the Queue Enterprise replicated-queue set, replicate to
+the monitoring/support host, and run the gateway *there* against the local replicas - the
+gateway's `sources` list then names the replica directories
+(e.g. `/data/replica/prod-a/metrics/order-engine`). The producer only ever writes a local
+mmap; a slow, GC-ing or restarting monitoring box shows up as replication lag and backfill,
+never as producer jitter. Each source directory still has exactly one writer (the
+replication sink). Gateway restarts either resume live (`fromEnd: true`) or rebuild by
+replay (`fromEnd: false`); point-event totals are counted since gateway start/replay,
+anchored by `chronicle_gateway_started_epoch`.
+
+See `chronicle-queue-metrics-gateway/deploy/` (Chronicle-Queue-Enterprise) for a runnable
+compose stack - gateway, Prometheus, Grafana, OTel collector - and
+`Chronicle-Queue/docs/queue-metrics.adoc` for metrics-queue retention sizing (a cycle file
+must outlive the slowest consumer, including a lagging gateway).
