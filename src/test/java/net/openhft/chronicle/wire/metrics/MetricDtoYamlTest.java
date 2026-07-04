@@ -8,7 +8,11 @@ import net.openhft.chronicle.wire.Marshallable;
 import net.openhft.chronicle.wire.WireTestCommon;
 import org.junit.Test;
 
+import java.util.Random;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -85,10 +89,33 @@ public class MetricDtoYamlTest extends WireTestCommon {
         CounterMetric metric = new CounterMetric();
         assertLabelThrows(metric, "key=bad", "value", "key");
         assertLabelThrows(metric, "key;bad", "value", "key");
-        assertLabelThrows(metric, "key", "value=bad", "value=bad");
-        assertLabelThrows(metric, "key", "value;bad", "value;bad");
         // and the metric is left untouched
         assertEquals(null, metric.labels());
+        // reserved characters in VALUES are sanitised, not fatal: values carry external
+        // data (tailer names, user config) and must never abort the emission path
+        metric.label("key", "value=bad").label("key2", "value;bad");
+        assertEquals("key=value_bad;key2=value_bad", metric.labels());
+    }
+
+    @Test
+    public void fuzzedLabelValuesNeverThrowAndAlwaysRoundTrip() {
+        final long seed = System.nanoTime();
+        final Random random = new Random(seed);
+        final char[] alphabet = "abzAZ09_ =;\n\r\t-./:\"'\\".toCharArray();
+        for (int iter = 0; iter < 1_000; iter++) {
+            final StringBuilder value = new StringBuilder();
+            for (int i = 0, len = random.nextInt(12); i < len; i++)
+                value.append(alphabet[random.nextInt(alphabet.length)]);
+            final CounterMetric metric = new CounterMetric().label("key", value.toString());
+            final String msg = "seed=" + seed + " iter=" + iter + " value=" + value;
+            final String stored = metric.decodeLabels().get("key");
+            assertNotNull(msg, stored);
+            // 1:1 character replacement - no truncation, no growth
+            assertEquals(msg, value.length(), stored.length());
+            assertTrue(msg, stored.indexOf('=') < 0 && stored.indexOf(';') < 0);
+            // the stored wire form must always re-parse under the strict whole-string rules
+            new CounterMetric().labels(metric.labels());
+        }
     }
 
     @Test

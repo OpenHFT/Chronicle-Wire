@@ -187,15 +187,25 @@ public abstract class Metric<M extends Metric<M>> extends SelfDescribingMarshall
      *
      * @param key   the label key; must match {@code ^[a-zA-Z_][a-zA-Z0-9_]*$} and not
      *              already be present
-     * @param value the label value; must not be {@code null} and must not contain
-     *              {@code '='} or {@code ';'} (blank is allowed)
+     * @param value the label value; must not be {@code null} (blank is allowed). Values
+     *              routinely carry external data (tailer names, queue names, user config),
+     *              so characters reserved by the wire form ({@code '='}, {@code ';'}, CR,
+     *              LF) are replaced with {@code '_'} rather than rejected - one hostile or
+     *              typo'd name must not abort the whole emission path
      * @return this instance for chaining
      * @throws IllegalArgumentException if the key is invalid or a duplicate, or the value
-     *                                  is {@code null} or contains {@code '='} or {@code ';'}
+     *                                  is {@code null}
      */
     public M label(String key, String value) {
+        labels = appendLabel(labels, key, value);
+        return self();
+    }
+
+    static String appendLabel(String labels, String key, String value) {
         validateLabelKey(key);
-        validateLabelValue(key, value);
+        if (value == null)
+            throw new IllegalArgumentException("label value for key '" + key + "' must not be null");
+        value = sanitiseLabelValue(value);
         if (containsLabelKey(labels, key))
             throw new IllegalArgumentException("duplicate label key '" + key + "' in: " + labels);
         StringBuilder sb = new StringBuilder(
@@ -203,8 +213,7 @@ public abstract class Metric<M extends Metric<M>> extends SelfDescribingMarshall
         if (labels != null)
             sb.append(labels).append(';');
         sb.append(key).append('=').append(value);
-        labels = sb.toString();
-        return self();
+        return sb.toString();
     }
 
     /**
@@ -239,6 +248,30 @@ public abstract class Metric<M extends Metric<M>> extends SelfDescribingMarshall
                 throw new IllegalArgumentException(
                         "label key must match ^[a-zA-Z_][a-zA-Z0-9_]*$, was: " + key);
         }
+    }
+
+    /**
+     * Replaces the characters reserved by the concatenated wire form ({@code '='},
+     * {@code ';'}, CR, LF) with {@code '_'}. Allocation-free when the value is clean -
+     * the common case is a pre-validated constant, scanned once.
+     */
+    static String sanitiseLabelValue(String value) {
+        final int length = value.length();
+        int i = 0;
+        while (i < length && !reservedInLabelValue(value.charAt(i)))
+            i++;
+        if (i == length)
+            return value;
+        final StringBuilder sb = new StringBuilder(length).append(value, 0, i);
+        for (; i < length; i++) {
+            final char ch = value.charAt(i);
+            sb.append(reservedInLabelValue(ch) ? '_' : ch);
+        }
+        return sb.toString();
+    }
+
+    private static boolean reservedInLabelValue(char ch) {
+        return ch == '=' || ch == ';' || ch == '\n' || ch == '\r';
     }
 
     static void validateLabelValue(String key, String value) {
