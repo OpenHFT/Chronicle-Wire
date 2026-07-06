@@ -78,6 +78,14 @@ public static void main(String[] args) {
 
 Notes:
 
+* Latency instruments normally emit one histogram for each owner flush. For display
+  or storage tiers, configure them at registration with `windowIntervalsNs(...)`
+  and keep the owner flush cadence at the shortest interval. Each duration is
+  sampled into every configured tier, and each tier resets only when its own
+  `HistogramMetric` DTO is emitted. Tests should use tiny interval values and
+  advance `intervalNs` directly rather than sleeping for production-sized
+  windows.
+
 * `QueueMetricsBinding.at(path)` creates and owns the queue (default roll cycle
   `RollCycles.FAST_HOURLY` - the retention granularity); pass a `RollCycle` to change it,
   or use `new QueueMetricsBinding(queue, selection)` over a queue you own. Retention is

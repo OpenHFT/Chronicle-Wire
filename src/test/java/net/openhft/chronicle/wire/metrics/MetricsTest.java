@@ -483,6 +483,62 @@ public class MetricsTest extends WireTestCommon {
     }
 
     @Test
+    public void latencyInstrumentPublishesConfiguredWindowsIndependently() {
+        MetricsRegistry registry = Metrics.newRegistry("chronicle.test.windows");
+        LatencyInstrument latency = registry.latency("chronicle_test_latency_ns")
+                .label("queue", "orders")
+                .unit("ns")
+                .windowIntervalsNs(8, 2, 4);
+
+        CapturingMetricsOut capture = new CapturingMetricsOut();
+        for (int i = 1; i <= 8; i++) {
+            latency.record(i * 1000L);
+            registry.flush(capture, i, 1);
+        }
+
+        assertEquals(7, capture.size());
+        assertHistogramWindow(capture, 0, 2, 2, 3_000L, 2);
+        assertHistogramWindow(capture, 1, 2, 2, 7_000L, 4);
+        assertHistogramWindow(capture, 2, 4, 4, 10_000L, 4);
+        assertHistogramWindow(capture, 3, 2, 2, 11_000L, 6);
+        assertHistogramWindow(capture, 4, 2, 2, 15_000L, 8);
+        assertHistogramWindow(capture, 5, 4, 4, 26_000L, 8);
+        assertHistogramWindow(capture, 6, 8, 8, 36_000L, 8);
+    }
+
+    @Test
+    public void latencyWindowIntervalsRejectInvalidValues() {
+        LatencyInstrument latency = Metrics.newRegistry("chronicle.test.bad.windows")
+                .latency("chronicle_test_latency_ns");
+
+        assertWindowRejected(latency);
+        assertWindowRejected(latency, 0);
+        assertWindowRejected(latency, 1, 1);
+        assertWindowRejected(latency, -1, 1);
+    }
+
+    private static void assertHistogramWindow(CapturingMetricsOut capture, int index,
+                                              long intervalNs, long count, long sum, long eventTime) {
+        assertEquals("histogramMetric", capture.methods.get(index));
+        HistogramMetric metric = capture.metric(index);
+        assertEquals(intervalNs, metric.intervalNs());
+        assertEquals(eventTime, metric.eventTime());
+        assertEquals(count, metric.histogram().count());
+        assertEquals(sum, metric.histogram().sum());
+        assertEquals("queue=orders", metric.labels());
+        assertEquals("ns", metric.unit());
+    }
+
+    private static void assertWindowRejected(LatencyInstrument latency, long... intervalsNs) {
+        try {
+            latency.windowIntervalsNs(intervalsNs);
+            fail("expected invalid latency window intervals to fail");
+        } catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains("interval"));
+        }
+    }
+
+    @Test
     public void flushToIgnoredIsANoOp() {
         MetricsRegistry registry = Metrics.registry("chronicle.test.noop");
         CounterInstrument counter = registry.counter("chronicle_test_noop_total");
