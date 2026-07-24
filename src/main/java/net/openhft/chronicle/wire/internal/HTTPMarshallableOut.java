@@ -32,8 +32,17 @@ public class HTTPMarshallableOut implements MarshallableOut {
     // The encapsulated Wire object for serialization
     private final Wire wire;
 
+    // One-based count of the POST currently being built: each document is delivered over its own
+    // HTTP connection, so each is a distinct output context for DocumentContext.contextCount().
+    private long connectionCount = 1;
+
     // Document context holder for managing the wire and the HTTP communication
     private final DocumentContextHolder dcHolder = new DocumentContextHolder() {
+
+        @Override
+        public long contextCount() {
+            return connectionCount;
+        }
 
         // Inline comment about override functionality
         @Override
@@ -73,6 +82,7 @@ public class HTTPMarshallableOut implements MarshallableOut {
                 throw new IORuntimeException(ioe);
             }
             startWire();
+            connectionCount++; // the next document goes over a new connection
         }
     };
 
@@ -118,4 +128,11 @@ public class HTTPMarshallableOut implements MarshallableOut {
         dcHolder.documentContext(wire.acquireWritingDocument(metaData));
         return dcHolder;
     }
+    @Override
+    public <T> MarshallableOut contextListener(Class<T> writerType,
+                                               MarshallableOut.ContextListener<? super T> listener) {
+        wire.contextListener(writerType, listener);
+        return this;
+    }
+
 }
