@@ -55,3 +55,32 @@ Impact & Consequences ::
 Notes/Links ::
 ** `operational-requirements.adoc`
 ** `functional-requirements.adoc`
+
+=== [NF-F-003] MarshallableOut Context Listener
+
+Date :: 2026-07-23
+Context ::
+* Chronicle Queue needed a way to write a per-roll-file preamble (a schema/session header)
+  before the first application excerpt, generalising an earlier roll-file-specific listener.
+* The same hook is useful at the wire level (first use), for file outputs and for transports
+  (connect / reconnect), so it belongs on `MarshallableOut` rather than in Queue.
+Decision Statement :: Add `MarshallableOut.ContextListener<T>` and
+`contextListener(Class<T>, ContextListener)`, fired once before the first data document of a new
+context, receiving a preset method writer.
+Alternatives Considered ::
+* Keep the listener in Queue only. ::
+  ** Pros: Smaller surface.
+  ** Cons: Duplicates the notify-once machinery; other outputs cannot reuse it.
+* Fire on every document. ::
+  ** Pros: Simpler state.
+  ** Cons: Wrong semantics - the preamble must appear once per context, not per message.
+Rationale for Decision ::
+* One choke point per layer (`AbstractWire`) keeps the semantics consistent across wire formats.
+* A leading metadata document is allowed to precede the context so stream framing is preserved.
+Impact & Consequences ::
+* The listener is at-most-once: a listener that throws is not retried, so it must be
+  complete-or-nothing and must not re-enter the output during the callback.
+* Must be configured before first use; setting it afterwards throws `IllegalStateException`.
+Notes/Links ::
+** `interface-control.adoc`
+** `functional-requirements.adoc`
