@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.bytes.MethodReader;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
@@ -57,6 +58,28 @@ public class BinaryWire2Test extends WireTestCommon {
         @NotNull BinaryWire wire = new BinaryWire(bytes, false, false, false, 32, "lzw");
         wire.usePadding(usePadding);
         return wire;
+    }
+
+    @Test
+    public void contextListenerWritesBeforeFirstBinaryDocument() {
+        BinaryWire wire = createWire();
+        wire.contextListener(ContextEvents.class, writer -> writer.event("context"));
+
+        ContextEvents writer = wire.methodWriter(ContextEvents.class);
+        writer.event("one");
+        writer.event("two");
+
+        wire.bytes().readPosition(0);
+        List<String> events = new ArrayList<>();
+        MethodReader reader = wire.methodReader((ContextEvents) events::add);
+        while (reader.readOne()) {
+            // drain
+        }
+        assertEquals(Arrays.asList("context", "one", "two"), events);
+    }
+
+    interface ContextEvents {
+        void event(String value);
     }
 
     // Test writing an object that is not marshallable and expecting an IllegalArgumentException
