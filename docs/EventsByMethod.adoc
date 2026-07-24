@@ -30,7 +30,7 @@ sequenceDiagram
 
 Typical use cases include:
 
-* High performance inter-process messaging.
+* High-performance inter-process messaging.
 * Recording events to disk for replay during testing.
 * Converting asynchronous network traffic into method calls.
 
@@ -215,11 +215,11 @@ writer.via("targetQueue")
 
 === Filtering messages with chained calls
 
-A `MethodReader` recognises implementations that extends the marker interface `@IgnoresEverything` as one which doesn't need to the called.
+A `MethodReader` recognises implementations that extend the marker interface `@IgnoresEverything` as ones that do not need to be called.
 As such, if any stage in the chained call returns an implementation of this interface, the rest of the message is discarded and not read.
 For convenience, there is a Mocker for generating such an implementation.
 
-.Provides an implementation of `Saying` that is recognised as ignoring everything
+.Implementation of `Saying` that is recognised as ignoring everything
 [source,java]
 ----
 static final Saying SAY_NOTHING = Mocker.ignoring(Saying.class);

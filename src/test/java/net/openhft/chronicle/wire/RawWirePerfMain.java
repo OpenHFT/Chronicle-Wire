@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 
 public class RawWirePerfMain extends WireTestCommon {
 
-    public static void main(String[] args) throws StreamCorruptedException {
+    public static void main(String[] args) {
         // Create an instance of BinaryWirePerfTest with specific parameters.
         // These parameters typically control the test conditions.
         @NotNull BinaryWirePerfTest test = new BinaryWirePerfTest(-1, true, false, true);

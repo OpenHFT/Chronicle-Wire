@@ -23,7 +23,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * The ReductionUtil class provides utility methods and inner classes related to the reduction process.
- * It offers functionalities to work with marshallable objects and listeners to read excerpts
+ * It supports marshallable objects and listeners that read excerpts
  * from documents and perform various reduction operations on them.
  */
 public final class ReductionUtil {
@@ -60,7 +60,7 @@ public final class ReductionUtil {
     }
 
     /**
-     * The CollectorReduction class provides functionalities to perform reduction operations using
+     * The CollectorReduction class performs reduction operations using
      * a specific collector and an extractor. It extracts data from a wire, collects it using the
      * provided collector, and then performs the final reduction.
      *
@@ -124,9 +124,9 @@ public final class ReductionUtil {
     }
 
     /**
-     * The LongSupplierReduction class provides functionalities to perform reduction operations
+     * The LongSupplierReduction class performs reduction operations
      * over long values extracted from documents. It reads long values from a wire, accumulates them,
-     * and then offers a final reduction in the form of a LongSupplier.
+     * and then exposes a final reduction in the form of a LongSupplier.
      *
      * @param <A> Intermediate accumulation type.
      */
@@ -186,9 +186,9 @@ public final class ReductionUtil {
     }
 
     /**
-     * The DoubleSupplierReduction class provides functionalities to perform reduction operations
+     * The DoubleSupplierReduction class performs reduction operations
      * over double values extracted from documents. It reads double values from a wire, accumulates them,
-     * and then offers a final reduction in the form of a DoubleSupplier.
+     * and then exposes a final reduction in the form of a DoubleSupplier.
      *
      * @param <A> Intermediate accumulation type.
      */

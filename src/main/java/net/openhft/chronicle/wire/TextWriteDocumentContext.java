@@ -9,10 +9,10 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Provides a concrete implementation of the {@link WriteDocumentContext} for text-based wire representations.
- * This class manages and tracks the state of the document being written and contains functionalities
- * for starting a new write transaction in the document.
+ * This class manages and tracks the state of the document being written and supports
+ * starting a new write transaction in the document.
  * <p>
- * While writing, it can be ensured that meta-data is correctly specified, and the position of the write
+ * While writing, it can ensure that meta-data is correctly specified, and the position of the write
  * operation is recorded.
  */
 public class TextWriteDocumentContext implements WriteDocumentContext {

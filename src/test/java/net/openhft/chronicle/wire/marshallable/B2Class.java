@@ -17,14 +17,14 @@ public class B2Class extends BClass {
         super(id, flag, b, ch, s, i, l, f, d, text);
     }
 
-    // Overrides the writeMarshallable method to first serialize the data from the superclass and then write the current version number using stop bit encoding.
+    // Overrides the writeMarshallable method to first serialize the data from the superclass and then write the current version number using stop-bit encoding.
     @Override
     public void writeMarshallable(BytesOut<?> out) {
         super.writeMarshallable(out);
         out.writeStopBit(MASHALLABLE_VERSION);
     }
 
-    // Overrides the readMarshallable method to first deserialize the data from the superclass and then read the version number using stop bit decoding.
+    // Overrides the readMarshallable method to first deserialize the data from the superclass and then read the version number using stop-bit decoding.
     @Override
     public void readMarshallable(BytesIn<?> in) {
         super.readMarshallable(in);

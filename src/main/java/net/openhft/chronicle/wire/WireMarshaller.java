@@ -161,7 +161,7 @@ public class WireMarshaller<T> {
      * {@link ReadMarshallable#unexpectedField(Object, ValueIn)} implementation.
      *
      * @param tClass the type to check
-     * @return true if {@code tClass} overrides the method
+     * @return {@code true} if {@code tClass} overrides the method
      */
     private static <T> boolean overridesUnexpectedFields(Class<T> tClass) {
         try {
@@ -792,7 +792,7 @@ public class WireMarshaller<T> {
     }
 
     /**
-     * @return true if this marshaller is for a leaf type
+     * @return {@code true} if this marshaller is for a leaf type
      */
     public boolean isLeaf() {
         return isLeaf;
@@ -1240,7 +1240,7 @@ public class WireMarshaller<T> {
          *
          * @param o  First object.
          * @param o2 Second object.
-         * @return true if values are the same, false otherwise.
+         * @return {@code true} if values are the same, false otherwise.
          * @throws IllegalAccessException If unable to access the field.
          */
         protected boolean sameValue(Object o, Object o2) throws IllegalAccessException {
@@ -2318,7 +2318,7 @@ public class WireMarshaller<T> {
      * for fields that are of type {@link Map}.
      * <p>
      * This extension is designed to manage the parsing and instantiation of the correct {@link Map} type
-     * and provides functionality to work with the key-value pairs within the map.
+     * and works with the key-value pairs within the map.
      */
     static class MapFieldAccess extends FieldAccess {
 

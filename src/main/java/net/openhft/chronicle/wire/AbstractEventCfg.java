@@ -115,7 +115,7 @@ public class AbstractEventCfg<E extends AbstractEventCfg<E>> extends AbstractMar
      * Checks if this event is intended for the given destination service.
      *
      * @param destServiceId The destination service ID to check against
-     * @return true if the event is routed to the specified service, false otherwise
+     * @return {@code true} if the event is routed to the specified service, false otherwise
      */
     public boolean routedTo(String destServiceId) {
         return this.serviceId == null || this.serviceId().isEmpty() || this.serviceId().equals(destServiceId);

@@ -49,7 +49,7 @@ public interface Reduction<T> extends ExcerptListener {
      * Accepts the input of the provided {@code tailer } and reduces (folds) the contents of it
      * into this Reduction returning the last seen index or -1 if no index was seen.
      * <p>
-     * This method can be used to initialise a Reduction before appending new values.
+     * This method can initialise a Reduction before appending new values.
      * <p>
      * It is the responsibility of the caller to make sure no simultaneous appenders are using
      * this Reduction during the entire fold operation.

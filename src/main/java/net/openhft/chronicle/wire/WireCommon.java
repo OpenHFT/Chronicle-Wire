@@ -128,7 +128,7 @@ public interface WireCommon {
     /**
      * If a message is marked as NOT_COMPLETE is it still present.
      *
-     * @return true if NOT_COMPLETE messages can be seen, false if they cannot.
+     * @return {@code true} if NOT_COMPLETE messages can be seen, false if they cannot.
      */
     default boolean notCompleteIsNotPresent() {
         return true;

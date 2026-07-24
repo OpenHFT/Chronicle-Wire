@@ -91,7 +91,7 @@ public class JSONWithAMapTest extends net.openhft.chronicle.wire.WireTestCommon 
         }
 
         // check the number of '{' match the number of '}'
-        Assert.assertTrue("openBracket=" + openBracket + ",closeBracket=" + closeBracket, openBracket == closeBracket);
+        Assert.assertEquals("openBracket=" + openBracket + ",closeBracket=" + closeBracket, openBracket, closeBracket);
 
         // DON'T CHANGE THE EXPECTED JSON IT IS CORRECT ! - please use this website to validate the json - https://jsonformatter.org
         Assert.assertEquals(expected, actual);

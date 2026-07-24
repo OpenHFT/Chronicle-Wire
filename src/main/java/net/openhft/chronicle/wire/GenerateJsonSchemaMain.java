@@ -234,7 +234,7 @@ public class GenerateJsonSchemaMain {
      * This method is typically used to check if a field has a NotNull validation constraint.
      *
      * @param annotations The array of annotations to be checked.
-     * @return true if an annotation with name ending in '.NotNull' is found, false otherwise.
+     * @return {@code true} if an annotation with name ending in '.NotNull' is found, false otherwise.
      */
     private boolean hasNotNull(Annotation[] annotations) {
         for (Annotation annotation : annotations) {

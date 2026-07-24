@@ -33,7 +33,7 @@ public final class StreamsUtil {
     }
 
     /**
-     * The VanillaSpliterator class provides basic spliterator functionalities
+     * The VanillaSpliterator class provides basic spliterator functionality
      * over an iterator without any concurrent modifications.
      *
      * @param <T> the type of elements returned by this spliterator.
@@ -102,7 +102,7 @@ public final class StreamsUtil {
 
     /**
      * The VanillaSpliteratorOfLong is a spliterator over a PrimitiveIterator.OfLong,
-     * providing basic spliterator functionalities for long elements.
+     * providing basic spliterator functionality for long elements.
      */
     @SuppressWarnings("overloads")
     public static final class VanillaSpliteratorOfLong
@@ -137,7 +137,7 @@ public final class StreamsUtil {
 
     /**
      * The VanillaSpliteratorOfDouble is a spliterator over a PrimitiveIterator.OfDouble,
-     * providing basic spliterator functionalities for double elements.
+     * providing basic spliterator functionality for double elements.
      */
     @SuppressWarnings("overloads")
     public static final class VanillaSpliteratorOfDouble

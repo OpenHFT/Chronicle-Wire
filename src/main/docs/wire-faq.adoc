@@ -90,7 +90,7 @@ Can I read data written in one `WireType` with another? ::
 Sometimes, yes. For example, binary data written with `BINARY_LIGHT` can often be "dumped" or inspected using `YAML_ONLY` because `BINARY_LIGHT` can be self-describing. `READ_ANY` wire type attempts to auto-detect the format. However, you cannot reliably read `FIELDLESS_BINARY` as YAML, for instance.
 
 How does `YAML_RETAIN_TYPE` or `JSON_RETAIN_TYPE` work? ::
-These wire types include explicit type information (e.g., `!com.example.MyClass {}` in YAML) in the output. This allows for deserialisation of polymorphic types or when the concrete class is not known by the reader beforehand.
+These wire types include explicit type information (e.g., `!com.example.MyClass {}` in YAML) in the output. This allows deserialisation of polymorphic types or when the concrete class is not known by the reader beforehand.
 
 == Annotations
 

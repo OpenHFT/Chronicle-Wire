@@ -193,7 +193,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
     /**
      * Checks if the WireIn is empty.
      *
-     * @return true if empty, otherwise false.
+     * @return {@code true} if empty, otherwise false.
      */
     default boolean isEmpty() {
         return bytes().isEmpty();
@@ -218,7 +218,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
      *
      * @param metaDataConsumer Consumer that processes the metadata section of the document.
      * @param dataConsumer     Consumer that processes the main data section of the document.
-     * @return true if the document was successfully read, otherwise false.
+     * @return {@code true} if the document was successfully read, otherwise false.
      * @throws InvalidMarshallableException if there's an error during marshalling.
      */
     default boolean readDocument(@Nullable ReadMarshallable metaDataConsumer,
@@ -232,7 +232,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
      * @param position         The position from which to start reading the document.
      * @param metaDataConsumer Consumer that processes the metadata section of the document.
      * @param dataConsumer     Consumer that processes the main data section of the document.
-     * @return true if the document was successfully read from the given position, otherwise false.
+     * @return {@code true} if the document was successfully read from the given position, otherwise false.
      * @throws InvalidMarshallableException if there's an error during marshalling.
      */
     default boolean readDocument(long position,
@@ -347,7 +347,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
     /**
      * Checks if the current position in the stream represents the end of an event or method flow.
      *
-     * @return true if the current position is the end of an event, otherwise false.
+     * @return {@code true} if the current position is the end of an event, otherwise false.
      */
     default boolean isEndEvent() {
         return false;
@@ -362,7 +362,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
     /**
      * Provides a hint about the order in which the input should be read.
      *
-     * @return true if the input should be read in a specific order, otherwise false.
+     * @return {@code true} if the input should be read in a specific order, otherwise false.
      */
     default boolean hintReadInputOrder() {
         return false;
@@ -371,7 +371,7 @@ public interface WireIn extends WireCommon, MarshallableIn {
     /**
      * Checks if the current position in the stream has a metadata prefix.
      *
-     * @return true if there's a metadata prefix at the current position, otherwise false.
+     * @return {@code true} if there's a metadata prefix at the current position, otherwise false.
      */
     default boolean hasMetaDataPrefix() {
         return false;

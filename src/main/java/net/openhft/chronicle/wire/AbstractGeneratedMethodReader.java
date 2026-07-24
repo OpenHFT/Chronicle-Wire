@@ -475,7 +475,7 @@ public abstract class AbstractGeneratedMethodReader implements MethodReader {
         }
 
         /**
-         * Returns the thread local message history.
+         * Returns the thread-local message history.
          */
         public MessageHistory get() {
             return messageHistoryTL.get();

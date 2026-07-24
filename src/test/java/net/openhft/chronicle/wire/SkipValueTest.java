@@ -113,7 +113,7 @@ public class SkipValueTest extends net.openhft.chronicle.wire.WireTestCommon {
                 {null, STRING_ANY, wr(v -> v.text("Long string 012345678901234567890123456789"))},
 //        public static final int EVENT_NAME = 0xB9;
 //        public static final int FIELD_NUMBER = 0xBA;
-                {null, NULL, wr(v -> v.nu11())},
+                {null, NULL, wr(ValueOut::nu11)},
                 {null, TYPE_LITERAL, wr(v -> v.typeLiteral(String.class))},
 //        public static final int EVENT_OBJECT = 0xBD;
                 {null, COMMENT, wr(v -> v.wireOut().writeComment("hi").getValueOut().text("hi"))},

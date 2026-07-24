@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 /**
  * This is the {@code MarshallableOutBuilder} class.
- * It provides functionality to construct instances of {@link MarshallableOut} based on a specified URL.
+ * It constructs instances of {@link MarshallableOut} based on a specified URL.
  * The class follows the builder pattern, enabling the caller to set desired configurations and then retrieve
  * the appropriate {@code MarshallableOut} implementation based on the URL's protocol.
  */

@@ -41,7 +41,7 @@ public interface Wire extends WireIn, WireOut {
     /**
      * Indicates whether tuples should be generated.
      * By default, this method returns the value of Wires.GENERATE_TUPLES
-     * @return true if tuples should be generated, false otherwise.
+     * @return {@code true} if tuples should be generated, false otherwise.
      */
     default boolean generateTuples() {
         return Wires.GENERATE_TUPLES;

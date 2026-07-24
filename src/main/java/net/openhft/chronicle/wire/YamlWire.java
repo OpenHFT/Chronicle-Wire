@@ -623,7 +623,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * Determines if the current YAML structure has reached the end of its document.
      * It checks based on the current token from the YamlTokeniser.
      *
-     * @return true if the current token represents the end of a document or the stream; false otherwise.
+     * @return {@code true} if the current token represents the end of a document or the stream; false otherwise.
      */
     private boolean endOfDocument() {
         // Check if there's nothing to read
@@ -885,7 +885,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * Checks if the next token's text matches the given key name after handling any escape sequences.
      *
      * @param keyName The expected key name.
-     * @return true if the next token's text matches the given key name; false otherwise.
+     * @return {@code true} if the next token's text matches the given key name; false otherwise.
      */
     private boolean checkForMatch(@NotNull String keyName) {
         YamlToken next = yt.next();
@@ -1745,7 +1745,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          * @param buffer Temporary storage used during sequence processing.
          * @param bufferAdd Supplier function to add items to the buffer.
          * @param reader0 The reader that processes each item in the sequence.
-         * @return true if the sequence was successfully read, false otherwise.
+         * @return {@code true} if the sequence was successfully read, false otherwise.
          * @throws InvalidMarshallableException If there's a problem with marshalling.
          */
         @Override
@@ -2269,7 +2269,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         }
 
         /**
-         * @return true if !!null "", if {@code true} reads the !!null "" up to the next STOP, if
+         * @return {@code true} if !!null "", if {@code true} reads the !!null "" up to the next STOP, if
          * {@code false} no  data is read  ( data is only peaked if {@code false} )
          */
         @Override

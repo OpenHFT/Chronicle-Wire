@@ -49,7 +49,7 @@ public class ReadmePojoTest extends WireTestCommon {
     }
 
     @Test
-    public void testMapDump() throws IOException {
+    public void testMapDump() {
         // Creating a LinkedHashMap with various key-value pairs
         @NotNull Map<String, Object> map = new LinkedHashMap<>();
         map.put("text", "words");

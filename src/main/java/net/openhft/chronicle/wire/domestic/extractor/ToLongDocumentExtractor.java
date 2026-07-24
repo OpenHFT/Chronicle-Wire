@@ -15,7 +15,7 @@ import java.util.function.LongUnaryOperator;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * The ToLongDocumentExtractor functional interface allows for the extraction of long values
+ * The ToLongDocumentExtractor functional interface allows the extraction of long values
  * from documents using a given wire and index. It also includes methods to transform
  * and map the extracted values to other types.
  */

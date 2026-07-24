@@ -14,7 +14,7 @@ For systems that store data long-term or communicate across different service ve
 Chronicle Wire's approach to schema evolution is rooted in its flexible, format-agnostic design:
 
 * **Philosophy:** It generally favors flexibility, particularly with its self-describing formats (like YAML, JSON, and `BINARY_LIGHT`).
-These formats inherently carry metadata (field names or numbers) that allows for a degree of tolerance to schema changes.
+These formats inherently carry metadata (field names or numbers) that allows a degree of tolerance to schema changes.
 Conversely, highly optimised, non-self-describing formats like `FIELDLESS_BINARY` offer minimal to no schema evolution support by design, prioritising raw speed and compactness.
 * **No Central Schema Registry:** Unlike systems like Apache Avro or Google Protocol Buffers, Chronicle Wire does not typically rely on separately defined schema files (e.g., `.avsc` or `.proto`).
 The Java class definition (often a `Marshallable` object) itself serves as the primary schema definition.
@@ -284,7 +284,7 @@ Explicit Version Field ::
 `WireParselet` (for Text Formats) ::
 ** A `WireParselet` is a functional interface `(s, v) -> {}` where `s` is a `CharSequence` (the field name/key) and `v` is a `ValueIn`.
 You can provide a `WireParselet` to certain Wire methods (e.g., `wire.read().applyToMarshallable(parselet)`).
-** This allows for completely custom parsing logic for text-based formats.
+** This allows completely custom parsing logic for text-based formats.
 You can inspect field names, skip fields, transform values, or build up your object graph manually.
 It's powerful for very complex transformations or when dealing with loosely structured text data.
 
@@ -334,7 +334,7 @@ Document Your Schemas and Changes :: Maintain clear documentation (even if infor
 While Chronicle Wire offers considerable flexibility, it's important to understand its limitations regarding automatic schema evolution:
 
 Automatic Complex Type Conversion :: Wire will automatically convert an `long` field to a `Date` field, or an `OldCustomer` object to a `NewCustomer` object with a different structure, without custom code.
-However, it is on a best effort basis, and custom logic is often required for non-trivial transformations.
+However, it is on a best-effort basis, and custom logic is often required for non-trivial transformations.
 No Built-in Data Migration Framework :: Chronicle Wire provides the serialisation tools, but large-scale data migration (transforming existing stored data from one schema to another) is typically an application-level concern requiring custom utilities.
 `FIELDLESS_BINARY` Rigidity:: As emphasized, this format is not designed for evolution.
 

@@ -111,7 +111,7 @@ public interface DocumentExtractor<T> {
     // peek
 
     /**
-     * Generic builder that can be used to build DocumentExtractor objects of common types.
+     * Generic builder that can build DocumentExtractor objects of common types.
      *
      * @param <E> element type to extract
      */
@@ -120,7 +120,7 @@ public interface DocumentExtractor<T> {
         /**
          * Specifies a {@code supplier} of element that shall be reused when extracting elements from excerpts.
          * <p>
-         * By default, thread local reuse objects are created on demand but this can be changed by means of the
+         * By default, thread-local reuse objects are created on demand but this can be changed by means of the
          * {@link #withThreadConfinedReuse()} method.
          * <p>
          * The provided supplier must provide distinct objects on each invocation. This can be accomplished
@@ -165,7 +165,7 @@ public interface DocumentExtractor<T> {
     }
 
     /**
-     * Creates and returns a new Builder that can be used to create DocumentExtractor objects
+     * Creates and returns a new Builder that can create DocumentExtractor objects
      * of the provided {@code elementType}.
      *
      * @param elementType type of element to extract

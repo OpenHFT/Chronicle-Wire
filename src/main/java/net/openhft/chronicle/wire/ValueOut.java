@@ -48,7 +48,7 @@ import static net.openhft.chronicle.wire.Wires.isScalar;
 public interface ValueOut {
 
     /**
-     * Thread local {@link MapMarshaller} to support thread-safe marshalling operations.
+     * Thread-local {@link MapMarshaller} to support thread-safe marshalling operations.
      */
     ThreadLocal<MapMarshaller> MM_TL = ThreadLocal.withInitial(MapMarshaller::new);
 

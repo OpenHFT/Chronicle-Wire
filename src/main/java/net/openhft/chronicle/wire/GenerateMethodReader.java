@@ -689,7 +689,7 @@ public class GenerateMethodReader {
      *
      * @param m                 Method that is being processed.
      * @param instanceFieldName In generated code, method is executed on field with this name.
-     * @param chainedCallPrefix Prefix for method call statement, passed in order to save method result for chaining.
+     * @param chainedCallPrefix Prefix for method call statement, passed to save method result for chaining.
      * @return Code that performs a method call.
      */
     private String methodCall(Method m, String instanceFieldName, String chainedCallPrefix, @Nullable Class<?> returnType) {
@@ -1011,7 +1011,7 @@ public class GenerateMethodReader {
 
         final int packageDelimiterIndex = name.lastIndexOf('.');
 
-        // Intentionally using this instead of class.simpleName() in order to support anonymous class
+        // Intentionally using this instead of class.simpleName() to support anonymous class
         String nameWithoutPackage = packageDelimiterIndex == -1 ? name : name.substring(packageDelimiterIndex + 1);
 
         // Further refine the name for specific synthetic class scenarios.

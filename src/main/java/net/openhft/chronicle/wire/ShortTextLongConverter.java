@@ -29,7 +29,7 @@ public class ShortTextLongConverter extends AbstractLongConverter {
 
     /**
      * Provides a readily available instance of ShortTextLongConverter for ease of use.
-     * This shared instance allows for convenient access to the converter functionality
+     * This shared instance allows convenient access to the converter functionality
      * without the need for repeated instantiations.
      */
     public static final ShortTextLongConverter INSTANCE = new ShortTextLongConverter();

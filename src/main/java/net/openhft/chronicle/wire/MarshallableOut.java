@@ -47,7 +47,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * WARNING : any data written inside the writingDocument(), should be performed as quickly as
      * possible because a write lock is held until the DocumentContext is closed by the
      * try-with-resources.
-     * For thread safe implementation such as Queue this blocks other appenders. Tailers are never blocked.
+     * For thread-safe implementation such as Queue this blocks other appenders. Tailers are never blocked.
      * <pre>
      * try (DocumentContext dc = appender.writingDocument()) {
      *      // this should be performed as quickly as possible for implementations that support cocurrent writers
@@ -75,7 +75,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 
     /**
-     * @return true if this output is configured to expect the history of the message to be written
+     * @return {@code true} if this output is configured to expect the history of the message to be written
      * to.
      */
     default boolean recordHistory() {
@@ -251,7 +251,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     }
 
     /**
-     * Returns a {@code MethodWriterBuilder} that can be used to create a proxy for an interface.
+     * Returns a {@code MethodWriterBuilder} that can create a proxy for an interface.
      * Each message called on the proxy will be written for replay. This is a convenience method
      * that assumes metadata is not required.
      *
@@ -264,7 +264,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     }
 
     /**
-     * Returns a {@code MethodWriterBuilder} that can be used to create a proxy for an interface.
+     * Returns a {@code MethodWriterBuilder} that can create a proxy for an interface.
      * Depending on the {@code metaData} parameter, every method may be written as metadata. Each
      * message called on the proxy will be written to a file for method replay.
      *

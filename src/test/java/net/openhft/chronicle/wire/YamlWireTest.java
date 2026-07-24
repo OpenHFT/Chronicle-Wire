@@ -1697,14 +1697,14 @@ public class YamlWireTest extends WireTestCommon {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void writeUnserializable() throws IOException {
+    public void writeUnserializable() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         System.out.println(WireType.YAML_ONLY.asString(Thread.currentThread()));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void writeUnserializable2() throws IOException {
+    public void writeUnserializable2() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         @NotNull Socket s = new Socket();

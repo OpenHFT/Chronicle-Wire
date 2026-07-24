@@ -24,7 +24,7 @@ public interface DocumentContext extends Closeable, SourceContext {
      * Checks it the {@code DocumentContext} is metadata. If it is, {@code true} is
      * returned, otherwise {@code false}.
      *
-     * @return true if the entry is metadata
+     * @return {@code true} if the entry is metadata
      */
     boolean isMetaData();
 
@@ -32,7 +32,7 @@ public interface DocumentContext extends Closeable, SourceContext {
      * Checks if the {@code DocumentContext} is present. If it is, {@code true} is returned,
      * otherwise {@code false}.
      *
-     * @return true if the entry is present
+     * @return {@code true} if the entry is present
      */
     boolean isPresent();
 

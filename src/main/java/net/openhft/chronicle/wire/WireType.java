@@ -97,7 +97,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     },
     /**
-     * High performance binary wire format. This is an alias for
+     * High-performance binary wire format. This is an alias for
      * {@link #BINARY_LIGHT}.
      */
     BINARY {
@@ -120,7 +120,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
         }
     },
     /**
-     * High performance binary wire format optimised for speed and size.
+     * High-performance binary wire format optimised for speed and size.
      * Does not support legacy DeltaWire features.
      */
     BINARY_LIGHT {
@@ -764,7 +764,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
      * Indicates if this WireType is of a textual nature.
      * This implementation returns false, indicating it's not textual.
      *
-     * @return true if the WireType is textual; false otherwise.
+     * @return {@code true} if the WireType is textual; false otherwise.
      */
     public boolean isText() {
         return false;

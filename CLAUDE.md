@@ -97,5 +97,5 @@ Core Chronicle components:
 ## Documentation
 
 - AsciiDoc files in `src/main/docs/` - keep in sync with code changes
-- Javadoc should document behavioral contracts, edge cases, thread safety, and performance notes
+- Javadoc should document behavioural contracts, edge cases, thread safety, and performance notes
 - Reference docs: `src/main/docs/decision-log.adoc`, `src/main/docs/project-requirements.adoc`

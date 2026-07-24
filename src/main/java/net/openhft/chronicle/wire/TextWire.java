@@ -34,7 +34,7 @@ import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 import static net.openhft.chronicle.wire.TextStopCharTesters.END_OF_TYPE;
 
 /**
- * A representation of the YAML-based wire format. `TextWire` provides functionalities
+ * A representation of the YAML-based wire format. `TextWire` supports functionality
  * for reading and writing objects in a YAML-based format, and encapsulates various characteristics
  * of the YAML text format.
  *
@@ -55,7 +55,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     // A set of characters considered as "end characters" in this wire format.
     static final BitSet END_CHARS = new BitSet();
 
-    // Thread locals for stop char testers that might need escaping in specific contexts.
+    // Thread locals for stop-char testers that might need escaping in specific contexts.
     // They are weakly referenced to avoid potential memory leaks in multithreaded environments.
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(StopCharTesters.QUOTES::escaping);
     static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_SINGLE_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(() -> StopCharTesters.SINGLE_QUOTES.escaping());
@@ -63,7 +63,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
     static final Pattern REGX_PATTERN = Pattern.compile("\\.|\\$");
 
-    // Suppliers for various stop char testers.
+    // Suppliers for various stop-char testers.
     static final Supplier<StopCharTester> QUOTES_ESCAPING = StopCharTesters.QUOTES::escaping;
     static final Supplier<StopCharTester> SINGLE_QUOTES_ESCAPING = StopCharTesters.SINGLE_QUOTES::escaping;
     static final Supplier<StopCharTester> END_OF_TEXT_ESCAPING = TextStopCharTesters.END_OF_TEXT::escaping;
@@ -855,7 +855,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      * returns {@code true} if the next string is {@code str}
      *
      * @param source string
-     * @return true if the strings are the same
+     * @return {@code true} if the strings are the same
      */
     protected boolean peekStringIgnoreCase(@NotNull final String source) {
         if (source.isEmpty())
@@ -1774,7 +1774,7 @@ public class TextWire extends YamlWireOut<TextWire> {
          * Checks whether the provided character acts as a separator.
          *
          * @param nextChar Character to be checked
-         * @return true if it's a separator, otherwise false
+         * @return {@code true} if it's a separator, otherwise false
          */
         protected boolean isASeparator(int nextChar) {
             return TextStopCharsTesters.isASeparator(nextChar);
@@ -2843,7 +2843,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         /**
-         * @return true if !!null "", if {@code true} reads the !!null "" up to the next STOP, if
+         * @return {@code true} if !!null "", if {@code true} reads the !!null "" up to the next STOP, if
          * {@code false} no  data is read  ( data is only peaked if {@code false} )
          */
         @Override

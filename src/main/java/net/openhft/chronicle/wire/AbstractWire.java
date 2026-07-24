@@ -440,7 +440,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
 
     /**
      * Checks that no data is written after the end of the message. If data is found, an exception is thrown.
-     * This method returns true if no extra data is found after the end or if the check isn't feasible.
+     * This method returns {@code true} if no extra data is found after the end or if the check isn't feasible.
      *
      * @param pos The position to start the check from.
      * @return True if there's no data after the end or if the check isn't feasible.
@@ -533,7 +533,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
                     }
 
                 } else {
-                    // mis-aligned check, assume only one writer (best effort)
+                    // mis-aligned check, assume only one writer (best-effort)
                     MEMORY.loadFence();
                     if (bytes.readInt(pos) == 0) {
                         if (!writeEOF)

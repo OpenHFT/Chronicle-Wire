@@ -64,7 +64,7 @@ public class ReadOneTest extends WireTestCommon {
     }
 
     // Core testing method that simulates writing to and reading from the Wire
-    private void doTest(boolean scanning) throws InterruptedException {
+    private void doTest(boolean scanning) {
         ignoreException("Unknown @MethodId='history' called on interface net.openhft.chronicle.wire.ReadOneTest$SnapshotListener");
         ignoreException("Unknown method-name='myDto' called on interface net.openhft.chronicle.wire.ReadOneTest$SnapshotListener");
         // Initialization phase
