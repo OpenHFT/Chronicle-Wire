@@ -206,6 +206,15 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
         return wireAcquisition.acquireWire().acquireWritingDocument(metaData);
     }
 
+    // Writes are delegated to the acquired underlying wire, whose listener fields this setter would
+    // never reach - a listener registered here would be silently ignored, so fail loudly instead.
+    @NotNull
+    @Override
+    public <T> WireOut contextListener(@NotNull Class<T> writerType,
+                                       @NotNull MarshallableOut.ContextListener<? super T> listener) {
+        throw new UnsupportedOperationException("contextListener is not supported on a READ_ANY wire");
+    }
+
     @Override
     public String readingPeekYaml() {
         return wireAcquisition.acquireWire().readingPeekYaml();

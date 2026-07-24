@@ -9,6 +9,7 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
@@ -21,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.StreamCorruptedException;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
@@ -64,6 +66,14 @@ public abstract class AbstractWire implements Wire, InternalWire {
     private HeadNumberChecker headNumberChecker;
     private boolean usePadding = DEFAULT_USE_PADDING;
     private boolean generateTuples = GENERATE_TUPLES;
+    private Class<?> contextListenerWriterType;
+    private MarshallableOut.ContextListener<?> contextListener;
+    private boolean contextListenerNotified;
+    private boolean notifyingContextListener;
+    // Latched by the first document of any kind so a context listener cannot be installed once
+    // output has begun. Distinct from contextListenerNotified, which tracks whether the listener
+    // has actually fired (a listener-free wire still latches this on its first write).
+    private boolean firstDocumentStarted;
 
     /**
      * Constructor for AbstractWire.
@@ -212,6 +222,60 @@ public abstract class AbstractWire implements Wire, InternalWire {
     @Override
     public void commentListener(Consumer<CharSequence> commentListener) {
         this.commentListener = commentListener;
+    }
+
+    @NotNull
+    @Override
+    public <T> WireOut contextListener(@NotNull Class<T> writerType,
+                                       @NotNull MarshallableOut.ContextListener<? super T> listener) {
+        if (firstDocumentStarted)
+            throw new IllegalStateException("Cannot set contextListener after the first output context has started");
+        contextListenerWriterType = Objects.requireNonNull(writerType);
+        contextListener = Objects.requireNonNull(listener);
+        return this;
+    }
+
+    /**
+     * Fires the context listener at most once, before the first data document. A leading metadata
+     * document (a stream header/framing) is allowed to precede the context records, so notification
+     * is skipped while {@code metaData} is true and happens before the first data document instead.
+     * The notified flag is set before the listener runs, so a listener that writes some records and
+     * then throws is not retried - avoiding duplicate, half-written context records.
+     */
+    protected final void notifyContextListenerIfNeeded(boolean metaData) {
+        firstDocumentStarted = true;
+        if (metaData || contextListenerNotified || notifyingContextListener
+                || contextListener == null || contextListenerWriterType == null)
+            return;
+        contextListenerNotified = true;
+        notifyingContextListener = true;
+        try {
+            notifyContextListener(contextListener, contextListenerWriterType);
+        } finally {
+            notifyingContextListener = false;
+        }
+    }
+
+    // On a plain wire a listener writing via the wire directly during the callback is harmless
+    // (the notified flag is already latched), so no reentrancy policing is needed here - the
+    // supplied writer is a plain method writer.
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private void notifyContextListener(MarshallableOut.ContextListener listener, Class writerType) {
+        listener.onNewContext(methodWriter(writerType));
+    }
+
+    // writeDocument writes directly through WireInternal.writeData rather than writingDocument, so
+    // it needs its own notification hook or a context listener would be silently skipped on this path.
+    @Override
+    public void writeDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
+        notifyContextListenerIfNeeded(metaData);
+        WireInternal.writeData(this, metaData, false, writer);
+    }
+
+    @Override
+    public void writeNotCompleteDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
+        notifyContextListenerIfNeeded(metaData);
+        WireInternal.writeData(this, metaData, true, writer);
     }
 
     @NotNull
