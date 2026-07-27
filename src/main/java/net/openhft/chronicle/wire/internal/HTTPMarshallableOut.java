@@ -131,8 +131,8 @@ public class HTTPMarshallableOut implements MarshallableOut {
     @Override
     public <T> MarshallableOut contextListener(Class<T> writerType,
                                                MarshallableOut.ContextListener<? super T> listener) {
-        wire.contextListener(writerType, listener);
-        return this;
+        throw new UnsupportedOperationException(
+                "contextListener is not supported for HTTP output: each POST is a new output context");
     }
 
 }

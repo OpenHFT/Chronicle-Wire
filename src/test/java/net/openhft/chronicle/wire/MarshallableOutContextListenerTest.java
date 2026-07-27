@@ -300,10 +300,17 @@ public class MarshallableOutContextListenerTest extends WireTestCommon {
                 1, hdrs);
     }
 
-    // NOTE: HTTPMarshallableOut is the third delegating out but is skipped here: it POSTs on
-    // document close and requires a live HTTP endpoint returning 2xx, adding an in-test HttpServer
-    // and network flakiness. It shares the identical per-document wire.clear() mechanism as the
-    // File/StringConsumer outs above, which already demonstrate the T-P0-4 bug.
+    @SuppressWarnings("deprecation")
+    @Test
+    public void httpOutputRejectsContextListenerBecauseEveryPostIsANewContext() throws Exception {
+        MarshallableOut out = MarshallableOut.builder(new URL("http://localhost/context-listener-test"))
+                .wireType(WireType.JSON_ONLY)
+                .get();
+
+        UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
+                () -> out.contextListener(ContextEvents.class, w -> w.event("ctx")));
+        assertTrue(exception.getMessage().contains("each POST is a new output context"));
+    }
 
     // ------------------------------------------------------------------
     // 6. T-cov (coverage, not necessarily bugs)

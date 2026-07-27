@@ -66,14 +66,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     private HeadNumberChecker headNumberChecker;
     private boolean usePadding = DEFAULT_USE_PADDING;
     private boolean generateTuples = GENERATE_TUPLES;
-    private Class<?> contextListenerWriterType;
-    private MarshallableOut.ContextListener<?> contextListener;
-    private boolean contextListenerNotified;
-    private boolean notifyingContextListener;
-    // Latched by the first document of any kind so a context listener cannot be installed once
-    // output has begun. Distinct from contextListenerNotified, which tracks whether the listener
-    // has actually fired (a listener-free wire still latches this on its first write).
-    private boolean firstDocumentStarted;
+    private WireContextListenerLifecycle contextListenerLifecycle;
 
     /**
      * Constructor for AbstractWire.
@@ -228,10 +221,10 @@ public abstract class AbstractWire implements Wire, InternalWire {
     @Override
     public <T> WireOut contextListener(@NotNull Class<T> writerType,
                                        @NotNull MarshallableOut.ContextListener<? super T> listener) {
-        if (firstDocumentStarted)
+        WireContextListenerLifecycle lifecycle = contextListenerLifecycle;
+        if (lifecycle != null && lifecycle.started())
             throw new IllegalStateException("Cannot set contextListener after the first output context has started");
-        contextListenerWriterType = Objects.requireNonNull(writerType);
-        contextListener = Objects.requireNonNull(listener);
+        contextListenerLifecycle = WireContextListenerLifecycle.active(writerType, listener);
         return this;
     }
 
@@ -239,29 +232,22 @@ public abstract class AbstractWire implements Wire, InternalWire {
      * Fires the context listener at most once, before the first data document. A leading metadata
      * document (a stream header/framing) is allowed to precede the context records, so notification
      * is skipped while {@code metaData} is true and happens before the first data document instead.
-     * The notified flag is set before the listener runs, so a listener that writes some records and
-     * then throws is not retried - avoiding duplicate, half-written context records.
+     * A listener-free wire transitions once from a configurable {@code null} lifecycle to the
+     * shared no-op lifecycle. Thereafter ordinary users pay one field read and a predictable
+     * identity check; the no-op entry point itself is skipped.
      */
     protected final void notifyContextListenerIfNeeded(boolean metaData) {
-        firstDocumentStarted = true;
-        if (metaData || contextListenerNotified || notifyingContextListener
-                || contextListener == null || contextListenerWriterType == null)
-            return;
-        contextListenerNotified = true;
-        notifyingContextListener = true;
-        try {
-            notifyContextListener(contextListener, contextListenerWriterType);
-        } finally {
-            notifyingContextListener = false;
+        WireContextListenerLifecycle lifecycle = contextListenerLifecycle;
+        if (lifecycle == null) {
+            contextListenerLifecycle = WireContextListenerLifecycle.NO_OP;
+        } else if (lifecycle != WireContextListenerLifecycle.NO_OP) {
+            lifecycle.beforeDocument(this, metaData);
         }
     }
 
-    // On a plain wire a listener writing via the wire directly during the callback is harmless
-    // (the notified flag is already latched), so no reentrancy policing is needed here - the
-    // supplied writer is a plain method writer.
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private void notifyContextListener(MarshallableOut.ContextListener listener, Class writerType) {
-        listener.onNewContext(methodWriter(writerType));
+    /** Package-private injection point for lifecycle integration tests. */
+    final void contextListenerLifecycle(WireContextListenerLifecycle lifecycle) {
+        contextListenerLifecycle = Objects.requireNonNull(lifecycle);
     }
 
     // writeDocument writes directly through WireInternal.writeData rather than writingDocument, so
