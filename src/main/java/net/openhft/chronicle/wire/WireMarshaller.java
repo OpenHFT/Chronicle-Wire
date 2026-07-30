@@ -2296,9 +2296,16 @@ public class WireMarshaller<T> {
             } else if (!coll.isEmpty()) {
                 coll.clear();
             }
-            boolean sequenced = read.sequence(coll, seqConsumer);
-            if (overwrite && !sequenced) {
-                field.set(o, null);
+            if (!read.sequence(coll, seqConsumer)) {
+                // A null in the input must survive; with overwrite there is no default to fall back to
+                Collection defaultColl = overwrite ? null : (Collection) field.get(defaults);
+                if (defaultColl == null) {
+                    field.set(o, null);
+                } else {
+                    coll.clear();
+                    if (!defaultColl.isEmpty())
+                        coll.addAll(defaultColl);
+                }
             }
         }
 
