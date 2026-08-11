@@ -64,6 +64,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     private HeadNumberChecker headNumberChecker;
     private boolean usePadding = DEFAULT_USE_PADDING;
     private boolean generateTuples = GENERATE_TUPLES;
+    private int outputContextCount = 1;
 
     /**
      * Constructor for AbstractWire.
@@ -76,6 +77,14 @@ public abstract class AbstractWire implements Wire, InternalWire {
         this.bytes = bytes;
         this.use8bit = use8bit;
         notCompleteIsNotPresent = bytes.sharedMemory();
+    }
+
+    final int outputContextCount() {
+        return outputContextCount;
+    }
+
+    protected final void advanceOutputContext() {
+        outputContextCount++;
     }
 
     /**

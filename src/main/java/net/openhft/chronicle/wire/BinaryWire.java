@@ -248,6 +248,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         valueIn.resetState();
         valueOut.resetState();
         bytes.clear();
+        advanceOutputContext();
     }
 
     @Override

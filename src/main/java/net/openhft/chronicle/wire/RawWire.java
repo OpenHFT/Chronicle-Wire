@@ -95,6 +95,7 @@ public class RawWire extends AbstractWire implements Wire {
         readContext.reset();
         bytes.clear();
         lastSB = null;
+        advanceOutputContext();
     }
 
     @Override

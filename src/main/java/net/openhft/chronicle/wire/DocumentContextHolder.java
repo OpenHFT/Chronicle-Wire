@@ -37,6 +37,14 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
         return dc.isNotComplete();
     }
 
+    @Override
+    public int contextCount() {
+        // dc == null is the holder's documented closed state - report "no known context" rather
+        // than NPE or a valid-looking value
+        DocumentContext dc = this.dc;
+        return dc == null ? -1 : dc.contextCount();
+    }
+
     /**
      * Retrieves the encapsulated {@link DocumentContext} instance.
      *
