@@ -32,6 +32,26 @@ applications.
 |`net.openhft.chronicle.wire.converter.LongConverter`
 |Maps textual encodings to numeric values without intermediate allocation.
 |Consumers may supply custom implementations so the SPI contract is documented in code comments.
+
+|`net.openhft.chronicle.wire.MarshallableOut.ContextListener`
+|Callback attempted at most once per output context. Contexts include first Wire use and each
+`Wire.reset()`, a Queue roll file, each HTTP POST, and each connection generation on supported
+connection-oriented outputs. The supplied method writer emits context records before the first
+application data document; leading metadata may precede them.
+|Register on the outermost output before first application use. The writer is not callback-scoped
+and emits normal method-writer documents without `MessageHistory` unless written explicitly.
+Failure is propagated and not retried for that context. Unsupported outputs, including `READ_ANY`
+wires and overwrite-mode files, reject registration with `UnsupportedOperationException`.
+
+|`net.openhft.chronicle.wire.DocumentContext#contextCount()`
+|Non-decreasing identifier of the output context containing an open document. DTOs with transient
+state can write large static context progressively and resend it only when this value increases.
+Wire starts at `1` and increments on `reset()`; Queue returns its roll cycle; HTTP counts POSTs;
+supported connection-oriented outputs count connection generations.
+|Initialise the previous count to `0` or `-1` and rewrite context only when the current value is
+greater. `clear()` and further documents in the same context leave the count unchanged; a negative
+value does not trigger a rewrite. Queue double buffering throws `IllegalStateException`, so it
+cannot be combined with progressive context-count use.
 |===
 
 == Document Lifecycle

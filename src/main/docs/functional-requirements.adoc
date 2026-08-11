@@ -60,6 +60,14 @@ depends on `chronicle-bytes` to expand buffers in zero-copy fashion (see
 xref:system-architecture.adoc#cross_cutting_concerns[System Architecture – Cross-Cutting Concerns]).
 |`src/test/java/net/openhft/chronicle/wire/ElasticBytesCapacityTest.java`,
 `src/test/java/net/openhft/chronicle/wire/ElasticByteBufferTest.java`.
+
+|FN-008
+|Notify a configured `MarshallableOut.ContextListener` before the first application data document
+of each output-owned context, and expose a `DocumentContext.contextCount()` that is non-decreasing
+across successive open documents so progressive state is resent only when the context changes.
+|`src/test/java/net/openhft/chronicle/wire/WireContextListenerLifecycleTest.java`,
+`src/test/java/net/openhft/chronicle/wire/DocumentContextLifecycleTest.java`, and
+`src/test/java/net/openhft/chronicle/wire/MarshallableOutContextListenerTest.java`.
 |===
 
 == Traceability and Updates

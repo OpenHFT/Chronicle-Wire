@@ -55,3 +55,41 @@ Impact & Consequences ::
 Notes/Links ::
 ** `operational-requirements.adoc`
 ** `functional-requirements.adoc`
+
+=== [FN-008] MarshallableOut Context Listener
+
+Date :: 2026-07-23
+Context ::
+* Chronicle Queue needed to write a per-roll-file preamble before the first application excerpt,
+  generalising an earlier roll-file-specific listener.
+* The same contract applies to Wire reuse, persistent outputs and transports, but each output owns
+  different context boundaries.
+Decision Statement :: Add `MarshallableOut.ContextListener<T>` and
+`contextListener(Class<T>, ContextListener)`. Make one notification attempt before the first
+application data document in each implementation-defined output context, using a preset method
+writer.
+Alternatives Considered ::
+* Keep the listener in Queue only. ::
+  ** Pros: Smaller Wire API.
+  ** Cons: Other outputs would need separate, incompatible listener contracts.
+* Fire on every document. ::
+  ** Pros: No context lifecycle state.
+  ** Cons: A preamble belongs to the output context, not every message within it.
+Rationale for Decision ::
+* `MarshallableOut` provides the common API while the output that defines the context owns its
+  lifecycle. `AbstractWire` handles Wire generations, Queue handles roll files, and transports
+  handle request or connection generations.
+* A leading metadata document may precede the context records without changing their ordering
+  relative to application data.
+Impact & Consequences ::
+* A listener is attempted at most once per context. Failure is propagated and is not retried, so
+  listeners should write complete-or-nothing.
+* The supplied method writer is not callback-scoped and may be retained. During notification, the
+  listener writes through it rather than opening another output document.
+* Configure the listener on the outermost output before first application use. Combining listeners
+  on a wrapper and its underlying output is unsupported.
+* `Wire.reset()` starts another output context and advances `contextCount()`; `Wire.clear()`
+  retains the current context and count.
+Notes/Links ::
+** `interface-control.adoc`
+** `functional-requirements.adoc`
