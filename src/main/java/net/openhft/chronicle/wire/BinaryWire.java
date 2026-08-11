@@ -249,6 +249,7 @@ public class BinaryWire extends AbstractWire implements Wire {
         valueOut.resetState();
         bytes.clear();
         advanceOutputContext();
+        resetContextListener();
     }
 
     @Override
@@ -336,6 +337,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
+        notifyContextListenerIfNeeded(metaData);
         writeContext.start(metaData);
         return writeContext;
     }

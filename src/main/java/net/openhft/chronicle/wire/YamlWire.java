@@ -416,6 +416,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
+        notifyContextListenerIfNeeded(metaData);
         if (writeContext == null)
             useBinaryDocuments();
         writeContext.start(metaData);
@@ -1102,6 +1103,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     public void reset() {
         resetState();
         advanceOutputContext();
+        resetContextListener();
     }
 
     private void resetState() {

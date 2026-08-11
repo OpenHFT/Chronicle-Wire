@@ -102,6 +102,9 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * Register before first use on a single thread. Exceptions propagate and the listener is not
      * retried for that context, so it should write complete-or-nothing.
      * <p>
+     * Configure only the outermost output. Combining a listener on a wrapper with one on its
+     * underlying output is unsupported.
+     * <p>
      * For progressive context, expose {@link DocumentWritten}, hold one document context and write
      * missing context only when {@link DocumentContext#contextCount()} increases. This pattern is
      * not supported by queues configured for double buffering.
