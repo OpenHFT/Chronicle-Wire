@@ -116,4 +116,17 @@ public class FileMarshallableOut implements MarshallableOut {
     static class FMOOptions extends SelfDescribingMarshallable {
         boolean append; // Indicates if data should be appended to the existing file
     }
+    @Override
+    public <T> MarshallableOut contextListener(Class<T> writerType,
+                                               MarshallableOut.ContextListener<? super T> listener) {
+        // In overwrite mode every document atomically replaces the file, so context records written
+        // with the first document would be lost from the surviving output - fail loudly instead.
+        if (!options.append)
+            throw new UnsupportedOperationException(
+                    "contextListener requires append mode (add ?append=true to the file URL): "
+                            + "in overwrite mode each document replaces the file, discarding the context records");
+        wire.contextListener(writerType, listener);
+        return this;
+    }
+
 }

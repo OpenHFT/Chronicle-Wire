@@ -60,4 +60,11 @@ public class StringConsumerMarshallableOut implements MarshallableOut {
         dcHolder.documentContext(wire.acquireWritingDocument(metaData));
         return dcHolder;
     }
+    @Override
+    public <T> MarshallableOut contextListener(Class<T> writerType,
+                                               MarshallableOut.ContextListener<? super T> listener) {
+        wire.contextListener(writerType, listener);
+        return this;
+    }
+
 }
