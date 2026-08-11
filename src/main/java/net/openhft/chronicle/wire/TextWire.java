@@ -1281,6 +1281,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         valueIn.resetState();
         valueOut.resetState();
         bytes.clear();
+        advanceOutputContext();
     }
 
     @Override
