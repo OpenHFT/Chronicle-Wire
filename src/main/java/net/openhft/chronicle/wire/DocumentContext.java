@@ -83,6 +83,8 @@ public interface DocumentContext extends Closeable, SourceContext {
      *       this only makes sense in tests and is not a production value.) A context whose count is
      *       unknown (no document present, or the context has been closed) returns a
      *       <em>negative</em> value.</li>
+     *   <li>The value is bounded to the {@code int} range because supported context identifiers,
+     *       including Queue roll cycles, are inherently {@code int}-valued.</li>
      *   <li>Compare counts with equality only. The value is an identifier, not an ordinal:
      *       Queue implementations return the roll cycle number for the document (which may have
      *       gaps), implementations without multiple output contexts return {@code 1}, and
@@ -103,7 +105,7 @@ public interface DocumentContext extends Closeable, SourceContext {
      *
      * @return the context count for this document, or a negative value if not known
      */
-    default long contextCount() {
+    default int contextCount() {
         return 1;
     }
 

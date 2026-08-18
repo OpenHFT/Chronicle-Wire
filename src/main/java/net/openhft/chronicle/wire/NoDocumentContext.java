@@ -47,7 +47,7 @@ public enum NoDocumentContext implements DocumentContext {
     }
 
     @Override
-    public long contextCount() {
+    public int contextCount() {
         // no document, so no context: a negative value, never a valid-looking count
         return -1;
     }

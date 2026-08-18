@@ -38,7 +38,7 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
     }
 
     @Override
-    public long contextCount() {
+    public int contextCount() {
         // dc == null is the holder's documented closed state - report "no known context" rather
         // than NPE or a valid-looking value
         DocumentContext dc = this.dc;

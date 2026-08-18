@@ -68,7 +68,7 @@ public abstract class WrappedDocumentContext implements DocumentContext {
     }
 
     @Override
-    public long contextCount() {
+    public int contextCount() {
         return dc.contextCount();
     }
 

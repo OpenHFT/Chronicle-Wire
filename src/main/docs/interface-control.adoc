@@ -46,7 +46,8 @@ applications.
 |Identifier of the output context a document belongs to, letting DTOs with transient state write
  large static context progressively - once per context - and resend it when the context changes.
  Queue returns the roll cycle number; single-context outputs return `1`; channel-like outputs
- return the one-based connection count (HTTP increments per POST).
+ return the one-based connection count (HTTP increments per POST). The value is an `int` because
+ supported context identifiers, including Queue roll cycles, are inherently `int`-valued.
 |Valid counts are positive and never `0` with a real clock (a test time provider at the epoch can
  yield roll cycle `0` - a test-only value); unknown/absent/closed contexts return a negative value.
  Compare with equality only - the value is an identifier, not an ordinal. For a queue it never goes

@@ -395,7 +395,7 @@ public class MarshallableOutContextListenerTest extends WireTestCommon {
         // interface default (a plain-wire delegate would make 1 == 1 pass either way).
         DocumentContext stub = new DocumentContext() {
             @Override
-            public long contextCount() {
+            public int contextCount() {
                 return 42;
             }
 
@@ -465,7 +465,7 @@ public class MarshallableOutContextListenerTest extends WireTestCommon {
             URL url = new URL("http://localhost:" + server.getAddress().getPort() + "/ctx");
             MarshallableOut out = MarshallableOut.builder(url).wireType(WireType.JSON_ONLY).get();
 
-            List<Long> counts = new ArrayList<>();
+            List<Integer> counts = new ArrayList<>();
             for (int i = 0; i < 3; i++) {
                 try (DocumentContext dc = out.writingDocument()) {
                     counts.add(dc.contextCount());
@@ -473,7 +473,7 @@ public class MarshallableOutContextListenerTest extends WireTestCommon {
                 }
             }
             assertEquals("each HTTP document is a separate delivery and must report a distinct " +
-                    "one-based connection count", Arrays.asList(1L, 2L, 3L), counts);
+                    "one-based connection count", Arrays.asList(1, 2, 3), counts);
             assertEquals(3, posts.size());
         } finally {
             server.stop(0);

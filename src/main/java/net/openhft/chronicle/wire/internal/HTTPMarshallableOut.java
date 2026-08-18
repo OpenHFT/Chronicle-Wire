@@ -34,13 +34,13 @@ public class HTTPMarshallableOut implements MarshallableOut {
 
     // One-based count of the POST currently being built: each document is delivered over its own
     // HTTP connection, so each is a distinct output context for DocumentContext.contextCount().
-    private long connectionCount = 1;
+    private int connectionCount = 1;
 
     // Document context holder for managing the wire and the HTTP communication
     private final DocumentContextHolder dcHolder = new DocumentContextHolder() {
 
         @Override
-        public long contextCount() {
+        public int contextCount() {
             return connectionCount;
         }
 
