@@ -335,6 +335,7 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
+        notifyContextListenerIfNeeded(metaData);
         writeContext.start(metaData);
         return writeContext;
     }

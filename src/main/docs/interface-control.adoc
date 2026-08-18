@@ -32,6 +32,27 @@ applications.
 |`net.openhft.chronicle.wire.converter.LongConverter`
 |Maps textual encodings to numeric values without intermediate allocation.
 |Consumers may supply custom implementations so the SPI contract is documented in code comments.
+
+|`net.openhft.chronicle.wire.MarshallableOut.ContextListener`
+|Callback fired at most once per output context (first wire use, a new queue roll file, a transport
+ connection), receiving a preset method writer whose calls are written before the first data
+ document. A leading metadata document may precede the context records.
+|Must be registered before the first document; registering later throws `IllegalStateException`.
+ At-most-once on failure: a listener that throws is not retried for that context, so listeners
+ should be complete-or-nothing. Outputs that cannot honour the contract (`READ_ANY` wires,
+ overwrite-mode file outputs) reject registration with `UnsupportedOperationException`.
+
+|`net.openhft.chronicle.wire.DocumentContext#contextCount()`
+|Identifier of the output context a document belongs to, letting DTOs with transient state write
+ large static context progressively - once per context - and resend it when the context changes.
+ Queue returns the roll cycle number; single-context outputs return `1`; channel-like outputs
+ return the one-based connection count (HTTP increments per POST). The value is an `int` because
+ supported context identifiers, including Queue roll cycles, are inherently `int`-valued.
+|Valid counts are positive and never `0` with a real clock (a test time provider at the epoch can
+ yield roll cycle `0` - a test-only value); unknown/absent/closed contexts return a negative value.
+ Compare with equality only - the value is an identifier, not an ordinal. For a queue it never goes
+ backwards (EOF-marked cycles are never reused). A Queue configured for double buffering throws
+ `IllegalStateException` - progressive usage and double buffering are not supported together.
 |===
 
 == Document Lifecycle

@@ -9,6 +9,7 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
@@ -21,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.StreamCorruptedException;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
@@ -64,6 +66,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     private HeadNumberChecker headNumberChecker;
     private boolean usePadding = DEFAULT_USE_PADDING;
     private boolean generateTuples = GENERATE_TUPLES;
+    private WireContextListenerLifecycle contextListenerLifecycle;
 
     /**
      * Constructor for AbstractWire.
@@ -212,6 +215,53 @@ public abstract class AbstractWire implements Wire, InternalWire {
     @Override
     public void commentListener(Consumer<CharSequence> commentListener) {
         this.commentListener = commentListener;
+    }
+
+    @NotNull
+    @Override
+    public <T> WireOut contextListener(@NotNull Class<T> writerType,
+                                       @NotNull MarshallableOut.ContextListener<? super T> listener) {
+        WireContextListenerLifecycle lifecycle = contextListenerLifecycle;
+        if (lifecycle != null && lifecycle.started())
+            throw new IllegalStateException("Cannot set contextListener after the first output context has started");
+        contextListenerLifecycle = WireContextListenerLifecycle.active(writerType, listener);
+        return this;
+    }
+
+    /**
+     * Fires the context listener at most once, before the first data document. A leading metadata
+     * document (a stream header/framing) is allowed to precede the context records, so notification
+     * is skipped while {@code metaData} is true and happens before the first data document instead.
+     * A listener-free wire transitions once from a configurable {@code null} lifecycle to the
+     * shared no-op lifecycle. Thereafter ordinary users pay one field read and a predictable
+     * identity check; the no-op entry point itself is skipped.
+     */
+    protected final void notifyContextListenerIfNeeded(boolean metaData) {
+        WireContextListenerLifecycle lifecycle = contextListenerLifecycle;
+        if (lifecycle == null) {
+            contextListenerLifecycle = WireContextListenerLifecycle.NO_OP;
+        } else if (lifecycle != WireContextListenerLifecycle.NO_OP) {
+            lifecycle.beforeDocument(this, metaData);
+        }
+    }
+
+    /** Package-private injection point for lifecycle integration tests. */
+    final void contextListenerLifecycle(WireContextListenerLifecycle lifecycle) {
+        contextListenerLifecycle = Objects.requireNonNull(lifecycle);
+    }
+
+    // writeDocument writes directly through WireInternal.writeData rather than writingDocument, so
+    // it needs its own notification hook or a context listener would be silently skipped on this path.
+    @Override
+    public void writeDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
+        notifyContextListenerIfNeeded(metaData);
+        WireInternal.writeData(this, metaData, false, writer);
+    }
+
+    @Override
+    public void writeNotCompleteDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
+        notifyContextListenerIfNeeded(metaData);
+        WireInternal.writeData(this, metaData, true, writer);
     }
 
     @NotNull

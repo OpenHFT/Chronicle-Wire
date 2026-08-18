@@ -59,6 +59,46 @@ public class YamlWireTest extends WireTestCommon {
         this.usePadding = usePadding;
     }
 
+    @Test
+    public void contextListenerWritesOnFirstUseOnly() {
+        Wire wire = Wire.newYamlWireOnHeap(); // fresh local wire: shared static wire would leak the listener into later tests
+        AtomicInteger calls = new AtomicInteger();
+        wire.contextListener(ContextEvents.class, writer -> {
+            calls.incrementAndGet();
+            writer.event("context");
+        });
+
+        ContextEvents writer = wire.methodWriter(ContextEvents.class);
+        writer.event("one");
+        writer.event("two");
+
+        assertEquals(1, calls.get());
+        assertEquals(Arrays.asList("context", "one", "two"), readContextEvents(wire));
+    }
+
+    @Test
+    public void contextListenerCannotBeSetAfterFirstUse() {
+        Wire wire = Wire.newYamlWireOnHeap(); // fresh local wire: shared static wire would leak the listener into later tests
+        wire.methodWriter(ContextEvents.class).event("one");
+
+        assertThrows(IllegalStateException.class,
+                () -> wire.contextListener(ContextEvents.class, writer -> writer.event("late")));
+    }
+
+    private static List<String> readContextEvents(Wire wire) {
+        wire.bytes().readPosition(0);
+        List<String> events = new ArrayList<>();
+        MethodReader reader = wire.methodReader((ContextEvents) events::add);
+        while (reader.readOne()) {
+            // drain
+        }
+        return events;
+    }
+
+    interface ContextEvents {
+        void event(String value);
+    }
+
     // Defines the set of parameters to be used for the test
     @Parameterized.Parameters(name = "usePadding={0}")
     public static Collection<Object[]> wireTypes() {

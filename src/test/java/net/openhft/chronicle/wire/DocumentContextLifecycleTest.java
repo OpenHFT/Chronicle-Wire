@@ -18,6 +18,7 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
         Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap(256));
         // write two docs
         try (DocumentContext dc = w.writingDocument()) {
+            assertEquals(1, dc.contextCount());
             dc.wire().write("a").int32(1);
         }
         try (DocumentContext dc = w.writingDocument()) {
@@ -43,6 +44,7 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
     public void textUseTextDocumentsLifecycle() {
         Wire w = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
         try (DocumentContext dc = w.writingDocument()) {
+            assertEquals(1, dc.contextCount());
             dc.wire().write("x").int64(11L);
         }
         try (DocumentContext dc = w.writingDocument(true)) { // meta document allowed

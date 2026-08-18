@@ -27,6 +27,22 @@ import java.util.stream.Stream;
 public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteNotifier {
 
     /**
+     * Receives a callback when a {@link MarshallableOut} starts a new output context.
+     * The meaning of a context is implementation specific.
+     *
+     * @param <T> event interface type used by the supplied method writer
+     */
+    @FunctionalInterface
+    interface ContextListener<T> {
+        /**
+         * Called before the first application document is written in the new output context.
+         *
+         * @param writer preset method writer for writing context records
+         */
+        void onNewContext(T writer);
+    }
+
+    /**
      * Creates and returns a new instance of {@link MarshallableOutBuilder} initialized with the provided URL.
      *
      * @param url The URL which will dictate the specific type of {@code MarshallableOut} to create.
@@ -73,6 +89,67 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * Start or reuse an existing a DocumentContext, optionally call close() when done.
      */
     DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException;
+
+    /**
+     * Sets a listener to be called when this output starts a new implementation-defined context.
+     * <p>
+     * The listener receives a preset method writer for {@code writerType}. Method calls made by the
+     * listener are written before the first application document in that context. Implementations
+     * define what starts a new context, for example first wire use, queue roll-file creation or
+     * transport connection. A leading metadata document (a stream header) is written before the
+     * context records; the context precedes the first <em>data</em> document.
+     * <p>
+     * Context records are synthetic and do not record {@link MessageHistory} by default. A listener
+     * may write history explicitly if that context has a real causal history, but normal usage
+     * assumes no history is written.
+     * <p>
+     * If an implementation creates the first output context lazily, the listener is called on first
+     * use as well as on later context changes. Context that must exist before that first write is
+     * application state and must be written by the application as it is built; this is not a
+     * construction-time callback. Listener implementations should track what context they have
+     * assumed was already sent and emit any still-required records again when called. If there is
+     * no context to write for a given callback, the listener may return without writing anything;
+     * writing no placeholder record is the safest and most consistent behaviour.
+     * <p>
+     * The supplied writer emits normal method-writer documents. Do not enable this listener on an
+     * output whose readers require one fixed raw payload format unless those readers explicitly
+     * tolerate the context records.
+     * <p>
+     * Contract:
+     * <ul>
+     *   <li>Must be set before the first document is written; setting it afterwards throws
+     *       {@link IllegalStateException}.</li>
+     *   <li>The listener must write only through the supplied writer. It must not open a document on,
+     *       mutate, or otherwise re-enter, this output during the callback.</li>
+     *   <li>The supplied writer is scoped to the callback. Retaining it or using it after
+     *       {@link ContextListener#onNewContext(Object)} returns is unsupported; implementations may
+     *       reject this usage.</li>
+     *   <li>If the listener throws, the exception is propagated to the caller. Retry policy after a
+     *       failure before any context record is implementation-specific. Listener implementations
+     *       should be idempotent and complete-or-nothing (do not throw after writing records).</li>
+     *   <li>For low-latency resends, clear any local "already sent" assumptions first and then write
+     *       the missing context while one document context is held, if the supplied method writer also
+     *       exposes {@link DocumentWritten}. {@link DocumentContext#contextCount()} is the
+     *       comparison key (compare with equality only) for deciding whether static context has
+     *       already been written in that output context. Note that on a Queue configured for double
+     *       buffering {@code contextCount()} throws {@link IllegalStateException} - progressive
+     *       resends and double buffering are not supported together. This is the same pattern as a
+     *       writer created with {@code methodWriter(EventType.class, DocumentWritten.class)}.</li>
+     *   <li>Not thread-safe: configure it on a single thread before the output is used.</li>
+     * </ul>
+     *
+     * @param writerType event interface type for the supplied method writer
+     * @param listener   listener to call for new output contexts
+     * @param <T>        event interface type
+     * @return this output
+     * @throws UnsupportedOperationException if this output does not support context listeners
+     * @throws IllegalStateException         if set after the first output context has started
+     */
+    @NotNull
+    default <T> MarshallableOut contextListener(@NotNull Class<T> writerType,
+                                                @NotNull ContextListener<? super T> listener) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * @return true if this output is configured to expect the history of the message to be written
