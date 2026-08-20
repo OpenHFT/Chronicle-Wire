@@ -352,10 +352,12 @@ public abstract class AbstractWire implements Wire, InternalWire {
                 break;
 
             if (isNotComplete(header)) {
-                if (header != END_OF_DATA)
+                if (header != END_OF_DATA) {
                     Jvm.warn().on(getClass(), new Exception("Incomplete header found at pos: " + pos + ": " + Integer.toHexString(header) + ", overwriting"));
-                else
-                    throw new WriteAfterEOFException();
+                } else {
+                    Jvm.warn().on(getClass(), "Overwriting an end-of-data marker at pos: " + pos
+                            + ". This can occur when recovering replicated data after the target was sealed from incomplete local state.");
+                }
                 bytes.writeVolatileInt(pos, NOT_INITIALIZED);
                 break;
             }

@@ -55,3 +55,37 @@ Impact & Consequences ::
 Notes/Links ::
 ** `operational-requirements.adoc`
 ** `functional-requirements.adoc`
+
+=== [FN-003] Treat End-of-Data as Replaceable Recovery State
+
+Date :: 2026-08-20
+Context ::
+* Replicas can receive different prefixes before a leader fails. A newly
+  elected node can therefore seal an older roll while another replica still
+  holds entries missing from that roll.
+* An end-of-data marker reflects the target's local state. It is not a
+  consensus decision that data retained by another replica may be discarded.
+Decision Statement :: Permit a subsequent header to replace an end-of-data
+marker and emit a warning whenever this occurs.
+Alternatives Considered ::
+* Reject every write after end-of-data. ::
+  ** Pros: Treats a sealed store as immutable.
+  ** Cons: Prevents exact-index back-fill from recovering data held by a more
+  complete replica after asymmetric replication and leader election.
+* Make replacement configurable by each replication deployment. ::
+  ** Pros: Lets operators retain strict rejection.
+  ** Cons: Requires clients to predict a rare failover condition and can make
+  recovery depend on which differently configured node becomes leader.
+Rationale for Decision ::
+* Available replicated data is authoritative; a marker inferred from
+  incomplete local state must not cause that data to be lost.
+* A warning preserves evidence that a previously sealed position was reopened
+  without turning recovery correctness into a client configuration choice.
+Impact & Consequences ::
+* Callers that encounter end-of-data can continue writing at that position.
+* Each actual replacement produces a warning containing the byte position.
+* Higher layers remain responsible for adding queue, cycle, index, and peer
+  context where it is available.
+Notes/Links ::
+** `https://github.com/OpenHFT/Chronicle-Wire/issues/618`
+** `https://github.com/OpenHFT/Chronicle-Wire/pull/619`

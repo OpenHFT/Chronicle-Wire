@@ -246,11 +246,13 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * INTERNAL METHOD, call writingDocument instead
      * <p>
-     * Start a header for a document
+     * Start a header for a document. If the position contains an end-of-data
+     * marker, the marker is replaced and a warning is emitted. This permits a
+     * higher layer to recover replicated data that arrived after the target
+     * inferred the end of its locally available data.
      *
      * @param safeLength ensure there is at least this much space
      * @return the position of the header
-     * @throws WriteAfterEOFException if you attempt to append an excerpt after an EOF has been written
      */
     long enterHeader(long safeLength);
 
