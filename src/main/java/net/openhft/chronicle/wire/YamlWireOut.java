@@ -17,6 +17,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
@@ -73,6 +74,7 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
     protected final StringBuilder sb = new StringBuilder();
     private boolean addTimeStamps = false;
     private boolean trimFirstCurly = true;
+    private boolean useMinimalQuoting;
 
     /**
      * Constructs a new instance of YamlWireOut with specified bytes and 8-bit flag.
@@ -103,6 +105,19 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
      */
     public T addTimeStamps(boolean addTimeStamps) {
         this.addTimeStamps = addTimeStamps;
+        return (T) this;
+    }
+
+    /**
+     * Selects an opt-in text quoting mode that leaves unambiguous plain strings
+     * such as {@code 1st} unquoted while quoting values that the YAML reader would
+     * infer as a number, date, boolean or null.
+     *
+     * @param useMinimalQuoting whether to minimise quotes without changing String typing
+     * @return this wire
+     */
+    public T useMinimalQuoting(boolean useMinimalQuoting) {
+        this.useMinimalQuoting = useMinimalQuoting;
         return (T) this;
     }
 
@@ -347,8 +362,12 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         if (cs.length() == 0)
             return Quotes.DOUBLE;
 
+        if (useMinimalQuoting && hasImplicitNonStringType(cs))
+            return Quotes.DOUBLE;
+
         // If string starts with special characters or ends with whitespace, use double quoteStyle.
-        if (STARTS_QUOTE_CHARS.get(cs.charAt(0)) ||
+        if ((STARTS_QUOTE_CHARS.get(cs.charAt(0)) &&
+                !(useMinimalQuoting && Character.isDigit(cs.charAt(0)))) ||
                 Character.isWhitespace(cs.charAt(cs.length() - 1)))
             return Quotes.DOUBLE;
         boolean hasSingleQuote = false;
@@ -375,6 +394,17 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         if (hasSingleQuote)
             return Quotes.NONE;
         return quoteStyle;
+    }
+
+    private static boolean hasImplicitNonStringType(@NotNull CharSequence value) {
+        if (StringUtils.isEqual(value, "true") ||
+                StringUtils.isEqual(value, "false") ||
+                StringUtils.isEqual(value, "null"))
+            return true;
+
+        final Object parsed = YamlWire.readNumberOrTextFrom((char) 0,
+                new StringBuilder(value));
+        return !(parsed instanceof CharSequence);
     }
 
     /**
