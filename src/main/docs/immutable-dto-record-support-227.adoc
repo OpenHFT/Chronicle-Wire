@@ -1,0 +1,59 @@
+= Immutable DTO and Record Reading Proposal (Issue #227)
+:toc:
+:sectnums:
+:lang: en-GB
+:source-highlighter: rouge
+
+Status: *Proposed and consumer-gated*. No constructor-based reader or Manager
+API is accepted or shipped by this change.
+
+== Product gate
+
+Implementation requires a named consumer to provide:
+
+* the exact carrier shape and supported Java versions;
+* whether records alone are sufficient;
+* examples covering aliases, missing values, defaults and schema evolution;
+* the required exception behaviour when constructor validation fails; and
+* compatibility expectations for existing field-based readers and writers.
+
+Without that evidence, issue #227 should be closed as not planned rather than
+turning this proposal into a general framework.
+
+== Current behaviour
+
+Chronicle Wire allocates ordinary objects and populates fields. For immutable
+classes this can bypass constructors and write final fields. Records are rejected.
+The current path therefore cannot prove or preserve constructor invariants.
+
+The exploratory ignored test uses a plain carrier with no Chronicle superclass
+or interface. Its transient checksum and validation rule are observable only if
+the constructor executes, so Unsafe allocation followed by writes to `x` and `y`
+cannot satisfy the contract.
+
+== Candidate mapping choices
+
+Records provide language-defined component names, order and a canonical
+constructor. They are the least ambiguous first slice, discovered reflectively
+when running on a supported Java version.
+
+Ordinary Java 8 immutable classes do not have a language-level canonical
+constructor. Parameter names are not normally retained in class files unless the
+class was compiled with `-parameters`. If a consumer requires these classes, the
+proposal must choose explicit registration or an annotation that defines:
+
+* constructor selection and component order;
+* wire names and aliases;
+* required and optional values;
+* primitive and reference defaults; and
+* propagation or wrapping of constructor exceptions.
+
+Matching constructors by debug metadata or parameter type alone is not an
+acceptable contract.
+
+== Relationship to final-field safety
+
+Final-field policy belongs to the deserialisation strategy. The existing
+field-based strategy warns or fails immediately before an unsafe final-field
+write. A future constructor strategy assigns final fields normally and must not
+emit that warning.
