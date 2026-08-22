@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -43,6 +44,19 @@ public class WireMarshaller<T> {
     private static final Class[] UNEXPECTED_FIELDS_PARAMETER_TYPES = {Object.class, ValueIn.class};
     // An empty array of {@link FieldAccess}, used for classes that have no marshallable fields such as interfaces or some enum types
     private static final FieldAccess[] NO_FIELDS = {};
+    /**
+     * Chronicle-Wire#414: deserialisation overwrites marshallable {@code final} fields via Unsafe.
+     * That is a hazard - the JVM is permitted to treat {@code final} fields as trusted constants and
+     * constant-fold reads of them, so after a wire read a reader may observe the pre-read value.
+     * When {@code true}, field-based deserialisation fails immediately before changing a
+     * {@code final} field; when {@code false} (the default) it warns once per class at that same
+     * boundary. Marshaller discovery and serialisation do not evaluate this policy. Defaults from
+     * the {@code wire.strictFinalFields} system property.
+     */
+    private static volatile boolean strictFinalFields = Jvm.getBoolean("wire.strictFinalFields");
+    private static final Set<String> STRICT_FINAL_FIELD_ALLOWLIST = strictFinalFieldAllowlist();
+    private static final ClassValue<AtomicBoolean> FINAL_FIELD_WARNING_EMITTED =
+            ClassLocal.withInitial(ignored -> new AtomicBoolean());
     // Reflection accessor for {@link Class#isRecord()} available on Java 14+
     private static Method isRecord;
     // One entry per marshallable field of {@code T}. The ordering is preserved so that field writers can honour input order hints if provided
@@ -138,6 +152,59 @@ public class WireMarshaller<T> {
         return overridesUnexpectedFields(tClass)
                 ? new WireMarshallerForUnexpectedFields<>(fields, isLeaf, defaultObject)
                 : new WireMarshaller<>(fields, isLeaf, defaultObject);
+    }
+
+    /**
+     * Sets whether Chronicle Wire should fail immediately before field-based deserialisation
+     * changes a {@code final} field. The policy is evaluated for every read, including reads made
+     * through a previously cached marshaller.
+     *
+     * @param strict {@code true} to throw {@link IllegalStateException} before the field write,
+     *               {@code false} (default) to warn once per class
+     * @see #strictFinalFields()
+     */
+    public static void strictFinalFields(boolean strict) {
+        strictFinalFields = strict;
+    }
+
+    /**
+     * @return whether strict final-field checking is enabled
+     * @see #strictFinalFields(boolean)
+     */
+    public static boolean strictFinalFields() {
+        return strictFinalFields;
+    }
+
+    private static void beforeFinalFieldWrite(@NotNull Object target, @NotNull Field field) {
+        final Class<?> targetType = target.getClass();
+        final String message = targetType.getName() + " final field '" + field.getName() + "' is about " +
+                "to be changed by field-based deserialisation. Writing a final field via Unsafe or " +
+                "reflection is unsafe: the JVM may treat final fields as constants and constant-fold " +
+                "reads of them. Use a constructor-based deserialisation strategy, make the field " +
+                "non-final, or mark it transient. Set system property 'wire.strictFinalFields' or " +
+                "call WireMarshaller.strictFinalFields(true) to fail before the write.";
+        if (strictFinalFields && !STRICT_FINAL_FIELD_ALLOWLIST.contains(targetType.getName()))
+            throw new FinalFieldWriteException(message);
+        if (FINAL_FIELD_WARNING_EMITTED.get(targetType).compareAndSet(false, true))
+            Jvm.warn().on(targetType, message);
+    }
+
+    private static Set<String> strictFinalFieldAllowlist() {
+        final String configured = Jvm.getProperty("wire.strictFinalFields.allowlist");
+        if (configured == null || configured.trim().isEmpty())
+            return Collections.emptySet();
+        return Collections.unmodifiableSet(Stream.of(configured.split(","))
+                .map(String::trim)
+                .filter(name -> !name.isEmpty())
+                .collect(Collectors.toSet()));
+    }
+
+    private static final class FinalFieldWriteException extends IllegalStateException {
+        private static final long serialVersionUID = 0L;
+
+        private FinalFieldWriteException(String message) {
+            super(message);
+        }
     }
 
     /**
@@ -976,6 +1043,7 @@ public class WireMarshaller<T> {
         @NotNull
         final Field field;
         final long offset;
+        final boolean finalField;
         @NotNull
         final WireKey key;
 
@@ -999,6 +1067,7 @@ public class WireMarshaller<T> {
          */
         FieldAccess(@NotNull Field field, Boolean isLeaf) {
             this.field = field;
+            finalField = Modifier.isFinal(field.getModifiers());
 
             offset = unsafeObjectFieldOffset(field);
             key = field::getName;
@@ -1290,12 +1359,15 @@ public class WireMarshaller<T> {
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException, InvalidMarshallableException {
             if (!read.isPresent()) {
                 if (overwrite && defaults != null)
-                    copy(Objects.requireNonNull(defaults), o);
+                    setDefaultValue(Objects.requireNonNull(defaults), o);
             } else {
                 long pos = read.wireIn().bytes().readPosition();
                 try {
+                    if (!managesFinalFieldWritePolicy())
+                        beforeFieldWrite(o);
                     setValue(o, read, overwrite);
-                } catch (UnexpectedFieldHandlingException | ClassCastException | ClassNotFoundRuntimeException e) {
+                } catch (UnexpectedFieldHandlingException | ClassCastException |
+                         ClassNotFoundRuntimeException | FinalFieldWriteException e) {
                     Jvm.rethrow(e);
                 } catch (Exception e) {
                     read.wireIn().bytes().readPosition(pos);
@@ -1304,9 +1376,22 @@ public class WireMarshaller<T> {
                         read.text(sb);
                         Jvm.warn().on(getClass(), "Failed to read '" + this.field.getName() + "' with '" + sb + "' taking default", e);
                     }
-                    copy(defaults, o);
+                    setDefaultValue(defaults, o);
                 }
             }
+        }
+
+        /**
+         * @return whether this accessor checks immediately before each reference replacement,
+         * allowing it to update an existing mutable value without reporting a final-field write
+         */
+        protected boolean managesFinalFieldWritePolicy() {
+            return false;
+        }
+
+        protected final void beforeFieldWrite(Object target) {
+            if (finalField)
+                beforeFinalFieldWrite(target, field);
         }
 
         /**
@@ -1328,6 +1413,7 @@ public class WireMarshaller<T> {
          * @param o             Object to reset the value in.
          */
         protected void setDefaultValue(Object defaultObject, Object o) throws IllegalAccessException {
+            beforeFieldWrite(o);
             copy(defaultObject, o);
         }
 
@@ -1383,9 +1469,15 @@ public class WireMarshaller<T> {
             IntValue f = (IntValue) field.get(o);
             if (f == null) {
                 f = read.wireIn().newIntReference();
+                beforeFieldWrite(o);
                 field.set(o, f);
             }
             read.int32(f);
+        }
+
+        @Override
+        protected boolean managesFinalFieldWritePolicy() {
+            return true;
         }
 
         @Override
@@ -1421,9 +1513,15 @@ public class WireMarshaller<T> {
             LongValue f = (LongValue) field.get(o);
             if (f == null) {
                 f = read.wireIn().newLongReference();
+                beforeFieldWrite(o);
                 field.set(o, f);
             }
             read.int64(f);
+        }
+
+        @Override
+        protected boolean managesFinalFieldWritePolicy() {
+            return true;
         }
 
         @Override
@@ -1474,7 +1572,8 @@ public class WireMarshaller<T> {
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
             long pos = read.wireIn().bytes().readPosition();
             try {
-                @Nullable Object using = ObjectUtils.isImmutable(type) == ObjectUtils.Immutability.NO ? field.get(o) : null;
+                final Object previous = field.get(o);
+                @Nullable Object using = ObjectUtils.isImmutable(type) == ObjectUtils.Immutability.NO ? previous : null;
 
                 Object object = null;
                 try {
@@ -1495,16 +1594,30 @@ public class WireMarshaller<T> {
 
                 if (object instanceof SingleThreadedChecked)
                     ((SingleThreadedChecked) object).singleThreadedCheckReset();
-                field.set(o, object);
+                if (object != previous) {
+                    beforeFieldWrite(o);
+                    field.set(o, object);
+                }
 
-            } catch (UnexpectedFieldHandlingException | ClassCastException | ClassNotFoundRuntimeException e) {
+            } catch (UnexpectedFieldHandlingException | ClassCastException |
+                     ClassNotFoundRuntimeException | FinalFieldWriteException e) {
                 Jvm.rethrow(e);
             } catch (Exception e) {
                 read.wireIn().bytes().readPosition(pos);
                 Jvm.warn().on(getClass(), "Unable to parse field: " + field.getName() + ", as a marshallable as it is " + read.objectBestEffort(), e);
-                if (overwrite)
-                    field.set(o, ObjectUtils.defaultValue(field.getType()));
+                if (overwrite) {
+                    final Object defaultValue = ObjectUtils.defaultValue(field.getType());
+                    if (field.get(o) != defaultValue) {
+                        beforeFieldWrite(o);
+                        field.set(o, defaultValue);
+                    }
+                }
             }
+        }
+
+        @Override
+        protected boolean managesFinalFieldWritePolicy() {
+            return true;
         }
 
         @Override
@@ -1583,10 +1696,18 @@ public class WireMarshaller<T> {
             StringBuilder sb = unsafeGetObject(o, offset);
             if (sb == null) {
                 sb = new StringBuilder();
+                beforeFieldWrite(o);
                 unsafePutObject(o, offset, sb);
             }
-            if (read.textTo(sb) == null)
+            if (read.textTo(sb) == null) {
+                beforeFieldWrite(o);
                 unsafePutObject(o, offset, null);
+            }
+        }
+
+        @Override
+        protected boolean managesFinalFieldWritePolicy() {
+            return true;
         }
 
         @Override
@@ -1601,6 +1722,7 @@ public class WireMarshaller<T> {
                 return;
             if (sb == null) {
                 sb = new StringBuilder();
+                beforeFieldWrite(o);
                 unsafePutObject(o, offset, sb);
             }
             sb.setLength(0);
@@ -1661,8 +1783,10 @@ public class WireMarshaller<T> {
         @Override
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) {
             @NotNull Bytes<?> bytes = unsafeGetObject(o, offset);
-            if (bytes == null)
+            if (bytes == null) {
+                beforeFieldWrite(o);
                 unsafePutObject(o, offset, bytes = Bytes.allocateElasticOnHeap(128));
+            }
             WireIn wireIn = read.wireIn();
             if (wireIn instanceof TextWire) {
                 wireIn.consumePadding();
@@ -1671,10 +1795,37 @@ public class WireMarshaller<T> {
                     return;
                 }
             }
-            if (read.textTo(bytes) == null)
+            if (read.textTo(bytes) == null) {
+                beforeFieldWrite(o);
                 unsafePutObject(o, offset, null);
-            else
+            } else
                 bytes.singleThreadedCheckReset();
+        }
+
+        @Override
+        protected boolean managesFinalFieldWritePolicy() {
+            return true;
+        }
+
+        @Override
+        protected void setDefaultValue(Object defaultObject, Object o) {
+            final Bytes<?> fromBytes = unsafeGetObject(defaultObject, offset);
+            Bytes<?> toBytes = unsafeGetObject(o, offset);
+            if (fromBytes == toBytes)
+                return;
+            if (fromBytes == null) {
+                if (toBytes != null) {
+                    beforeFieldWrite(o);
+                    unsafePutObject(o, offset, null);
+                }
+                return;
+            }
+            if (toBytes == null) {
+                beforeFieldWrite(o);
+                unsafePutObject(o, offset, toBytes = Bytes.allocateElasticOnHeap());
+            }
+            toBytes.clear();
+            toBytes.write(fromBytes);
         }
 
         /**
@@ -1757,8 +1908,10 @@ public class WireMarshaller<T> {
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
             final Object arr = field.get(o);
             if (read.isNull()) {
-                if (arr != null)
+                if (arr != null) {
+                    beforeFieldWrite(o);
                     field.set(o, null);
+                }
                 return;
             }
             @NotNull List list = new ArrayList();
@@ -1769,7 +1922,13 @@ public class WireMarshaller<T> {
             Object arr2 = Array.newInstance(componentType, list.size());
             for (int i = 0; i < list.size(); i++)
                 Array.set(arr2, i, list.get(i));
+            beforeFieldWrite(o);
             field.set(o, arr2);
+        }
+
+        @Override
+        protected boolean managesFinalFieldWritePolicy() {
+            return true;
         }
 
         @Override
@@ -1831,13 +1990,22 @@ public class WireMarshaller<T> {
         protected void setValue(Object o, @NotNull ValueIn read, boolean overwrite) throws IllegalAccessException {
             final Object arr = field.get(o);
             if (read.isNull()) {
-                if (arr != null)
+                if (arr != null) {
+                    beforeFieldWrite(o);
                     field.set(o, null);
+                }
                 return;
             }
             byte[] arr2 = read.bytes((byte[]) arr);
-            if (arr2 != arr)
+            if (arr2 != arr) {
+                beforeFieldWrite(o);
                 field.set(o, arr2);
+            }
+        }
+
+        @Override
+        protected boolean managesFinalFieldWritePolicy() {
+            return true;
         }
 
         @Override
@@ -1953,12 +2121,14 @@ public class WireMarshaller<T> {
             EnumSet coll = (EnumSet) field.get(o);
             if (coll == null) {
                 coll = enumSetSupplier.get();
+                beforeFieldWrite(o);
                 field.set(o, coll);
             }
 
             if (!read.sequence(coll, addAll)) {
                 Collection defaultColl = (Collection) field.get(defaults);
                 if (defaultColl == null) {
+                    beforeFieldWrite(o);
                     field.set(o, null);
                 } else {
                     coll.clear();
@@ -2157,6 +2327,7 @@ public class WireMarshaller<T> {
             Collection coll = (Collection) field.get(o);
             if (coll == null) {
                 coll = collectionSupplier.get();
+                beforeFieldWrite(o);
                 field.set(o, coll);
             }
             if (!read.sequence(coll, (c, in2) -> {
@@ -2167,6 +2338,7 @@ public class WireMarshaller<T> {
             })) {
                 Collection defaultColl = (Collection) field.get(defaults);
                 if (defaultColl == null) {
+                    beforeFieldWrite(o);
                     field.set(o, null);
                 } else {
                     coll.clear();
@@ -2292,12 +2464,14 @@ public class WireMarshaller<T> {
             Collection coll = (Collection) field.get(o);
             if (coll == null) {
                 coll = collectionSupplier.get();
+                beforeFieldWrite(o);
                 field.set(o, coll);
             } else if (!coll.isEmpty()) {
                 coll.clear();
             }
             boolean sequenced = read.sequence(coll, seqConsumer);
             if (overwrite && !sequenced) {
+                beforeFieldWrite(o);
                 field.set(o, null);
             }
         }
@@ -2403,12 +2577,15 @@ public class WireMarshaller<T> {
             Map map = (Map) field.get(o);
             if (map == null) {
                 map = collectionSupplier.get();
+                beforeFieldWrite(o);
                 field.set(o, map);
             } else if (!map.isEmpty()) {
                 map.clear();
             }
-            if (read.marshallableAsMap(keyType, valueType, map) == null)
+            if (read.marshallableAsMap(keyType, valueType, map) == null) {
+                beforeFieldWrite(o);
                 field.set(o, null);
+            }
         }
 
         @Override

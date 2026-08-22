@@ -55,3 +55,38 @@ Impact & Consequences ::
 Notes/Links ::
 ** `operational-requirements.adoc`
 ** `functional-requirements.adoc`
+
+=== [RISK-004] Enforce Final-Field Safety at the Mutation Boundary
+
+Date :: 2026-08-22
+Context ::
+* Field-based deserialisation can change `final` fields through Unsafe or
+  reflection, allowing JVM constant folding to expose a stale value.
+* A cached marshaller is also used for serialisation, and future immutable
+  support may construct values without mutating final fields.
+Decision Statement :: Cache field metadata, but evaluate final-field policy
+immediately before field-based deserialisation writes a final field. Warn once
+per target class by default and evaluate strict mode before every such write.
+Alternatives Considered ::
+* Check when a marshaller is created. ::
+  ** Pros: Simple and performed once.
+  ** Cons: Warns on writes, can consume the warning before a read, and lets a
+  cached marshaller bypass a later strict-mode change.
+* Reject every type that declares a final field. ::
+  ** Pros: Conservative type-level rule.
+  ** Cons: Rejects safe constructor materialisation and final collection
+  references whose contents can be updated without replacing the reference.
+Rationale for Decision ::
+* The policy now observes the hazardous action rather than type discovery.
+* Constructor-based readers do not use the field-write path and therefore do
+  not produce a false warning.
+Impact & Consequences ::
+* Serialisation and direct `WireMarshaller.of` calls do not warn.
+* A missing field does not warn with `overwrite=false`; resetting it from a
+  default with `overwrite=true` does warn or fail before the write.
+* Throwable marshallers use the same policy.
+* Tests retain an exact legacy DTO type allow-list. The `strict-final-fields`
+  Maven profile still runs their owning tests, permits only those named types,
+  and fails on any new unsafe final-field reference write.
+Notes/Links ::
+** `https://github.com/OpenHFT/Chronicle-Wire/issues/414`
