@@ -1,0 +1,210 @@
+= TextWire -> YamlWire migration: failure inventory and checklist (issue #509)
+:toc:
+:toclevels: 2
+
+This document is the inventory deliverable for
+https://github.com/OpenHFT/Chronicle-Wire/issues/509[issue #509]. It does not
+close the migration epic and it does not treat round-trip equivalence as a
+universal replacement for exact text contracts.
+
+Scope note (from #509): `WireType.TEXT` is redirected to `YamlWire` when
+`wire.testAsYaml=true`. Text parsing remains a non-negotiable compatibility
+requirement; deprecating the `TextWire` writer is a separate decision.
+
+== Reproducible evidence
+
+The classified sweep used production and test source at exact SHA
+`19688fda425dded95084ae41d30d009e4e9513ee` (`origin/ea` at the time of the
+sweep), OpenJDK 21.0.11, Linux, and the Maven/dependency versions recorded in
+the Surefire XML.
+
+Run the checked-in evidence collector from the repository root:
+
+[source,shell]
+----
+./scripts/yaml-migration-509-sweep.sh
+----
+
+It performs a clean offline sweep, excludes only the JVM-crashing security
+test, and writes the following untracked build artifacts beneath
+`target/yaml-migration-509/`:
+
+* exact source SHA, Java version and Maven version;
+* the complete Maven log and exit code;
+* every Surefire XML report;
+* aggregate counts; and
+* a TSV containing every failing test method.
+
+The optional crash reproduction is deliberately isolated from the main sweep:
+
+[source,shell]
+----
+YAML_MIGRATION_RUN_CRASH_REPRO=true ./scripts/yaml-migration-509-sweep.sh
+----
+
+That mode retains the focused log, exit code, and any `hs_err_pid*.log` files.
+`ApacheStructExploitTest` itself is the current minimal executable reproducer.
+CI should publish the whole evidence directory as an artifact on every
+supported JDK.
+
+=== Result summary
+
+[cols="1,1",options="header"]
+|===
+| Metric | Value
+| Test classes executed | 312
+| Tests executed | 11,365
+| Failures | 55
+| YAML-specific errors | 12
+| Classes with YAML failures/errors | 19
+| Classes that crash the JVM | 1 (`ApacheStructExploitTest`, excluded from the sweep)
+|===
+
+A fresh rerun on 2026-08-22 reproduced all 55 failures and 12 YAML-specific
+errors. The managed runner additionally denied loopback socket creation,
+causing 14 environment-only `SocketException: Operation not permitted` errors
+in `MarshallableOutBuilderTest#httpBinary`,
+`TextWireTest#writeUnserializable3`, both
+`YamlWireTest#writeUnserializable3` parameters, and all ten
+`WireToOutputStreamTest#testVisSocket` parameters. Those 14 errors are recorded
+in the generated evidence but excluded from the table and taxonomy. No claim is
+made that this rerun independently reproduced the fatal crash; that requires
+the opt-in crash run and its `hs_err` artifact.
+
+== Method-level migration checklist
+
+Each checkbox below is either one method or a tightly related parameter group
+with one acceptance criterion. A class may appear in several categories.
+
+=== 0. Fatal security-path JVM crash
+
+* [ ] `security.ApacheStructExploitTest`: hostile YAML must never crash the JVM,
+  must be rejected before arbitrary JDK implementation fields are traversed,
+  must preserve the test's intended `ClassNotFoundRuntimeException` failure
+  category (unless a separate security decision changes it), must execute no
+  command, and must pass on every supported JDK.
+
+The observed native stack reaches
+`WireMarshaller$BooleanFieldAccess.copy(Object, Object)` through
+`FieldAccess.setDefaultValue` and `YamlWire$TextValueIn.marshallable`. A null
+default object is a plausible immediate trigger for the unsafe boolean read,
+but it is only a root-cause hypothesis. A null guard may be useful crash
+containment; it is not accepted as the fix until a focused reproduction proves
+that rejection happens at the correct trust boundary and retains the security
+test's expected failure mode.
+
+=== 1. Genuine parser/materialisation defects
+
+Acceptance criterion: fix parsing/materialisation and retain a focused semantic
+assertion; do not rebaseline output to hide missing values or exceptions.
+
+* [ ] `DeserializeFromNakedFileTest#testBytes[TEXT]` -- buffer underflow.
+* [ ] `marshallable.ThreeSequenceTest#testThree` -- `IllegalStateException: NONE`.
+* [ ] `YamlSpecTest#test2_21MiscellaneousFixed` -- unexpected `MAPPING_KEY`.
+* [ ] `UnsupportedChangesTest#scalarToMarshallable` -- `ClassCastException`.
+* [ ] `TextDocumentTest#testDocument` -- unsupported `TAG !atomic` and leaked resource.
+* [ ] `TextWireAgitatorTest#colonInList` -- wrong exception path.
+* [ ] `TextWireTest#testNestedList` -- `IllegalStateException: NONE`.
+* [ ] `TextWireTest#testArrayTypes1` -- unexpected `MAPPING_KEY`.
+* [ ] `TextWireTest#testArrayTypes2` -- malformed UTF-8 read.
+* [ ] `TextWireTest#writeCharacter` -- parsed character is `null`.
+* [ ] `TextWireTest#testABCDBytes` -- unexpected `DOCUMENT_END`.
+* [ ] `marshallable.MarshallingJSONStringTest#readingJsonListWithNestedSingleListInMiddle`
+  and `#readingJsonListWithNestedSingleListAsLastElement` -- unexpected
+  `MAPPING_START` while consuming nested lists.
+
+=== 2. Data/model semantic differences
+
+Acceptance criterion: decide and assert the intended object/value semantics.
+Rendered-text changes alone cannot explain these missing, reordered, or
+mis-typed values.
+
+* [ ] `MarshallableTest#testEmptyFromString` -- empty object becomes `null`.
+* [ ] `TextWireTest#testRead`, `#testRead1`, and `#testRead2` -- read position or
+  field-consumption differences.
+* [ ] `TextWireTest#testABCStringBuilder` -- consumes an additional value.
+* [ ] `TextWireTest#type` -- type identity changes to `Object`.
+* [ ] `TextWireTest#readMarshallableAsEnum` -- enum becomes `null`.
+* [ ] `TextWireTest#testTypeWithEmpty` -- nested values are replaced with
+  null/zero defaults.
+* [ ] `TextWireTest#writeObjectWithTreeMap` -- map contents are lost.
+* [ ] `marshallable.MarshallingJSONStringTest#testNoPrefixAddedToJson` -- parsed
+  list becomes empty.
+* [ ] `marshallable.UnknownDatatimeTest#ignoreAnUnknownDateTime` -- token-state
+  and resource-release failure.
+* [ ] `marshallable.WithSubstitutionTest#subs` -- substitution changes the
+  object values and diagnostics.
+* [ ] `reordered.ReorderedTest#testWithReorderedFields[TEXT]` -- list elements
+  and numeric values are lost.
+
+=== 3. Intentional legacy/non-compliant parsing
+
+`InvalidYamWithCommonMistakesTest` exercises permissive inputs that are not
+valid YAML. These methods are not rendering snapshots to rebaseline. For each,
+choose explicitly between retaining a documented TextWire compatibility parser
+or rejecting the input with a stable diagnostic:
+
+* [ ] `#testDtp`
+* [ ] `#testAssumeTheType`
+* [ ] `#testAssumeTheType2`
+* [ ] `#testAssumeTheTypeMissingTypeThrows`
+* [ ] `#testAssumeTypeBasedOnWhatIsIntheYaml`
+* [ ] `#testAssumeTypeBasedOnWhatIsIntheYaml3`
+* [ ] `#testAssumeTypeBasedOnWhatIsIntheYamlWithSpace`
+* [ ] `#testAssumeTypeBasedOnWhatIsIntheYamlWithSpace2`
+* [ ] `#testAssumeTypeBasedOnWhatButUseAlias`
+* [ ] `#testBadTypeDtp0`
+
+=== 4. Implementation identity and scalar-conversion policy
+
+These two failures from the same parameterised class have different causes:
+
+* [ ] `TextBinaryWireTest#testValueOf[TEXT]` -- the parameter says `TEXT` while
+  `WireType.TEXT.apply` deliberately returns `YamlWire`; decide whether the test
+  should assert configured type or implementation identity.
+* [ ] `TextBinaryWireTest#testConvertToNum[TEXT]` -- decide whether YAML booleans
+  may convert to integer `1`/`0`; this is a semantic conversion contract, not an
+  output-format delta.
+
+=== 5. Exception and diagnostic differences
+
+Acceptance criterion: preserve or deliberately revise the exception category
+and warning contract. A round-trip assertion cannot replace these tests.
+
+* [ ] `marshallable.CNFREOnMissingClassTest#throwClassNotFoundRuntimeExceptionOnMissingClassForInterfaceField`
+* [ ] `marshallable.CNFREOnMissingClassTest#throwClassNotFoundRuntimeExceptionOnMissingClassForFieldNotATuple`
+* [ ] `marshallable.CNFREOnMissingClassTest#throwClassNotFoundRuntimeExceptionOnMissingClassForField`
+* [ ] `marshallable.CNFREOnMissingClassTest#throwClassNotFoundRuntimeExceptionOnMissingClassForField2`
+* [ ] `marshallable.CNFREOnMissingClassTest#useTupleOnMissingClassForInterfaceField`
+* [ ] `WiresTest#unknownType` and `#unknownType2Throws2`
+* [ ] `TextWireAgitatorTest#lowerCaseClassThrows`
+* [ ] `TextWireTest#testSingleQuote` -- diagnostic expectation differs even
+  though the method's value assertion completes.
+
+=== 6. Writer rendering differences
+
+These are exact externally visible text contracts. For each group, decide
+whether YAML rendering is the new contract or whether compatibility requires a
+writer change. Rebaseline only after that decision; do not mechanically replace
+the assertion with round-trip coverage.
+
+* [ ] `issue.JSON222Test#testJSONAsTextWire` cases `n_63.json`, `n_64.json`,
+  `n_66.json`, `n_79.json`, `n_80.json`, `n_81.json`, `n_85.json`, `n_87.json`,
+  `n_137.json`, `n_149.json`, `n_153.json`, `n_154.json`, `n_155.json`, and
+  `n_173.json` -- numeric spelling/normalisation.
+* [ ] `converter.LongConvertorFieldsTest#detectSpecialChar` and
+  `#detectSpecialCharBase85` -- converter output and quoting.
+* [ ] `TextWireTest#readsComment` -- comment/document ordering.
+* [ ] `TextWireTest#commaInAValue` and `#commaInAValue2` -- whitespace in
+  comma-containing scalars.
+* [ ] `WriteDocumentContextTest#nestedText` -- size-prefixed document layout.
+
+== Epic completion criteria
+
+* [ ] Resolve every method-level item above with a focused acceptance test.
+* [ ] Keep TextWire input parsing compatible where explicitly promised.
+* [ ] Run the crash reproducer on the supported JDK matrix and publish its log
+  and `hs_err` file; verify that no command executes.
+* [ ] Run the full sweep with `ApacheStructExploitTest` included.
+* [ ] Update this inventory from generated evidence and close #509 only when the
+  YAML sweep is green.
