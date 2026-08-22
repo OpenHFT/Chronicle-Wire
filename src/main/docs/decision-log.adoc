@@ -55,3 +55,34 @@ Impact & Consequences ::
 Notes/Links ::
 ** `operational-requirements.adoc`
 ** `functional-requirements.adoc`
+
+=== [UX-005] Make Minimal String Quoting Opt-In
+
+Date :: 2026-08-22
+Context ::
+* The existing text writer quotes every string beginning with a digit, including
+  unambiguous values such as `1st`.
+* Exact text is externally visible, while removing quotes from an implicitly
+  typed scalar can change an `Object` read from String to number, boolean, null,
+  date or time.
+Decision Statement :: Preserve existing output by default. Provide opt-in
+minimal quoting that omits quotes only when the YAML reader classifies the plain
+scalar as text, and quotes ambiguous text values to preserve String typing.
+Alternatives Considered ::
+* Treat round-trip through `text()` as the only contract. ::
+  ** Pros: No production change.
+  ** Cons: Does not address unnecessary output quoting and cannot detect dynamic
+  scalar type changes.
+* Remove every leading digit from the quote rule. ::
+  ** Pros: Small implementation.
+  ** Cons: Emits numeric and date-like strings as implicitly typed scalars.
+Rationale for Decision ::
+* Opt-in preserves the established default representation.
+* Reusing the reader's scalar classification keeps writer and reader decisions
+  aligned.
+Impact & Consequences ::
+* `useMinimalQuoting(true)` emits `1st`, `123abc` and `3D-model2` without quotes.
+* Numeric, boolean, null and date-like text remains quoted and reads dynamically
+  as String.
+Notes/Links ::
+** `https://github.com/OpenHFT/Chronicle-Wire/issues/477`

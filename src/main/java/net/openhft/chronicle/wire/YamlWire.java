@@ -2400,9 +2400,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             @Nullable StringBuilder s = textTo0(acquireStringBuilder());
             if (yt.current() == YamlToken.LITERAL)
                 return s;
-            if (StringUtils.isEqual(s, "true"))
+            if (blockQuoteChar == 0 && StringUtils.isEqual(s, "true"))
                 return true;
-            if (StringUtils.isEqual(s, "false"))
+            if (blockQuoteChar == 0 && StringUtils.isEqual(s, "false"))
                 return false;
             return readNumberOrTextFrom(blockQuoteChar, s);
         }
