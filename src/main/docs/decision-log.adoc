@@ -55,3 +55,42 @@ Impact & Consequences ::
 Notes/Links ::
 ** `operational-requirements.adoc`
 ** `functional-requirements.adoc`
+
+=== [FN-006] Propose Consumer-Gated Constructor Materialisation
+
+Date :: 2026-08-22
+Status :: Proposed; no implementation is accepted or shipped.
+Context ::
+* Issue #227 proposes a broad Manager abstraction, while the only bounded
+  candidate currently identified is constructor-based immutable reading.
+* No named consumer, carrier shape, mapping contract or compatibility rules
+  have yet passed the product gate.
+Decision Statement :: Keep constructor materialisation as a proposal until a
+consumer supplies its exact DTO shape and required mapping rules. Do not treat
+an ignored exploratory test as an accepted deliverable and do not close #227.
+Alternatives Considered ::
+* Implement the full Manager abstraction. ::
+  ** Pros: Covers creation, reading, writing, access, reuse and migration.
+  ** Cons: Its scope and value have not been established by a current consumer.
+* Implement records first. ::
+  ** Pros: Component names, order and canonical constructor are language-defined.
+  ** Cons: Requires reflective Java-version gating while the module targets Java 8.
+* Support ordinary immutable classes by inferred constructor parameters. ::
+  ** Pros: Supports Java 8 carriers.
+  ** Cons: Parameter names are not a class-file contract without `-parameters`;
+  overloaded constructors, aliases and missing values remain ambiguous.
+Rationale for Decision ::
+* The consumer must determine whether records alone suffice or ordinary classes
+  require explicit registration or annotations.
+* Constructor exceptions, aliases, missing required values and defaults must be
+  defined before implementation because constructor invocation exists to retain
+  invariants rather than bypass them.
+Impact & Consequences ::
+* The exploratory contract uses a plain carrier with a transient constructor-only
+  invariant, so the current allocate-and-set path cannot satisfy it.
+* Any future constructor strategy is treated as safe by the final-field policy;
+  only field-based mutation warns or fails.
+* If no consumer passes the gate, close #227 as not planned.
+Notes/Links ::
+** `immutable-dto-record-support-227.adoc`
+** `https://github.com/OpenHFT/Chronicle-Wire/issues/227`
