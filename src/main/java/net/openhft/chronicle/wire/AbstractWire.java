@@ -352,11 +352,11 @@ public abstract class AbstractWire implements Wire, InternalWire {
                 break;
 
             if (isNotComplete(header)) {
-                if (header != END_OF_DATA) {
+                if (header != END_OF_DATA)
                     Jvm.warn().on(getClass(), new Exception("Incomplete header found at pos: " + pos + ": " + Integer.toHexString(header) + ", overwriting"));
-                } else {
-                    Jvm.warn().on(getClass(), "Overwriting an end-of-data marker at pos: " + pos
-                            + ". This can occur when recovering replicated data after the target was sealed from incomplete local state.");
+                else {
+                    insideHeader = false;
+                    throw new WriteAfterEOFException();
                 }
                 bytes.writeVolatileInt(pos, NOT_INITIALIZED);
                 break;
@@ -366,6 +366,25 @@ public abstract class AbstractWire implements Wire, InternalWire {
         }
         bytes.writePositionRemaining(pos + SPB_HEADER_SIZE, safeLength);
         return pos;
+    }
+
+    @Override
+    public long recoverFromEndOfData() {
+        long position = bytes.writePosition();
+        for (; ; ) {
+            if (usePadding)
+                position += BytesUtil.padOffset(position);
+
+            final int header = bytes.readVolatileInt(position);
+            if (header == END_OF_DATA) {
+                bytes.writeVolatileInt(position, NOT_INITIALIZED);
+                return position;
+            }
+            if (header == NOT_INITIALIZED || isNotComplete(header))
+                return -1;
+
+            position += lengthOf(header) + SPB_HEADER_SIZE;
+        }
     }
 
     @Override

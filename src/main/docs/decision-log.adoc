@@ -56,7 +56,7 @@ Notes/Links ::
 ** `operational-requirements.adoc`
 ** `functional-requirements.adoc`
 
-=== [FN-003] Treat End-of-Data as Replaceable Recovery State
+=== [FN-003] Replace End-of-Data Only During Validated Recovery
 
 Date :: 2026-08-20
 Context ::
@@ -65,8 +65,9 @@ Context ::
   holds entries missing from that roll.
 * An end-of-data marker reflects the target's local state. It is not a
   consensus decision that data retained by another replica may be discarded.
-Decision Statement :: Permit a subsequent header to replace an end-of-data
-marker and emit a warning whenever this occurs.
+Decision Statement :: Keep ordinary writes sealed at end-of-data. Permit marker
+replacement only through an explicit internal recovery operation, after the
+storage layer holds its write lock and validates the exact recovery index.
 Alternatives Considered ::
 * Reject every write after end-of-data. ::
   ** Pros: Treats a sealed store as immutable.
@@ -76,16 +77,25 @@ Alternatives Considered ::
   ** Pros: Lets operators retain strict rejection.
   ** Cons: Requires clients to predict a rare failover condition and can make
   recovery depend on which differently configured node becomes leader.
+* Replace end-of-data from every header entry. ::
+  ** Pros: Restores the pre-2023 Wire behaviour with minimal code.
+  ** Cons: Cannot distinguish coordinated back-fill from an accidental write to
+  an archived, corrupt, or deliberately sealed store.
 Rationale for Decision ::
 * Available replicated data is authoritative; a marker inferred from
   incomplete local state must not cause that data to be lost.
-* A warning preserves evidence that a previously sealed position was reopened
-  without turning recovery correctness into a client configuration choice.
+* An explicit operation preserves the normal seal contract while allowing the
+  Queue exact-index path to recover authoritative replicated data.
+* Queue and its replication caller can report the queue, cycle, index and peer
+  context that Wire does not have.
 Impact & Consequences ::
-* Callers that encounter end-of-data can continue writing at that position.
-* Each actual replacement produces a warning containing the byte position.
-* Higher layers remain responsible for adding queue, cycle, index, and peer
-  context where it is available.
+* Ordinary `enterHeader` callers continue to receive `WriteAfterEOFException`.
+* The internal recovery operation reports whether and where it replaced the
+  marker; the coordinating storage layer emits the contextual warning.
+* Wire, Queue, and Queue Enterprise changes must be validated together. Wire is
+  released first, followed by Queue and Queue Enterprise, and the supported BOM
+  is updated only after the coordinated combination passes its compatibility
+  tests. Older Queue versions do not call the new operation and stay strict.
 Notes/Links ::
 ** `https://github.com/OpenHFT/Chronicle-Wire/issues/618`
 ** `https://github.com/OpenHFT/Chronicle-Wire/pull/619`
