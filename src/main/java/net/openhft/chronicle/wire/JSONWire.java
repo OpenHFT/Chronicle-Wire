@@ -9,13 +9,12 @@ import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassLookup;
-import net.openhft.chronicle.core.threads.ThreadLocalHelper;
+import net.openhft.chronicle.core.threads.WeakThreadLocal;
 import net.openhft.chronicle.core.util.ClassNotFoundRuntimeException;
 import net.openhft.chronicle.core.util.UnresolvedType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Type;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
@@ -24,7 +23,6 @@ import java.time.LocalTime;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
 
 import static net.openhft.chronicle.bytes.NativeBytes.nativeBytes;
 
@@ -54,11 +52,9 @@ public class JSONWire extends TextWire {
     // Bytes for comma, commonly used as JSON separator.
     static final BytesStore<?, ?> COMMA = BytesStore.from(",");
 
-    // A thread-local variable to store a reference to the stop characters tester for JSON parsing.
-    static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT_JSON = new ThreadLocal<>();
-
-    // Supplier for stop character tester for strict JSON text that escapes specific characters.
-    static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_JSON_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT_JSON::escaping;
+    // A weak thread-local stop character tester for JSON parsing.
+    static final WeakThreadLocal<StopCharsTester> STRICT_ESCAPED_END_OF_TEXT_JSON =
+            new WeakThreadLocal<>(TextStopCharsTesters.STRICT_END_OF_TEXT_JSON::escaping);
 
     // Flag to determine whether to use types or not during parsing.
     boolean useTypes;
@@ -752,7 +748,7 @@ public class JSONWire extends TextWire {
     @Override
     @NotNull
     protected StopCharsTester getStrictEscapingEndOfText() {
-        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT_JSON, STRICT_END_OF_TEXT_JSON_ESCAPING);
+        StopCharsTester escaping = STRICT_ESCAPED_END_OF_TEXT_JSON.get();
         // reset it.
         escaping.isStopChar(' ', ' ');
         return escaping;

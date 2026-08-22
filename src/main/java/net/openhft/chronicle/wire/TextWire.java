@@ -11,14 +11,13 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.scoped.ScopedResource;
-import net.openhft.chronicle.core.threads.ThreadLocalHelper;
+import net.openhft.chronicle.core.threads.WeakThreadLocal;
 import net.openhft.chronicle.core.util.*;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Type;
 import java.nio.BufferUnderflowException;
 import java.time.LocalDate;
@@ -55,20 +54,19 @@ public class TextWire extends YamlWireOut<TextWire> {
     // A set of characters considered as "end characters" in this wire format.
     static final BitSet END_CHARS = new BitSet();
 
-    // Thread locals for stop char testers that might need escaping in specific contexts.
-    // They are weakly referenced to avoid potential memory leaks in multithreaded environments.
-    static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(StopCharTesters.QUOTES::escaping);
-    static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_SINGLE_QUOTES = new ThreadLocal<>();//ThreadLocal.withInitial(() -> StopCharTesters.SINGLE_QUOTES.escaping());
-    static final ThreadLocal<WeakReference<StopCharTester>> ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
-    static final ThreadLocal<WeakReference<StopCharsTester>> STRICT_ESCAPED_END_OF_TEXT = new ThreadLocal<>();// ThreadLocal.withInitial(() -> TextStopCharsTesters.END_OF_TEXT.escaping());
+    // Each parsing context has its own constructor-bound supplier. In particular,
+    // strict text and event names must not share a cache because their stop rules differ.
+    static final WeakThreadLocal<StopCharTester> ESCAPED_QUOTES =
+            new WeakThreadLocal<>(StopCharTesters.QUOTES::escaping);
+    static final WeakThreadLocal<StopCharTester> ESCAPED_SINGLE_QUOTES =
+            new WeakThreadLocal<>(StopCharTesters.SINGLE_QUOTES::escaping);
+    static final WeakThreadLocal<StopCharTester> ESCAPED_END_OF_TEXT =
+            new WeakThreadLocal<>(TextStopCharTesters.END_OF_TEXT::escaping);
+    static final WeakThreadLocal<StopCharsTester> STRICT_ESCAPED_END_OF_TEXT =
+            new WeakThreadLocal<>(TextStopCharsTesters.STRICT_END_OF_TEXT::escaping);
+    static final WeakThreadLocal<StopCharsTester> ESCAPED_END_EVENT_NAME =
+            new WeakThreadLocal<>(TextStopCharsTesters.END_EVENT_NAME::escaping);
     static final Pattern REGX_PATTERN = Pattern.compile("\\.|\\$");
-
-    // Suppliers for various stop char testers.
-    static final Supplier<StopCharTester> QUOTES_ESCAPING = StopCharTesters.QUOTES::escaping;
-    static final Supplier<StopCharTester> SINGLE_QUOTES_ESCAPING = StopCharTesters.SINGLE_QUOTES::escaping;
-    static final Supplier<StopCharTester> END_OF_TEXT_ESCAPING = TextStopCharTesters.END_OF_TEXT::escaping;
-    static final Supplier<StopCharsTester> STRICT_END_OF_TEXT_ESCAPING = TextStopCharsTesters.STRICT_END_OF_TEXT::escaping;
-    static final Supplier<StopCharsTester> END_EVENT_NAME_ESCAPING = TextStopCharsTesters.END_EVENT_NAME::escaping;
 
     // Metadata representation in bytes.
     static final Bytes<?> META_DATA = Bytes.from("!!meta-data");
@@ -274,7 +272,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     @Nullable
     static StopCharTester getEscapingSingleQuotes() {
         // Fetch or create the StopCharTester from thread-local storage
-        StopCharTester sct = ThreadLocalHelper.getTL(ESCAPED_SINGLE_QUOTES, SINGLE_QUOTES_ESCAPING);
+        StopCharTester sct = ESCAPED_SINGLE_QUOTES.get();
         // Reset the StopCharTester instance
         sct.isStopChar(' ');
         return sct;
@@ -686,7 +684,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      */
     @NotNull
     protected StopCharTester getEscapingEndOfText() {
-        StopCharTester escaping = ThreadLocalHelper.getTL(ESCAPED_END_OF_TEXT, END_OF_TEXT_ESCAPING);
+        StopCharTester escaping = ESCAPED_END_OF_TEXT.get();
         // reset it.
         escaping.isStopChar(' ');
         return escaping;
@@ -700,7 +698,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      */
     @NotNull
     protected StopCharsTester getStrictEscapingEndOfText() {
-        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT, STRICT_END_OF_TEXT_ESCAPING);
+        StopCharsTester escaping = STRICT_ESCAPED_END_OF_TEXT.get();
         // reset it.
         escaping.isStopChar(' ', ' ');
         return escaping;
@@ -708,7 +706,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @NotNull
     protected StopCharsTester getEscapingEndEventName() {
-        StopCharsTester escaping = ThreadLocalHelper.getTL(STRICT_ESCAPED_END_OF_TEXT, END_EVENT_NAME_ESCAPING);
+        StopCharsTester escaping = ESCAPED_END_EVENT_NAME.get();
 
         // Reset the stop characters tester to stop at space characters.
         escaping.isStopChar(' ', ' ');
@@ -723,7 +721,7 @@ public class TextWire extends YamlWireOut<TextWire> {
      */
     @Nullable
     protected StopCharTester getEscapingQuotes() {
-        StopCharTester sct = ThreadLocalHelper.getTL(ESCAPED_QUOTES, QUOTES_ESCAPING);
+        StopCharTester sct = ESCAPED_QUOTES.get();
         // reset it.
         sct.isStopChar(' ');
         return sct;

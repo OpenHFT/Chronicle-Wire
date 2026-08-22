@@ -59,6 +59,22 @@ public class TextWireTest extends WireTestCommon {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
+    @Test
+    public void strictTextAndEventNameEscapingUseSeparateCaches() {
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        try {
+            final TextWire textWire = new TextWire(bytes);
+            final StopCharsTester strictText = textWire.getStrictEscapingEndOfText();
+            final StopCharsTester eventName = textWire.getEscapingEndEventName();
+
+            assertNotSame(strictText, eventName);
+            assertSame(strictText, textWire.getStrictEscapingEndOfText());
+            assertSame(eventName, textWire.getEscapingEndEventName());
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
     // Test to check if white space within type specifications is handled correctly.
     @Test
     public void fromList() {
