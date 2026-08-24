@@ -9,13 +9,13 @@ package net.openhft.chronicle.wire;
  * weaken this contract for normal writers.
  * <p>
  * This type remains public because the internal-use {@link WireOut#enterHeader(long)} implementation
- * hook is part of a public interface. This direct checked {@link Exception} requires each storage
- * caller to handle a sealed position explicitly and cannot be absorbed by existing broad
- * {@code IOException} handling; a special return value could be ignored and then used as a header
- * position. Rolling outputs such as Chronicle Queue translate this signal into their own lifecycle
- * behaviour rather than expose it through ordinary append APIs.
+ * hook is part of a public interface. Encountering EOF at a selected write position is an illegal
+ * storage state unless a rolling output explicitly handles the signal by moving to another context.
+ * A distinct exception preserves that signal without using a special header position that could be
+ * ignored and then used as valid. Rolling outputs such as Chronicle Queue translate it into their
+ * own lifecycle behaviour rather than expose it through ordinary append APIs.
  */
-public class WriteAfterEOFException extends Exception {
+public class WriteAfterEOFException extends IllegalStateException {
     private static final long serialVersionUID = 0L;
 
     /**

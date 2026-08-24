@@ -91,14 +91,12 @@ Rationale for Decision ::
 Impact & Consequences ::
 * Ordinary `enterHeader` callers continue to receive `WriteAfterEOFException`.
   `WireOut.enterHeader` is marked for internal use, but its implementation hook
-  is declared on a public interface. The exception remains public and directly
-  extends checked `Exception`, so existing broad `IOException` or
-  `StreamCorruptedException` handling cannot consume it accidentally. Each
-  storage caller must handle or declare the seal condition specifically.
-  Returning a special `long` could be ignored and then treated as a valid header
-  position. This deliberately changes the former runtime-exception contract: a
-  Wire change must now fail compilation in Queue until Queue handles it, rather
-  than surface later through Queue Enterprise.
+  is declared on a public interface. The exception remains public and extends
+  `IllegalStateException`: EOF at a selected write position is an invalid state
+  unless a rolling storage boundary deliberately handles it. Returning a special
+  `long` could be ignored and then treated as a valid header position. Internal
+  paths whose ordering guarantees an unsealed position allow the exception to
+  surface as an invariant failure rather than adding defensive adapters.
 * Rolling storage implementations translate the seal signal at their boundary.
   Chronicle Queue catches it for both ordinary document headers and sequential
   byte appends, rolls forward without replacing EOF, and does not expose it
