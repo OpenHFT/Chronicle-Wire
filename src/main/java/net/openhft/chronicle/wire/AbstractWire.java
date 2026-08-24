@@ -369,11 +369,6 @@ public abstract class AbstractWire implements Wire, InternalWire {
     }
 
     @Override
-    public boolean recoverFromEndOfData() {
-        return bytes.compareAndSwapInt(bytes.writePosition(), END_OF_DATA, NOT_INITIALIZED);
-    }
-
-    @Override
     public void updateHeader(final long position, final boolean metaData, int expectedHeader) throws StreamCorruptedException {
         if (position <= 0)
             invalidPosition(position);
