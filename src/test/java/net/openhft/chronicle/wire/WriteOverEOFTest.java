@@ -33,7 +33,8 @@ public class WriteOverEOFTest extends WireTestCommon {
     }
 
     @Test
-    public void explicitRecoveryReplacesEOFAndRemainsUsable() throws StreamCorruptedException {
+    public void explicitRecoveryReplacesEOFAndRemainsUsable()
+            throws StreamCorruptedException, WriteAfterEOFException {
         final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
             final Wire wire = WireType.BINARY.apply(bytes);
@@ -59,7 +60,8 @@ public class WriteOverEOFTest extends WireTestCommon {
         }
     }
 
-    private static void writeFramed(Wire wire, String value) throws StreamCorruptedException {
+    private static void writeFramed(Wire wire, String value)
+            throws StreamCorruptedException, WriteAfterEOFException {
         final long headerPosition = wire.enterHeader(128);
         wire.write("value").text(value);
         wire.updateHeader(headerPosition, false, 0);

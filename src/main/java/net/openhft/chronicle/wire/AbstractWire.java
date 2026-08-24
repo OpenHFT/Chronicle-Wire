@@ -330,7 +330,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     }
 
     @Override
-    public long enterHeader(long safeLength) {
+    public long enterHeader(long safeLength) throws WriteAfterEOFException {
         if (safeLength > bytes.writeRemaining()) {
             if (bytes.isElastic()) {
                 long l = bytes.writeLimit();
