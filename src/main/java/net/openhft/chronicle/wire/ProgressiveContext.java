@@ -21,8 +21,9 @@ package net.openhft.chronicle.wire;
  *     }
  * }
  * </pre>
- * Call this method with {@link DocumentContext#contextCount()} immediately before writing the
- * context in the same held document.
+ * Call this method with {@link MarshallableOut#contextCount()} or the equivalent
+ * {@link DocumentContext#contextCount()} immediately before writing the context in the same held
+ * document.
  */
 public interface ProgressiveContext {
 

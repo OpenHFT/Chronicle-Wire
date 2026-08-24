@@ -22,9 +22,10 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
     @Test
     public void binaryReadWriteAndExhaust() {
         Wire w = WireType.BINARY.apply(Bytes.allocateElasticOnHeap(256));
+        assertEquals(0, w.contextCount());
         // write two docs
         try (DocumentContext dc = w.writingDocument()) {
-            assertEquals(1, dc.contextCount());
+            assertEquals(w.contextCount(), dc.contextCount());
             dc.wire().write("a").int32(1);
         }
         try (DocumentContext dc = w.writingDocument()) {
@@ -49,8 +50,9 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
     @Test
     public void textUseTextDocumentsLifecycle() {
         Wire w = new TextWire(Bytes.allocateElasticOnHeap(256)).useTextDocuments();
+        assertEquals(0, w.contextCount());
         try (DocumentContext dc = w.writingDocument()) {
-            assertEquals(1, dc.contextCount());
+            assertEquals(w.contextCount(), dc.contextCount());
             dc.wire().write("x").int64(11L);
         }
         try (DocumentContext dc = w.writingDocument(true)) { // meta document allowed
@@ -98,6 +100,23 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
     }
 
     @Test
+    public void marshallableOutWithoutContextTrackingReturnsNegativeContextCount() {
+        MarshallableOut output = new MarshallableOut() {
+            @Override
+            public DocumentContext writingDocument(boolean metaData) {
+                return NoDocumentContext.INSTANCE;
+            }
+
+            @Override
+            public DocumentContext acquireWritingDocument(boolean metaData) {
+                return NoDocumentContext.INSTANCE;
+            }
+        };
+
+        assertEquals(-1, output.contextCount());
+    }
+
+    @Test
     public void resetAdvancesContextCountWhileClearRetainsIt() {
         for (WireType wireType : WRITABLE_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
@@ -113,6 +132,21 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
             } finally {
                 bytes.releaseLast();
             }
+        }
+    }
+
+    @Test
+    public void testSeamAcceptsZeroButNotUnavailableCount() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        try {
+            AbstractWire wire = (AbstractWire) WireType.BINARY.apply(bytes);
+
+            wire.outputContextCountForTesting(0);
+
+            assertEquals(0, wire.contextCount());
+            assertThrows(IllegalArgumentException.class, () -> wire.outputContextCountForTesting(-1));
+        } finally {
+            bytes.releaseLast();
         }
     }
 
@@ -136,20 +170,67 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
     }
 
     @Test
+    public void resetRejectsContextCountOverflowBeforeMutation() {
+        for (WireType wireType : WRITABLE_WIRE_TYPES) {
+            Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+            try {
+                AbstractWire wire = (AbstractWire) wireType.apply(bytes);
+                wire.outputContextCountForTesting(Integer.MAX_VALUE - 1);
+                SchemaContext context = new SchemaContext("schema-v1");
+
+                int penultimate = writePayloadAndReadContextCount(wire, "penultimate");
+                assertEquals(wireType.name(), Integer.MAX_VALUE - 1, penultimate);
+                assertTrue(wireType.name(), context.needsResending(penultimate));
+
+                wire.reset();
+
+                int last = writePayloadAndReadContextCount(wire, "last");
+                assertEquals(wireType.name(), Integer.MAX_VALUE, last);
+                assertTrue(wireType.name(), context.needsResending(last));
+
+                byte[] contentsBeforeRejectedReset = bytes.toByteArray();
+                long readPositionBeforeRejectedReset = bytes.readPosition();
+                long writePositionBeforeRejectedReset = bytes.writePosition();
+
+                IllegalStateException exception = assertThrows(IllegalStateException.class, wire::reset);
+
+                assertEquals(wireType.name(), "Output context count exhausted", exception.getMessage());
+                assertEquals(wireType.name(), Integer.MAX_VALUE, wire.contextCount());
+                assertArrayEquals(wireType.name(), contentsBeforeRejectedReset, bytes.toByteArray());
+                assertEquals(wireType.name(), readPositionBeforeRejectedReset, bytes.readPosition());
+                assertEquals(wireType.name(), writePositionBeforeRejectedReset, bytes.writePosition());
+                assertEquals(wireType.name(), 2, context.writeCount);
+            } finally {
+                bytes.releaseLast();
+            }
+        }
+    }
+
+    @Test
     public void progressiveContextOnlyNeedsResendingForHigherCounts() {
         SchemaContext context = new SchemaContext("schema-v1");
 
         assertFalse(context.needsResending(-1));
+        assertTrue(context.needsResending(0));
+        assertFalse(context.needsResending(0));
         assertTrue(context.needsResending(1));
         assertFalse(context.needsResending(1));
         assertFalse(context.needsResending(0));
         assertTrue(context.needsResending(2));
-        assertEquals(2, context.writeCount);
+        assertEquals(3, context.writeCount);
     }
 
     private static int writeAndReadContextCount(Wire wire) {
         try (DocumentContext dc = wire.writingDocument()) {
             return dc.contextCount();
+        }
+    }
+
+    private static int writePayloadAndReadContextCount(Wire wire, String payload) {
+        try (DocumentContext dc = wire.writingDocument()) {
+            int contextCount = dc.contextCount();
+            dc.wire().write("payload").text(payload);
+            return contextCount;
         }
     }
 

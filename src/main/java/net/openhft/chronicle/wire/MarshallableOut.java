@@ -37,6 +37,31 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     }
 
     /**
+     * Returns an identifier for this output's current context. Values from successive output
+     * contexts are non-decreasing. Context need only be written again when this value increases;
+     * an unchanged value means that the previously written context still applies.
+     * <p>
+     * Callers initialise the last written count to {@code -1} and compare values directly. Zero is
+     * a valid first context, for example Queue cycle zero. A returned {@code -1} is not an increase
+     * and needs no special handling. Context data can implement {@link ProgressiveContext} to
+     * standardise this comparison.
+     * <p>
+     * The default is {@code -1}, indicating that the implementation does not expose an output
+     * context. Writable Wire implementations start at {@code 0}; {@link Wire#reset()} advances the
+     * count while {@link Wire#clear()} leaves it unchanged. Queue implementations return the roll
+     * cycle, and connection-based outputs should return a one-based connection count.
+     * Implementations may throw {@link IllegalStateException} when the output context is not yet
+     * known, such as when using double buffering. Implementations whose count cannot advance without
+     * overflowing must throw {@link IllegalStateException} before opening the next output context
+     * rather than wrap into the negative range.
+     *
+     * @return the output context count, or a negative value if unavailable
+     */
+    default int contextCount() {
+        return -1;
+    }
+
+    /**
      * Start a document which is completed when DocumentContext.close() is called. You can use a
      * <pre>
      * try(DocumentContext dc = appender.writingDocument()) {

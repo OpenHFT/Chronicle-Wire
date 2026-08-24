@@ -69,30 +69,14 @@ public interface DocumentContext extends Closeable, SourceContext {
     }
 
     /**
-     * Returns an identifier for the output context of this document. Values from successive open
-     * documents are non-decreasing. Context need only be written again when this value increases;
-     * an unchanged value means that the previously written context still applies.
-     * <p>
-     * Callers may initialise the last written count to {@code 0} or {@code -1} and compare values
-     * directly. A returned {@code -1} is not an increase and needs no special handling.
-     * Context data can implement {@link ProgressiveContext} to standardise this comparison.
-     * {@link DocumentContextHolder} returns {@code -1} after close and
-     * {@link NoDocumentContext} always returns {@code -1}.
-     * <p>
-     * Writable Wire implementations start at {@code 1}; {@link Wire#reset()} advances the count
-     * while {@link Wire#clear()} leaves it unchanged. Queue implementations return the roll cycle,
-     * and connection-based outputs should return a one-based connection count. Read it from an
-     * open document on its writing thread. Implementations may throw
-     * {@link IllegalStateException} when the output context is not yet known, such as when using
-     * double buffering.
+     * Returns the associated output's {@link MarshallableOut#contextCount() context count}, or
+     * {@code -1} when this context has no Wire. Read it from an open document on its writing thread.
      *
-     * @return the output context count, or a negative value if unavailable
+     * @return the output context count, or {@code -1} if unavailable
      */
     default int contextCount() {
         Wire wire = wire();
-        return wire instanceof AbstractWire
-                ? ((AbstractWire) wire).outputContextCount()
-                : 1;
+        return wire == null ? -1 : wire.contextCount();
     }
 
     /**

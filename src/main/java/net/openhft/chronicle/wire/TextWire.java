@@ -1274,6 +1274,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @Override
     public void reset() {
+        checkCanAdvanceOutputContext();
         writeContext.reset();
         readContext.reset();
         sb.setLength(0);

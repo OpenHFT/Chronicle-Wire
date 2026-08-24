@@ -1100,6 +1100,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * Resets the state of the YamlWire instance, clearing all buffers and contexts.
      */
     public void reset() {
+        checkCanAdvanceOutputContext();
         resetState();
         advanceOutputContext();
     }

@@ -243,6 +243,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      */
     @Override
     public void reset() {
+        checkCanAdvanceOutputContext();
         writeContext.reset();
         readContext.reset();
         valueIn.resetState();

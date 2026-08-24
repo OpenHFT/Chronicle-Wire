@@ -89,6 +89,7 @@ public class RawWire extends AbstractWire implements Wire {
 
     @Override
     public void reset() {
+        checkCanAdvanceOutputContext();
         valueIn.resetState();
         valueOut.resetState();
         writeContext.reset();
