@@ -21,6 +21,7 @@ public class WriteOverEOFTest extends WireTestCommon {
         final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
             final Wire wire = WireType.BINARY.apply(bytes);
+            wire.usePadding(true);
             final long eofPosition = 64;
             bytes.writePosition(eofPosition);
             bytes.writeInt(eofPosition, END_OF_DATA);
@@ -38,13 +39,14 @@ public class WriteOverEOFTest extends WireTestCommon {
         final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
             final Wire wire = WireType.BINARY.apply(bytes);
+            wire.usePadding(true);
             final long eofPosition = 64;
             bytes.writePosition(eofPosition);
             bytes.writeInt(eofPosition, END_OF_DATA);
 
-            assertEquals(eofPosition, ((net.openhft.chronicle.wire.domestic.InternalWire) wire)
+            assertTrue(((net.openhft.chronicle.wire.domestic.InternalWire) wire)
                     .recoverFromEndOfData());
-            assertEquals(-1, ((net.openhft.chronicle.wire.domestic.InternalWire) wire)
+            assertFalse(((net.openhft.chronicle.wire.domestic.InternalWire) wire)
                     .recoverFromEndOfData());
             writeFramed(wire, "recovered");
             writeFramed(wire, "after-recovery");
@@ -55,6 +57,28 @@ public class WriteOverEOFTest extends WireTestCommon {
             try (DocumentContext context = wire.readingDocument()) {
                 assertFalse(context.isPresent());
             }
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    public void recoveryDoesNotSearchPastTheCurrentWritePosition() {
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        try {
+            final Wire wire = WireType.BINARY.apply(bytes);
+            wire.usePadding(true);
+            final long currentPosition = 64;
+            final long laterEofPosition = 72;
+            bytes.writeInt(currentPosition, 4);
+            bytes.writeInt(currentPosition + Integer.BYTES, 0x12345678);
+            bytes.writeInt(laterEofPosition, END_OF_DATA);
+            bytes.writePosition(currentPosition);
+
+            assertFalse(((net.openhft.chronicle.wire.domestic.InternalWire) wire)
+                    .recoverFromEndOfData());
+            assertEquals(END_OF_DATA, bytes.readVolatileInt(laterEofPosition));
+            assertEquals(currentPosition, bytes.writePosition());
         } finally {
             bytes.releaseLast();
         }

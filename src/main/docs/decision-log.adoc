@@ -103,8 +103,15 @@ Impact & Consequences ::
   Chronicle Queue catches it for both ordinary document headers and sequential
   byte appends, rolls forward without replacing EOF, and does not expose it
   through its ordinary appender APIs.
-* The internal recovery operation reports whether and where it replaced the
-  marker; the coordinating storage layer emits the contextual warning.
+* The internal recovery operation performs one compare-and-swap at the current
+  write position and reports whether it replaced the marker. It does not search
+  or reposition. The coordinating storage layer validates and positions the
+  Wire first, then relies on the CAS result without a preliminary header read.
+  EOF is used with padded Wires, so the caller aligns the selected position
+  before the CAS. It emits the contextual warning with that position.
+  The CAS is a defensive invariant check rather than a concurrency protocol:
+  callers hold the storage write lock and only one recovery coordinator may
+  backfill the target at a time.
 * Wire, Queue, and Queue Enterprise changes must be validated together. Wire is
   released first, followed by Queue and Queue Enterprise, and the supported BOM
   is updated only after the coordinated combination passes its compatibility

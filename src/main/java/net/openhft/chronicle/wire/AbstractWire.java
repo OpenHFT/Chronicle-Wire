@@ -369,22 +369,8 @@ public abstract class AbstractWire implements Wire, InternalWire {
     }
 
     @Override
-    public long recoverFromEndOfData() {
-        long position = bytes.writePosition();
-        for (; ; ) {
-            if (usePadding)
-                position += BytesUtil.padOffset(position);
-
-            final int header = bytes.readVolatileInt(position);
-            if (header == END_OF_DATA) {
-                bytes.writeVolatileInt(position, NOT_INITIALIZED);
-                return position;
-            }
-            if (header == NOT_INITIALIZED || isNotComplete(header))
-                return -1;
-
-            position += lengthOf(header) + SPB_HEADER_SIZE;
-        }
+    public boolean recoverFromEndOfData() {
+        return bytes.compareAndSwapInt(bytes.writePosition(), END_OF_DATA, NOT_INITIALIZED);
     }
 
     @Override
