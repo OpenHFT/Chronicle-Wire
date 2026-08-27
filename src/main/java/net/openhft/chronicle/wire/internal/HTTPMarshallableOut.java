@@ -32,8 +32,16 @@ public class HTTPMarshallableOut implements MarshallableOut {
     // The encapsulated Wire object for serialization
     private final Wire wire;
 
+    // Each top-level writable document is delivered over its own HTTP connection.
+    private int connectionCount;
+
     // Document context holder for managing the wire and the HTTP communication
     private final DocumentContextHolder dcHolder = new DocumentContextHolder() {
+
+        @Override
+        public int contextCount() {
+            return connectionCount;
+        }
 
         // Inline comment about override functionality
         @Override
@@ -95,7 +103,7 @@ public class HTTPMarshallableOut implements MarshallableOut {
 
     // Method for resetting the wire state
     void startWire() {
-        wire.clear();
+        wire.reset();
     }
 
     // Method for finalizing the wire content
@@ -109,13 +117,26 @@ public class HTTPMarshallableOut implements MarshallableOut {
 
     @Override
     public DocumentContext writingDocument(boolean metaData) throws UnrecoverableTimeoutException {
-        dcHolder.documentContext(wire.writingDocument(metaData));
-        return dcHolder;
+        return openedDocument(wire.writingDocument(metaData));
     }
 
     @Override
     public DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException {
-        dcHolder.documentContext(wire.acquireWritingDocument(metaData));
+        return openedDocument(wire.acquireWritingDocument(metaData));
+    }
+
+    private DocumentContext openedDocument(DocumentContext documentContext) {
+        if (dcHolder.isClosed())
+            connectionCount++;
+        dcHolder.documentContext(documentContext);
         return dcHolder;
     }
+
+    @Override
+    public <T> MarshallableOut contextListener(Class<T> writerType,
+                                               MarshallableOut.ContextListener<? super T> listener) {
+        wire.contextListener(writerType, listener);
+        return this;
+    }
+
 }

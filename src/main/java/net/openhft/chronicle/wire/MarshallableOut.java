@@ -27,6 +27,22 @@ import java.util.stream.Stream;
 public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteNotifier {
 
     /**
+     * Receives a callback when a {@link MarshallableOut} starts a new output context.
+     * The meaning of a context is implementation specific.
+     *
+     * @param <T> event interface type used by the supplied method writer
+     */
+    @FunctionalInterface
+    interface ContextListener<T> {
+        /**
+         * Called before the first application document is written in the new output context.
+         *
+         * @param writer preset method writer for writing context records
+         */
+        void onNewContext(T writer);
+    }
+
+    /**
      * Creates and returns a new instance of {@link MarshallableOutBuilder} initialized with the provided URL.
      *
      * @param url The URL which will dictate the specific type of {@code MarshallableOut} to create.
@@ -73,6 +89,38 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * Start or reuse an existing a DocumentContext, optionally call close() when done.
      */
     DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException;
+
+    /**
+     * Registers a listener that writes context records before the first application data document
+     * in each implementation-defined output context, such as first wire use, a queue roll file or a
+     * transport connection. A leading meta-data document may be written first.
+     * <p>
+     * The supplied method writer is not callback-scoped and may be retained for normal use. During
+     * notification, the listener must use this writer rather than open another output document. Its
+     * calls write normal method-writer documents and omit {@link MessageHistory} unless the listener writes it explicitly.
+     * <p>
+     * Register before first use on a single thread. Exceptions propagate and the listener is not
+     * retried for that context, so it should write complete-or-nothing.
+     * <p>
+     * Configure only the outermost output. Combining a listener on a wrapper with one on its
+     * underlying output is unsupported.
+     * <p>
+     * For progressive context, expose {@link DocumentWritten}, hold one document context and write
+     * missing context only when {@link DocumentContext#contextCount()} increases. This pattern is
+     * not supported by queues configured for double buffering.
+     *
+     * @param writerType event interface type for the supplied method writer
+     * @param listener   listener to call for new output contexts
+     * @param <T>        event interface type
+     * @return this output
+     * @throws UnsupportedOperationException if this output does not support context listeners
+     * @throws IllegalStateException         if set after the first output context has started
+     */
+    @NotNull
+    default <T> MarshallableOut contextListener(@NotNull Class<T> writerType,
+                                                @NotNull ContextListener<? super T> listener) {
+        throw new UnsupportedOperationException("Context listeners are not supported by this output");
+    }
 
     /**
      * @return true if this output is configured to expect the history of the message to be written

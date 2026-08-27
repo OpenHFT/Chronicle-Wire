@@ -9,6 +9,7 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.HexDumpBytesDescription;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.ClassLookup;
@@ -64,6 +65,8 @@ public abstract class AbstractWire implements Wire, InternalWire {
     private HeadNumberChecker headNumberChecker;
     private boolean usePadding = DEFAULT_USE_PADDING;
     private boolean generateTuples = GENERATE_TUPLES;
+    private int outputContextCount = 1;
+    @NotNull private WireContextListenerLifecycle contextListenerLifecycle = NoOpWireContextListenerLifecycle.UNSET;
 
     /**
      * Constructor for AbstractWire.
@@ -76,6 +79,14 @@ public abstract class AbstractWire implements Wire, InternalWire {
         this.bytes = bytes;
         this.use8bit = use8bit;
         notCompleteIsNotPresent = bytes.sharedMemory();
+    }
+
+    final int outputContextCount() {
+        return outputContextCount;
+    }
+
+    protected final void advanceOutputContext() {
+        outputContextCount++;
     }
 
     /**
@@ -212,6 +223,47 @@ public abstract class AbstractWire implements Wire, InternalWire {
     @Override
     public void commentListener(Consumer<CharSequence> commentListener) {
         this.commentListener = commentListener;
+    }
+
+    @NotNull
+    @Override
+    public <T> WireOut contextListener(@NotNull Class<T> writerType,
+                                       @NotNull MarshallableOut.ContextListener<? super T> listener) {
+        WireContextListenerLifecycle lifecycle = contextListenerLifecycle;
+        if (lifecycle.started())
+            throw new IllegalStateException("Cannot set contextListener after the first output context has started");
+        contextListenerLifecycle = WireContextListenerLifecycle.active(writerType, listener);
+        return this;
+    }
+
+    /**
+     * Fires the listener before the first data document in the current output context. A leading
+     * metadata document may precede the context records.
+     */
+    protected final void notifyContextListenerIfNeeded(boolean metaData) {
+        if (contextListenerLifecycle == NoOpWireContextListenerLifecycle.UNSET) {
+            contextListenerLifecycle = NoOpWireContextListenerLifecycle.SET;
+        }
+        contextListenerLifecycle.beforeDocument(this, metaData);
+    }
+
+    /** Prepares a configured context listener for the next output context. */
+    protected final void resetContextListener() {
+        contextListenerLifecycle.resetContext();
+    }
+
+    // writeDocument writes directly through WireInternal.writeData rather than writingDocument, so
+    // it needs its own notification hook or a context listener would be silently skipped on this path.
+    @Override
+    public void writeDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
+        notifyContextListenerIfNeeded(metaData);
+        WireInternal.writeData(this, metaData, false, writer);
+    }
+
+    @Override
+    public void writeNotCompleteDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
+        notifyContextListenerIfNeeded(metaData);
+        WireInternal.writeData(this, metaData, true, writer);
     }
 
     @NotNull

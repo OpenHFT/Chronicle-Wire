@@ -95,6 +95,8 @@ public class RawWire extends AbstractWire implements Wire {
         readContext.reset();
         bytes.clear();
         lastSB = null;
+        advanceOutputContext();
+        resetContextListener();
     }
 
     @Override
@@ -102,13 +104,10 @@ public class RawWire extends AbstractWire implements Wire {
         return true;
     }
 
-    /**
-     * Begins a document for raw value writing. The {@code metaData} flag is
-     * ignored as this format stores no metadata.
-     */
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
+        notifyContextListenerIfNeeded(metaData);
         writeContext.start(metaData);
         return writeContext;
     }

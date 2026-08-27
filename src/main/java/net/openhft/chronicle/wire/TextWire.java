@@ -377,6 +377,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
+        notifyContextListenerIfNeeded(metaData);
         if (writeContext == null)
             useTextDocuments();
         writeContext.start(metaData);
@@ -1281,6 +1282,8 @@ public class TextWire extends YamlWireOut<TextWire> {
         valueIn.resetState();
         valueOut.resetState();
         bytes.clear();
+        advanceOutputContext();
+        resetContextListener();
     }
 
     @Override
