@@ -13,7 +13,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 public class WireContextListenerLifecycleTest extends WireTestCommon {
     private static final WireType[] WRITABLE_WIRE_TYPES = {
@@ -99,14 +101,15 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
         assertEquals("Context listener failed for the current output context", poisoned.getMessage());
 
         assertEquals(1, calls.get());
-        assertEquals("" +
-                        "--- !!data #binary\n" +
-                        "context: {\n" +
-                        "  name: schema,\n" +
-                        "  version: 7\n" +
-                        "}\n" +
-                        "# position: 40, header: 1\n",
-                Wires.fromSizePrefixedBlobs(wire));
+        try (DocumentContext context = wire.readingDocument()) {
+            assertTrue(context.isPresent());
+            assertEquals("context", context.wire().readEvent(String.class));
+            assertEquals(new ContextData("schema", 7),
+                    context.wire().getValueIn().object(ContextData.class));
+        }
+        try (DocumentContext context = wire.readingDocument()) {
+            assertFalse(context.isPresent());
+        }
 
         wire.reset();
         writer.event(new EventData("after-reset", 3));
