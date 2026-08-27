@@ -82,14 +82,16 @@ Rationale for Decision ::
 * A leading metadata document may precede the context records without changing their ordering
   relative to application data.
 Impact & Consequences ::
-* A listener is attempted at most once per context. Failure is propagated and is not retried, so
-  listeners should write complete-or-nothing.
+* A listener completes at most once per context. Failure is propagated, is not retried and poisons
+  that context so application data cannot be written without proven context.
 * The supplied method writer is not callback-scoped and may be retained. During notification, the
-  listener writes through it rather than opening another output document.
+  listener must write through it rather than re-entering the outer output.
 * Configure the listener on the outermost output before first application use. Combining listeners
   on a wrapper and its underlying output is unsupported.
 * `Wire.reset()` starts another output context and advances `contextCount()`; `Wire.clear()`
   retains the current context and count.
+* `ProgressiveContext` is excluded because acknowledgement before document commit can suppress
+  required context after rollback and cannot distinguish outputs that report the same count.
 Notes/Links ::
 ** `interface-control.adoc`
 ** `functional-requirements.adoc`

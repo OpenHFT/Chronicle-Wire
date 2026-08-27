@@ -1102,6 +1102,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      */
     public void reset() {
         checkCanAdvanceOutputContext();
+        checkCanResetContextListener();
         resetState();
         advanceOutputContext();
         resetContextListener();

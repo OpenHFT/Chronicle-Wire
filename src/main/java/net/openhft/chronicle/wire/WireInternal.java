@@ -138,6 +138,8 @@ public enum WireInternal {
      */
     public static long writeData(@NotNull WireOut wireOut, boolean metaData, boolean notComplete,
                                  @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
+        if (wireOut instanceof AbstractWire)
+            ((AbstractWire) wireOut).notifyContextListenerIfNeeded(metaData);
         wireOut.getValueOut().resetBetweenDocuments();
         long position;
 

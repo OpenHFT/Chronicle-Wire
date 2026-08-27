@@ -28,6 +28,10 @@ interface WireContextListenerLifecycle {
      */
     void beforeDocument(AbstractWire wire, boolean metaData);
 
+    /** Verifies that resetting the output context cannot interrupt notification. */
+    default void checkCanResetContext() {
+    }
+
     /** Prepares this lifecycle for another output context. */
     default void resetContext() {
     }
