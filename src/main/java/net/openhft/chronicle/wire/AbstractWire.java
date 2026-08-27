@@ -406,8 +406,10 @@ public abstract class AbstractWire implements Wire, InternalWire {
             if (isNotComplete(header)) {
                 if (header != END_OF_DATA)
                     Jvm.warn().on(getClass(), new Exception("Incomplete header found at pos: " + pos + ": " + Integer.toHexString(header) + ", overwriting"));
-                else
+                else {
+                    insideHeader = false;
                     throw new WriteAfterEOFException();
+                }
                 bytes.writeVolatileInt(pos, NOT_INITIALIZED);
                 break;
             }
