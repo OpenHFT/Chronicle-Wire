@@ -83,7 +83,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     }
 
     @Override
-    public final int contextCount() {
+    public int contextCount() {
         return outputContextCount;
     }
 
@@ -265,23 +265,14 @@ public abstract class AbstractWire implements Wire, InternalWire {
         contextListenerLifecycle.beforeDocument(this, metaData);
     }
 
+    /** Verifies that a reset cannot interrupt a running context callback. */
+    protected final void checkCanResetContextListener() {
+        contextListenerLifecycle.checkCanResetContext();
+    }
+
     /** Prepares a configured context listener for the next output context. */
     protected final void resetContextListener() {
         contextListenerLifecycle.resetContext();
-    }
-
-    // writeDocument writes directly through WireInternal.writeData rather than writingDocument, so
-    // it needs its own notification hook or a context listener would be silently skipped on this path.
-    @Override
-    public void writeDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
-        notifyContextListenerIfNeeded(metaData);
-        WireInternal.writeData(this, metaData, false, writer);
-    }
-
-    @Override
-    public void writeNotCompleteDocument(boolean metaData, @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
-        notifyContextListenerIfNeeded(metaData);
-        WireInternal.writeData(this, metaData, true, writer);
     }
 
     @NotNull

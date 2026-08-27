@@ -63,8 +63,8 @@ xref:system-architecture.adoc#cross_cutting_concerns[System Architecture – Cro
 
 |FN-008
 |Notify a configured `MarshallableOut.ContextListener` before the first application data document
-of each output-owned context, and expose a `DocumentContext.contextCount()` that is non-decreasing
-across successive open documents so progressive state is resent only when the context changes.
+of each output-owned context. Listener failure shall poison that context until reset. Expose a
+non-decreasing `DocumentContext.contextCount()` and report exactly `-1` when the count is unavailable.
 |`src/test/java/net/openhft/chronicle/wire/WireContextListenerLifecycleTest.java`,
 `src/test/java/net/openhft/chronicle/wire/DocumentContextLifecycleTest.java`, and
 `src/test/java/net/openhft/chronicle/wire/MarshallableOutContextListenerTest.java`.

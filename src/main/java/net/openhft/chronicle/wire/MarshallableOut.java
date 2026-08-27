@@ -59,8 +59,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * <p>
      * Callers initialise the last written count to {@code -1} and compare values directly. Zero is
      * a valid first context, for example Queue cycle zero. A returned {@code -1} is not an increase
-     * and needs no special handling. Context data can implement {@link ProgressiveContext} to
-     * standardise this comparison.
+     * and needs no special handling.
      * <p>
      * The default is {@code -1}, indicating that the implementation does not expose an output
      * context. Writable Wire implementations start at {@code 0}; {@link Wire#reset()} advances the

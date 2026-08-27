@@ -79,13 +79,14 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
     }
 
     @Test
-    public void listenerFailureIsNotRetried() {
+    public void listenerFailurePoisonsCurrentContextUntilReset() {
         Wire wire = newWire(WireType.BINARY);
         AtomicInteger calls = new AtomicInteger();
         wire.contextListener(ContextEvents.class, writer -> {
             calls.incrementAndGet();
             writer.context(new ContextData("schema", 7));
-            throw new IllegalStateException("listener failed");
+            if (calls.get() == 1)
+                throw new IllegalStateException("listener failed");
         });
 
         ContextEvents writer = wire.methodWriter(ContextEvents.class);
@@ -93,7 +94,9 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
                 () -> writer.event(new EventData("failed", 1)));
         assertEquals("listener failed", thrown.getMessage());
 
-        writer.event(new EventData("after", 2));
+        IllegalStateException poisoned = assertThrows(IllegalStateException.class,
+                () -> writer.event(new EventData("after", 2)));
+        assertEquals("Context listener failed for the current output context", poisoned.getMessage());
 
         assertEquals(1, calls.get());
         assertEquals("" +
@@ -102,13 +105,13 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
                         "  name: schema,\n" +
                         "  version: 7\n" +
                         "}\n" +
-                        "# position: 40, header: 1\n" +
-                        "--- !!data #binary\n" +
-                        "event: {\n" +
-                        "  name: after,\n" +
-                        "  sequence: 2\n" +
-                        "}\n",
+                        "# position: 40, header: 1\n",
                 Wires.fromSizePrefixedBlobs(wire));
+
+        wire.reset();
+        writer.event(new EventData("after-reset", 3));
+
+        assertEquals(2, calls.get());
     }
 
     @Test
@@ -270,9 +273,46 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
     }
 
     @Test
+    public void wiresWriteDataUsesLifecycleAndClosesRegistrationWindow() {
+        Wire wire = newWire(WireType.BINARY);
+        AtomicInteger calls = new AtomicInteger();
+        wire.contextListener(ContextEvents.class, writer -> {
+            calls.incrementAndGet();
+            writer.context(new ContextData("schema", 7));
+        });
+
+        Wires.writeData(wire, out -> out.write("event").text("one"));
+        Wires.writeData(wire, out -> out.write("event").text("two"));
+        WireInternal.writeData(wire, false, false,
+                out -> out.write("event").text("three"));
+
+        assertEquals(1, calls.get());
+        assertThrows(IllegalStateException.class,
+                () -> wire.contextListener(ContextEvents.class, ignored -> {
+                }));
+    }
+
+    @Test
+    public void listenerCannotReenterThroughOuterWire() {
+        Wire wire = newWire(WireType.BINARY);
+        wire.contextListener(ContextEvents.class, ignored ->
+                wire.writeDocument(false, out -> out.write("illegal").text("re-entry")));
+
+        ContextEvents writer = wire.methodWriter(ContextEvents.class);
+        IllegalStateException failure = assertThrows(IllegalStateException.class,
+                () -> writer.event(new EventData("one", 1)));
+
+        assertEquals("Only the supplied context writer may write while the context listener is running",
+                failure.getMessage());
+        assertThrows(IllegalStateException.class,
+                () -> writer.event(new EventData("two", 2)));
+    }
+
+    @Test
     public void readAnyRejectsContextListeners() {
         Wire wire = newWire(WireType.READ_ANY);
 
+        assertEquals(-1, wire.contextCount());
         assertThrows(UnsupportedOperationException.class,
                 () -> wire.contextListener(ContextEvents.class, ignored -> {
                 }));

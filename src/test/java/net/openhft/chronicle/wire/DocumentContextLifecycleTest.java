@@ -151,42 +151,20 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
     }
 
     @Test
-    public void resetMakesProgressiveContextEligibleAgain() {
-        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
-        try {
-            Wire wire = WireType.BINARY.apply(bytes);
-            SchemaContext context = new SchemaContext("schema-v1");
-
-            assertTrue(writeContextWhenMissing(wire, context));
-            assertFalse(writeContextWhenMissing(wire, context));
-
-            wire.reset();
-
-            assertTrue(writeContextWhenMissing(wire, context));
-            assertEquals(2, context.writeCount);
-        } finally {
-            bytes.releaseLast();
-        }
-    }
-
-    @Test
     public void resetRejectsContextCountOverflowBeforeMutation() {
         for (WireType wireType : WRITABLE_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             try {
                 AbstractWire wire = (AbstractWire) wireType.apply(bytes);
                 wire.outputContextCountForTesting(Integer.MAX_VALUE - 1);
-                SchemaContext context = new SchemaContext("schema-v1");
 
                 int penultimate = writePayloadAndReadContextCount(wire, "penultimate");
                 assertEquals(wireType.name(), Integer.MAX_VALUE - 1, penultimate);
-                assertTrue(wireType.name(), context.needsResending(penultimate));
 
                 wire.reset();
 
                 int last = writePayloadAndReadContextCount(wire, "last");
                 assertEquals(wireType.name(), Integer.MAX_VALUE, last);
-                assertTrue(wireType.name(), context.needsResending(last));
 
                 byte[] contentsBeforeRejectedReset = bytes.toByteArray();
                 long readPositionBeforeRejectedReset = bytes.readPosition();
@@ -199,25 +177,10 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
                 assertArrayEquals(wireType.name(), contentsBeforeRejectedReset, bytes.toByteArray());
                 assertEquals(wireType.name(), readPositionBeforeRejectedReset, bytes.readPosition());
                 assertEquals(wireType.name(), writePositionBeforeRejectedReset, bytes.writePosition());
-                assertEquals(wireType.name(), 2, context.writeCount);
             } finally {
                 bytes.releaseLast();
             }
         }
-    }
-
-    @Test
-    public void progressiveContextOnlyNeedsResendingForHigherCounts() {
-        SchemaContext context = new SchemaContext("schema-v1");
-
-        assertFalse(context.needsResending(-1));
-        assertTrue(context.needsResending(0));
-        assertFalse(context.needsResending(0));
-        assertTrue(context.needsResending(1));
-        assertFalse(context.needsResending(1));
-        assertFalse(context.needsResending(0));
-        assertTrue(context.needsResending(2));
-        assertEquals(3, context.writeCount);
     }
 
     private static int writeAndReadContextCount(Wire wire) {
@@ -231,34 +194,6 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
             int contextCount = dc.contextCount();
             dc.wire().write("payload").text(payload);
             return contextCount;
-        }
-    }
-
-    private static boolean writeContextWhenMissing(Wire wire, SchemaContext context) {
-        try (DocumentContext dc = wire.writingDocument()) {
-            if (!context.needsResending(dc.contextCount()))
-                return false;
-            dc.wire().write("context").marshallable(context);
-            return true;
-        }
-    }
-
-    static final class SchemaContext extends SelfDescribingMarshallable implements ProgressiveContext {
-        private final String schema;
-        private transient int lastContextCount = -1;
-        private transient int writeCount;
-
-        SchemaContext(String schema) {
-            this.schema = schema;
-        }
-
-        @Override
-        public boolean needsResending(int contextCount) {
-            if (contextCount <= lastContextCount)
-                return false;
-            lastContextCount = contextCount;
-            writeCount++;
-            return true;
         }
     }
 
