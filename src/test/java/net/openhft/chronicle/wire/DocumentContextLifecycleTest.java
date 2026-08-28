@@ -98,6 +98,8 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
     public void noDocumentContextReturnsNegativeContextCount() {
         assertEquals(-1, NoDocumentContext.INSTANCE.contextCount());
         assertEquals(-1, DocumentContext.NOOP.contextCount());
+        DocumentContext.NOOP.rollbackIfNotComplete();
+        assertTrue(DocumentContext.NOOP instanceof net.openhft.chronicle.core.util.IgnoresEverything);
     }
 
     @Test

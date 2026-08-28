@@ -37,6 +37,9 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
     @Override
     public void beforeDocument(AbstractWire wire, boolean metaData) {
         started = true;
+        if (state == State.FAILED)
+            throw new IllegalStateException(
+                    "Context listener failed for the current output context", failure);
         if (metaData) {
             if (state == State.IN_PROGRESS && listenerWriteDepth == 0)
                 throw new IllegalStateException(
@@ -48,8 +51,18 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
                 state = State.IN_PROGRESS;
                 try {
                     notifyListener(wire);
+                    if (!wire.writingIsComplete()) {
+                        wire.rollbackIfNotComplete();
+                        throw new IllegalStateException(
+                                "Context listener returned with an incomplete chained document");
+                    }
                     state = State.SUCCEEDED;
                 } catch (Throwable throwable) {
+                    try {
+                        wire.rollbackIfNotComplete();
+                    } catch (Throwable rollbackFailure) {
+                        throwable.addSuppressed(rollbackFailure);
+                    }
                     failure = throwable;
                     state = State.FAILED;
                     throw Jvm.rethrow(throwable);
@@ -63,8 +76,7 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
             case SUCCEEDED:
                 return;
             case FAILED:
-                throw new IllegalStateException(
-                        "Context listener failed for the current output context", failure);
+                throw new AssertionError("FAILED handled before metadata dispatch");
             default:
                 throw new AssertionError(state);
         }

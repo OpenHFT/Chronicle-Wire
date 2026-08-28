@@ -3,6 +3,8 @@
  */
 package net.openhft.chronicle.wire;
 
+import net.openhft.chronicle.core.util.IgnoresEverything;
+
 /**
  * An enumeration implementation of the {@link DocumentContext} interface.
  * This context represents a non-existent or uninitialized document context,
@@ -12,7 +14,7 @@ package net.openhft.chronicle.wire;
  * that works with document contexts. Using `NoDocumentContext.INSTANCE` denotes
  * a guaranteed uninitialized state for a document context.
  */
-public enum NoDocumentContext implements DocumentContext {
+public enum NoDocumentContext implements DocumentContext, IgnoresEverything {
     /** The singleton instance of the NoDocumentContext */
     INSTANCE;
 
@@ -59,6 +61,11 @@ public enum NoDocumentContext implements DocumentContext {
 
     @Override
     public void close() {
+        // Do nothing
+    }
+
+    @Override
+    public void rollbackIfNotComplete() {
         // Do nothing
     }
 

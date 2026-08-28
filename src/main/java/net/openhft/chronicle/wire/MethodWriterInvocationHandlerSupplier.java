@@ -52,6 +52,18 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
         this.supplier = supplier;
     }
 
+    MethodWriterInvocationHandlerSupplier copyWith(
+            Supplier<MethodWriterInvocationHandler> replacementSupplier) {
+        final MethodWriterInvocationHandlerSupplier copy =
+                new MethodWriterInvocationHandlerSupplier(replacementSupplier);
+        copy.recordHistory = recordHistory;
+        copy.closeable = closeable;
+        copy.disableThreadSafe = disableThreadSafe;
+        copy.genericEvent = genericEvent;
+        copy.useMethodIds = useMethodIds;
+        return copy;
+    }
+
     /**
      * Enable or disable invocation history recording on new handlers.
      */
