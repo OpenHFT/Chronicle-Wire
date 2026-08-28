@@ -18,6 +18,7 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
     private boolean started;
     private State state = State.READY;
     private int listenerWriteDepth;
+    private boolean listenerRolledBack;
     private Throwable failure;
 
     ActiveWireContextListenerLifecycle(Class<?> writerType, MarshallableOut.ContextListener<?> listener) {
@@ -49,10 +50,13 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
         switch (state) {
             case READY:
                 state = State.IN_PROGRESS;
+                listenerRolledBack = false;
                 try {
                     notifyListener(wire);
+                    if (listenerRolledBack)
+                        throw new IllegalStateException(
+                                "Context listener rolled back its output document");
                     if (!wire.writingIsComplete()) {
-                        wire.rollbackIfNotComplete();
                         throw new IllegalStateException(
                                 "Context listener returned with an incomplete chained document");
                     }
@@ -92,11 +96,16 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
     @Override
     public void resetContext() {
         state = State.READY;
+        listenerRolledBack = false;
         failure = null;
     }
 
     @Override
     public void documentRolledBack() {
+        if (state == State.IN_PROGRESS) {
+            listenerRolledBack = true;
+            return;
+        }
         if (state != State.SUCCEEDED)
             return;
         failure = new IllegalStateException(
