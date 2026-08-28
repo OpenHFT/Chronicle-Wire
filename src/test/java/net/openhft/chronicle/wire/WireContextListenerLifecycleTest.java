@@ -482,6 +482,57 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
     }
 
     @Test
+    public void directWriteFailuresRollbackAndPoisonAcrossWiresAndEntryPoints() {
+        for (WireType wireType : WRITABLE_WIRE_TYPES) {
+            for (int entryPoint = 0; entryPoint < 3; entryPoint++) {
+                final int directEntryPoint = entryPoint;
+                Wire wire = newWire(wireType);
+                AtomicInteger calls = new AtomicInteger();
+                wire.contextListener(ContextEvents.class,
+                        writer -> writer.context(new ContextData("schema", calls.incrementAndGet())));
+
+                final IllegalStateException payloadFailure = new IllegalStateException(
+                        wireType + " entryPoint=" + entryPoint);
+                final long[] payloadPosition = {-1};
+                WriteMarshallable failingWriter = out -> {
+                    payloadPosition[0] = out.bytes().writePosition();
+                    out.bytes().writeByte((byte) 0x5a);
+                    throw payloadFailure;
+                };
+
+                assertEquals(payloadFailure, assertThrows(IllegalStateException.class,
+                        () -> writeDirectly(wire, directEntryPoint, failingWriter)));
+                assertEquals(wireType + " entryPoint=" + entryPoint, 1, calls.get());
+                assertTrue(wireType + " entryPoint=" + entryPoint,
+                        wire.bytes().writePosition() < payloadPosition[0]);
+
+                final long positionAfterRollback = wire.bytes().writePosition();
+                final IllegalStateException poisoned = assertThrows(IllegalStateException.class,
+                        () -> wire.writeDocument(false, out -> out.bytes().writeByte((byte) 1)));
+                assertTrue(poisoned.getCause().getMessage().contains("Application rollback"));
+                assertEquals(positionAfterRollback, wire.bytes().writePosition());
+                assertEquals(1, calls.get());
+            }
+        }
+    }
+
+    private static void writeDirectly(Wire wire, int entryPoint, WriteMarshallable writer) {
+        switch (entryPoint) {
+            case 0:
+                wire.writeDocument(false, writer);
+                return;
+            case 1:
+                wire.writeNotCompleteDocument(false, writer);
+                return;
+            case 2:
+                Wires.writeData(wire, writer);
+                return;
+            default:
+                throw new AssertionError(entryPoint);
+        }
+    }
+
+    @Test
     public void wiresWriteDataUsesLifecycleAndClosesRegistrationWindow() {
         Wire wire = newWire(WireType.BINARY);
         AtomicInteger calls = new AtomicInteger();
