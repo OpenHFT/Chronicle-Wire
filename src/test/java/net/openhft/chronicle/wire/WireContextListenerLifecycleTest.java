@@ -119,6 +119,88 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
     }
 
     @Test
+    public void metadataCannotBypassAFailedListener() {
+        Wire wire = newWire(WireType.BINARY);
+        final IllegalStateException original = new IllegalStateException("listener failed");
+        wire.contextListener(ContextEvents.class, writer -> {
+            throw original;
+        });
+
+        assertThrows(IllegalStateException.class,
+                () -> wire.methodWriter(ContextEvents.class).event(new EventData("failed", 1)));
+        final long writePosition = wire.bytes().writePosition();
+
+        final IllegalStateException metadataFailure = assertThrows(IllegalStateException.class,
+                () -> wire.writeDocument(true, out -> out.write("metadata").text("blocked")));
+        assertEquals(original, metadataFailure.getCause());
+        assertEquals(writePosition, wire.bytes().writePosition());
+    }
+
+    @Test
+    public void incompleteChainedListenerOutputFailsClosedAcrossWires() {
+        exerciseChainedListenerCompletion(false, false);
+        exerciseChainedListenerCompletion(false, true);
+        exerciseChainedListenerCompletion(true, false);
+        exerciseChainedListenerCompletion(true, true);
+    }
+
+    private void exerciseChainedListenerCompletion(boolean proxy, boolean complete) {
+        if (proxy) {
+            ignoreException("Falling back to proxy method writer");
+            System.setProperty(DISABLE_WRITER_PROXY_CODEGEN, "true");
+        }
+        try {
+            for (WireType wireType : WRITABLE_WIRE_TYPES) {
+                Wire wire = newWire(wireType);
+                wire.contextListener(ChainedContextEvents.class, writer -> {
+                    ChainedContextTail tail = writer.context("schema");
+                    if (complete)
+                        tail.complete(7);
+                });
+
+                ContextEvents dataWriter = wire.methodWriter(ContextEvents.class);
+                if (complete) {
+                    dataWriter.event(new EventData("data", 1));
+                    assertTrue(wireType.name(), wire.writingIsComplete());
+                } else {
+                    final IllegalStateException failure = assertThrows(IllegalStateException.class,
+                            () -> dataWriter.event(new EventData("blocked", 1)));
+                    assertEquals(wireType.name(),
+                            "Context listener returned with an incomplete chained document",
+                            failure.getMessage());
+                    assertTrue(wireType.name(), wire.writingIsComplete());
+                    assertThrows(IllegalStateException.class,
+                            () -> dataWriter.event(new EventData("still-blocked", 2)));
+                }
+            }
+        } finally {
+            if (proxy)
+                System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
+        }
+    }
+
+    @Test
+    public void proxyWriterFreezesItsOutputAtBuildTime() {
+        ignoreException("Falling back to proxy method writer");
+        System.setProperty(DISABLE_WRITER_PROXY_CODEGEN, "true");
+        try {
+            Wire first = newWire(WireType.BINARY);
+            Wire second = newWire(WireType.BINARY);
+            VanillaMethodWriterBuilder<ContextEvents> builder =
+                    (VanillaMethodWriterBuilder<ContextEvents>) first.methodWriterBuilder(ContextEvents.class);
+            ContextEvents writer = builder.build();
+            builder.marshallableOut(second);
+
+            writer.event(new EventData("first", 1));
+
+            assertTrue(first.bytes().writePosition() > 0);
+            assertEquals(0, second.bytes().writePosition());
+        } finally {
+            System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
+        }
+    }
+
+    @Test
     public void allConcreteWiresInvokeListenerBeforeFirstDataDocument() {
         for (WireType wireType : WRITABLE_WIRE_TYPES) {
             Wire wire = newWire(wireType);
@@ -368,6 +450,14 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
         void context(ContextData context);
 
         void event(EventData event);
+    }
+
+    interface ChainedContextEvents {
+        ChainedContextTail context(String name);
+    }
+
+    interface ChainedContextTail {
+        void complete(int version);
     }
 
     static final class ContextData extends SelfDescribingMarshallable {

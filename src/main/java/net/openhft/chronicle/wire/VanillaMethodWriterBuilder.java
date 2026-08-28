@@ -76,6 +76,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     // Supplier that provides a MethodWriterInvocationHandler for proxy method calls
     @NotNull
     private final MethodWriterInvocationHandlerSupplier handlerSupplier;
+    private final Function<Supplier<MarshallableOut>, MethodWriterInvocationHandler> handlerFactory;
     // Supplier to get an instance of MarshallableOut
     private Supplier<MarshallableOut> outSupplier;
     // A Closeable resource associated with the builder
@@ -112,6 +113,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         //  Maybe have an option to always use current thread class loader?
         this.classLoader = clsLdr != null ? clsLdr : getClass().getClassLoader();
         this.methodWriterClassNameGenerator = new MethodWriterClassNameGenerator();
+        this.handlerFactory = null;
         this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(handlerSupplier);
     }
 
@@ -129,6 +131,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         ClassLoader clsLdr = tClass.getClassLoader();
         this.classLoader = clsLdr != null ? clsLdr : getClass().getClassLoader();
         this.methodWriterClassNameGenerator = new MethodWriterClassNameGenerator();
+        this.handlerFactory = handlerFactory;
         this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(
                 () -> handlerFactory.apply(Objects.requireNonNull(outSupplier,
                         "marshallableOut(out) has not been set.")));
@@ -296,7 +299,16 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
 
         //noinspection unchecked
-        return (T) Proxy.newProxyInstance(classLoader, interfacesArr, new CallSupplierInvocationHandler(this));
+        return (T) Proxy.newProxyInstance(classLoader, interfacesArr,
+                new CallSupplierInvocationHandler(updateInterceptor, proxyHandlerSupplier()));
+    }
+
+    private MethodWriterInvocationHandlerSupplier proxyHandlerSupplier() {
+        if (handlerFactory == null)
+            return handlerSupplier;
+        final Supplier<MarshallableOut> frozenOutput = Objects.requireNonNull(outSupplier,
+                "marshallableOut(out) has not been set.");
+        return handlerSupplier.copyWith(() -> handlerFactory.apply(frozenOutput));
     }
 
     /**
@@ -498,10 +510,10 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
          *
          * @param builder The {@link VanillaMethodWriterBuilder} instance to extract values from.
          */
-        CallSupplierInvocationHandler(@NotNull final VanillaMethodWriterBuilder builder) {
-            // Take a snapshot of these values so the builder can be reclaimed by the GC later.
-            this.updateInterceptor = builder.updateInterceptor;
-            this.handlerSupplier = builder.handlerSupplier;
+        CallSupplierInvocationHandler(UpdateInterceptor updateInterceptor,
+                                      MethodWriterInvocationHandlerSupplier handlerSupplier) {
+            this.updateInterceptor = updateInterceptor;
+            this.handlerSupplier = handlerSupplier;
         }
 
         @Override
