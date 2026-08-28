@@ -66,8 +66,7 @@ xref:system-architecture.adoc#cross_cutting_concerns[System Architecture – Cro
 of each output-owned context. Listener failure shall poison that context until reset. Expose a
 non-decreasing `DocumentContext.contextCount()` and report exactly `-1` when the count is unavailable.
 |`src/test/java/net/openhft/chronicle/wire/WireContextListenerLifecycleTest.java`,
-`src/test/java/net/openhft/chronicle/wire/DocumentContextLifecycleTest.java`, and
-`src/test/java/net/openhft/chronicle/wire/MarshallableOutContextListenerTest.java`.
+`src/test/java/net/openhft/chronicle/wire/DocumentContextLifecycleTest.java`.
 |===
 
 == Traceability and Updates
