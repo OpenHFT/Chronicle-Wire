@@ -65,6 +65,7 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
                     }
                     failure = throwable;
                     state = State.FAILED;
+                    logFailureOnce(wire, throwable);
                     throw Jvm.rethrow(throwable);
                 }
                 return;
@@ -92,6 +93,25 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
     public void resetContext() {
         state = State.READY;
         failure = null;
+    }
+
+    @Override
+    public void documentRolledBack() {
+        if (state != State.SUCCEEDED)
+            return;
+        failure = new IllegalStateException(
+                "Application rollback may have removed the context records for this output context");
+        state = State.FAILED;
+    }
+
+    private void logFailureOnce(AbstractWire wire, Throwable throwable) {
+        Jvm.warn().on(ActiveWireContextListenerLifecycle.class,
+                "Context listener failed: writerType=" + writerType.getName()
+                        + ", listenerType=" + listener.getClass().getName()
+                        + ", outputType=" + wire.getClass().getName()
+                        + ", outputIdentity=0x" + Integer.toHexString(System.identityHashCode(wire))
+                        + ", contextCount=" + wire.contextCount(),
+                throwable);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

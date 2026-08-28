@@ -266,6 +266,11 @@ public abstract class AbstractWire implements Wire, InternalWire {
         contextListenerLifecycle.resetContext();
     }
 
+    /** Prevents later application output when rollback may have removed its context records. */
+    final void contextDocumentRolledBack() {
+        contextListenerLifecycle.documentRolledBack();
+    }
+
     @NotNull
     @Override
     public HeaderType readDataHeader(boolean includeMetaData) {

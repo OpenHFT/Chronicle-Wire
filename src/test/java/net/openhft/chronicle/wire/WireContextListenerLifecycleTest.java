@@ -5,6 +5,7 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -27,6 +28,11 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
     };
 
     private final List<Bytes<?>> allocatedBytes = new ArrayList<>();
+
+    @Before
+    public void allowExpectedListenerDiagnostics() {
+        ignoreException("Context listener failed:");
+    }
 
     @After
     public void releaseBytes() {
@@ -116,6 +122,47 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
         writer.event(new EventData("after-reset", 3));
 
         assertEquals(2, calls.get());
+    }
+
+    @Test
+    public void applicationSerializationFailurePoisonsSuccessfulContextUntilReset() {
+        Wire wire = newWire(WireType.BINARY);
+        AtomicInteger calls = new AtomicInteger();
+        wire.contextListener(ContextEvents.class,
+                writer -> writer.context(new ContextData("schema", calls.incrementAndGet())));
+
+        final IllegalStateException serializationFailure = new IllegalStateException("payload failed");
+        assertEquals(serializationFailure, assertThrows(IllegalStateException.class,
+                () -> wire.writeDocument(out -> {
+                    out.write("event").text("partial");
+                    throw serializationFailure;
+                })));
+        assertEquals(1, calls.get());
+
+        final IllegalStateException poisoned = assertThrows(IllegalStateException.class,
+                () -> wire.writeDocument(out -> out.write("event").text("blocked")));
+        assertTrue(poisoned.getCause().getMessage().contains("Application rollback"));
+        assertEquals(1, calls.get());
+
+        wire.reset();
+        wire.writeDocument(out -> out.write("event").text("after-reset"));
+        assertEquals(2, calls.get());
+    }
+
+    @Test
+    public void noOpListenerInitialisesLazyTextAndYamlWriteContexts() {
+        for (WireType wireType : new WireType[]{WireType.TEXT, WireType.YAML}) {
+            Wire wire = newWire(wireType);
+            AtomicInteger calls = new AtomicInteger();
+            wire.contextListener(ContextEvents.class, ignored -> calls.incrementAndGet());
+
+            try (DocumentContext document = wire.writingDocument(false)) {
+                document.wire().write("event").text("data");
+            }
+
+            assertEquals(wireType.name(), 1, calls.get());
+            assertTrue(wireType.name(), wire.writingIsComplete());
+        }
     }
 
     @Test

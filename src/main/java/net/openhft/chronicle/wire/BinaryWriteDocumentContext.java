@@ -88,6 +88,7 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         notComplete = false;
         @NotNull Bytes<?> bytes = wire().bytes();
         if (rollback) {
+            notifyContextRollback();
             bytes.zeroOut(bytes.readPosition(), bytes.writePosition());
             bytes.writePosition(bytes.readPosition());
             return;
@@ -103,6 +104,11 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         else
             bytes.writeInt(position, length);
         wire().getValueOut().resetBetweenDocuments();
+    }
+
+    private void notifyContextRollback() {
+        if (wire instanceof AbstractWire)
+            ((AbstractWire) wire).contextDocumentRolledBack();
     }
 
     @Override

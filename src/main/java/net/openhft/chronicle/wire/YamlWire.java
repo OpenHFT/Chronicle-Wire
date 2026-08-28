@@ -430,9 +430,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
-        notifyContextListenerIfNeeded(metaData);
         if (writeContext == null)
             useBinaryDocuments();
+        notifyContextListenerIfNeeded(metaData);
         writeContext.start(metaData);
         return writeContext;
     }

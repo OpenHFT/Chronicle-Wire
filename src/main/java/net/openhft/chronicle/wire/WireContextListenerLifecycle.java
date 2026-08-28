@@ -36,6 +36,10 @@ interface WireContextListenerLifecycle {
     default void resetContext() {
     }
 
+    /** Marks a successful context unusable when a later application document is rolled back. */
+    default void documentRolledBack() {
+    }
+
     static <T> WireContextListenerLifecycle active(@NotNull Class<T> writerType,
                                                    @NotNull MarshallableOut.ContextListener<? super T> listener) {
         return new ActiveWireContextListenerLifecycle(requireNonNull(writerType), requireNonNull(listener));
