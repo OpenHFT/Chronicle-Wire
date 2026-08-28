@@ -240,6 +240,7 @@ public class RawWire extends AbstractWire implements Wire {
 
     @Override
     public void clear() {
+        checkCanResetContextListener();
         bytes.clear();
     }
 

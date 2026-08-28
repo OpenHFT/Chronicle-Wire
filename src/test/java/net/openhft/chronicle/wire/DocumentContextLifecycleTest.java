@@ -97,6 +97,7 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
     @Test
     public void noDocumentContextReturnsNegativeContextCount() {
         assertEquals(-1, NoDocumentContext.INSTANCE.contextCount());
+        assertEquals(-1, DocumentContext.NOOP.contextCount());
     }
 
     @Test
@@ -136,27 +137,12 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
     }
 
     @Test
-    public void testSeamAcceptsZeroButNotUnavailableCount() {
-        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
-        try {
-            AbstractWire wire = (AbstractWire) WireType.BINARY.apply(bytes);
-
-            wire.outputContextCountForTesting(0);
-
-            assertEquals(0, wire.contextCount());
-            assertThrows(IllegalArgumentException.class, () -> wire.outputContextCountForTesting(-1));
-        } finally {
-            bytes.releaseLast();
-        }
-    }
-
-    @Test
     public void resetRejectsContextCountOverflowBeforeMutation() {
         for (WireType wireType : WRITABLE_WIRE_TYPES) {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap();
             try {
                 AbstractWire wire = (AbstractWire) wireType.apply(bytes);
-                wire.outputContextCountForTesting(Integer.MAX_VALUE - 1);
+                setOutputContextCount(wire, Integer.MAX_VALUE - 1);
 
                 int penultimate = writePayloadAndReadContextCount(wire, "penultimate");
                 assertEquals(wireType.name(), Integer.MAX_VALUE - 1, penultimate);
@@ -186,6 +172,16 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
     private static int writeAndReadContextCount(Wire wire) {
         try (DocumentContext dc = wire.writingDocument()) {
             return dc.contextCount();
+        }
+    }
+
+    private static void setOutputContextCount(AbstractWire wire, int count) {
+        try {
+            java.lang.reflect.Field field = AbstractWire.class.getDeclaredField("outputContextCount");
+            field.setAccessible(true);
+            field.setInt(wire, count);
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError(e);
         }
     }
 

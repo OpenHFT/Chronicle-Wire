@@ -349,12 +349,26 @@ public class TextWire extends YamlWireOut<TextWire> {
         return new TextMethodWriterInvocationHandler(interfaces[0], this);
     }
 
+    @NotNull
+    TextMethodWriterInvocationHandler newTextMethodWriterInvocationHandler(
+            Supplier<MarshallableOut> outSupplier, Class<?>... interfaces) {
+        MarshallableOut output = outSupplier.get();
+        if (output instanceof WireOut) {
+            for (Class<?> anInterface : interfaces) {
+                Comment comment = Jvm.findAnnotation(anInterface, Comment.class);
+                if (comment != null)
+                    ((WireOut) output).writeComment(comment.value());
+            }
+        }
+        return new TextMethodWriterInvocationHandler(interfaces[0], outSupplier);
+    }
+
     @Override
     @NotNull
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
         VanillaMethodWriterBuilder<T> text = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.TEXT,
-                () -> newTextMethodWriterInvocationHandler(tClass));
+                out -> newTextMethodWriterInvocationHandler(out, tClass));
         text.marshallableOut(this);
         return text;
     }
@@ -1033,6 +1047,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @Override
     public void clear() {
+        checkCanResetContextListener();
         bytes.clear();
         valueIn.resetState();
         valueOut.resetState();

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
@@ -142,6 +143,28 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
             }
 
             assertEquals(wireType.name(), 2, calls.get());
+        }
+    }
+
+    @Test
+    public void proxyFallbackUsesTheSuppliedListenerOutput() {
+        ignoreException("Falling back to proxy method writer");
+        System.setProperty(DISABLE_WRITER_PROXY_CODEGEN, "true");
+        try {
+            for (WireType wireType : WRITABLE_WIRE_TYPES) {
+                Wire wire = newWire(wireType);
+                AtomicInteger calls = new AtomicInteger();
+                wire.contextListener(ContextEvents.class, writer -> {
+                    calls.incrementAndGet();
+                    writer.context(new ContextData(wireType.name(), 1));
+                });
+
+                wire.methodWriter(ContextEvents.class).event(new EventData("data", 1));
+
+                assertEquals(wireType.name(), 1, calls.get());
+            }
+        } finally {
+            System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
         }
     }
 
@@ -307,6 +330,20 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
 
         assertEquals("Only the supplied context writer may write while the context listener is running",
                 failure.getMessage());
+        assertThrows(IllegalStateException.class,
+                () -> writer.event(new EventData("two", 2)));
+    }
+
+    @Test
+    public void listenerCannotClearTheOuterWire() {
+        Wire wire = newWire(WireType.BINARY);
+        wire.contextListener(ContextEvents.class, ignored -> wire.clear());
+
+        ContextEvents writer = wire.methodWriter(ContextEvents.class);
+        IllegalStateException failure = assertThrows(IllegalStateException.class,
+                () -> writer.event(new EventData("one", 1)));
+
+        assertEquals("Cannot reset a wire while its context listener is running", failure.getMessage());
         assertThrows(IllegalStateException.class,
                 () -> writer.event(new EventData("two", 2)));
     }
