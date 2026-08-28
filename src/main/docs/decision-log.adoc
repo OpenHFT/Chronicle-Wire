@@ -86,6 +86,8 @@ Impact & Consequences ::
   that context so application data cannot be written without proven context.
 * The supplied method writer is not callback-scoped and may be retained. During notification, the
   listener must write through it rather than re-entering the outer output.
+* Generated and reflective proxy method writers both bind the supplied writer to the listener's
+  internal output. Calling `clear()` or `reset()` through the outer Wire during notification fails.
 * Configure the listener on the outermost output before first application use. Combining listeners
   on a wrapper and its underlying output is unsupported.
 * `Wire.reset()` starts another output context and advances `contextCount()`; `Wire.clear()`

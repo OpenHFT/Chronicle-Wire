@@ -349,7 +349,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
         // Creates a new builder instance with the specified WireType and InvocationHandler
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.BINARY_LIGHT,
-                () -> new BinaryMethodWriterInvocationHandler(tClass, metaData, this));
+                out -> new BinaryMethodWriterInvocationHandler(tClass, metaData, out));
 
         // Configure the builder
         builder.marshallableOut(this);

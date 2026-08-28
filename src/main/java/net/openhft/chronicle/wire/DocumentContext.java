@@ -3,7 +3,6 @@
  */
 package net.openhft.chronicle.wire;
 
-import net.openhft.chronicle.core.util.Mocker;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
@@ -18,7 +17,7 @@ import java.io.Closeable;
  * Implementations must ensure proper handling of resources and consistency of the document state.
  */
 public interface DocumentContext extends Closeable, SourceContext {
-    DocumentContext NOOP = Mocker.ignored(DocumentContext.class);
+    DocumentContext NOOP = NoDocumentContext.INSTANCE;
 
     /**
      * Checks it the {@code DocumentContext} is metadata. If it is, {@code true} is

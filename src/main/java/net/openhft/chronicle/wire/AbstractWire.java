@@ -87,16 +87,6 @@ public abstract class AbstractWire implements Wire, InternalWire {
         return outputContextCount;
     }
 
-    /**
-     * Sets a non-negative context count so package-local tests can exercise lifecycle boundaries
-     * without performing billions of resets.
-     */
-    final void outputContextCountForTesting(int outputContextCount) {
-        if (outputContextCount < 0)
-            throw new IllegalArgumentException("outputContextCount must not be negative");
-        this.outputContextCount = outputContextCount;
-    }
-
     protected final void checkCanAdvanceOutputContext() {
         if (outputContextCount == Integer.MAX_VALUE)
             throw new IllegalStateException("Output context count exhausted");
@@ -156,6 +146,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
 
     @Override
     public void clear() {
+        checkCanResetContextListener();
         bytes.clear();
         headerNumber(Long.MIN_VALUE);
     }

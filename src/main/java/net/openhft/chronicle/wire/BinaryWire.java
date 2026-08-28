@@ -317,6 +317,7 @@ public class BinaryWire extends AbstractWire implements Wire {
      */
     @Override
     public void clear() {
+        checkCanResetContextListener();
         bytes.clear();
         valueIn.resetState();
         valueOut.resetState();

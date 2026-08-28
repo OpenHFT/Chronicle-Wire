@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -112,6 +113,25 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         this.classLoader = clsLdr != null ? clsLdr : getClass().getClassLoader();
         this.methodWriterClassNameGenerator = new MethodWriterClassNameGenerator();
         this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(handlerSupplier);
+    }
+
+    /**
+     * Creates a builder whose fallback invocation handlers resolve the current output supplier.
+     * This is required when a builder is rebound to an internal output before construction: the
+     * generated and reflective writer paths must target the same destination.
+     */
+    VanillaMethodWriterBuilder(@NotNull Class<T> tClass,
+                               WireType wireType,
+                               @NotNull Function<Supplier<MarshallableOut>, MethodWriterInvocationHandler> handlerFactory) {
+        this.packageName = Jvm.getPackageName(tClass);
+        this.wireType = wireType;
+        addInterface(tClass);
+        ClassLoader clsLdr = tClass.getClassLoader();
+        this.classLoader = clsLdr != null ? clsLdr : getClass().getClassLoader();
+        this.methodWriterClassNameGenerator = new MethodWriterClassNameGenerator();
+        this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(
+                () -> handlerFactory.apply(Objects.requireNonNull(outSupplier,
+                        "marshallableOut(out) has not been set.")));
     }
 
     /**

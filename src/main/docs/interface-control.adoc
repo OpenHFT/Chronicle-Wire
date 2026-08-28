@@ -42,7 +42,8 @@ may precede them.
 and emits normal method-writer documents without `MessageHistory` unless written explicitly. A
 callback failure poisons the current context: the failure is propagated, is not retried, and later
 application data is rejected until reset. Unsupported outputs, including `READ_ANY` wires, reject
-registration with `UnsupportedOperationException`.
+registration with `UnsupportedOperationException`. Generated and reflective proxy writers use the
+same supplied internal output; the callback cannot clear or reset the outer Wire.
 
 |`net.openhft.chronicle.wire.DocumentContext#contextCount()`
 |Non-decreasing identifier of the output context containing an open document. DTOs with transient
