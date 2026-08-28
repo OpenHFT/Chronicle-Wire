@@ -17,7 +17,7 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
     private final MarshallableOut.ContextListener<?> listener;
     private boolean started;
     private State state = State.READY;
-    private int listenerWriteDepth;
+    private boolean suppliedDocumentOpening;
     private boolean listenerRolledBack;
     private Throwable failure;
 
@@ -42,7 +42,7 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
             throw new IllegalStateException(
                     "Context listener failed for the current output context", failure);
         if (metaData) {
-            if (state == State.IN_PROGRESS && listenerWriteDepth == 0)
+            if (state == State.IN_PROGRESS && !consumeSuppliedDocumentOpening())
                 throw new IllegalStateException(
                         "Only the supplied context writer may write while the context listener is running");
             return;
@@ -74,7 +74,7 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
                 }
                 return;
             case IN_PROGRESS:
-                if (listenerWriteDepth > 0)
+                if (consumeSuppliedDocumentOpening())
                     return;
                 throw new IllegalStateException(
                         "Only the supplied context writer may write while the context listener is running");
@@ -156,15 +156,27 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
         }
 
         private DocumentContext openDocument(boolean metaData, boolean acquire) {
-            listenerWriteDepth++;
+            if (suppliedDocumentOpening)
+                throw new IllegalStateException("A supplied context document is already being opened");
+            suppliedDocumentOpening = true;
             try {
                 return acquire
                         ? wire.acquireWritingDocument(metaData)
                         : wire.writingDocument(metaData);
             } finally {
-                listenerWriteDepth--;
+                suppliedDocumentOpening = false;
             }
         }
+    }
+
+    private boolean consumeSuppliedDocumentOpening() {
+        if (!suppliedDocumentOpening)
+            return false;
+        // This is a one-shot capability for the single AbstractWire boundary entered by
+        // ListenerOutput. Consuming it here prevents a nested write through a captured outer Wire
+        // from borrowing the supplied writer's permission.
+        suppliedDocumentOpening = false;
+        return true;
     }
 
     private enum State {

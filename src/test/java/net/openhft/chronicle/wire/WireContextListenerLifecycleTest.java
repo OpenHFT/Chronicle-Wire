@@ -482,6 +482,31 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
     }
 
     @Test
+    public void lazyTextualWiresCanNotifyBeforeTheirFirstWriteContextExists() {
+        final Bytes<?> textBytes = Bytes.allocateElasticOnHeap();
+        final Bytes<?> yamlBytes = Bytes.allocateElasticOnHeap();
+        final Bytes<?> jsonBytes = Bytes.allocateElasticOnHeap();
+        allocatedBytes.add(textBytes);
+        allocatedBytes.add(yamlBytes);
+        allocatedBytes.add(jsonBytes);
+
+        final Wire[] wires = {
+                new TextWire(textBytes),
+                new YamlWire(yamlBytes),
+                new JSONWire(jsonBytes)
+        };
+        for (Wire wire : wires) {
+            final AtomicInteger calls = new AtomicInteger();
+            wire.contextListener(ContextEvents.class, ignored -> calls.incrementAndGet());
+
+            wire.writeDocument(false, out -> out.write("event").text("first"));
+
+            assertEquals(wire.getClass().getSimpleName(), 1, calls.get());
+            assertTrue(wire.getClass().getSimpleName(), wire.bytes().writePosition() > 0);
+        }
+    }
+
+    @Test
     public void directWriteFailuresRollbackAndPoisonAcrossWiresAndEntryPoints() {
         for (WireType wireType : WRITABLE_WIRE_TYPES) {
             for (int entryPoint = 0; entryPoint < 3; entryPoint++) {
