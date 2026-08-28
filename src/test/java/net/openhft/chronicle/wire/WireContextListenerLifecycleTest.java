@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -191,6 +192,43 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
         exerciseChainedListenerCompletion(true, true);
     }
 
+    @Test
+    public void listenerRollbackFailsClosedAcrossWires() {
+        exerciseListenerRollback(false);
+        exerciseListenerRollback(true);
+    }
+
+    private void exerciseListenerRollback(boolean proxy) {
+        if (proxy) {
+            ignoreException("Falling back to proxy method writer");
+            System.setProperty(DISABLE_WRITER_PROXY_CODEGEN, "true");
+        }
+        try {
+            for (WireType wireType : WRITABLE_WIRE_TYPES) {
+                Wire wire = newWire(wireType);
+                AtomicInteger calls = new AtomicInteger();
+                wire.contextListener(ChainedContextEvents.class, writer -> {
+                    calls.incrementAndGet();
+                    writer.context("schema");
+                    wire.rollbackIfNotComplete();
+                });
+
+                ContextEvents dataWriter = wire.methodWriter(ContextEvents.class);
+                final IllegalStateException failure = assertThrows(IllegalStateException.class,
+                        () -> dataWriter.event(new EventData("blocked", 1)));
+                assertEquals(wireType.name(),
+                        "Context listener rolled back its output document",
+                        failure.getMessage());
+                assertEquals(wireType.name(), 1, calls.get());
+                assertThrows(IllegalStateException.class,
+                        () -> dataWriter.event(new EventData("still-blocked", 2)));
+            }
+        } finally {
+            if (proxy)
+                System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
+        }
+    }
+
     private void exerciseChainedListenerCompletion(boolean proxy, boolean complete) {
         if (proxy) {
             ignoreException("Falling back to proxy method writer");
@@ -245,6 +283,22 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
         } finally {
             System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
         }
+    }
+
+    @Test
+    public void explicitProxyClassFreezesItsOutputAtBuildTime() {
+        Wire first = newWire(WireType.BINARY);
+        Wire second = newWire(WireType.BINARY);
+        VanillaMethodWriterBuilder<ContextEvents> builder =
+                (VanillaMethodWriterBuilder<ContextEvents>) first.methodWriterBuilder(ContextEvents.class);
+        builder.proxyClass(PrecompiledContextEvents.class);
+        ContextEvents writer = builder.build();
+        builder.marshallableOut(second);
+
+        writer.event(new EventData("first", 1));
+
+        assertTrue(first.bytes().writePosition() > 0);
+        assertEquals(0, second.bytes().writePosition());
     }
 
     @Test
@@ -505,6 +559,46 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
 
     interface ChainedContextTail {
         void complete(int version);
+    }
+
+    public static final class PrecompiledContextEvents implements ContextEvents {
+        private static final Method CONTEXT;
+        private static final Method EVENT;
+
+        static {
+            try {
+                CONTEXT = ContextEvents.class.getMethod("context", ContextData.class);
+                EVENT = ContextEvents.class.getMethod("event", EventData.class);
+            } catch (NoSuchMethodException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        private final MethodWriterInvocationHandlerSupplier handlerSupplier;
+
+        public PrecompiledContextEvents(MethodWriterInvocationHandlerSupplier handlerSupplier) {
+            this.handlerSupplier = handlerSupplier;
+        }
+
+        @Override
+        public void context(ContextData context) {
+            invoke(CONTEXT, context);
+        }
+
+        @Override
+        public void event(EventData event) {
+            invoke(EVENT, event);
+        }
+
+        private void invoke(Method method, Object argument) {
+            try {
+                handlerSupplier.get().invoke(this, method, new Object[]{argument});
+            } catch (RuntimeException | Error e) {
+                throw e;
+            } catch (Throwable throwable) {
+                throw new AssertionError(throwable);
+            }
+        }
     }
 
     static final class ContextData extends SelfDescribingMarshallable {

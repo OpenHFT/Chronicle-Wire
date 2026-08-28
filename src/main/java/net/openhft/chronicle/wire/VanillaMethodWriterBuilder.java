@@ -280,7 +280,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         if (proxyClass != null) {
             try {
                 Constructor<T> constructor = (Constructor) proxyClass.getConstructor(MethodWriterInvocationHandlerSupplier.class);
-                return constructor.newInstance(handlerSupplier);
+                return constructor.newInstance(proxyHandlerSupplier());
             } catch (Throwable e) {
                 // do nothing and drop through
                 if (Jvm.isDebugEnabled(getClass()))
