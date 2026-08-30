@@ -117,6 +117,9 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
         };
 
         assertEquals(-1, output.contextCount());
+        assertThrows(UnsupportedOperationException.class,
+                () -> output.contextListener(Runnable.class, ignored -> {
+                }));
     }
 
     @Test

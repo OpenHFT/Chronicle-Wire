@@ -206,8 +206,9 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
         return wireAcquisition.acquireWire().acquireWritingDocument(metaData);
     }
 
-    // Writes are delegated to the acquired underlying wire, whose listener fields this setter would
-    // never reach - a listener registered here would be silently ignored, so fail loudly instead.
+    /// WireContextListenerLifecycleTest#readAnyRejectsContextListeners demonstrates that READ_ANY
+    /// cannot retain listener state: writes use separately acquired wires, so accepting registration
+    /// here would silently omit the context.
     @NotNull
     @Override
     public <T> WireOut contextListener(@NotNull Class<T> writerType,

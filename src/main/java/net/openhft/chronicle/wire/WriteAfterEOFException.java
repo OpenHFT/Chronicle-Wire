@@ -8,6 +8,8 @@ package net.openhft.chronicle.wire;
  * The marker is a hard seal for ordinary writes. A rolling output catches this at its storage boundary and
  * moves to another context; Wire exposes no operation that replaces the marker.
  */
+/// WriteOverEOFTest#ordinaryWriteRemainsSealedAtEOF demonstrates that this distinct exception remains
+/// the repeatable hard-seal signal while Wire clears only transient header state.
 public class WriteAfterEOFException extends IllegalStateException {
     private static final long serialVersionUID = 0L;
 
