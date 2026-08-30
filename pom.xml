@@ -15,7 +15,7 @@
     </parent>
 
     <artifactId>chronicle-wire</artifactId>
-    <version>2026.9-SNAPSHOT</version>
+    <version>2026.10-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Wire</name>
     <!-- Core library for Chronicle's binary wire serialization -->
     <description>Chronicle-Wire</description>
