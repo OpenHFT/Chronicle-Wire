@@ -92,8 +92,8 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         notComplete = false;
         @NotNull Bytes<?> bytes = wire().bytes();
         if (rollback) {
-            /// WireContextListenerLifecycleTest#applicationSerializationFailurePoisonsSuccessfulContextUntilReset
-            /// demonstrates that text rollback notifies the lifecycle before truncating context output.
+            //! WireContextListenerLifecycleTest#applicationSerializationFailurePoisonsSuccessfulContextUntilReset
+            //! demonstrates that text rollback notifies the lifecycle before truncating context output.
             notifyContextRollback();
             bytes.writePosition(bytes.readPosition());
             return;
@@ -109,8 +109,8 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
     }
 
     private void notifyContextRollback() {
-        /// WireContextListenerLifecycleTest#listenerRollbackFailsClosedAcrossWires demonstrates that
-        /// the same hook records rollback performed by listener code while IN_PROGRESS.
+        //! WireContextListenerLifecycleTest#listenerRollbackFailsClosedAcrossWires demonstrates that
+        //! the same hook records rollback performed by listener code while IN_PROGRESS.
         if (wire instanceof AbstractWire)
             ((AbstractWire) wire).contextDocumentRolledBack();
     }

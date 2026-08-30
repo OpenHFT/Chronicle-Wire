@@ -14,14 +14,14 @@ enum NoOpWireContextListenerLifecycle implements WireContextListenerLifecycle {
 
     @Override
     public boolean started() {
-        /// WireContextListenerLifecycleTest#listenerFreeWireCannotBeConfiguredAfterFirstUse demonstrates
-        /// why SET reports started even though listener-free notification itself is a no-op.
+        //! WireContextListenerLifecycleTest#listenerFreeWireCannotBeConfiguredAfterFirstUse demonstrates
+        //! why SET reports started even though listener-free notification itself is a no-op.
         return this == SET;
     }
 
     @Override
     public void beforeDocument(AbstractWire wire, boolean metaData) {
-        /// WireContextListenerLifecycleTest#listenerFreeWireCannotBeConfiguredAfterFirstUse demonstrates
-        /// that the UNSET-to-SET transition belongs at the caller; this shared callback stays allocation-free.
+        //! WireContextListenerLifecycleTest#listenerFreeWireCannotBeConfiguredAfterFirstUse demonstrates
+        //! that the UNSET-to-SET transition belongs at the caller; this shared callback stays allocation-free.
     }
 }

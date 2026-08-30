@@ -28,8 +28,8 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
 
     @Override
     public boolean started() {
-        /// WireContextListenerLifecycleTest#contextListenerWaitsForDataAfterMetadataAndWritesDtoOnce
-        /// demonstrates that leading metadata starts registration even though notification is deferred.
+        //! WireContextListenerLifecycleTest#contextListenerWaitsForDataAfterMetadataAndWritesDtoOnce
+        //! demonstrates that leading metadata starts registration even though notification is deferred.
         return started;
     }
 
@@ -40,8 +40,8 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
     @Override
     public void beforeDocument(AbstractWire wire, boolean metaData) {
         started = true;
-        /// WireContextListenerLifecycleTest#metadataCannotBypassAFailedListener demonstrates that
-        /// FAILED is checked before the metadata exemption and preserves the original cause.
+        //! WireContextListenerLifecycleTest#metadataCannotBypassAFailedListener demonstrates that
+        //! FAILED is checked before the metadata exemption and preserves the original cause.
         if (state == State.FAILED)
             throw new IllegalStateException(
                     "Context listener failed for the current output context", failure);
@@ -53,27 +53,27 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
         }
         switch (state) {
             case READY:
-                /// WireContextListenerLifecycleTest#listenerCannotReenterThroughOuterWire demonstrates
-                /// that IN_PROGRESS must be visible before invoking user code.
+                //! WireContextListenerLifecycleTest#listenerCannotReenterThroughOuterWire demonstrates
+                //! that IN_PROGRESS must be visible before invoking user code.
                 state = State.IN_PROGRESS;
                 listenerRolledBack = false;
                 try {
                     notifyListener(wire);
-                    /// WireContextListenerLifecycleTest#listenerRollbackFailsClosedAcrossWires demonstrates
-                    /// that an explicit listener rollback cannot be reported as successful context output.
+                    //! WireContextListenerLifecycleTest#listenerRollbackFailsClosedAcrossWires demonstrates
+                    //! that an explicit listener rollback cannot be reported as successful context output.
                     if (listenerRolledBack)
                         throw new IllegalStateException(
                                 "Context listener rolled back its output document");
-                    /// WireContextListenerLifecycleTest#incompleteChainedListenerOutputFailsClosedAcrossWires
-                    /// demonstrates that returning with an open chain must fail before application output.
+                    //! WireContextListenerLifecycleTest#incompleteChainedListenerOutputFailsClosedAcrossWires
+                    //! demonstrates that returning with an open chain must fail before application output.
                     if (!wire.writingIsComplete()) {
                         throw new IllegalStateException(
                                 "Context listener returned with an incomplete chained document");
                     }
                     state = State.SUCCEEDED;
                 } catch (Throwable throwable) {
-                    /// WireContextListenerLifecycleTest#listenerFailurePoisonsCurrentContextUntilReset
-                    /// demonstrates one rollback/diagnostic transition and no same-context callback retry.
+                    //! WireContextListenerLifecycleTest#listenerFailurePoisonsCurrentContextUntilReset
+                    //! demonstrates one rollback/diagnostic transition and no same-context callback retry.
                     try {
                         wire.rollbackIfNotComplete();
                     } catch (Throwable rollbackFailure) {
@@ -86,8 +86,8 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
                 }
                 return;
             case IN_PROGRESS:
-                /// WireContextListenerLifecycleTest#listenerCannotReenterThroughOuterWire demonstrates that
-                /// only the one-shot supplied-writer opening may cross the common Wire boundary.
+                //! WireContextListenerLifecycleTest#listenerCannotReenterThroughOuterWire demonstrates that
+                //! only the one-shot supplied-writer opening may cross the common Wire boundary.
                 if (consumeSuppliedDocumentOpening())
                     return;
                 throw new IllegalStateException(
@@ -103,16 +103,16 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
 
     @Override
     public void checkCanResetContext() {
-        /// WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire demonstrates that reset or
-        /// clear cannot erase structural state while listener code is executing.
+        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire demonstrates that reset or
+        //! clear cannot erase structural state while listener code is executing.
         if (state == State.IN_PROGRESS)
             throw new IllegalStateException("Cannot reset a wire while its context listener is running");
     }
 
     @Override
     public void resetContext() {
-        /// WireContextListenerLifecycleTest#resetReusesListenerForTheNextOutputContext demonstrates that
-        /// reset clears failure and per-context state while retaining the configured listener.
+        //! WireContextListenerLifecycleTest#resetReusesListenerForTheNextOutputContext demonstrates that
+        //! reset clears failure and per-context state while retaining the configured listener.
         state = State.READY;
         listenerRolledBack = false;
         failure = null;
@@ -120,9 +120,9 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
 
     @Override
     public void documentRolledBack() {
-        /// WireContextListenerLifecycleTest#listenerRollbackFailsClosedAcrossWires and
-        /// #applicationSerializationFailurePoisonsSuccessfulContextUntilReset distinguish rollback
-        /// during notification from rollback after a successful context.
+        //! WireContextListenerLifecycleTest#listenerRollbackFailsClosedAcrossWires and
+        //! #applicationSerializationFailurePoisonsSuccessfulContextUntilReset distinguish rollback
+        //! during notification from rollback after a successful context.
         if (state == State.IN_PROGRESS) {
             listenerRolledBack = true;
             return;
@@ -135,8 +135,8 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
     }
 
     private void logFailureOnce(AbstractWire wire, Throwable throwable) {
-        /// WireContextListenerLifecycleTest#listenerFailurePoisonsCurrentContextUntilReset demonstrates
-        /// one transition to FAILED; diagnostics are emitted only at that transition, without payload data.
+        //! WireContextListenerLifecycleTest#listenerFailurePoisonsCurrentContextUntilReset demonstrates
+        //! one transition to FAILED; diagnostics are emitted only at that transition, without payload data.
         Jvm.warn().on(ActiveWireContextListenerLifecycle.class,
                 "Context listener failed: writerType=" + writerType.getName()
                         + ", listenerType=" + listener.getClass().getName()
@@ -148,9 +148,9 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     private void notifyListener(AbstractWire wire) {
-        /// WireContextListenerLifecycleTest#suppliedMethodWriterCanBeRetainedAfterNotification and
-        /// #proxyFallbackUsesTheSuppliedListenerOutput demonstrate a normal retained writer bound
-        /// to the listener-only output for generated and reflective paths.
+        //! WireContextListenerLifecycleTest#suppliedMethodWriterCanBeRetainedAfterNotification and
+        //! #proxyFallbackUsesTheSuppliedListenerOutput demonstrate a normal retained writer bound
+        //! to the listener-only output for generated and reflective paths.
         final VanillaMethodWriterBuilder builder =
                 (VanillaMethodWriterBuilder) wire.methodWriterBuilder(writerType);
         builder.marshallableOut(new ListenerOutput(wire));
@@ -167,22 +167,22 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
         @NotNull
         @Override
         public DocumentContext writingDocument(boolean metaData) {
-            /// WireContextListenerLifecycleTest#suppliedMethodWriterCanBeRetainedAfterNotification
-            /// demonstrates that supplied writes use the ordinary document boundary.
+            //! WireContextListenerLifecycleTest#suppliedMethodWriterCanBeRetainedAfterNotification
+            //! demonstrates that supplied writes use the ordinary document boundary.
             return openDocument(metaData, false);
         }
 
         @NotNull
         @Override
         public DocumentContext acquireWritingDocument(boolean metaData) {
-            /// WireContextListenerLifecycleTest#allConcreteWiresInvokeListenerBeforeFirstDataDocument
-            /// exercises acquisition through the same one-shot supplied-writer boundary.
+            //! WireContextListenerLifecycleTest#allConcreteWiresInvokeListenerBeforeFirstDataDocument
+            //! exercises acquisition through the same one-shot supplied-writer boundary.
             return openDocument(metaData, true);
         }
 
         private DocumentContext openDocument(boolean metaData, boolean acquire) {
-            /// WireContextListenerLifecycleTest#listenerCannotReenterThroughOuterWire demonstrates that
-            /// one supplied opening is allowed but nested/captured outer-Wire openings are rejected.
+            //! WireContextListenerLifecycleTest#listenerCannotReenterThroughOuterWire demonstrates that
+            //! one supplied opening is allowed but nested/captured outer-Wire openings are rejected.
             if (suppliedDocumentOpening)
                 throw new IllegalStateException("A supplied context document is already being opened");
             suppliedDocumentOpening = true;
@@ -199,8 +199,8 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
     private boolean consumeSuppliedDocumentOpening() {
         if (!suppliedDocumentOpening)
             return false;
-        /// WireContextListenerLifecycleTest#listenerCannotReenterThroughOuterWire demonstrates that
-        /// the supplied writer's permission is consumed at exactly one AbstractWire boundary.
+        //! WireContextListenerLifecycleTest#listenerCannotReenterThroughOuterWire demonstrates that
+        //! the supplied writer's permission is consumed at exactly one AbstractWire boundary.
         suppliedDocumentOpening = false;
         return true;
     }

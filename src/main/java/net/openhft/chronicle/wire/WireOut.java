@@ -229,8 +229,8 @@ public interface WireOut extends WireCommon, MarshallableOut {
     @Override
     default <T> WireOut contextListener(@NotNull Class<T> writerType,
                                         @NotNull MarshallableOut.ContextListener<? super T> listener) {
-        /// WireContextListenerLifecycleTest#contextListenerWaitsForDataAfterMetadataAndWritesDtoOnce
-        /// asserts the covariant fluent return while concrete wires provide the supported implementation.
+        //! WireContextListenerLifecycleTest#contextListenerWaitsForDataAfterMetadataAndWritesDtoOnce
+        //! asserts the covariant fluent return while concrete wires provide the supported implementation.
         MarshallableOut.super.contextListener(writerType, listener);
         return this;
     }
@@ -262,8 +262,8 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @return the position of the header
      * @throws WriteAfterEOFException if the selected write position holds an end-of-data marker
      */
-    /// WriteOverEOFTest#ordinaryWriteRemainsSealedAtEOF demonstrates the documented exception and
-    /// that refusal leaves the marker and selected write position unchanged.
+    //! WriteOverEOFTest#ordinaryWriteRemainsSealedAtEOF demonstrates the documented exception and
+    //! that refusal leaves the marker and selected write position unchanged.
     long enterHeader(long safeLength);
 
     /**
