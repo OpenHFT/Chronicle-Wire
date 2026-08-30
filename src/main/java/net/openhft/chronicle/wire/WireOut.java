@@ -254,11 +254,16 @@ public interface WireOut extends WireCommon, MarshallableOut {
     /**
      * INTERNAL METHOD, call writingDocument instead
      * <p>
-     * Start a header for a document
+     * Start a header for a document. Although this implementation hook is on a public interface, it
+     * is not an application API. The distinct exception identifies an end-of-data marker as a hard
+     * seal; returning a special header position would allow a caller to ignore the condition
+     * accidentally. A rolling output should catch the exception at its storage boundary and move to
+     * a writable context; application code should use
+     * {@link #writingDocument()} rather than call this method directly.
      *
      * @param safeLength ensure there is at least this much space
      * @return the position of the header
-     * @throws WriteAfterEOFException if you attempt to append an excerpt after an EOF has been written
+     * @throws WriteAfterEOFException if the target position is sealed by an end-of-data marker
      */
     long enterHeader(long safeLength);
 

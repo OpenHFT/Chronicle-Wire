@@ -93,3 +93,63 @@ Impact & Consequences ::
 Notes/Links ::
 ** `interface-control.adoc`
 ** `functional-requirements.adoc`
+
+=== [FN-003] Replace End-of-Data Only During Validated Recovery
+
+Date :: 2026-08-20
+Context ::
+* Replicas can receive different prefixes before a leader fails. A newly
+  elected node can therefore seal an older roll while another replica still
+  holds entries missing from that roll.
+* An end-of-data marker reflects the target's local state. It is not a
+  consensus decision that data retained by another replica may be discarded.
+Decision Statement :: Keep ordinary writes sealed at end-of-data. Permit marker
+replacement only through an explicit internal recovery operation, after the
+storage layer holds its write lock and validates the exact recovery index.
+Alternatives Considered ::
+* Reject every write after end-of-data. ::
+  ** Pros: Treats a sealed store as immutable.
+  ** Cons: Prevents exact-index back-fill from recovering data held by a more
+  complete replica after asymmetric replication and leader election.
+* Make replacement configurable by each replication deployment. ::
+  ** Pros: Lets operators retain strict rejection.
+  ** Cons: Requires clients to predict a rare failover condition and can make
+  recovery depend on which differently configured node becomes leader.
+* Replace end-of-data from every header entry. ::
+  ** Pros: Restores the pre-2023 Wire behaviour with minimal code.
+  ** Cons: Cannot distinguish coordinated back-fill from an accidental write to
+  an archived, corrupt, or deliberately sealed store.
+Rationale for Decision ::
+* Available replicated data is authoritative; a marker inferred from
+  incomplete local state must not cause that data to be lost.
+* An explicit operation preserves the normal seal contract while allowing the
+  Queue exact-index path to recover authoritative replicated data.
+* Queue and its replication caller can report the queue, cycle, index and peer
+  context that Wire does not have.
+Impact & Consequences ::
+* Ordinary `enterHeader` callers continue to receive `WriteAfterEOFException`.
+  `WireOut.enterHeader` is marked for internal use, but its implementation hook
+  is declared on a public interface. The exception remains public and extends
+  `IllegalStateException`: EOF at a selected write position is an invalid state
+  unless a rolling storage boundary deliberately handles it. Returning a special
+  `long` could be ignored and then treated as a valid header position. Internal
+  paths whose ordering guarantees an unsealed position allow the exception to
+  surface as an invariant failure rather than adding defensive adapters.
+* Rolling storage implementations translate the seal signal at their boundary.
+  Chronicle Queue catches it for both ordinary document headers and sequential
+  byte appends, rolls forward without replacing EOF, and does not expose it
+  through its ordinary appender APIs.
+* Wire exposes no EOF-recovery operation. The coordinating storage layer owns
+  recovery: it validates and aligns the padded header position, then performs
+  one compare-and-swap on the underlying Bytes without a preliminary header
+  read. It emits the contextual warning with that position. The CAS is a
+  defensive invariant check rather than a concurrency protocol: callers hold
+  the storage write lock and only one recovery coordinator may backfill the
+  target at a time.
+* Wire, Queue, and Queue Enterprise changes must be validated together. Wire is
+  released first, followed by Queue and Queue Enterprise, and the supported BOM
+  is updated only after the coordinated combination passes its compatibility
+  tests. Older Queue versions do not call the new operation and stay strict.
+Notes/Links ::
+** `https://github.com/OpenHFT/Chronicle-Wire/issues/618`
+** `https://github.com/OpenHFT/Chronicle-Wire/pull/619`

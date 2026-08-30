@@ -407,7 +407,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
                 if (header != END_OF_DATA)
                     Jvm.warn().on(getClass(), new Exception("Incomplete header found at pos: " + pos + ": " + Integer.toHexString(header) + ", overwriting"));
                 else {
-                    /// EOF refused this header acquisition; leave the Wire outside a header before propagating.
+                    /// EOF opens no header; restore the state established before the header read before propagating the seal.
                     insideHeader = false;
                     throw new WriteAfterEOFException();
                 }
