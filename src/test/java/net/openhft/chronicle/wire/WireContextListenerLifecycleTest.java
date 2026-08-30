@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
@@ -45,10 +46,11 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
     public void contextListenerWaitsForDataAfterMetadataAndWritesDtoOnce() {
         Wire wire = newWire(WireType.BINARY);
         AtomicInteger calls = new AtomicInteger();
-        wire.contextListener(ContextEvents.class, writer -> {
+        WireOut configured = wire.contextListener(ContextEvents.class, writer -> {
             calls.incrementAndGet();
             writer.context(new ContextData("schema", 7));
         });
+        assertSame(wire, configured);
 
         try (DocumentContext dc = wire.writingDocument(true)) {
             dc.wire().write("header").text("metadata");

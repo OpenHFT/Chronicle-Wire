@@ -39,8 +39,8 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
 
     @Override
     public int contextCount() {
-        // dc == null is the holder's documented closed state - report "no known context" rather
-        // than NPE or a valid-looking value
+        /// DocumentContextLifecycleTest#holderAndWrapperDelegateContextCount demonstrates both states:
+        /// delegate while open and return the unavailable sentinel instead of dereferencing null after close.
         DocumentContext dc = this.dc;
         return dc == null ? -1 : dc.contextCount();
     }

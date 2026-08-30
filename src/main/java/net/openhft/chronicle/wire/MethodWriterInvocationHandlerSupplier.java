@@ -54,6 +54,9 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
 
     MethodWriterInvocationHandlerSupplier copyWith(
             Supplier<MethodWriterInvocationHandler> replacementSupplier) {
+        /// WireContextListenerLifecycleTest#proxyWriterFreezesItsOutputAtBuildTime and
+        /// #explicitProxyClassFreezesItsOutputAtBuildTime demonstrate the need for a distinct frozen
+        /// supplier; copying the options ensures rebinding changes only its output factory.
         final MethodWriterInvocationHandlerSupplier copy =
                 new MethodWriterInvocationHandlerSupplier(replacementSupplier);
         copy.recordHistory = recordHistory;

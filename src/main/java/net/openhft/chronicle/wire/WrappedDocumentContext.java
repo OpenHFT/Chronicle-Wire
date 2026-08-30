@@ -69,6 +69,8 @@ public abstract class WrappedDocumentContext implements DocumentContext {
 
     @Override
     public int contextCount() {
+        /// DocumentContextLifecycleTest#holderAndWrapperDelegateContextCount demonstrates that wrappers
+        /// preserve implementation-specific counts rather than recomputing them from the Wire.
         return dc.contextCount();
     }
 

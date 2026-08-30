@@ -138,6 +138,8 @@ public enum WireInternal {
      */
     public static long writeData(@NotNull WireOut wireOut, boolean metaData, boolean notComplete,
                                  @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
+        /// WireContextListenerLifecycleTest#wiresWriteDataUsesLifecycleAndClosesRegistrationWindow
+        /// demonstrates that direct WireInternal/Wires entry points share the notification boundary.
         if (wireOut instanceof AbstractWire)
             ((AbstractWire) wireOut).notifyContextListenerIfNeeded(metaData);
         wireOut.getValueOut().resetBetweenDocuments();
@@ -175,6 +177,8 @@ public enum WireInternal {
                 bytes.writeInt(position, length | (notComplete ? Wires.NOT_COMPLETE : 0));
 
         } catch (Throwable failure) {
+            /// WireContextListenerLifecycleTest#directWriteFailuresRollbackAndPoisonAcrossWiresAndEntryPoints
+            /// demonstrates pre-header position restoration and lifecycle poisoning for every direct path.
             bytes.writePosition(writePositionBeforeHeader);
             if (wireOut instanceof AbstractWire)
                 ((AbstractWire) wireOut).contextDocumentRolledBack();

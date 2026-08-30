@@ -14,6 +14,8 @@ import net.openhft.chronicle.core.util.IgnoresEverything;
  * that works with document contexts. Using `NoDocumentContext.INSTANCE` denotes
  * a guaranteed uninitialized state for a document context.
  */
+/// DocumentContextLifecycleTest#noDocumentContextReturnsNegativeContextCount demonstrates that the
+/// sentinel remains IgnoresEverything-compatible and harmless under rollback.
 public enum NoDocumentContext implements DocumentContext, IgnoresEverything {
     /** The singleton instance of the NoDocumentContext */
     INSTANCE;
@@ -50,7 +52,8 @@ public enum NoDocumentContext implements DocumentContext, IgnoresEverything {
 
     @Override
     public int contextCount() {
-        // no document, so no context: a negative value, never a valid-looking count
+        /// DocumentContextLifecycleTest#noDocumentContextReturnsNegativeContextCount demonstrates that
+        /// no document must not resemble writable context zero.
         return -1;
     }
 
@@ -66,7 +69,8 @@ public enum NoDocumentContext implements DocumentContext, IgnoresEverything {
 
     @Override
     public void rollbackIfNotComplete() {
-        // Do nothing
+        /// DocumentContextLifecycleTest#noDocumentContextReturnsNegativeContextCount demonstrates that
+        /// rollback on the public NOOP sentinel remains harmless.
     }
 
     @Override
