@@ -398,31 +398,13 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         return new TextMethodWriterInvocationHandler(interfaces[0], this);
     }
 
-    @NotNull
-    TextMethodWriterInvocationHandler newTextMethodWriterInvocationHandler(
-            Supplier<MarshallableOut> outSupplier, Class<?>... interfaces) {
-        //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates
-        //! that YAML proxy handlers resolve the builder-supplied output, including interface comments,
-        //! instead of retaining the outer Wire.
-        MarshallableOut output = outSupplier.get();
-        if (output instanceof WireOut) {
-            for (Class<?> anInterface : interfaces) {
-                Comment comment = Jvm.findAnnotation(anInterface, Comment.class);
-                if (comment != null)
-                    ((WireOut) output).writeComment(comment.value());
-            }
-        }
-        return new TextMethodWriterInvocationHandler(interfaces[0], outSupplier);
-    }
-
     @Override
     @NotNull
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
-        //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates that
-        //! YAML builders create handlers from the output selected by the listener lifecycle.
+        //! Retain the selected output supplier so a reflective writer cannot fall back to the outer Wire.
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.YAML,
-                out -> newTextMethodWriterInvocationHandler(out, tClass));
+                out -> new TextMethodWriterInvocationHandler(tClass, out));
         builder.marshallableOut(this);
         return builder;
     }
