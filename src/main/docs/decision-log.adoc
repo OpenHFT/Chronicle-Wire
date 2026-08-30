@@ -97,3 +97,24 @@ Impact & Consequences ::
 Notes/Links ::
 ** `interface-control.adoc`
 ** `functional-requirements.adoc`
+
+=== [FN-003] End-of-Data Is a Hard Wire Seal
+
+Date :: 2026-08-20
+Context ::
+* `enterHeader()` encounters end-of-data only after entering its transient header state.
+* Leaving that state set masks the storage condition on a later attempt with a nested-header failure.
+Decision Statement :: Clear the transient header state and throw `WriteAfterEOFException` without
+changing the marker or write position. Wire provides no operation that replaces end-of-data.
+Alternatives Considered ::
+* Return a sentinel header position. :: A caller could mistake it for a valid position.
+* Replace end-of-data while acquiring a header. :: Ordinary writes would weaken the storage seal.
+Rationale for Decision ::
+* The distinct exception preserves the storage signal while leaving the Wire outside a header.
+* A rolling storage owner can catch the signal at its boundary and select another context.
+Impact & Consequences ::
+* Repeated attempts observe the same seal rather than stale Wire state.
+* Any validated recovery belongs to the coordinating storage layer, outside Wire.
+Notes/Links ::
+** `https://github.com/OpenHFT/Chronicle-Wire/issues/618`
+** `https://github.com/OpenHFT/Chronicle-Wire/pull/619`

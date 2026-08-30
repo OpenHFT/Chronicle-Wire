@@ -258,7 +258,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
      *
      * @param safeLength ensure there is at least this much space
      * @return the position of the header
-     * @throws WriteAfterEOFException if you attempt to append an excerpt after an EOF has been written
+     * @throws WriteAfterEOFException if the selected write position holds an end-of-data marker
      */
     long enterHeader(long safeLength);
 
