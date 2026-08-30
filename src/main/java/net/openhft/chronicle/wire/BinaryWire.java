@@ -243,9 +243,9 @@ public class BinaryWire extends AbstractWire implements Wire {
      */
     @Override
     public void reset() {
-        /// DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt,
-        /// #resetRejectsContextCountOverflowBeforeMutation and WireContextListenerLifecycleTest
-        /// #resetReusesListenerForTheNextOutputContext demonstrate Binary preflight, advance and re-arm.
+        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt,
+        //! #resetRejectsContextCountOverflowBeforeMutation and WireContextListenerLifecycleTest
+        //! #resetReusesListenerForTheNextOutputContext demonstrate Binary preflight, advance and re-arm.
         checkCanAdvanceOutputContext();
         checkCanResetContextListener();
         writeContext.reset();
@@ -320,9 +320,9 @@ public class BinaryWire extends AbstractWire implements Wire {
      */
     @Override
     public void clear() {
-        /// WireContextListenerLifecycleTest#clearRetainsTheCurrentOutputContext and
-        /// #listenerCannotClearTheOuterWire demonstrate that Binary clear neither advances/re-arms
-        /// the context nor interrupts an active callback.
+        //! WireContextListenerLifecycleTest#clearRetainsTheCurrentOutputContext and
+        //! #listenerCannotClearTheOuterWire demonstrate that Binary clear neither advances/re-arms
+        //! the context nor interrupts an active callback.
         checkCanResetContextListener();
         bytes.clear();
         valueIn.resetState();
@@ -346,8 +346,8 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
-        /// WireContextListenerLifecycleTest#allConcreteWiresInvokeListenerBeforeFirstDataDocument
-        /// demonstrates that Binary enters the shared lifecycle before opening application output.
+        //! WireContextListenerLifecycleTest#allConcreteWiresInvokeListenerBeforeFirstDataDocument
+        //! demonstrates that Binary enters the shared lifecycle before opening application output.
         notifyContextListenerIfNeeded(metaData);
         writeContext.start(metaData);
         return writeContext;

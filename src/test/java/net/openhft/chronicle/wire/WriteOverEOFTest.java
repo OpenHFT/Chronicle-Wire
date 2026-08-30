@@ -28,8 +28,8 @@ public class WriteOverEOFTest extends WireTestCommon {
             assertEquals(eofPosition, bytes.writePosition());
             assertEquals(END_OF_DATA, bytes.readVolatileInt(eofPosition));
 
-            /// Repeating the refusal is the observable purpose of clearing insideHeader: EOF remains the
-            /// storage condition, rather than being masked by stale state from the first header attempt.
+            //! Repeating the refusal is the observable purpose of clearing insideHeader: EOF remains the
+            //! storage condition, rather than being masked by stale state from the first header attempt.
             assertThrows(WriteAfterEOFException.class, () -> wire.enterHeader(128));
             assertFalse(((AbstractWire) wire).isInsideHeader());
             assertEquals(eofPosition, bytes.writePosition());
