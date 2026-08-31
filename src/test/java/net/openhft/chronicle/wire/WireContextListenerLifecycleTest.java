@@ -442,6 +442,34 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
     }
 
     @Test
+    public void retainedSuppliedWriterCanStartNextContextAfterReset() {
+        Wire wire = newWire(WireType.BINARY);
+        AtomicInteger calls = new AtomicInteger();
+        AtomicReference<ContextEvents> suppliedWriter = new AtomicReference<>();
+        wire.contextListener(ContextEvents.class, writer -> {
+            suppliedWriter.set(writer);
+            writer.context(new ContextData("schema", calls.incrementAndGet()));
+        });
+
+        ContextEvents applicationWriter = wire.methodWriter(ContextEvents.class);
+        applicationWriter.event(new EventData("before-reset", 1));
+        ContextEvents retainedWriter = suppliedWriter.get();
+        assertEquals(1, calls.get());
+
+        wire.reset();
+
+        //! A supplied writer retained from the previous context must enter the new listener
+        //! lifecycle before it writes application data.
+        retainedWriter.event(new EventData("retained-after-reset", 2));
+        applicationWriter.event(new EventData("ordinary-after-retained", 3));
+
+        assertEquals(2, calls.get());
+        String dump = Wires.fromSizePrefixedBlobs(wire);
+        assertTrue(dump, dump.indexOf("version: 2") < dump.indexOf("name: retained-after-reset"));
+        assertTrue(dump, dump.indexOf("name: retained-after-reset") < dump.indexOf("name: ordinary-after-retained"));
+    }
+
+    @Test
     public void listenerFreeWireCannotBeConfiguredAfterFirstUse() {
         Wire wire = newWire(WireType.BINARY);
         try (DocumentContext dc = wire.writingDocument(false)) {
