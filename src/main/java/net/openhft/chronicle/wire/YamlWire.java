@@ -401,10 +401,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @Override
     @NotNull
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
-        //! Retain the selected output supplier so a reflective writer cannot fall back to the outer Wire.
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.YAML,
-                out -> new TextMethodWriterInvocationHandler(tClass, out));
+                out -> TextMethodWriterInvocationHandler.withInterfaceComment(tClass, out));
         builder.marshallableOut(this);
         return builder;
     }
@@ -417,9 +416,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
-        //! WireContextListenerLifecycleTest#noOpListenerInitialisesLazyTextAndYamlWriteContexts and
-        //! #allConcreteWiresInvokeListenerBeforeFirstDataDocument demonstrate lazy initialisation
-        //! followed by notification before YAML application output.
         if (writeContext == null)
             useBinaryDocuments();
         notifyContextListenerIfNeeded(metaData);
@@ -936,9 +932,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     public void clear() {
-        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt and
-        //! WireContextListenerLifecycleTest#clearRetainsTheCurrentOutputContext demonstrate why
-        //! YAML clear uses resetState without advancing or re-arming the context.
         checkCanResetContextListener();
         resetState();
     }
@@ -1109,9 +1102,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * Resets the state of the YamlWire instance, clearing all buffers and contexts.
      */
     public void reset() {
-        //! DocumentContextLifecycleTest#resetRejectsContextCountOverflowBeforeMutation and
-        //! WireContextListenerLifecycleTest#resetReusesListenerForTheNextOutputContext demonstrate
-        //! preflight before YAML mutation, then one count advance and listener re-arm.
         checkCanAdvanceOutputContext();
         checkCanResetContextListener();
         resetState();
@@ -1120,8 +1110,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     }
 
     private void resetState() {
-        //! WireContextListenerLifecycleTest#clearRetainsTheCurrentOutputContext demonstrates that this
-        //! shared state cleanup is deliberately separate from context identity changes.
         // Reset reading and writing contexts if they exist
         if (readContext != null)
             readContext.reset();
@@ -2523,15 +2511,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     public boolean writingIsComplete() {
-        //! WireContextListenerLifecycleTest#lazyTextualWiresCanNotifyBeforeTheirFirstWriteContextExists
-        //! demonstrates that lifecycle inspection is valid before YAML creates its lazy write context.
         return writeContext == null || !writeContext.isNotComplete();
     }
 
     @Override
     public void rollbackIfNotComplete() {
-        //! WireContextListenerLifecycleTest#directWriteFailuresRollbackAndPoisonAcrossWiresAndEntryPoints
-        //! demonstrates that cleanup is harmless before lazy initialisation and real afterward.
         if (writeContext != null)
             writeContext.rollbackIfNotComplete();
     }
