@@ -51,6 +51,9 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
         }
         switch (state) {
             case READY:
+                //! A retained supplied writer may be the first writer after reset. Consume its
+                //! outer opening so the new listener can open its own supplied context document.
+                consumeSuppliedDocumentOpening();
                 // Publish re-entrancy state before invoking user code; otherwise a listener can
                 // recursively open an ordinary document ahead of its own context record.
                 state = State.IN_PROGRESS;
