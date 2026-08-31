@@ -56,6 +56,9 @@ Notes/Links ::
 ** `operational-requirements.adoc`
 ** `functional-requirements.adoc`
 
+//! WireContextListenerLifecycleTest#allConcreteWiresInvokeListenerBeforeFirstDataDocument and
+//! #listenerFailurePoisonsCurrentContextUntilReset exercise FN-008's ordering and failure policy;
+//! this record prevents Queue and transport implementations from inventing incompatible boundaries.
 === [FN-008] MarshallableOut Context Listener
 
 Date :: 2026-07-23
@@ -98,6 +101,8 @@ Notes/Links ::
 ** `interface-control.adoc`
 ** `functional-requirements.adoc`
 
+//! WriteOverEOFTest#ordinaryWriteRemainsSealedAtEOF demonstrates FN-003's separate state rule:
+//! refusing an EOF write must clear transient header acquisition without changing the durable seal.
 === [FN-003] End-of-Data Is a Hard Wire Seal
 
 Date :: 2026-08-20

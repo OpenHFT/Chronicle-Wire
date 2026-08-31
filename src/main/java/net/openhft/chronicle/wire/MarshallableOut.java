@@ -32,6 +32,8 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      *
      * @param <T> event interface type used by the supplied method writer
      */
+    //! WireContextListenerLifecycleTest#contextListenerWaitsForDataAfterMetadataAndWritesDtoOnce
+    //! demonstrates the callback contract and preset method writer exposed by this API.
     @FunctionalInterface
     interface ContextListener<T> {
         /**
@@ -73,6 +75,8 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * @return the output context count, or a negative value if unavailable
      */
     default int contextCount() {
+        //! DocumentContextLifecycleTest#marshallableOutWithoutContextTrackingReturnsNegativeContextCount
+        //! demonstrates the fail-safe default for outputs with no stable context identity.
         return -1;
     }
 
@@ -143,6 +147,8 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     @NotNull
     default <T> MarshallableOut contextListener(@NotNull Class<T> writerType,
                                                 @NotNull ContextListener<? super T> listener) {
+        //! DocumentContextLifecycleTest#marshallableOutWithoutContextTrackingReturnsNegativeContextCount
+        //! also demonstrates that unsupported outputs reject registration rather than silently ignore it.
         throw new UnsupportedOperationException("Context listeners are not supported by this output");
     }
 
@@ -347,6 +353,8 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     @NotNull
     default <T> MethodWriterBuilder<T> methodWriterBuilder(boolean metaData, @NotNull Class<T> tClass) {
         // Creates a new builder instance with the specified WireType and InvocationHandler
+        //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates
+        //! that reflective writers must bind to the builder-selected output, not this outer instance.
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.BINARY_LIGHT,
                 out -> new BinaryMethodWriterInvocationHandler(tClass, metaData, out));

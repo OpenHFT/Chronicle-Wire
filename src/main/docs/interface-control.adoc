@@ -33,6 +33,9 @@ applications.
 |Maps textual encodings to numeric values without intermediate allocation.
 |Consumers may supply custom implementations so the SPI contract is documented in code comments.
 
+//! WireContextListenerLifecycleTest#suppliedMethodWriterCanBeRetainedAfterNotification and
+//! #listenerFailurePoisonsCurrentContextUntilReset demonstrate the retention and fail-closed API
+//! obligations that consumers need here rather than only in implementation-specific documentation.
 |`net.openhft.chronicle.wire.MarshallableOut.ContextListener`
 |Callback completed at most once per output context. Wire contexts include first use and each
 `Wire.reset()`; Queue and supported transports define their own context boundaries. The supplied
@@ -45,6 +48,9 @@ application data is rejected until reset. Unsupported outputs, including `READ_A
 registration with `UnsupportedOperationException`. Generated and reflective proxy writers use the
 same supplied internal output; the callback cannot clear or reset the outer Wire.
 
+//! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt and
+//! #resetRejectsContextCountOverflowBeforeMutation demonstrate the independently observable count
+//! contract: reset advances it, clear retains it, and overflow fails before output is mutated.
 |`net.openhft.chronicle.wire.DocumentContext#contextCount()`
 |Non-decreasing identifier of the output context containing an open document. DTOs with transient
 state can decide whether an output context has changed. Writable Wire starts at `0` and increments

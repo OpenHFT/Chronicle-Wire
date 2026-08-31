@@ -458,8 +458,6 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
 
         wire.reset();
 
-        //! A supplied writer retained from the previous context must enter the new listener
-        //! lifecycle before it writes application data.
         retainedWriter.event(new EventData("retained-after-reset", 2));
         applicationWriter.event(new EventData("ordinary-after-retained", 3));
 
