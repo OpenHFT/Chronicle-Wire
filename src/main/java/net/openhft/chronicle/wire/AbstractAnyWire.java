@@ -206,6 +206,9 @@ public abstract class AbstractAnyWire extends AbstractWire implements Wire {
         return wireAcquisition.acquireWire().acquireWritingDocument(metaData);
     }
 
+    //! WireContextListenerLifecycleTest#readAnyRejectsContextListeners demonstrates that READ_ANY
+    //! cannot retain listener state: writes use separately acquired wires, so accepting registration
+    //! here would silently omit the context.
     @NotNull
     @Override
     public <T> WireOut contextListener(@NotNull Class<T> writerType,

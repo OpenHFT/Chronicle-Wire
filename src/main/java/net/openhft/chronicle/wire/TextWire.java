@@ -352,8 +352,9 @@ public class TextWire extends YamlWireOut<TextWire> {
     @Override
     @NotNull
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
-        //! Interface @Comment output is intentionally absent: no supported interface uses it in
-        //! this proxy path, and it is unrelated to the EOF-state correction in this integration.
+        //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates
+        //! that forced-proxy Text writers bind to the listener-selected output rather than the outer Wire.
+        //! Interface @Comment output remains absent because no supported interface uses it on this path.
         VanillaMethodWriterBuilder<T> text = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.TEXT,
                 out -> new TextMethodWriterInvocationHandler(tClass, out));
@@ -379,6 +380,9 @@ public class TextWire extends YamlWireOut<TextWire> {
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
+        //! WireContextListenerLifecycleTest#noOpListenerInitialisesLazyTextAndYamlWriteContexts and
+        //! #allConcreteWiresInvokeListenerBeforeFirstDataDocument demonstrate lazy initialisation
+        //! followed by notification before Text application output.
         if (writeContext == null)
             useTextDocuments();
         notifyContextListenerIfNeeded(metaData);
@@ -1035,6 +1039,9 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @Override
     public void clear() {
+        //! WireContextListenerLifecycleTest#clearRetainsTheCurrentOutputContext and
+        //! #listenerCannotClearTheOuterWire demonstrate that Text clear retains context identity and
+        //! cannot interrupt active notification.
         checkCanResetContextListener();
         bytes.clear();
         valueIn.resetState();
@@ -1278,6 +1285,9 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @Override
     public void reset() {
+        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt,
+        //! #resetRejectsContextCountOverflowBeforeMutation and WireContextListenerLifecycleTest
+        //! #resetReusesListenerForTheNextOutputContext demonstrate Text preflight, advance and re-arm.
         checkCanAdvanceOutputContext();
         checkCanResetContextListener();
         writeContext.reset();
@@ -1287,6 +1297,9 @@ public class TextWire extends YamlWireOut<TextWire> {
         valueIn.resetState();
         valueOut.resetState();
         bytes.clear();
+        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt and
+        //! WireContextListenerLifecycleTest#resetReusesListenerForTheNextOutputContext demonstrate
+        //! that Text publishes the new count and re-arms notification only after reset succeeds.
         advanceOutputContext();
         resetContextListener();
     }
@@ -3114,11 +3127,15 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @Override
     public boolean writingIsComplete() {
+        //! WireContextListenerLifecycleTest#lazyTextualWiresCanNotifyBeforeTheirFirstWriteContextExists
+        //! demonstrates that lifecycle inspection is valid before Text creates its lazy write context.
         return writeContext == null || !writeContext.isNotComplete();
     }
 
     @Override
     public void rollbackIfNotComplete() {
+        //! WireContextListenerLifecycleTest#directWriteFailuresRollbackAndPoisonAcrossWiresAndEntryPoints
+        //! demonstrates that cleanup is harmless before lazy initialisation and real afterward.
         if (writeContext != null)
             writeContext.rollbackIfNotComplete();
     }

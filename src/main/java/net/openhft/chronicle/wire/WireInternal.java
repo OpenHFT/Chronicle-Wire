@@ -138,6 +138,9 @@ public enum WireInternal {
      */
     public static long writeData(@NotNull WireOut wireOut, boolean metaData, boolean notComplete,
                                  @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
+        //! WireContextListenerLifecycleTest#wiresWriteDataUsesLifecycleAndClosesRegistrationWindow
+        //! and #directWriteEntryPointsInvokeListenerOnce demonstrate that both low-level helpers and
+        //! public complete/not-complete direct writes share one metadata-aware notification boundary.
         if (wireOut instanceof AbstractWire)
             ((AbstractWire) wireOut).notifyContextListenerIfNeeded(metaData);
         wireOut.getValueOut().resetBetweenDocuments();
@@ -177,6 +180,8 @@ public enum WireInternal {
         } catch (Throwable failure) {
             // A direct write reserves its header before invoking user serialization. Restore the
             // pre-header boundary and poison a successful context lifecycle before propagating.
+            //! WireContextListenerLifecycleTest#directWriteFailuresRollbackAndPoisonAcrossWiresAndEntryPoints
+            //! demonstrates pre-header position restoration and lifecycle poisoning for every direct path.
             bytes.writePosition(writePositionBeforeHeader);
             if (wireOut instanceof AbstractWire)
                 ((AbstractWire) wireOut).contextDocumentRolledBack();

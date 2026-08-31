@@ -40,6 +40,9 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
         started = true;
         // A listener failure poisons the whole output context. Metadata must not bypass that
         // boundary and create a stream whose later application records lack valid context.
+        //! WireContextListenerLifecycleTest#metadataCannotBypassAFailedListener demonstrates why
+        //! failure is rejected before the metadata exemption: otherwise metadata could advance a
+        //! poisoned stream without valid context and obscure the original callback failure.
         if (state == State.FAILED)
             throw new IllegalStateException(
                     "Context listener failed for the current output context", failure);
@@ -51,11 +54,15 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
         }
         switch (state) {
             case READY:
-                //! A retained supplied writer may be the first writer after reset. Consume its
-                //! outer opening so the new listener can open its own supplied context document.
+                //! WireContextListenerLifecycleTest#retainedSuppliedWriterCanStartNextContextAfterReset
+                //! demonstrates that a retained writer may open the next context first; consume its outer
+                //! opening so the newly re-armed listener can open its own supplied context document.
                 consumeSuppliedDocumentOpening();
                 // Publish re-entrancy state before invoking user code; otherwise a listener can
                 // recursively open an ordinary document ahead of its own context record.
+                //! WireContextListenerLifecycleTest#listenerCannotReenterThroughOuterWire demonstrates
+                //! that IN_PROGRESS must be visible before calling user code; publishing it afterward
+                //! admits an outer-Wire document ahead of the required context record.
                 state = State.IN_PROGRESS;
                 listenerRolledBack = false;
                 try {
