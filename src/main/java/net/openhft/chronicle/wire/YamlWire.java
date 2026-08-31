@@ -401,6 +401,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @Override
     @NotNull
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
+        //! Interface @Comment output is intentionally absent: no supported interface uses it in
+        //! this proxy path, and it is unrelated to the EOF-state correction in this integration.
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.YAML,
                 out -> new TextMethodWriterInvocationHandler(tClass, out));
