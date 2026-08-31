@@ -53,16 +53,6 @@ public class TextMethodWriterInvocationHandler extends AbstractMethodWriterInvoc
         this.marshallableOutSupplier = marshallableOutSupplier;
     }
 
-    static TextMethodWriterInvocationHandler withInterfaceComment(
-            Class<?> tClass,
-            @NotNull Supplier<MarshallableOut> marshallableOutSupplier) {
-        final MarshallableOut output = marshallableOutSupplier.get();
-        final Comment comment = Jvm.findAnnotation(tClass, Comment.class);
-        if (comment != null && output instanceof WireOut)
-            ((WireOut) output).writeComment(comment.value());
-        return new TextMethodWriterInvocationHandler(tClass, marshallableOutSupplier);
-    }
-
     /**
      * Handles a direct {@code writingDocument()} call on the proxy before
      * deferring to the superclass for normal method processing.

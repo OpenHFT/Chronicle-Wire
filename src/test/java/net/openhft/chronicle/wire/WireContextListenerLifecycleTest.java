@@ -354,29 +354,6 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
     }
 
     @Test
-    public void textProxyFallbackPreservesInterfaceComments() {
-        assertProxyFallbackPreservesInterfaceComment(WireType.TEXT);
-    }
-
-    @Test
-    public void yamlProxyFallbackPreservesInterfaceComments() {
-        assertProxyFallbackPreservesInterfaceComment(WireType.YAML);
-    }
-
-    private void assertProxyFallbackPreservesInterfaceComment(WireType wireType) {
-        ignoreException("Falling back to proxy method writer");
-        System.setProperty(DISABLE_WRITER_PROXY_CODEGEN, "true");
-        try {
-            final Wire wire = newWire(wireType);
-            wire.methodWriterBuilder(CommentedEvents.class).build().event("value");
-
-            assertTrue(wireType.name(), wire.bytes().toString().contains("# interface comment"));
-        } finally {
-            System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
-        }
-    }
-
-    @Test
     public void clearRetainsTheCurrentOutputContext() {
         for (WireType wireType : WRITABLE_WIRE_TYPES) {
             Wire wire = newWire(wireType);
@@ -652,11 +629,6 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
         void context(ContextData context);
 
         void event(EventData event);
-    }
-
-    @Comment("interface comment")
-    interface CommentedEvents {
-        void event(String value);
     }
 
     interface ChainedContextEvents {
