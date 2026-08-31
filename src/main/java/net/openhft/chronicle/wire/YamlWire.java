@@ -403,7 +403,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.YAML,
-                out -> TextMethodWriterInvocationHandler.withInterfaceComment(tClass, out));
+                out -> new TextMethodWriterInvocationHandler(tClass, out));
         builder.marshallableOut(this);
         return builder;
     }

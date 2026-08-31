@@ -354,7 +354,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
         VanillaMethodWriterBuilder<T> text = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.TEXT,
-                out -> TextMethodWriterInvocationHandler.withInterfaceComment(tClass, out));
+                out -> new TextMethodWriterInvocationHandler(tClass, out));
         text.marshallableOut(this);
         return text;
     }
