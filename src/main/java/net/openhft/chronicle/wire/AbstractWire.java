@@ -65,11 +65,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
     private HeadNumberChecker headNumberChecker;
     private boolean usePadding = DEFAULT_USE_PADDING;
     private boolean generateTuples = GENERATE_TUPLES;
-    //! DocumentContextLifecycleTest#binaryReadWriteAndExhaust and #textUseTextDocumentsLifecycle
-    //! demonstrate that a fresh writable Wire exposes context zero through its documents.
     private int outputContextCount;
-    //! WireContextListenerLifecycleTest#contextListenerWaitsForDataAfterMetadataAndWritesDtoOnce
-    //! demonstrates that a fresh Wire accepts one registration before output starts.
     @NotNull
     private WireContextListenerLifecycle contextListenerLifecycle = NoOpWireContextListenerLifecycle.UNSET;
 
@@ -88,21 +84,15 @@ public abstract class AbstractWire implements Wire, InternalWire {
 
     @Override
     public int contextCount() {
-        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt demonstrates
-        //! that callers observe the live Wire context rather than a constant default.
         return outputContextCount;
     }
 
     protected final void checkCanAdvanceOutputContext() {
-        //! DocumentContextLifecycleTest#resetRejectsContextCountOverflowBeforeMutation demonstrates
-        //! that exhaustion must fail before reset clears bytes or changes lifecycle state.
         if (outputContextCount == Integer.MAX_VALUE)
             throw new IllegalStateException("Output context count exhausted");
     }
 
     protected final void advanceOutputContext() {
-        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt demonstrates that
-        //! reset advances exactly once after the pre-mutation overflow check.
         checkCanAdvanceOutputContext();
         outputContextCount++;
     }
@@ -156,8 +146,6 @@ public abstract class AbstractWire implements Wire, InternalWire {
 
     @Override
     public void clear() {
-        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire demonstrates that clear
-        //! must reject re-entry while listener output is structurally incomplete.
         checkCanResetContextListener();
         bytes.clear();
         headerNumber(Long.MIN_VALUE);
@@ -250,9 +238,6 @@ public abstract class AbstractWire implements Wire, InternalWire {
     @Override
     public <T> WireOut contextListener(@NotNull Class<T> writerType,
                                        @NotNull MarshallableOut.ContextListener<? super T> listener) {
-        //! WireContextListenerLifecycleTest#listenerFreeWireCannotBeConfiguredAfterFirstUse and
-        //! #contextListenerWaitsForDataAfterMetadataAndWritesDtoOnce demonstrate that first output,
-        //! including metadata, closes the registration window.
         WireContextListenerLifecycle lifecycle = contextListenerLifecycle;
         if (lifecycle.started())
             throw new IllegalStateException("Cannot set contextListener after the first output context has started");
@@ -265,8 +250,6 @@ public abstract class AbstractWire implements Wire, InternalWire {
      * metadata document may precede the context records.
      */
     protected final void notifyContextListenerIfNeeded(boolean metaData) {
-        //! WireContextListenerLifecycleTest#listenerFreeWireCannotBeConfiguredAfterFirstUse demonstrates
-        //! why even a listener-free first write records that output has started.
         if (contextListenerLifecycle == NoOpWireContextListenerLifecycle.UNSET) {
             contextListenerLifecycle = NoOpWireContextListenerLifecycle.SET;
         }
@@ -275,22 +258,16 @@ public abstract class AbstractWire implements Wire, InternalWire {
 
     /** Verifies that a reset cannot interrupt a running context callback. */
     protected final void checkCanResetContextListener() {
-        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire demonstrates that all
-        //! reset-like entry points share this active-callback guard.
         contextListenerLifecycle.checkCanResetContext();
     }
 
     /** Prepares a configured context listener for the next output context. */
     protected final void resetContextListener() {
-        //! WireContextListenerLifecycleTest#resetReusesListenerForTheNextOutputContext demonstrates
-        //! that reset re-arms the registration instead of discarding it.
         contextListenerLifecycle.resetContext();
     }
 
     /** Prevents later application output when rollback may have removed its context records. */
     final void contextDocumentRolledBack() {
-        //! WireContextListenerLifecycleTest#applicationSerializationFailurePoisonsSuccessfulContextUntilReset
-        //! demonstrates that rollback after successful context output must poison the current context.
         contextListenerLifecycle.documentRolledBack();
     }
 
@@ -435,8 +412,8 @@ public abstract class AbstractWire implements Wire, InternalWire {
                 if (header != END_OF_DATA)
                     Jvm.warn().on(getClass(), new Exception("Incomplete header found at pos: " + pos + ": " + Integer.toHexString(header) + ", overwriting"));
                 else {
-                    //! WriteOverEOFTest#ordinaryWriteRemainsSealedAtEOF demonstrates that EOF opens no header:
-                    //! clear insideHeader before propagating the seal so a rolling owner can select another context.
+                    // EOF opens no header. Clear only transient acquisition state; the durable
+                    // marker and write position remain unchanged for the storage owner to handle.
                     insideHeader = false;
                     throw new WriteAfterEOFException();
                 }
