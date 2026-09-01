@@ -2532,8 +2532,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     public void rollbackIfNotComplete() {
-        //! WireContextListenerLifecycleTest#directWriteFailuresRollbackAndPoisonAcrossWiresAndEntryPoints
-        //! demonstrates that cleanup is harmless before lazy initialisation and real afterward.
+        //! WireContextListenerLifecycleTest#rollbackBeforeFirstTextOrYamlDocumentIsHarmless and
+        //! #directWriteFailuresRollbackAndPoisonAcrossWiresAndEntryPoints distinguish null-safe
+        //! pre-initialisation cleanup from rollback of a real YAML document.
         if (writeContext != null)
             writeContext.rollbackIfNotComplete();
     }

@@ -93,7 +93,8 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         @NotNull Bytes<?> bytes = wire().bytes();
         if (rollback) {
             //! WireContextListenerLifecycleTest#applicationSerializationFailurePoisonsSuccessfulContextUntilReset
-            //! demonstrates that text rollback notifies the lifecycle before truncating context output.
+            //! requires text rollback to notify the lifecycle whenever truncation can remove
+            //! context output; the test establishes poisoning, not a separately observable call order.
             notifyContextRollback();
             bytes.writePosition(bytes.readPosition());
             return;

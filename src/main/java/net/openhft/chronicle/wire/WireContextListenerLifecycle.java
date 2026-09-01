@@ -15,6 +15,11 @@ import static java.util.Objects.requireNonNull;
  * allocated only when the advanced context-listener feature is configured.</p>
  */
 interface WireContextListenerLifecycle {
+    //! WireContextListenerLifecycleTest#allConcreteWiresInvokeListenerBeforeFirstDataDocument and
+    //! #listenerCannotReenterThroughOuterWire require every writable Wire to share the same
+    //! registration, notification and re-entry states. Keeping those transitions behind this
+    //! internal seam prevents one Wire type from publishing application data under a different
+    //! context lifecycle.
     /**
      * @return whether an output document has already started
      */
@@ -42,6 +47,9 @@ interface WireContextListenerLifecycle {
 
     static <T> WireContextListenerLifecycle active(@NotNull Class<T> writerType,
                                                    @NotNull MarshallableOut.ContextListener<? super T> listener) {
+        //! WireContextListenerLifecycleTest#listenerFailurePoisonsCurrentContextUntilReset requires
+        //! configured outputs to receive private mutable failure state; sharing it would poison or
+        //! suppress notifications on an unrelated Wire.
         return new ActiveWireContextListenerLifecycle(requireNonNull(writerType), requireNonNull(listener));
     }
 }

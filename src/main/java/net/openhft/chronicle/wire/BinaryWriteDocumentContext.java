@@ -89,7 +89,8 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         @NotNull Bytes<?> bytes = wire().bytes();
         if (rollback) {
             //! WireContextListenerLifecycleTest#applicationSerializationFailurePoisonsSuccessfulContextUntilReset
-            //! demonstrates that Binary rollback notifies the lifecycle before truncating context bytes.
+            //! requires Binary rollback to notify the lifecycle whenever truncation can remove
+            //! context bytes; the test establishes poisoning, not a separately observable call order.
             notifyContextRollback();
             bytes.zeroOut(bytes.readPosition(), bytes.writePosition());
             bytes.writePosition(bytes.readPosition());

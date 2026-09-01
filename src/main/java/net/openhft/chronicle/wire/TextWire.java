@@ -3134,8 +3134,9 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @Override
     public void rollbackIfNotComplete() {
-        //! WireContextListenerLifecycleTest#directWriteFailuresRollbackAndPoisonAcrossWiresAndEntryPoints
-        //! demonstrates that cleanup is harmless before lazy initialisation and real afterward.
+        //! WireContextListenerLifecycleTest#rollbackBeforeFirstTextOrYamlDocumentIsHarmless and
+        //! #directWriteFailuresRollbackAndPoisonAcrossWiresAndEntryPoints distinguish null-safe
+        //! pre-initialisation cleanup from rollback of a real Text document.
         if (writeContext != null)
             writeContext.rollbackIfNotComplete();
     }

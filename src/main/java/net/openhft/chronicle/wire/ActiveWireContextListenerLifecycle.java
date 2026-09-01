@@ -67,15 +67,25 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
                 listenerRolledBack = false;
                 try {
                     notifyListener(wire);
+                    //! WireContextListenerLifecycleTest#listenerRollbackFailsClosedAcrossWires
+                    //! requires an explicit rollback requested by callback code to fail the
+                    //! notification even after rollback has closed the supplied document.
                     if (listenerRolledBack)
                         throw new IllegalStateException(
                                 "Context listener rolled back its output document");
+                    //! WireContextListenerLifecycleTest#incompleteChainedListenerOutputFailsClosedAcrossWires
+                    //! requires the callback to finish every supplied chain before application
+                    //! data can follow it; otherwise the next write can become part of context.
                     if (!wire.writingIsComplete()) {
                         throw new IllegalStateException(
                                 "Context listener returned with an incomplete chained document");
                     }
                     state = State.SUCCEEDED;
                 } catch (Throwable throwable) {
+                    //! WireContextListenerLifecycleTest#listenerFailurePoisonsCurrentContextUntilReset
+                    //! requires the callback failure to remain primary while any incomplete
+                    //! supplied document is rolled back. Retrying after partial context output can
+                    //! duplicate records, so cleanup failure is suppressed and the state is FAILED.
                     try {
                         wire.rollbackIfNotComplete();
                     } catch (Throwable rollbackFailure) {
@@ -109,6 +119,8 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
 
     @Override
     public void resetContext() {
+        //! WireContextListenerLifecycleTest#resetReusesListenerForTheNextOutputContext requires a
+        //! completed or failed context to re-arm only when the owning Wire completes its reset.
         state = State.READY;
         listenerRolledBack = false;
         failure = null;
@@ -117,11 +129,17 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
     @Override
     public void documentRolledBack() {
         if (state == State.IN_PROGRESS) {
+            //! WireContextListenerLifecycleTest#listenerRollbackFailsClosedAcrossWires requires
+            //! callback rollback intent to survive document cleanup until beforeDocument can
+            //! reject the notification.
             listenerRolledBack = true;
             return;
         }
         if (state != State.SUCCEEDED)
             return;
+        //! WireContextListenerLifecycleTest#applicationSerializationFailurePoisonsSuccessfulContextUntilReset
+        //! requires rollback of a later application document to invalidate the successful
+        //! lifecycle: truncation may also have removed the context records it depended on.
         failure = new IllegalStateException(
                 "Application rollback may have removed the context records for this output context");
         state = State.FAILED;
@@ -165,6 +183,10 @@ final class ActiveWireContextListenerLifecycle implements WireContextListenerLif
         }
 
         private DocumentContext openDocument(boolean metaData, boolean acquire) {
+            //! WireContextListenerLifecycleTest#listenerCannotReenterThroughOuterWire and
+            //! #incompleteChainedListenerOutputFailsClosedAcrossWires require exactly one supplied
+            //! opening token. A nested acquisition before the outer holder is established can
+            //! recurse into notification or bind competing context documents.
             if (suppliedDocumentOpening)
                 throw new IllegalStateException("A supplied context document is already being opened");
             suppliedDocumentOpening = true;
