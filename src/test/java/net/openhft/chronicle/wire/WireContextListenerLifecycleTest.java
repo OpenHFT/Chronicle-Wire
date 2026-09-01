@@ -709,16 +709,19 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
 
     @Test
     public void listenerCannotClearTheOuterWire() {
-        Wire wire = newWire(WireType.BINARY);
-        wire.contextListener(ContextEvents.class, ignored -> wire.clear());
+        for (WireType wireType : WRITABLE_WIRE_TYPES) {
+            Wire wire = newWire(wireType);
+            wire.contextListener(ContextEvents.class, ignored -> wire.clear());
 
-        ContextEvents writer = wire.methodWriter(ContextEvents.class);
-        IllegalStateException failure = assertThrows(IllegalStateException.class,
-                () -> writer.event(new EventData("one", 1)));
+            ContextEvents writer = wire.methodWriter(ContextEvents.class);
+            IllegalStateException failure = assertThrows(wireType.name(), IllegalStateException.class,
+                    () -> writer.event(new EventData("one", 1)));
 
-        assertEquals("Cannot reset a wire while its context listener is running", failure.getMessage());
-        assertThrows(IllegalStateException.class,
-                () -> writer.event(new EventData("two", 2)));
+            assertEquals(wireType.name(),
+                    "Cannot reset a wire while its context listener is running", failure.getMessage());
+            assertThrows(wireType.name(), IllegalStateException.class,
+                    () -> writer.event(new EventData("two", 2)));
+        }
     }
 
     @Test
