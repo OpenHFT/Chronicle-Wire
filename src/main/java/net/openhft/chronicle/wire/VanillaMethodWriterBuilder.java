@@ -117,8 +117,9 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         //  Maybe have an option to always use current thread class loader?
         this.classLoader = clsLdr != null ? clsLdr : getClass().getClassLoader();
         this.methodWriterClassNameGenerator = new MethodWriterClassNameGenerator();
-        //! MethodWriterTest#testDefault demonstrates that legacy supplier-based builders retain their
-        //! original handler path; null selects that unchanged path in proxyHandlerSupplier().
+        //! WireContextListenerLifecycleTest#legacySupplierConstructorBuildsProxyWriter requires the
+        //! public supplier constructor to retain its original handler path; null distinguishes it
+        //! from listener-aware factories that must be rebound to a frozen output.
         this.handlerFactory = null;
         this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(handlerSupplier);
     }

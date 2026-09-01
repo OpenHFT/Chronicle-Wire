@@ -181,7 +181,8 @@ public enum WireInternal {
             // A direct write reserves its header before invoking user serialization. Restore the
             // pre-header boundary and poison a successful context lifecycle before propagating.
             //! WireContextListenerLifecycleTest#directWriteFailuresRollbackAndPoisonAcrossWiresAndEntryPoints
-            //! demonstrates pre-header position restoration and lifecycle poisoning for every direct path.
+            //! requires exact restoration to the position captured after context notification and
+            //! before payload-header reservation, then lifecycle poisoning, for every direct path.
             bytes.writePosition(writePositionBeforeHeader);
             if (wireOut instanceof AbstractWire)
                 ((AbstractWire) wireOut).contextDocumentRolledBack();

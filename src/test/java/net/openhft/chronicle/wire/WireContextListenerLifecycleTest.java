@@ -4,6 +4,8 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.MethodWriterInvocationHandler;
+import net.openhft.chronicle.core.io.Closeable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,9 +14,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.openhft.chronicle.wire.VanillaMethodWriterBuilder.DISABLE_WRITER_PROXY_CODEGEN;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.aryEq;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -304,6 +313,63 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
     }
 
     @Test
+    public void copyWithPreservesWriterOptions() {
+        MethodWriterInvocationHandler replacement = createMock(MethodWriterInvocationHandler.class);
+        Closeable closeable = createMock(Closeable.class);
+        replacement.genericEvent("event");
+        replacement.onClose(closeable);
+        replacement.recordHistory(true);
+        replacement.useMethodIds(false);
+        replay(replacement, closeable);
+
+        MethodWriterInvocationHandlerSupplier original =
+                new MethodWriterInvocationHandlerSupplier(() -> {
+                    throw new AssertionError("the original output must not be resolved");
+                });
+        original.recordHistory(true);
+        original.onClose(closeable);
+        original.disableThreadSafe(true);
+        original.genericEvent("event");
+        original.useMethodIds(false);
+
+        AtomicInteger replacementCalls = new AtomicInteger();
+        MethodWriterInvocationHandlerSupplier copy = original.copyWith(() -> {
+            replacementCalls.incrementAndGet();
+            return replacement;
+        });
+
+        assertSame(replacement, copy.get());
+        assertSame(replacement, copy.get());
+        assertEquals(1, replacementCalls.get());
+        verify(replacement, closeable);
+    }
+
+    @Test
+    public void legacySupplierConstructorBuildsProxyWriter() throws Throwable {
+        ignoreException("Falling back to proxy method writer");
+        System.setProperty(DISABLE_WRITER_PROXY_CODEGEN, "true");
+        try {
+            MethodWriterInvocationHandler handler = createMock(MethodWriterInvocationHandler.class);
+            handler.genericEvent(null);
+            handler.onClose(null);
+            handler.recordHistory(false);
+            handler.useMethodIds(true);
+            expect(handler.invoke(anyObject(), anyObject(Method.class), aryEq(new Object[]{"value"})))
+                    .andReturn(null);
+            replay(handler);
+
+            VanillaMethodWriterBuilder<LegacyEvent> builder = new VanillaMethodWriterBuilder<>(
+                    LegacyEvent.class, WireType.TEXT, () -> handler);
+            builder.marshallableOut(newWire(WireType.TEXT));
+            builder.build().event("value");
+
+            verify(handler);
+        } finally {
+            System.clearProperty(DISABLE_WRITER_PROXY_CODEGEN);
+        }
+    }
+
+    @Test
     public void allConcreteWiresInvokeListenerBeforeFirstDataDocument() {
         for (WireType wireType : WRITABLE_WIRE_TYPES) {
             Wire wire = newWire(wireType);
@@ -535,14 +601,32 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
     }
 
     @Test
+    public void rollbackBeforeFirstTextOrYamlDocumentIsHarmless() {
+        final Bytes<?> textBytes = Bytes.allocateElasticOnHeap();
+        final Bytes<?> yamlBytes = Bytes.allocateElasticOnHeap();
+        allocatedBytes.add(textBytes);
+        allocatedBytes.add(yamlBytes);
+
+        for (Wire wire : new Wire[]{new TextWire(textBytes), new YamlWire(yamlBytes)}) {
+            wire.rollbackIfNotComplete();
+
+            assertTrue(wire.getClass().getSimpleName(), wire.writingIsComplete());
+            assertEquals(wire.getClass().getSimpleName(), 0, wire.bytes().writePosition());
+        }
+    }
+
+    @Test
     public void directWriteFailuresRollbackAndPoisonAcrossWiresAndEntryPoints() {
         for (WireType wireType : WRITABLE_WIRE_TYPES) {
             for (int entryPoint = 0; entryPoint < 3; entryPoint++) {
                 final int directEntryPoint = entryPoint;
                 Wire wire = newWire(wireType);
                 AtomicInteger calls = new AtomicInteger();
-                wire.contextListener(ContextEvents.class,
-                        writer -> writer.context(new ContextData("schema", calls.incrementAndGet())));
+                AtomicLong contextBoundary = new AtomicLong(-1);
+                wire.contextListener(ContextEvents.class, writer -> {
+                    writer.context(new ContextData("schema", calls.incrementAndGet()));
+                    contextBoundary.set(wire.bytes().writePosition());
+                });
 
                 final IllegalStateException payloadFailure = new IllegalStateException(
                         wireType + " entryPoint=" + entryPoint);
@@ -556,8 +640,10 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
                 assertEquals(payloadFailure, assertThrows(IllegalStateException.class,
                         () -> writeDirectly(wire, directEntryPoint, failingWriter)));
                 assertEquals(wireType + " entryPoint=" + entryPoint, 1, calls.get());
+                assertEquals(wireType + " entryPoint=" + entryPoint,
+                        contextBoundary.get(), wire.bytes().writePosition());
                 assertTrue(wireType + " entryPoint=" + entryPoint,
-                        wire.bytes().writePosition() < payloadPosition[0]);
+                        contextBoundary.get() < payloadPosition[0]);
 
                 final long positionAfterRollback = wire.bytes().writePosition();
                 final IllegalStateException poisoned = assertThrows(IllegalStateException.class,
@@ -655,6 +741,10 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
         void context(ContextData context);
 
         void event(EventData event);
+    }
+
+    interface LegacyEvent {
+        void event(String value);
     }
 
     interface ChainedContextEvents {
