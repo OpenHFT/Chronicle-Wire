@@ -155,8 +155,9 @@ public abstract class AbstractWire implements Wire, InternalWire {
 
     @Override
     public void clear() {
-        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire demonstrates that clear
-        //! must reject re-entry while listener output is structurally incomplete.
+        //! No in-repository concrete Wire inherits this clear implementation; each has a focused
+        //! listenerCannotClearTheOuterWire discriminator. Keep the guard here defensively so an
+        //! external AbstractWire implementation cannot clear structurally incomplete listener output.
         checkCanResetContextListener();
         bytes.clear();
         headerNumber(Long.MIN_VALUE);
@@ -274,8 +275,8 @@ public abstract class AbstractWire implements Wire, InternalWire {
 
     /** Verifies that a reset cannot interrupt a running context callback. */
     protected final void checkCanResetContextListener() {
-        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire demonstrates that all
-        //! reset-like entry points share this active-callback guard.
+        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire exercises every writable
+        //! concrete Wire and requires their reset-like entry points to share this active-callback guard.
         contextListenerLifecycle.checkCanResetContext();
     }
 
