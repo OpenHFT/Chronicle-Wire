@@ -54,9 +54,14 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
 
     MethodWriterInvocationHandlerSupplier copyWith(
             Supplier<MethodWriterInvocationHandler> replacementSupplier) {
-        //! WireContextListenerLifecycleTest#copyWithPreservesWriterOptions requires rebinding to
-        //! replace only the output factory: history, close handling, thread-safety, generic-event
-        //! naming and method-id policy must remain identical on the frozen supplier.
+        //! WireContextListenerLifecycleTest#proxyWriterFreezesItsOutputAtBuildTime and
+        //! #proxyFallbackUsesTheSuppliedListenerOutput require a fresh wrapper when a builder is
+        //! rebound: the original delegate follows the builder's mutable output supplier and its
+        //! caches may already hold handlers for another output. Reusing it could therefore reroute
+        //! a built proxy, or make its destination depend on the first-use thread. The
+        //! #copyWithPreservesWriterOptions test demonstrates that only the delegate and caches are
+        //! replaced; history, close handling, thread-safety, generic-event naming and method-id
+        //! policy remain unchanged.
         final MethodWriterInvocationHandlerSupplier copy =
                 new MethodWriterInvocationHandlerSupplier(replacementSupplier);
         copy.recordHistory = recordHistory;

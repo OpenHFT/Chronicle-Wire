@@ -243,17 +243,22 @@ public class BinaryWire extends AbstractWire implements Wire {
      */
     @Override
     public void reset() {
-        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt,
-        //! #resetRejectsContextCountOverflowBeforeMutation and WireContextListenerLifecycleTest
-        //! #resetReusesListenerForTheNextOutputContext demonstrate Binary preflight, advance and re-arm.
+        //! DocumentContextLifecycleTest#resetRejectsContextCountOverflowBeforeMutation demonstrates
+        //! that Binary checks count exhaustion before mutating its state.
         checkCanAdvanceOutputContext();
+        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire establishes that a
+        //! running callback cannot be interrupted by reset-like operations.
         checkCanResetContextListener();
         writeContext.reset();
         readContext.reset();
         valueIn.resetState();
         valueOut.resetState();
         bytes.clear();
+        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt demonstrates
+        //! that Binary publishes the next context only after its state reset succeeds.
         advanceOutputContext();
+        //! WireContextListenerLifecycleTest#resetReusesListenerForTheNextOutputContext demonstrates
+        //! that Binary re-arms notification only after its state reset succeeds.
         resetContextListener();
     }
 
@@ -320,9 +325,8 @@ public class BinaryWire extends AbstractWire implements Wire {
      */
     @Override
     public void clear() {
-        //! WireContextListenerLifecycleTest#clearRetainsTheCurrentOutputContext and
-        //! #listenerCannotClearTheOuterWire demonstrate that Binary clear neither advances/re-arms
-        //! the context nor interrupts an active callback.
+        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire demonstrates that
+        //! Binary clear rejects an active callback before mutating state.
         checkCanResetContextListener();
         bytes.clear();
         valueIn.resetState();
