@@ -71,15 +71,16 @@ public interface DocumentContext extends Closeable, SourceContext {
 
     /**
      * Returns the associated output's {@link MarshallableOut#contextCount() context count}, or
-     * {@code -1} when this context has no Wire. Read it from an open document on its writing thread.
+     * {@link MarshallableOut#UNSET_CONTEXT} when this context has no Wire. Read it from an open
+     * document on its writing thread.
      *
-     * @return the output context count, or {@code -1} if unavailable
+     * @return the output context count, or {@link MarshallableOut#UNSET_CONTEXT} if unavailable
      */
     default int contextCount() {
         //! DocumentContextLifecycleTest#binaryReadWriteAndExhaust and #textUseTextDocumentsLifecycle
         //! demonstrate delegation to the associated Wire, while NOOP covers the unavailable path.
         Wire wire = wire();
-        return wire == null ? -1 : wire.contextCount();
+        return wire == null ? MarshallableOut.UNSET_CONTEXT : wire.contextCount();
     }
 
     /**

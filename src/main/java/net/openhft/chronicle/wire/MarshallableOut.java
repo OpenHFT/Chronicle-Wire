@@ -26,6 +26,13 @@ import java.util.stream.Stream;
 @DontChain
 public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteNotifier {
 
+    //! No runtime test can distinguish this public symbol from the same literal. It exists so Queue,
+    //! wrappers and other outputs share one unavailable-context representation while zero remains valid.
+    /**
+     * Indicates that an output does not expose a current context.
+     */
+    int UNSET_CONTEXT = -1;
+
     /**
      * Receives a callback when a {@link MarshallableOut} starts a new output context.
      * The meaning of a context is implementation specific.
@@ -59,25 +66,25 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * contexts are non-decreasing. Context need only be written again when this value increases;
      * an unchanged value means that the previously written context still applies.
      * <p>
-     * Callers initialise the last written count to {@code -1} and compare values directly. Zero is
-     * a valid first context, for example Queue cycle zero. A returned {@code -1} is not an increase
-     * and needs no special handling.
+     * Callers initialise the last written count to {@link #UNSET_CONTEXT} and compare values directly.
+     * Zero is a valid first context, for example Queue cycle zero. A returned
+     * {@link #UNSET_CONTEXT} is not an increase and needs no special handling.
      * <p>
-     * The default is {@code -1}, indicating that the implementation does not expose an output
-     * context. Writable Wire implementations start at {@code 0}; {@link Wire#reset()} advances the
-     * count while {@link Wire#clear()} leaves it unchanged. Queue implementations return the roll
+     * The default is {@link #UNSET_CONTEXT}, indicating that the implementation does not expose an
+     * output context. Writable Wire implementations start at {@code 0}; {@link Wire#reset()} advances
+     * the count while {@link Wire#clear()} leaves it unchanged. Queue implementations return the roll
      * cycle, and connection-based outputs should return a one-based connection count.
      * Implementations may throw {@link IllegalStateException} when the output context is not yet
      * known, such as when using double buffering. Implementations whose count cannot advance without
      * overflowing must throw {@link IllegalStateException} before opening the next output context
      * rather than wrap into the negative range.
      *
-     * @return the output context count, or a negative value if unavailable
+     * @return the output context count, or {@link #UNSET_CONTEXT} if unavailable
      */
     default int contextCount() {
-        //! DocumentContextLifecycleTest#marshallableOutWithoutContextTrackingReturnsNegativeContextCount
+        //! DocumentContextLifecycleTest#marshallableOutWithoutContextTrackingReturnsUnsetContext
         //! demonstrates the fail-safe default for outputs with no stable context identity.
-        return -1;
+        return UNSET_CONTEXT;
     }
 
     /**
