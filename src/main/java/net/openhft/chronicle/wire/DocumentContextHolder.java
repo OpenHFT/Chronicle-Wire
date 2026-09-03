@@ -42,7 +42,7 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
         //! DocumentContextLifecycleTest#holderAndWrapperDelegateContextCount demonstrates both states:
         //! delegate while open and return the unavailable sentinel instead of dereferencing null after close.
         DocumentContext dc = this.dc;
-        return dc == null ? -1 : dc.contextCount();
+        return dc == null ? MarshallableOut.UNSET_CONTEXT : dc.contextCount();
     }
 
     /**
