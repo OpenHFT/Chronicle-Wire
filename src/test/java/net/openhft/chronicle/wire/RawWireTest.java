@@ -9,7 +9,6 @@ import net.openhft.chronicle.bytes.internal.NoBytesStore;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.*;
@@ -530,8 +529,6 @@ public class RawWireTest extends WireTestCommon {
     }
 
     // Test case for writing and reading byte arrays using a Wire
-    // Currently, this test is ignored due to an UnsupportedOperationException
-    @Ignore("todo fix :currently using NoBytesStore so will fail with UnsupportedOperationException")
     @SuppressWarnings("rawtypes")
     @Test
     public void testBytes() {

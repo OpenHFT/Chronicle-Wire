@@ -11,7 +11,6 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -846,7 +845,6 @@ public class BinaryWire2Test extends WireTestCommon {
         wire.bytes().releaseLast();  // Release the resources
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void testUnicodeReadAndWriteHex() {
         bytes.releaseLast();
@@ -865,9 +863,7 @@ public class BinaryWire2Test extends WireTestCommon {
     }
 
     // Test reading and writing Unicode characters on heap
-    // Note: This test has been marked to be ignored due to some issues
     @Test
-    @Ignore("TODO FIX")
     public void testUnicodeReadAndWriteOnHeap() {
         bytes.releaseLast();
         bytes = allocateElasticOnHeap();  // Allocate memory for the bytes on the heap

@@ -5,7 +5,6 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -22,7 +21,6 @@ import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(value = Parameterized.class)
-@Ignore("TODO FIX")
 public class TextCompatibilityTest extends WireTestCommon {
 
     // File name for the current test run.
@@ -51,7 +49,7 @@ public class TextCompatibilityTest extends WireTestCommon {
         if (new File("Chronicle-Wire").isDirectory())
             dir = "Chronicle-Wire/" + dir;
         Files.find(Paths.get(dir), 4, (p, a) -> p.toString().endsWith(".yaml"))
-                .filter(p -> !p.endsWith(".out.yaml"))
+                .filter(p -> !p.toString().endsWith(".out.yaml"))
                 .forEach(p -> addTest(list, p.toString()));
 
         return list;
@@ -72,23 +70,27 @@ public class TextCompatibilityTest extends WireTestCommon {
         String expected = null;
         try {
             Bytes<?> bytes = BytesUtil.readFile(filename);
-            if (bytes.readRemaining() > 50)
-                return;
-            expected = filename.equals(expectedFilename) ? bytes.toString() : BytesUtil.readFile(filename).toString();
             try {
+                if (bytes.readRemaining() > 50)
+                    return;
+                expected = filename.equals(expectedFilename) ? bytes.toString() : readText(expectedFilename);
                 Object o = new YamlWire(bytes)
                         .getValueIn()
                         .object();
                 Bytes<?> out = Bytes.allocateElasticOnHeap(256);
-                String s = WireType.TEXT.apply(out).getValueOut().object(o).toString();
-                if (s.trim().equals(expected.trim()))
-                    return;
-                if (print) {
-                   // System.out.println("Comparison failure in " + filename);
-                   // System.out.println("Expected:\n" + expected);
-                   // System.out.println("Actual:\n" + s);
-                } else {
-                    assertEquals(expected, s);
+                try {
+                    String s = WireType.TEXT.apply(out).getValueOut().object(o).toString();
+                    if (s.trim().equals(expected.trim()))
+                        return;
+                    if (print) {
+                       // System.out.println("Comparison failure in " + filename);
+                       // System.out.println("Expected:\n" + expected);
+                       // System.out.println("Actual:\n" + s);
+                    } else {
+                        assertEquals(expected, s);
+                    }
+                } finally {
+                    out.releaseLast();
                 }
             } finally {
                 bytes.releaseLast();
@@ -97,6 +99,15 @@ public class TextCompatibilityTest extends WireTestCommon {
         } catch (Exception e) {
            // System.out.println("Expected:\n" + expected);
             throw new AssertionError(filename, e);
+        }
+    }
+
+    private static String readText(String filename) throws IOException {
+        Bytes<?> bytes = BytesUtil.readFile(filename);
+        try {
+            return bytes.toString();
+        } finally {
+            bytes.releaseLast();
         }
     }
 

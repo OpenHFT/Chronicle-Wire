@@ -88,6 +88,16 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         defaultValueIn = new DefaultValueIn(this);
     }
 
+    @NotNull
+    @Override
+    protected Quotes needsQuotes(@NotNull CharSequence cs) {
+        //! JSON222Test#testJSONAsYamlWire demonstrates that a dot-prefixed numeric-looking String
+        //! must be quoted or YamlWire reads it back as a Double and changes its type.
+        if (cs.length() > 1 && cs.charAt(0) == '.' && cs.charAt(1) >= '0' && cs.charAt(1) <= '9')
+            return Quotes.DOUBLE;
+        return super.needsQuotes(cs);
+    }
+
     /**
      * Constructor that initializes the YamlWire with provided bytes.
      * Defaults to not using 8-bit.
@@ -430,7 +440,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     public DocumentContext acquireWritingDocument(boolean metaData) {
-        if (writeContext != null && writeContext.isOpen())
+        //! WriteDocumentContextTest#nestedYaml and #chainedYaml demonstrate that YAML must
+        //! distinguish a nested acquisition from continuation of an explicitly chained document.
+        if (writeContext != null && writeContext.isOpen() && writeContext.chainedElement())
             return writeContext;
         return writingDocument(metaData);
     }

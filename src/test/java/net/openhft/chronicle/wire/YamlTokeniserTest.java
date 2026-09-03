@@ -1064,7 +1064,6 @@ public class YamlTokeniserTest extends WireTestCommon {
                 doTest("yaml/spec/2_24GlobalTags.yaml")); // Invoke the tokenization utility and verify the output
     }
 
-    @Ignore("TODO FIX")
     // Test case for tokenizing a YAML file representing an unordered set
     @Test
     public void eg2_25() {

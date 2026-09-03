@@ -1715,9 +1715,7 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // This test is for writing a Map<String, String> to the Wire and reading it back.
-    // Currently, it's marked as ignored using the @Ignore annotation.
     @Test
-    @Ignore
     public void testStringMap() {
         // Create a wire instance
         @NotNull Wire wire = createWire();
