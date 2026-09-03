@@ -4,7 +4,6 @@
 package net.openhft.chronicle.wire.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.wire.JSONWire;
 import net.openhft.chronicle.wire.Wire;
@@ -17,7 +16,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -69,11 +72,7 @@ public class JSON222Test extends WireTestCommon {
 
     private void testJSON(WireType wireType) throws IOException {
         // Read the file content into a byte array
-        int len = Maths.toUInt31(file.length());
-        @NotNull byte[] bytes = new byte[len];
-        try (@NotNull InputStream in = new FileInputStream(file)) {
-            in.read(bytes);
-        }
+        @NotNull byte[] bytes = Files.readAllBytes(file.toPath());
         // System.out.println(file + " " + new String(bytes, "UTF-8"));
         // Convert byte array to Bytes object for further processing
         Bytes<?> b = Bytes.wrapForRead(bytes);
@@ -88,8 +87,15 @@ public class JSON222Test extends WireTestCommon {
             @NotNull List<Object> list = new ArrayList<>();
             do {
                 // Read an object from the wire
-                @Nullable final Object object = wire.getValueIn()
-                        .object();
+                @Nullable final Object object;
+                try {
+                    object = wire.getValueIn()
+                            .object();
+                } catch (Exception e) {
+                    if (fail)
+                        return;
+                    throw new AssertionError(e);
+                }
 
                 // Write the read object into another wire for further comparison
                 @NotNull Wire out3 = wireType.apply(bytes3);
@@ -122,11 +128,7 @@ public class JSON222Test extends WireTestCommon {
 
                 if (!file2.exists())
                     throw new AssertionError("Expected to fail\n" + bytes2);
-                @NotNull byte[] bytes4 = new byte[(int) file2.length()];
-                try (@NotNull InputStream in = new FileInputStream(file2)) {
-                    in.read(bytes4);
-                }
-                String expected = new String(bytes4, "UTF-8");
+                String expected = new String(Files.readAllBytes(file2.toPath()), StandardCharsets.UTF_8);
                 if (expected.contains("\r\n"))
                     expected = expected.replaceAll("\r\n", "\n");
                 String actual = bytes2.toString();
@@ -136,9 +138,6 @@ public class JSON222Test extends WireTestCommon {
             }
             // if (fail)
             // throw new AssertionError("Expected to fail, was " + list);
-        } catch (Exception e) {
-            if (!fail)
-                throw new AssertionError(e);
         } finally {
             // Release resources to avoid memory leaks
             bytes2.releaseLast();

@@ -12,10 +12,12 @@ import org.junit.runners.Parameterized;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
@@ -37,8 +39,9 @@ public class TextCompatibilityTest extends WireTestCommon {
     // Main method that demonstrates how to find YAML files in a directory and run the test on them.
     public static void main(String[] args) throws IOException {
         String base = "/home/peter/git/snakeyaml/src/test/resources";
-        Files.find(Paths.get(base), 4, (p, a) -> p.toString().endsWith(".yaml"))
-                .forEach(p -> runTest(p.toString(), p.toString(), true));
+        try (Stream<Path> paths = Files.find(Paths.get(base), 4, (p, a) -> p.toString().endsWith(".yaml"))) {
+            paths.forEach(p -> runTest(p.toString(), p.toString(), true));
+        }
     }
 
     // Provide the combinations of files and their expected content for the tests.
@@ -48,9 +51,10 @@ public class TextCompatibilityTest extends WireTestCommon {
         String dir = "src/test/resources/compat";
         if (new File("Chronicle-Wire").isDirectory())
             dir = "Chronicle-Wire/" + dir;
-        Files.find(Paths.get(dir), 4, (p, a) -> p.toString().endsWith(".yaml"))
-                .filter(p -> !p.toString().endsWith(".out.yaml"))
-                .forEach(p -> addTest(list, p.toString()));
+        try (Stream<Path> paths = Files.find(Paths.get(dir), 4, (p, a) -> p.toString().endsWith(".yaml"))) {
+            paths.filter(p -> !p.toString().endsWith(".out.yaml"))
+                    .forEach(p -> addTest(list, p.toString()));
+        }
 
         return list;
     }

@@ -542,14 +542,18 @@ public class RawWireTest extends WireTestCommon {
                 .write().bytes(Bytes.wrapForRead("Hello".getBytes(ISO_8859_1)))
                 .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
                 .write().bytes(allBytes);
-       // System.out.println(bytes.toDebugString());
+        // System.out.println(bytes.toDebugString());
         @NotNull NativeBytes allBytes2 = nativeBytes();
-        // Reading and validating byte arrays from the wire
-        wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
-                .read().bytes(b -> assertEquals("Hello", b.toString()))
-                .read().bytes(b -> assertEquals("quotable, text", b.toString()))
-                .read().bytes(allBytes2);
-        assertEquals(Bytes.wrapForRead(allBytes), allBytes2);
+        try {
+            // Reading and validating byte arrays from the wire
+            wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
+                    .read().bytes(b -> assertEquals("Hello", b.toString()))
+                    .read().bytes(b -> assertEquals("quotable, text", b.toString()))
+                    .read().bytes(allBytes2);
+            assertEquals(Bytes.wrapForRead(allBytes), allBytes2);
+        } finally {
+            allBytes2.releaseLast();
+        }
     }
 
     // Test case for writing and reading custom Marshallable objects using a Wire
