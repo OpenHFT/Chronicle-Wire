@@ -163,8 +163,6 @@ public enum WireInternal {
                 wireOut.addPadding(bytesToSkip);
                 position1 = bytes.writePosition();
             }
-//            if (position1 < position)
-//                System.out.println("Message truncated from " + position + " to " + position1);
             int length;
             if (bytes instanceof HexDumpBytes) {
                 // Todo: this looks suspicious. Why cast to int individually rather than use long arithmetics?
