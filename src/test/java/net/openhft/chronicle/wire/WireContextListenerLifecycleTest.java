@@ -258,6 +258,18 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
                 if (complete) {
                     dataWriter.event(new EventData("data", 1));
                     assertTrue(wireType.name(), wire.writingIsComplete());
+
+                    if (!proxy) {
+                        AtomicReference<String> contextName = new AtomicReference<>();
+                        AtomicInteger contextVersion = new AtomicInteger(Integer.MIN_VALUE);
+                        ChainedContextEvents contextReader = name -> {
+                            contextName.set(name);
+                            return contextVersion::set;
+                        };
+                        assertTrue(wireType.name(), wire.methodReader(contextReader).readOne());
+                        assertEquals(wireType.name(), "schema", contextName.get());
+                        assertEquals(wireType.name(), 7, contextVersion.get());
+                    }
                 } else {
                     final IllegalStateException failure = assertThrows(IllegalStateException.class,
                             () -> dataWriter.event(new EventData("blocked", 1)));
