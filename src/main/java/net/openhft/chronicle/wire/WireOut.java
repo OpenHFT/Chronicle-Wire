@@ -262,8 +262,6 @@ public interface WireOut extends WireCommon, MarshallableOut {
      * @return the position of the header
      * @throws WriteAfterEOFException if the selected write position holds an end-of-data marker
      */
-    //! WriteOverEOFTest#ordinaryWriteRemainsSealedAtEOF demonstrates the documented exception and
-    //! that refusal leaves the marker and selected write position unchanged.
     long enterHeader(long safeLength);
 
     /**
