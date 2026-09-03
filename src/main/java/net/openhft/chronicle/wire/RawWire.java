@@ -89,10 +89,11 @@ public class RawWire extends AbstractWire implements Wire {
 
     @Override
     public void reset() {
-        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt,
-        //! #resetRejectsContextCountOverflowBeforeMutation and WireContextListenerLifecycleTest
-        //! #resetReusesListenerForTheNextOutputContext demonstrate Raw preflight, advance and re-arm.
+        //! DocumentContextLifecycleTest#resetRejectsContextCountOverflowBeforeMutation demonstrates
+        //! that Raw checks count exhaustion before mutating its state.
         checkCanAdvanceOutputContext();
+        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire establishes that a
+        //! running callback cannot be interrupted by reset-like operations.
         checkCanResetContextListener();
         valueIn.resetState();
         valueOut.resetState();
@@ -100,7 +101,11 @@ public class RawWire extends AbstractWire implements Wire {
         readContext.reset();
         bytes.clear();
         lastSB = null;
+        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt demonstrates
+        //! that Raw publishes the next context only after its state reset succeeds.
         advanceOutputContext();
+        //! WireContextListenerLifecycleTest#resetReusesListenerForTheNextOutputContext demonstrates
+        //! that Raw re-arms notification only after its state reset succeeds.
         resetContextListener();
     }
 
@@ -259,9 +264,8 @@ public class RawWire extends AbstractWire implements Wire {
 
     @Override
     public void clear() {
-        //! WireContextListenerLifecycleTest#clearRetainsTheCurrentOutputContext and
-        //! #listenerCannotClearTheOuterWire demonstrate that Raw clear retains context identity and
-        //! cannot interrupt active notification.
+        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire demonstrates that
+        //! Raw clear rejects an active callback before mutating state.
         checkCanResetContextListener();
         bytes.clear();
     }

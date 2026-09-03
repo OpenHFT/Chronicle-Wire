@@ -16,8 +16,6 @@ import java.io.Serializable;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-//! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates that
-//! reflective handler construction needs an output-aware factory rather than the legacy Supplier alone.
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -132,14 +130,14 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     VanillaMethodWriterBuilder(@NotNull Class<T> tClass,
                                WireType wireType,
                                @NotNull Function<Supplier<MarshallableOut>, MethodWriterInvocationHandler> handlerFactory) {
-        //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates
-        //! why reflective handlers are constructed from the builder-selected output supplier.
         this.packageName = Jvm.getPackageName(tClass);
         this.wireType = wireType;
         addInterface(tClass);
         ClassLoader clsLdr = tClass.getClassLoader();
         this.classLoader = clsLdr != null ? clsLdr : getClass().getClassLoader();
         this.methodWriterClassNameGenerator = new MethodWriterClassNameGenerator();
+        //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates
+        //! why this overload retains a factory that can be rebound to the builder-selected output.
         this.handlerFactory = handlerFactory;
         this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(
                 () -> handlerFactory.apply(Objects.requireNonNull(outSupplier,
@@ -521,11 +519,11 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         private final MethodWriterInvocationHandlerSupplier handlerSupplier;
 
         /**
-         * Constructs a new {@code CallSupplierInvocationHandler} using the specified builder.
-         * The values from the builder are captured in a snapshot so that the builder can be
-         * garbage collected if no longer referenced.
+         * Creates a proxy invocation handler from the values selected when the proxy is built.
+         * Holding them directly avoids retaining the mutable builder.
          *
-         * @param builder The {@link VanillaMethodWriterBuilder} instance to extract values from.
+         * @param updateInterceptor interceptor applied before delegation, or {@code null} if none
+         * @param handlerSupplier   configured source of method-writer invocation handlers for this proxy
          */
         CallSupplierInvocationHandler(UpdateInterceptor updateInterceptor,
                                       MethodWriterInvocationHandlerSupplier handlerSupplier) {

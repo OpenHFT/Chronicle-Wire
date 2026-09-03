@@ -353,10 +353,10 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     @NotNull
     default <T> MethodWriterBuilder<T> methodWriterBuilder(boolean metaData, @NotNull Class<T> tClass) {
         // Creates a new builder instance with the specified WireType and InvocationHandler
-        //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates
-        //! that reflective writers must bind to the builder-selected output, not this outer instance.
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.BINARY_LIGHT,
+                //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates
+                //! that reflective writers must bind to the builder-selected output, not this outer instance.
                 out -> new BinaryMethodWriterInvocationHandler(tClass, metaData, out));
 
         // Configure the builder

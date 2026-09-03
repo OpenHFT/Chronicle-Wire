@@ -401,11 +401,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @Override
     @NotNull
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
-        //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates
-        //! that forced-proxy YAML writers bind to the listener-selected output rather than the outer Wire.
-        //! Interface @Comment output remains absent because no supported interface uses it on this path.
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.YAML,
+                //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates
+                //! that forced-proxy YAML writers bind to the listener-selected output rather than the outer Wire.
                 out -> new TextMethodWriterInvocationHandler(tClass, out));
         builder.marshallableOut(this);
         return builder;
@@ -419,11 +418,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
-        //! WireContextListenerLifecycleTest#noOpListenerInitialisesLazyTextAndYamlWriteContexts and
-        //! #allConcreteWiresInvokeListenerBeforeFirstDataDocument demonstrate lazy initialisation
-        //! followed by notification before YAML application output.
         if (writeContext == null)
             useBinaryDocuments();
+        //! WireContextListenerLifecycleTest#noOpListenerInitialisesLazyTextAndYamlWriteContexts and
+        //! #allConcreteWiresInvokeListenerBeforeFirstDataDocument demonstrate that YAML notifies
+        //! after lazy initialisation and before opening the application document.
         notifyContextListenerIfNeeded(metaData);
         writeContext.start(metaData);
         return writeContext;
@@ -938,10 +937,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     public void clear() {
-        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt and
-        //! WireContextListenerLifecycleTest#clearRetainsTheCurrentOutputContext demonstrate why
-        //! YAML clear uses resetState without advancing or re-arming the context.
+        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire demonstrates that
+        //! YAML clear rejects an active callback before mutating state.
         checkCanResetContextListener();
+        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt demonstrates
+        //! why YAML clear performs state cleanup without invoking the context-advancing reset.
         resetState();
     }
 
@@ -1111,19 +1111,22 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * Resets the state of the YamlWire instance, clearing all buffers and contexts.
      */
     public void reset() {
-        //! DocumentContextLifecycleTest#resetRejectsContextCountOverflowBeforeMutation and
-        //! WireContextListenerLifecycleTest#resetReusesListenerForTheNextOutputContext demonstrate
-        //! preflight before YAML mutation, then one count advance and listener re-arm.
+        //! DocumentContextLifecycleTest#resetRejectsContextCountOverflowBeforeMutation demonstrates
+        //! that YAML checks count exhaustion before mutating its state.
         checkCanAdvanceOutputContext();
+        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire establishes that a
+        //! running callback cannot be interrupted by reset-like operations.
         checkCanResetContextListener();
         resetState();
+        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt demonstrates
+        //! that YAML publishes the next context only after its state reset succeeds.
         advanceOutputContext();
+        //! WireContextListenerLifecycleTest#resetReusesListenerForTheNextOutputContext demonstrates
+        //! that YAML re-arms notification only after its state reset succeeds.
         resetContextListener();
     }
 
     private void resetState() {
-        //! WireContextListenerLifecycleTest#clearRetainsTheCurrentOutputContext demonstrates that this
-        //! shared state cleanup is deliberately separate from context identity changes.
         // Reset reading and writing contexts if they exist
         if (readContext != null)
             readContext.reset();

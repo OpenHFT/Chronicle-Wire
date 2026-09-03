@@ -67,8 +67,11 @@ public abstract class AbstractWire implements Wire, InternalWire {
     //! DocumentContextLifecycleTest#binaryReadWriteAndExhaust and #textUseTextDocumentsLifecycle
     //! demonstrate that a fresh writable Wire exposes context zero through its documents.
     private int outputContextCount;
-    //! WireContextListenerLifecycleTest#contextListenerWaitsForDataAfterMetadataAndWritesDtoOnce
-    //! demonstrates that a fresh Wire accepts one registration before output starts.
+    //! WireContextListenerLifecycleTest#contextListenerWaitsForDataAfterMetadataAndWritesDtoOnce,
+    //! #listenerCannotReenterThroughOuterWire and #listenerFailurePoisonsCurrentContextUntilReset
+    //! require this field to own registration and per-context notification state. Once configured,
+    //! the active lifecycle also retains the writer type and listener and coordinates re-entry,
+    //! reset and failure handling; the UNSET and SET sentinels keep listener-free Wires allocation-free.
     @NotNull
     private WireContextListenerLifecycle contextListenerLifecycle = NoOpWireContextListenerLifecycle.UNSET;
 
@@ -432,9 +435,9 @@ public abstract class AbstractWire implements Wire, InternalWire {
                 break;
 
             if (isNotComplete(header)) {
-                if (header != END_OF_DATA)
+                if (header != END_OF_DATA) {
                     Jvm.warn().on(getClass(), new Exception("Incomplete header found at pos: " + pos + ": " + Integer.toHexString(header) + ", overwriting"));
-                else {
+                } else {
                     // EOF opens no header. Clear only transient acquisition state; the durable
                     // marker and write position remain unchanged for the storage owner to handle.
                     //! WriteOverEOFTest#ordinaryWriteRemainsSealedAtEOF demonstrates that EOF opens no header:

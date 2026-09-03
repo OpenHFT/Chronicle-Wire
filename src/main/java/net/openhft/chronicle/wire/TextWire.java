@@ -352,11 +352,10 @@ public class TextWire extends YamlWireOut<TextWire> {
     @Override
     @NotNull
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
-        //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates
-        //! that forced-proxy Text writers bind to the listener-selected output rather than the outer Wire.
-        //! Interface @Comment output remains absent because no supported interface uses it on this path.
         VanillaMethodWriterBuilder<T> text = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.TEXT,
+                //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates
+                //! that forced-proxy Text writers bind to the listener-selected output rather than the outer Wire.
                 out -> new TextMethodWriterInvocationHandler(tClass, out));
         text.marshallableOut(this);
         return text;
@@ -380,11 +379,11 @@ public class TextWire extends YamlWireOut<TextWire> {
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
-        //! WireContextListenerLifecycleTest#noOpListenerInitialisesLazyTextAndYamlWriteContexts and
-        //! #allConcreteWiresInvokeListenerBeforeFirstDataDocument demonstrate lazy initialisation
-        //! followed by notification before Text application output.
         if (writeContext == null)
             useTextDocuments();
+        //! WireContextListenerLifecycleTest#noOpListenerInitialisesLazyTextAndYamlWriteContexts and
+        //! #allConcreteWiresInvokeListenerBeforeFirstDataDocument demonstrate that Text notifies
+        //! after lazy initialisation and before opening the application document.
         notifyContextListenerIfNeeded(metaData);
         writeContext.start(metaData);
         return writeContext;
@@ -1039,9 +1038,8 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @Override
     public void clear() {
-        //! WireContextListenerLifecycleTest#clearRetainsTheCurrentOutputContext and
-        //! #listenerCannotClearTheOuterWire demonstrate that Text clear retains context identity and
-        //! cannot interrupt active notification.
+        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire demonstrates that
+        //! Text clear rejects an active callback before mutating state.
         checkCanResetContextListener();
         bytes.clear();
         valueIn.resetState();
@@ -1285,10 +1283,11 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @Override
     public void reset() {
-        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt,
-        //! #resetRejectsContextCountOverflowBeforeMutation and WireContextListenerLifecycleTest
-        //! #resetReusesListenerForTheNextOutputContext demonstrate Text preflight, advance and re-arm.
+        //! DocumentContextLifecycleTest#resetRejectsContextCountOverflowBeforeMutation demonstrates
+        //! that Text checks count exhaustion before mutating its state.
         checkCanAdvanceOutputContext();
+        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire establishes that a
+        //! running callback cannot be interrupted by reset-like operations.
         checkCanResetContextListener();
         writeContext.reset();
         readContext.reset();
@@ -1297,10 +1296,11 @@ public class TextWire extends YamlWireOut<TextWire> {
         valueIn.resetState();
         valueOut.resetState();
         bytes.clear();
-        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt and
-        //! WireContextListenerLifecycleTest#resetReusesListenerForTheNextOutputContext demonstrate
-        //! that Text publishes the new count and re-arms notification only after reset succeeds.
+        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt demonstrates
+        //! that Text publishes the next context only after its state reset succeeds.
         advanceOutputContext();
+        //! WireContextListenerLifecycleTest#resetReusesListenerForTheNextOutputContext demonstrates
+        //! that Text re-arms notification only after its state reset succeeds.
         resetContextListener();
     }
 
