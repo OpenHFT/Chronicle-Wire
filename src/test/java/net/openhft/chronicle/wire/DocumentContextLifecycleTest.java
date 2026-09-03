@@ -88,22 +88,23 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
             }
         };
 
-        assertEquals(-1, holder.contextCount());
+        assertEquals(MarshallableOut.UNSET_CONTEXT, holder.contextCount());
         holder.documentContext(delegate);
         assertEquals(42, holder.contextCount());
         assertEquals(42, wrapper.contextCount());
     }
 
     @Test
-    public void noDocumentContextReturnsNegativeContextCount() {
-        assertEquals(-1, NoDocumentContext.INSTANCE.contextCount());
-        assertEquals(-1, DocumentContext.NOOP.contextCount());
+    public void noDocumentContextReturnsUnsetContext() {
+        assertEquals(MarshallableOut.UNSET_CONTEXT, NoDocumentContext.INSTANCE.contextCount());
+        assertEquals(MarshallableOut.UNSET_CONTEXT, DocumentContext.NOOP.contextCount());
         DocumentContext.NOOP.rollbackIfNotComplete();
         assertTrue(DocumentContext.NOOP instanceof net.openhft.chronicle.core.util.IgnoresEverything);
     }
 
     @Test
-    public void marshallableOutWithoutContextTrackingReturnsNegativeContextCount() {
+    public void marshallableOutWithoutContextTrackingReturnsUnsetContext() {
+        assertEquals(-1, MarshallableOut.UNSET_CONTEXT);
         MarshallableOut output = new MarshallableOut() {
             @Override
             public DocumentContext writingDocument(boolean metaData) {
@@ -116,7 +117,7 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
             }
         };
 
-        assertEquals(-1, output.contextCount());
+        assertEquals(MarshallableOut.UNSET_CONTEXT, output.contextCount());
         assertThrows(UnsupportedOperationException.class,
                 () -> output.contextListener(Runnable.class, ignored -> {
                 }));

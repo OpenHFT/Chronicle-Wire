@@ -740,7 +740,7 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
     public void readAnyRejectsContextListeners() {
         Wire wire = newWire(WireType.READ_ANY);
 
-        assertEquals(-1, wire.contextCount());
+        assertEquals(MarshallableOut.UNSET_CONTEXT, wire.contextCount());
         assertThrows(UnsupportedOperationException.class,
                 () -> wire.contextListener(ContextEvents.class, ignored -> {
                 }));
