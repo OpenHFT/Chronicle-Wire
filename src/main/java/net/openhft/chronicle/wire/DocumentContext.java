@@ -3,8 +3,6 @@
  */
 package net.openhft.chronicle.wire;
 
-//! DocumentContextLifecycleTest#noDocumentContextReturnsNegativeContextCount requires the concrete
-//! NoDocumentContext sentinel; removing Mocker avoids a proxy whose default count resembles context zero.
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;

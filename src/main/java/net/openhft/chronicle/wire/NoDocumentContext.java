@@ -3,8 +3,6 @@
  */
 package net.openhft.chronicle.wire;
 
-//! DocumentContextLifecycleTest#noDocumentContextReturnsNegativeContextCount requires the concrete
-//! NOOP to retain the IgnoresEverything marker expected by existing fast-path checks.
 import net.openhft.chronicle.core.util.IgnoresEverything;
 
 /**
@@ -16,9 +14,6 @@ import net.openhft.chronicle.core.util.IgnoresEverything;
  * that works with document contexts. Using `NoDocumentContext.INSTANCE` denotes
  * a guaranteed uninitialized state for a document context.
  */
-//! DocumentContextLifecycleTest#noDocumentContextReturnsNegativeContextCount requires the sentinel
-//! to remain IgnoresEverything-compatible while explicitly overriding the otherwise-throwing
-//! rollbackIfNotComplete default.
 public enum NoDocumentContext implements DocumentContext, IgnoresEverything {
     /** The singleton instance of the NoDocumentContext */
     INSTANCE;
@@ -65,8 +60,6 @@ public enum NoDocumentContext implements DocumentContext, IgnoresEverything {
 
     @Override
     public void rollbackIfNotComplete() {
-        //! DocumentContextLifecycleTest#noDocumentContextReturnsNegativeContextCount requires
-        //! rollback on the public NOOP sentinel to remain harmless.
     }
 
     @Override

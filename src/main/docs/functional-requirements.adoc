@@ -61,9 +61,6 @@ xref:system-architecture.adoc#cross_cutting_concerns[System Architecture – Cro
 |`src/test/java/net/openhft/chronicle/wire/ElasticBytesCapacityTest.java`,
 `src/test/java/net/openhft/chronicle/wire/ElasticByteBufferTest.java`.
 
-//! WireContextListenerLifecycleTest#allConcreteWiresInvokeListenerBeforeFirstDataDocument and
-//! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt pin the observable
-//! notification and count requirements; without this row the tests would have no release contract.
 |FN-008
 |Notify a configured `MarshallableOut.ContextListener` before the first application data document
 of each output-owned context. Listener failure shall poison that context until reset. Expose a
