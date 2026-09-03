@@ -6,6 +6,10 @@ LLM-based agents can accelerate development only if they respect our house rules
 * what *not* to comment;
 * when to open pull requests.
 
+## Formatting
+
+* Wrap new or changed lines at 144 characters. Do not reflow unchanged lines solely to meet this limit.
+
 ## Language & character-set policy
 
 | Requirement  | Rationale |
