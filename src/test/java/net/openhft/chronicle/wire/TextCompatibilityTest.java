@@ -93,6 +93,7 @@ public class TextCompatibilityTest extends WireTestCommon {
             } finally {
                 bytes.releaseLast();
             }
+            // Successful parsing is sufficient; a root-level YAML null legitimately returns null.
             TEXT.fromFile(Object.class, filename);
         } catch (Exception e) {
             throw new AssertionError(filename, e);
