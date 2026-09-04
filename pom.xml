@@ -15,7 +15,9 @@
     </parent>
 
     <artifactId>chronicle-wire</artifactId>
-    <version>2026.9-SNAPSHOT</version>
+    <!-- //! No unit test can discriminate a Maven project coordinate. Queue and transport integration
+         require the coordinated 2026.10-SNAPSHOT API, so retaining 2026.9 would validate the wrong Wire. -->
+    <version>2026.10-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Wire</name>
     <!-- Core library for Chronicle's binary wire serialization -->
     <description>Chronicle-Wire</description>

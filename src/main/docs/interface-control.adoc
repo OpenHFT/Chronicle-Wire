@@ -32,6 +32,27 @@ applications.
 |`net.openhft.chronicle.wire.converter.LongConverter`
 |Maps textual encodings to numeric values without intermediate allocation.
 |Consumers may supply custom implementations so the SPI contract is documented in code comments.
+
+|`net.openhft.chronicle.wire.MarshallableOut.ContextListener`
+|Callback completed at most once per output context. Wire contexts include first use and each
+`Wire.reset()`; Queue and supported transports define their own context boundaries. The supplied
+method writer emits context records before the first application data document; leading metadata
+may precede them.
+|Register on the outermost output before first application use. The writer is not callback-scoped
+and emits normal method-writer documents without `MessageHistory` unless written explicitly. A
+callback failure poisons the current context: the failure is propagated, is not retried, and later
+application data is rejected until reset. Unsupported outputs, including `READ_ANY` wires, reject
+registration with `UnsupportedOperationException`. Generated and reflective proxy writers use the
+same supplied internal output; the callback cannot clear or reset the outer Wire.
+
+|`net.openhft.chronicle.wire.DocumentContext#contextCount()`
+|Non-decreasing identifier of the output context containing an open document. DTOs with transient
+state can decide whether an output context has changed. Writable Wire starts at `0` and increments
+on `reset()`; Queue returns its actual ordinary destination cycle; supported connection-oriented
+outputs use one-based connection generations.
+|`-1` means unavailable. `clear()` and further documents in the same context leave the count
+unchanged. Overflow is rejected before reset mutates storage. Historical exact Queue recovery does
+not change the ordinary output count.
 |===
 
 == Document Lifecycle
