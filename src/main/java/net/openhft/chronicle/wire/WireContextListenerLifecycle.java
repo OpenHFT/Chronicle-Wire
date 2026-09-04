@@ -50,6 +50,6 @@ interface WireContextListenerLifecycle {
         //! WireContextListenerLifecycleTest#listenerFailurePoisonsCurrentContextUntilReset requires
         //! configured outputs to receive private mutable failure state; sharing it would poison or
         //! suppress notifications on an unrelated Wire.
-        return new ActiveWireContextListenerLifecycle(requireNonNull(writerType), requireNonNull(listener));
+        return new ActiveWireContextListenerLifecycle<>(requireNonNull(writerType), requireNonNull(listener));
     }
 }
