@@ -19,26 +19,30 @@ public class YamlTokeniserTest extends WireTestCommon {
         try {
             // Reads the file into a Bytes object
             Bytes<?> bytes = BytesUtil.readFile(resource);
+            try {
 
-            // Uncomment to remove carriage return characters
-            // bytes = Bytes.from(bytes.toString().replace("\r", ""));
+                // Uncomment to remove carriage return characters
+                // bytes = Bytes.from(bytes.toString().replace("\r", ""));
 
-            // Initialize a new YamlTokeniser with the Bytes object
-            YamlTokeniser yt = new YamlTokeniser(bytes);
+                // Initialize a new YamlTokeniser with the Bytes object
+                YamlTokeniser yt = new YamlTokeniser(bytes);
 
-            // StringBuilder to collect tokens
-            StringBuilder sb = new StringBuilder();
+                // StringBuilder to collect tokens
+                StringBuilder sb = new StringBuilder();
 
-            // Tokenize the YAML, but limit to 100 tokens for safety
-            int i = 0;
-            while (yt.next(Integer.MIN_VALUE) != YamlToken.STREAM_END) {
-                sb.append(yt).append('\n');
-                if (++i >= 100) {
-                    sb.append(".......\n");
-                    break;
+                // Tokenize the YAML, but limit to 100 tokens for safety
+                int i = 0;
+                while (yt.next(Integer.MIN_VALUE) != YamlToken.STREAM_END) {
+                    sb.append(yt).append('\n');
+                    if (++i >= 100) {
+                        sb.append(".......\n");
+                        break;
+                    }
                 }
+                return sb.toString();
+            } finally {
+                bytes.releaseLast();
             }
-            return sb.toString();
         } catch (IOException e) {
             // If any IOException occurs, throw an AssertionError
             throw new AssertionError(e);

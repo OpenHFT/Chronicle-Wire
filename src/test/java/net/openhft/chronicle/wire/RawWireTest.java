@@ -538,10 +538,20 @@ public class RawWireTest extends WireTestCommon {
             allBytes[i] = (byte) i;
 
         // Writing byte arrays to the wire
-        wire.write().bytes(NoBytesStore.NO_BYTES)
-                .write().bytes(Bytes.wrapForRead("Hello".getBytes(ISO_8859_1)))
-                .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
-                .write().bytes(allBytes);
+        wire.write().bytes(NoBytesStore.NO_BYTES);
+        Bytes<?> hello = Bytes.wrapForRead("Hello".getBytes(ISO_8859_1));
+        try {
+            wire.write().bytes(hello);
+        } finally {
+            hello.releaseLast();
+        }
+        Bytes<?> quotable = Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1));
+        try {
+            wire.write().bytes(quotable);
+        } finally {
+            quotable.releaseLast();
+        }
+        wire.write().bytes(allBytes);
         // System.out.println(bytes.toDebugString());
         @NotNull NativeBytes allBytes2 = nativeBytes();
         try {
@@ -550,7 +560,12 @@ public class RawWireTest extends WireTestCommon {
                     .read().bytes(b -> assertEquals("Hello", b.toString()))
                     .read().bytes(b -> assertEquals("quotable, text", b.toString()))
                     .read().bytes(allBytes2);
-            assertEquals(Bytes.wrapForRead(allBytes), allBytes2);
+            Bytes<?> expected = Bytes.wrapForRead(allBytes);
+            try {
+                assertEquals(expected, allBytes2);
+            } finally {
+                expected.releaseLast();
+            }
         } finally {
             allBytes2.releaseLast();
         }

@@ -1728,16 +1728,14 @@ public class TextWireTest extends WireTestCommon {
         @Nullable Map<String, String> map = wire.read().object(Map.class);
         assertEquals(0, map.size());
 
-        // TODO we shouldn't need to create a new wire.
-        // wire = createWire();
-//
-        // Set<String> threeObjects = new HashSet(Arrays.asList(new String[]{"abc", "def", "ghi"}));
-        // wire.write().object(threeObjects);
-//
-        // Set<String> list2 = wire.read()
-        // .object(Set.class);
-        // assertEquals(3, list2.size());
-        // assertEquals("[abc, def, ghi]", list2.toString());
+        wire = createWire();
+        @NotNull Map<String, String> strings = new LinkedHashMap<>();
+        strings.put("number", "123");
+        strings.put("punctuation", "a: b");
+        wire.write().object(strings);
+
+        @Nullable Map<?, ?> strings2 = wire.read().object(Map.class);
+        assertEquals(strings, strings2);
     }
 
     // This test case demonstrates how to decode nested structures from a textual representation.

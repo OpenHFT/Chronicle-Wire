@@ -76,8 +76,24 @@ public class JSON222Test extends WireTestCommon {
         // System.out.println(file + " " + new String(bytes, "UTF-8"));
         // Convert byte array to Bytes object for further processing
         Bytes<?> b = Bytes.wrapForRead(bytes);
-        @NotNull Wire wire = new JSONWire(b);
+        try {
+            testJSONWithInput(wireType, b);
+        } finally {
+            b.releaseLast();
+        }
+    }
+
+    private void testJSONWithInput(WireType wireType, Bytes<?> input) throws IOException {
+        @NotNull Wire wire = new JSONWire(input);
         Bytes<?> bytes2 = Bytes.allocateElasticOnHeap();
+        try {
+            testJSONRoundTrip(wireType, wire, bytes2);
+        } finally {
+            bytes2.releaseLast();
+        }
+    }
+
+    private void testJSONRoundTrip(WireType wireType, Wire wire, Bytes<?> bytes2) throws IOException {
         @NotNull Wire out = wireType.apply(bytes2);
 
         // Flag to determine if this test iteration is expected to fail
@@ -115,9 +131,10 @@ public class JSON222Test extends WireTestCommon {
             } while (wire.isNotEmptyAfterPadding());
 
             if (fail) {
-                // If the test iteration is expected to fail, we check the expected output against a reference file
+                // If the test iteration is expected to fail, check the expected output against a reference file
                 @NotNull String path = file.getPath();
-                @NotNull final File file2 = new File(path.replaceAll("\\b._", "e-").replaceAll("\\.json", ".yaml"));
+                @NotNull final File file2 = new File(path.replaceAll("\\b._", "e-")
+                        .replaceAll("\\.json", ".yaml"));
 
 /*
                // System.out.println(file2 + "\n" + new String(bytes, "UTF-8") + "\n" + bytes2);
@@ -139,8 +156,6 @@ public class JSON222Test extends WireTestCommon {
             // if (fail)
             // throw new AssertionError("Expected to fail, was " + list);
         } finally {
-            // Release resources to avoid memory leaks
-            bytes2.releaseLast();
             bytes3.releaseLast();
         }
     }
