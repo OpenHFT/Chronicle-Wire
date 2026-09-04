@@ -552,7 +552,6 @@ public class RawWireTest extends WireTestCommon {
             quotable.releaseLast();
         }
         wire.write().bytes(allBytes);
-        // System.out.println(bytes.toDebugString());
         @NotNull NativeBytes allBytes2 = nativeBytes();
         try {
             // Reading and validating byte arrays from the wire

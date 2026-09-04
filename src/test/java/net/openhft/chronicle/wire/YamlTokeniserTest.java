@@ -20,10 +20,6 @@ public class YamlTokeniserTest extends WireTestCommon {
             // Reads the file into a Bytes object
             Bytes<?> bytes = BytesUtil.readFile(resource);
             try {
-
-                // Uncomment to remove carriage return characters
-                // bytes = Bytes.from(bytes.toString().replace("\r", ""));
-
                 // Initialize a new YamlTokeniser with the Bytes object
                 YamlTokeniser yt = new YamlTokeniser(bytes);
 

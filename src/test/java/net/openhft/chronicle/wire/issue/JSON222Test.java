@@ -73,7 +73,6 @@ public class JSON222Test extends WireTestCommon {
     private void testJSON(WireType wireType) throws IOException {
         // Read the file content into a byte array
         @NotNull byte[] bytes = Files.readAllBytes(file.toPath());
-        // System.out.println(file + " " + new String(bytes, "UTF-8"));
         // Convert byte array to Bytes object for further processing
         Bytes<?> b = Bytes.wrapForRead(bytes);
         try {
@@ -100,7 +99,6 @@ public class JSON222Test extends WireTestCommon {
         boolean fail = file.getName().startsWith("n");
         Bytes<?> bytes3 = Bytes.allocateElasticOnHeap();
         try {
-            @NotNull List<Object> list = new ArrayList<>();
             do {
                 // Read an object from the wire
                 @Nullable final Object object;
@@ -118,14 +116,12 @@ public class JSON222Test extends WireTestCommon {
                 out3.getValueOut()
                         .object(object);
 
-                // System.out.println("As YAML " + bytes3);
                 // Validate the read object with an external YAML parser
                 parseWithSnakeYaml(bytes3.toString());
                 @Nullable Object object3 = out3.getValueIn()
                         .object();
                 assertEquals(object, object3);
 
-                list.add(object);
                 out.getValueOut().object(object);
 
             } while (wire.isNotEmptyAfterPadding());
@@ -135,13 +131,6 @@ public class JSON222Test extends WireTestCommon {
                 @NotNull String path = file.getPath();
                 @NotNull final File file2 = new File(path.replaceAll("\\b._", "e-")
                         .replaceAll("\\.json", ".yaml"));
-
-/*
-               // System.out.println(file2 + "\n" + new String(bytes, "UTF-8") + "\n" + bytes2);
-                try (OutputStream out2 = new FileOutputStream(file2)) {
-                    out2.write(bytes2.toByteArray());
-                }
-*/
 
                 if (!file2.exists())
                     throw new AssertionError("Expected to fail\n" + bytes2);
@@ -153,8 +142,6 @@ public class JSON222Test extends WireTestCommon {
                 if (wireType == WireType.TEXT)
                     assertEquals(expected, actual);
             }
-            // if (fail)
-            // throw new AssertionError("Expected to fail, was " + list);
         } finally {
             bytes3.releaseLast();
         }

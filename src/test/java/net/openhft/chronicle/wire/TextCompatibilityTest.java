@@ -70,14 +70,13 @@ public class TextCompatibilityTest extends WireTestCommon {
 
     // Run the actual compatibility test on a file and its expected content.
     @SuppressWarnings("rawtypes")
-    private static void runTest(String filename, String expectedFilename, boolean print) {
-        String expected = null;
+    private static void runTest(String filename, String expectedFilename, boolean tolerateDifference) {
         try {
             Bytes<?> bytes = BytesUtil.readFile(filename);
             try {
                 if (bytes.readRemaining() > 50)
                     return;
-                expected = filename.equals(expectedFilename) ? bytes.toString() : readText(expectedFilename);
+                String expected = filename.equals(expectedFilename) ? bytes.toString() : readText(expectedFilename);
                 Object o = new YamlWire(bytes)
                         .getValueIn()
                         .object();
@@ -86,22 +85,16 @@ public class TextCompatibilityTest extends WireTestCommon {
                     String s = WireType.TEXT.apply(out).getValueOut().object(o).toString();
                     if (s.trim().equals(expected.trim()))
                         return;
-                    if (print) {
-                       // System.out.println("Comparison failure in " + filename);
-                       // System.out.println("Expected:\n" + expected);
-                       // System.out.println("Actual:\n" + s);
-                    } else {
+                    if (!tolerateDifference)
                         assertEquals(expected, s);
-                    }
                 } finally {
                     out.releaseLast();
                 }
             } finally {
                 bytes.releaseLast();
             }
-            Object o = TEXT.fromFile(Object.class, filename);
+            TEXT.fromFile(Object.class, filename);
         } catch (Exception e) {
-           // System.out.println("Expected:\n" + expected);
             throw new AssertionError(filename, e);
         }
     }
