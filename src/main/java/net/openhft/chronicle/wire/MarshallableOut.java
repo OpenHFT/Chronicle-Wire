@@ -34,6 +34,8 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     int UNSET_CONTEXT = -1;
 
     /**
+     * WARNING: This API is alpha stage and subject to change without notice.
+     * <p>
      * Receives a callback when a {@link MarshallableOut} starts a new output context.
      * The meaning of a context is implementation specific.
      *
