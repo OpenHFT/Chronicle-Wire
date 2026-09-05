@@ -18,6 +18,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassLookup;
+import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.values.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -345,6 +346,11 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
 
         // Empty strings require double quoteStyle.
         if (cs.length() == 0)
+            return Quotes.DOUBLE;
+
+        //! ScalarTypePreservationTest#textAndTypedScalarsRetainTypes demonstrates that bare "true" and "false" Strings are read as
+        //! Booleans. Quoting every String would alter established text output, so quote only these resolver-sensitive spellings.
+        if (StringUtils.isEqual(cs, "true") || StringUtils.isEqual(cs, "false"))
             return Quotes.DOUBLE;
 
         // If string starts with special characters or ends with whitespace, use double quoteStyle.

@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static net.openhft.chronicle.wire.WireType.TEXT;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(value = Parameterized.class)
@@ -36,16 +35,8 @@ public class TextCompatibilityTest extends WireTestCommon {
         this.expected = expected;
     }
 
-    // Main method that demonstrates how to find YAML files in a directory and run the test on them.
-    public static void main(String[] args) throws IOException {
-        String base = "/home/peter/git/snakeyaml/src/test/resources";
-        try (Stream<Path> paths = Files.find(Paths.get(base), 4, (p, a) -> p.toString().endsWith(".yaml"))) {
-            paths.forEach(p -> runTest(p.toString(), p.toString(), true));
-        }
-    }
-
     // Provide the combinations of files and their expected content for the tests.
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> combinations() throws IOException {
         List<Object[]> list = new ArrayList<>();
         String dir = "src/test/resources/compat";
@@ -70,12 +61,10 @@ public class TextCompatibilityTest extends WireTestCommon {
 
     // Run the actual compatibility test on a file and its expected content.
     @SuppressWarnings("rawtypes")
-    private static void runTest(String filename, String expectedFilename, boolean tolerateDifference) {
+    private static void runTest(String filename, String expectedFilename) {
         try {
             Bytes<?> bytes = BytesUtil.readFile(filename);
             try {
-                if (bytes.readRemaining() > 50)
-                    return;
                 String expected = filename.equals(expectedFilename) ? bytes.toString() : readText(expectedFilename);
                 Object o = new YamlWire(bytes)
                         .getValueIn()
@@ -83,18 +72,13 @@ public class TextCompatibilityTest extends WireTestCommon {
                 Bytes<?> out = Bytes.allocateElasticOnHeap(256);
                 try {
                     String s = WireType.TEXT.apply(out).getValueOut().object(o).toString();
-                    if (s.trim().equals(expected.trim()))
-                        return;
-                    if (!tolerateDifference)
-                        assertEquals(expected, s);
+                    assertEquals(expected.trim(), s.trim());
                 } finally {
                     out.releaseLast();
                 }
             } finally {
                 bytes.releaseLast();
             }
-            // Successful parsing is sufficient; a root-level YAML null legitimately returns null.
-            TEXT.fromFile(Object.class, filename);
         } catch (Exception e) {
             throw new AssertionError(filename, e);
         }
@@ -112,6 +96,6 @@ public class TextCompatibilityTest extends WireTestCommon {
     // Perform the compatibility test for the current combination of file and expected content.
     @Test
     public void test() {
-        runTest(filename, expected, false);
+        runTest(filename, expected);
     }
 }

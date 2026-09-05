@@ -1722,6 +1722,8 @@ public class TextWireTest extends WireTestCommon {
         @NotNull Map<String, String> strings = new LinkedHashMap<>();
         strings.put("number", "123");
         strings.put("punctuation", "a: b");
+        strings.put("boolean-true", "true");
+        strings.put("boolean-false", "false");
         wire.write().object(strings);
 
         @Nullable Map<?, ?> strings2 = wire.read().object(Map.class);
