@@ -12,6 +12,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.time.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -555,10 +558,12 @@ public class RawWireTest extends WireTestCommon {
         @NotNull NativeBytes allBytes2 = nativeBytes();
         try {
             // Reading and validating byte arrays from the wire
-            wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
-                    .read().bytes(b -> assertEquals("Hello", b.toString()))
-                    .read().bytes(b -> assertEquals("quotable, text", b.toString()))
+            List<String> actual = new ArrayList<>();
+            wire.read().bytes(b -> actual.add(b.toString()))
+                    .read().bytes(b -> actual.add(b.toString()))
+                    .read().bytes(b -> actual.add(b.toString()))
                     .read().bytes(allBytes2);
+            assertEquals(Arrays.asList("", "Hello", "quotable, text"), actual);
             Bytes<?> expected = Bytes.wrapForRead(allBytes);
             try {
                 assertEquals(expected, allBytes2);

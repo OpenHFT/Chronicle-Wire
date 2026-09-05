@@ -94,6 +94,8 @@ public class MarshallableTest extends WireTestCommon {
 
         String s = wireType.asString(dto2);
         DTO1 dto1 = wireType.fromString(DTO1.class, s);
+        // The YAML snapshot cannot distinguish Integer elements from Long elements.
+        assertEquals(Arrays.asList(1, 22), dto1.two);
         assertEquals("!net.openhft.chronicle.wire.MarshallableTest$DTO1 {\n" +
                 "  one: CLASS,\n" +
                 "  two: [\n" +

@@ -28,8 +28,16 @@ public class ScalarTypePreservationTest extends WireTestCommon {
 
     @Test
     public void quotedJsonBooleansRemainStrings() {
-        assertJsonString("true");
-        assertJsonString("false");
+        assertParsedString(WireType.JSON, "\"true\"", "true");
+        assertParsedString(WireType.JSON, "\"false\"", "false");
+    }
+
+    @Test
+    public void singleQuotedBooleansRemainStrings() {
+        for (WireType wireType : new WireType[]{WireType.TEXT, WireType.YAML_ONLY}) {
+            assertParsedString(wireType, "'true'", "true");
+            assertParsedString(wireType, "'false'", "false");
+        }
     }
 
     private static void assertScalar(@NotNull WireType wireType, Object expected, @NotNull Class<?> expectedType,
@@ -43,10 +51,10 @@ public class ScalarTypePreservationTest extends WireTestCommon {
         }
     }
 
-    private static void assertJsonString(@NotNull String expected) {
-        Bytes<?> bytes = Bytes.from('"' + expected + '"');
+    private static void assertParsedString(@NotNull WireType wireType, @NotNull String input, @NotNull String expected) {
+        Bytes<?> bytes = Bytes.from(input);
         try {
-            assertValueAndType(expected, String.class, new JSONWire(bytes).getValueIn().object());
+            assertValueAndType(expected, String.class, wireType.apply(bytes).getValueIn().object());
         } finally {
             bytes.releaseLast();
         }
