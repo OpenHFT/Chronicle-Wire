@@ -102,7 +102,6 @@ public class TextWireTest extends WireTestCommon {
                 .write().bytes(Bytes.wrapForRead("Hello".getBytes(ISO_8859_1)))
                 .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
                 .write().bytes(allBytes);
-        // System.out.println(bytes.toString());
 
         // Read back the bytes sequences and validate their content
         @NotNull Bytes<?> allBytes2 = allocateElasticOnHeap();
@@ -234,9 +233,6 @@ public class TextWireTest extends WireTestCommon {
         value.map.put("hello", "world");
         wire.write().object(value);
 
-        // Uncomment the below line to see the serialized content of the wire.
-        // System.out.println(wire);
-
         // Deserialize the wire content back to an object and check the content of the map.
         ObjectWithTreeMap value2 = new ObjectWithTreeMap();
         wire.read().object(value2, ObjectWithTreeMap.class);
@@ -310,7 +306,6 @@ public class TextWireTest extends WireTestCommon {
 
         // Convert the binary blob into a string representation.
         final String textYaml = Wires.fromSizePrefixedBlobs(b);
-        // System.out.println(textYaml);
         // Deserialize the TEXT into an object and verify its structure.
         @Nullable Object o = WireType.TEXT.fromString(textYaml);
         Assert.assertEquals("{map={some={key=value}, some-other={key=value}}}", o.toString());
@@ -397,8 +392,7 @@ public class TextWireTest extends WireTestCommon {
         @NotNull String expected = "{A=, B=other}";
         expectWithSnakeYaml(expected, wire);
 
-        // TODO: Handle the potential issue when reading a string as a Boolean object
-        // assertEquals(null, wire.read(() -> "A").object(Boolean.class));
+        // TODO: Define and test Boolean coercion for empty text.
         assertEquals(false, wire.read(() -> "B").object(Boolean.class));
     }
 
@@ -895,8 +889,7 @@ public class TextWireTest extends WireTestCommon {
 
         // Add a comment for visual separation
         wire.writeComment("");
-        // TODO fix how types are serialized.
-        // expectWithSnakeYaml(wire, "{=1, field1=2, Test=3}");
+        // TODO: Validate type serialisation with SnakeYAML once tagged scalars are supported.
         assertEquals("\"\": !MyType " +
                 "field1: !AlsoMyType " +
                 "Test: !" + name1 + " # \n", wire.toString());
@@ -1237,9 +1230,6 @@ public class TextWireTest extends WireTestCommon {
             o.writeEventName(() -> "example")
                     .map(expected);
         });
-        // bytes.readPosition(4);
-        // expectWithSnakeYaml("{example={hello=world, hello1=world1, hello2=world2}}", wire);
-        // bytes.readPosition(0);
 
         // Assert the written map's format
         assertEquals("--- !!data\n" +
@@ -1715,9 +1705,7 @@ public class TextWireTest extends WireTestCommon {
     }
 
     // This test is for writing a Map<String, String> to the Wire and reading it back.
-    // Currently, it's marked as ignored using the @Ignore annotation.
     @Test
-    @Ignore
     public void testStringMap() {
         // Create a wire instance
         @NotNull Wire wire = createWire();
@@ -1730,16 +1718,16 @@ public class TextWireTest extends WireTestCommon {
         @Nullable Map<String, String> map = wire.read().object(Map.class);
         assertEquals(0, map.size());
 
-        // TODO we shouldn't need to create a new wire.
-        // wire = createWire();
-//
-        // Set<String> threeObjects = new HashSet(Arrays.asList(new String[]{"abc", "def", "ghi"}));
-        // wire.write().object(threeObjects);
-//
-        // Set<String> list2 = wire.read()
-        // .object(Set.class);
-        // assertEquals(3, list2.size());
-        // assertEquals("[abc, def, ghi]", list2.toString());
+        wire = createWire();
+        @NotNull Map<String, String> strings = new LinkedHashMap<>();
+        strings.put("number", "123");
+        strings.put("punctuation", "a: b");
+        strings.put("boolean-true", "true");
+        strings.put("boolean-false", "false");
+        wire.write().object(strings);
+
+        @Nullable Map<?, ?> strings2 = wire.read().object(Map.class);
+        assertEquals(strings, strings2);
     }
 
     // This test case demonstrates how to decode nested structures from a textual representation.
@@ -1748,7 +1736,6 @@ public class TextWireTest extends WireTestCommon {
         @NotNull String s = "cluster: {\n" +
                 "  host1: {\n" +
                 "     hostId: 1,\n" +
-                // "     name: one,\n" +
                 "  },\n" +
                 "  host2: {\n" +
                 "     hostId: 2,\n" +
@@ -2266,7 +2253,6 @@ public class TextWireTest extends WireTestCommon {
         for (Class<?> clz : new Class[]{byte.class, char.class, int.class, long.class, double.class, float.class, boolean.class}) {
             // Create a Wire instance and append data with the current class type to its bytes
             Wire wire = createWire();
-            // System.out.println("Class: " + clz);
             wire.bytes().append("a: [ !type ").append(clz.getName()).append("[] ], b: !type String[], c: hi");
 
             // Verify the data types and content retrieved from the wire for the current class type
@@ -2597,7 +2583,6 @@ public class TextWireTest extends WireTestCommon {
     static class FieldWithComment extends SelfDescribingMarshallable {
         @Comment("a comment where the value=%s")
         String field;
-        // String field2;
     }
 
     // Class containing two fields, one of which has an associated comment
@@ -2758,11 +2743,6 @@ public class TextWireTest extends WireTestCommon {
 
         // Define a custom way to read objects of this type from the wire format.
         public void readMarshallable(@NotNull WireIn wire) throws IORuntimeException {
-
-            // WORKS
-            // Wires.readMarshallable(this, wire, true);  // WORKS
-
-            // FAILS
             Wires.readMarshallable(this, wire, false);
         }
     }

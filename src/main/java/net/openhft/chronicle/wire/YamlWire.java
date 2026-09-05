@@ -88,6 +88,16 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         defaultValueIn = new DefaultValueIn(this);
     }
 
+    @NotNull
+    @Override
+    protected Quotes needsQuotes(@NotNull CharSequence cs) {
+        //! ScalarTypePreservationTest#textAndTypedScalarsRetainTypes demonstrates that a dot-prefixed numeric-looking String must be
+        //! quoted or YamlWire reads it back as a Double. Quoting every dot-prefixed String would unnecessarily alter established output.
+        if (cs.length() > 1 && cs.charAt(0) == '.' && cs.charAt(1) >= '0' && cs.charAt(1) <= '9')
+            return Quotes.DOUBLE;
+        return super.needsQuotes(cs);
+    }
+
     /**
      * Constructor that initializes the YamlWire with provided bytes.
      * Defaults to not using 8-bit.
@@ -430,7 +440,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     public DocumentContext acquireWritingDocument(boolean metaData) {
-        if (writeContext != null && writeContext.isOpen())
+        //! WriteDocumentContextTest#nestedYaml and #chainedYaml demonstrate that YAML must
+        //! distinguish a nested acquisition from continuation of an explicitly chained document.
+        if (writeContext != null && writeContext.isOpen() && writeContext.chainedElement())
             return writeContext;
         return writingDocument(metaData);
     }
@@ -2427,9 +2439,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             @Nullable StringBuilder s = textTo0(acquireStringBuilder());
             if (yt.current() == YamlToken.LITERAL)
                 return s;
-            if (StringUtils.isEqual(s, "true"))
+            //! ScalarTypePreservationTest#textAndTypedScalarsRetainTypes demonstrates that quoted YAML booleans were inferred as
+            //! Boolean. The quote must be checked before the spelling because decoded text alone loses that syntactic distinction.
+            if (blockQuoteChar == 0 && StringUtils.isEqual(s, "true"))
                 return true;
-            if (StringUtils.isEqual(s, "false"))
+            if (blockQuoteChar == 0 && StringUtils.isEqual(s, "false"))
                 return false;
             return readNumberOrTextFrom(blockQuoteChar, s);
         }

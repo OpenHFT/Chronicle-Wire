@@ -19,26 +19,26 @@ public class YamlTokeniserTest extends WireTestCommon {
         try {
             // Reads the file into a Bytes object
             Bytes<?> bytes = BytesUtil.readFile(resource);
+            try {
+                // Initialize a new YamlTokeniser with the Bytes object
+                YamlTokeniser yt = new YamlTokeniser(bytes);
 
-            // Uncomment to remove carriage return characters
-            // bytes = Bytes.from(bytes.toString().replace("\r", ""));
+                // StringBuilder to collect tokens
+                StringBuilder sb = new StringBuilder();
 
-            // Initialize a new YamlTokeniser with the Bytes object
-            YamlTokeniser yt = new YamlTokeniser(bytes);
-
-            // StringBuilder to collect tokens
-            StringBuilder sb = new StringBuilder();
-
-            // Tokenize the YAML, but limit to 100 tokens for safety
-            int i = 0;
-            while (yt.next(Integer.MIN_VALUE) != YamlToken.STREAM_END) {
-                sb.append(yt).append('\n');
-                if (++i >= 100) {
-                    sb.append(".......\n");
-                    break;
+                // Tokenize the YAML, but limit to 100 tokens for safety
+                int i = 0;
+                while (yt.next(Integer.MIN_VALUE) != YamlToken.STREAM_END) {
+                    sb.append(yt).append('\n');
+                    if (++i >= 100) {
+                        sb.append(".......\n");
+                        break;
+                    }
                 }
+                return sb.toString();
+            } finally {
+                bytes.releaseLast();
             }
-            return sb.toString();
         } catch (IOException e) {
             // If any IOException occurs, throw an AssertionError
             throw new AssertionError(e);
@@ -1064,7 +1064,6 @@ public class YamlTokeniserTest extends WireTestCommon {
                 doTest("yaml/spec/2_24GlobalTags.yaml")); // Invoke the tokenization utility and verify the output
     }
 
-    @Ignore("TODO FIX")
     // Test case for tokenizing a YAML file representing an unordered set
     @Test
     public void eg2_25() {
