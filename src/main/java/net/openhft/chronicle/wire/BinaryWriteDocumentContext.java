@@ -169,6 +169,15 @@ public class BinaryWriteDocumentContext implements WriteDocumentContext {
         return wire;
     }
 
+    @Override
+    public int contextCount() {
+        //! A concrete method resolves the otherwise conflicting MarshallableOut and DocumentContext
+        //! defaults in CQE's DelegatingAppender; compiling unchanged CQE discriminates its absence.
+        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt preserves normal
+        //! Wire/document identity as integration evidence, not a discriminator for this declaration.
+        return WriteDocumentContext.super.contextCount();
+    }
+
     /**
      * Retrieves the current position in the wire where the document starts.
      *
