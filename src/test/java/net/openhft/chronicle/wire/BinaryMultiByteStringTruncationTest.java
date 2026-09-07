@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2026 chronicle.software
+ * Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
  */
 package net.openhft.chronicle.wire;
 
@@ -9,8 +9,9 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Covers binary round-tripping of short UTF-8 strings whose encoded byte length
- * is greater than their UTF-16 character count.
+ * A non-Latin-1 value leaves BinaryWire's reused StringBuilder in UTF-16 storage on Java 9+.
+ * Subsequent 8-bit field names must still decode correctly. The heap binary cases reproduce
+ * CORE-62 with pre-fix Core/Bytes dependencies; direct memory, ASCII and text are compatibility controls.
  */
 public class BinaryMultiByteStringTruncationTest extends WireTestCommon {
 
@@ -58,9 +59,8 @@ public class BinaryMultiByteStringTruncationTest extends WireTestCommon {
 
     @Test
     public void binaryRoundTripsAllFieldsAfterMultiByteStringDirectMemory() {
-        // Chronicle Queue reads memory-mapped (direct / NativeBytesStore) bytes, which take a
-        // different field-name read path (parse8bit_SB1) than on-heap bytes. That path was never
-        // broken; this guards it stays correct after a multi-byte field if the read paths are reworked.
+        // Chronicle Queue's direct-memory bytes use parse8bit_SB1 for short field names.
+        // These ASCII names were unaffected by CORE-62; retain this as compatibility coverage.
         Dto back = roundTrip(Bytes.allocateElasticDirect(), WireType.BINARY, Dto.class, dto(MULTI_BYTE));
         assertAllFields(back, MULTI_BYTE);
     }
@@ -88,11 +88,14 @@ public class BinaryMultiByteStringTruncationTest extends WireTestCommon {
         assertEquals("5", back.f5);
     }
 
+    // The non-Latin-1 value must precede a field name to exercise reuse of UTF-16 builder storage.
+    @FieldOrder({"m", "thisFieldNameIsLongEnoughToUseFieldNameAny"})
     public static class LongFieldDto extends SelfDescribingMarshallable {
         String m;
         String thisFieldNameIsLongEnoughToUseFieldNameAny;
     }
 
+    @FieldOrder({"m", "f1", "f2", "f3", "f4", "f5"})
     public static class Dto extends SelfDescribingMarshallable {
         String m;
         String f1;
