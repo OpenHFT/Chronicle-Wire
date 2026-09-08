@@ -3,15 +3,15 @@
  */
 package net.openhft.chronicle.wire.marshallable;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.wire.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.lang.reflect.Field;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
@@ -111,8 +111,7 @@ public class NullCollectionWithOverwriteFalseTest extends WireTestCommon {
     }
 
     /**
-     * Pins the current behaviour of an inline-initialised field read with overwrite enabled,
-     * which no other test states. Mirroring CollectionFieldAccess would resolve this to empty.
+     * Explicit null replaces an inline-initialised field when overwrite is enabled.
      */
     @Test
     public void inlineInitialisedListWithOverwrite() {
@@ -126,6 +125,120 @@ public class NullCollectionWithOverwriteFalseTest extends WireTestCommon {
 
         MyInitialisedListOverwriteTrueDto o = Marshallable.fromString(MyInitialisedListOverwriteTrueDto.class, cs);
         assertNull(o.strings);
+    }
+
+    /**
+     * Explicit null replaces every container default when overwrite is enabled.
+     */
+    @Test
+    public void nullContainersWithOverwrite() throws Exception {
+        checkContainers(true, true);
+    }
+
+    /**
+     * Explicit null restores null, empty or populated defaults when overwrite is disabled.
+     */
+    @Test
+    public void nullContainersWithoutOverwrite() throws Exception {
+        checkContainers(false, true);
+    }
+
+    /**
+     * Present containers replace stale contents in both modes, including on destination reuse.
+     */
+    @Test
+    public void emptyAndPopulatedContainersReplacePreviousContents() throws Exception {
+        checkContainers(false, false);
+        checkContainers(true, false);
+    }
+
+    /**
+     * Missing fields restore defaults with overwrite enabled and retain existing contents otherwise.
+     */
+    @Test
+    public void absentContainersRespectOverwrite() throws Exception {
+        for (WireType type : new WireType[]{WireType.TEXT, WireType.BINARY}) {
+            for (boolean overwrite : new boolean[]{false, true}) {
+                Containers target = new Containers();
+                target.strings.add("stale");
+                target.numbers.add(99);
+                target.states.add(Thread.State.TERMINATED);
+                target.map.put("stale", 99);
+                Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+                try {
+                    Wires.readMarshallable(target, type.apply(bytes), overwrite);
+                    Containers defaults = new Containers();
+                    if (!overwrite) {
+                        defaults.strings.add("stale");
+                        defaults.numbers.add(99);
+                        defaults.states.add(Thread.State.TERMINATED);
+                        defaults.map.put("stale", 99);
+                    }
+                    for (Field field : Containers.class.getDeclaredFields())
+                        assertEquals(type + " absent " + field.getName(), field.get(defaults), field.get(target));
+                } finally {
+                    bytes.releaseLast();
+                }
+            }
+        }
+    }
+
+    private void checkContainers(boolean overwrite, boolean nullInput) throws Exception {
+        for (WireType type : new WireType[]{WireType.TEXT, WireType.BINARY}) {
+            Containers source = new Containers();
+            Containers target = new Containers();
+            Containers defaults = new Containers();
+            for (Field field : Containers.class.getDeclaredFields()) {
+                if (nullInput)
+                    field.set(source, null);
+            }
+            target.emptyStrings.add("stale");
+            target.strings.add("stale");
+            target.emptyNumbers.add(99);
+            target.numbers.add(99);
+            target.emptyStates.add(Thread.State.TERMINATED);
+            target.states.add(Thread.State.TERMINATED);
+            target.emptyMap.put("stale", 99);
+            target.map.put("stale", 99);
+            Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+            try {
+                Wire wire = type.apply(bytes);
+                source.writeMarshallable(wire);
+                Wires.readMarshallable(target, wire, overwrite);
+                for (Field field : Containers.class.getDeclaredFields()) {
+                    Object expected = nullInput && overwrite ? null : field.get(defaults);
+                    assertEquals(type + " " + field.getName(), expected, field.get(target));
+                }
+                // Reuse the destination after a read that may have cleared its fields.
+                bytes.clear();
+                defaults.writeMarshallable(wire);
+                Wires.readMarshallable(target, wire, overwrite);
+                for (Field field : Containers.class.getDeclaredFields())
+                    assertEquals(type + " reused " + field.getName(), field.get(defaults), field.get(target));
+            } finally {
+                bytes.releaseLast();
+            }
+        }
+    }
+
+    /**
+     * Null, empty and populated defaults exercise the String collection, general collection,
+     * EnumSet and Map readers. Tests use separate input, destination and default instances
+     * with text and binary wires; Thread.State supplies enum values only.
+     */
+    static class Containers extends SelfDescribingMarshallable {
+        List<String> nullStrings;
+        List<String> emptyStrings = new ArrayList<>();
+        List<String> strings = new ArrayList<>(Collections.singletonList("default"));
+        List<Integer> nullNumbers;
+        List<Integer> emptyNumbers = new ArrayList<>();
+        List<Integer> numbers = new ArrayList<>(Collections.singletonList(1));
+        EnumSet<Thread.State> nullStates;
+        EnumSet<Thread.State> emptyStates = EnumSet.noneOf(Thread.State.class);
+        EnumSet<Thread.State> states = EnumSet.of(Thread.State.NEW);
+        Map<String, Integer> nullMap;
+        Map<String, Integer> emptyMap = new LinkedHashMap<>();
+        Map<String, Integer> map = new LinkedHashMap<>(Collections.singletonMap("default", 1));
     }
 
     /**
