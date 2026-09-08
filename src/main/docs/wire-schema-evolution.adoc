@@ -22,6 +22,14 @@ Evolution is managed by how these class definitions change and how the chosen `W
 
 This document delves into the mechanisms Chronicle Wire employs for schema evolution, the role of different wire formats and annotations, and strategies for managing data model changes effectively.
 
+== Null Collection and Map Fields
+
+For an explicitly null collection or map, `Wires.readMarshallable` sets the field
+to null when `overwrite` is `true`. When `overwrite` is `false`, it restores the
+field's default value, which may be null, empty or populated. This applies to
+String collections, other collections, EnumSets and Maps. Empty input containers
+remain empty rather than restoring defaults.
+
 == Mechanisms in Self-Describing Formats
 
 ifdef::env-github[[source,mermaid]
