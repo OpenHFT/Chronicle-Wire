@@ -1,0 +1,27 @@
+= Chronicle Wire Release Notes
+Chronicle Software
+:sectnums:
+:lang: en-GB
+
+== Unreleased
+
+=== Preserve boolean-looking strings in textual formats
+
+`TextWire` and `YamlWire` now quote String values and String field names whose exact spelling is
+`true` or `false`. For example, writing the String `true` emits `"true"`; writing the Boolean
+`true` continues to emit the bare boolean token `true`.
+
+When reading an untyped value with `ValueIn.object()`, Text, YAML and JSON readers now retain
+quoted `true` and `false` as Strings. Previously those quoted spellings could be inferred as
+Booleans. Both single and double quotes are recognised by Text/YAML; JSON uses double quotes.
+
+This changes textual output for those two String spellings, including map keys. Consumers that
+compare encoded text or relied on quoted boolean-looking Strings becoming Booleans must account
+for the corrected type preservation. Typed Boolean values retain their Boolean representation.
+
+Regression coverage: `BooleanScalarTypePreservationTest` checks String/Boolean round trips,
+quoted JSON input and single-quoted Text/YAML input. The YAML specification fixture also records
+the quoted String-key output.
+
+Extracted from link:https://github.com/OpenHFT/Chronicle-Wire/pull/1284[#1284] following the
+link:https://github.com/OpenHFT/Chronicle-Wire/pull/1284#discussion_r3962098450[behaviour-change review].
