@@ -11,7 +11,6 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -189,7 +188,6 @@ public class BinaryWire2Test extends WireTestCommon {
         ObjectWithTreeMap value = new ObjectWithTreeMap();
         value.map.put("hello", "world");
         wire.write().object(value);
-        // System.out.println(Bytes.);
         ObjectWithTreeMap value2 = new ObjectWithTreeMap();
         wire.read().object(value2, ObjectWithTreeMap.class);
         assertEquals("{hello=world}", value2.map.toString());
@@ -280,7 +278,6 @@ public class BinaryWire2Test extends WireTestCommon {
             dc.wire().write().object(new Date(1234567890000L));
         }
         try (final DocumentContext dc = wire.readingDocument()) {
-            // System.out.println(Wires.fromSizePrefixedBlobs(dc));
             Assert.assertEquals(1234567890000L, dc.wire().read().object(Date.class).getTime());
         }
     }
@@ -693,7 +690,6 @@ public class BinaryWire2Test extends WireTestCommon {
                 .marshallable(w -> w.write("key").text("1")
                         .write("value")
                         .object(expected)));
-        // System.out.println(wire);
 
         // Read back the stored byte array and validate its content
         wire.readDocument(null, wir -> wire.read(() -> "put")
@@ -709,7 +705,6 @@ public class BinaryWire2Test extends WireTestCommon {
         @NotNull Wire wire = createWire();
         @NotNull Random rand = new Random();
         for (int i = 0; i < 70000; i += rand.nextInt(i + 1) + 1) {
-            // System.out.println(i);
             wire.clear();
             @NotNull final byte[] fromBytes = new byte[i];
             wire.writeDocument(false, w -> w.write("bytes").bytes(fromBytes));
@@ -846,7 +841,6 @@ public class BinaryWire2Test extends WireTestCommon {
         wire.bytes().releaseLast();  // Release the resources
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void testUnicodeReadAndWriteHex() {
         bytes.releaseLast();
@@ -865,9 +859,7 @@ public class BinaryWire2Test extends WireTestCommon {
     }
 
     // Test reading and writing Unicode characters on heap
-    // Note: This test has been marked to be ignored due to some issues
     @Test
-    @Ignore("TODO FIX")
     public void testUnicodeReadAndWriteOnHeap() {
         bytes.releaseLast();
         bytes = allocateElasticOnHeap();  // Allocate memory for the bytes on the heap
@@ -879,24 +871,25 @@ public class BinaryWire2Test extends WireTestCommon {
         @NotNull Wire wire = createWire();
         try {
             wire.writeDocument(false, w -> w.write("data")
-                    .typePrefix("!UpdateEvent")
                     .marshallable(
                             v -> {
-                                v.write("mm").text("你好")  // Write Chinese characters
+                                v.write("mm").text("\u4f60\u597d")  // Write Chinese characters
                                         .write("value").float64(15.0);
                             }));
-            // assertEquals("29 00 00 00 c4 64 61 74 61 b6 0c 21 55 70 64 61\n" +
-            // "74 65 45 76 65 6e 74 82 11 00 00 00 c2 6d 6d e6\n" +
-            // "e4 bd a0 e5 a5 bd c5 76 61 6c 75 65 0f\n", bytes.toHexString());
             // Ensure that the wire's content matches the expected format with the Chinese characters
 
             assertEquals("" +
                             "--- !!data #binary\n" +
-                            "data: !!UpdateEvent {\n" +
+                            "data: {\n" +
                             "  mm: \"\\u4F60\\u597D\",\n" +
                             "  value: 15\n" +
                             "}\n",
                     Wires.fromSizePrefixedBlobs(wire.bytes()));
+
+            assertTrue(wire.readDocument(null, w -> w.read("data").marshallable(m -> {
+                assertEquals("\u4f60\u597d", m.read("mm").text());
+                assertEquals(15.0, m.read("value").float64(), 0.0);
+            })));
         } finally {
             wire.bytes().releaseLast();  // Release the resources
         }
@@ -1027,8 +1020,6 @@ public class BinaryWire2Test extends WireTestCommon {
 
             // Asserting that the read value is the same as the written value
             assertEquals(d, v, 0.0);
-            final long size = wire.bytes().readPosition();
-            // System.out.println(d + " size: " + size);
         }
     }
 

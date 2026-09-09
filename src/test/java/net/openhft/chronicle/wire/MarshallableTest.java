@@ -93,8 +93,9 @@ public class MarshallableTest extends WireTestCommon {
         dto2.three = "2018-11-02";
 
         String s = wireType.asString(dto2);
-        // System.out.println(s);
         DTO1 dto1 = wireType.fromString(DTO1.class, s);
+        // The YAML snapshot cannot distinguish Integer elements from Long elements.
+        assertEquals(Arrays.asList(1, 22), dto1.two);
         assertEquals("!net.openhft.chronicle.wire.MarshallableTest$DTO1 {\n" +
                 "  one: CLASS,\n" +
                 "  two: [\n" +
@@ -111,8 +112,6 @@ public class MarshallableTest extends WireTestCommon {
         doTestCopy(WireType.TEXT);
     }
 
-    // TODO: This test is currently ignored. The copy process using WireType.YAML_ONLY needs to be fixed.
-    @Ignore(/* TODO FIX */)
     @Test
     public void testCopyYaml() {
         doTestCopy(WireType.YAML_ONLY);
