@@ -10,6 +10,7 @@ import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.internal.BytesFieldInfo;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.Assert;
 import org.junit.Before;
@@ -62,6 +63,9 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
 
         // Initialize the embedded bytes object and set its values.
         EBM e1 = new EBM();
+        assertEquals(31, e1.a.writeRemaining());
+        assertEquals(23, e1.b.writeRemaining());
+        assertEquals(11, e1.c.writeRemaining());
         e1.number = Base85LongConverter.INSTANCE.parse("Hello!", 0, 5);
         e1.a.append("a12345678901234567890123456789");
         e1.b.append("a1234567890123456789abc");
@@ -75,12 +79,21 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
         assertEquals(expected, e1.toString());
         Bytes<?> bytes = new HexDumpBytes();
         e1.writeMarshallable(bytes);
-        assertEquals("00 80 04 08 00 80 04 08 1e 61 31 32 33 34 35 36\n" +
+        // The padding occupies the header-alignment gap on 32-bit HotSpot, and follows the longs on 64-bit HotSpot.
+        String expectedHex = OS.is64Bit()
+                ? "00 00 05 08 00 00 05 08 1e 61 31 32 33 34 35 36\n" +
                 "37 38 39 30 31 32 33 34 35 36 37 38 39 30 31 32\n" +
                 "33 34 35 36 37 38 39 00 17 61 31 32 33 34 35 36\n" +
                 "37 38 39 30 31 32 33 34 35 36 37 38 39 61 62 63\n" +
-                "c4 5f 74 4c 00 00 00 00 0b 61 31 32 33 34 35 36\n" +
-                "37 38 39 30\n", bytes.toHexString());
+                "c4 5f 74 4c 00 00 00 00 00 00 00 00 0b 61 31 32\n" +
+                "33 34 35 36 37 38 39 30\n"
+                : "00 00 05 08 00 00 05 08 00 00 00 00 1e 61 31 32\n" +
+                "33 34 35 36 37 38 39 30 31 32 33 34 35 36 37 38\n" +
+                "39 30 31 32 33 34 35 36 37 38 39 00 17 61 31 32\n" +
+                "33 34 35 36 37 38 39 30 31 32 33 34 35 36 37 38\n" +
+                "39 61 62 63 c4 5f 74 4c 00 00 00 00 0b 61 31 32\n" +
+                "33 34 35 36 37 38 39 30\n";
+        assertEquals(expectedHex, bytes.toHexString());
         EBM e2 = new EBM();
         e2.readMarshallable(bytes);
         assertEquals(expected, e2.toString());
@@ -165,6 +178,8 @@ public class EmbeddedBytesMarshallableTest extends WireTestCommon {
             START = range[0];
         }
 
+        // Fill the 32-bit header-alignment gap before any int in group c can be moved into it.
+        transient int padding;
         @FieldGroup("a")
         transient long a0, a1, a2, a3;
         @FieldGroup("b")
