@@ -1950,6 +1950,10 @@ public class WireMarshaller<T> {
 
         @Override
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
+            if (!read.isPresent()) {
+                super.readValue(o, defaults, read, overwrite);
+                return;
+            }
             EnumSet coll = (EnumSet) field.get(o);
             if (coll == null) {
                 coll = enumSetSupplier.get();
@@ -1957,7 +1961,7 @@ public class WireMarshaller<T> {
             }
 
             if (!read.sequence(coll, addAll)) {
-                Collection defaultColl = (Collection) field.get(defaults);
+                Collection defaultColl = overwrite ? null : (Collection) field.get(defaults);
                 if (defaultColl == null) {
                     field.set(o, null);
                 } else {
@@ -2154,6 +2158,10 @@ public class WireMarshaller<T> {
 
         @Override
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
+            if (!read.isPresent()) {
+                super.readValue(o, defaults, read, overwrite);
+                return;
+            }
             Collection coll = (Collection) field.get(o);
             if (coll == null) {
                 coll = collectionSupplier.get();
@@ -2165,7 +2173,7 @@ public class WireMarshaller<T> {
                 while (in2.hasNextSequenceItem())
                     c.add(in2.object(componentType));
             })) {
-                Collection defaultColl = (Collection) field.get(defaults);
+                Collection defaultColl = overwrite ? null : (Collection) field.get(defaults);
                 if (defaultColl == null) {
                     field.set(o, null);
                 } else {
@@ -2289,6 +2297,10 @@ public class WireMarshaller<T> {
 
         @Override
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException {
+            if (!read.isPresent()) {
+                super.readValue(o, defaults, read, overwrite);
+                return;
+            }
             Collection coll = (Collection) field.get(o);
             if (coll == null) {
                 coll = collectionSupplier.get();
@@ -2296,9 +2308,15 @@ public class WireMarshaller<T> {
             } else if (!coll.isEmpty()) {
                 coll.clear();
             }
-            boolean sequenced = read.sequence(coll, seqConsumer);
-            if (overwrite && !sequenced) {
-                field.set(o, null);
+            if (!read.sequence(coll, seqConsumer)) {
+                Collection defaultColl = overwrite ? null : (Collection) field.get(defaults);
+                if (defaultColl == null) {
+                    field.set(o, null);
+                } else {
+                    coll.clear();
+                    if (!defaultColl.isEmpty())
+                        coll.addAll(defaultColl);
+                }
             }
         }
 
@@ -2400,6 +2418,10 @@ public class WireMarshaller<T> {
 
         @Override
         protected void readValue(Object o, Object defaults, ValueIn read, boolean overwrite) throws IllegalAccessException, InvalidMarshallableException {
+            if (!read.isPresent()) {
+                super.readValue(o, defaults, read, overwrite);
+                return;
+            }
             Map map = (Map) field.get(o);
             if (map == null) {
                 map = collectionSupplier.get();
@@ -2407,8 +2429,16 @@ public class WireMarshaller<T> {
             } else if (!map.isEmpty()) {
                 map.clear();
             }
-            if (read.marshallableAsMap(keyType, valueType, map) == null)
-                field.set(o, null);
+            if (read.marshallableAsMap(keyType, valueType, map) == null) {
+                Map defaultMap = overwrite ? null : (Map) field.get(defaults);
+                if (defaultMap == null) {
+                    field.set(o, null);
+                } else {
+                    map.clear();
+                    if (!defaultMap.isEmpty())
+                        map.putAll(defaultMap);
+                }
+            }
         }
 
         @Override
