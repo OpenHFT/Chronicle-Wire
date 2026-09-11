@@ -9,10 +9,12 @@ import net.openhft.chronicle.bytes.internal.NoBytesStore;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -530,8 +532,6 @@ public class RawWireTest extends WireTestCommon {
     }
 
     // Test case for writing and reading byte arrays using a Wire
-    // Currently, this test is ignored due to an UnsupportedOperationException
-    @Ignore("todo fix :currently using NoBytesStore so will fail with UnsupportedOperationException")
     @SuppressWarnings("rawtypes")
     @Test
     public void testBytes() {
@@ -541,18 +541,38 @@ public class RawWireTest extends WireTestCommon {
             allBytes[i] = (byte) i;
 
         // Writing byte arrays to the wire
-        wire.write().bytes(NoBytesStore.NO_BYTES)
-                .write().bytes(Bytes.wrapForRead("Hello".getBytes(ISO_8859_1)))
-                .write().bytes(Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1)))
-                .write().bytes(allBytes);
-       // System.out.println(bytes.toDebugString());
+        wire.write().bytes(NoBytesStore.NO_BYTES);
+        Bytes<?> hello = Bytes.wrapForRead("Hello".getBytes(ISO_8859_1));
+        try {
+            wire.write().bytes(hello);
+        } finally {
+            hello.releaseLast();
+        }
+        Bytes<?> quotable = Bytes.wrapForRead("quotable, text".getBytes(ISO_8859_1));
+        try {
+            wire.write().bytes(quotable);
+        } finally {
+            quotable.releaseLast();
+        }
+        wire.write().bytes(allBytes);
         @NotNull NativeBytes allBytes2 = nativeBytes();
-        // Reading and validating byte arrays from the wire
-        wire.read().bytes(b -> assertEquals(0, b.readRemaining()))
-                .read().bytes(b -> assertEquals("Hello", b.toString()))
-                .read().bytes(b -> assertEquals("quotable, text", b.toString()))
-                .read().bytes(allBytes2);
-        assertEquals(Bytes.wrapForRead(allBytes), allBytes2);
+        try {
+            // Reading and validating byte arrays from the wire
+            List<String> actual = new ArrayList<>();
+            wire.read().bytes(b -> actual.add(b.toString()))
+                    .read().bytes(b -> actual.add(b.toString()))
+                    .read().bytes(b -> actual.add(b.toString()))
+                    .read().bytes(allBytes2);
+            assertEquals(Arrays.asList("", "Hello", "quotable, text"), actual);
+            Bytes<?> expected = Bytes.wrapForRead(allBytes);
+            try {
+                assertEquals(expected, allBytes2);
+            } finally {
+                expected.releaseLast();
+            }
+        } finally {
+            allBytes2.releaseLast();
+        }
     }
 
     // Test case for writing and reading custom Marshallable objects using a Wire

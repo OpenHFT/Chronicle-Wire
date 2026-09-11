@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
@@ -172,14 +173,41 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
     }
 
     @Test
-    public void objectRejectsMaxUnsignedLengthWithoutReadingNestedU8Array() {
-        Bytes<?> bytes = bytesLength32(0xFFFFFFFFL, BinaryWireCode.U8_ARRAY, 1, 2, 3);
+    public void valueInReadsUnsignedLength32() {
+        // Check unsigned decoding without asking a 32-bit JVM to allocate a multi-gigabyte byte store.
+        for (long length : new long[]{0x80000000L, 0xFFFFFFFFL}) {
+            Bytes<?> bytes = bytesLength32(length, BinaryWireCode.U8_ARRAY, 1, 2, 3);
+            try {
+                assertEquals(length, new BinaryWire(bytes).getValueIn().readLength());
+                assertEquals(BinaryWireCode.U8_ARRAY, bytes.readUnsignedByte());
+                assertArrayEquals(new byte[]{1, 2, 3}, bytes.toByteArray());
+            } finally {
+                bytes.releaseLast();
+            }
+        }
+    }
+
+    @Test
+    public void objectRejectsTruncatedU8Array() {
+        Bytes<?> bytes = bytesLength32(5, BinaryWireCode.U8_ARRAY, 1, 2, 3);
         try {
             BinaryWire source = new BinaryWire(bytes);
+            assertThrows(BufferUnderflowException.class, () -> source.getValueIn().object());
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    public void objectReadsU8Array() {
+        Bytes<?> bytes = bytesLength32(4, BinaryWireCode.U8_ARRAY, 1, 2, 3);
+        try {
+            BytesStore<?, ?> value = (BytesStore<?, ?>) new BinaryWire(bytes).getValueIn().object();
             try {
-                source.getValueIn().object();
-                fail("Expected IORuntimeException for unsigned 32-bit object length");
-            } catch (BufferUnderflowException expected) {
+                assertArrayEquals(new byte[]{1, 2, 3}, value.toByteArray());
+                assertEquals(0, bytes.readRemaining());
+            } finally {
+                value.releaseLast();
             }
         } finally {
             bytes.releaseLast();
