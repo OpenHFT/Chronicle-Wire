@@ -403,7 +403,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.YAML,
-                () -> newTextMethodWriterInvocationHandler(tClass));
+                //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates
+                //! that forced-proxy YAML writers bind to the listener-selected output rather than the outer Wire.
+                out -> new TextMethodWriterInvocationHandler(tClass, out));
         builder.marshallableOut(this);
         return builder;
     }
@@ -418,6 +420,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     public DocumentContext writingDocument(boolean metaData) {
         if (writeContext == null)
             useBinaryDocuments();
+        //! WireContextListenerLifecycleTest#noOpListenerInitialisesLazyTextAndYamlWriteContexts and
+        //! #allConcreteWiresInvokeListenerBeforeFirstDataDocument demonstrate that YAML notifies
+        //! after lazy initialisation and before opening the application document.
+        notifyContextListenerIfNeeded(metaData);
         writeContext.start(metaData);
         return writeContext;
     }
@@ -931,7 +937,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     public void clear() {
-        reset();
+        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire demonstrates that
+        //! YAML clear rejects an active callback before mutating state.
+        checkCanResetContextListener();
+        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt demonstrates
+        //! why YAML clear performs state cleanup without invoking the context-advancing reset.
+        resetState();
     }
 
     /**
@@ -1100,6 +1111,22 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * Resets the state of the YamlWire instance, clearing all buffers and contexts.
      */
     public void reset() {
+        //! DocumentContextLifecycleTest#resetRejectsContextCountOverflowBeforeMutation demonstrates
+        //! that YAML checks count exhaustion before mutating its state.
+        checkCanAdvanceOutputContext();
+        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire establishes that a
+        //! running callback cannot be interrupted by reset-like operations.
+        checkCanResetContextListener();
+        resetState();
+        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt demonstrates
+        //! that YAML publishes the next context only after its state reset succeeds.
+        advanceOutputContext();
+        //! WireContextListenerLifecycleTest#resetReusesListenerForTheNextOutputContext demonstrates
+        //! that YAML re-arms notification only after its state reset succeeds.
+        resetContextListener();
+    }
+
+    private void resetState() {
         // Reset reading and writing contexts if they exist
         if (readContext != null)
             readContext.reset();
@@ -2501,11 +2528,17 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     public boolean writingIsComplete() {
-        return !writeContext.isNotComplete();
+        //! WireContextListenerLifecycleTest#lazyTextualWiresCanNotifyBeforeTheirFirstWriteContextExists
+        //! demonstrates that lifecycle inspection is valid before YAML creates its lazy write context.
+        return writeContext == null || !writeContext.isNotComplete();
     }
 
     @Override
     public void rollbackIfNotComplete() {
-        writeContext.rollbackIfNotComplete();
+        //! WireContextListenerLifecycleTest#rollbackBeforeFirstTextOrYamlDocumentIsHarmless and
+        //! #directWriteFailuresRollbackAndPoisonAcrossWiresAndEntryPoints distinguish null-safe
+        //! pre-initialisation cleanup from rollback of a real YAML document.
+        if (writeContext != null)
+            writeContext.rollbackIfNotComplete();
     }
 }

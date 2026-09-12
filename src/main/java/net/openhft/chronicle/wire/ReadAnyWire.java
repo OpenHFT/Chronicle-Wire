@@ -56,6 +56,13 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
         clear();
     }
 
+    @Override
+    public int contextCount() {
+        //! WireContextListenerLifecycleTest#readAnyRejectsContextListeners demonstrates that READ_ANY
+        //! has no single writable output context and therefore reports the unavailable sentinel.
+        return MarshallableOut.UNSET_CONTEXT;
+    }
+
     @NotNull
     @Override
     public BooleanValue newBooleanReference() {
