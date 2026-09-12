@@ -2979,6 +2979,8 @@ public class TextWire extends YamlWireOut<TextWire> {
             @Nullable String text = valueIn.text();
             if (text == null || Enum.class.isAssignableFrom(strategy.type()))
                 return text;
+            if (code == '\'' || code == '"')
+                return text;
             switch (text) {
                 // Interpretation for boolean values.
                 case "true":
