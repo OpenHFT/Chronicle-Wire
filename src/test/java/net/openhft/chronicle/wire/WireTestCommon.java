@@ -15,9 +15,13 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -25,6 +29,42 @@ import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings({"this-escape"})
 public class WireTestCommon {
+
+    /**
+     * Known test DTOs that still exercise field-based writes to final fields.
+     * New types are deliberately not matched and therefore fail their owning test.
+     */
+    private static final Set<String> LEGACY_FINAL_FIELD_READ_ALLOWLIST =
+            Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(
+                    "java.math.MathContext",
+                    "java.rmi.server.ObjID",
+                    "java.rmi.server.UID",
+                    "java.security.AllPermission",
+                    "java.time.ZoneRegion",
+                    "java.util.Currency",
+                    "java.util.SimpleTimeZone",
+                    "net.openhft.chronicle.wire.FloatDtoTest$Value",
+                    "net.openhft.chronicle.wire.ForwardAndBackwardCompatibilityMarshallableTest$MDTO2",
+                    "net.openhft.chronicle.wire.Issue341Test$MyComparableSerializable",
+                    "net.openhft.chronicle.wire.JsonWireDoubleAndFloatSpecialValuesAcceptanceTests$DoubleDto",
+                    "net.openhft.chronicle.wire.JsonWireDoubleAndFloatSpecialValuesAcceptanceTests$FloatDto",
+                    "net.openhft.chronicle.wire.MethodReaderArgumentsRecycleTest$MyDto",
+                    "net.openhft.chronicle.wire.MyTypes",
+                    "net.openhft.chronicle.wire.OverrideAValueTest$ParentHolder",
+                    "net.openhft.chronicle.wire.TestJsonIssue467$ResponseItem467",
+                    "net.openhft.chronicle.wire.TextWireTest$FieldWithEnum",
+                    "net.openhft.chronicle.wire.UsingTestMarshallableTest$MarshableFilter",
+                    "net.openhft.chronicle.wire.WiresTest$EnumThing",
+                    "net.openhft.chronicle.wire.bytesmarshallable.NestedGenericTest$ValueHolder",
+                    "net.openhft.chronicle.wire.bytesmarshallable.NestedGenericTest$ValueHolderDef",
+                    "net.openhft.chronicle.wire.dynenum.WireDynamicEnumTest$WDENum2",
+                    "net.openhft.chronicle.wire.dynenum.WireDynamicEnumTest$WDENums",
+                    "net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT1",
+                    "net.openhft.chronicle.wire.method.VanillaMethodReaderTest$MRT2",
+                    "net.openhft.chronicle.wire.recursive.ReferToBaseClass",
+                    "net.openhft.chronicle.wire.recursive.ReferToSameClass",
+                    "net.openhft.chronicle.wire.serializable.MonetaTest$NonScalarComparable"
+            )));
 
     // A thread dump to monitor thread states and detect unwanted thread creation
     private ThreadDump threadDump;
@@ -46,6 +86,18 @@ public class WireTestCommon {
         ignoreException("The incubating features are subject to change");
         ignoreException("NamedThreadFactory created here");
         ignoreException("Unable to find suitable cleaner service, falling back to using reflection");
+        ignoreException(k -> k.level == LogLevel.WARN && isAllowlistedFinalFieldRead(k.message),
+                "an explicitly allow-listed legacy final-field read");
+    }
+
+    private static boolean isAllowlistedFinalFieldRead(String message) {
+        if (message == null || !message.contains("field-based deserialisation"))
+            return false;
+        for (String type : LEGACY_FINAL_FIELD_READ_ALLOWLIST) {
+            if (message.startsWith(type + " final field '"))
+                return true;
+        }
+        return false;
     }
 
     // Activates the reference tracing before executing tests
