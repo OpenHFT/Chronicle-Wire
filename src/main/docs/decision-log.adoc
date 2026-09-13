@@ -118,3 +118,18 @@ Impact & Consequences ::
 Notes/Links ::
 ** `https://github.com/OpenHFT/Chronicle-Wire/issues/618`
 ** `https://github.com/OpenHFT/Chronicle-Wire/pull/619`
+
+=== [TEST-004] Preserve First-Attempt Unit-Test Failures
+
+Date :: 2026-09-12
+Decision Statement ::
+* Set Surefire `rerunFailingTestsCount` to the literal value `0`.
+* Command-line properties, including `-Dsurefire.rerunFailingTestsCount=3`, must not enable automatic retries.
+Rationale for Decision ::
+* An intermittent failure must retain its original outcome for investigation.
+Validation ::
+* A probe that fails first and would pass on retry must execute once and leave Maven failed.
+* Check inherited profiles in the effective POM and retain first-attempt results from lifecycle verification.
+Impact & Consequences ::
+* Explicitly recorded, bounded repeat runs remain useful for diagnosis.
+* CI must still handle reported failures when `maven.test.failure.ignore` allows later build steps to continue.

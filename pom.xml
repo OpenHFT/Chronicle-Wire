@@ -237,6 +237,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <!-- //! A fail-first probe must run once even when CI requests retries; a Maven property would allow overrides. -->
+                    <rerunFailingTestsCount>0</rerunFailingTestsCount>
                     <!-- required for Issue327Test.date -->
                     <systemPropertyVariables>
                         <user.timezone>UTC</user.timezone>
