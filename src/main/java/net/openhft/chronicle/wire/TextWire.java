@@ -2979,6 +2979,10 @@ public class TextWire extends YamlWireOut<TextWire> {
             @Nullable String text = valueIn.text();
             if (text == null || Enum.class.isAssignableFrom(strategy.type()))
                 return text;
+            //! BooleanScalarTypePreservationTest#quotedJsonBooleansRemainStrings shows that decoded text alone cannot distinguish
+            //! quoted Strings from bare Booleans. #singleQuotedBooleansRemainStrings requires the same guard for single quotes.
+            if (code == '"' || code == '\'')
+                return text;
             switch (text) {
                 // Interpretation for boolean values.
                 case "true":
