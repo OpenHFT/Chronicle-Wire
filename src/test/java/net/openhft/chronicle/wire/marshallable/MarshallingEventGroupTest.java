@@ -67,6 +67,7 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "    lifecycle: !net.openhft.chronicle.threads.EventLoopLifecycle NEW,\n" +
                     "    name: test/core-event-loop,\n" +
                     "    privateGroup: false,\n" +
+                    "    handlersFinished: false,\n" +
                     "    mediumHandlers: [    ],\n" +
                     "    newHandlers: [    ],\n" +
                     "    pauser: !net.openhft.chronicle.threads.LongPauser { minPauseTimeNS: 500000, maxPauseTimeNS: 20000000, pausing: false, minBusyNS: 0, minYieldNS: 50000, firstPauseNS: 9223372036854775807, pauseTimeNS: 500000, timePaused: 0, countPaused: 0, yieldStart: 0, pauseUntilNS: 0 },\n" +
