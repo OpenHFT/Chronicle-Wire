@@ -237,11 +237,8 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
         out.writeByte((byte) 0x66);
         try {
             BinaryWire source = new BinaryWire(bytes);
-            try {
-                source.getValueIn().bytes(out);
-            } catch (BufferUnderflowException e) {
-                // expected
-            }
+            assertThrows(BufferUnderflowException.class, () -> source.getValueIn().bytes(out));
+            assertEquals("Rejected input must leave the cleared output empty", 0, out.writePosition());
         } finally {
             out.releaseLast();
             bytes.releaseLast();
