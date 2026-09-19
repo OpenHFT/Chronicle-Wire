@@ -191,8 +191,8 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
     public void objectRejectsTruncatedU8Array() {
         Bytes<?> bytes = bytesLength32(5, BinaryWireCode.U8_ARRAY, 1, 2, 3);
         try {
-            BinaryWire source = new BinaryWire(bytes);
-            assertThrows(BufferUnderflowException.class, () -> source.getValueIn().object());
+            ValueIn valueIn = new BinaryWire(bytes).getValueIn();
+            assertThrows(BufferUnderflowException.class, valueIn::object);
         } finally {
             bytes.releaseLast();
         }
@@ -236,8 +236,8 @@ public class BinaryWireReadWithLengthTest extends WireTestCommon {
         Bytes<?> out = Bytes.allocateElasticOnHeap();
         out.writeByte((byte) 0x66);
         try {
-            BinaryWire source = new BinaryWire(bytes);
-            assertThrows(BufferUnderflowException.class, () -> source.getValueIn().bytes(out));
+            ValueIn valueIn = new BinaryWire(bytes).getValueIn();
+            assertThrows(BufferUnderflowException.class, () -> valueIn.bytes(out));
             assertEquals("Rejected input must leave the cleared output empty", 0, out.writePosition());
         } finally {
             out.releaseLast();
