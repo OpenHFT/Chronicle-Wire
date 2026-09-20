@@ -423,6 +423,31 @@
             </plugin>
 
         </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>none</phase>
+                        </execution>
+                        <!-- //! Keep source attachment without source:jar forking generate-sources and repeating validation.
+                             Adding a second goal to attach-sources would retain the inherited fork. The replacement preserves
+                             source contents and normal lifecycle checks; no unit test distinguishes these build invocations.
+                             Qualification compares source/runtime entries and checks the lifecycle plugin execution counts. -->
+                        <execution>
+                            <id>attach-sources-no-fork</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
     <scm>
