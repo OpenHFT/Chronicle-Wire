@@ -1,0 +1,607 @@
+# Static FIX-292 isolation snapshot, 2026-09-20. Provisional entries require review before removal.
+# references changed/named test fixture
+net/openhft/chronicle/wire/AbstractClassGeneratorTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/AbstractCommonMarshallableTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/AbstractFieldTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/AbstractMarshallableCfgTest.java
+# Open PRs #913
+net/openhft/chronicle/wire/AbstractUntypedFieldTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/Base32LongConverterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/Base64LongConverterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/Base85LongConverterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BinaryInTextTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BinaryMethodWriterInvocationHandlerTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BinaryMultiByteStringTruncationTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BinaryToTextTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BinaryWire2Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BinaryWireAnchorTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BinaryWireHighCodeTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BinaryWireNestedDocumentTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BinaryWireNumbersTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BinaryWirePerfTest.java
+# Open PRs #1292
+net/openhft/chronicle/wire/BinaryWireReadWithLengthTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BinaryWireScalarCoverageTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BinaryWireStringInternerTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BinaryWireTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BinaryWireWithMappedBytesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BitSetTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BooleanContainerFieldTypePreservationTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BooleanScalarTypePreservationTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BracketsOnJSONWireTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BytesMarshallableCompatibilityTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/BytesReferenceCountingTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/CSVBytesMarshallableTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/CSVWireTest.java
+# process-global-setting
+net/openhft/chronicle/wire/ChainedMethodsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/CharSequenceObjectMapTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ChronicleBitSetTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ClassAliasPoolTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ConvertersEdgeTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/CopyTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/DefaultMarshallerTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/DefaultValueInAdditionalCasesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/DefaultValueInCoverageTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/DefaultValueInEdgeCasesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/DeserializeFromNakedFileTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/DocumentContextLifecycleTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/DocumentContextTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/DoubleTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ElasticByteBufferTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ElasticBytesCapacityTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/EmbeddedBytesMarshallableTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/EnumSetMarshallingTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/EnumTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/EscapeCharsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/FIX42Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/FileMarshallableOutValidationTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/FloatDtoTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ForwardAndBackwardCompatibilityMarshallableTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ForwardAndBackwardCompatibilityTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/GenerateJsonSchemaMainTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/GenerateMethodBridgeTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/GenerateMethodDelegateTest.java
+# process-global-setting
+net/openhft/chronicle/wire/GenerateMethodWriter2CoverageTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/GenerateMethodWriterMultiInterfaceTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/GenericMethodsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/HashWireTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/HexDumpTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/IdentifierLongConverterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/IgnoreHighOrderBitsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/InnerMapTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/InvalidYamWithCommonMistakesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/Issue341Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/JSONEmptySequencesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/JSONLCoverageTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/JSONLTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/JSONNanTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/JSONTypesWithEnumsAndBoxedTypesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/JSONTypesWithMapsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/JSONWireDTOTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/JSONWireMiscTest.java
+# Open PRs #926
+net/openhft/chronicle/wire/JSONWireTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/JSONWireTypesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/JSONWireWithListsTest.java
+# Open PRs #1293
+net/openhft/chronicle/wire/JsonWireDoubleAndFloatSpecialValuesAcceptanceTests.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/KubernetesYamlTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/LongArrayValueBitSetMoreOpsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/LongArrayValueBitSetOperationsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/LongConversionTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/LongValueBitSetMoreOpsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/LongValueBitSetOperationsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/Marshallable2Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MarshallableCfgResetTest.java
+# fixed-port-or-socket-fixture
+net/openhft/chronicle/wire/MarshallableOutBuilderTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MarshallableTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MessageHistoryTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MessagePathClassifierTest.java
+# process-global-setting
+net/openhft/chronicle/wire/MethodReaderArgumentsRecycleProxyTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MethodReaderArgumentsRecycleTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MethodReaderBuilderExceptionHandlerTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MethodReaderChainedInterceptedGenericInterfaceTest.java
+# process-global-setting
+net/openhft/chronicle/wire/MethodReaderDelegationTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MethodReaderInterceptorReturnsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MethodReaderMethodIdsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MethodReaderNonStandardInstancesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MethodReaderSuperInterfaceForSeveralReturnTypesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MethodWriterBytesTest.java
+# process-global-setting
+net/openhft/chronicle/wire/MethodWriterCodegenToggleTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MethodWriterHistoryTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MethodWriterNestedReturnTypeTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MethodWriterReaderDispatchTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MethodWriterReaderSimpleIntegrationTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MethodWriterStringTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MethodWriterVagueTypesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MicroLongConverterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MicroTimestampLongConverterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/MilliTimestampLongConverterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/NanoLongConverterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/NanoTimestampLongConverterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/NestedMapsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/NullContainerYamlTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/OutOfOrderTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/OverrideAValueTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/PrimArraysTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/PrimitiveTypeWrappersTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ProjectTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/QueryWireRoundTripTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/QueryWireTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/RFCExamplesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/RawWireEdgeCaseTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/RawWireRoundTripTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/RawWireTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ReadAnyWireDetectionTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ReadAnyWireTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ReadDocumentContextTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ReadOneTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ReadmeChapter1Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ReadmePojoTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ScalarTypePreservationTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/SequenceTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/SerializableObjectTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ShortTextLongConverterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/SkipValueTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/SmallDoublesMarshallingTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/StrangeTextCombinationTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/StringConsumerMarshallableOutTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/TextBinaryWireTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/TextCompatibilityTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/TextDocumentTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/TextSkipValueTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/TextWireAgitatorTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/TextWireCompatibilityTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/TextWireEdgeCaseTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/TextWireTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/TextWireTypeArrayTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/TextWithArraysTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ThrowableTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/TimestampLongConverterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/TimestampLongConverterZoneIdsTest.java
+# process-global-setting
+net/openhft/chronicle/wire/TimestampLongConverterZonedIdsConfigTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/TriviallyCopyableTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/TupleInvocationHandlerTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/UnicodeStringTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/UnknownEnumTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/UnknownFieldsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/UnsupportedChangesTest.java
+# process-global-setting
+net/openhft/chronicle/wire/UpdateInterceptorReturnTypeTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/UsingTestMarshallableTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ValueInApisNegativeTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ValueInArrayReadersTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ValueInBestEffortTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ValueInObjectFallbackTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ValueInSequenceBoundariesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/ValueOutMapTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/VanillaMessageHistoryRoundTripTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/VanillaMessageHistoryTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/VanillaMethodReaderTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/VanillaMethodWriterBuilderOptionsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/VanillaMethodWriterBuilderVerboseTypesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireCollectionsAndMapsTest.java
+# process-global-setting
+net/openhft/chronicle/wire/WireContextListenerLifecycleTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireDumperTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireInternalInternTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireInternalTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireInternerAndDumpTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireMarshallerDeepGraphTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireMarshallerTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireNumberFormatsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireObjectStreamAdapterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireParserTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireResetTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireResourcesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireRoundTripParamTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireScalarEdgeCasesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireSerializedLambdaTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireStringCollectionTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireTextBugTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireToOutputStreamTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireTypeConverterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WireTypeTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WiresFromFileTest.java
+# process-global-setting
+net/openhft/chronicle/wire/WiresTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WiresUtilityTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WordsLongConverterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WriteDocumentContextTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/WriteOverEOFTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/YamlAnchorCoverageTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/YamlAnchorExamplesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/YamlAnchorSimpleDemoTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/YamlSpecTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/YamlSpecificationTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/YamlSpecificationTextWireTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/YamlTokeniserTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/YamlValueOutFormattingBranchesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/YamlWireTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/bytesmarshallable/BytesMarshallableTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/bytesmarshallable/NestedGenericTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/bytesmarshallable/PerfRegressionTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/compact/DotNetTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/converter/Base64Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/converter/NanoTimeTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/domestic/streaming/StreamsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/domestic/streaming/reduction/CollectorTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/domestic/streaming/reduction/CountAccumulationTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/domestic/streaming/reduction/LastIndexSeenTailerTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/domestic/streaming/reduction/LastIndexSeenTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/domestic/streaming/reduction/LastMarketDataPerSymbolTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/domestic/streaming/reduction/MethodWriterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/domestic/streaming/reduction/MinMaxLastMarketDataPerSymbolTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/domestic/streaming/streams/StreamsDemoTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/domestic/streaming/streams/StreamsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/dynenum/WireDynamicEnumTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/internal/MethodWriterClassNameGeneratorTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/internal/VanillaFieldInfoTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/internal/WireTypeConverterWithTuplesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/internal/stream/StreamsUtilTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/io/SyncableMethodWriterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/issue/Issue277Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/issue/Issue327Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/issue/Issue328Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/issue/Issue344Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/issue/Issue609Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/issue/Issue620Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/issue/Issue739Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/issue/Issue751Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/issue/Issue844Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/issue/JSON222IndividualTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/issue/JSON222Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/issue/JSON322Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/issue/WireBug35Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/issue/WireBug37Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/issue/WireBug38Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/issue/WireBug39Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/java17/NestedTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/map/MapCustomTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/map/MapMarshallableTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/map/MapWireTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/ByteBufferMarshallingTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/BytesUsageTest.java
+# Open PRs #781, #782
+net/openhft/chronicle/wire/marshallable/CNFREOnMissingClassTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/CompareNaNTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/EnumWireTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/FieldInfoTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/JSONWithAMapTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/MarshallableWireTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/MarshallableWithOverwriteFalseTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/MarshallingEventGroupTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/NullCollectionWithOverwriteFalseTest.java
+# affinity-or-global-handler
+net/openhft/chronicle/wire/marshallable/NullFieldMarshallingTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/StringBuilderArrayTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/This0AsTransientTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/ThreeSequenceTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/TriviallyCopyableMarketDataTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/TwoArraysTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/UnknownDatatimeTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/WithDefaultsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/marshallable/WithSubstitutionTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/method/BrokenChainTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/method/DefaultMethodHandlingTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/method/GenerateMethodWriterInheritanceTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/method/GenericMethodWriterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/method/HandleSkippedValueReadsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/method/MarshallableMethodReaderTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/method/MethodIdTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/method/MethodReaderWithHistoryTest.java
+# process-global-setting
+net/openhft/chronicle/wire/method/MethodWriter2Test.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/method/MethodWriterByInterfaceTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/method/MethodWriterMarshallableTest.java
+# process-global-setting
+net/openhft/chronicle/wire/method/MethodWriterProxy2Test.java
+# process-global-setting
+net/openhft/chronicle/wire/method/MethodWriterProxyTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/method/MethodWriterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/method/SkipsIgnoresEveryThingTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/method/VanillaMethodReaderHierarchyTest.java
+# affinity-or-global-handler
+net/openhft/chronicle/wire/method/VanillaMethodReaderTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/method/YamlTextWireTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/passthrough/GenericPassTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/passthrough/PassThroughTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/recursive/RecursiveTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/reordered/ReorderedTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/reuse/ByteArrayResuseTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/reuse/NestedClassTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/reuse/WireCollectionTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/security/ApacheStructExploitTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/serializable/MonetaTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/serializable/SerializableWireTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/type/conversions/binary/ConventionsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/wire/utils/JavaSourceCodeFormatterTest.java
