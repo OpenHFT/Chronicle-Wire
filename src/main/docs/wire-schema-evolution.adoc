@@ -22,13 +22,30 @@ Evolution is managed by how these class definitions change and how the chosen `W
 
 This document delves into the mechanisms Chronicle Wire employs for schema evolution, the role of different wire formats and annotations, and strategies for managing data model changes effectively.
 
-== Null Collection and Map Fields
+[#container-field-input]
+== Collection, EnumSet and Map Fields: Absent, Null and Empty Input
 
-For an explicitly null collection or map, `Wires.readMarshallable` sets the field
-to null when `overwrite` is `true`. When `overwrite` is `false`, it restores the
-field's default value, which may be null, empty or populated. This applies to
-String collections, other collections, EnumSets and Maps. Empty input containers
-remain empty rather than restoring defaults.
+`WireMarshaller` reads `Collection`, `EnumSet` and `Map` fields the same way, whatever the element type.
+The _declared default_ is the value the field holds after the no-argument constructor, so it may be null, empty or populated.
+`overwrite` is the flag passed to `Wires.readMarshallable(Object, WireIn, boolean)`.
+`Marshallable.readMarshallable` passes `true` and `AbstractMarshallableCfg` passes `false`.
+
+[cols="2,3,3",options="header"]
+|===
+| Input field | `overwrite=false` | `overwrite=true`
+| Absent | Keeps the destination's current value | Restores the declared default
+| Present and null | Restores the declared default | Sets null
+| Present and empty | Sets empty | Sets empty
+| Present and populated | Replaces the contents with the input | Replaces the contents with the input
+|===
+
+A restored container is a separate instance from the defaults and from every other destination.
+Its elements, keys and values are copied by reference, so a mutable element is still shared with the defaults.
+A reused destination keeps nothing from an earlier read, other than in the absent, `overwrite=false` case above.
+
+NOTE: `YamlWire` (`WireType.YAML_ONLY`) reads in input order.
+For an ordinary DTO it resets an absent field to its declared default even when `overwrite` is `false`.
+A class that overrides `unexpectedField`, which includes every `AbstractMarshallableCfg`, keeps the destination's value as the table says.
 
 == Mechanisms in Self-Describing Formats
 
@@ -132,16 +149,10 @@ Secondary Mechanism :: When there is no default constructor.
 
 // Role of `@DefaultValue` :: The `@DefaultValue` annotation is primarily for documentation or for use by external tools/code generators. Chronicle Wire itself does *not* automatically parse the string in `@DefaultValue` and inject it during deserialisation if a field is missing from the stream. Custom logic in `readMarshallable` or a post-processing step would be needed to implement such behaviour.
 
-*Collections :: If a `List` or `Map` field is defined in the Java class but missing in the input stream, it will be initialised to `null`.
-It is the responsibility of the application logic (e.g., in a constructor or a custom `readMarshallable` method) to initialise it to an empty collection if that's the desired default behaviour.
-+
-[source,java]
-----
-// In readMarshallable or constructor:
-if (this.myList == null) {
-    this.myList = new ArrayList<>();
-}
-----
+*Collections :: A `Collection`, `EnumSet` or `Map` field that is missing in the input stream follows the same rule as any other field.
+It is restored to its declared default, so a field initialised inline to an empty collection is empty after the read,
+and a field with no initialiser is null.
+See <<container-field-input>> for explicit nulls and for reads with `overwrite` disabled.
 
 === Reordering Fields
 
