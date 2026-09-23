@@ -37,6 +37,14 @@ import static net.openhft.chronicle.wire.SerializationStrategies.MARSHALLABLE;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface ValueIn {
+    default Object getObjectToInject() {
+        return null;
+    }
+
+    default void resetObjectToInject() {
+
+    }
+
     /**
      * A {@link Consumer} that ignores the supplied {@code ValueIn}.  Useful as a
      * no-op placeholder.
