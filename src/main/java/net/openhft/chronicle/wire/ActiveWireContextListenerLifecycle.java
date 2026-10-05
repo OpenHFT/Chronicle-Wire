@@ -12,16 +12,16 @@ import org.jetbrains.annotations.NotNull;
  * <p>A failed callback poisons the current context. It is not retried because it may already have
  * committed context records, and application data is rejected until the wire is reset.</p>
  */
-final class ActiveWireContextListenerLifecycle<T> implements WireContextListenerLifecycle {
-    private final Class<T> writerType;
-    private final MarshallableOut.ContextListener<? super T> listener;
+final class ActiveWireContextListenerLifecycle implements WireContextListenerLifecycle {
+    private final Class<?> writerType;
+    private final MarshallableOut.ContextListener<?> listener;
     private boolean started;
     private State state = State.READY;
     private boolean suppliedDocumentOpening;
     private boolean listenerRolledBack;
     private Throwable failure;
 
-    ActiveWireContextListenerLifecycle(Class<T> writerType, MarshallableOut.ContextListener<? super T> listener) {
+    ActiveWireContextListenerLifecycle(Class<?> writerType, MarshallableOut.ContextListener<?> listener) {
         this.writerType = writerType;
         this.listener = listener;
     }
@@ -157,9 +157,10 @@ final class ActiveWireContextListenerLifecycle<T> implements WireContextListener
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     private void notifyListener(AbstractWire wire) {
-        final VanillaMethodWriterBuilder<T> builder = (VanillaMethodWriterBuilder<T>) wire.methodWriterBuilder(writerType);
+        final VanillaMethodWriterBuilder builder =
+                (VanillaMethodWriterBuilder) wire.methodWriterBuilder(writerType);
         builder.marshallableOut(new ListenerOutput(wire));
-        listener.onNewContext(builder.build());
+        ((MarshallableOut.ContextListener) listener).onNewContext(builder.build());
     }
 
     private final class ListenerOutput implements MarshallableOut {
