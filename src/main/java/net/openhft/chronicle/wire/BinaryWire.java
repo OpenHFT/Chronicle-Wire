@@ -243,23 +243,11 @@ public class BinaryWire extends AbstractWire implements Wire {
      */
     @Override
     public void reset() {
-        //! DocumentContextLifecycleTest#resetRejectsContextCountOverflowBeforeMutation demonstrates
-        //! that Binary checks count exhaustion before mutating its state.
-        checkCanAdvanceOutputContext();
-        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire establishes that a
-        //! running callback cannot be interrupted by reset-like operations.
-        checkCanResetContextListener();
         writeContext.reset();
         readContext.reset();
         valueIn.resetState();
         valueOut.resetState();
         bytes.clear();
-        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt demonstrates
-        //! that Binary publishes the next context only after its state reset succeeds.
-        advanceOutputContext();
-        //! WireContextListenerLifecycleTest#resetReusesListenerForTheNextOutputContext demonstrates
-        //! that Binary re-arms notification only after its state reset succeeds.
-        resetContextListener();
     }
 
     @Override
@@ -325,9 +313,6 @@ public class BinaryWire extends AbstractWire implements Wire {
      */
     @Override
     public void clear() {
-        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire demonstrates that
-        //! Binary clear rejects an active callback before mutating state.
-        checkCanResetContextListener();
         bytes.clear();
         valueIn.resetState();
         valueOut.resetState();
@@ -350,9 +335,6 @@ public class BinaryWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
-        //! WireContextListenerLifecycleTest#allConcreteWiresInvokeListenerBeforeFirstDataDocument
-        //! demonstrates that Binary enters the shared lifecycle before opening application output.
-        notifyContextListenerIfNeeded(metaData);
         writeContext.start(metaData);
         return writeContext;
     }
