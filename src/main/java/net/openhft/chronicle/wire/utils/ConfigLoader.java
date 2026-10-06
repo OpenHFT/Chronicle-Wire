@@ -4,6 +4,7 @@
 package net.openhft.chronicle.wire.utils;
 
 import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.wire.DependencyResolver;
 import net.openhft.chronicle.wire.TextWire;
 
 import java.io.IOException;
@@ -63,4 +64,22 @@ public enum ConfigLoader {
     public static <T> T loadWithProperties(String fileAsString, Properties properties) {
         return (T) TextWire.from(replaceTokensWithProperties(fileAsString, properties)).readObject();
     }
+
+    public static <T> T loadFromFile(String filename, DependencyResolver resolver) throws IOException {
+        return loadFromFile(ConfigLoader.class, filename, resolver);
+    }
+
+    public static <T> T loadFromFile(Class<?> classLoader, String filename, DependencyResolver resolver) throws IOException {
+        return load(loadFile(classLoader, filename), resolver);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T load(String fileAsString, DependencyResolver resolver) {
+        // temporarily not replacing the tokens with properties for testing reasons
+        // TODO: will eventually add an overloaded byte's replaceTokensWithProperties() method and pass in
+        //  the dependency resolver's map - so then can check if the map contains the object before
+        //  incorrectly throwing an exception there
+        return  (T) TextWire.from(fileAsString, resolver).readObject();
+    }
+
 }

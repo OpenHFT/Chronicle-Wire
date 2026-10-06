@@ -8,7 +8,10 @@ import net.openhft.chronicle.bytes.ref.*;
 import net.openhft.chronicle.bytes.util.Compression;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.io.*;
+import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.threads.ThreadLocalHelper;
@@ -109,6 +112,10 @@ public class TextWire extends YamlWireOut<TextWire> {
     // Flag to determine if strict parsing rules are applied
     private boolean strict = false;
 
+    private DependencyResolver dependencyResolver;
+
+    private Object objectToInject;
+
     /**
      * Default constructor initializing the `TextWire` with elastic on-heap bytes, assume text documents.
      */
@@ -158,6 +165,26 @@ public class TextWire extends YamlWireOut<TextWire> {
     @NotNull
     public static TextWire from(@NotNull String text) {
         return new TextWire(Bytes.from(text));
+    }
+
+    /**
+     * Factory method to create a `TextWire` from a string representation
+     * that is ready for dependency injection
+     *
+     * @param text String representation of the wire format.
+     * @param resolver Instance of the dependency resolver
+     * @return A new instance of `TextWire`.
+     */
+    @NotNull
+    public static TextWire from(@NotNull String text, DependencyResolver resolver) {
+        TextWire textWire = from(text);
+        textWire.setDependencyResolver(resolver);
+
+        return textWire;
+    }
+
+    private void setDependencyResolver(DependencyResolver dependencyResolver) {
+        this.dependencyResolver = dependencyResolver;
     }
 
     /**
@@ -852,6 +879,15 @@ public class TextWire extends YamlWireOut<TextWire> {
     }
 
     /**
+     * Peeks the unsigned byte "offset" many bytes after the current read position without advancing the pointer.
+     *
+     * @return The unsigned byte "offset" many bytes after the current read position as an integer.
+     */
+    int peekCodeByOffset(int offset) {
+        return bytes.peekUnsignedByte(bytes.readPosition() + offset);
+    }
+
+    /**
      * returns {@code true} if the next string is {@code str}
      *
      * @param source string
@@ -914,6 +950,7 @@ public class TextWire extends YamlWireOut<TextWire> {
         }
 
         // Iterate while bytes remain.
+//        System.out.println("FFF Start of outer loop!!");
         while (bytes.readRemaining() > 0) {
             long position = bytes.readPosition();
             // at the current position look for the field.
@@ -922,6 +959,21 @@ public class TextWire extends YamlWireOut<TextWire> {
             valueIn.consumeAny = false;
             // might have changed due to readField in JSONWire
             curr = valueIn.curr();
+
+            int offset = 0;
+            // iterate until the end of this field's value
+            System.out.println("GGG Start of loop!!");
+            int peeked = peekCodeByOffset(offset);
+            while (peeked != ',' && peeked != -1) {
+//                System.out.println("1: " + (char)peekCodeOffset(offset));
+                if (peeked == '$' && peekCodeByOffset(offset + 1) == '{') {
+                    parseDependencyAndSetObjectToInject(offset);
+                    break;
+                }
+
+                offset++;
+                peeked = peekCodeByOffset(offset);
+            }
 
             // If the field matches the required key, return its value.
             if (StringUtils.equalsCaseIgnore(stringBuilder, keyName))
@@ -942,6 +994,35 @@ public class TextWire extends YamlWireOut<TextWire> {
 
         // Continuation of the read operation (possibly handles edge cases or fallbacks).
         return read2(defaultValue, curr, stringBuilder, keyName);
+    }
+
+    /**
+     * Parses the ${...} variable by peeking the byte buffer, then checks if an associated object
+     * exists in the dependency resolver
+     *
+     * @param offset The number of bytes away from the start of the buffer that the byte should be peeked
+     */
+    private void parseDependencyAndSetObjectToInject(int offset) {
+        offset += 2;    // skips past the ${
+        StringBuilder sb2 = acquireStringBuilder2();
+        int peeked = peekCodeByOffset(offset);
+
+        while (peeked != '}' && peeked != -1) { // will be -1 if reaches end of buffer
+            sb2.append((char) peeked);
+            offset++;
+            peeked = peekCodeByOffset(offset);
+        }
+
+        String key = sb2.toString().trim();
+//        System.out.println("CCC: key found: " + key);
+
+        // TODO: add a check here to see if the dependencyResolver is null and do the appropriate action
+
+        if (dependencyResolver.containsDependencyKey(key)) {
+            this.objectToInject = dependencyResolver.resolve(key);
+        } else {
+            this.objectToInject = "DEPENDENCY_OBJECT_MISSING_FROM_DEPENDENCY_RESOLVER";
+        }
     }
 
     /**
@@ -1306,6 +1387,15 @@ public class TextWire extends YamlWireOut<TextWire> {
      * It manages a stack of states, allowing for nested or sequential value reading.
      */
     public class TextValueIn implements ValueIn {
+        @Override
+        public Object getObjectToInject() {
+            return objectToInject;
+        }
+
+        @Override
+        public void resetObjectToInject() {
+            objectToInject = null;
+        }
 
         /**
          * Stack maintaining the states of value readings,
@@ -1713,8 +1803,9 @@ public class TextWire extends YamlWireOut<TextWire> {
                     // Skip the '$' character
                     bytes.readSkip(1);
                     // If it's a variable (e.g., ${var}), consume until the ending curly brace
-                    if (peekCode() == '{')
-                        bytes.parse8bit(StopCharTesters.CURLY_STOP);
+                    if (peekCode() == '{') {
+                        System.out.println("dependencyToInject: {" + bytes.parse8bit(StopCharTesters.CURLY_STOP) + "}");
+                    }
                     break;
                 }
                 case '{': {
@@ -2530,7 +2621,10 @@ public class TextWire extends YamlWireOut<TextWire> {
                 bytes.readLimit(newLimit);
                 bytes.readSkip(1); // skip the {
                 consumePadding();
+
+                System.out.println("Object before reading: " + object);
                 object = strategy.readUsing(null, object, this, BracketType.MAP);
+                System.out.println("Object after reading: " + object + "\n");
 
             } finally {
                 bytes.readLimit(limit);
