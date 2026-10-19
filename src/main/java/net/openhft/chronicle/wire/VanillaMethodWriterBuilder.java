@@ -200,6 +200,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * {@link Proxy} if generation is disabled or fails.
      *
      * @return a new proxy implementing {@code T}
+     * @throws ClosedIllegalStateException if the output reports closure during generated writer construction
      * @throws NullPointerException if {@link #marshallableOut(MarshallableOut)} was not configured
      */
     @NotNull
@@ -251,6 +252,8 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     /**
      * Returns the method writer proxy instance. Tries to reuse or generate a
      * compiled class before falling back to {@link Proxy}.
+     *
+     * @throws ClosedIllegalStateException if the output reports closure during generated writer construction
      */
     @NotNull
     @Override

@@ -38,8 +38,13 @@ signatures, and replication ledgers remain stable between JVMs.
 |FN-004
 |Method writer/reader infrastructure shall transform strongly-typed service interfaces into wire traffic
 without reflection-induced garbage, while supporting interceptors and chained adapters.
+If generated writer construction encounters `ClosedIllegalStateException` from its output,
+it shall propagate the same exception without marking the generated class as a compilation
+failure or publishing a proxy. This applies to first and subsequent construction attempts;
+it does not add an output probe or coordinate concurrent closure. Explicitly disabled
+generation and genuine compilation failures retain the existing proxy fallback.
 |`MethodReader*Test.java`, `VanillaMethodReaderTest.java`, `MethodWriterReaderSimpleIntegrationTest.java`,
-and `GenerateMethodWriter2CoverageTest.java`.
+`GenerateMethodWriter2CoverageTest.java`, and `MethodWriterClosedOutputTest.java`.
 
 |FN-005
 |Low-latency converters (e.g., long and time converters) must provide zero-copy parsing and formatting

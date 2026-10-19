@@ -11,6 +11,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -46,7 +49,7 @@ public class MethodWriterClosedOutputTest extends WireTestCommon {
         try {
             Wire wire = new BinaryWire(bytes);
             ColdEvents writer = wire.methodWriter(ColdEvents.class);
-            assertFalse("an output failure must not poison the generated class cache",
+            assertFalse("healthy output must still produce a generated writer",
                     Proxy.isProxyClass(writer.getClass()));
             writer.event("after failure");
             List<String> seen = new ArrayList<>();
@@ -101,14 +104,38 @@ public class MethodWriterClosedOutputTest extends WireTestCommon {
                     new BinaryWire(bytes).methodWriterBuilder(type);
             // Model an output supplier failing after code generation, without introducing a Queue dependency.
             builder.marshallableOutSupplier(() -> { throw closed; });
+            Throwable failure = null;
             try {
                 builder.build();
-                fail("closed output must be reported to the caller, not replaced with a proxy");
-            } catch (ClosedIllegalStateException actual) {
-                assertSame("preserve the original close diagnostic", closed, actual);
+            } catch (Throwable actual) {
+                failure = actual;
             }
+            // Class.forName can bypass this cache on the normal loader. A healthy follow-up
+            // writer alone therefore cannot detect the poisoned COMPILE_FAILED entry.
+            assertCacheNotPoisoned(builder);
+            assertSame("closed output must propagate its original diagnostic, not publish a proxy", closed, failure);
         } finally {
             bytes.releaseLast();
         }
     }
+
+    private static void assertCacheNotPoisoned(VanillaMethodWriterBuilder<?> builder) {
+        try {
+            Field cacheField = VanillaMethodWriterBuilder.class.getDeclaredField("classCache");
+            Field packageField = VanillaMethodWriterBuilder.class.getDeclaredField("packageName");
+            Field failedField = VanillaMethodWriterBuilder.class.getDeclaredField("COMPILE_FAILED");
+            Method className = VanillaMethodWriterBuilder.class.getDeclaredMethod("getClassName");
+            cacheField.setAccessible(true);
+            packageField.setAccessible(true);
+            failedField.setAccessible(true);
+            className.setAccessible(true);
+            String key = packageField.get(builder) + "." + className.invoke(builder);
+            Map<?, ?> cache = (Map<?, ?>) cacheField.get(null);
+            assertNotSame("output lifetime must not mark the reusable writer class as COMPILE_FAILED",
+                    failedField.get(null), cache.get(key));
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError(e);
+        }
+    }
+
 }
