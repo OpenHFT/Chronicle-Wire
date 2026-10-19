@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.util.Builder;
 import net.openhft.chronicle.core.util.GenericReflection;
 import net.openhft.chronicle.wire.internal.MethodWriterClassNameGenerator;
@@ -307,6 +308,10 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                 }
             }
         } catch (MethodWriterValidationException e) {
+            throw e;
+        } catch (ClosedIllegalStateException e) {
+            // An output lifetime failure does not invalidate the generated class.
+            // Propagate it rather than publishing a proxy bound to the same closed output.
             throw e;
         } catch (Throwable e) {
             // Log the exception and fallback to proxy method writer

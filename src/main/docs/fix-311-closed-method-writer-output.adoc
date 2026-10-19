@@ -1,0 +1,17 @@
+= Method writer construction with a closed output
+
+When generated method writer construction encounters a
+`ClosedIllegalStateException` from its output supplier, propagate that same
+exception to the caller. Do not return a proxy writer or mark the generated
+class as having failed compilation: an output's lifetime is independent of the
+generated class, which remains reusable with a healthy output.
+
+This applies when `VanillaMethodWriterBuilder.createInstance()` tries a newly
+generated or previously loaded class. It does not add an extra output probe,
+change explicitly disabled code generation, or make writer construction atomic
+with a concurrent output close. Callers must still coordinate resource lifetime.
+Other compilation failures retain the existing fallback behaviour.
+
+The regression uses a failing output supplier, checks exception identity and a
+subsequent healthy writer's recorded value, and retains a working proxy control.
+Related investigation: FIX-311 / client support ticket CS00003888.
