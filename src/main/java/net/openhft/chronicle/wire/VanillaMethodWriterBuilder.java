@@ -313,8 +313,11 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         } catch (MethodWriterValidationException e) {
             throw e;
         } catch (ClosedIllegalStateException e) {
-            // An output lifetime failure does not invalidate the generated class.
-            // Propagate it rather than publishing a proxy bound to the same closed output.
+            //! FIX-311: A closed output is not a compilation failure. Falling through
+            //! poisons classCache with COMPILE_FAILED and returns a proxy on the same dead output.
+            //! MethodWriterClosedOutputTest.closedOutputDuringFirstConstructionMustNotPublishAProxy
+            //! and closedOutputMustAlsoFailWhenTheWriterClassIsAlreadyGenerated fail without
+            //! this propagation, checking both the cache entry and original exception identity.
             throw e;
         } catch (Throwable e) {
             // Log the exception and fallback to proxy method writer
