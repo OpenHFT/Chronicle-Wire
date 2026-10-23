@@ -4681,8 +4681,10 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public boolean bool() throws IORuntimeException {
             int code = readCode();
-            if (isText(code))
+            if (isText(code)) {
+                bytes.uncheckedReadSkipBackOne();
                 return Boolean.valueOf(text());
+            }
 
             switch (code) {
                 case TRUE:
