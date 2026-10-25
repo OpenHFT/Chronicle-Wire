@@ -4,32 +4,32 @@
 package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-import static org.junit.Assert.*;
+import java.util.Arrays;
+import java.util.Collection;
 
-public class ReadAnyWireTextValuesTest extends WireTestCommon {
+@RunWith(Parameterized.class)
+public class ReadAnyWireTextValuesTest extends WireAsTextTestCommon {
 
-    @Test
-    public void readsValuesFromTextWrittenAsText() {
-        assertReadsValues(WireType.TEXT);
+    @Parameterized.Parameters(name = "written as {0}")
+    public static Collection<Object[]> writers() {
+        return Arrays.asList(new Object[][]{
+                {WireType.TEXT},
+                {WireType.BINARY}
+        });
     }
 
-    @Test
-    public void readsValuesFromTextWrittenAsBinary() {
-        assertReadsValues(WireType.BINARY);
-    }
+    @Parameterized.Parameter
+    public WireType writer;
 
-    private static void assertReadsValues(WireType writer) {
+    @Override
+    protected Wire wireWithText(String... values) {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         Wire out = writer.apply(bytes);
-        for (String value : new String[]{"true", "false", "42", "-3.5e2"})
+        for (String value : values)
             out.write().text(value);
-
-        Wire wire = WireType.READ_ANY.apply(bytes);
-        assertTrue(wire.read().bool());
-        assertFalse(wire.read().bool());
-        assertEquals(42, wire.read().int32());
-        assertEquals(-350.0, wire.read().float64(), 0.0);
+        return WireType.READ_ANY.apply(bytes);
     }
 }
