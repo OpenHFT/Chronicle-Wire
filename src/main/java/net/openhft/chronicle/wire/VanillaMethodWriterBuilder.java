@@ -310,14 +310,9 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                     return (T) newInstance(clazz);
                 }
             }
-        } catch (MethodWriterValidationException e) {
-            throw e;
-        } catch (ClosedIllegalStateException e) {
-            //! FIX-311: A closed output is not a compilation failure. Falling through
-            //! poisons classCache with COMPILE_FAILED and returns a proxy on the same dead output.
-            //! MethodWriterClosedOutputTest.closedOutputDuringFirstConstructionMustNotPublishAProxy
-            //! and closedOutputMustAlsoFailWhenTheWriterClassIsAlreadyGenerated fail without
-            //! this propagation, checking both the cache entry and original exception identity.
+        } catch (MethodWriterValidationException | ClosedIllegalStateException e) {
+            // These failures do not indicate broken code generation. Proxy fallback
+            // would hide the real cause and incorrectly mark the class as COMPILE_FAILED.
             throw e;
         } catch (Throwable e) {
             // Log the exception and fallback to proxy method writer
