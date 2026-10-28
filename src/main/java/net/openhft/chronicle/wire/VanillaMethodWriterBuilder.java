@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.util.Builder;
 import net.openhft.chronicle.core.util.GenericReflection;
 import net.openhft.chronicle.wire.internal.MethodWriterClassNameGenerator;
@@ -199,6 +200,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * {@link Proxy} if generation is disabled or fails.
      *
      * @return a new proxy implementing {@code T}
+     * @throws ClosedIllegalStateException if the output reports closure during generated writer construction
      * @throws NullPointerException if {@link #marshallableOut(MarshallableOut)} was not configured
      */
     @NotNull
@@ -250,6 +252,8 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     /**
      * Returns the method writer proxy instance. Tries to reuse or generate a
      * compiled class before falling back to {@link Proxy}.
+     *
+     * @throws ClosedIllegalStateException if the output reports closure during generated writer construction
      */
     @NotNull
     @Override
@@ -306,7 +310,9 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                     return (T) newInstance(clazz);
                 }
             }
-        } catch (MethodWriterValidationException e) {
+        } catch (MethodWriterValidationException | ClosedIllegalStateException e) {
+            // These failures do not indicate broken code generation. Proxy fallback
+            // would hide the real cause and incorrectly mark the class as COMPILE_FAILED.
             throw e;
         } catch (Throwable e) {
             // Log the exception and fallback to proxy method writer
