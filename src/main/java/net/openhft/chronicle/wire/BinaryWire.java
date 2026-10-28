@@ -4681,8 +4681,23 @@ public class BinaryWire extends AbstractWire implements Wire {
         @Override
         public boolean bool() throws IORuntimeException {
             int code = readCode();
-            if (isText(code))
-                return Boolean.valueOf(text());
+            if (isText(code)) {
+                bytes.uncheckedReadSkipBackOne();
+                StringBuilder sb = acquireStringBuilder();
+                if (textTo(sb) == null) {
+                    return false;
+                }
+                if (ObjectUtils.isTrue(sb)) {
+                    return true;
+                }
+                if (ObjectUtils.isFalse(sb)) {
+                    return false;
+                }
+                if (Jvm.isDebugEnabled(BinaryWire.class)) {
+                    Jvm.debug().on(BinaryWire.class, "Unable to parse '" + sb + "' as a boolean flag, assuming false");
+                }
+                return false;
+            }
 
             switch (code) {
                 case TRUE:
