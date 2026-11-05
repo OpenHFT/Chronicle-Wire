@@ -6,6 +6,7 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.util.Builder;
 import net.openhft.chronicle.core.util.GenericReflection;
 import net.openhft.chronicle.wire.internal.MethodWriterClassNameGenerator;
@@ -16,7 +17,6 @@ import java.io.Serializable;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -76,9 +76,6 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     // Supplier that provides a MethodWriterInvocationHandler for proxy method calls
     @NotNull
     private final MethodWriterInvocationHandlerSupplier handlerSupplier;
-    //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates that
-    //! listener-aware builders need a factory that can be rebound before their writer is built.
-    private final Function<Supplier<MarshallableOut>, MethodWriterInvocationHandler> handlerFactory;
     // Supplier to get an instance of MarshallableOut
     private Supplier<MarshallableOut> outSupplier;
     // A Closeable resource associated with the builder
@@ -115,33 +112,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         //  Maybe have an option to always use current thread class loader?
         this.classLoader = clsLdr != null ? clsLdr : getClass().getClassLoader();
         this.methodWriterClassNameGenerator = new MethodWriterClassNameGenerator();
-        //! WireContextListenerLifecycleTest#legacySupplierConstructorBuildsProxyWriter requires the
-        //! public supplier constructor to retain its original handler path; null distinguishes it
-        //! from listener-aware factories that must be rebound to a frozen output.
-        this.handlerFactory = null;
         this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(handlerSupplier);
-    }
-
-    /**
-     * Creates a builder whose fallback invocation handlers resolve the current output supplier.
-     * This is required when a builder is rebound to an internal output before construction: the
-     * generated and reflective writer paths must target the same destination.
-     */
-    VanillaMethodWriterBuilder(@NotNull Class<T> tClass,
-                               WireType wireType,
-                               @NotNull Function<Supplier<MarshallableOut>, MethodWriterInvocationHandler> handlerFactory) {
-        this.packageName = Jvm.getPackageName(tClass);
-        this.wireType = wireType;
-        addInterface(tClass);
-        ClassLoader clsLdr = tClass.getClassLoader();
-        this.classLoader = clsLdr != null ? clsLdr : getClass().getClassLoader();
-        this.methodWriterClassNameGenerator = new MethodWriterClassNameGenerator();
-        //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates
-        //! why this overload retains a factory that can be rebound to the builder-selected output.
-        this.handlerFactory = handlerFactory;
-        this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(
-                () -> handlerFactory.apply(Objects.requireNonNull(outSupplier,
-                        "marshallableOut(out) has not been set.")));
     }
 
     /**
@@ -229,6 +200,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      * {@link Proxy} if generation is disabled or fails.
      *
      * @return a new proxy implementing {@code T}
+     * @throws ClosedIllegalStateException if the output reports closure during generated writer construction
      * @throws NullPointerException if {@link #marshallableOut(MarshallableOut)} was not configured
      */
     @NotNull
@@ -280,6 +252,8 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     /**
      * Returns the method writer proxy instance. Tries to reuse or generate a
      * compiled class before falling back to {@link Proxy}.
+     *
+     * @throws ClosedIllegalStateException if the output reports closure during generated writer construction
      */
     @NotNull
     @Override
@@ -287,9 +261,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         if (proxyClass != null) {
             try {
                 Constructor<T> constructor = (Constructor) proxyClass.getConstructor(MethodWriterInvocationHandlerSupplier.class);
-                //! WireContextListenerLifecycleTest#explicitProxyClassFreezesItsOutputAtBuildTime
-                //! demonstrates that precompiled proxies receive the same frozen supplier as fallback proxies.
-                return constructor.newInstance(proxyHandlerSupplier());
+                return constructor.newInstance(handlerSupplier);
             } catch (Throwable e) {
                 // do nothing and drop through
                 if (Jvm.isDebugEnabled(getClass()))
@@ -308,22 +280,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
 
         //noinspection unchecked
-        //! WireContextListenerLifecycleTest#proxyWriterFreezesItsOutputAtBuildTime demonstrates that a
-        //! Java proxy snapshots its output when built rather than reading a reused builder later.
-        return (T) Proxy.newProxyInstance(classLoader, interfacesArr,
-                new CallSupplierInvocationHandler(updateInterceptor, proxyHandlerSupplier()));
-    }
-
-    private MethodWriterInvocationHandlerSupplier proxyHandlerSupplier() {
-        //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates
-        //! that handlerFactory paths must replace the outer output, while legacy factories remain unchanged.
-        if (handlerFactory == null)
-            return handlerSupplier;
-        // Generated and reflective writers must retain the same output selected at build time;
-        // resolving the mutable builder later can route a fallback writer to a different Wire.
-        final Supplier<MarshallableOut> frozenOutput = Objects.requireNonNull(outSupplier,
-                "marshallableOut(out) has not been set.");
-        return handlerSupplier.copyWith(() -> handlerFactory.apply(frozenOutput));
+        return (T) Proxy.newProxyInstance(classLoader, interfacesArr, new CallSupplierInvocationHandler(this));
     }
 
     /**
@@ -353,7 +310,9 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                     return (T) newInstance(clazz);
                 }
             }
-        } catch (MethodWriterValidationException e) {
+        } catch (MethodWriterValidationException | ClosedIllegalStateException e) {
+            // These failures do not indicate broken code generation. Proxy fallback
+            // would hide the real cause and incorrectly mark the class as COMPILE_FAILED.
             throw e;
         } catch (Throwable e) {
             // Log the exception and fallback to proxy method writer
@@ -519,18 +478,16 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         private final MethodWriterInvocationHandlerSupplier handlerSupplier;
 
         /**
-         * Creates a proxy invocation handler from the values selected when the proxy is built.
-         * Holding them directly avoids retaining the mutable builder.
+         * Constructs a new {@code CallSupplierInvocationHandler} using the specified builder.
+         * The values from the builder are captured in a snapshot so that the builder can be
+         * garbage collected if no longer referenced.
          *
-         * @param updateInterceptor interceptor applied before delegation, or {@code null} if none
-         * @param handlerSupplier   configured source of method-writer invocation handlers for this proxy
+         * @param builder The {@link VanillaMethodWriterBuilder} instance to extract values from.
          */
-        CallSupplierInvocationHandler(UpdateInterceptor updateInterceptor,
-                                      MethodWriterInvocationHandlerSupplier handlerSupplier) {
-            //! WireContextListenerLifecycleTest#proxyWriterFreezesItsOutputAtBuildTime demonstrates that
-            //! the invocation handler retains snapshots, not the mutable builder that created it.
-            this.updateInterceptor = updateInterceptor;
-            this.handlerSupplier = handlerSupplier;
+        CallSupplierInvocationHandler(@NotNull final VanillaMethodWriterBuilder builder) {
+            // Take a snapshot of these values so the builder can be reclaimed by the GC later.
+            this.updateInterceptor = builder.updateInterceptor;
+            this.handlerSupplier = builder.handlerSupplier;
         }
 
         @Override

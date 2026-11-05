@@ -60,16 +60,13 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "    handlers: [\n" +
                     "      !net.openhft.chronicle.threads.MonitorEventLoop$IdempotentLoopStartedEventHandler { handler: NOOP_PAUSER_MONITOR, loopStarted: false }\n" +
                     "    ],\n" +
-                    "    pauser: !net.openhft.chronicle.threads.MilliPauser { pausing: false, pauseTimeMS: 10," +
-                    " timePaused: 0, countPaused: 0, pauseUntilMS: 0 },\n" +
-                    "    handlersFinished: false\n" +
+                    "    pauser: !net.openhft.chronicle.threads.MilliPauser { pausing: false, pauseTimeMS: 10, timePaused: 0, countPaused: 0, pauseUntilMS: 0 }\n" +
                     "  },\n" +
                     "  core: !net.openhft.chronicle.threads.VanillaEventLoop {\n" +
                     "    referenceId: 0,\n" +
                     "    lifecycle: !net.openhft.chronicle.threads.EventLoopLifecycle NEW,\n" +
                     "    name: test/core-event-loop,\n" +
                     "    privateGroup: false,\n" +
-                    "    handlersFinished: false,\n" +
                     "    mediumHandlers: [    ],\n" +
                     "    newHandlers: [    ],\n" +
                     "    pauser: !net.openhft.chronicle.threads.LongPauser { minPauseTimeNS: 500000, maxPauseTimeNS: 20000000, pausing: false, minBusyNS: 0, minYieldNS: 50000, firstPauseNS: 9223372036854775807, pauseTimeNS: 500000, timePaused: 0, countPaused: 0, yieldStart: 0, pauseUntilNS: 0 },\n" +
@@ -100,7 +97,6 @@ public class MarshallingEventGroupTest extends WireTestCommon {
                     "    name: test/blocking-event-loop,\n" +
                     "    privateGroup: false,\n" +
                     "    handlers: [    ],\n" +
-                    "    pendingHandlers: [    ],\n" +
                     "    runners: [    ],\n" +
                     "    threadFactory: test/blocking-event-loop,\n" +
                     "    pauserSupplier: !net.openhft.chronicle.threads.PauserMode sleepy\n" +
