@@ -174,8 +174,12 @@ public class NullCollectionWithOverwriteFalseTest extends WireTestCommon {
                         defaults.states.add(Thread.State.TERMINATED);
                         defaults.map.put("stale", 99);
                     }
-                    for (Field field : Containers.class.getDeclaredFields())
+                    for (Field field : Containers.class.getDeclaredFields()) {
+                        // JaCoCo's synthetic fields are not part of the container state.
+                        if (field.isSynthetic())
+                            continue;
                         assertEquals(type + " absent " + field.getName(), field.get(defaults), field.get(target));
+                    }
                 } finally {
                     bytes.releaseLast();
                 }
@@ -189,6 +193,8 @@ public class NullCollectionWithOverwriteFalseTest extends WireTestCommon {
             Containers target = new Containers();
             Containers defaults = new Containers();
             for (Field field : Containers.class.getDeclaredFields()) {
+                if (field.isSynthetic())
+                    continue;
                 if (nullInput)
                     field.set(source, null);
             }
@@ -206,6 +212,8 @@ public class NullCollectionWithOverwriteFalseTest extends WireTestCommon {
                 source.writeMarshallable(wire);
                 Wires.readMarshallable(target, wire, overwrite);
                 for (Field field : Containers.class.getDeclaredFields()) {
+                    if (field.isSynthetic())
+                        continue;
                     Object expected = nullInput && overwrite ? null : field.get(defaults);
                     assertEquals(type + " " + field.getName(), expected, field.get(target));
                 }
@@ -213,8 +221,11 @@ public class NullCollectionWithOverwriteFalseTest extends WireTestCommon {
                 bytes.clear();
                 defaults.writeMarshallable(wire);
                 Wires.readMarshallable(target, wire, overwrite);
-                for (Field field : Containers.class.getDeclaredFields())
+                for (Field field : Containers.class.getDeclaredFields()) {
+                    if (field.isSynthetic())
+                        continue;
                     assertEquals(type + " reused " + field.getName(), field.get(defaults), field.get(target));
+                }
             } finally {
                 bytes.releaseLast();
             }
