@@ -74,7 +74,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
      */
     public synchronized <T> Class<T> acquireClass(ClassLoader classLoader) {
         // Full class name (including package) for the generated class.
-        String fullName = metaData.packageName() + "." + className();
+        String fullName = ReflectionUtil.qualifiedName(metaData.packageName(), className());
         try {
             // Try loading the class if it's already been generated and loaded.
             return (Class<T>) classLoader.loadClass(fullName);
@@ -89,9 +89,8 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
                 generateMainCode(mainCode);
 
                 // Append package and import statements.
-                sourceCode.append("" +
-                        "package " + metaData.packageName() + ";\n" +
-                        "\n");
+                if (!metaData.packageName().isEmpty())
+                    sourceCode.append("package " + metaData.packageName() + ";\n\n");
                 String extendsClassName = nameForClass(extendsClass());
                 String implementsSet = metaData.interfaces().stream()
                         .map(this::nameForClass)

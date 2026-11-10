@@ -169,7 +169,7 @@ public class GenerateMethodReader {
             generateSourceCode();
 
         final ClassLoader classLoader = instances[0].getClass().getClassLoader();
-        final String fullClassName = packageName() + "." + generatedClassName();
+        final String fullClassName = ReflectionUtil.qualifiedName(packageName(), generatedClassName());
 
         try {
             return Wires.loadFromJava(classLoader, fullClassName, sourceCode.toString());
