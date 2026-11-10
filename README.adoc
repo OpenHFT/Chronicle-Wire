@@ -1650,6 +1650,30 @@ These are also not limited to being used only within Chronicle Wire.
 With Chronicle Queue for instance, another example would be to have a `MethodWriter` that serialises and writes a method call to the out queue, and a `MethodReader` that reads in the in queue for any methods implemented.
 For more detail about this example, see link:https://github.com/OpenHFT/Chronicle-Queue-Demo/blob/c1e128545e8f219daa186836ca58a07047436084/md-pipeline/src/main/java/org/trading/Runner.java[here].
 
+=== Imports
+
+`MethodReader` lives in Chronicle Bytes, although you obtain it from a Wire:
+
+[source,java]
+----
+import net.openhft.chronicle.bytes.MethodReader;   // chronicle-bytes
+import net.openhft.chronicle.wire.Wire;            // chronicle-wire
+
+MethodReader reader = wire.methodReader(handler);
+----
+
+|===
+| `net.openhft.chronicle.bytes` (chronicle-bytes) | `net.openhft.chronicle.wire` (chronicle-wire)
+
+| `MethodReader`, `MethodReaderBuilder`, `MethodWriterBuilder`, `MethodId`, `MethodReaderInterceptorReturns`, `BytesMarshallable`
+| `MethodWriter`, `VanillaMethodReaderBuilder`, `AbstractGeneratedMethodReader`, `Wire`, `BytesInBinaryMarshallable`, `SelfDescribingMarshallable`
+|===
+
+`cannot find symbol` for `net.openhft.chronicle.wire.MethodReader` means the import names the wrong package.
+Import `net.openhft.chronicle.bytes.MethodReader`; do not add a class of that name to your own code.
+To check a name, run `javap` on the jar your build resolves (`mvn dependency:build-classpath`), not on another version in `~/.m2`.
+A successful callback does not show which reader you got: check `reader instanceof AbstractGeneratedMethodReader` and test unknown-method handling explicitly.
+
 == Uses of Chronicle Wire
 
 Chronicle Wire can be used for:
