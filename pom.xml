@@ -449,7 +449,6 @@
                             <forkCount>${chronicle.ci.forks.max8}</forkCount>
                             <reuseForks>true</reuseForks>
                             <runOrder>alphabetical</runOrder>
-                            <argLine>${surefireArgLine} ${jvm.requiredArgs}</argLine>
                             <rerunFailingTestsCount>0</rerunFailingTestsCount>
                             <reportsDirectory>${project.build.directory}/ci-reports/surefire/default-cli</reportsDirectory>
                         </configuration>

@@ -22,6 +22,8 @@ Surefire reports are separated under each module's `target/ci-reports/surefire/<
 
 The selected allocation was measured on native Linux with Java 21 and unchanged declared dependencies. Other JDKs, operating systems, explicit Snapshot profiles, targeted `-Dtest` and `test-serial` routes need their own qualification before activation. Use the complete command above for this trial. No retries are introduced.
 
+The managed profiles inherit JVM arguments from the active build configuration. They must not override argLine: the Sonar profile supplies late JaCoCo binding when coverage is enabled. Existing Sonar and managed CI routes remain separate; a combined scanner invocation must explicitly import the execution-specific test report directories.
+
 == Retiring protected exceptions
 
 Fix demonstrated shared-state/resource hazards one test at a time; qualify never-tested exceptions without presuming a defect. Move only the proved-safe class into the ordinary batch, preserve assertions and full inventories, and require repeated concurrent PR and aggregate evidence. Global isolation can be removed only after cross-module interference is resolved.
