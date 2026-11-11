@@ -1972,8 +1972,128 @@ When writing and reading from text, Marshallable are always self describing, how
 * Change the type of fields
 * Dumbing as text without access to the class specification.
 
-`BytesInBinaryMarshallable` is faster and more compact, however you need to add your own support for schema changes.
-See the Code Generating section below.
+`BytesInBinaryMarshallable` stores raw field values without field names in binary,
+but you must provide your own support for schema changes. Extending it alone does
+not select explicit byte marshalling; see the example below.
+
+[[explicit-bytes-marshalling]]
+=== Explicit Bytes marshalling on a latency-sensitive path
+
+The default `BytesMarshallable` methods use the reflection-based
+`BytesMarshaller` to process fields and invoke the default validation hooks.
+For a latency-sensitive, stable schema, consider generating the reader and
+writer ahead of time, or writing them explicitly, and keeping the resulting
+methods in the DTO. Override *both* methods: the field operations then run
+directly instead of going through the default reflective field marshaller.
+Measure the complete application path; the benefit depends on the schema,
+workload and environment.
+
+This order-event DTO extends `BytesInBinaryMarshallable` and combines an event
+timestamp with short-text identifiers and other primitive fields.
+The conversion annotations describe text representations; the explicit Bytes
+methods store the underlying values without text conversion. The base class
+does not generate these methods for you.
+
+.An order event with a timestamp and packed identifiers
+[source,java]
+----
+import net.openhft.chronicle.bytes.BytesIn;
+import net.openhft.chronicle.wire.BytesInBinaryMarshallable;
+import net.openhft.chronicle.bytes.BytesOut;
+import net.openhft.chronicle.wire.converter.ShortText;
+import net.openhft.chronicle.wire.converter.NanoTime;
+
+class Order extends BytesInBinaryMarshallable {
+    @NanoTime long eventTime;
+    long orderId;
+    @ShortText long symbol;  // up to 10 characters
+    @ShortText int sourceId;    // up to 5 characters
+    boolean buy;
+    double price;
+    int quantity;
+    final StringBuilder clOrdId = new StringBuilder(32); // client order id
+
+    @Override
+    public void writeMarshallable(BytesOut<?> out) {
+        out.writeLong(eventTime).writeLong(orderId).writeLong(symbol).writeInt(sourceId).writeBoolean(buy)
+                .writeDouble(price).writeInt(quantity).writeUtf8(clOrdId);
+    }
+
+    @Override
+    public void readMarshallable(BytesIn<?> in) {
+        if (in.readRemaining() < 42)
+            throw new IllegalStateException("truncated order record");
+        eventTime = in.readLong();
+        orderId = in.readLong();
+        symbol = in.readLong();
+        sourceId = in.readInt();
+        buy = in.readBoolean();
+        price = in.readDouble();
+        quantity = in.readInt();
+        if (!in.readUtf8(clOrdId))
+            throw new IllegalStateException("clOrdId must not be null");
+    }
+}
+----
+
+For example, initialise `symbol` with `ShortText.INSTANCE.parse("EURUSD")`
+at the text boundary. `@ShortText long` supports up to 10 characters, while
+`@ShortText int` supports up to 5. For example, initialise `sourceId` with
+`(int) ShortText.INSTANCE.parse("XNAS")`. The explicit methods write the packed
+values with `writeLong` and `writeInt` and read them with `readLong` and
+`readInt`; the annotations do not change these binary widths. This record
+has a 41-byte fixed portion: three longs, two ints, one boolean and one double.
+The double illustrates the API; applications needing
+exact decimal prices can instead agree on a scaled-integer representation.
+
+The variable-length client order id uses `writeUtf8(clOrdId)` and
+`readUtf8(clOrdId)`. The encoded string contains a stop-bit UTF-8 *byte-length*
+prefix followed by its payload. Even an empty string needs a one-byte zero
+prefix, so this record's minimum encoded length is *42 bytes*, not 41.
+For non-empty strings the size is `41 + prefixBytes + utf8Bytes`; the prefix
+itself grows for longer strings. Character count is not UTF-8 byte count.
+For example, a 128-byte UTF-8 payload needs a two-byte prefix (171 bytes total).
+
+The minimum-length check is only a preliminary check. The reader still has to
+decode the prefix and consume the complete string; enough bytes for an empty
+string do not prove that a non-empty string is complete. Bound the input's
+read limit to the record's frame so a truncated string cannot consume bytes
+from the next record. Enforce any application maximum length and required
+non-empty client-order-id rule separately. This example allows an empty id
+but rejects an encoded null.
+
+`readUtf8(StringBuilder)` clears and fills the existing builder, allowing DTO
+reuse without constructing a new String for each id. Its initial capacity of
+32 is not a length limit; larger ids may grow its backing storage. Fields held
+through references, such as `clOrdId`, can conveniently go after the fixed-width
+fields, as here, but they do not have to. The reader and writer must use the
+same field order, and the minimum-length calculation must include the minimum
+encoding of every variable-length field wherever it occurs.
+
+`@NanoTime` describes nanoseconds since the Unix epoch, not the arbitrary
+origin of `System.nanoTime()`. Initialise `eventTime`, for example, with
+`NanoTime.INSTANCE.parse("2026-11-11T09:00:00.123456789Z")` at a text boundary.
+
+For text formats the same DTO still appears as YAML: Wire's text marshalling
+(and this base class's `toString()`) renders the annotated identifiers as short
+strings and `eventTime` as a readable timestamp. Overriding the BytesIn/BytesOut
+methods does not replace the WireIn/WireOut text methods. The compact binary
+layout above contains neither YAML field names nor formatted timestamp text.
+
+Use `writeBoolean` and `readBoolean` as a pair. `writeBoolean` writes `Y` or
+`N`, rather than numeric `1`/`0` bytes. When migrating an existing
+persisted format, verify boolean encoding as well as field order and widths.
+The minimum-length check does not reject trailing bytes or validate field values. Overriding the defaults also bypasses their
+validation calls; implement any required validation explicitly.
+
+The reader and writer must agree on field order, widths, encoding and byte
+order. Specify and test these as part of the application protocol, including
+versioning and migration for persisted data. An explicit layout is not
+automatically compatible with the reflective layout or older records; test
+both cross-reading and boundary values before changing an existing format.
+`BytesInBinaryMarshallable` in Chronicle Wire also uses the default Bytes
+marshaller unless its read and write methods are overridden. A generated
+Wire method reader or writer does not by itself generate these DTO methods.
 
 === Code Generation for Marshallable
 
