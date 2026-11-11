@@ -89,8 +89,7 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
                 generateMainCode(mainCode);
 
                 // Append package and import statements.
-                if (!metaData.packageName().isEmpty())
-                    sourceCode.append("package " + metaData.packageName() + ";\n\n");
+                appendPackageDeclaration();
                 String extendsClassName = nameForClass(extendsClass());
                 String implementsSet = metaData.interfaces().stream()
                         .map(this::nameForClass)
@@ -130,6 +129,11 @@ public abstract class AbstractClassGenerator<M extends AbstractClassGenerator.Me
             // If there's any error during generation, compile, or load, throw an exception.
             throw Jvm.rethrow(new ClassNotFoundException(e.getMessage() + '\n' + sourceCode, e));
         }
+    }
+
+    private void appendPackageDeclaration() {
+        if (!metaData.packageName().isEmpty())
+            sourceCode.append("package " + metaData.packageName() + ";\n\n");
     }
 
     /**

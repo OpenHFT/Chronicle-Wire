@@ -23,6 +23,7 @@ import static org.junit.Assert.assertEquals;
  * readers. The generated class name used to start with '.', so code generation failed and both
  * fell back to proxies with a "falling back" warning, which {@link WireTestCommon} reports.
  */
+// Deliberate default package: the POM excludes only S1220 for this regression fixture.
 public class DefaultPackageMethodReaderWriterTest extends WireTestCommon {
 
     private static final String EXPECTED = "writer=generated reader=generated events=[say:hello, count:3]";
