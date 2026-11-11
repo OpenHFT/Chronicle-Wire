@@ -24,6 +24,38 @@ Chronicle Wire is a high-performance, zero-GC serialisation library built on top
 It abstracts the underlying wire format, letting you use human readable text or compact binary interchangeably while retaining a common API.
 Typical use cases include configuration files, persistence of in-memory state, and extremely fast IPC between JVMs.
 
+== Refusing method-reader code-generation fallback
+
+By default, a method-reader generation failure logs a warning and falls back to
+a reflective reader. For tests or applications that must not silently take that
+path, set the following JVM system property before building the reader:
+
+[source,shell]
+----
+-DdisableCodegenFallback=true
+----
+
+The default is `false`. A bare `-DdisableCodegenFallback` also enables refusal,
+using `Jvm.getBoolean` semantics, including its `system.properties` loading.
+The property is read for each generation attempt, rather than fixed at class loading.
+With refusal enabled, a failed attempt throws `IllegalStateException` with the
+original cause. A cached failed generation also throws, but the existing cache
+stores only a failure marker, so its original cause is not available on later builds.
+Successful generated readers continue to work.
+
+This option controls implicit fallback in the method-reader builder only.
+Explicit proxy selection with `-DdisableReaderProxyCodegen=true` still works;
+it does not request code generation. Method-writer generation is unchanged.
+A bad generated reader does not disable generation of other reader classes.
+There is no environment-wide retry suppression or change to unknown-method-ID
+handling. Applications that require a generated reader should also assert the
+selected implementation in their integration tests.
+
+Apply the property and the
+https://github.com/OpenHFT/OpenHFT/blob/ea/docs/Java-Version-Support.adoc[recommended JVM access options]
+to each compiler-using child JVM as well. System properties are not automatically
+inherited by separately launched Java processes.
+
 == Key Features
 
 * Multiple wire formats (YAML, JSON, CSV, binary variants)
