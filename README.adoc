@@ -51,6 +51,25 @@ There is no environment-wide retry suppression or change to unknown-method-ID
 handling. Applications that require a generated reader should also assert the
 selected implementation in their integration tests.
 
+If the compiler reports that a handler type is inaccessible, inspect the interfaces
+implemented by that handler, including private nested helper interfaces. Automatic
+method discovery can include a helper interface alongside the public event interface,
+so being in a named package alone does not make every generated type reference accessible.
+Keep the public event contract accessible to generated code and separate unrelated
+helper behaviour using composition or a helper base class where appropriate.
+Validate the resulting event round-trip and selected reader implementation.
+
+The generator checks the dispatch type, including its enclosing types, before
+compiling Java. An inaccessible dispatch type reports the offending interface
+method and type, with guidance to expose the event contract or separate unrelated
+helper behaviour. A public nested interface inside a private enclosing class is
+also inaccessible. This validation does not discard helper-interface methods:
+the default reflective fallback can still dispatch them. Refusing fallback exposes
+the validation cause; it does not change Java visibility or select a smaller event
+contract. Reproduce in a fresh JVM when the failure has already been cached,
+because the cached marker does not retain that cause. Other compiler failures
+continue to report their original cause.
+
 Apply the property and the
 https://github.com/OpenHFT/OpenHFT/blob/ea/docs/Java-Version-Support.adoc[recommended JVM access options]
 to each compiler-using child JVM as well. System properties are not automatically

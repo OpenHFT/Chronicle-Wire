@@ -34,6 +34,27 @@ Typical use cases include:
 * Recording events to disk for replay during testing.
 * Converting asynchronous network traffic into method calls.
 
+== Handler interfaces and generated access
+
+Method-reader discovery examines implemented interfaces, including inherited ones.
+Naming an interface as a helper, or making it private, does not exclude its methods
+from event dispatch. Keep unrelated helper behaviour in composition or a base class
+that does not itself add helper interfaces to the handler. Do not remove an intended
+event contract merely to avoid a generation error.
+
+Generated dispatch must be able to name the method's dispatch type and its enclosing
+types from the generated class's package. A private nested interface, or a public
+interface inside a private enclosing class, is not accessible there. The generator
+validates these references before compilation and identifies the offending method
+and type. Package-private interfaces in the same generated package remain usable.
+
+By default an unsuccessful generation falls back to reflection, which can still
+dispatch methods from those private interfaces. To require generation, use
+`-DdisableCodegenFallback=true` and assert the selected reader implementation in tests.
+This option exposes the validation failure without silently dropping those methods.
+Inherited, default and chained methods remain eligible; unsupported overloads still
+fail rather than selecting an arbitrary event signature.
+
 == Event processing
 
 === Microservices using Kappa Architecture

@@ -125,6 +125,10 @@ public class CodegenFallbackTest {
     }
 
     private static void run(String scenario, String value, boolean compilerAccess) throws Exception {
+        run(scenario, value, compilerAccess, CodegenFallbackTest.class);
+    }
+
+    static void run(String scenario, String value, boolean compilerAccess, Class<?> mainClass) throws Exception {
         Path directory = Files.createTempDirectory("codegen fallback ");
         Path log = directory.resolve("child.log");
         List<String> command = new ArrayList<>();
@@ -147,7 +151,7 @@ public class CodegenFallbackTest {
             if (cp.length() > 0) cp.append(File.pathSeparator);
             cp.append(Paths.get(entry).toAbsolutePath());
         }
-        command.addAll(Arrays.asList("-cp", cp.toString(), CodegenFallbackTest.class.getName(), scenario));
+        command.addAll(Arrays.asList("-cp", cp.toString(), mainClass.getName(), scenario));
         Process child = null;
         try {
             ProcessBuilder process = new ProcessBuilder(command).directory(directory.toFile())
