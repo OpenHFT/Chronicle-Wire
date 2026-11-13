@@ -289,6 +289,17 @@ public class GenerateMethodWriter {
     }
 
     /**
+     * Adds an import for the type unless it is in the default package, which cannot be imported.
+     *
+     * @param importSet The imports of the generated class.
+     * @param type      The type referred to by the generated class.
+     */
+    private static void addImport(Set<String> importSet, Class<?> type) {
+        if (!Jvm.getPackageName(type).isEmpty())
+            importSet.add(nameForClass(type));
+    }
+
+    /**
      * Retrieves the name for a class, considering any imports and package details.
      * If the type is part of the provided import set, or if it belongs to the "java.lang" package,
      * only the simple name of the class is returned. Otherwise, the full canonical name is returned.
@@ -400,7 +411,8 @@ public class GenerateMethodWriter {
 
         try {
             // Define package for the generated class
-            imports.append("package " + packageName + ";\n\n");
+            if (!packageName.isEmpty())
+                imports.append("package " + packageName + ";\n\n");
 
             // Collection of classes/packages that need to be imported in generated class
             SortedSet<String> importSet = new TreeSet<>();
@@ -426,7 +438,7 @@ public class GenerateMethodWriter {
 
             // Iterate through all interfaces to extract required imports and validations
             for (Class<?> interfaceClazz : interfaces) {
-                importSet.add(nameForClass(interfaceClazz));
+                addImport(importSet, interfaceClazz);
 
                 if (!interfaceClazz.isInterface())
                     throw new MethodWriterValidationException("expecting an interface instead of class=" + interfaceClazz.getName());
@@ -443,7 +455,7 @@ public class GenerateMethodWriter {
                         Class<?> pType = erase(type);
                         if (pType.isPrimitive() || pType.isArray() || Jvm.getPackageName(pType).equals("java.lang"))
                             continue;
-                        importSet.add(nameForClass(pType));
+                        addImport(importSet, pType);
                     }
                 }
             }
@@ -510,13 +522,13 @@ public class GenerateMethodWriter {
                 System.out.println(imports);
 
             // Attempt to load the class using the generated code
-            return Wires.loadFromJava(classLoader, packageName + '.' + className, imports.toString());
+            return Wires.loadFromJava(classLoader, ReflectionUtil.qualifiedName(packageName, className), imports.toString());
 
         } catch (AssertionError e) {
             // In case there is a linkage error, try loading the class directly
             if (e.getCause() instanceof LinkageError) {
                 try {
-                    return Class.forName(packageName + '.' + className, true, classLoader);
+                    return Class.forName(ReflectionUtil.qualifiedName(packageName, className), true, classLoader);
                 } catch (ClassNotFoundException x) {
                     throw Jvm.rethrow(x);
                 }

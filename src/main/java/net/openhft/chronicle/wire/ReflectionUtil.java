@@ -91,4 +91,16 @@ public final class ReflectionUtil {
 
         return PREPEND_PACKAGE ? PACKAGE_PREFIX : "";
     }
+
+    /**
+     * Joins a package name and a simple class name, without a separator for the default package.
+     *
+     * @param packageName the package name, or an empty string for the default package
+     * @param simpleName  the class name within that package
+     * @return the binary name of the class
+     */
+    @NotNull
+    static String qualifiedName(@NotNull String packageName, @NotNull String simpleName) {
+        return packageName.isEmpty() ? simpleName : packageName + "." + simpleName;
+    }
 }
