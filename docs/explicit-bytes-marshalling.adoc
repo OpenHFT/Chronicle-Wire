@@ -118,4 +118,3 @@ both cross-reading and boundary values before changing an existing format.
 `BytesInBinaryMarshallable` in Chronicle Wire also uses the default Bytes
 marshaller unless its read and write methods are overridden. A generated
 Wire method reader or writer does not by itself generate these DTO methods.
-
