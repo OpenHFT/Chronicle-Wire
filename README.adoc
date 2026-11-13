@@ -1972,8 +1972,20 @@ When writing and reading from text, Marshallable are always self describing, how
 * Change the type of fields
 * Dumbing as text without access to the class specification.
 
-`BytesInBinaryMarshallable` is faster and more compact, however you need to add your own support for schema changes.
-See the Code Generating section below.
+`BytesInBinaryMarshallable` stores raw field values without field names in binary,
+but you must provide your own support for schema changes. Extending it alone does
+not select explicit byte marshalling; see <<explicit-bytes-marshalling>>.
+
+[[explicit-bytes-marshalling]]
+=== Explicit Bytes marshalling
+
+For a stable schema, override both `writeMarshallable(BytesOut)` and
+`readMarshallable(BytesIn)` with matching field operations, written explicitly
+or generated ahead of time. Extending `BytesInBinaryMarshallable` alone does
+not generate these methods. Measure the application path before adopting them.
+
+See link:docs/explicit-bytes-marshalling.adoc[the complete order-event example]
+for binary layout, framing, validation and persisted-format compatibility.
 
 === Code Generation for Marshallable
 
