@@ -35,7 +35,8 @@ import java.lang.reflect.Method;
  * }</pre>
  *
  * <p>Please mind that if provided code fails to compile, reflexive method call will be delegated to the interceptor
- * with {@link #intercept(Method, Object, Object[], Invocation)}, like it happens with a regular
+ * with {@link #intercept(Method, Object, Object[], Invocation)}, unless {@code disableCodegenFallback} is enabled.
+ * With fallback allowed, this behaves like a regular
  * {@link MethodReaderInterceptorReturns}.
  */
 public interface GeneratingMethodReaderInterceptorReturns extends MethodReaderInterceptorReturns {
