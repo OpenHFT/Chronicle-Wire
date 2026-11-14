@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 
 /**
  * Demonstrates the event-by-method pattern where method calls are serialised
- * and later dispatched to a handler via a {@link MethodReader}.
+ * and later dispatched to a handler via a {@link net.openhft.chronicle.bytes.MethodReader}.
  */
 public class EventByMethodExamples {
     static {
