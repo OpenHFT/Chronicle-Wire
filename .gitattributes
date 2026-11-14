@@ -1,0 +1,2 @@
+# Compatibility fixtures must retain their exact line endings on Windows.
+src/test/resources/compat/*.yaml text eol=lf
