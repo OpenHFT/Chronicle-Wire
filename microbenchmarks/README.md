@@ -13,7 +13,7 @@ The tests were run with -Xmx1g -XX:MaxInlineSize=400 on an isolated CPU on an i7
 
 # Tests
 
-These are latency test with the [full Results Here](https://github.com/OpenHFT/Chronicle-Wire/tree/master/microbenchmarks/results)
+These are latency test with the [full Results Here](https://github.com/OpenHFT/Chronicle-Wire/tree/HEAD/microbenchmarks/results)
 
 Something I found interesting is that while a typical time might be stable for a given run, you can get different results at different time.  
 For this reason I ran the tests with 10 forks.  By looking at the high percentiles, we tend to pick up the results of the worst run.
