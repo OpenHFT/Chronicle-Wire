@@ -168,7 +168,7 @@ System.out.println(bytes.toString());
 
 == Using Wire
 
-=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example1.java[Simple use case]
+=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/HEAD/demo/src/main/java/run/chronicle/wire/demo/Example1.java[Simple use case]
 
 First you need to have a buffer to write to.
 This can be a `byte[]`, a `ByteBuffer`, off-heap memory, or even an address and length that you have obtained from some other library.
@@ -265,8 +265,7 @@ prints in `RawWire`.
 00000020 00 00 25 40                                      ··%@
 ----
 
-// For more examples see https://github.com/OpenHFT/Chronicle-Wire/blob/master/README-Chapter1.md[Examples Chapter1]
-=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example2.java[Simple example with a data type]
+=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/HEAD/demo/src/main/java/run/chronicle/wire/demo/Example2.java[Simple example with a data type]
 
 This example is much the same as the previous section, with the code required wrapped in a method.
 See Section "The code for the class Data" for the code for Data.
@@ -329,7 +328,7 @@ prints
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ----
 
-=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example3.java[Simple example with a nested data type]
+=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/HEAD/demo/src/main/java/run/chronicle/wire/demo/Example3.java[Simple example with a nested data type]
 
 In this example the data is marshalled as a nested data structure.
 
@@ -399,7 +398,7 @@ c5 70 72 69 63 65 90 00 00 28 41                # price
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ----
 
-=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example4.java[Simple example with a data type with a type]
+=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/HEAD/demo/src/main/java/run/chronicle/wire/demo/Example4.java[Simple example with a data type with a type]
 
 In this example, the type is encoded with the data.
 Instead of showing the entire package name which will almost certainly not work on any other platform, an alias for the type is used.
@@ -467,7 +466,7 @@ c5 70 72 69 63 65 90 00 00 28 41                # price
 Data{message='Hello World', number=1234567890, timeUnit=NANOSECONDS, price=10.5}
 ----
 
-=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example6.java[Write a message with a sequence of records]
+=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/HEAD/demo/src/main/java/run/chronicle/wire/demo/Example6.java[Write a message with a sequence of records]
 
 [source,java,opts=novalidate]
 ----
@@ -587,7 +586,7 @@ Data{message='G'Day All', number=1212121, timeUnit=MINUTES, price=12.34}
 Data{message='Howyall', number=1234567890, timeUnit=SECONDS, price=1000.0}
 ----
 
-=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Example7.java[Using the `ClassAliasPool`]
+=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/HEAD/demo/src/main/java/run/chronicle/wire/demo/Example7.java[Using the `ClassAliasPool`]
 
 This example shows how to pass your classes to `ClassAliasPool.CLASS_ALIASES.addAlias(Class<?>... classes)`, to create alias names for them so that you can refer to them without using the complete name of their packages.
 
@@ -712,7 +711,7 @@ address: "15 Royal Way, Liverpool"
 
 You will see the complete package name for `o2` object.
 
-=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/ea/demo/src/main/java/run/chronicle/wire/demo/Data.java[The code for the class Data]
+=== link:https://github.com/OpenHFT/Chronicle-Wire/blob/HEAD/demo/src/main/java/run/chronicle/wire/demo/Data.java[The code for the class Data]
 
 [source,java,opts=novalidate]
 ----
@@ -2113,7 +2112,7 @@ private static final int MASHALLABLE_VERSION = 1;
 
 === JLBH Benchmark Performance
 
-To explore the efficiency of the examples above, this link:https://github.com/OpenHFT/Chronicle-Wire/blob/develop/src/test/java/net/openhft/chronicle/wire/TriviallyCopyableJLBH.java[TrivallyCopyableJLBH.java] test was created.
+To explore the efficiency of the examples above, this link:https://github.com/OpenHFT/Chronicle-Wire/blob/HEAD/src/test/java/net/openhft/chronicle/wire/TriviallyCopyableJLBH.java[TrivallyCopyableJLBH.java] test was created.
 As can be seen on lines 18-26, we have the ability to switch between running the TriviallyCopyable House ("House1"), the BinaryWire House ("House2") or 'UNKNOWN'.Important to note is that trivially copyable objects were used in order to improve java serialisation speeds.For further understanding on trivially copyable objects, refer to link:https://dzone.com/articles/how-to-get-c-speed-in-java-serialisation[this article].
 This shows that we can serialise and then de-serialise 100,000 messages in a second.The Trivially Copyable version is even faster, especially at the higher percentiles.
 
