@@ -109,37 +109,37 @@ public class MethodReaderInterfaceAccessTest {
     @Test
     public void privateHelperPreservesFallbackAndDiagnosesFreshAndCachedRefusal() throws Exception {
         for (String value : new String[]{null, "false", "true", ""})
-            run("helper", value);
+            assertScenarioPasses("helper", value);
     }
 
     @Test
     public void publicMemberOfPrivateOuterIsAlsoInaccessible() throws Exception {
-        run("outer", null);
-        run("outer", "true");
+        assertScenarioPasses("outer", null);
+        assertScenarioPasses("outer", "true");
     }
 
     @Test
     public void explicitProxyRetainsPublicAndPrivateEventsInStrictMode() throws Exception {
-        run("explicit", "true");
+        assertScenarioPasses("explicit", "true");
     }
 
     @Test
     public void reflectiveInterceptorPreservesPrivateEventFallback() throws Exception {
-        run("helper-interceptor", null);
-        run("helper-interceptor", "true");
+        assertScenarioPasses("helper-interceptor", null);
+        assertScenarioPasses("helper-interceptor", "true");
     }
 
     @Test
     public void accessibleInheritedDefaultChainedAndDuplicateEventsRemainGenerated() throws Exception {
-        run("contracts", null);
-        run("contracts", "true");
+        assertScenarioPasses("contracts", null);
+        assertScenarioPasses("contracts", "true");
     }
 
     @Test
     public void overloadsRemainRejectedInGeneratedAndReflectiveModes() throws Exception {
-        run("overloaded", null);
-        run("overloaded", "true");
-        run("overloaded-proxy", "true");
+        assertScenarioPasses("overloaded", null);
+        assertScenarioPasses("overloaded", "true");
+        assertScenarioPasses("overloaded-proxy", "true");
     }
 
     public static void main(String[] args) {
@@ -152,8 +152,10 @@ public class MethodReaderInterfaceAccessTest {
             if (scenario.equals("contracts")) {
                 publicContracts(wire);
             } else if (scenario.startsWith("overloaded")) {
+                VanillaMethodReaderBuilder builder = new VanillaMethodReaderBuilder(wire);
+                OverloadedReceiver receiver = new OverloadedReceiver();
                 IllegalStateException failure = assertThrows(IllegalStateException.class,
-                        () -> new VanillaMethodReaderBuilder(wire).build(new OverloadedReceiver()));
+                        () -> builder.build(receiver));
                 assertTrue(failure.toString(), causeContains(failure, "does not support overloaded methods"));
             } else {
                 privateContracts(wire, scenario);
@@ -251,7 +253,7 @@ public class MethodReaderInterfaceAccessTest {
         return false;
     }
 
-    private static void run(String scenario, String value) throws Exception {
+    private static void assertScenarioPasses(String scenario, String value) throws Exception {
         CodegenFallbackTest.run(scenario, value, true, MethodReaderInterfaceAccessTest.class);
     }
 }
