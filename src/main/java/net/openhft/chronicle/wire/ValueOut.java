@@ -959,19 +959,6 @@ public interface ValueOut {
             } else if (object instanceof Enum) {
                 return asEnum((Enum) object);
             } else if (isScalar(object)) {
-                if (object instanceof LocalDate) {
-                    LocalDate d = (LocalDate) object;
-                    try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
-                        return text(stlSb.get()
-                                .append(d.getYear())
-                                .append('-')
-                                .append(d.getMonthValue() < 10 ? "0" : "")
-                                .append(d.getMonthValue())
-                                .append('-')
-                                .append(d.getDayOfMonth() < 10 ? "0" : "")
-                                .append(d.getDayOfMonth()));
-                    }
-                }
                 return text(object.toString());
             } else if (object instanceof Locale) {
                 return text(((Locale) object).toLanguageTag());
