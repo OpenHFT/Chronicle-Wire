@@ -83,9 +83,10 @@ public class MissingNumericReferenceTest extends WireTestCommon {
         try {
             Wire wire = type.apply(bytes);
             wire.write("present").int32(1);
+            ValueIn missingField = wire.read("absent");
             IllegalStateException failure = new IllegalStateException("rejected");
             assertSame(failure, assertThrows(IllegalStateException.class, () ->
-                    wire.read("absent").int32(null, target, (holder, value) -> {
+                    missingField.int32(null, target, (holder, value) -> {
                         holder.set(value);
                         throw failure;
                     })));
