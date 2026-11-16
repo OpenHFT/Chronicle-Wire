@@ -89,15 +89,14 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * @param value to write with it.
      */
     default void writeMessage(WireKey key, Object value) throws UnrecoverableTimeoutException {
-        @NotNull DocumentContext dc = writingDocument();
-        try {
-            Wire wire = dc.wire();
-            wire.write(key).object(value);
-        } catch (Throwable t) {
-            dc.rollbackOnClose();
-            throw Jvm.rethrow(t);
-        } finally {
-            dc.close();
+        try (@NotNull DocumentContext dc = writingDocument()) {
+            try {
+                Wire wire = dc.wire();
+                wire.write(key).object(value);
+            } catch (Throwable t) {
+                dc.rollbackOnClose();
+                throw Jvm.rethrow(t);
+            }
         }
     }
 
@@ -111,15 +110,14 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * @throws UnrecoverableTimeoutException if the operation times out in an unrecoverable manner.
      */
     default void writeMessage(String eventName, Object value) throws UnrecoverableTimeoutException {
-        @NotNull DocumentContext dc = writingDocument();
-        try {
-            Wire wire = dc.wire();
-            wire.write(eventName).object(value);
-        } catch (Throwable t) {
-            dc.rollbackOnClose();
-            throw Jvm.rethrow(t);
-        } finally {
-            dc.close();
+        try (@NotNull DocumentContext dc = writingDocument()) {
+            try {
+                Wire wire = dc.wire();
+                wire.write(eventName).object(value);
+            } catch (Throwable t) {
+                dc.rollbackOnClose();
+                throw Jvm.rethrow(t);
+            }
         }
     }
 
@@ -152,14 +150,13 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * @throws InvalidMarshallableException if the object cannot be serialized properly.
      */
     default void writeBytes(@NotNull WriteBytesMarshallable marshallable) throws UnrecoverableTimeoutException, InvalidMarshallableException {
-        @NotNull DocumentContext dc = writingDocument();
-        try {
-            marshallable.writeMarshallable(dc.wire().bytes());
-        } catch (Throwable t) {
-            dc.rollbackOnClose();
-            throw Jvm.rethrow(t);
-        } finally {
-            dc.close();
+        try (@NotNull DocumentContext dc = writingDocument()) {
+            try {
+                marshallable.writeMarshallable(dc.wire().bytes());
+            } catch (Throwable t) {
+                dc.rollbackOnClose();
+                throw Jvm.rethrow(t);
+            }
         }
     }
 
@@ -176,15 +173,14 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * @throws InvalidMarshallableException if the object cannot be serialized properly.
      */
     default <T> void writeDocument(T t, @NotNull BiConsumer<ValueOut, T> writer) throws UnrecoverableTimeoutException, InvalidMarshallableException {
-        @NotNull DocumentContext dc = writingDocument();
-        try {
-            Wire wire = dc.wire();
-            writer.accept(wire.getValueOut(), t);
-        } catch (Throwable e) {
-            dc.rollbackOnClose();
-            throw Jvm.rethrow(e);
-        } finally {
-            dc.close();
+        try (@NotNull DocumentContext dc = writingDocument()) {
+            try {
+                Wire wire = dc.wire();
+                writer.accept(wire.getValueOut(), t);
+            } catch (Throwable e) {
+                dc.rollbackOnClose();
+                throw Jvm.rethrow(e);
+            }
         }
     }
 
@@ -196,14 +192,13 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * @throws UnrecoverableTimeoutException if the operation times out in an unrecoverable manner.
      */
     default void writeText(@NotNull CharSequence text) throws UnrecoverableTimeoutException {
-        @NotNull DocumentContext dc = writingDocument();
-        try {
-            dc.wire().getValueOut().text(text);
-        } catch (Throwable t) {
-            dc.rollbackOnClose();
-            throw Jvm.rethrow(t);
-        } finally {
-            dc.close();
+        try (@NotNull DocumentContext dc = writingDocument()) {
+            try {
+                dc.wire().getValueOut().text(text);
+            } catch (Throwable t) {
+                dc.rollbackOnClose();
+                throw Jvm.rethrow(t);
+            }
         }
     }
 
@@ -216,18 +211,17 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * @throws UnrecoverableTimeoutException if the operation times out in an unrecoverable manner.
      */
     default void writeMap(@NotNull Map<?, ?> map) throws UnrecoverableTimeoutException {
-        @NotNull DocumentContext dc = writingDocument();
-        try {
-            Wire wire = dc.wire();
-            for (@NotNull Map.Entry<?, ?> entry : map.entrySet()) {
-                wire.writeEvent(Object.class, entry.getKey())
-                        .object(Object.class, entry.getValue());
+        try (@NotNull DocumentContext dc = writingDocument()) {
+            try {
+                Wire wire = dc.wire();
+                for (@NotNull Map.Entry<?, ?> entry : map.entrySet()) {
+                    wire.writeEvent(Object.class, entry.getKey())
+                            .object(Object.class, entry.getValue());
+                }
+            } catch (Throwable t) {
+                dc.rollbackOnClose();
+                throw Jvm.rethrow(t);
             }
-        } catch (Throwable t) {
-            dc.rollbackOnClose();
-            throw Jvm.rethrow(t);
-        } finally {
-            dc.close();
         }
     }
 
