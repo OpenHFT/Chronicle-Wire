@@ -339,6 +339,19 @@ Document Your Schemas and Changes :: Maintain clear documentation (even if infor
 
 == Limitations
 
+For an absent numeric field, the `ValueIn.int32` and `int64` overloads that
+accept a nullable reference and a setter supply the default value (zero when
+unspecified). A null reference is replaced with a writable reference backed by
+independent heap storage: there are no input bytes for an absent field to bind
+to. After a successful setter call, the receiver owns this reference and must
+close it. If initialisation or the setter throws, the newly created reference
+is closed. An existing reference remains caller-owned and is reused.
+An existing reference without a backing store is initialised with independent
+storage as well, including references supplied through `int64ForBinding`.
+`UnboundDefaultReferenceTest` covers this path for binary and text references.
+`MissingNumericReferenceTest` checks this behaviour for text and
+binary input, including configured defaults and reference reuse.
+
 While Chronicle Wire offers considerable flexibility, it's important to understand its limitations regarding automatic schema evolution:
 
 Automatic Complex Type Conversion :: Wire will automatically convert an `long` field to a `Date` field, or an `OldCustomer` object to a `NewCustomer` object with a different structure, without custom code.
