@@ -1,0 +1,11 @@
+= Wire stream resource ownership
+:sectnums:
+:lang: en-GB
+
+`WireType.streamFromBytes` transfers cleanup of the supplied bytes to the returned stream.
+Exhausting the stream releases the bytes. Closing it also releases them if exhaustion has not already done so.
+Callers must use try-with-resources when reading a file or byte stream, including when using `findFirst`, `limit` or a callback that can throw.
+Streams derived from the returned stream share its close handler.
+
+`StreamFromBytesLifecycleTest` checks early close, short-circuiting, callback failure, repeated close and full consumption.
+The existing exclusive-ownership expectation remains: callers must not reuse or separately release the transferred bytes while the stream owns them.
