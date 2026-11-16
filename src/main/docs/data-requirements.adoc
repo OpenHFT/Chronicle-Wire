@@ -38,6 +38,8 @@ it must reference the fully-qualified Java class or an alias registered via `Cla
 * Text values default to UTF-8 bytes on the wire while remaining ISO-8859-1 inside documentation.
 * Collections are written as nested documents where each entry uses either an implicit numeric key
   (arrays) or explicit field names (maps). Ordered collections retain insertion order.
+* JSON `null`, `[]` and `[null]` are distinct collection values. Sequence readers consume
+  a null value without invoking the element reader. Deserialisation does not modify static fields.
 
 == Schema Evolution Policy
 

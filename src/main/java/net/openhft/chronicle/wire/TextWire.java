@@ -2167,7 +2167,8 @@ public class TextWire extends YamlWireOut<TextWire> {
 
         @Override
         public <T> boolean sequence(@NotNull T t, @NotNull BiConsumer<T, ValueIn> tReader) {
-            consumePadding();
+            if (isNull())
+                return false;
 
             char code = (char) peekCode();
             if (code == '!') {
@@ -2220,7 +2221,8 @@ public class TextWire extends YamlWireOut<TextWire> {
         public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd, Reader reader0) throws InvalidMarshallableException {
 
             list.clear();
-            consumePadding();
+            if (isNull())
+                return false;
 
             char code = (char) peekCode();
             if (code == '!') {
