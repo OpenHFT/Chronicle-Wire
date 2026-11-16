@@ -300,6 +300,7 @@ public class DefaultValueIn implements ValueIn {
     public WireIn int64(@NotNull LongValue value) {
         @NotNull Number o = (Number) defaultValue;
         if (o == null) o = 0;
+        bindDefaultReference(value);
         value.setValue(o.longValue());
         return wireIn();
     }
@@ -309,6 +310,7 @@ public class DefaultValueIn implements ValueIn {
     public WireIn int32(@NotNull IntValue value) {
         @Nullable Number o = (Number) defaultValue;
         if (o == null) o = 0;
+        bindDefaultReference(value);
         value.setValue(o.intValue());
         return wireIn();
     }
@@ -330,6 +332,7 @@ public class DefaultValueIn implements ValueIn {
         if (created)
             value = detachedReference(new BinaryLongReference());
         try {
+            bindDefaultReference(value);
             value.setValue(o.longValue());
             setter.accept(t, value);
         } catch (RuntimeException | Error e) {
@@ -349,6 +352,7 @@ public class DefaultValueIn implements ValueIn {
         if (created)
             value = detachedReference(new BinaryIntReference());
         try {
+            bindDefaultReference(value);
             value.setValue(o.intValue());
             setter.accept(t, value);
         } catch (RuntimeException | Error e) {
@@ -357,6 +361,14 @@ public class DefaultValueIn implements ValueIn {
             throw e;
         }
         return wireIn();
+    }
+
+    private static void bindDefaultReference(Object value) {
+        if (value instanceof Byteable) {
+            Byteable reference = (Byteable) value;
+            if (reference.bytesStore() == null)
+                detachedReference(reference);
+        }
     }
 
     // An absent field has no backing bytes in the input to bind to.
