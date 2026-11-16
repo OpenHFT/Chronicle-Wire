@@ -1,0 +1,5 @@
+= Preserve ISO dates in typed marshalling
+:sectnums:
+:lang: en-GB
+
+Typed Serializable LocalDate values use the ISO representation supplied by LocalDate.toString(). This preserves zero-padded years, year zero, negative years and expanded positive years when the value is read back.
