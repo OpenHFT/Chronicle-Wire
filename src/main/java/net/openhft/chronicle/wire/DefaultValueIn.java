@@ -331,14 +331,15 @@ public class DefaultValueIn implements ValueIn {
         boolean created = value == null;
         if (created)
             value = detachedReference(new BinaryLongReference());
+        boolean failed = true;
         try {
             bindDefaultReference(value);
             value.setValue(o.longValue());
             setter.accept(t, value);
-        } catch (RuntimeException | Error e) {
-            if (created)
+            failed = false;
+        } finally {
+            if (failed && created)
                 net.openhft.chronicle.core.io.Closeable.closeQuietly(value);
-            throw e;
         }
         return wireIn();
     }
@@ -351,14 +352,15 @@ public class DefaultValueIn implements ValueIn {
         boolean created = value == null;
         if (created)
             value = detachedReference(new BinaryIntReference());
+        boolean failed = true;
         try {
             bindDefaultReference(value);
             value.setValue(o.intValue());
             setter.accept(t, value);
-        } catch (RuntimeException | Error e) {
-            if (created)
+            failed = false;
+        } finally {
+            if (failed && created)
                 net.openhft.chronicle.core.io.Closeable.closeQuietly(value);
-            throw e;
         }
         return wireIn();
     }
