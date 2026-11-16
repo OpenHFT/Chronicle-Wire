@@ -568,7 +568,8 @@ public abstract class AbstractWire implements Wire, InternalWire {
                                 ", pos: " + pos +
                                 ", success: " + success);
 
-                        // FIXME Should return something here?
+                        if (success)
+                            return EndOfWire.PRESENT_AFTER_UPDATE;
                     }
                     continue;
                 }
