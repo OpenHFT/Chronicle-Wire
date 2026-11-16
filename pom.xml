@@ -21,6 +21,11 @@
     <description>Chronicle-Wire</description>
     <packaging>bundle</packaging>
     <properties>
+        <!-- A named package would remove this regression condition. S1220 is a file-level
+             issue, so a class-level SuppressWarnings annotation cannot suppress it. -->
+        <sonar.issue.ignore.multicriteria>defaultPackageRegression</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria.defaultPackageRegression.ruleKey>java:S1220</sonar.issue.ignore.multicriteria.defaultPackageRegression.ruleKey>
+        <sonar.issue.ignore.multicriteria.defaultPackageRegression.resourceKey>src/test/java/DefaultPackageMethodReaderWriterTest.java</sonar.issue.ignore.multicriteria.defaultPackageRegression.resourceKey>
         <!-- Define the target coverage thresholds as properties -->
         <jacoco.line.coverage>0.726</jacoco.line.coverage>
         <jacoco.branch.coverage>0.664</jacoco.branch.coverage>
