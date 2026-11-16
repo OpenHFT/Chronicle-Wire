@@ -1,0 +1,5 @@
+= Adapt reflective long-handler return types
+:sectnums:
+:lang: en-GB
+
+The reflective method reader adapts non-void one-long-argument method handles to the Object return type used by its invocation path. Fluent interfaces therefore return the next handler without WrongMethodTypeException. Void handlers retain their exact void invocation path.
