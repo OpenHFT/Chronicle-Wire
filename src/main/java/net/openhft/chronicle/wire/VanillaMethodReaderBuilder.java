@@ -29,6 +29,9 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
     // System property name to disable proxy generation.
     public static final String DISABLE_READER_PROXY_CODEGEN = "disableReaderProxyCodegen";
 
+    /** Refuse implicit method-reader fallback after generation fails; false by default. */
+    public static final String DISABLE_CODEGEN_FALLBACK = "disableCodegenFallback";
+
     // Cache of generated reader classes keyed by name.
     private static final Map<String, Class<?>> classCache = new ConcurrentHashMap<>();
 
@@ -229,6 +232,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
         if (ignoreDefaults || Jvm.getBoolean(DISABLE_READER_PROXY_CODEGEN))
             return null;
 
+        final boolean disableFallback = Jvm.getBoolean(DISABLE_CODEGEN_FALLBACK);
         GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, multipleNonMarshallableParamTypes, metaDataHandler, impls);
 
         String fullClassName = generateMethodReader.packageName() + "." + generateMethodReader.generatedClassName();
@@ -246,11 +250,17 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
             }
         } catch (Throwable e) {
             classCache.put(fullClassName, COMPILE_FAILED);
+            if (disableFallback)
+                throw new IllegalStateException("Method-reader code generation failed for " + fullClassName +
+                        "; fallback is disabled by -D" + DISABLE_CODEGEN_FALLBACK, e);
             Jvm.warn().on(getClass(), "Failed to compile generated method reader - " +
                     "falling back to proxy method reader. Please report this failure as support for " +
                     "proxy method readers will be dropped in x.25.", e);
         }
 
+        if (disableFallback)
+            throw new IllegalStateException("Generated method reader unavailable for " + fullClassName +
+                    "; generation may have failed previously and fallback is disabled by -D" + DISABLE_CODEGEN_FALLBACK);
         return null;
     }
 
