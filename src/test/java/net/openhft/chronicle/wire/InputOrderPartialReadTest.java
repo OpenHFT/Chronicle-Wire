@@ -70,4 +70,20 @@ public class InputOrderPartialReadTest extends WireTestCommon {
         assertEquals(7, value.y);
         assertEquals("default", value.name);
     }
+
+    @Test
+    public void unnamedEntryInNamedFallbackDoesNotOverwriteFirstField() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        try {
+            Wire wire = new BinaryWire(bytes);
+            wire.write("y").int32(7);
+            wire.write("").int32(42);
+            Value value = new Value();
+            WireMarshaller.of(Value.class).readMarshallableInputOrder(value, wire, true);
+            assertEquals(10, value.x);
+            assertEquals(7, value.y);
+        } finally {
+            bytes.releaseLast();
+        }
+    }
 }

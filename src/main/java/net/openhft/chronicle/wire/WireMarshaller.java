@@ -628,7 +628,7 @@ public class WireMarshaller<T> {
         if (exact != null)
             return exact;
         for (FieldAccess candidate : fields) {
-            if (matchesFieldName(name, candidate))
+            if (StringUtils.equalsCaseIgnore(candidate.field.getName(), name))
                 return candidate;
         }
         return null;
