@@ -1634,6 +1634,9 @@ public class TextWire extends YamlWireOut<TextWire> {
                     parseWord(stringBuilder);
 
                     if ("byte[]".contentEquals(stringBuilder)) {
+                        // BinaryWire copies typed arrays as text, without a compression marker.
+                        if (peekCode() != '!')
+                            return textBytes(using, stringBuilder);
                         bytes.readSkip(1);
                         parseWord(stringBuilder);
                     }
@@ -1654,18 +1657,20 @@ public class TextWire extends YamlWireOut<TextWire> {
                     throw new IllegalStateException("unsupported type=" + stringBuilder);
 
                 } else {
-                    textTo(stringBuilder);
-                    if (using != null && stringBuilder.length() == using.length) {
-                        for (int i = 0; i < using.length; i++)
-                            using[i] = (byte) stringBuilder.charAt(i);
-                        return using;
-                    }
-                    // todo fix this.
-                    return stringBuilder.toString().getBytes(ISO_8859_1);
+                    return textBytes(using, stringBuilder);
                 }
             } finally {
                 consumePadding(1);
             }
+        }
+
+        private byte[] textBytes(byte[] using, StringBuilder text) {
+            textTo(text);
+            if (using == null || text.length() != using.length)
+                return text.toString().getBytes(ISO_8859_1);
+            for (int i = 0; i < using.length; i++)
+                using[i] = (byte) text.charAt(i);
+            return using;
         }
 
         @NotNull
