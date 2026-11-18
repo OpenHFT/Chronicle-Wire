@@ -38,8 +38,16 @@ it must reference the fully-qualified Java class or an alias registered via `Cla
 * Text values default to UTF-8 bytes on the wire while remaining ISO-8859-1 inside documentation.
 * Collections are written as nested documents where each entry uses either an implicit numeric key
   (arrays) or explicit field names (maps). Ordered collections retain insertion order.
-* JSON `null`, `[]` and `[null]` are distinct collection values. Sequence readers consume
-  a null value without invoking the element reader. Deserialisation does not modify static fields.
+* Text, YAML and JSON preserve distinct null collections, empty collections and
+  collections containing a null element. Deserialisation does not modify static fields.
+* YAML resolves unquoted `null`, `Null`, `NULL`, `~` and omitted values as null.
+  Quoted strings and explicit `!!str` values retain their string meaning.
+  The writer quotes null-like strings, while nulls may use the explicit `!!null` tag.
+  Existing YAML that used bare null-like words as strings must quote them or use `!!str`;
+  the spelling alone cannot distinguish that legacy intent from a null value.
+* Text, YAML and JSON sequence readers return false for null without invoking the
+  element reader. Buffered reads clear the destination list even for null, leaving
+  the reusable object buffer intact. Empty sequences return true with zero elements.
 
 == Schema Evolution Policy
 

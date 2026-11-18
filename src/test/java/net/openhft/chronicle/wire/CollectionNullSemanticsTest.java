@@ -15,6 +15,7 @@ import java.util.function.Supplier;
 import static org.junit.Assert.*;
 
 public class CollectionNullSemanticsTest extends WireTestCommon {
+    private static final WireType[] TYPES = {WireType.TEXT, WireType.YAML, WireType.YAML_ONLY, WireType.JSON, WireType.JSON_ONLY};
     public static class Value extends SelfDescribingMarshallable {
         public List<String> values;
     }
@@ -38,7 +39,7 @@ public class CollectionNullSemanticsTest extends WireTestCommon {
 
     @Test
     public void singletonNullIsData() {
-        for (WireType type : new WireType[]{WireType.JSON, WireType.JSON_ONLY}) {
+        for (WireType type : TYPES) {
             Value value = type.fromString(Value.class, "{\"values\":[null]}");
             assertEquals(Collections.singletonList(null), value.values);
         }
@@ -46,7 +47,7 @@ public class CollectionNullSemanticsTest extends WireTestCommon {
 
     @Test
     public void nullEmptyAndMixedListsRemainDistinct() {
-        for (WireType type : new WireType[]{WireType.JSON, WireType.JSON_ONLY}) {
+        for (WireType type : TYPES) {
             assertNull(type.fromString(Value.class, "{\"values\":null}").values);
             assertEquals(Collections.emptyList(), type.fromString(Value.class, "{\"values\":[]}").values);
             assertEquals(Arrays.asList(null, "x"),
@@ -60,8 +61,10 @@ public class CollectionNullSemanticsTest extends WireTestCommon {
         List<String> sentinel = Collections.singletonList(null);
         WithStatic.shared = sentinel;
         try {
-            assertEquals(7, WireType.JSON.fromString(WithStatic.class, "{\"value\":7}").value);
-            assertSame(sentinel, WithStatic.shared);
+            for (WireType type : TYPES) {
+                assertEquals(7, type.fromString(WithStatic.class, "{\"value\":7}").value);
+                assertSame(type.toString(), sentinel, WithStatic.shared);
+            }
         } finally {
             WithStatic.shared = original;
         }
@@ -69,16 +72,20 @@ public class CollectionNullSemanticsTest extends WireTestCommon {
 
     @Test
     public void finalStaticCollectionDoesNotPreventReading() {
-        assertEquals(7, WireType.JSON.fromString(WithFinalStatic.class, "{\"value\":7}").value);
-        assertEquals(Collections.singletonList(null), WithFinalStatic.SHARED);
+        for (WireType type : TYPES) {
+            assertEquals(7, type.fromString(WithFinalStatic.class, "{\"value\":7}").value);
+            assertEquals(Collections.singletonList(null), WithFinalStatic.SHARED);
+        }
     }
 
     @Test
     public void inheritedAndNestedNullCollectionsAreDecodedAtTheirValue() {
-        assertNull(WireType.JSON.fromString(Child.class, "{\"values\":null}").values);
-        Nested nested = WireType.JSON.fromString(Nested.class, "{\"nested\":{\"values\":null}}");
-        assertNotNull(nested.nested);
-        assertNull(nested.nested.values);
+        for (WireType type : TYPES) {
+            assertNull(type.fromString(Child.class, "{\"values\":null}").values);
+            Nested nested = type.fromString(Nested.class, "{\"nested\":{\"values\":null}}");
+            assertNotNull(nested.nested);
+            assertNull(nested.nested.values);
+        }
     }
 
     @Test
