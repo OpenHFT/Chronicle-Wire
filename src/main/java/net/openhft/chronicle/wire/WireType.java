@@ -635,6 +635,8 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     /**
      * Creates a {@link Stream} of objects by deserialising documents from the
      * provided {@link Bytes} buffer.
+     * The stream takes ownership of the bytes and releases them on exhaustion or
+     * close. Use try-with-resources when consumption can finish early or throw.
      *
      * @param expectedType expected object type
      * @param b            source bytes
@@ -668,7 +670,10 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
                             bytes.releaseLast();
                         return false;
                     }
-                }, false);
+                }, false).onClose(() -> {
+                    if (b.refCount() > 0)
+                        b.releaseLast();
+                });
     }
 
     /**
