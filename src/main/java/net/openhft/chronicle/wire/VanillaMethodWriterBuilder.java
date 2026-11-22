@@ -295,7 +295,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      */
     @Nullable
     private T createInstance() {
-        String fullClassName = packageName + "." + getClassName();
+        String fullClassName = ReflectionUtil.qualifiedName(packageName, getClassName());
         try {
             try {
                 // Attempt to create an instance from an already loaded class
@@ -348,10 +348,11 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                     updateInterceptor != null, verboseTypes);
 
         // Configure and use version 2 of the method writer generator
+        int lastDot = fullClassName.lastIndexOf('.');
         GenerateMethodWriter2 gmw = new GenerateMethodWriter2();
         gmw.metaData()
-                .packageName(fullClassName.substring(0, fullClassName.lastIndexOf('.')))
-                .baseClassName(fullClassName.substring(1 + fullClassName.lastIndexOf('.')))
+                .packageName(lastDot < 0 ? "" : fullClassName.substring(0, lastDot))
+                .baseClassName(fullClassName.substring(lastDot + 1))
                 .interfaces(interfaces)
                 .genericEvent(genericEvent)
                 .metaData(metaData)
