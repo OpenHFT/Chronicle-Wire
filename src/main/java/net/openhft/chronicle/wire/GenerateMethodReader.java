@@ -536,6 +536,7 @@ public class GenerateMethodReader {
      * @param eventNameSwitchBlock The block of code that handles the switching of event names.
      */
     private void handleMethod(Method m, Class<?> anInterface, String instanceFieldName, boolean methodFilter, SourceCodeFormatter eventNameSwitchBlock, SourceCodeFormatter eventIdSwitchBlock) {
+        validateDispatchType(m, hasRealInterceptorReturns() ? anInterface : m.getDeclaringClass());
         Jvm.setAccessible(m);
 
         // Retrieving parameter and return type information of the method
@@ -663,6 +664,23 @@ public class GenerateMethodReader {
         // Further handling of chainable return types
         if (chainReturnType != null)
             handleInterface(chainReturnType, "chainedCallReturnResult", false, eventNameSwitchBlock, eventIdSwitchBlock);
+    }
+
+    /** Do not discard inaccessible interface methods: reflective readers may still dispatch them. */
+    private void validateDispatchType(Method method, Class<?> dispatchType) {
+        String generatedPackage = packageName();
+        for (Class<?> type = dispatchType; type != null; type = type.getEnclosingClass()) {
+            int modifiers = type.getModifiers();
+            Package typePackage = type.getPackage();
+            String packageName = typePackage == null ? "" : typePackage.getName();
+            if (Modifier.isPrivate(modifiers) ||
+                    (!Modifier.isPublic(modifiers) && !generatedPackage.equals(packageName))) {
+                throw new IllegalStateException("Cannot generate method-reader dispatch for " + method +
+                        ": type " + type.getName() + " is not accessible from generated package '" +
+                        generatedPackage + "'. Make the event interface accessible, or move unrelated " +
+                        "helper behaviour to composition or a base class.");
+            }
+        }
     }
 
     /**
