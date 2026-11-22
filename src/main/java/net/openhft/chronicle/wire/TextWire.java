@@ -594,27 +594,32 @@ public class TextWire extends YamlWireOut<TextWire> {
         long position = bytes.readPosition();
         long nextLine = fieldLine;
         int ch;
-        while ((ch = bytes.peekUnsignedByte(position)) >= 0) {
+        while ((ch = peekWithinReadLimit(position)) > 0) {
             if (ch == '#') {
-                while ((ch = bytes.peekUnsignedByte(++position)) >= 0 && ch != '\r' && ch != '\n') {
+                while ((ch = peekWithinReadLimit(++position)) > 0 && ch != '\r' && ch != '\n') {
                     // Inspect comments without advancing the reader or notifying listeners twice.
                 }
             }
-            if (ch < 0 || ch > ' ')
+            if (ch <= 0 || ch > ' ')
                 break;
             if (ch == '\r' || ch == '\n')
                 nextLine = position + 1;
             position++;
         }
-        if (ch < 0 || ch == ',' || ch == '}'
+        if (ch <= 0 || ch == ',' || ch == '}'
                 || (nextLine > fieldLine && position - nextLine <= fieldIndent && isFieldAhead(position)))
             valueIn.emptyValuePosition = position;
+    }
+
+    private int peekWithinReadLimit(long position) {
+        // An indexed mapped peek can acquire another chunk before checking its limit.
+        return position < bytes.readLimit() ? bytes.peekUnsignedByte(position) : -1;
     }
 
     private boolean isFieldAhead(long position) {
         for (long pos = position; pos < bytes.readLimit(); pos++) {
             int ch = bytes.peekUnsignedByte(pos);
-            if (ch == ':' && bytes.peekUnsignedByte(pos + 1) <= ' ')
+            if (ch == ':' && peekWithinReadLimit(pos + 1) <= ' ')
                 return true;
             if (ch == '\n' || ch == '\r' || ch == ',' || ch == '}' || ch == ']')
                 break;
