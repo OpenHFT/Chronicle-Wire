@@ -5,6 +5,8 @@ package net.openhft.chronicle.wire;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.internal.NoBytesStore;
+import net.openhft.chronicle.bytes.ref.BinaryIntReference;
+import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.pool.ClassLookup;
@@ -298,6 +300,7 @@ public class DefaultValueIn implements ValueIn {
     public WireIn int64(@NotNull LongValue value) {
         @NotNull Number o = (Number) defaultValue;
         if (o == null) o = 0;
+        bindDefaultReference(value);
         value.setValue(o.longValue());
         return wireIn();
     }
@@ -307,6 +310,7 @@ public class DefaultValueIn implements ValueIn {
     public WireIn int32(@NotNull IntValue value) {
         @Nullable Number o = (Number) defaultValue;
         if (o == null) o = 0;
+        bindDefaultReference(value);
         value.setValue(o.intValue());
         return wireIn();
     }
@@ -324,8 +328,19 @@ public class DefaultValueIn implements ValueIn {
     public <T> WireIn int64(@Nullable LongValue value, T t, @NotNull BiConsumer<T, LongValue> setter) {
         @NotNull Number o = (Number) defaultValue;
         if (o == null) o = 0;
-        value.setValue(o.longValue());
-        setter.accept(t, value);
+        boolean created = value == null;
+        if (created)
+            value = detachedReference(new BinaryLongReference());
+        boolean failed = true;
+        try {
+            bindDefaultReference(value);
+            value.setValue(o.longValue());
+            setter.accept(t, value);
+            failed = false;
+        } finally {
+            if (failed && created)
+                net.openhft.chronicle.core.io.Closeable.closeQuietly(value);
+        }
         return wireIn();
     }
 
@@ -334,9 +349,39 @@ public class DefaultValueIn implements ValueIn {
     public <T> WireIn int32(@Nullable IntValue value, T t, @NotNull BiConsumer<T, IntValue> setter) {
         @NotNull Number o = (Number) defaultValue;
         if (o == null) o = 0;
-        value.setValue(o.intValue());
-        setter.accept(t, value);
+        boolean created = value == null;
+        if (created)
+            value = detachedReference(new BinaryIntReference());
+        boolean failed = true;
+        try {
+            bindDefaultReference(value);
+            value.setValue(o.intValue());
+            setter.accept(t, value);
+            failed = false;
+        } finally {
+            if (failed && created)
+                net.openhft.chronicle.core.io.Closeable.closeQuietly(value);
+        }
         return wireIn();
+    }
+
+    private static void bindDefaultReference(Object value) {
+        if (value instanceof Byteable) {
+            Byteable reference = (Byteable) value;
+            if (reference.bytesStore() == null)
+                detachedReference(reference);
+        }
+    }
+
+    // An absent field has no backing bytes in the input to bind to.
+    private static <T extends Byteable> T detachedReference(T reference) {
+        BytesStore<?, ?> store = BytesStore.wrap(new byte[(int) reference.maxSize()]);
+        try {
+            reference.bytesStore(store, 0, reference.maxSize());
+            return reference;
+        } finally {
+            store.release(net.openhft.chronicle.core.io.ReferenceOwner.INIT);
+        }
     }
 
     /**
