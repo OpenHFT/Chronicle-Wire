@@ -1,0 +1,5 @@
+= Preserve write failures when document close fails
+:sectnums:
+:lang: en-GB
+
+The MarshallableOut convenience writers roll back a failed write and close its document context exactly once. If closing also fails, the write exception remains primary and the close exception is suppressed. A close failure after a successful write is still propagated.
