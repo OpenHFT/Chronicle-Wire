@@ -1879,6 +1879,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 yt.next();
                 return classLookup().forName(stringBuilder);
             } catch (ClassNotFoundRuntimeException e) {
+                if (Wires.THROW_CNFRE)
+                    throw e;
                 Jvm.warn().on(getClass(), "Unable to find " + stringBuilder + " " + e);
                 return null;
             }
@@ -1917,8 +1919,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public boolean isTyped() {
             consumePadding();
-            int code = bytes.peekUnsignedByte();
-            return code == '!';
+            return yt.current() == YamlToken.TAG;
         }
 
         @NotNull

@@ -20,8 +20,8 @@ package net.openhft.chronicle.wire;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import net.openhft.chronicle.core.io.Resettable;
 import net.openhft.chronicle.core.io.ValidatableUtil;
+import net.openhft.chronicle.core.io.Resettable;
 import net.openhft.chronicle.core.pool.ClassLookup;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import net.openhft.chronicle.core.util.*;
@@ -1265,7 +1265,7 @@ public interface ValueIn {
         } else {
             t = Wires.object2(this, using, clazz, true, (Class) o);
         }
-        return ValidatableUtil.validate(t);
+        return Wires.validateRead(t);
     }
 
     /**
@@ -1280,7 +1280,7 @@ public interface ValueIn {
      */
     default <E> E object(@Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
         E t = Wires.object1(this, using, clazz, bestEffort);
-        return ValidatableUtil.validate(t);
+        return Wires.validateRead(t);
     }
 
 /**

@@ -1046,30 +1046,44 @@ public enum Wires {
 
         // If we failed to create an instance of the object, throw an exception.
         if (using == null)
-            throw new ClassNotFoundRuntimeException(new ClassNotFoundException("failed to create instance of clazz=" + clazz + " is it aliased?"));
+            throw new UninstantiableObjectException(clazz);
 
-        // Deserialize the object using the strategy.
-        Object marshallable = in.marshallable(using, strategy);
-        E e = readResolve(marshallable);
+        // After allocation, nested failures belong to this instance's callbacks.
+        // Their markers must not make an outer field look uninstantiable.
+        try {
+            Object marshallable = in.marshallable(using, strategy);
+            E e = readResolve(marshallable);
 
-        // If the object is of a type that has a name (e.g., an Enum or CoreDynamicEnum), handle it specially.
-        String name = nameOf(e);
-        if (name != null) {
-            Class<?> aClass = e.getClass();
-            E e2 = (E) EnumCache.of(aClass).valueOf(name);
+            // If the object is of a type that has a name (e.g., an Enum or CoreDynamicEnum), handle it specially.
+            String name = nameOf(e);
+            if (name != null) {
+                Class<?> aClass = e.getClass();
+                E e2 = (E) EnumCache.of(aClass).valueOf(name);
 
-            // If the deserialized object and the cached version are not the same, update the cached version.
-            if (e != e2) {
-                try (ScopedResource<Wire> wireSR = Wires.acquireBinaryWireScoped()) {
-                    Wire wire = wireSR.get();
-                    WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(aClass);
-                    wm.writeMarshallable(e, wire);
-                    wm.readMarshallable(e2, wire, false);
+                // If the deserialized object and the cached version are not the same, update the cached version.
+                if (e != e2) {
+                    try (ScopedResource<Wire> wireSR = Wires.acquireBinaryWireScoped()) {
+                        Wire wire = wireSR.get();
+                        WireMarshaller wm = WireMarshaller.WIRE_MARSHALLER_CL.get(aClass);
+                        wm.writeMarshallable(e, wire);
+                        wm.readMarshallable(e2, wire, false);
+                    }
+                    return e2;
                 }
-                return e2;
             }
+            return e;
+        } catch (UninstantiableObjectException e) {
+            throw new ClassNotFoundRuntimeException(e.getCause());
         }
-        return e;
+    }
+
+    /** An allocation failure before any reader has run for this object. */
+    static final class UninstantiableObjectException extends ClassNotFoundRuntimeException {
+        private static final long serialVersionUID = 0L;
+
+        UninstantiableObjectException(Class<?> type) {
+            super(new ClassNotFoundException("failed to create instance of clazz=" + type + " is it aliased?"));
+        }
     }
 
     /**
@@ -1116,7 +1130,7 @@ public enum Wires {
      */
     @Nullable
     public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz) throws InvalidMarshallableException {
-        return ValidatableUtil.validate(object1(in, using, clazz, true));
+        return object0(in, using, clazz, true);
     }
 
     /**
@@ -1131,7 +1145,16 @@ public enum Wires {
      * @throws InvalidMarshallableException If an error occurs during deserialization.
      */
     public static <E> E object0(ValueIn in, @Nullable E using, @Nullable Class clazz, boolean bestEffort) throws InvalidMarshallableException {
-        return ValidatableUtil.validate(object1(in, using, clazz, bestEffort));
+        return validateRead(object1(in, using, clazz, bestEffort));
+    }
+
+    static <E> E validateRead(E object) {
+        try {
+            return ValidatableUtil.validate(object);
+        } catch (UninstantiableObjectException e) {
+            // Validation runs only after this value was successfully read.
+            throw new ClassNotFoundRuntimeException(e.getCause());
+        }
     }
 
     /**

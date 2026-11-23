@@ -1431,17 +1431,18 @@ public class WireMarshaller<T> {
                 @Nullable Object using = ObjectUtils.isImmutable(type) == ObjectUtils.Immutability.NO ? field.get(o) : null;
 
                 Object object = null;
+                final boolean typed = read.isTyped();
                 try {
                     object = read.object(using, type, false);
-                } catch (ClassNotFoundRuntimeException e) {
-                    // "Unhandled" Abstract classes that are not types should be null (Enums are abstract classes in Java but should not be null here)
+                } catch (Wires.UninstantiableObjectException e) {
+                    // Abstract fields without a usable type can remain null when missing aliases are ignored.
                     if (using == null &&
                             Modifier.isAbstract(type.getModifiers()) &&
                             !Modifier.isInterface(type.getModifiers()) &&
                             !type.isEnum() &&
-                            !read.isTyped()) {
-                        // retain the null value of object
-                        read.wireIn().bytes().readPosition(pos);
+                            (!typed || !Wires.THROW_CNFRE)) {
+                        // No instance was created; consume its value before the next field.
+                        read.skipValue();
                         Jvm.warn().on(getClass(), "Ignoring exception and setting field '" + field.getName() + "' to null", e);
                     } else {
                         Jvm.rethrow(e);
