@@ -17,8 +17,6 @@ import java.io.Closeable;
  * Implementations must ensure proper handling of resources and consistency of the document state.
  */
 public interface DocumentContext extends Closeable, SourceContext {
-    //! DocumentContextLifecycleTest#noDocumentContextReturnsNegativeContextCount demonstrates that
-    //! NOOP retains its ignores-everything identity and harmless rollback behavior.
     DocumentContext NOOP = NoDocumentContext.INSTANCE;
 
     /**
@@ -77,8 +75,6 @@ public interface DocumentContext extends Closeable, SourceContext {
      * @return the output context count, or {@link MarshallableOut#UNSET_CONTEXT} if unavailable
      */
     default int contextCount() {
-        //! DocumentContextLifecycleTest#binaryReadWriteAndExhaust and #textUseTextDocumentsLifecycle
-        //! demonstrate delegation to the associated Wire, while NOOP covers the unavailable path.
         Wire wire = wire();
         return wire == null ? MarshallableOut.UNSET_CONTEXT : wire.contextCount();
     }

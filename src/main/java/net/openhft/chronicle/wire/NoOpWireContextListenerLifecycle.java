@@ -9,10 +9,7 @@ package net.openhft.chronicle.wire;
  * inlined on ordinary writes.
  */
 enum NoOpWireContextListenerLifecycle implements WireContextListenerLifecycle {
-    //! WireContextListenerLifecycleTest#listenerFreeWireCannotBeConfiguredAfterFirstUse requires
-    //! the listener-free path to distinguish an unused Wire from one whose first document has
-    //! permanently closed registration. Shared sentinels preserve that state without allocating
-    //! lifecycle objects on ordinary writes.
+    // Shared sentinels track first use without allocating state on listener-free wires.
     UNSET,
     SET;
 
