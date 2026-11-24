@@ -79,37 +79,37 @@ public class MarshallableOutFailureTest extends WireTestCommon {
     }
 
     @Test
-    public void keyMessagePreservesWriteFailure() throws Exception {
+    public void keyMessagePreservesWriteFailure() {
         preservesFailure(out -> out.writeMessage((WireKey) () -> "event", 1));
     }
 
     @Test
-    public void namedMessagePreservesWriteFailure() throws Exception {
+    public void namedMessagePreservesWriteFailure() {
         preservesFailure(out -> out.writeMessage("event", 1));
     }
 
     @Test
-    public void bytesMessagePreservesWriteFailure() throws Exception {
+    public void bytesMessagePreservesWriteFailure() {
         preservesFailure(out -> out.writeBytes(bytes -> {}));
     }
 
     @Test
-    public void valueDocumentPreservesWriteFailure() throws Exception {
+    public void valueDocumentPreservesWriteFailure() {
         preservesFailure(out -> out.writeDocument(1, (value, item) -> {}));
     }
 
     @Test
-    public void textMessagePreservesWriteFailure() throws Exception {
+    public void textMessagePreservesWriteFailure() {
         preservesFailure(out -> out.writeText("text"));
     }
 
     @Test
-    public void mapMessagePreservesWriteFailure() throws Exception {
+    public void mapMessagePreservesWriteFailure() {
         preservesFailure(out -> out.writeMap(Collections.singletonMap("key", 1)));
     }
 
     @Test
-    public void successfulWriteStillReportsCloseFailure() throws Exception {
+    public void successfulWriteStillReportsCloseFailure() {
         IllegalStateException cleanup = new IllegalStateException("close failed");
         Output output = new Output(null, cleanup);
         assertSame(
@@ -119,7 +119,7 @@ public class MarshallableOutFailureTest extends WireTestCommon {
     }
 
     @Test
-    public void successfulWriteClosesExactlyOnce() throws Exception {
+    public void successfulWriteClosesExactlyOnce() {
         Output output = new Output(null, null);
         output.writeText("text");
         assertEquals(1, output.texts);
