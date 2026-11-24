@@ -36,28 +36,29 @@ public class ExcerptIteratorContractTest extends WireTestCommon {
     }
 
     @Test
-    public void emptyDoubleIteratorIsExhausted() throws Exception {
+    public void emptyDoubleIteratorIsExhausted() {
         try (Source s = new Source()) {
             assertFalse(s.doubles().hasNext());
         }
     }
 
     @Test
-    public void emptyDoubleNextThrows() throws Exception {
+    public void emptyDoubleNextThrows() {
         try (Source s = new Source()) {
-            assertThrows(NoSuchElementException.class, () -> s.doubles().nextDouble());
+            PrimitiveIterator.OfDouble iterator = s.doubles();
+            assertThrows(NoSuchElementException.class, iterator::nextDouble);
         }
     }
 
     @Test
-    public void doubleNextReadsFirstDocument() throws Exception {
+    public void doubleNextReadsFirstDocument() {
         try (Source s = new Source(12.5)) {
             assertEquals(12.5, s.doubles().nextDouble(), 0);
         }
     }
 
     @Test
-    public void doubleHasNextCachesWithoutSkipping() throws Exception {
+    public void doubleHasNextCachesWithoutSkipping() {
         try (Source s = new Source(12.5, 25)) {
             AtomicInteger reads = new AtomicInteger();
             PrimitiveIterator.OfDouble it = new StreamsUtil.ExcerptIteratorOfDouble(s.wire, (w, i) -> {
@@ -73,7 +74,7 @@ public class ExcerptIteratorContractTest extends WireTestCommon {
     }
 
     @Test
-    public void doubleIterationEndsAfterLastDocument() throws Exception {
+    public void doubleIterationEndsAfterLastDocument() {
         try (Source s = new Source(1, 2)) {
             PrimitiveIterator.OfDouble it = s.doubles();
             assertEquals(1, it.nextDouble(), 0);
@@ -84,7 +85,7 @@ public class ExcerptIteratorContractTest extends WireTestCommon {
     }
 
     @Test
-    public void doubleNaNSentinelSkipsDocument() throws Exception {
+    public void doubleNaNSentinelSkipsDocument() {
         try (Source s = new Source(Double.NaN, 3)) {
             PrimitiveIterator.OfDouble it = s.doubles();
             assertEquals(3, it.nextDouble(), 0);
@@ -93,7 +94,7 @@ public class ExcerptIteratorContractTest extends WireTestCommon {
     }
 
     @Test
-    public void doubleExtractorFailureClosesDocument() throws Exception {
+    public void doubleExtractorFailureClosesDocument() {
         try (Source s = new Source(1, 2)) {
             AtomicInteger calls = new AtomicInteger();
             PrimitiveIterator.OfDouble it = new StreamsUtil.ExcerptIteratorOfDouble(s.wire, (w,i) -> {
@@ -108,7 +109,7 @@ public class ExcerptIteratorContractTest extends WireTestCommon {
     }
 
     @Test
-    public void doubleIteratorPreservesSpecialValues() throws Exception {
+    public void doubleIteratorPreservesSpecialValues() {
         try (Source s = new Source(1, 2, 3)) {
             double[] values = {-0.0, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY};
             AtomicInteger calls = new AtomicInteger();
@@ -123,7 +124,7 @@ public class ExcerptIteratorContractTest extends WireTestCommon {
     }
 
     @Test
-    public void objectNullSentinelSkipsDocument() throws Exception {
+    public void objectNullSentinelSkipsDocument() {
         try (Source s = new Source(1, 2)) {
             Iterator<String> it = new StreamsUtil.ExcerptIterator<>(s.wire, (w,i) -> w.read("v").float64() == 1 ? null : "two");
             assertEquals("two", it.next());
@@ -132,7 +133,7 @@ public class ExcerptIteratorContractTest extends WireTestCommon {
     }
 
     @Test
-    public void objectExtractorFailureClosesDocument() throws Exception {
+    public void objectExtractorFailureClosesDocument() {
         try (Source s = new Source(1, 2)) {
             Iterator<String> it = new StreamsUtil.ExcerptIterator<>(s.wire, (w,i) -> {
                 if (w.read("v").float64() == 1)
@@ -146,7 +147,7 @@ public class ExcerptIteratorContractTest extends WireTestCommon {
     }
 
     @Test
-    public void longSentinelSkipsDocument() throws Exception {
+    public void longSentinelSkipsDocument() {
         try (Source s = new Source(1, 2)) {
             PrimitiveIterator.OfLong it = new StreamsUtil.ExcerptIteratorOfLong(s.wire, (w,i) -> w.read("v").float64() == 1 ? Long.MIN_VALUE : 2);
             assertEquals(2, it.nextLong());
@@ -155,7 +156,7 @@ public class ExcerptIteratorContractTest extends WireTestCommon {
     }
 
     @Test
-    public void longHasNextCachesWithoutSkipping() throws Exception {
+    public void longHasNextCachesWithoutSkipping() {
         try (Source s = new Source(1, 2)) {
             PrimitiveIterator.OfLong it = new StreamsUtil.ExcerptIteratorOfLong(s.wire, (w,i) -> (long) w.read("v").float64());
             assertTrue(it.hasNext());
