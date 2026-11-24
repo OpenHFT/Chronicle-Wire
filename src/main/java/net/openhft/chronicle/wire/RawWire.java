@@ -89,11 +89,7 @@ public class RawWire extends AbstractWire implements Wire {
 
     @Override
     public void reset() {
-        //! DocumentContextLifecycleTest#resetRejectsContextCountOverflowBeforeMutation demonstrates
-        //! that Raw checks count exhaustion before mutating its state.
         checkCanAdvanceOutputContext();
-        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire establishes that a
-        //! running callback cannot be interrupted by reset-like operations.
         checkCanResetContextListener();
         valueIn.resetState();
         valueOut.resetState();
@@ -101,11 +97,7 @@ public class RawWire extends AbstractWire implements Wire {
         readContext.reset();
         bytes.clear();
         lastSB = null;
-        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt demonstrates
-        //! that Raw publishes the next context only after its state reset succeeds.
         advanceOutputContext();
-        //! WireContextListenerLifecycleTest#resetReusesListenerForTheNextOutputContext demonstrates
-        //! that Raw re-arms notification only after its state reset succeeds.
         resetContextListener();
     }
 
@@ -117,8 +109,6 @@ public class RawWire extends AbstractWire implements Wire {
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
-        //! WireContextListenerLifecycleTest#allConcreteWiresInvokeListenerBeforeFirstDataDocument
-        //! demonstrates that Raw enters the shared lifecycle before opening application output.
         notifyContextListenerIfNeeded(metaData);
         writeContext.start(metaData);
         return writeContext;
@@ -133,15 +123,11 @@ public class RawWire extends AbstractWire implements Wire {
 
     @Override
     public boolean writingIsComplete() {
-        //! WireContextListenerLifecycleTest#incompleteChainedListenerOutputFailsClosedAcrossWires
-        //! demonstrates that Raw must expose its real structural completion state.
         return !writeContext.isOpen();
     }
 
     @Override
     public void rollbackIfNotComplete() {
-        //! WireContextListenerLifecycleTest#listenerRollbackFailsClosedAcrossWires demonstrates that
-        //! fail-closed cleanup reaches Raw's genuine document rollback.
         writeContext.rollbackIfNotComplete();
     }
 
@@ -264,8 +250,6 @@ public class RawWire extends AbstractWire implements Wire {
 
     @Override
     public void clear() {
-        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire demonstrates that
-        //! Raw clear rejects an active callback before mutating state.
         checkCanResetContextListener();
         bytes.clear();
     }

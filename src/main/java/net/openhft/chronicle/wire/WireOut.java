@@ -229,8 +229,6 @@ public interface WireOut extends WireCommon, MarshallableOut {
     @Override
     default <T> WireOut contextListener(@NotNull Class<T> writerType,
                                         @NotNull MarshallableOut.ContextListener<? super T> listener) {
-        //! WireContextListenerLifecycleTest#contextListenerWaitsForDataAfterMetadataAndWritesDtoOnce
-        //! asserts the covariant fluent return while concrete wires provide the supported implementation.
         MarshallableOut.super.contextListener(writerType, listener);
         return this;
     }

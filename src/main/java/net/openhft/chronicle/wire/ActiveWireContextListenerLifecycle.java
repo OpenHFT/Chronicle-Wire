@@ -40,9 +40,6 @@ final class ActiveWireContextListenerLifecycle<T> implements WireContextListener
         started = true;
         // A listener failure poisons the whole output context. Metadata must not bypass that
         // boundary and create a stream whose later application records lack valid context.
-        //! WireContextListenerLifecycleTest#metadataCannotBypassAFailedListener demonstrates why
-        //! failure is rejected before the metadata exemption: otherwise metadata could advance a
-        //! poisoned stream without valid context and obscure the original callback failure.
         if (state == State.FAILED)
             throw new IllegalStateException(
                     "Context listener failed for the current output context", failure);
@@ -54,48 +51,7 @@ final class ActiveWireContextListenerLifecycle<T> implements WireContextListener
         }
         switch (state) {
             case READY:
-                //! WireContextListenerLifecycleTest#retainedSuppliedWriterCanStartNextContextAfterReset
-                //! demonstrates that a retained writer may open the next context first; consume its outer
-                //! opening so the newly re-armed listener can open its own supplied context document.
-                consumeSuppliedDocumentOpening();
-                // Publish re-entrancy state before invoking user code; otherwise a listener can
-                // recursively open an ordinary document ahead of its own context record.
-                //! WireContextListenerLifecycleTest#listenerCannotReenterThroughOuterWire demonstrates
-                //! that IN_PROGRESS must be visible before calling user code; publishing it afterward
-                //! admits an outer-Wire document ahead of the required context record.
-                state = State.IN_PROGRESS;
-                listenerRolledBack = false;
-                try {
-                    notifyListener(wire);
-                    //! WireContextListenerLifecycleTest#listenerRollbackFailsClosedAcrossWires
-                    //! requires an explicit rollback requested by callback code to fail the
-                    //! notification even after rollback has closed the supplied document.
-                    if (listenerRolledBack)
-                        throw new IllegalStateException(
-                                "Context listener rolled back its output document");
-                    //! WireContextListenerLifecycleTest#incompleteChainedListenerOutputFailsClosedAcrossWires
-                    //! requires the callback to finish every supplied chain before application
-                    //! data can follow it; otherwise the next write can become part of context.
-                    if (!wire.writingIsComplete()) {
-                        throw new IllegalStateException(
-                                "Context listener returned with an incomplete chained document");
-                    }
-                    state = State.SUCCEEDED;
-                } catch (Throwable throwable) {
-                    //! WireContextListenerLifecycleTest#listenerFailurePoisonsCurrentContextUntilReset
-                    //! requires the callback failure to remain primary while any incomplete
-                    //! supplied document is rolled back. Retrying after partial context output can
-                    //! duplicate records, so cleanup failure is suppressed and the state is FAILED.
-                    try {
-                        wire.rollbackIfNotComplete();
-                    } catch (Throwable rollbackFailure) {
-                        throwable.addSuppressed(rollbackFailure);
-                    }
-                    failure = throwable;
-                    state = State.FAILED;
-                    logFailureOnce(wire, throwable);
-                    throw Jvm.rethrow(throwable);
-                }
+                startContext(wire);
                 return;
             case IN_PROGRESS:
                 if (consumeSuppliedDocumentOpening())
@@ -111,6 +67,41 @@ final class ActiveWireContextListenerLifecycle<T> implements WireContextListener
         }
     }
 
+    // User callbacks can throw Errors or sneaky checked exceptions. Preserve the original failure
+    // while rolling back, then poison this context so partially written records cannot be retried.
+    @SuppressWarnings("java:S1181")
+    private void startContext(AbstractWire wire) {
+        // A writer retained across reset can open this context and then be used again inside the listener.
+        consumeSuppliedDocumentOpening();
+        // Publish re-entrancy state before invoking user code; otherwise a listener can
+        // recursively open an ordinary document ahead of its own context record.
+        state = State.IN_PROGRESS;
+        listenerRolledBack = false;
+        try {
+            notifyListener(wire);
+            if (listenerRolledBack)
+                throw new IllegalStateException(
+                        "Context listener rolled back its output document");
+            // An open chain would make the next application write part of the context document.
+            if (!wire.writingIsComplete()) {
+                throw new IllegalStateException(
+                        "Context listener returned with an incomplete chained document");
+            }
+            state = State.SUCCEEDED;
+        } catch (Throwable throwable) {
+            // Retrying a partially written context could duplicate records.
+            try {
+                wire.rollbackIfNotComplete();
+            } catch (Throwable rollbackFailure) {
+                throwable.addSuppressed(rollbackFailure);
+            }
+            failure = throwable;
+            state = State.FAILED;
+            logFailureOnce(wire, throwable);
+            throw Jvm.rethrow(throwable);
+        }
+    }
+
     @Override
     public void checkCanResetContext() {
         if (state == State.IN_PROGRESS)
@@ -119,8 +110,6 @@ final class ActiveWireContextListenerLifecycle<T> implements WireContextListener
 
     @Override
     public void resetContext() {
-        //! WireContextListenerLifecycleTest#resetReusesListenerForTheNextOutputContext requires a
-        //! completed or failed context to re-arm only when the owning Wire completes its reset.
         state = State.READY;
         listenerRolledBack = false;
         failure = null;
@@ -129,17 +118,12 @@ final class ActiveWireContextListenerLifecycle<T> implements WireContextListener
     @Override
     public void documentRolledBack() {
         if (state == State.IN_PROGRESS) {
-            //! WireContextListenerLifecycleTest#listenerRollbackFailsClosedAcrossWires requires
-            //! callback rollback intent to survive document cleanup until beforeDocument can
-            //! reject the notification.
+            // Remember the rollback even if the listener closes the document before returning.
             listenerRolledBack = true;
             return;
         }
         if (state != State.SUCCEEDED)
             return;
-        //! WireContextListenerLifecycleTest#applicationSerializationFailurePoisonsSuccessfulContextUntilReset
-        //! requires rollback of a later application document to invalidate the successful
-        //! lifecycle: truncation may also have removed the context records it depended on.
         failure = new IllegalStateException(
                 "Application rollback may have removed the context records for this output context");
         state = State.FAILED;
@@ -182,10 +166,6 @@ final class ActiveWireContextListenerLifecycle<T> implements WireContextListener
         }
 
         private DocumentContext openDocument(boolean metaData, boolean acquire) {
-            //! WireContextListenerLifecycleTest#listenerCannotReenterThroughOuterWire and
-            //! #incompleteChainedListenerOutputFailsClosedAcrossWires require exactly one supplied
-            //! opening token. A nested acquisition before the outer holder is established can
-            //! recurse into notification or bind competing context documents.
             if (suppliedDocumentOpening)
                 throw new IllegalStateException("A supplied context document is already being opened");
             suppliedDocumentOpening = true;

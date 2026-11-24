@@ -92,9 +92,6 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         notComplete = false;
         @NotNull Bytes<?> bytes = wire().bytes();
         if (rollback) {
-            //! WireContextListenerLifecycleTest#applicationSerializationFailurePoisonsSuccessfulContextUntilReset
-            //! requires text rollback to notify the lifecycle whenever truncation can remove
-            //! context output; the test establishes poisoning, not a separately observable call order.
             notifyContextRollback();
             bytes.writePosition(bytes.readPosition());
             return;
@@ -110,8 +107,6 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
     }
 
     private void notifyContextRollback() {
-        //! WireContextListenerLifecycleTest#listenerRollbackFailsClosedAcrossWires demonstrates that
-        //! the same hook records rollback performed by listener code while IN_PROGRESS.
         if (wire instanceof AbstractWire)
             ((AbstractWire) wire).contextDocumentRolledBack();
     }

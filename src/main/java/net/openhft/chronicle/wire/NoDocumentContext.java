@@ -60,6 +60,7 @@ public enum NoDocumentContext implements DocumentContext, IgnoresEverything {
 
     @Override
     public void rollbackIfNotComplete() {
+        // No document was opened, so there is no partial output to roll back.
     }
 
     @Override

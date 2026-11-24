@@ -91,8 +91,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @NotNull
     @Override
     protected Quotes needsQuotes(@NotNull CharSequence cs) {
-        //! ScalarTypePreservationTest#dotPrefixedNumericTextRetainsType demonstrates that a dot-prefixed numeric-looking String must be
-        //! quoted or YamlWire reads it back as a Double. Quoting every dot-prefixed String would unnecessarily alter established output.
+        // Quote strings such as ".5" so they read back as text.
         if (cs.length() > 1 && cs.charAt(0) == '.' && cs.charAt(1) >= '0' && cs.charAt(1) <= '9')
             return Quotes.DOUBLE;
         return super.needsQuotes(cs);
@@ -413,8 +412,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.YAML,
-                //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates
-                //! that forced-proxy YAML writers bind to the listener-selected output rather than the outer Wire.
                 out -> new TextMethodWriterInvocationHandler(tClass, out));
         builder.marshallableOut(this);
         return builder;
@@ -430,9 +427,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     public DocumentContext writingDocument(boolean metaData) {
         if (writeContext == null)
             useBinaryDocuments();
-        //! WireContextListenerLifecycleTest#noOpListenerInitialisesLazyTextAndYamlWriteContexts and
-        //! #allConcreteWiresInvokeListenerBeforeFirstDataDocument demonstrate that YAML notifies
-        //! after lazy initialisation and before opening the application document.
         notifyContextListenerIfNeeded(metaData);
         writeContext.start(metaData);
         return writeContext;
@@ -440,8 +434,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     public DocumentContext acquireWritingDocument(boolean metaData) {
-        //! WriteDocumentContextTest#nestedYaml and #chainedYaml demonstrate that YAML must
-        //! distinguish a nested acquisition from continuation of an explicitly chained document.
+        // Only a chained write continues the open document.
         if (writeContext != null && writeContext.isOpen() && writeContext.chainedElement())
             return writeContext;
         return writingDocument(metaData);
@@ -952,11 +945,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     public void clear() {
-        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire demonstrates that
-        //! YAML clear rejects an active callback before mutating state.
         checkCanResetContextListener();
-        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt demonstrates
-        //! why YAML clear performs state cleanup without invoking the context-advancing reset.
+        // Clearing the bytes preserves the current context number.
         resetState();
     }
 
@@ -1126,18 +1116,10 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * Resets the state of the YamlWire instance, clearing all buffers and contexts.
      */
     public void reset() {
-        //! DocumentContextLifecycleTest#resetRejectsContextCountOverflowBeforeMutation demonstrates
-        //! that YAML checks count exhaustion before mutating its state.
         checkCanAdvanceOutputContext();
-        //! WireContextListenerLifecycleTest#listenerCannotClearTheOuterWire establishes that a
-        //! running callback cannot be interrupted by reset-like operations.
         checkCanResetContextListener();
         resetState();
-        //! DocumentContextLifecycleTest#resetAdvancesContextCountWhileClearRetainsIt demonstrates
-        //! that YAML publishes the next context only after its state reset succeeds.
         advanceOutputContext();
-        //! WireContextListenerLifecycleTest#resetReusesListenerForTheNextOutputContext demonstrates
-        //! that YAML re-arms notification only after its state reset succeeds.
         resetContextListener();
     }
 
@@ -2468,8 +2450,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
                 return s;
             if (blockQuoteChar == 0 && s != null && (s.length() == 0 || isNullLiteral(s)))
                 return null;
-            //! BooleanScalarTypePreservationTest#textAndTypedBooleansRetainTypes shows that quoted YAML booleans became Booleans.
-            //! Check the original quote before the spelling; decoded text alone loses the String/Boolean distinction.
+            // Only unquoted scalars can be booleans.
             if (blockQuoteChar == 0 && StringUtils.isEqual(s, "true"))
                 return true;
             if (blockQuoteChar == 0 && StringUtils.isEqual(s, "false"))
@@ -2571,16 +2552,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     public boolean writingIsComplete() {
-        //! WireContextListenerLifecycleTest#lazyTextualWiresCanNotifyBeforeTheirFirstWriteContextExists
-        //! demonstrates that lifecycle inspection is valid before YAML creates its lazy write context.
         return writeContext == null || !writeContext.isNotComplete();
     }
 
     @Override
     public void rollbackIfNotComplete() {
-        //! WireContextListenerLifecycleTest#rollbackBeforeFirstTextOrYamlDocumentIsHarmless and
-        //! #directWriteFailuresRollbackAndPoisonAcrossWiresAndEntryPoints distinguish null-safe
-        //! pre-initialisation cleanup from rollback of a real YAML document.
         if (writeContext != null)
             writeContext.rollbackIfNotComplete();
     }

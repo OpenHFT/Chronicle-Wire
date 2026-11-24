@@ -138,9 +138,6 @@ public enum WireInternal {
      */
     public static long writeData(@NotNull WireOut wireOut, boolean metaData, boolean notComplete,
                                  @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
-        //! WireContextListenerLifecycleTest#wiresWriteDataUsesLifecycleAndClosesRegistrationWindow
-        //! and #directWriteEntryPointsInvokeListenerOnce demonstrate that both low-level helpers and
-        //! public complete/not-complete direct writes share one metadata-aware notification boundary.
         if (wireOut instanceof AbstractWire)
             ((AbstractWire) wireOut).notifyContextListenerIfNeeded(metaData);
         wireOut.getValueOut().resetBetweenDocuments();
@@ -148,6 +145,7 @@ public enum WireInternal {
 
         @NotNull Bytes<?> bytes = wireOut.bytes();
         final long writePositionBeforeHeader = bytes.writePosition();
+        boolean completed = false;
         try {
             position = bytes.writePositionForHeader(wireOut.usePadding());
 
@@ -175,16 +173,14 @@ public enum WireInternal {
             else
                 bytes.writeInt(position, length | (notComplete ? Wires.NOT_COMPLETE : 0));
 
-        } catch (Throwable failure) {
-            // A direct write reserves its header before invoking user serialization. Restore the
-            // pre-header boundary and poison a successful context lifecycle before propagating.
-            //! WireContextListenerLifecycleTest#directWriteFailuresRollbackAndPoisonAcrossWiresAndEntryPoints
-            //! requires exact restoration to the position captured after context notification and
-            //! before payload-header reservation, then lifecycle poisoning, for every direct path.
-            bytes.writePosition(writePositionBeforeHeader);
-            if (wireOut instanceof AbstractWire)
-                ((AbstractWire) wireOut).contextDocumentRolledBack();
-            throw Jvm.rethrow(failure);
+            completed = true;
+        } finally {
+            if (!completed) {
+                // Restore the pre-header boundary even when user serialization throws an Error.
+                bytes.writePosition(writePositionBeforeHeader);
+                if (wireOut instanceof AbstractWire)
+                    ((AbstractWire) wireOut).contextDocumentRolledBack();
+            }
         }
 
         return position;

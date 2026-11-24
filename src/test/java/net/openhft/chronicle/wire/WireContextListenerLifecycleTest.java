@@ -111,12 +111,14 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
         });
 
         ContextEvents writer = wire.methodWriter(ContextEvents.class);
+        EventData failedEvent = new EventData("failed", 1);
         IllegalStateException thrown = assertThrows(IllegalStateException.class,
-                () -> writer.event(new EventData("failed", 1)));
+                () -> writer.event(failedEvent));
         assertEquals("listener failed", thrown.getMessage());
 
+        EventData subsequentEvent = new EventData("after", 2);
         IllegalStateException poisoned = assertThrows(IllegalStateException.class,
-                () -> writer.event(new EventData("after", 2)));
+                () -> writer.event(subsequentEvent));
         assertEquals("Context listener failed for the current output context", poisoned.getMessage());
 
         assertEquals(1, calls.get());
@@ -185,8 +187,10 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
             throw original;
         });
 
+        ContextEvents writer = wire.methodWriter(ContextEvents.class);
+        EventData failedEvent = new EventData("failed", 1);
         assertThrows(IllegalStateException.class,
-                () -> wire.methodWriter(ContextEvents.class).event(new EventData("failed", 1)));
+                () -> writer.event(failedEvent));
         final long writePosition = wire.bytes().writePosition();
 
         final IllegalStateException metadataFailure = assertThrows(IllegalStateException.class,
@@ -225,14 +229,16 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
                 });
 
                 ContextEvents dataWriter = wire.methodWriter(ContextEvents.class);
+                EventData blockedEvent = new EventData("blocked", 1);
                 final IllegalStateException failure = assertThrows(IllegalStateException.class,
-                        () -> dataWriter.event(new EventData("blocked", 1)));
+                        () -> dataWriter.event(blockedEvent));
                 assertEquals(wireType.name(),
                         "Context listener rolled back its output document",
                         failure.getMessage());
                 assertEquals(wireType.name(), 1, calls.get());
+                EventData subsequentEvent = new EventData("still-blocked", 2);
                 assertThrows(IllegalStateException.class,
-                        () -> dataWriter.event(new EventData("still-blocked", 2)));
+                        () -> dataWriter.event(subsequentEvent));
             }
         } finally {
             if (proxy)
@@ -271,14 +277,16 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
                         assertEquals(wireType.name(), 7, contextVersion.get());
                     }
                 } else {
+                    EventData blockedEvent = new EventData("blocked", 1);
                     final IllegalStateException failure = assertThrows(IllegalStateException.class,
-                            () -> dataWriter.event(new EventData("blocked", 1)));
+                            () -> dataWriter.event(blockedEvent));
                     assertEquals(wireType.name(),
                             "Context listener returned with an incomplete chained document",
                             failure.getMessage());
                     assertTrue(wireType.name(), wire.writingIsComplete());
+                    EventData subsequentEvent = new EventData("still-blocked", 2);
                     assertThrows(IllegalStateException.class,
-                            () -> dataWriter.event(new EventData("still-blocked", 2)));
+                            () -> dataWriter.event(subsequentEvent));
                 }
             }
         } finally {
@@ -710,13 +718,15 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
                 wire.writeDocument(false, out -> out.write("illegal").text("re-entry")));
 
         ContextEvents writer = wire.methodWriter(ContextEvents.class);
+        EventData firstEvent = new EventData("one", 1);
         IllegalStateException failure = assertThrows(IllegalStateException.class,
-                () -> writer.event(new EventData("one", 1)));
+                () -> writer.event(firstEvent));
 
         assertEquals("Only the supplied context writer may write while the context listener is running",
                 failure.getMessage());
+        EventData secondEvent = new EventData("two", 2);
         assertThrows(IllegalStateException.class,
-                () -> writer.event(new EventData("two", 2)));
+                () -> writer.event(secondEvent));
     }
 
     @Test
@@ -726,13 +736,15 @@ public class WireContextListenerLifecycleTest extends WireTestCommon {
             wire.contextListener(ContextEvents.class, ignored -> wire.clear());
 
             ContextEvents writer = wire.methodWriter(ContextEvents.class);
+            EventData firstEvent = new EventData("one", 1);
             IllegalStateException failure = assertThrows(wireType.name(), IllegalStateException.class,
-                    () -> writer.event(new EventData("one", 1)));
+                    () -> writer.event(firstEvent));
 
             assertEquals(wireType.name(),
                     "Cannot reset a wire while its context listener is running", failure.getMessage());
+            EventData secondEvent = new EventData("two", 2);
             assertThrows(wireType.name(), IllegalStateException.class,
-                    () -> writer.event(new EventData("two", 2)));
+                    () -> writer.event(secondEvent));
         }
     }
 

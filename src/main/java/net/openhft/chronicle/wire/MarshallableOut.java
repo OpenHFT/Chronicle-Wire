@@ -26,8 +26,6 @@ import java.util.stream.Stream;
 @DontChain
 public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteNotifier {
 
-    //! No runtime test can distinguish this public symbol from the same literal. It exists so Queue,
-    //! wrappers and other outputs share one unavailable-context representation while zero remains valid.
     /**
      * Indicates that an output does not expose a current context.
      */
@@ -41,8 +39,6 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      *
      * @param <T> event interface type used by the supplied method writer
      */
-    //! WireContextListenerLifecycleTest#contextListenerWaitsForDataAfterMetadataAndWritesDtoOnce
-    //! demonstrates the callback contract and preset method writer exposed by this API.
     @FunctionalInterface
     interface ContextListener<T> {
         /**
@@ -84,8 +80,6 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * @return the output context count, or {@link #UNSET_CONTEXT} if unavailable
      */
     default int contextCount() {
-        //! DocumentContextLifecycleTest#marshallableOutWithoutContextTrackingReturnsUnsetContext
-        //! demonstrates the fail-safe default for outputs with no stable context identity.
         return UNSET_CONTEXT;
     }
 
@@ -156,8 +150,6 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     @NotNull
     default <T> MarshallableOut contextListener(@NotNull Class<T> writerType,
                                                 @NotNull ContextListener<? super T> listener) {
-        //! DocumentContextLifecycleTest#marshallableOutWithoutContextTrackingReturnsNegativeContextCount
-        //! also demonstrates that unsupported outputs reject registration rather than silently ignore it.
         throw new UnsupportedOperationException("Context listeners are not supported by this output");
     }
 
@@ -358,8 +350,6 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
         // Creates a new builder instance with the specified WireType and InvocationHandler
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.BINARY_LIGHT,
-                //! WireContextListenerLifecycleTest#proxyFallbackUsesTheSuppliedListenerOutput demonstrates
-                //! that reflective writers must bind to the builder-selected output, not this outer instance.
                 out -> new BinaryMethodWriterInvocationHandler(tClass, metaData, out));
 
         // Configure the builder
