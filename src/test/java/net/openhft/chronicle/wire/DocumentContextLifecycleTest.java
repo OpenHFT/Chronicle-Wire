@@ -85,6 +85,7 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
         WrappedDocumentContext wrapper = new WrappedDocumentContext(delegate) {
             @Override
             public void reset() {
+                // This fixture only exercises context-count delegation.
             }
         };
 
@@ -104,7 +105,7 @@ public class DocumentContextLifecycleTest extends WireTestCommon {
 
     @Test
     public void marshallableOutWithoutContextTrackingReturnsUnsetContext() {
-        assertEquals(-1, MarshallableOut.UNSET_CONTEXT);
+        assertEquals(MarshallableOut.UNSET_CONTEXT, -1);
         MarshallableOut output = new MarshallableOut() {
             @Override
             public DocumentContext writingDocument(boolean metaData) {

@@ -51,35 +51,7 @@ final class ActiveWireContextListenerLifecycle<T> implements WireContextListener
         }
         switch (state) {
             case READY:
-                // A writer retained across reset can open this context and then be used again inside the listener.
-                consumeSuppliedDocumentOpening();
-                // Publish re-entrancy state before invoking user code; otherwise a listener can
-                // recursively open an ordinary document ahead of its own context record.
-                state = State.IN_PROGRESS;
-                listenerRolledBack = false;
-                try {
-                    notifyListener(wire);
-                    if (listenerRolledBack)
-                        throw new IllegalStateException(
-                                "Context listener rolled back its output document");
-                    // An open chain would make the next application write part of the context document.
-                    if (!wire.writingIsComplete()) {
-                        throw new IllegalStateException(
-                                "Context listener returned with an incomplete chained document");
-                    }
-                    state = State.SUCCEEDED;
-                } catch (Throwable throwable) {
-                    // Retrying a partially written context could duplicate records.
-                    try {
-                        wire.rollbackIfNotComplete();
-                    } catch (Throwable rollbackFailure) {
-                        throwable.addSuppressed(rollbackFailure);
-                    }
-                    failure = throwable;
-                    state = State.FAILED;
-                    logFailureOnce(wire, throwable);
-                    throw Jvm.rethrow(throwable);
-                }
+                startContext(wire);
                 return;
             case IN_PROGRESS:
                 if (consumeSuppliedDocumentOpening())
@@ -92,6 +64,41 @@ final class ActiveWireContextListenerLifecycle<T> implements WireContextListener
                 throw new AssertionError("FAILED handled before metadata dispatch");
             default:
                 throw new AssertionError(state);
+        }
+    }
+
+    // User callbacks can throw Errors or sneaky checked exceptions. Preserve the original failure
+    // while rolling back, then poison this context so partially written records cannot be retried.
+    @SuppressWarnings("java:S1181")
+    private void startContext(AbstractWire wire) {
+        // A writer retained across reset can open this context and then be used again inside the listener.
+        consumeSuppliedDocumentOpening();
+        // Publish re-entrancy state before invoking user code; otherwise a listener can
+        // recursively open an ordinary document ahead of its own context record.
+        state = State.IN_PROGRESS;
+        listenerRolledBack = false;
+        try {
+            notifyListener(wire);
+            if (listenerRolledBack)
+                throw new IllegalStateException(
+                        "Context listener rolled back its output document");
+            // An open chain would make the next application write part of the context document.
+            if (!wire.writingIsComplete()) {
+                throw new IllegalStateException(
+                        "Context listener returned with an incomplete chained document");
+            }
+            state = State.SUCCEEDED;
+        } catch (Throwable throwable) {
+            // Retrying a partially written context could duplicate records.
+            try {
+                wire.rollbackIfNotComplete();
+            } catch (Throwable rollbackFailure) {
+                throwable.addSuppressed(rollbackFailure);
+            }
+            failure = throwable;
+            state = State.FAILED;
+            logFailureOnce(wire, throwable);
+            throw Jvm.rethrow(throwable);
         }
     }
 

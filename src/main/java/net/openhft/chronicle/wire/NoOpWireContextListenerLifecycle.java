@@ -20,5 +20,6 @@ enum NoOpWireContextListenerLifecycle implements WireContextListenerLifecycle {
 
     @Override
     public void beforeDocument(AbstractWire wire, boolean metaData) {
+        // Listener-free wires have no context records to emit.
     }
 }
