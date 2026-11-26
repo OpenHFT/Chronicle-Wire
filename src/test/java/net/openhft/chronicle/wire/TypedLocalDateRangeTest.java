@@ -12,8 +12,6 @@ import org.junit.Test;
 import java.io.Serializable;
 import java.lang.annotation.*;
 import java.time.*;
-import java.util.*;
-import java.util.concurrent.atomic.*;
 
 public class TypedLocalDateRangeTest extends WireTestCommon {
 
@@ -30,27 +28,27 @@ public class TypedLocalDateRangeTest extends WireTestCommon {
     }
 
     @Test
-    public void ordinaryYearRoundTrips() throws Exception {
+    public void ordinaryYearRoundTrips() {
         checkDate(2026, 11, 16);
     }
 
     @Test
-    public void shortYearRoundTrips() throws Exception {
+    public void shortYearRoundTrips() {
         checkDate(99, 2, 3);
     }
 
     @Test
-    public void yearZeroRoundTrips() throws Exception {
+    public void yearZeroRoundTrips() {
         checkDate(0, 2, 29);
     }
 
     @Test
-    public void negativeYearRoundTrips() throws Exception {
+    public void negativeYearRoundTrips() {
         checkDate(-1, 2, 3);
     }
 
     @Test
-    public void expandedYearRoundTrips() throws Exception {
+    public void expandedYearRoundTrips() {
         checkDate(10000, 2, 3);
     }
 }

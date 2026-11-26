@@ -74,14 +74,14 @@ public class ReflectiveLongReturnTest extends WireTestCommon {
     }
 
     @Test
-    public void reflectiveLongDispatches() throws Exception {
+    public void reflectiveLongDispatches() {
         AtomicLong seen = new AtomicLong();
         textRead((LongCall) seen::set, "number: 42\n", true);
         assertEquals(42, seen.get());
     }
 
     @Test
-    public void reflectiveFluentReturnDispatches() throws Exception {
+    public void reflectiveFluentReturnDispatches() {
         List<String> seen = new ArrayList<>();
         Begin begin = n -> s -> seen.add(n + ":" + s);
         textRead(begin, "number: 42\nend: done\n", true);
@@ -89,21 +89,21 @@ public class ReflectiveLongReturnTest extends WireTestCommon {
     }
 
     @Test
-    public void reflectiveConvertedLongDispatches() throws Exception {
+    public void reflectiveConvertedLongDispatches() {
         AtomicLong seen = new AtomicLong();
         textRead((Converted) seen::set, "number: ff\n", true);
         assertEquals(255, seen.get());
     }
 
     @Test
-    public void generatedConvertedLongDispatches() throws Exception {
+    public void generatedConvertedLongDispatches() {
         AtomicLong seen = new AtomicLong();
         textRead((Converted) seen::set, "number: ff\n", false);
         assertEquals(255, seen.get());
     }
 
     @Test
-    public void generatedMetaConvertedLongDispatches() throws Exception {
+    public void generatedMetaConvertedLongDispatches() {
         AtomicLong seen = new AtomicLong();
         textRead((MetaConverted) seen::set, "number: ff\n", false);
         assertEquals(255, seen.get());
