@@ -51,6 +51,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     public static final BytesStore<?, ?> BINARY = BytesStore.from("!!binary");
     public static final @NotNull Bytes<byte[]> TYPE_STR = Bytes.from("type ");
     static final String SEQ_MAP = "!seqmap";
+    private static final String NULL_TAG = "!null";
 
     // A set of characters considered as "end characters" in this wire format.
     static final BitSet END_CHARS = new BitSet();
@@ -1527,7 +1528,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             bytes.readSkip(1);
             StringBuilder tag = acquireStringBuilder();
             parseWord(tag);
-            if (StringUtils.isEqual(tag, "!null")) {
+            if (StringUtils.isEqual(tag, NULL_TAG)) {
                 textTo(tag);
                 return null;
             }
@@ -1664,7 +1665,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                     if (uncompressed != null) {
                         bytesConsumer.readMarshallable(Bytes.wrapForRead(uncompressed));
 
-                    } else if (StringUtils.isEqual(sb, "!null")) {
+                    } else if (StringUtils.isEqual(sb, NULL_TAG)) {
                         bytesConsumer.readMarshallable(null);
                         parseWord(sb);
                     } else {
@@ -1703,7 +1704,7 @@ public class TextWire extends YamlWireOut<TextWire> {
                     if (bytes != null)
                         return bytes;
 
-                    if ("!null".contentEquals(stringBuilder)) {
+                    if (NULL_TAG.contentEquals(stringBuilder)) {
                         parseWord(stringBuilder);
                         return null;
                     }
