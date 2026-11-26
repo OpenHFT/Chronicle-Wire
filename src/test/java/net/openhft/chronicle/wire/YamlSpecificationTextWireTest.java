@@ -52,7 +52,9 @@ public class YamlSpecificationTextWireTest extends WireTestCommon {
         String actual = parseWithText(snippet);
 
         // Expected output read from a .out.yaml file
-        byte[] expectedBytes = getBytes(input + ".out.yaml");
+        byte[] expectedBytes = getBytes(input + ".out.text.yaml");
+        if (expectedBytes == null)
+            expectedBytes = getBytes(input + ".out.yaml");
         String expected;
         if (expectedBytes != null) {
             assertEquals(actual, parseWithText(actual));

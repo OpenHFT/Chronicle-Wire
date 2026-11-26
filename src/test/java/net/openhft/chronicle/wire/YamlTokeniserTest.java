@@ -927,6 +927,7 @@ public class YamlTokeniserTest extends WireTestCommon {
                         "MAPPING_START \n" +
                         "MAPPING_KEY \n" +
                         "TEXT null\n" +
+                        "TEXT \n" +
                         "MAPPING_KEY \n" +
                         "TEXT booleans\n" +
                         "SEQUENCE_START \n" +

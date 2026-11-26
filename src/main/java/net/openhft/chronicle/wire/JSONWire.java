@@ -1363,7 +1363,7 @@ public class JSONWire extends TextWire {
         public boolean isNull() {
             consumePadding();
 
-            if (peekStringIgnoreCase("null")) {
+            if (peekStringIgnoreCase("null") && isScalarEnd(bytes.readPosition() + 4)) {
                 bytes.readSkip(4);
                 // Skip to the next token, consuming any padding and/or a comma
                 consumePadding(1);
@@ -1374,12 +1374,6 @@ public class JSONWire extends TextWire {
             }
 
             return false;
-        }
-
-        @Override
-        public String text() {
-            @Nullable String text = super.text();
-            return text == null || text.equals("null") ? null : text;
         }
 
         @Override

@@ -484,9 +484,9 @@ public enum SerializationStrategies implements SerializationStrategy {
                 Object key = wireIn.readEvent(Object.class);
                 map.put(key, in.object());
 
-                // make sure we are progressing.
+                // An implicit final null can consume a token at EOF without advancing bytes.
                 long pos2 = wireIn.bytes().readPosition();
-                if (pos2 <= pos && !Jvm.isDebug())
+                if (pos2 <= pos && in.hasNext() && !Jvm.isDebug())
                     throw new IllegalStateException(wireIn.bytes().toDebugString());
                 pos = pos2;
             }
