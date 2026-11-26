@@ -33,7 +33,27 @@ public class TypedByteArrayCopyTest extends WireTestCommon {
         copy(new byte[0], WireType.BINARY);
     }
 
+    @Test public void typedTextReusesMatchingArray() {
+        copy(new byte[]{65, 66}, WireType.TEXT, new byte[2], true);
+    }
+
+    @Test public void typedTextReplacesShortArray() {
+        copy(new byte[]{65, 66}, WireType.TEXT, new byte[1], false);
+    }
+
+    @Test public void typedTextReplacesLongArray() {
+        copy(new byte[]{65, 66}, WireType.TEXT, new byte[3], false);
+    }
+
+    @Test public void typedTextReusesEmptyArray() {
+        copy(new byte[0], WireType.TEXT, new byte[0], true);
+    }
+
     private void copy(byte[] expected, WireType destination) {
+        copy(expected, destination, null, false);
+    }
+
+    private void copy(byte[] expected, WireType destination, byte[] using, boolean reused) {
         Bytes<?> source = Bytes.allocateElasticOnHeap();
         Bytes<?> target = Bytes.allocateElasticOnHeap();
         try {
@@ -43,7 +63,12 @@ public class TypedByteArrayCopyTest extends WireTestCommon {
             in.write("tail").int32(7);
             long limit = source.readLimit();
             in.copyTo(out);
-            assertArrayEquals(expected, out.read("value").bytes());
+            byte[] actual = out.read("value").bytes(using);
+            assertArrayEquals(expected, actual);
+            if (reused)
+                assertSame(using, actual);
+            else
+                assertNotSame(using, actual);
             assertEquals(7, out.read("tail").int32());
             assertEquals(limit, source.readLimit());
         } finally {
