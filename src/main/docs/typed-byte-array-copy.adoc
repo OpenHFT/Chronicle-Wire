@@ -1,0 +1,3 @@
+= Reading copied typed byte arrays
+
+TextWire reads the typed byte-array representation emitted when BinaryWire is copied to text, including printable, empty and high-bit byte values. The existing binary and text output formats are unchanged. A shared text-byte reader retains equal-length array reuse and ISO-8859-1 conversion.
