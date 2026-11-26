@@ -192,7 +192,8 @@ public class YamlTokeniser {
             blockStart = blockEnd = in.readPosition();
             blockQuote = 0;
             consumeWhitespace();
-            return last = YamlToken.TEXT;
+            last = YamlToken.TEXT;
+            return last;
         }
         YamlToken next = next0(minIndent); // Internal method to get the next token based on indentation
         return this.last = next;
@@ -426,27 +427,38 @@ public class YamlTokeniser {
         int ch;
         while ((ch = in.peekUnsignedByte(position)) >= 0) {
             if (ch == '#') {
-                while ((ch = in.peekUnsignedByte(++position)) >= 0 && ch != '\r' && ch != '\n') {
-                    // Skip the entry's comment without consuming the next token.
-                }
+                position = commentEnd(position);
+                ch = in.peekUnsignedByte(position);
             }
             if (ch < 0)
                 return true;
             if (ch == '\r' || ch == '\n')
                 nextLine = position + 1;
             else if (ch > ' ') {
-                if (mapping && (ch == ',' || ch == '}'))
-                    return true;
-                // A block sequence may start at its mapping key's indentation.
-                if (mapping && ch == '-' && in.peekUnsignedByte(position + 1) <= ' ')
-                    return false;
-                if (mapping && (ch == '!' || ch == '&' || ch == '[' || ch == '{'))
-                    return false;
-                return nextLine > lineStart && (position - nextLine) * 2 <= indent2;
+                return endsEmptyValue(indent2, mapping, position, nextLine, ch);
             }
             position++;
         }
         return true;
+    }
+
+    private long commentEnd(long position) {
+        int ch;
+        while ((ch = in.peekUnsignedByte(++position)) >= 0 && ch != '\r' && ch != '\n') {
+            // Skip the entry's comment without consuming the next token.
+        }
+        return position;
+    }
+
+    private boolean endsEmptyValue(int indent2, boolean mapping, long position, long nextLine, int ch) {
+        if (mapping && (ch == ',' || ch == '}'))
+            return true;
+        // A block sequence may start at its mapping key's indentation.
+        if (mapping && ch == '-' && in.peekUnsignedByte(position + 1) <= ' ')
+            return false;
+        if (mapping && (ch == '!' || ch == '&' || ch == '[' || ch == '{'))
+            return false;
+        return nextLine > lineStart && (position - nextLine) * 2 <= indent2;
     }
 
     /**

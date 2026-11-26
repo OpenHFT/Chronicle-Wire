@@ -596,9 +596,8 @@ public class TextWire extends YamlWireOut<TextWire> {
         int ch;
         while ((ch = peekWithinReadLimit(position)) > 0) {
             if (ch == '#') {
-                while ((ch = peekWithinReadLimit(++position)) > 0 && ch != '\r' && ch != '\n') {
-                    // Inspect comments without advancing the reader or notifying listeners twice.
-                }
+                position = commentEnd(position);
+                ch = peekWithinReadLimit(position);
             }
             if (ch <= 0 || ch > ' ')
                 break;
@@ -609,6 +608,14 @@ public class TextWire extends YamlWireOut<TextWire> {
         if (ch <= 0 || ch == ',' || ch == '}'
                 || (nextLine > fieldLine && position - nextLine <= fieldIndent && isFieldAhead(position)))
             valueIn.emptyValuePosition = position;
+    }
+
+    private long commentEnd(long position) {
+        int ch;
+        while ((ch = peekWithinReadLimit(++position)) > 0 && ch != '\r' && ch != '\n') {
+            // Inspect comments without advancing the reader or notifying listeners twice.
+        }
+        return position;
     }
 
     private int peekWithinReadLimit(long position) {
@@ -1455,7 +1462,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
         @SuppressWarnings("fallthrough")
         @Nullable
-        private <ACS extends Appendable & CharSequence> CharSequence textTo0(@NotNull ACS destination, boolean resolveNull) {
+        private <A extends Appendable & CharSequence> CharSequence textTo0(@NotNull A destination, boolean resolveNull) {
             if (resolveNull && isNull())
                 return null;
             consumePadding();
@@ -1488,28 +1495,9 @@ public class TextWire extends YamlWireOut<TextWire> {
                     readText(destination, getEscapingSingleQuotes());
                     break;
 
-                case '!': {
-                    // Handle explicit typing (e.g. "!null" or "!type")
-
-                    bytes.readSkip(1);
-                    final StringBuilder stringBuilder = acquireStringBuilder();
-                    parseWord(stringBuilder);
-                    if (StringUtils.isEqual(stringBuilder, "!null")) {
-                        textTo(stringBuilder);
-                        ret = null;
-                    } else if (StringUtils.isEqual(stringBuilder, "!str")) {
-                        ret = textTo0(destination, false);
-                    } else {
-                        // ignore the type.
-                        if (destination instanceof StringBuilder) {
-                            textTo((StringBuilder) destination);
-                        } else {
-                            textTo(stringBuilder);
-                            ret = stringBuilder;
-                        }
-                    }
+                case '!':
+                    ret = taggedText(destination);
                     break;
-                }
 
                 case -1:
                     // End of input
@@ -1523,34 +1511,9 @@ public class TextWire extends YamlWireOut<TextWire> {
                     }
                     // fall through
 
-                default: {
-                    // Handle other types of inputs
-
-                    final long rem = bytes.readRemaining();
-                    if (rem > 0) {
-                        if (destination instanceof Bytes) {
-                            bytes.parse8bit((Bytes) destination, getStrictEscapingEndOfText());
-                        } else if (use8bit) {
-                            bytes.parse8bit((StringBuilder) destination, getStrictEscapingEndOfText());
-                        } else {
-                            bytes.parseUtf8(destination, getStrictEscapingEndOfText());
-                        }
-                        // If nothing was read, throw an exception
-                        if (rem == bytes.readRemaining())
-                            throw new IORuntimeException("Nothing to read at " + bytes.toDebugString(32));
-                    } else {
-                        // Clear the target appendable if no remaining content
-                        AppendableUtil.setLength(destination, 0);
-                    }
-                    // trim trailing spaces.
-                    while (destination.length() > 0) {
-                        if (Character.isWhitespace(destination.charAt(destination.length() - 1)))
-                            AppendableUtil.setLength(destination, destination.length() - 1);
-                        else
-                            break;
-                    }
+                default:
+                    unquotedText(destination);
                     break;
-                }
             }
 
             // Peek the previous character and revert position if it's an end character (e.g., ',', ']', '}')
@@ -1558,6 +1521,44 @@ public class TextWire extends YamlWireOut<TextWire> {
             if (END_CHARS.get(prev))
                 bytes.readSkip(-1);
             return ret;
+        }
+
+        private <A extends Appendable & CharSequence> CharSequence taggedText(A destination) {
+            bytes.readSkip(1);
+            StringBuilder tag = acquireStringBuilder();
+            parseWord(tag);
+            if (StringUtils.isEqual(tag, "!null")) {
+                textTo(tag);
+                return null;
+            }
+            if (StringUtils.isEqual(tag, "!str"))
+                return textTo0(destination, false);
+            // Unknown tags retain the existing text conversion.
+            if (destination instanceof StringBuilder) {
+                textTo((StringBuilder) destination);
+                return destination;
+            }
+            textTo(tag);
+            return tag;
+        }
+
+        private <A extends Appendable & CharSequence> void unquotedText(A destination) {
+            long remaining = bytes.readRemaining();
+            if (remaining > 0) {
+                if (destination instanceof Bytes)
+                    bytes.parse8bit((Bytes) destination, getStrictEscapingEndOfText());
+                else if (use8bit)
+                    bytes.parse8bit((StringBuilder) destination, getStrictEscapingEndOfText());
+                else
+                    bytes.parseUtf8(destination, getStrictEscapingEndOfText());
+                if (remaining == bytes.readRemaining())
+                    throw new IORuntimeException("Nothing to read at " + bytes.toDebugString(32));
+            } else {
+                AppendableUtil.setLength(destination, 0);
+            }
+            while (destination.length() > 0
+                    && Character.isWhitespace(destination.charAt(destination.length() - 1)))
+                AppendableUtil.setLength(destination, destination.length() - 1);
         }
 
         /**

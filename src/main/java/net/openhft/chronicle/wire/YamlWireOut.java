@@ -1645,11 +1645,11 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * @throws InvalidMarshallableException If the object cannot be serialized.
          */
         @NotNull
-        public YamlValueOut write(Class<?> expectedType, @NotNull Object objectKey) throws InvalidMarshallableException {
+        public YamlValueOut write(Class<?> expectedType, @Nullable Object objectKey) throws InvalidMarshallableException {
             if (dropDefault) {
                 if (expectedType != String.class)
                     throw new UnsupportedOperationException("todo");
-                eventName = objectKey.toString();
+                eventName = java.util.Objects.requireNonNull(objectKey).toString();
             } else {
                 prependSeparator();
                 if (objectKey == null) {
