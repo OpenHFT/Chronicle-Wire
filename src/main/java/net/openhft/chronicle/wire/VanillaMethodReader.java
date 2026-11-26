@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -537,7 +538,10 @@ public class VanillaMethodReader implements MethodReader {
         Class<?> parameterType2 = ObjectUtils.implementationToUse(parameterType);
         if (parameterType == long.class && target != null) {
             try {
-                MethodHandle mh = method.getDeclaringClass().isInstance(target) ? MethodHandles.lookup().unreflect(method).bindTo(target) : null;
+                MethodHandle bound = method.getDeclaringClass().isInstance(target)
+                        ? MethodHandles.lookup().unreflect(method).bindTo(target) : null;
+                MethodHandle mh = bound == null || method.getReturnType() == void.class
+                        ? bound : bound.asType(MethodType.methodType(Object.class, long.class));
                 @NotNull Object[] argArr = {null};
                 MethodWireKey key = createWireKey(method, name);
                 wireParser.registerOnce(key, (s, v) -> invokeMethodWithOneLong(target, contextHolder, method, name, mh, argArr, s, v, methodReaderInterceptorReturns));
