@@ -52,6 +52,6 @@ public class YamlSpecTest extends WireTestCommon {
 
     @Test
     public void test2_21MiscellaneousFixed() {
-        doTest("2_21MiscellaneousFixed.yaml", "{null=, booleans=[true, false], string=012345}");
+        doTest("2_21MiscellaneousFixed.yaml", "{null=null, booleans=[true, false], string=012345}");
     }
 }

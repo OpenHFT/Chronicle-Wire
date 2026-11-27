@@ -1,0 +1,5 @@
+= Copy JSON numbers with exponents
+:sectnums:
+:lang: en-GB
+
+JSONWire.copyTo preserves valid exponent notation. Binary destinations receive floating-point values for exponent-form numbers, including integer mantissas; text destinations retain the numeric token. Integer tokens continue to use the integer path, and subsequent fields remain readable.

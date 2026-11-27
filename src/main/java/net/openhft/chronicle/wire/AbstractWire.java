@@ -64,6 +64,9 @@ public abstract class AbstractWire implements Wire, InternalWire {
     private HeadNumberChecker headNumberChecker;
     private boolean usePadding = DEFAULT_USE_PADDING;
     private boolean generateTuples = GENERATE_TUPLES;
+    private int outputContextCount;
+    @NotNull
+    private WireContextListenerLifecycle contextListenerLifecycle = NoOpWireContextListenerLifecycle.UNSET;
 
     /**
      * Constructor for AbstractWire.
@@ -76,6 +79,21 @@ public abstract class AbstractWire implements Wire, InternalWire {
         this.bytes = bytes;
         this.use8bit = use8bit;
         notCompleteIsNotPresent = bytes.sharedMemory();
+    }
+
+    @Override
+    public int contextCount() {
+        return outputContextCount;
+    }
+
+    protected final void checkCanAdvanceOutputContext() {
+        if (outputContextCount == Integer.MAX_VALUE)
+            throw new IllegalStateException("Output context count exhausted");
+    }
+
+    protected final void advanceOutputContext() {
+        checkCanAdvanceOutputContext();
+        outputContextCount++;
     }
 
     /**
@@ -127,6 +145,7 @@ public abstract class AbstractWire implements Wire, InternalWire {
 
     @Override
     public void clear() {
+        checkCanResetContextListener();
         bytes.clear();
         headerNumber(Long.MIN_VALUE);
     }
@@ -212,6 +231,44 @@ public abstract class AbstractWire implements Wire, InternalWire {
     @Override
     public void commentListener(Consumer<CharSequence> commentListener) {
         this.commentListener = commentListener;
+    }
+
+    @NotNull
+    @Override
+    public <T> WireOut contextListener(@NotNull Class<T> writerType,
+                                       @NotNull MarshallableOut.ContextListener<? super T> listener) {
+        WireContextListenerLifecycle lifecycle = contextListenerLifecycle;
+        if (lifecycle.started())
+            throw new IllegalStateException("Cannot set contextListener after the first output context has started");
+        contextListenerLifecycle = WireContextListenerLifecycle.active(writerType, listener);
+        return this;
+    }
+
+    /**
+     * Fires the listener before the first data document in the current output context. A leading
+     * metadata document may precede the context records.
+     */
+    protected final void notifyContextListenerIfNeeded(boolean metaData) {
+        // Even a metadata write closes the listener registration window.
+        if (contextListenerLifecycle == NoOpWireContextListenerLifecycle.UNSET) {
+            contextListenerLifecycle = NoOpWireContextListenerLifecycle.SET;
+        }
+        contextListenerLifecycle.beforeDocument(this, metaData);
+    }
+
+    /** Verifies that a reset cannot interrupt a running context callback. */
+    protected final void checkCanResetContextListener() {
+        contextListenerLifecycle.checkCanResetContext();
+    }
+
+    /** Prepares a configured context listener for the next output context. */
+    protected final void resetContextListener() {
+        contextListenerLifecycle.resetContext();
+    }
+
+    /** Prevents later application output when rollback may have removed its context records. */
+    final void contextDocumentRolledBack() {
+        contextListenerLifecycle.documentRolledBack();
     }
 
     @NotNull
@@ -352,10 +409,14 @@ public abstract class AbstractWire implements Wire, InternalWire {
                 break;
 
             if (isNotComplete(header)) {
-                if (header != END_OF_DATA)
+                if (header != END_OF_DATA) {
                     Jvm.warn().on(getClass(), new Exception("Incomplete header found at pos: " + pos + ": " + Integer.toHexString(header) + ", overwriting"));
-                else
+                } else {
+                    // EOF opens no header. Clear only transient acquisition state; the durable
+                    // marker and write position remain unchanged for the storage owner to handle.
+                    insideHeader = false;
                     throw new WriteAfterEOFException();
+                }
                 bytes.writeVolatileInt(pos, NOT_INITIALIZED);
                 break;
             }
@@ -568,7 +629,8 @@ public abstract class AbstractWire implements Wire, InternalWire {
                                 ", pos: " + pos +
                                 ", success: " + success);
 
-                        // FIXME Should return something here?
+                        if (success)
+                            return EndOfWire.PRESENT_AFTER_UPDATE;
                     }
                     continue;
                 }

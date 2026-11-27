@@ -10,6 +10,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.function.DoublePredicate;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,6 +33,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * </ul>
  */
 class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
+
+    /**
+     * RFC 8259 section 6 number grammar.
+     * Double.parseDouble alone is more lenient: it also takes a leading plus, a type suffix, hex and padding.
+     */
+    private static final Pattern JSON_NUMBER = Pattern.compile("-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?");
+    private static final Pattern VALUE_FIELD = Pattern.compile("\\{\"value\":(" + JSON_NUMBER.pattern() + ")}");
 
     @ParameterizedTest
     @MethodSource("doubleTestInputs")
@@ -138,7 +147,7 @@ class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
     /**
      * Finite floats spanning the {@link YamlWireOut.YamlValueOut#float32(float)} formatter: both
      * sides of each {@code [1e-3, 1e6)} fast-path threshold (stepped by one ulp), large and small
-     * magnitudes, the extreme finite values, and negatives.
+     * magnitudes, the extreme finite values, ordinary values and zero as controls, all in both signs.
      */
     private static Stream<Float> finiteFloatInputs() {
         return Stream.of(
@@ -152,19 +161,20 @@ class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
                 1e-3f + Math.ulp(1e-3f),    // fast path
                 // large and small magnitudes
                 5_000_000.0f, 1e7f, 1.23456789e10f, Float.MAX_VALUE,
-                1e-4f, 1e-7f, Float.MIN_VALUE,
-                // negatives
-                -1e6f, -5_000_000.0f, -Float.MAX_VALUE, -1e-4f,
+                1e-4f, 1e-7f, Float.MIN_NORMAL, Float.MIN_VALUE,
                 // round values
-                2_000_000.0f, 3_000.0f
-        );
+                2_000_000.0f, 3_000.0f,
+                // controls the fast path already wrote as numbers
+                0.0f, 1.0f, 0.1f, 100.25f, 123456.79f
+        ).flatMap(f -> Stream.of(f, -f));
     }
 
     /**
      * Finite doubles spanning the {@link YamlWireOut.YamlValueOut#float64(double)} formatter: both
      * sides of each {@code [1e-3, 1e15)} fast-path threshold (stepped by one ulp), the round-number
      * {@code E3}/{@code E6} branches, full-precision mid-range values, the extreme finite values,
-     * the small magnitudes that route to the faithful Double.toString path (CORE-64), and negatives.
+     * the small magnitudes that route to the faithful Double.toString path (CORE-64), ordinary values
+     * and zero as controls, all in both signs.
      */
     private static Stream<Double> finiteDoubleInputs() {
         return Stream.of(
@@ -176,16 +186,16 @@ class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
                 1e-3 - Math.ulp(1e-3),      // special path (faithful Double.toString)
                 1e-3,                        // fast path (1e-3 >= 1e-3 is true)
                 1e-3 + Math.ulp(1e-3),      // fast path
-                // round-number E3 / E6 fast-path branches
-                3_000.0, 2_000_000.0,
+                // round-number E3 / E6 fast-path branches, up to the last multiple the E3 int cast can hold
+                3_000.0, 2_000_000.0, 1e9, 2_147_483_647_000.0, 2_147_483_648_000.0,
                 // full-precision values inside the append branches — writer must stay faithful
                 123.45678901234567, 9.999999999999998e14,
                 // large and small magnitudes
                 1e16, 1.23456789e20, 5e15, Double.MAX_VALUE,
-                1e-4, 1e-7, 1e-8, 1e-300, Double.MIN_VALUE,
-                // negatives
-                -1e15, -5e15, -Double.MAX_VALUE, -1e-4
-        );
+                1e-4, 1e-7, 1e-8, 1e-300, Double.MIN_NORMAL, Double.MIN_VALUE,
+                // controls the fast path already wrote as numbers
+                0.0, 1.0, 0.1, 100.25, 123456.789
+        ).flatMap(d -> Stream.of(d, -d));
     }
 
     /**
@@ -204,28 +214,30 @@ class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
     /** A finite float must serialise as an unquoted JSON number whose token denotes the exact value. */
     private void assertFloatIsFaithfulJsonNumber(float value) {
         String scalar = toJson(value);
-        Assertions.assertFalse(scalar.startsWith("\""),
-                "Finite float " + value + " must serialise as an unquoted JSON number, got " + scalar);
+        Assertions.assertTrue(JSON_NUMBER.matcher(scalar).matches(),
+                "Finite float " + value + " must serialise as one JSON number token and nothing else, got " + scalar);
         assertEquals(value, Float.parseFloat(scalar), 0.0f,
                 "Scalar JSON token must denote the exact float, got " + scalar);
         String field = toFieldJson(new FloatDto(value));
-        Assertions.assertFalse(field.contains("\"value\":\""),
-                "Finite float " + value + " must be written as a JSON number field, got " + field);
-        assertEquals(value, Float.parseFloat(fieldNumber(field)), 0.0f,
+        Matcher number = VALUE_FIELD.matcher(field);
+        Assertions.assertTrue(number.matches(),
+                "Finite float " + value + " must be written as a JSON number field and nothing else, got " + field);
+        assertEquals(value, Float.parseFloat(number.group(1)), 0.0f,
                 "Field JSON token must denote the exact float, got " + field);
     }
 
     /** A finite double must serialise as an unquoted JSON number whose token denotes the exact value. */
     private void assertDoubleIsFaithfulJsonNumber(double value) {
         String scalar = toJson(value);
-        Assertions.assertFalse(scalar.startsWith("\""),
-                "Finite double " + value + " must serialise as an unquoted JSON number, got " + scalar);
+        Assertions.assertTrue(JSON_NUMBER.matcher(scalar).matches(),
+                "Finite double " + value + " must serialise as one JSON number token and nothing else, got " + scalar);
         assertEquals(value, Double.parseDouble(scalar), 0.0,
                 "Scalar JSON token must denote the exact double, got " + scalar);
         String field = toFieldJson(new DoubleDto(value));
-        Assertions.assertFalse(field.contains("\"value\":\""),
-                "Finite double " + value + " must be written as a JSON number field, got " + field);
-        assertEquals(value, Double.parseDouble(fieldNumber(field)), 0.0,
+        Matcher number = VALUE_FIELD.matcher(field);
+        Assertions.assertTrue(number.matches(),
+                "Finite double " + value + " must be written as a JSON number field and nothing else, got " + field);
+        assertEquals(value, Double.parseDouble(number.group(1)), 0.0,
                 "Field JSON token must denote the exact double, got " + field);
     }
 
@@ -234,11 +246,6 @@ class JsonWireDoubleAndFloatSpecialValuesAcceptanceTests {
         JSONWire wire = new JSONWire();
         wire.getValueOut().object(dto);
         return JSONWire.asText(wire);
-    }
-
-    /** Extract the numeric token from a single-field document, e.g. {@code {"value":1.0E16}} -> {@code 1.0E16}. */
-    private static String fieldNumber(String fieldJson) {
-        return fieldJson.substring(fieldJson.indexOf(':') + 1, fieldJson.lastIndexOf('}'));
     }
 
     private static Stream<DoubleTestInput> doubleTestInputs() {

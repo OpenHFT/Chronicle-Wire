@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -76,6 +77,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
     // Supplier that provides a MethodWriterInvocationHandler for proxy method calls
     @NotNull
     private final MethodWriterInvocationHandlerSupplier handlerSupplier;
+    private final Function<Supplier<MarshallableOut>, MethodWriterInvocationHandler> handlerFactory;
     // Supplier to get an instance of MarshallableOut
     private Supplier<MarshallableOut> outSupplier;
     // A Closeable resource associated with the builder
@@ -112,7 +114,29 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         //  Maybe have an option to always use current thread class loader?
         this.classLoader = clsLdr != null ? clsLdr : getClass().getClassLoader();
         this.methodWriterClassNameGenerator = new MethodWriterClassNameGenerator();
+        // The supplier constructor already has a handler bound to its output.
+        this.handlerFactory = null;
         this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(handlerSupplier);
+    }
+
+    /**
+     * Creates a builder whose fallback invocation handlers resolve the current output supplier.
+     * This is required when a builder is rebound to an internal output before construction: the
+     * generated and reflective writer paths must target the same destination.
+     */
+    VanillaMethodWriterBuilder(@NotNull Class<T> tClass,
+                               WireType wireType,
+                               @NotNull Function<Supplier<MarshallableOut>, MethodWriterInvocationHandler> handlerFactory) {
+        this.packageName = Jvm.getPackageName(tClass);
+        this.wireType = wireType;
+        addInterface(tClass);
+        ClassLoader clsLdr = tClass.getClassLoader();
+        this.classLoader = clsLdr != null ? clsLdr : getClass().getClassLoader();
+        this.methodWriterClassNameGenerator = new MethodWriterClassNameGenerator();
+        this.handlerFactory = handlerFactory;
+        this.handlerSupplier = new MethodWriterInvocationHandlerSupplier(
+                () -> handlerFactory.apply(Objects.requireNonNull(outSupplier,
+                        "marshallableOut(out) has not been set.")));
     }
 
     /**
@@ -261,7 +285,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         if (proxyClass != null) {
             try {
                 Constructor<T> constructor = (Constructor) proxyClass.getConstructor(MethodWriterInvocationHandlerSupplier.class);
-                return constructor.newInstance(handlerSupplier);
+                return constructor.newInstance(proxyHandlerSupplier());
             } catch (Throwable e) {
                 // do nothing and drop through
                 if (Jvm.isDebugEnabled(getClass()))
@@ -280,7 +304,18 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         @NotNull Class[] interfacesArr = interfaces.toArray(new Class[interfaces.size()]);
 
         //noinspection unchecked
-        return (T) Proxy.newProxyInstance(classLoader, interfacesArr, new CallSupplierInvocationHandler(this));
+        return (T) Proxy.newProxyInstance(classLoader, interfacesArr,
+                new CallSupplierInvocationHandler(updateInterceptor, proxyHandlerSupplier()));
+    }
+
+    private MethodWriterInvocationHandlerSupplier proxyHandlerSupplier() {
+        if (handlerFactory == null)
+            return handlerSupplier;
+        // Generated and reflective writers must retain the same output selected at build time;
+        // resolving the mutable builder later can route a fallback writer to a different Wire.
+        final Supplier<MarshallableOut> frozenOutput = Objects.requireNonNull(outSupplier,
+                "marshallableOut(out) has not been set.");
+        return handlerSupplier.copyWith(() -> handlerFactory.apply(frozenOutput));
     }
 
     /**
@@ -295,7 +330,7 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
      */
     @Nullable
     private T createInstance() {
-        String fullClassName = packageName + "." + getClassName();
+        String fullClassName = ReflectionUtil.qualifiedName(packageName, getClassName());
         try {
             try {
                 // Attempt to create an instance from an already loaded class
@@ -348,10 +383,11 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
                     updateInterceptor != null, verboseTypes);
 
         // Configure and use version 2 of the method writer generator
+        int lastDot = fullClassName.lastIndexOf('.');
         GenerateMethodWriter2 gmw = new GenerateMethodWriter2();
         gmw.metaData()
-                .packageName(fullClassName.substring(0, fullClassName.lastIndexOf('.')))
-                .baseClassName(fullClassName.substring(1 + fullClassName.lastIndexOf('.')))
+                .packageName(lastDot < 0 ? "" : fullClassName.substring(0, lastDot))
+                .baseClassName(fullClassName.substring(lastDot + 1))
                 .interfaces(interfaces)
                 .genericEvent(genericEvent)
                 .metaData(metaData)
@@ -478,16 +514,16 @@ public class VanillaMethodWriterBuilder<T> implements Builder<T>, MethodWriterBu
         private final MethodWriterInvocationHandlerSupplier handlerSupplier;
 
         /**
-         * Constructs a new {@code CallSupplierInvocationHandler} using the specified builder.
-         * The values from the builder are captured in a snapshot so that the builder can be
-         * garbage collected if no longer referenced.
+         * Creates a proxy invocation handler from the values selected when the proxy is built.
+         * Holding them directly avoids retaining the mutable builder.
          *
-         * @param builder The {@link VanillaMethodWriterBuilder} instance to extract values from.
+         * @param updateInterceptor interceptor applied before delegation, or {@code null} if none
+         * @param handlerSupplier   configured source of method-writer invocation handlers for this proxy
          */
-        CallSupplierInvocationHandler(@NotNull final VanillaMethodWriterBuilder builder) {
-            // Take a snapshot of these values so the builder can be reclaimed by the GC later.
-            this.updateInterceptor = builder.updateInterceptor;
-            this.handlerSupplier = builder.handlerSupplier;
+        CallSupplierInvocationHandler(UpdateInterceptor updateInterceptor,
+                                      MethodWriterInvocationHandlerSupplier handlerSupplier) {
+            this.updateInterceptor = updateInterceptor;
+            this.handlerSupplier = handlerSupplier;
         }
 
         @Override

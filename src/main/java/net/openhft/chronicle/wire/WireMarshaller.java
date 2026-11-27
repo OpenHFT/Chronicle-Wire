@@ -588,42 +588,50 @@ public class WireMarshaller<T> {
         try (ScopedResource<StringBuilder> stlSb = Wires.acquireStringBuilderScoped()) {
             StringBuilder sb = stlSb.get();
 
-            // Iterating over all fields to read their values
             for (int i = 0; i < fields.length; i++) {
-                boolean more = in.hasMore();
                 FieldAccess field = fields[i];
-
-                ValueIn vin = more ? in.read(sb) : null;
-
-                // Check if fields are present and in order
-                if (more && matchesFieldName(sb, field)) {
-                    field.readValue(t, defaultValue, in.getValueIn(), overwrite);
-
-                } else {
-                    // If not, copy default values
-                    for (; i < fields.length; i++) {
-                        FieldAccess field2 = fields[i];
-                        field2.setDefaultValue(defaultValue, t);
-                    }
-
-                    if (vin == null || sb.length() <= 0)
-                        return;
-
-                    // Read the next set of values if there are any left
-                    do {
-                        FieldAccess fieldAccess = fieldMap.get(sb);
-                        if (fieldAccess == null)
-                            vin.skipValue();
-                        else
-                            fieldAccess.readValue(t, defaultValue, vin, overwrite);
-
-                        vin = in.read(sb);
-                    } while (in.hasMore());
+                ValueIn vin = in.hasMore() ? in.read(sb) : null;
+                if (vin != null && matchesFieldName(sb, field)) {
+                    field.readValue(t, defaultValue, vin, overwrite);
+                    continue;
                 }
+
+                if (overwrite) {
+                    for (int j = i; j < fields.length; j++)
+                        fields[j].setDefaultValue(defaultValue, t);
+                }
+                if (vin != null && sb.length() > 0)
+                    readRemainingFields(t, in, overwrite, sb, vin);
+                return;
             }
         } catch (IllegalAccessException e) {
             throw new AssertionError(e);
         }
+    }
+
+    private void readRemainingFields(T t, WireIn in, boolean overwrite,
+                                     StringBuilder name, ValueIn value) throws IllegalAccessException {
+        do {
+            FieldAccess field = fieldForInputName(name);
+            if (field == null)
+                value.skipValue();
+            else
+                field.readValue(t, defaultValue, value, overwrite);
+            if (!in.hasMore())
+                return;
+            value = in.read(name);
+        } while (in.hasMore());
+    }
+
+    private FieldAccess fieldForInputName(StringBuilder name) {
+        FieldAccess exact = fieldMap.get(name);
+        if (exact != null)
+            return exact;
+        for (FieldAccess candidate : fields) {
+            if (StringUtils.equalsCaseIgnore(candidate.field.getName(), name))
+                return candidate;
+        }
+        return null;
     }
 
     /**

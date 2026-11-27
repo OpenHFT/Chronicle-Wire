@@ -27,6 +27,29 @@ import java.util.stream.Stream;
 public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteNotifier {
 
     /**
+     * Indicates that an output does not expose a current context.
+     */
+    int UNSET_CONTEXT = -1;
+
+    /**
+     * WARNING: This API is alpha stage and subject to change without notice.
+     * <p>
+     * Receives a callback when a {@link MarshallableOut} starts a new output context.
+     * The meaning of a context is implementation specific.
+     *
+     * @param <T> event interface type used by the supplied method writer
+     */
+    @FunctionalInterface
+    interface ContextListener<T> {
+        /**
+         * Called before the first application document is written in the new output context.
+         *
+         * @param writer preset method writer for writing context records
+         */
+        void onNewContext(T writer);
+    }
+
+    /**
      * Creates and returns a new instance of {@link MarshallableOutBuilder} initialized with the provided URL.
      *
      * @param url The URL which will dictate the specific type of {@code MarshallableOut} to create.
@@ -34,6 +57,30 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      */
     static MarshallableOutBuilder builder(URL url) {
         return new MarshallableOutBuilder(url);
+    }
+
+    /**
+     * Returns an identifier for this output's current context. Values from successive output
+     * contexts are non-decreasing. Context need only be written again when this value increases;
+     * an unchanged value means that the previously written context still applies.
+     * <p>
+     * Callers initialise the last written count to {@link #UNSET_CONTEXT} and compare values directly.
+     * Zero is a valid first context, for example Queue cycle zero. A returned
+     * {@link #UNSET_CONTEXT} is not an increase and needs no special handling.
+     * <p>
+     * The default is {@link #UNSET_CONTEXT}, indicating that the implementation does not expose an
+     * output context. Writable Wire implementations start at {@code 0}; {@link Wire#reset()} advances
+     * the count while {@link Wire#clear()} leaves it unchanged. Queue implementations return the roll
+     * cycle, and connection-based outputs should return a one-based connection count.
+     * Implementations may throw {@link IllegalStateException} when the output context is not yet
+     * known, such as when using double buffering. Implementations whose count cannot advance without
+     * overflowing must throw {@link IllegalStateException} before opening the next output context
+     * rather than wrap into the negative range.
+     *
+     * @return the output context count, or {@link #UNSET_CONTEXT} if unavailable
+     */
+    default int contextCount() {
+        return UNSET_CONTEXT;
     }
 
     /**
@@ -75,6 +122,38 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
     DocumentContext acquireWritingDocument(boolean metaData) throws UnrecoverableTimeoutException;
 
     /**
+     * Registers a listener that writes context records before the first application data document
+     * in each implementation-defined output context, such as first wire use, a queue roll file or a
+     * transport connection. A leading meta-data document may be written first.
+     * <p>
+     * The supplied method writer is not callback-scoped and may be retained for normal use. During
+     * notification, the listener must use this writer rather than open another output document. Its
+     * calls write normal method-writer documents and omit {@link MessageHistory} unless the listener writes it explicitly.
+     * <p>
+     * Register before first use on a single thread. Exceptions propagate and the listener is not
+     * retried for that context, so it should write complete-or-nothing.
+     * <p>
+     * Configure only the outermost output. Combining a listener on a wrapper with one on its
+     * underlying output is unsupported.
+     * <p>
+     * For progressive context, expose {@link DocumentWritten}, hold one document context and write
+     * missing context only when {@link DocumentContext#contextCount()} increases. This pattern is
+     * not supported by queues configured for double buffering.
+     *
+     * @param writerType event interface type for the supplied method writer
+     * @param listener   listener to call for new output contexts
+     * @param <T>        event interface type
+     * @return this output
+     * @throws UnsupportedOperationException if this output does not support context listeners
+     * @throws IllegalStateException         if set after the first output context has started
+     */
+    @NotNull
+    default <T> MarshallableOut contextListener(@NotNull Class<T> writerType,
+                                                @NotNull ContextListener<? super T> listener) {
+        throw new UnsupportedOperationException("Context listeners are not supported by this output");
+    }
+
+    /**
      * @return true if this output is configured to expect the history of the message to be written
      * to.
      */
@@ -89,15 +168,14 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * @param value to write with it.
      */
     default void writeMessage(WireKey key, Object value) throws UnrecoverableTimeoutException {
-        @NotNull DocumentContext dc = writingDocument();
-        try {
-            Wire wire = dc.wire();
-            wire.write(key).object(value);
-        } catch (Throwable t) {
-            dc.rollbackOnClose();
-            throw Jvm.rethrow(t);
-        } finally {
-            dc.close();
+        try (@NotNull DocumentContext dc = writingDocument()) {
+            try {
+                Wire wire = dc.wire();
+                wire.write(key).object(value);
+            } catch (Throwable t) {
+                dc.rollbackOnClose();
+                throw Jvm.rethrow(t);
+            }
         }
     }
 
@@ -111,15 +189,14 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * @throws UnrecoverableTimeoutException if the operation times out in an unrecoverable manner.
      */
     default void writeMessage(String eventName, Object value) throws UnrecoverableTimeoutException {
-        @NotNull DocumentContext dc = writingDocument();
-        try {
-            Wire wire = dc.wire();
-            wire.write(eventName).object(value);
-        } catch (Throwable t) {
-            dc.rollbackOnClose();
-            throw Jvm.rethrow(t);
-        } finally {
-            dc.close();
+        try (@NotNull DocumentContext dc = writingDocument()) {
+            try {
+                Wire wire = dc.wire();
+                wire.write(eventName).object(value);
+            } catch (Throwable t) {
+                dc.rollbackOnClose();
+                throw Jvm.rethrow(t);
+            }
         }
     }
 
@@ -152,14 +229,13 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * @throws InvalidMarshallableException if the object cannot be serialized properly.
      */
     default void writeBytes(@NotNull WriteBytesMarshallable marshallable) throws UnrecoverableTimeoutException, InvalidMarshallableException {
-        @NotNull DocumentContext dc = writingDocument();
-        try {
-            marshallable.writeMarshallable(dc.wire().bytes());
-        } catch (Throwable t) {
-            dc.rollbackOnClose();
-            throw Jvm.rethrow(t);
-        } finally {
-            dc.close();
+        try (@NotNull DocumentContext dc = writingDocument()) {
+            try {
+                marshallable.writeMarshallable(dc.wire().bytes());
+            } catch (Throwable t) {
+                dc.rollbackOnClose();
+                throw Jvm.rethrow(t);
+            }
         }
     }
 
@@ -176,15 +252,14 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * @throws InvalidMarshallableException if the object cannot be serialized properly.
      */
     default <T> void writeDocument(T t, @NotNull BiConsumer<ValueOut, T> writer) throws UnrecoverableTimeoutException, InvalidMarshallableException {
-        @NotNull DocumentContext dc = writingDocument();
-        try {
-            Wire wire = dc.wire();
-            writer.accept(wire.getValueOut(), t);
-        } catch (Throwable e) {
-            dc.rollbackOnClose();
-            throw Jvm.rethrow(e);
-        } finally {
-            dc.close();
+        try (@NotNull DocumentContext dc = writingDocument()) {
+            try {
+                Wire wire = dc.wire();
+                writer.accept(wire.getValueOut(), t);
+            } catch (Throwable e) {
+                dc.rollbackOnClose();
+                throw Jvm.rethrow(e);
+            }
         }
     }
 
@@ -196,14 +271,13 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * @throws UnrecoverableTimeoutException if the operation times out in an unrecoverable manner.
      */
     default void writeText(@NotNull CharSequence text) throws UnrecoverableTimeoutException {
-        @NotNull DocumentContext dc = writingDocument();
-        try {
-            dc.wire().getValueOut().text(text);
-        } catch (Throwable t) {
-            dc.rollbackOnClose();
-            throw Jvm.rethrow(t);
-        } finally {
-            dc.close();
+        try (@NotNull DocumentContext dc = writingDocument()) {
+            try {
+                dc.wire().getValueOut().text(text);
+            } catch (Throwable t) {
+                dc.rollbackOnClose();
+                throw Jvm.rethrow(t);
+            }
         }
     }
 
@@ -216,18 +290,17 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
      * @throws UnrecoverableTimeoutException if the operation times out in an unrecoverable manner.
      */
     default void writeMap(@NotNull Map<?, ?> map) throws UnrecoverableTimeoutException {
-        @NotNull DocumentContext dc = writingDocument();
-        try {
-            Wire wire = dc.wire();
-            for (@NotNull Map.Entry<?, ?> entry : map.entrySet()) {
-                wire.writeEvent(Object.class, entry.getKey())
-                        .object(Object.class, entry.getValue());
+        try (@NotNull DocumentContext dc = writingDocument()) {
+            try {
+                Wire wire = dc.wire();
+                for (@NotNull Map.Entry<?, ?> entry : map.entrySet()) {
+                    wire.writeEvent(Object.class, entry.getKey())
+                            .object(Object.class, entry.getValue());
+                }
+            } catch (Throwable t) {
+                dc.rollbackOnClose();
+                throw Jvm.rethrow(t);
             }
-        } catch (Throwable t) {
-            dc.rollbackOnClose();
-            throw Jvm.rethrow(t);
-        } finally {
-            dc.close();
         }
     }
 
@@ -277,7 +350,7 @@ public interface MarshallableOut extends DocumentWritten, RollbackIfNotCompleteN
         // Creates a new builder instance with the specified WireType and InvocationHandler
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.BINARY_LIGHT,
-                () -> new BinaryMethodWriterInvocationHandler(tClass, metaData, this));
+                out -> new BinaryMethodWriterInvocationHandler(tClass, metaData, out));
 
         // Configure the builder
         builder.marshallableOut(this);

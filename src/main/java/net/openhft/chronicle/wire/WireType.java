@@ -20,9 +20,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -524,38 +522,7 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
             bytes.appendUtf8(cs);
             Wire wire = apply(bytes);
 
-            T object = wire.getValueIn().object(tClass);
-            cleanNullCollections(object);
-            return object;
-        }
-    }
-
-    /**
-     * Internal helper that removes a single {@code null} element from
-     * collections created when reading certain empty lists.
-     */
-    @SuppressWarnings("java:S3011")
-    private void cleanNullCollections(Object object) {
-        if (object == null) return;
-        Field[] declaredFields = object.getClass().getDeclaredFields();
-
-        for (int i=0; i<declaredFields.length; i++) {
-            Field field = declaredFields[i];
-            if (!Collection.class.isAssignableFrom(field.getType())) continue;
-
-            try {
-                field.setAccessible(true);
-                Object fieldValue = field.get(object);
-
-                if (fieldValue instanceof Collection) {
-                    Collection<?> collection = (Collection<?>) fieldValue;
-                    if (collection.size() == 1 && collection.iterator().next() == null) {
-                        field.set(object, null);
-                    }
-                }
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-                throw new InvalidMarshallableException("Failed cleaning null collection during processing field: " + field.getName());
-            }
+            return wire.getValueIn().object(tClass);
         }
     }
 
@@ -635,6 +602,8 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
     /**
      * Creates a {@link Stream} of objects by deserialising documents from the
      * provided {@link Bytes} buffer.
+     * The stream takes ownership of the bytes and releases them on exhaustion or
+     * close. Use try-with-resources when consumption can finish early or throw.
      *
      * @param expectedType expected object type
      * @param b            source bytes
@@ -668,7 +637,10 @@ public enum WireType implements Function<Bytes<?>, Wire>, LicenceCheck {
                             bytes.releaseLast();
                         return false;
                     }
-                }, false);
+                }, false).onClose(() -> {
+                    if (b.refCount() > 0)
+                        b.releaseLast();
+                });
     }
 
     /**

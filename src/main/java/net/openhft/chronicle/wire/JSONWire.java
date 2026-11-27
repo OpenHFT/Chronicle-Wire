@@ -589,7 +589,7 @@ public class JSONWire extends TextWire {
         // Move back one position to re-read the first character of the number
         bytes.readSkip(-1);
         long rp = bytes.readPosition();
-        boolean decimal = false;
+        boolean floatingPoint = false;
 
         // Continuously read the buffer until a non-numeric character is encountered
         while (true) {
@@ -608,11 +608,13 @@ public class JSONWire extends TextWire {
                 case '8':
                 case '9':
                 case '.':
+                case 'e':
+                case 'E':
                     bytes.readSkip(1);
                     // If we're dealing with a binary wire format
                     if (wire.isBinary()) {
-                        // Check if the character represents a decimal point
-                        decimal |= ch2 == '.';
+                        // Exponent notation is floating point even without a decimal point.
+                        floatingPoint |= ch2 == '.' || ch2 == 'e' || ch2 == 'E';
                     } else {
                         // For textual wire formats, simply append the character
                         wire.bytes().append((char) ch2);
@@ -630,8 +632,8 @@ public class JSONWire extends TextWire {
                             // Set the read position and limit to parse just the number
                             bytes.readPositionRemaining(rp, bytes.readPosition() - rp);
 
-                            // If the number had a decimal point, treat it as a double, otherwise as a long
-                            if (decimal)
+                            // Preserve the integer path for numbers without a fraction or exponent.
+                            if (floatingPoint)
                                 wire.getValueOut().float64(bytes.parseDouble());
                             else
                                 wire.getValueOut().int64(bytes.parseLong());
@@ -1363,7 +1365,7 @@ public class JSONWire extends TextWire {
         public boolean isNull() {
             consumePadding();
 
-            if (peekStringIgnoreCase("null")) {
+            if (peekStringIgnoreCase("null") && isScalarEnd(bytes.readPosition() + 4)) {
                 bytes.readSkip(4);
                 // Skip to the next token, consuming any padding and/or a comma
                 consumePadding(1);
@@ -1374,12 +1376,6 @@ public class JSONWire extends TextWire {
             }
 
             return false;
-        }
-
-        @Override
-        public String text() {
-            @Nullable String text = super.text();
-            return text == null || text.equals("null") ? null : text;
         }
 
         @Override

@@ -1,0 +1,5 @@
+= Preserve fields during partial input-order reads
+:sectnums:
+:lang: en-GB
+
+Input-order DTO reads with overwrite=false retain fields omitted from the input, including when the input fields are reordered or unknown fields appear. With overwrite=true, absent fields receive their defaults. Field-name matching remains case-insensitive when the reader falls back to named lookup.

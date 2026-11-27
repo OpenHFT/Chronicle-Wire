@@ -37,6 +37,12 @@ public class DocumentContextHolder implements DocumentContext, WriteDocumentCont
         return dc.isNotComplete();
     }
 
+    @Override
+    public int contextCount() {
+        DocumentContext context = this.dc;
+        return context == null ? MarshallableOut.UNSET_CONTEXT : context.contextCount();
+    }
+
     /**
      * Retrieves the encapsulated {@link DocumentContext} instance.
      *

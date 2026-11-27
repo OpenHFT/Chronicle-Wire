@@ -79,6 +79,7 @@ public class YamlTokeniser {
 
     // The last token that was processed
     private YamlToken last = YamlToken.STREAM_START;
+    private long emptyValuePosition = -1;
 
     /**
      * Constructs a new YAML tokenizer with the specified input.
@@ -115,6 +116,7 @@ public class YamlTokeniser {
         blockQuote = 0;
         hasSequenceEntry = false;
         lastKeyPosition = -1;
+        emptyValuePosition = -1;
         pushed.clear();
         last = YamlToken.STREAM_START;
         pushContext0(YamlToken.STREAM_START, NO_INDENT);
@@ -185,6 +187,14 @@ public class YamlTokeniser {
             YamlToken next = popPushed();  // Fetching the next token from the pushed list
             return last = next;
         }
+        if (in.readPosition() == emptyValuePosition) {
+            emptyValuePosition = -1;
+            blockStart = blockEnd = in.readPosition();
+            blockQuote = 0;
+            consumeWhitespace();
+            last = YamlToken.TEXT;
+            return last;
+        }
         YamlToken next = next0(minIndent); // Internal method to get the next token based on indentation
         return this.last = next;
     }
@@ -233,7 +243,7 @@ public class YamlTokeniser {
                     return dontRead();
                 lastKeyPosition = in.readPosition() - 1;
                 readDoublyQuoted();
-                if (isFieldEnd())
+                if (isFieldEnd(indent2))
                     return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent2);
                 return YamlToken.TEXT;
             case '\'':
@@ -241,7 +251,7 @@ public class YamlTokeniser {
                     return dontRead();
                 lastKeyPosition = in.readPosition() - 1;
                 readSinglyQuoted();
-                if (isFieldEnd())
+                if (isFieldEnd(indent2))
                     return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, indent2);
 
                 return YamlToken.TEXT;
@@ -262,7 +272,13 @@ public class YamlTokeniser {
                         return dontRead();
 
                     hasSequenceEntry = true;
-                    return indent(YamlToken.SEQUENCE_START, YamlToken.SEQUENCE_ENTRY, YamlToken.STREAM_START, indent2 + 1);
+                    YamlToken value = YamlToken.STREAM_START;
+                    if (isEmptyValue(indent2, false)) {
+                        blockStart = blockEnd = in.readPosition();
+                        blockQuote = 0;
+                        value = YamlToken.TEXT;
+                    }
+                    return indent(YamlToken.SEQUENCE_START, YamlToken.SEQUENCE_ENTRY, value, indent2 + 1);
                 }
                 if (indent2 == 0 && next == '-' && in.peekUnsignedByte(in.readPosition() + 1) == '-' && in.peekUnsignedByte(in.readPosition() + 2) <= ' ') {
                     if (contextIndent() <= minIndent && minIndent >= 0)
@@ -403,6 +419,46 @@ public class YamlTokeniser {
         if (isInFlow())
             return false;
         return minIndent > indent;
+    }
+
+    private boolean isEmptyValue(int indent2, boolean mapping) {
+        long position = in.readPosition();
+        long nextLine = lineStart;
+        int ch;
+        while ((ch = in.peekUnsignedByte(position)) >= 0) {
+            if (ch == '#') {
+                position = commentEnd(position);
+                ch = in.peekUnsignedByte(position);
+            }
+            if (ch < 0)
+                return true;
+            if (ch == '\r' || ch == '\n')
+                nextLine = position + 1;
+            else if (ch > ' ') {
+                return endsEmptyValue(indent2, mapping, position, nextLine, ch);
+            }
+            position++;
+        }
+        return true;
+    }
+
+    private long commentEnd(long position) {
+        int ch;
+        while ((ch = in.peekUnsignedByte(++position)) >= 0 && ch != '\r' && ch != '\n') {
+            // Skip the entry's comment without consuming the next token.
+        }
+        return position;
+    }
+
+    private boolean endsEmptyValue(int indent2, boolean mapping, long position, long nextLine, int ch) {
+        if (mapping && (ch == ',' || ch == '}'))
+            return true;
+        // A block sequence may start at its mapping key's indentation.
+        if (mapping && ch == '-' && in.peekUnsignedByte(position + 1) <= ' ')
+            return false;
+        if (mapping && (ch == '!' || ch == '&' || ch == '[' || ch == '{'))
+            return false;
+        return nextLine > lineStart && (position - nextLine) * 2 <= indent2;
     }
 
     /**
@@ -646,7 +702,7 @@ public class YamlTokeniser {
         readWords(); // Read words until we reach a character that is not part of the scalar.
 
         // If we've reached the end of a field, determine if this is a key in a mapping.
-        if (isFieldEnd()) {
+        if (isFieldEnd(currentIndentLevel)) {
             lastKeyPosition = pos;
             if (topContext().token != YamlToken.MAPPING_KEY)
                 return indent(YamlToken.MAPPING_START, YamlToken.MAPPING_KEY, YamlToken.TEXT, currentIndentLevel);
@@ -823,6 +879,7 @@ public class YamlTokeniser {
      */
     void revertToContext(int contextSize) {
         pushed.clear(); // Clear the pushed tokens.
+        emptyValuePosition = -1;
         // Remove contexts until reaching the desired context size.
         while (contextSize() > contextSize) {
             YTContext context0 = contexts.remove(contextSize() - 1);
@@ -904,7 +961,7 @@ public class YamlTokeniser {
      *
      * @return true if the current position is a field end, false otherwise.
      */
-    private boolean isFieldEnd() {
+    private boolean isFieldEnd(int indent2) {
         consumeSpaces(); // Consume any spaces or tabs.
         // Check if the next character is a colon.
         if (in.peekUnsignedByte() == ':') {
@@ -912,6 +969,8 @@ public class YamlTokeniser {
             int ch = in.peekUnsignedByte(in.readPosition() + 1);
             // Skip 2 bytes if the next character is a tab or space, otherwise skip just the colon.
             in.readSkip((ch == '\t' || ch == ' ') ? 2 : 1);
+            if (isEmptyValue(indent2, true))
+                emptyValuePosition = in.readPosition();
             return true; // The colon signifies the end of a field.
         }
         return false;
@@ -1150,6 +1209,29 @@ public class YamlTokeniser {
     public boolean isText(String s) {
         // TODO: This method can potentially be optimized for efficiency.
         return text().equals(s);
+    }
+
+    boolean isEmptyScalar() {
+        return last == YamlToken.TEXT && blockQuote == 0 && blockStart >= 0 && blockStart == blockEnd;
+    }
+
+    // Inspect the ASCII spelling directly: null detection also runs for ordinary scalar reads.
+    boolean isNullScalar() {
+        if (last != YamlToken.TEXT || blockQuote != 0 || blockStart < 0)
+            return false;
+        long length = blockEnd - blockStart;
+        if (length == 0)
+            return true;
+        if (length == 1)
+            return in.peekUnsignedByte(blockStart) == '~';
+        if (length != 4)
+            return false;
+        int first = in.peekUnsignedByte(blockStart);
+        int second = in.peekUnsignedByte(blockStart + 1);
+        int third = in.peekUnsignedByte(blockStart + 2);
+        int fourth = in.peekUnsignedByte(blockStart + 3);
+        return ((first == 'n' || first == 'N') && second == 'u' && third == 'l' && fourth == 'l')
+                || (first == 'N' && second == 'U' && third == 'L' && fourth == 'L');
     }
 
     /**

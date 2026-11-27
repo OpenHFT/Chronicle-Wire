@@ -432,7 +432,7 @@ public final class StreamsUtil {
 
         @Override
         public boolean hasNext() {
-            if (Double.isNaN(next)) {
+            if (!Double.isNaN(next)) {
                 return true;
             }
             long lastIndex = -1;

@@ -348,9 +348,8 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         if (cs.length() == 0)
             return Quotes.DOUBLE;
 
-        //! BooleanScalarTypePreservationTest#textAndTypedBooleansRetainTypes shows that bare "true" and "false" Strings become
-        //! Booleans. Quote only these resolver-sensitive spellings; quoting every String would alter established text output.
-        if (StringUtils.isEqual(cs, "true") || StringUtils.isEqual(cs, "false"))
+        // Quote strings which would otherwise resolve to booleans or null.
+        if (StringUtils.isEqual(cs, "true") || StringUtils.isEqual(cs, "false") || isNullLiteral(cs))
             return Quotes.DOUBLE;
 
         // If string starts with special characters or ends with whitespace, use double quoteStyle.
@@ -381,6 +380,11 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
         if (hasSingleQuote)
             return Quotes.NONE;
         return quoteStyle;
+    }
+
+    static boolean isNullLiteral(@NotNull CharSequence text) {
+        return StringUtils.isEqual(text, "null") || StringUtils.isEqual(text, "Null")
+                || StringUtils.isEqual(text, "NULL") || StringUtils.isEqual(text, "~");
     }
 
     /**
@@ -1641,15 +1645,19 @@ public abstract class YamlWireOut<T extends YamlWireOut<T>> extends AbstractWire
          * @throws InvalidMarshallableException If the object cannot be serialized.
          */
         @NotNull
-        public YamlValueOut write(Class<?> expectedType, @NotNull Object objectKey) throws InvalidMarshallableException {
+        public YamlValueOut write(Class<?> expectedType, @Nullable Object objectKey) throws InvalidMarshallableException {
             if (dropDefault) {
                 if (expectedType != String.class)
                     throw new UnsupportedOperationException("todo");
-                eventName = objectKey.toString();
+                eventName = java.util.Objects.requireNonNull(objectKey).toString();
             } else {
                 prependSeparator();
-                writeStartEvent();
-                object(expectedType, objectKey);
+                if (objectKey == null) {
+                    bytes.append("null");
+                } else {
+                    writeStartEvent();
+                    object(expectedType, objectKey);
+                }
                 endEvent();
             }
             return this;

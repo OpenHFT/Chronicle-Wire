@@ -91,8 +91,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @NotNull
     @Override
     protected Quotes needsQuotes(@NotNull CharSequence cs) {
-        //! ScalarTypePreservationTest#dotPrefixedNumericTextRetainsType demonstrates that a dot-prefixed numeric-looking String must be
-        //! quoted or YamlWire reads it back as a Double. Quoting every dot-prefixed String would unnecessarily alter established output.
+        // Quote strings such as ".5" so they read back as text.
         if (cs.length() > 1 && cs.charAt(0) == '.' && cs.charAt(1) >= '0' && cs.charAt(1) <= '9')
             return Quotes.DOUBLE;
         return super.needsQuotes(cs);
@@ -413,7 +412,7 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
         VanillaMethodWriterBuilder<T> builder = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.YAML,
-                () -> newTextMethodWriterInvocationHandler(tClass));
+                out -> new TextMethodWriterInvocationHandler(tClass, out));
         builder.marshallableOut(this);
         return builder;
     }
@@ -428,14 +427,14 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     public DocumentContext writingDocument(boolean metaData) {
         if (writeContext == null)
             useBinaryDocuments();
+        notifyContextListenerIfNeeded(metaData);
         writeContext.start(metaData);
         return writeContext;
     }
 
     @Override
     public DocumentContext acquireWritingDocument(boolean metaData) {
-        //! WriteDocumentContextTest#nestedYaml and #chainedYaml demonstrate that YAML must
-        //! distinguish a nested acquisition from continuation of an explicitly chained document.
+        // Only a chained write continues the open document.
         if (writeContext != null && writeContext.isOpen() && writeContext.chainedElement())
             return writeContext;
         return writingDocument(metaData);
@@ -722,6 +721,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
     @NotNull
     protected StringBuilder readField(@NotNull StringBuilder targetBuffer) {
         startEventIfTop();
+        // A caller may read the next field without consuming an omitted value.
+        if (yt.isEmptyScalar())
+            yt.next();
 
         // If the current token indicates a key in a map
         if (yt.current() == YamlToken.MAPPING_KEY) {
@@ -943,7 +945,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     public void clear() {
-        reset();
+        checkCanResetContextListener();
+        // Clearing the bytes preserves the current context number.
+        resetState();
     }
 
     /**
@@ -1112,6 +1116,14 @@ public class YamlWire extends YamlWireOut<YamlWire> {
      * Resets the state of the YamlWire instance, clearing all buffers and contexts.
      */
     public void reset() {
+        checkCanAdvanceOutputContext();
+        checkCanResetContextListener();
+        resetState();
+        advanceOutputContext();
+        resetContextListener();
+    }
+
+    private void resetState() {
         // Reset reading and writing contexts if they exist
         if (readContext != null)
             readContext.reset();
@@ -1171,6 +1183,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Nullable
         @Override
         public String text() {
+            if (isNull())
+                return null;
             @Nullable CharSequence cs = textTo0(acquireStringBuilder());
             yt.next();
             return cs == null ? null : WireInternal.INTERNER.intern(cs);
@@ -1180,6 +1194,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public StringBuilder textTo(@NotNull StringBuilder targetBuffer) {
             targetBuffer.setLength(0);
+            if (isNull())
+                return null;
             @Nullable CharSequence cs = textTo0(targetBuffer);
             yt.next();
             if (cs == null)
@@ -1195,6 +1211,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public Bytes<?> textTo(@NotNull Bytes<?> bytes) {
             bytes.clear();
+            if (isNull())
+                return null;
             if (yt.current() == YamlToken.TEXT) {
                 bytes.append(yt.text());
                 yt.next();
@@ -1308,6 +1326,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
                 // handle tag tokens
                 case TAG:
+                    if (yt.isText("!str")) {
+                        yt.next();
+                        destinationBuilder.append(yt.text());
+                        unescape(destinationBuilder, yt.blockQuote());
+                        return destinationBuilder;
+                    }
                     // check for a NULL tag and move to the next token
                     if (yt.isText(NULL_TAG)) {
                         yt.next();
@@ -1762,11 +1786,11 @@ public class YamlWire extends YamlWireOut<YamlWire> {
          */
         @Override
         public <T> boolean sequence(@NotNull List<T> list, @NotNull List<T> buffer, @NotNull Supplier<T> bufferAdd, Reader reader0) throws InvalidMarshallableException {
+            list.clear();
             consumePadding();
             if (isNull()) {
                 return false;
             }
-            list.clear();
             if (yt.current() == YamlToken.SEQUENCE_START) {
                 int minIndent = yt.secondTopContext().indent;
                 yt.next(Integer.MAX_VALUE);
@@ -1882,6 +1906,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Override
         public Object typePrefixOrObject(Class<?> tClass) {
             consumePadding();
+            if (yt.current() == YamlToken.TAG && yt.isText("!str"))
+                return String.class;
             switch (yt.current()) {
                 case TAG: {
                     Class<?> type = typePrefix();
@@ -1960,7 +1986,6 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         public Object marshallable(@NotNull Object object, @NotNull SerializationStrategy strategy)
                 throws BufferUnderflowException, IORuntimeException, InvalidMarshallableException {
             if (isNull()) {
-                consumeAny(yt.topContext().indent);
                 return null;
             }
 
@@ -2280,16 +2305,23 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             return (float) float64();
         }
 
-        /**
-         * @return true if !!null "", if {@code true} reads the !!null "" up to the next STOP, if
-         * {@code false} no  data is read  ( data is only peaked if {@code false} )
-         */
+        /** Consumes an explicit or implicit null scalar, preserving the next entry. */
         @Override
         public boolean isNull() {
             consumePadding();
 
+            if (yt.current() == YamlToken.SEQUENCE_ENTRY) {
+                yt.next();
+                consumePadding();
+            }
+
             if (yt.current() == YamlToken.TAG && yt.isText(NULL_TAG)) {
                 consumeAny(0);
+                return true;
+            }
+
+            if (yt.isNullScalar()) {
+                yt.next();
                 return true;
             }
 
@@ -2298,6 +2330,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
         @Override
         public Object objectWithInferredType(Object using, @NotNull SerializationStrategy strategy, Class<?> type) throws InvalidMarshallableException {
+            if (isNull())
+                return null;
             consumePadding();
             if (yt.current() == YamlToken.SEQUENCE_ENTRY)
                 yt.next();
@@ -2321,6 +2355,8 @@ public class YamlWire extends YamlWireOut<YamlWire> {
         @Nullable
         Object objectWithInferredType0(Object reusableInstance, @NotNull SerializationStrategy strategy, Class<?> defaultType) throws InvalidMarshallableException {
             boolean bestEffort = defaultType != null;
+            if (yt.current() == YamlToken.TAG && yt.isText("!str"))
+                return text();
 
             // Handle type declaration, if present
             if (yt.current() == YamlToken.TAG) {
@@ -2412,8 +2448,9 @@ public class YamlWire extends YamlWireOut<YamlWire> {
             @Nullable StringBuilder s = textTo0(acquireStringBuilder());
             if (yt.current() == YamlToken.LITERAL)
                 return s;
-            //! BooleanScalarTypePreservationTest#textAndTypedBooleansRetainTypes shows that quoted YAML booleans became Booleans.
-            //! Check the original quote before the spelling; decoded text alone loses the String/Boolean distinction.
+            if (blockQuoteChar == 0 && s != null && (s.length() == 0 || isNullLiteral(s)))
+                return null;
+            // Only unquoted scalars can be booleans.
             if (blockQuoteChar == 0 && StringUtils.isEqual(s, "true"))
                 return true;
             if (blockQuoteChar == 0 && StringUtils.isEqual(s, "false"))
@@ -2515,11 +2552,12 @@ public class YamlWire extends YamlWireOut<YamlWire> {
 
     @Override
     public boolean writingIsComplete() {
-        return !writeContext.isNotComplete();
+        return writeContext == null || !writeContext.isNotComplete();
     }
 
     @Override
     public void rollbackIfNotComplete() {
-        writeContext.rollbackIfNotComplete();
+        if (writeContext != null)
+            writeContext.rollbackIfNotComplete();
     }
 }
