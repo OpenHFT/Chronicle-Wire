@@ -44,9 +44,9 @@ public class WireInternalInternTest extends WireTestCommon {
 //                TimeZone.getTimeZone("GMT"),
 //                UUID.randomUUID(),
                 DayOfWeek.of(1),
-                LocalDate.now(),
-                LocalDateTime.now(),
-                LocalTime.now(),
+                LocalDate.of(2026, 11, 4),
+                LocalDateTime.of(2026, 11, 4, 12, 34, 56, 123_456_789),
+                LocalTime.of(12, 34, 56, 123_456_789),
                 Month.of(1)
 //                MonthDay.of(1, 2),
 //                OffsetDateTime.now(),
