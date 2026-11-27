@@ -89,12 +89,16 @@ public class RawWire extends AbstractWire implements Wire {
 
     @Override
     public void reset() {
+        checkCanAdvanceOutputContext();
+        checkCanResetContextListener();
         valueIn.resetState();
         valueOut.resetState();
         writeContext.reset();
         readContext.reset();
         bytes.clear();
         lastSB = null;
+        advanceOutputContext();
+        resetContextListener();
     }
 
     @Override
@@ -102,13 +106,10 @@ public class RawWire extends AbstractWire implements Wire {
         return true;
     }
 
-    /**
-     * Begins a document for raw value writing. The {@code metaData} flag is
-     * ignored as this format stores no metadata.
-     */
     @NotNull
     @Override
     public DocumentContext writingDocument(boolean metaData) {
+        notifyContextListenerIfNeeded(metaData);
         writeContext.start(metaData);
         return writeContext;
     }
@@ -118,6 +119,16 @@ public class RawWire extends AbstractWire implements Wire {
         if (writeContext.isOpen())
             return writeContext;
         return writingDocument(metaData);
+    }
+
+    @Override
+    public boolean writingIsComplete() {
+        return !writeContext.isOpen();
+    }
+
+    @Override
+    public void rollbackIfNotComplete() {
+        writeContext.rollbackIfNotComplete();
     }
 
     @NotNull
@@ -239,6 +250,7 @@ public class RawWire extends AbstractWire implements Wire {
 
     @Override
     public void clear() {
+        checkCanResetContextListener();
         bytes.clear();
     }
 

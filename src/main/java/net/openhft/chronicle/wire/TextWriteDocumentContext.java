@@ -92,6 +92,7 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
         notComplete = false;
         @NotNull Bytes<?> bytes = wire().bytes();
         if (rollback) {
+            notifyContextRollback();
             bytes.writePosition(bytes.readPosition());
             return;
         }
@@ -103,6 +104,11 @@ public class TextWriteDocumentContext implements WriteDocumentContext {
             bytes.append("...\n");
         }
         wire().getValueOut().resetBetweenDocuments();
+    }
+
+    private void notifyContextRollback() {
+        if (wire instanceof AbstractWire)
+            ((AbstractWire) wire).contextDocumentRolledBack();
     }
 
     @Override

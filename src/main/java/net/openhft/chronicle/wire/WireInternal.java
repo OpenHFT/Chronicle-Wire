@@ -138,37 +138,50 @@ public enum WireInternal {
      */
     public static long writeData(@NotNull WireOut wireOut, boolean metaData, boolean notComplete,
                                  @NotNull WriteMarshallable writer) throws InvalidMarshallableException {
+        if (wireOut instanceof AbstractWire)
+            ((AbstractWire) wireOut).notifyContextListenerIfNeeded(metaData);
         wireOut.getValueOut().resetBetweenDocuments();
         long position;
 
         @NotNull Bytes<?> bytes = wireOut.bytes();
-        position = bytes.writePositionForHeader(wireOut.usePadding());
+        final long writePositionBeforeHeader = bytes.writePosition();
+        boolean completed = false;
+        try {
+            position = bytes.writePositionForHeader(wireOut.usePadding());
 
-        int metaDataBit = metaData ? Wires.META_DATA : 0;
-        int len0 = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
-        bytes.writeOrderedInt(len0);
-        writer.writeMarshallable(wireOut);
-        if (!wireOut.isBinary())
-            BytesUtil.combineDoubleNewline(bytes);
-        long position1 = bytes.writePosition();
-        if (wireOut.usePadding()) {
-            int bytesToSkip = (int) ((position - position1) & 0x3);
-            wireOut.addPadding(bytesToSkip);
-            position1 = bytes.writePosition();
+            int metaDataBit = metaData ? Wires.META_DATA : 0;
+            int len0 = metaDataBit | Wires.NOT_COMPLETE | Wires.UNKNOWN_LENGTH;
+            bytes.writeOrderedInt(len0);
+            writer.writeMarshallable(wireOut);
+            if (!wireOut.isBinary())
+                BytesUtil.combineDoubleNewline(bytes);
+            long position1 = bytes.writePosition();
+            if (wireOut.usePadding()) {
+                int bytesToSkip = (int) ((position - position1) & 0x3);
+                wireOut.addPadding(bytesToSkip);
+                position1 = bytes.writePosition();
+            }
+            int length;
+            if (bytes instanceof HexDumpBytes) {
+                // Todo: this looks suspicious. Why cast to int individually rather than use long arithmetics?
+                length = metaDataBit | toIntU30((int) position1 - (int) position - 4, "Document length %,d out of 30-bit int range.");
+            } else {
+                length = metaDataBit | toIntU30(position1 - position - 4L, "Document length %,d out of 30-bit int range.");
+            }
+            if (wireOut.usePadding())
+                bytes.testAndSetInt(position, len0, length | (notComplete ? Wires.NOT_COMPLETE : 0));
+            else
+                bytes.writeInt(position, length | (notComplete ? Wires.NOT_COMPLETE : 0));
+
+            completed = true;
+        } finally {
+            if (!completed) {
+                // Restore the pre-header boundary even when user serialization throws an Error.
+                bytes.writePosition(writePositionBeforeHeader);
+                if (wireOut instanceof AbstractWire)
+                    ((AbstractWire) wireOut).contextDocumentRolledBack();
+            }
         }
-//            if (position1 < position)
-//                System.out.println("Message truncated from " + position + " to " + position1);
-        int length;
-        if (bytes instanceof HexDumpBytes) {
-            // Todo: this looks suspicious. Why cast to int individually rather than use long arithmetics?
-            length = metaDataBit | toIntU30((int) position1 - (int) position - 4, "Document length %,d out of 30-bit int range.");
-        } else {
-            length = metaDataBit | toIntU30(position1 - position - 4L, "Document length %,d out of 30-bit int range.");
-        }
-        if (wireOut.usePadding())
-            bytes.testAndSetInt(position, len0, length | (notComplete ? Wires.NOT_COMPLETE : 0));
-        else
-            bytes.writeInt(position, length | (notComplete ? Wires.NOT_COMPLETE : 0));
 
         return position;
     }

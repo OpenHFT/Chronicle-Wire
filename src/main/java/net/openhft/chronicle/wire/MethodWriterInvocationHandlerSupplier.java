@@ -52,6 +52,19 @@ public class MethodWriterInvocationHandlerSupplier implements Supplier<MethodWri
         this.supplier = supplier;
     }
 
+    MethodWriterInvocationHandlerSupplier copyWith(
+            Supplier<MethodWriterInvocationHandler> replacementSupplier) {
+        // A built proxy must keep its original output even when the builder is reused. Give it fresh handler caches.
+        final MethodWriterInvocationHandlerSupplier copy =
+                new MethodWriterInvocationHandlerSupplier(replacementSupplier);
+        copy.recordHistory = recordHistory;
+        copy.closeable = closeable;
+        copy.disableThreadSafe = disableThreadSafe;
+        copy.genericEvent = genericEvent;
+        copy.useMethodIds = useMethodIds;
+        return copy;
+    }
+
     /**
      * Enable or disable invocation history recording on new handlers.
      */

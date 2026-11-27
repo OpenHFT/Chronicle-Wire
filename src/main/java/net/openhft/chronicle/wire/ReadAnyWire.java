@@ -56,6 +56,11 @@ public class ReadAnyWire extends AbstractAnyWire implements Wire {
         clear();
     }
 
+    @Override
+    public int contextCount() {
+        return MarshallableOut.UNSET_CONTEXT;
+    }
+
     @NotNull
     @Override
     public BooleanValue newBooleanReference() {

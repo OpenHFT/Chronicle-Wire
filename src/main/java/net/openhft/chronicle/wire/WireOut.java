@@ -225,6 +225,14 @@ public interface WireOut extends WireCommon, MarshallableOut {
      */
     DocumentContext acquireWritingDocument(boolean metaData);
 
+    @NotNull
+    @Override
+    default <T> WireOut contextListener(@NotNull Class<T> writerType,
+                                        @NotNull MarshallableOut.ContextListener<? super T> listener) {
+        MarshallableOut.super.contextListener(writerType, listener);
+        return this;
+    }
+
     /**
      * Writes a document to the wire without marking its completion. This is primarily used in
      * networking scenarios, but no longer used for queues.
@@ -250,7 +258,7 @@ public interface WireOut extends WireCommon, MarshallableOut {
      *
      * @param safeLength ensure there is at least this much space
      * @return the position of the header
-     * @throws WriteAfterEOFException if you attempt to append an excerpt after an EOF has been written
+     * @throws WriteAfterEOFException if the selected write position holds an end-of-data marker
      */
     long enterHeader(long safeLength);
 

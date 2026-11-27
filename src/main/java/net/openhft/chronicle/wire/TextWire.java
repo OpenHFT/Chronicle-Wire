@@ -354,7 +354,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     public <T> MethodWriterBuilder<T> methodWriterBuilder(@NotNull Class<T> tClass) {
         VanillaMethodWriterBuilder<T> text = new VanillaMethodWriterBuilder<>(tClass,
                 WireType.TEXT,
-                () -> newTextMethodWriterInvocationHandler(tClass));
+                out -> new TextMethodWriterInvocationHandler(tClass, out));
         text.marshallableOut(this);
         return text;
     }
@@ -379,6 +379,7 @@ public class TextWire extends YamlWireOut<TextWire> {
     public DocumentContext writingDocument(boolean metaData) {
         if (writeContext == null)
             useTextDocuments();
+        notifyContextListenerIfNeeded(metaData);
         writeContext.start(metaData);
         return writeContext;
     }
@@ -1032,6 +1033,7 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @Override
     public void clear() {
+        checkCanResetContextListener();
         bytes.clear();
         valueIn.resetState();
         valueOut.resetState();
@@ -1274,6 +1276,8 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @Override
     public void reset() {
+        checkCanAdvanceOutputContext();
+        checkCanResetContextListener();
         writeContext.reset();
         readContext.reset();
         sb.setLength(0);
@@ -1281,6 +1285,8 @@ public class TextWire extends YamlWireOut<TextWire> {
         valueIn.resetState();
         valueOut.resetState();
         bytes.clear();
+        advanceOutputContext();
+        resetContextListener();
     }
 
     @Override
@@ -2958,8 +2964,7 @@ public class TextWire extends YamlWireOut<TextWire> {
             @Nullable String text = valueIn.text();
             if (text == null || Enum.class.isAssignableFrom(strategy.type()))
                 return text;
-            //! BooleanScalarTypePreservationTest#quotedJsonBooleansRemainStrings shows that decoded text alone cannot distinguish
-            //! quoted Strings from bare Booleans. #singleQuotedBooleansRemainStrings requires the same guard for single quotes.
+            // Quoted boolean literals are strings.
             if (code == '"' || code == '\'')
                 return text;
             switch (text) {
@@ -3110,11 +3115,12 @@ public class TextWire extends YamlWireOut<TextWire> {
 
     @Override
     public boolean writingIsComplete() {
-        return !writeContext.isNotComplete();
+        return writeContext == null || !writeContext.isNotComplete();
     }
 
     @Override
     public void rollbackIfNotComplete() {
-        writeContext.rollbackIfNotComplete();
+        if (writeContext != null)
+            writeContext.rollbackIfNotComplete();
     }
 }
