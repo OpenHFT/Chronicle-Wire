@@ -30,6 +30,7 @@ public class JSONWireMarshallableMain {
      *
      * @param args Command line arguments (not used).
      */
+    @SuppressWarnings("try") // The affinity lock is held for its lifetime and released automatically.
     public static void main(String... args) {
 
         Histogram readHist = new Histogram();
