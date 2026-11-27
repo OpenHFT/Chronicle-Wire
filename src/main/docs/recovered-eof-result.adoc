@@ -1,0 +1,5 @@
+= Report EOF published during writer recovery
+:sectnums:
+:lang: en-GB
+
+When endOfWire replaces an incomplete header with EOF after a timeout, it returns PRESENT_AFTER_UPDATE. Consequently writeEndOfWire returns true for this publication. An EOF already present returns PRESENT; an unsuccessful compare-and-swap retries the scan.
