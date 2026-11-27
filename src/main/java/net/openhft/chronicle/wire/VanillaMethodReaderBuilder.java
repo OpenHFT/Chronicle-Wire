@@ -231,7 +231,7 @@ public class VanillaMethodReaderBuilder implements MethodReaderBuilder {
 
         GenerateMethodReader generateMethodReader = new GenerateMethodReader(wireType, methodReaderInterceptorReturns, multipleNonMarshallableParamTypes, metaDataHandler, impls);
 
-        String fullClassName = generateMethodReader.packageName() + "." + generateMethodReader.generatedClassName();
+        String fullClassName = ReflectionUtil.qualifiedName(generateMethodReader.packageName(), generateMethodReader.generatedClassName());
 
         try {
             try {
