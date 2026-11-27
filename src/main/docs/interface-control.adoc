@@ -44,6 +44,11 @@ applications.
 
 All code paths must honour this lifecycle; skipping the closing step can leak buffers or block queue tailers.
 
+Document iterators close each reading context, including when extraction throws.
+Repeated `hasNext()` calls retain the cached value until `next()` consumes it.
+The primitive double iterator skips the extractor's `NaN` sentinel and reports exhaustion
+with `hasNext() == false`; `nextDouble()` then throws `NoSuchElementException`.
+
 == Compatibility Policy
 
 * Method signatures in the interfaces listed above change only in major releases.
